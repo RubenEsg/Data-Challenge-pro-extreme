@@ -1,0 +1,428 @@
+{
+ "descripcion": "Modo producción simulado en 2025: 11 orígenes (último día de enero a noviembre), entrenamiento hasta el origen, 28 días pronosticados desde el origen con H = 7·ceil((d − origen)/7)",
+ "por_origen_y_H": [
+  {
+   "origen": "2025-01-31",
+   "H": 7,
+   "franjas": 357,
+   "WAPE_hibrido": 11.003,
+   "WAPE_V4": 11.901,
+   "WAPE_chronos2": 10.814
+  },
+  {
+   "origen": "2025-01-31",
+   "H": 14,
+   "franjas": 357,
+   "WAPE_hibrido": 11.28,
+   "WAPE_V4": 13.044,
+   "WAPE_chronos2": 11.452
+  },
+  {
+   "origen": "2025-01-31",
+   "H": 21,
+   "franjas": 357,
+   "WAPE_hibrido": 12.994,
+   "WAPE_V4": 13.892,
+   "WAPE_chronos2": 13.354
+  },
+  {
+   "origen": "2025-01-31",
+   "H": 28,
+   "franjas": 357,
+   "WAPE_hibrido": 13.854,
+   "WAPE_V4": 13.972,
+   "WAPE_chronos2": 13.777
+  },
+  {
+   "origen": "2025-02-28",
+   "H": 7,
+   "franjas": 357,
+   "WAPE_hibrido": 20.809,
+   "WAPE_V4": 20.033,
+   "WAPE_chronos2": 28.461
+  },
+  {
+   "origen": "2025-02-28",
+   "H": 14,
+   "franjas": 357,
+   "WAPE_hibrido": 12.786,
+   "WAPE_V4": 12.002,
+   "WAPE_chronos2": 14.535
+  },
+  {
+   "origen": "2025-02-28",
+   "H": 21,
+   "franjas": 357,
+   "WAPE_hibrido": 13.499,
+   "WAPE_V4": 13.235,
+   "WAPE_chronos2": 15.524
+  },
+  {
+   "origen": "2025-02-28",
+   "H": 28,
+   "franjas": 357,
+   "WAPE_hibrido": 13.553,
+   "WAPE_V4": 14.56,
+   "WAPE_chronos2": 15.879
+  },
+  {
+   "origen": "2025-03-31",
+   "H": 7,
+   "franjas": 357,
+   "WAPE_hibrido": 10.989,
+   "WAPE_V4": 11.509,
+   "WAPE_chronos2": 10.578
+  },
+  {
+   "origen": "2025-03-31",
+   "H": 14,
+   "franjas": 357,
+   "WAPE_hibrido": 13.086,
+   "WAPE_V4": 12.999,
+   "WAPE_chronos2": 14.147
+  },
+  {
+   "origen": "2025-03-31",
+   "H": 21,
+   "franjas": 357,
+   "WAPE_hibrido": 15.47,
+   "WAPE_V4": 16.572,
+   "WAPE_chronos2": 25.188
+  },
+  {
+   "origen": "2025-03-31",
+   "H": 28,
+   "franjas": 357,
+   "WAPE_hibrido": 13.388,
+   "WAPE_V4": 13.061,
+   "WAPE_chronos2": 14.12
+  },
+  {
+   "origen": "2025-04-30",
+   "H": 7,
+   "franjas": 357,
+   "WAPE_hibrido": 13.171,
+   "WAPE_V4": 13.718,
+   "WAPE_chronos2": 13.636
+  },
+  {
+   "origen": "2025-04-30",
+   "H": 14,
+   "franjas": 357,
+   "WAPE_hibrido": 12.923,
+   "WAPE_V4": 13.539,
+   "WAPE_chronos2": 13.391
+  },
+  {
+   "origen": "2025-04-30",
+   "H": 21,
+   "franjas": 357,
+   "WAPE_hibrido": 14.718,
+   "WAPE_V4": 14.921,
+   "WAPE_chronos2": 15.302
+  },
+  {
+   "origen": "2025-04-30",
+   "H": 28,
+   "franjas": 357,
+   "WAPE_hibrido": 12.987,
+   "WAPE_V4": 13.423,
+   "WAPE_chronos2": 14.663
+  },
+  {
+   "origen": "2025-05-31",
+   "H": 7,
+   "franjas": 357,
+   "WAPE_hibrido": 14.285,
+   "WAPE_V4": 14.556,
+   "WAPE_chronos2": 14.856
+  },
+  {
+   "origen": "2025-05-31",
+   "H": 14,
+   "franjas": 357,
+   "WAPE_hibrido": 13.771,
+   "WAPE_V4": 13.112,
+   "WAPE_chronos2": 14.606
+  },
+  {
+   "origen": "2025-05-31",
+   "H": 21,
+   "franjas": 357,
+   "WAPE_hibrido": 20.402,
+   "WAPE_V4": 19.866,
+   "WAPE_chronos2": 20.082
+  },
+  {
+   "origen": "2025-05-31",
+   "H": 28,
+   "franjas": 357,
+   "WAPE_hibrido": 16.109,
+   "WAPE_V4": 17.403,
+   "WAPE_chronos2": 15.044
+  },
+  {
+   "origen": "2025-06-30",
+   "H": 7,
+   "franjas": 357,
+   "WAPE_hibrido": 12.405,
+   "WAPE_V4": 13.245,
+   "WAPE_chronos2": 12.543
+  },
+  {
+   "origen": "2025-06-30",
+   "H": 14,
+   "franjas": 357,
+   "WAPE_hibrido": 16.339,
+   "WAPE_V4": 17.066,
+   "WAPE_chronos2": 16.227
+  },
+  {
+   "origen": "2025-06-30",
+   "H": 21,
+   "franjas": 357,
+   "WAPE_hibrido": 12.29,
+   "WAPE_V4": 13.56,
+   "WAPE_chronos2": 13.143
+  },
+  {
+   "origen": "2025-06-30",
+   "H": 28,
+   "franjas": 357,
+   "WAPE_hibrido": 13.266,
+   "WAPE_V4": 13.691,
+   "WAPE_chronos2": 13.563
+  },
+  {
+   "origen": "2025-07-31",
+   "H": 7,
+   "franjas": 357,
+   "WAPE_hibrido": 15.202,
+   "WAPE_V4": 16.26,
+   "WAPE_chronos2": 16.334
+  },
+  {
+   "origen": "2025-07-31",
+   "H": 14,
+   "franjas": 357,
+   "WAPE_hibrido": 12.502,
+   "WAPE_V4": 12.852,
+   "WAPE_chronos2": 12.457
+  },
+  {
+   "origen": "2025-07-31",
+   "H": 21,
+   "franjas": 357,
+   "WAPE_hibrido": 14.247,
+   "WAPE_V4": 14.204,
+   "WAPE_chronos2": 14.434
+  },
+  {
+   "origen": "2025-07-31",
+   "H": 28,
+   "franjas": 357,
+   "WAPE_hibrido": 13.217,
+   "WAPE_V4": 13.556,
+   "WAPE_chronos2": 13.873
+  },
+  {
+   "origen": "2025-08-31",
+   "H": 7,
+   "franjas": 357,
+   "WAPE_hibrido": 12.801,
+   "WAPE_V4": 12.843,
+   "WAPE_chronos2": 13.494
+  },
+  {
+   "origen": "2025-08-31",
+   "H": 14,
+   "franjas": 357,
+   "WAPE_hibrido": 13.168,
+   "WAPE_V4": 13.331,
+   "WAPE_chronos2": 13.888
+  },
+  {
+   "origen": "2025-08-31",
+   "H": 21,
+   "franjas": 357,
+   "WAPE_hibrido": 13.118,
+   "WAPE_V4": 13.323,
+   "WAPE_chronos2": 13.543
+  },
+  {
+   "origen": "2025-08-31",
+   "H": 28,
+   "franjas": 357,
+   "WAPE_hibrido": 10.954,
+   "WAPE_V4": 11.146,
+   "WAPE_chronos2": 11.901
+  },
+  {
+   "origen": "2025-09-30",
+   "H": 7,
+   "franjas": 357,
+   "WAPE_hibrido": 12.493,
+   "WAPE_V4": 12.708,
+   "WAPE_chronos2": 14.132
+  },
+  {
+   "origen": "2025-09-30",
+   "H": 14,
+   "franjas": 357,
+   "WAPE_hibrido": 16.31,
+   "WAPE_V4": 16.09,
+   "WAPE_chronos2": 19.868
+  },
+  {
+   "origen": "2025-09-30",
+   "H": 21,
+   "franjas": 357,
+   "WAPE_hibrido": 12.347,
+   "WAPE_V4": 12.565,
+   "WAPE_chronos2": 12.808
+  },
+  {
+   "origen": "2025-09-30",
+   "H": 28,
+   "franjas": 357,
+   "WAPE_hibrido": 11.946,
+   "WAPE_V4": 11.738,
+   "WAPE_chronos2": 11.579
+  },
+  {
+   "origen": "2025-10-31",
+   "H": 7,
+   "franjas": 357,
+   "WAPE_hibrido": 13.007,
+   "WAPE_V4": 13.157,
+   "WAPE_chronos2": 13.405
+  },
+  {
+   "origen": "2025-10-31",
+   "H": 14,
+   "franjas": 357,
+   "WAPE_hibrido": 12.527,
+   "WAPE_V4": 12.588,
+   "WAPE_chronos2": 13.019
+  },
+  {
+   "origen": "2025-10-31",
+   "H": 21,
+   "franjas": 357,
+   "WAPE_hibrido": 13.078,
+   "WAPE_V4": 13.89,
+   "WAPE_chronos2": 13.299
+  },
+  {
+   "origen": "2025-10-31",
+   "H": 28,
+   "franjas": 357,
+   "WAPE_hibrido": 10.98,
+   "WAPE_V4": 12.022,
+   "WAPE_chronos2": 11.852
+  },
+  {
+   "origen": "2025-11-30",
+   "H": 7,
+   "franjas": 357,
+   "WAPE_hibrido": 13.942,
+   "WAPE_V4": 14.047,
+   "WAPE_chronos2": 14.624
+  },
+  {
+   "origen": "2025-11-30",
+   "H": 14,
+   "franjas": 357,
+   "WAPE_hibrido": 14.184,
+   "WAPE_V4": 13.339,
+   "WAPE_chronos2": 15.689
+  },
+  {
+   "origen": "2025-11-30",
+   "H": 21,
+   "franjas": 357,
+   "WAPE_hibrido": 17.259,
+   "WAPE_V4": 16.666,
+   "WAPE_chronos2": 18.032
+  },
+  {
+   "origen": "2025-11-30",
+   "H": 28,
+   "franjas": 357,
+   "WAPE_hibrido": 21.112,
+   "WAPE_V4": 21.524,
+   "WAPE_chronos2": 21.535
+  }
+ ],
+ "global": {
+  "H7": {
+   "franjas": 3927,
+   "WAPE_hibrido": 13.476775110626305,
+   "WAPE_V4": 13.848932185641932,
+   "WAPE_chronos2": 14.521535775242647,
+   "sesgo_hibrido_pct": -0.28378864033590245,
+   "sesgo_V4_pct": 0.6842217861251054,
+   "semanas_mejor": 10,
+   "semanas": 11
+  },
+  "H14": {
+   "franjas": 3927,
+   "WAPE_hibrido": 13.405527219197952,
+   "WAPE_V4": 13.530552197074261,
+   "WAPE_chronos2": 14.308129832361146,
+   "sesgo_hibrido_pct": 1.5556456818856201,
+   "sesgo_V4_pct": 0.9452601499679858,
+   "semanas_mejor": 6,
+   "semanas": 11
+  },
+  "H21": {
+   "franjas": 3927,
+   "WAPE_hibrido": 14.367176326091169,
+   "WAPE_V4": 14.650756952010385,
+   "WAPE_chronos2": 15.539065223738472,
+   "sesgo_hibrido_pct": 1.839764861461246,
+   "sesgo_V4_pct": 2.0623267720921934,
+   "semanas_mejor": 7,
+   "semanas": 11
+  },
+  "H28": {
+   "franjas": 3927,
+   "WAPE_hibrido": 13.557316786491638,
+   "WAPE_V4": 13.96384942218408,
+   "WAPE_chronos2": 14.157870480617243,
+   "sesgo_hibrido_pct": 0.006713271425251577,
+   "sesgo_V4_pct": 0.4616204533759438,
+   "semanas_mejor": 9,
+   "semanas": 11
+  },
+  "todas": {
+   "franjas": 15708,
+   "WAPE_hibrido": 13.698403983424418,
+   "WAPE_V4": 13.994939932312397,
+   "WAPE_chronos2": 14.626985748532348,
+   "sesgo_hibrido_pct": 0.7771177565972343,
+   "sesgo_V4_pct": 1.03381068054067,
+   "semanas_mejor": 32,
+   "semanas": 44
+  },
+  "vs_V4_bootstrap_dias": {
+   "dif_pp": -0.29653594888797796,
+   "ic_inf": -0.4507103596345146,
+   "ic_sup": -0.14477064491569058,
+   "origenes_mejor": 9,
+   "dif_por_origen_pp": {
+    "1": -0.9149,
+    "2": 0.2056,
+    "3": -0.2319,
+    "4": -0.4491,
+    "5": -0.072,
+    "6": -0.8183,
+    "7": -0.4223,
+    "8": -0.1501,
+    "9": -0.0111,
+    "10": -0.5148,
+    "11": 0.2409
+   }
+  }
+ }
+}

@@ -1,0 +1,5604 @@
+{
+ "experimento": "D1_optimizacion",
+ "descripcion": "Del pronóstico (E1, LightGBM Poisson h=7) a la programación: salidas por ruta x día x hora con cotas de intervalo y flota; escenarios S0 (oferta real), S1 (factor 0,85), S2 (0,95), S3 (S1 con intervalo máximo 8 min); referencias con carga real (oráculo) y con el pronóstico manual B1. Costos y tarifa son supuestos declarados en 'parametros'.",
+ "parametros": {
+  "horizonte": 7,
+  "capacidad_imputada": 50,
+  "factor_flota": 0.85,
+  "intervalo_min": 3.0,
+  "intervalo_max": {
+   "Laboral": 10.0,
+   "Sábado": 10.0,
+   "Domingo/festivo": 15.0
+  },
+  "elasticidad_ppv": 0.22,
+  "elasticidad_rango": [
+   0.17,
+   0.25
+  ],
+  "cv_defecto": 0.5,
+  "min_obs_cv": 30,
+  "min_obs_ciclo": 20,
+  "costo_bus_hora_cop": 60000,
+  "costo_km_cop": 1500,
+  "tarifa_cop": 3000,
+  "excluidos": [
+   "2024-09-06",
+   "2024-09-22"
+  ],
+  "margen_seguridad": 0.15,
+  "holgura_ultimo_despacho_min": 10,
+  "elasticidades_sensibilidad": [
+   0.17,
+   0.22,
+   0.25,
+   0.4,
+   0.6,
+   0.8,
+   1.0
+  ]
+ },
+ "escenarios": {
+  "S1": {
+   "factor": 0.85,
+   "intervalo_max": {
+    "Laboral": 10.0,
+    "Sábado": 10.0,
+    "Domingo/festivo": 15.0
+   },
+   "descripcion": "factor de carga objetivo 0,85"
+  },
+  "S2": {
+   "factor": 0.95,
+   "intervalo_max": {
+    "Laboral": 10.0,
+    "Sábado": 10.0,
+    "Domingo/festivo": 15.0
+   },
+   "descripcion": "factor de carga objetivo 0,95"
+  },
+  "S3": {
+   "factor": 0.85,
+   "intervalo_max": {
+    "Laboral": 8.0,
+    "Sábado": 8.0,
+    "Domingo/festivo": 8.0
+   },
+   "descripcion": "S1 con intervalo máximo 8 min"
+  }
+ },
+ "parametros_operativos_por_ruta_tipo_dia": [
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Domingo/festivo",
+   "vehiculos_dia": 32.0,
+   "flota_disp": 27.0,
+   "capacidad": 50.0,
+   "dist": 57.0,
+   "dist_gps": 63.2,
+   "ciclo_med": 194.55,
+   "ciclo_max": 202.08333333333334,
+   "cv_med": 0.49329762351466944,
+   "intervalo_min_ef_min": 3.0,
+   "tasa_no_valido": 0.1673060010496243
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Laboral",
+   "vehiculos_dia": 54.0,
+   "flota_disp": 45.0,
+   "capacidad": 50.0,
+   "dist": 57.0,
+   "dist_gps": 63.2,
+   "ciclo_med": 250.49166666666667,
+   "ciclo_max": 285.2,
+   "cv_med": 0.5134040774277803,
+   "intervalo_min_ef_min": 3.0,
+   "tasa_no_valido": 0.09581929498269873
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Sábado",
+   "vehiculos_dia": 51.5,
+   "flota_disp": 43.0,
+   "capacidad": 50.0,
+   "dist": 57.0,
+   "dist_gps": 63.2,
+   "ciclo_med": 236.1,
+   "ciclo_max": 261.51666666666665,
+   "cv_med": 0.5212143211505272,
+   "intervalo_min_ef_min": 3.0,
+   "tasa_no_valido": 0.11581591808685975
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Domingo/festivo",
+   "vehiculos_dia": 54.0,
+   "flota_disp": 45.0,
+   "capacidad": 50.0,
+   "dist": 56.4,
+   "dist_gps": 57.1,
+   "ciclo_med": 172.93333333333334,
+   "ciclo_max": 177.8,
+   "cv_med": 0.8771677723000929,
+   "intervalo_min_ef_min": 3.0,
+   "tasa_no_valido": 0.12511673779659216
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "vehiculos_dia": 93.0,
+   "flota_disp": 79.0,
+   "capacidad": 50.0,
+   "dist": 56.4,
+   "dist_gps": 57.1,
+   "ciclo_med": 237.26666666666668,
+   "ciclo_max": 264.8833333333333,
+   "cv_med": 0.9327710361477899,
+   "intervalo_min_ef_min": 2.0350006529972573,
+   "tasa_no_valido": 0.06551993252190978
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Sábado",
+   "vehiculos_dia": 89.0,
+   "flota_disp": 75.0,
+   "capacidad": 50.0,
+   "dist": 56.4,
+   "dist_gps": 57.1,
+   "ciclo_med": 219.7,
+   "ciclo_max": 251.125,
+   "cv_med": 0.8874295416626609,
+   "intervalo_min_ef_min": 2.474860335195531,
+   "tasa_no_valido": 0.07646692692603893
+  },
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Domingo/festivo",
+   "vehiculos_dia": 32.0,
+   "flota_disp": 27.0,
+   "capacidad": 50.0,
+   "dist": 62.9,
+   "dist_gps": 63.4,
+   "ciclo_med": 199.98333333333332,
+   "ciclo_max": 208.64999999999998,
+   "cv_med": 0.797970655038084,
+   "intervalo_min_ef_min": 3.0,
+   "tasa_no_valido": 0.15740130029661958
+  },
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Laboral",
+   "vehiculos_dia": 53.0,
+   "flota_disp": 45.0,
+   "capacidad": 50.0,
+   "dist": 62.9,
+   "dist_gps": 63.4,
+   "ciclo_med": 251.0,
+   "ciclo_max": 288.64166666666665,
+   "cv_med": 0.8167603716027525,
+   "intervalo_min_ef_min": 2.322551796094798,
+   "tasa_no_valido": 0.09875727445127996
+  },
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Sábado",
+   "vehiculos_dia": 51.0,
+   "flota_disp": 43.0,
+   "capacidad": 50.0,
+   "dist": 62.9,
+   "dist_gps": 63.4,
+   "ciclo_med": 247.65,
+   "ciclo_max": 265.29166666666663,
+   "cv_med": 0.7997225608303979,
+   "intervalo_min_ef_min": 3.0,
+   "tasa_no_valido": 0.10393759102743746
+  }
+ ],
+ "franjas_con_intervalo_min_menor_3": [
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Laboral",
+   "hora": 5,
+   "intervalo_min_ef": 2.322551796094798
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 5,
+   "intervalo_min_ef": 2.0350006529972573
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 6,
+   "intervalo_min_ef": 2.256212645486002
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 7,
+   "intervalo_min_ef": 2.9370317878112977
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Sábado",
+   "hora": 5,
+   "intervalo_min_ef": 2.840888888888889
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Sábado",
+   "hora": 6,
+   "intervalo_min_ef": 2.6835871404399323
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Sábado",
+   "hora": 7,
+   "intervalo_min_ef": 2.474860335195531
+  }
+ ],
+ "estimador_carga_critica": {
+  "evaluado_en_filas": 17248,
+  "WAPE_vs_L_real": {
+   "L_A": {
+    "WAPE": 16.976959829959185,
+    "MAE": 55.78660201981418,
+    "sesgo": 2.407996530631552
+   },
+   "L_B": {
+    "WAPE": 17.018957701742426,
+    "MAE": 55.92460779837039,
+    "sesgo": -14.432979819164764
+   },
+   "L_B1": {
+    "WAPE": 22.414830788640693,
+    "MAE": 73.65554593235922,
+    "sesgo": 3.5265967109813805
+   }
+  },
+  "WAPE_por_ruta": {
+   "L_A": {
+    "CL 72": 22.998095010906283,
+    "CRA 54": 14.03448330587639,
+    "SILENCIO": 19.744694079459705
+   },
+   "L_B": {
+    "CL 72": 22.69804201233793,
+    "CRA 54": 13.99003154289051,
+    "SILENCIO": 20.20395310174151
+   },
+   "L_B1": {
+    "CL 72": 27.592913700729582,
+    "CRA 54": 19.341068110610486,
+    "SILENCIO": 26.0257191874447
+   }
+  },
+  "elegido": "L_A",
+  "definicion": "L = carga_max mediana x viajes válidos de la franja; L_A = pred_carga_max x pred_viajes; L_B = pasajeros previstos x razón histórica 2023-2024 L/pasajeros; L_B1 = carga_max_b1 x viajes_b1 (manual)"
+ },
+ "variantes": [
+  {
+   "nombre": "S0 oferta real",
+   "clave": "S0",
+   "horizonte": "observado",
+   "metricas_global": {
+    "salidas_dia": 459.8794520547945,
+    "programadas_dia": 504.24931506849316,
+    "buses_hora_dia": 1731.6923603500763,
+    "km_dia": 26844.249589041094,
+    "espera_media_min": 5.058200677140497,
+    "intervalo_medio_min": 6.298890507765508,
+    "pct_horas_sobrecarga": 11.670918367346939,
+    "pct_horas_fc_menor_05": 28.02643784786642,
+    "factor_carga_medio": 0.6704272959183672,
+    "horas_sin_servicio_con_demanda": 0,
+    "pax_perdidos_dia_central": 0.0,
+    "pax_perdidos_dia_e017": 0.0,
+    "pax_perdidos_dia_e025": 0.0,
+    "pax_perdidos_pct_central": 0.0
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "salidas_dia": 80.82739726027397,
+     "programadas_dia": 90.55342465753425,
+     "buses_hora_dia": 308.1189672754947,
+     "km_dia": 4607.161643835617,
+     "espera_media_min": 7.849233060139671,
+     "intervalo_medio_min": 12.245504386231934,
+     "pct_horas_sobrecarga": 8.33482063180439,
+     "pct_horas_fc_menor_05": 26.68213457076566,
+     "factor_carga_medio": 0.6669355702302339,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 0.0,
+     "pax_perdidos_dia_e017": 0.0,
+     "pax_perdidos_dia_e025": 0.0,
+     "pax_perdidos_pct_central": 0.0
+    },
+    "CRA 54": {
+     "salidas_dia": 246.96712328767123,
+     "programadas_dia": 265.84383561643835,
+     "buses_hora_dia": 906.4611362252665,
+     "km_dia": 13928.945753424658,
+     "espera_media_min": 3.5878878794594598,
+     "intervalo_medio_min": 3.8619180590953763,
+     "pct_horas_sobrecarga": 17.277397260273972,
+     "pct_horas_fc_menor_05": 19.041095890410958,
+     "factor_carga_medio": 0.7319417808219176,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 0.0,
+     "pax_perdidos_dia_e017": 0.0,
+     "pax_perdidos_dia_e025": 0.0,
+     "pax_perdidos_pct_central": 0.0
+    },
+    "SILENCIO": {
+     "salidas_dia": 132.0849315068493,
+     "programadas_dia": 147.85205479452054,
+     "buses_hora_dia": 517.112256849315,
+     "km_dia": 8308.142191780822,
+     "espera_media_min": 6.2631179623367625,
+     "intervalo_medio_min": 7.417264565485143,
+     "pct_horas_sobrecarga": 9.250645994832041,
+     "pct_horas_fc_menor_05": 38.363479758828596,
+     "factor_carga_medio": 0.6119121447028424,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 0.0,
+     "pax_perdidos_dia_e017": 0.0,
+     "pax_perdidos_dia_e025": 0.0,
+     "pax_perdidos_pct_central": 0.0
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Domingo/festivo": {
+     "salidas_dia": 305.4852941176471,
+     "programadas_dia": 358.72058823529414,
+     "buses_hora_dia": 933.6945506535949,
+     "km_dia": 17846.652941176468,
+     "espera_media_min": 7.276994889235872,
+     "intervalo_medio_min": 9.32094575266845,
+     "pct_horas_sobrecarga": 2.5951557093425603,
+     "pct_horas_fc_menor_05": 59.34256055363322,
+     "factor_carga_medio": 0.4884740484429066,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 0.0,
+     "pax_perdidos_dia_e017": 0.0,
+     "pax_perdidos_dia_e025": 0.0,
+     "pax_perdidos_pct_central": 0.0
+    },
+    "Laboral": {
+     "salidas_dia": 503.62448979591835,
+     "programadas_dia": 546.1142857142858,
+     "buses_hora_dia": 1956.3882885487528,
+     "km_dia": 29392.576734693874,
+     "espera_media_min": 4.794994772491002,
+     "intervalo_medio_min": 5.923058251307065,
+     "pct_horas_sobrecarga": 15.206359945872801,
+     "pct_horas_fc_menor_05": 20.382273342354534,
+     "factor_carga_medio": 0.7232856901217862,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 0.0,
+     "pax_perdidos_dia_e017": 0.0,
+     "pax_perdidos_dia_e025": 0.0,
+     "pax_perdidos_pct_central": 0.0
+    },
+    "Sábado": {
+     "salidas_dia": 455.6730769230769,
+     "programadas_dia": 497.3076923076923,
+     "buses_hora_dia": 1716.564449786325,
+     "km_dia": 26603.796153846153,
+     "espera_media_min": 5.109991348040656,
+     "intervalo_medio_min": 6.4707560375496715,
+     "pct_horas_sobrecarga": 5.524861878453039,
+     "pct_horas_fc_menor_05": 27.97947908445146,
+     "factor_carga_medio": 0.6312983425414365,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 0.0,
+     "pax_perdidos_dia_e017": 0.0,
+     "pax_perdidos_dia_e025": 0.0,
+     "pax_perdidos_pct_central": 0.0
+    }
+   },
+   "buses_pico_mediana": {
+    "CL 72|Domingo/festivo": 14.011388888888888,
+    "CL 72|Laboral": 26.445,
+    "CL 72|Sábado": 22.92833333333333,
+    "CRA 54|Domingo/festivo": 36.580416666666665,
+    "CRA 54|Laboral": 76.58333333333334,
+    "CRA 54|Sábado": 72.0,
+    "SILENCIO|Domingo/festivo": 24.442083333333336,
+    "SILENCIO|Laboral": 45.071666666666665,
+    "SILENCIO|Sábado": 39.73236111111112
+   },
+   "cotas_activas_pct": null,
+   "notas": ""
+  },
+  {
+   "nombre": "S1 factor 0,85",
+   "clave": "S1",
+   "horizonte": "h=7",
+   "metricas_global": {
+    "salidas_dia": 431.0109589041096,
+    "programadas_dia": 497.55342465753426,
+    "buses_hora_dia": 1645.0138116438357,
+    "km_dia": 25118.507945205474,
+    "espera_media_min": 5.242443988702564,
+    "intervalo_medio_min": 6.375914354921539,
+    "pct_horas_sobrecarga": 9.908969675885661,
+    "pct_horas_fc_menor_05": 24.40424421638546,
+    "factor_carga_medio": 0.6840797150880984,
+    "horas_sin_servicio_con_demanda": 1,
+    "pax_perdidos_dia_central": 3594.750553514841,
+    "pax_perdidos_dia_e017": 3790.082502939361,
+    "pax_perdidos_dia_e025": 3475.7643966023106,
+    "pax_perdidos_pct_central": 10.193000917489417,
+    "bus_horas_ahorradas_anual": 31637.670277777826,
+    "km_ahorrados_anual": 629895.7000000011,
+    "ahorro_bus_hora_cop_anual": 1898260216.6666696,
+    "ahorro_km_cop_anual": 944843550.0000017,
+    "ingreso_perdido_cop_anual": 3936251856.098751,
+    "neto_cop_anual": -1093148089.4320798,
+    "sensibilidad_elasticidad": {
+     "0.17": {
+      "pax_perdidos_dia": 3790.082502939361,
+      "pct": 10.746869318108306,
+      "neto_cop_anual": -1307036574.0519285
+     },
+     "0.22": {
+      "pax_perdidos_dia": 3594.750553514841,
+      "pct": 10.193000917489417,
+      "neto_cop_anual": -1093148089.4320798
+     },
+     "0.25": {
+      "pax_perdidos_dia": 3475.7643966023106,
+      "pct": 9.85561283213476,
+      "neto_cop_anual": -962858247.6128592
+     },
+     "0.4": {
+      "pax_perdidos_dia": 2859.9641525367538,
+      "pct": 8.109496555272907,
+      "neto_cop_anual": -288556980.361074
+     },
+     "0.6": {
+      "pax_perdidos_dia": 1981.300700498395,
+      "pct": 5.618025383779717,
+      "neto_cop_anual": 673579499.6209288
+     },
+     "0.8": {
+      "pax_perdidos_dia": 1030.5304724947473,
+      "pct": 2.9220937295270923,
+      "neto_cop_anual": 1714672899.284923
+     },
+     "1.0": {
+      "pax_perdidos_dia": 0.005479452054794521,
+      "pct": 1.553711696831073e-05,
+      "neto_cop_anual": 2843097766.6666713
+     }
+    },
+    "elasticidad_equilibrio": 0.45998254641929215,
+    "pct_horas_menos_salidas": 44.36207359656191,
+    "pct_horas_mas_salidas": 39.22643029814666,
+    "pct_horas_igual": 16.41149610529143,
+    "salidas_menos_dia": 71.83561643835617,
+    "salidas_mas_dia": 42.967123287671235
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "salidas_dia": 97.7068493150685,
+     "programadas_dia": 116.7013698630137,
+     "buses_hora_dia": 375.07158295281585,
+     "km_dia": 5569.290410958904,
+     "espera_media_min": 6.254644079140225,
+     "intervalo_medio_min": 9.717116332829237,
+     "pct_horas_sobrecarga": 3.6230590754952705,
+     "pct_horas_fc_menor_05": 46.135998572193465,
+     "factor_carga_medio": 0.5429577284570835,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 180.19082491280088,
+     "pax_perdidos_dia_e017": 190.50388613085224,
+     "pax_perdidos_dia_e025": 173.93736298496276,
+     "pax_perdidos_pct_central": 2.8779728275028504,
+     "bus_horas_ahorradas_anual": -24437.70472222223,
+     "km_ahorrados_anual": -351177.0,
+     "ahorro_bus_hora_cop_anual": -1466262283.333334,
+     "ahorro_km_cop_anual": -526765500.0,
+     "ingreso_perdido_cop_anual": 197308953.27951697,
+     "neto_cop_anual": -2190336736.612851,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 190.50388613085224,
+       "pct": 3.042691036480963,
+       "neto_cop_anual": -2201629538.646617
+      },
+      "0.22": {
+       "pax_perdidos_dia": 180.19082491280088,
+       "pct": 2.8779728275028504,
+       "neto_cop_anual": -2190336736.612851
+      },
+      "0.25": {
+       "pax_perdidos_dia": 173.93736298496276,
+       "pct": 2.7780937492265227,
+       "neto_cop_anual": -2183489195.8018684
+      },
+      "0.4": {
+       "pax_perdidos_dia": 141.91251756637126,
+       "pct": 2.266599143636658,
+       "neto_cop_anual": -2148421990.0685105
+      },
+      "0.6": {
+       "pax_perdidos_dia": 97.16252761070743,
+       "pct": 1.5518610031916573,
+       "neto_cop_anual": -2099420751.0670586
+      },
+      "0.8": {
+       "pax_perdidos_dia": 49.91795618859513,
+       "pct": 0.7972798924960615,
+       "neto_cop_anual": -2047687945.3598456
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": -1993027783.333334
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 13.408541498791296,
+     "pct_horas_mas_salidas": 64.3190975020145,
+     "pct_horas_igual": 22.2723609991942,
+     "salidas_menos_dia": 3.8465753424657536,
+     "salidas_mas_dia": 20.726027397260275
+    },
+    "CRA 54": {
+     "salidas_dia": 217.78630136986303,
+     "programadas_dia": 242.4958904109589,
+     "buses_hora_dia": 812.7891906392693,
+     "km_dia": 12283.14739726027,
+     "espera_media_min": 4.077737430797693,
+     "intervalo_medio_min": 4.39489366054244,
+     "pct_horas_sobrecarga": 17.31164383561644,
+     "pct_horas_fc_menor_05": 4.280821917808219,
+     "factor_carga_medio": 0.826262033685729,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 2224.5530949595736,
+     "pax_perdidos_dia_e017": 2345.073910125645,
+     "pax_perdidos_dia_e025": 2151.1203333589783,
+     "pax_perdidos_pct_central": 11.351958404866533,
+     "bus_horas_ahorradas_anual": 34190.26013888896,
+     "km_ahorrados_anual": 600716.4000000013,
+     "ahorro_bus_hora_cop_anual": 2051415608.3333375,
+     "ahorro_km_cop_anual": 901074600.0000019,
+     "ingreso_perdido_cop_anual": 2435885638.980733,
+     "neto_cop_anual": 516604569.3526068,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 2345.073910125645,
+       "pct": 11.96697958992425,
+       "neto_cop_anual": 384634276.74575853
+      },
+      "0.22": {
+       "pax_perdidos_dia": 2224.5530949595736,
+       "pct": 11.351958404866533,
+       "neto_cop_anual": 516604569.3526068
+      },
+      "0.25": {
+       "pax_perdidos_dia": 2151.1203333589783,
+       "pct": 10.977228911048995,
+       "neto_cop_anual": 597013443.3052583
+      },
+      "0.4": {
+       "pax_perdidos_dia": 1770.8607713413596,
+       "pct": 9.036753432689949,
+       "neto_cop_anual": 1013397663.7145507
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1227.6477158201642,
+       "pct": 6.264721591674652,
+       "neto_cop_anual": 1608215959.5102599
+      },
+      "0.8": {
+       "pax_perdidos_dia": 639.0092912655285,
+       "pct": 3.2608827863923597,
+       "neto_cop_anual": 2252775034.397586
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 2952490208.3333397
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 62.320709105560034,
+     "pct_horas_mas_salidas": 28.18694601128123,
+     "pct_horas_igual": 9.492344883158744,
+     "salidas_menos_dia": 43.04383561643836,
+     "salidas_mas_dia": 13.863013698630137
+    },
+    "SILENCIO": {
+     "salidas_dia": 115.51780821917808,
+     "programadas_dia": 138.35616438356163,
+     "buses_hora_dia": 457.15303805175034,
+     "km_dia": 7266.0701369863,
+     "espera_media_min": 6.994526605099514,
+     "intervalo_medio_min": 8.278343524947804,
+     "pct_horas_sobrecarga": 8.528600964851826,
+     "pct_horas_fc_menor_05": 23.673328738800826,
+     "factor_carga_medio": 0.6772502441169429,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 1190.0066336424668,
+     "pax_perdidos_dia_e017": 1254.504706682863,
+     "pax_perdidos_dia_e025": 1150.7067002583701,
+     "pax_perdidos_pct_central": 12.646710818911828,
+     "bus_horas_ahorradas_anual": 21885.114861111128,
+     "km_ahorrados_anual": 380356.30000000075,
+     "ahorro_bus_hora_cop_anual": 1313106891.6666677,
+     "ahorro_km_cop_anual": 570534450.0000011,
+     "ingreso_perdido_cop_anual": 1303057263.838501,
+     "neto_cop_anual": 580584077.8281679,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 1254.504706682863,
+       "pct": 13.33215950050633,
+       "neto_cop_anual": 509958687.8489342
+      },
+      "0.22": {
+       "pax_perdidos_dia": 1190.0066336424668,
+       "pct": 12.646710818911828,
+       "neto_cop_anual": 580584077.8281679
+      },
+      "0.25": {
+       "pax_perdidos_dia": 1150.7067002583701,
+       "pct": 12.229053573430877,
+       "neto_cop_anual": 623617504.8837535
+      },
+      "0.4": {
+       "pax_perdidos_dia": 947.1908636290233,
+       "pct": 10.066203501711408,
+       "neto_cop_anual": 846467345.9928885
+      },
+      "0.6": {
+       "pax_perdidos_dia": 656.4904570675234,
+       "pct": 6.9768056170371375,
+       "neto_cop_anual": 1164784291.1777308
+      },
+      "0.8": {
+       "pax_perdidos_dia": 341.6032250406236,
+       "pct": 3.6303639658486153,
+       "neto_cop_anual": 1509585810.2471862
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.005479452054794521,
+       "pct": 5.8232486797967334e-05,
+       "neto_cop_anual": 1883635341.666669
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 57.35697018533441,
+     "pct_horas_mas_salidas": 25.173247381144236,
+     "pct_horas_igual": 17.469782433521353,
+     "salidas_menos_dia": 24.945205479452056,
+     "salidas_mas_dia": 8.378082191780821
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Domingo/festivo": {
+     "salidas_dia": 229.38235294117646,
+     "programadas_dia": 291.5735294117647,
+     "buses_hora_dia": 706.8777205882352,
+     "km_dia": 13373.70588235294,
+     "espera_media_min": 9.302817947831292,
+     "intervalo_medio_min": 11.518424979335187,
+     "pct_horas_sobrecarga": 6.645898234683282,
+     "pct_horas_fc_menor_05": 34.33714087919695,
+     "factor_carga_medio": 0.6166586350075446,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 3954.5085203518993,
+     "pax_perdidos_dia_e017": 4154.941878349295,
+     "pax_perdidos_dia_e025": 3831.638999832679,
+     "pax_perdidos_pct_central": 23.43128626544838,
+     "bus_horas_ahorradas_anual": 82788.14297385627,
+     "km_ahorrados_anual": 1632625.6764705875,
+     "ahorro_bus_hora_cop_anual": 4967288578.431376,
+     "ahorro_km_cop_anual": 2448938514.705881,
+     "ingreso_perdido_cop_anual": 4330186829.78533,
+     "neto_cop_anual": 3086040263.3519278,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4154.941878349295,
+       "pct": 24.618895639460845,
+       "neto_cop_anual": 2866565736.34478
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3954.5085203518993,
+       "pct": 23.43128626544838,
+       "neto_cop_anual": 3086040263.3519278
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3831.638999832679,
+       "pct": 22.70325877637673,
+       "neto_cop_anual": 3220582388.3204737
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3186.5122614510055,
+       "pct": 18.880748543633352,
+       "neto_cop_anual": 3926996166.8484063
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2239.9884921676985,
+       "pct": 13.272398155465567,
+       "neto_cop_anual": 4963439694.213627
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1182.787826586258,
+       "pct": 7.008264115097653,
+       "neto_cop_anual": 6121074423.025305
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.029411764705882353,
+       "pct": 0.00017427082906732867,
+       "neto_cop_anual": 7416194887.254905
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 56.11303344867359,
+     "pct_horas_mas_salidas": 22.722029988465977,
+     "pct_horas_igual": 21.16493656286044,
+     "salidas_menos_dia": 94.1470588235294,
+     "salidas_mas_dia": 18.044117647058822
+    },
+    "Laboral": {
+     "salidas_dia": 489.0,
+     "programadas_dia": 556.8122448979592,
+     "buses_hora_dia": 1917.866719387755,
+     "km_dia": 28498.83224489796,
+     "espera_media_min": 4.762651232133582,
+     "intervalo_medio_min": 5.750666617776611,
+     "pct_horas_sobrecarga": 11.28213802435724,
+     "pct_horas_fc_menor_05": 20.898173207036535,
+     "factor_carga_medio": 0.7083436916410217,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 3431.0845489629223,
+     "pax_perdidos_dia_e017": 3620.990856144277,
+     "pax_perdidos_dia_e025": 3315.5927050856844,
+     "pax_perdidos_pct_central": 8.396448331753154,
+     "bus_horas_ahorradas_anual": 14060.372743764288,
+     "km_ahorrados_anual": 326216.738775508,
+     "ahorro_bus_hora_cop_anual": 843622364.6258574,
+     "ahorro_km_cop_anual": 489325108.163262,
+     "ingreso_perdido_cop_anual": 3757037581.1144004,
+     "neto_cop_anual": -2424090108.325281,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 3620.990856144277,
+       "pct": 8.861181413485065,
+       "neto_cop_anual": -2632037514.6888638
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3431.0845489629223,
+       "pct": 8.396448331753154,
+       "neto_cop_anual": -2424090108.325281
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3315.5927050856844,
+       "pct": 8.11382011725834,
+       "neto_cop_anual": -2297626539.279705
+      },
+      "0.4": {
+       "pax_perdidos_dia": 2720.1174913987375,
+       "pct": 6.656590837940995,
+       "neto_cop_anual": -1645581180.292498
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1876.7208131623856,
+       "pct": 4.592655504687774,
+       "neto_cop_anual": -722061817.623693
+      },
+      "0.8": {
+       "pax_perdidos_dia": 971.9699232481513,
+       "pct": 2.378575964570138,
+       "neto_cop_anual": 268640406.83239365
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 1332947472.7891192
+      }
+     },
+     "elasticidad_equilibrio": 0.7457676786826876,
+     "pct_horas_menos_salidas": 40.42416966786715,
+     "pct_horas_mas_salidas": 44.0656262505002,
+     "pct_horas_igual": 15.510204081632653,
+     "salidas_menos_dia": 64.89387755102041,
+     "salidas_mas_dia": 50.26938775510204
+    },
+    "Sábado": {
+     "salidas_dia": 421.46153846153845,
+     "programadas_dia": 487.71153846153845,
+     "buses_hora_dia": 1586.2501923076925,
+     "km_dia": 24550.56730769231,
+     "espera_media_min": 5.326287149947355,
+     "intervalo_medio_min": 6.584863604578873,
+     "pct_horas_sobrecarga": 7.221783741120758,
+     "pct_horas_fc_menor_05": 29.439621152328332,
+     "factor_carga_medio": 0.6477270085336211,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 3895.4165029436876,
+     "pax_perdidos_dia_e017": 4109.64050172628,
+     "pax_perdidos_dia_e025": 3765.045000485166,
+     "pax_perdidos_pct_central": 11.823591897559579,
+     "bus_horas_ahorradas_anual": 47564.70397970086,
+     "km_ahorrados_anual": 749428.5288461532,
+     "ahorro_bus_hora_cop_anual": 2853882238.7820516,
+     "ahorro_km_cop_anual": 1124142793.2692297,
+     "ingreso_perdido_cop_anual": 4265481070.723338,
+     "neto_cop_anual": -287456038.67205715,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4109.64050172628,
+       "pct": 12.4738168823217,
+       "neto_cop_anual": -522031317.338995
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3895.4165029436876,
+       "pct": 11.823591897559579,
+       "neto_cop_anual": -287456038.67205715
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3765.045000485166,
+       "pct": 11.427880825591693,
+       "neto_cop_anual": -144699243.47997618
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3091.8326250876225,
+       "pct": 9.38450795876932,
+       "neto_cop_anual": 592468307.5803347
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2135.7488267255026,
+       "pct": 6.482547502638406,
+       "neto_cop_anual": 1639380066.7868557
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1107.3349818638487,
+       "pct": 3.361046735196561,
+       "neto_cop_anual": 2765493226.9103665
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 3978025032.051281
+      }
+     },
+     "elasticidad_equilibrio": 0.2794436271520322,
+     "pct_horas_menos_salidas": 47.549019607843135,
+     "pct_horas_mas_salidas": 38.009049773755656,
+     "pct_horas_igual": 14.441930618401205,
+     "salidas_menos_dia": 75.36538461538461,
+     "salidas_mas_dia": 41.15384615384615
+    }
+   },
+   "buses_pico_mediana": {
+    "CL 72|Domingo/festivo": 13.456666666666663,
+    "CL 72|Laboral": 28.520000000000003,
+    "CL 72|Sábado": 26.151666666666667,
+    "CRA 54|Domingo/festivo": 21.560000000000002,
+    "CRA 54|Laboral": 74.33166666666668,
+    "CRA 54|Sábado": 62.5,
+    "SILENCIO|Domingo/festivo": 13.909999999999997,
+    "SILENCIO|Laboral": 43.64583333333333,
+    "SILENCIO|Sábado": 30.623333333333342
+   },
+   "cotas_activas_pct": {
+    "pct_cota_min_frecuencia": 38.60327692720924,
+    "pct_cota_flota": 1.3644910018802041,
+    "pct_dias_flota_insuficiente": 0.0,
+    "pct_cota_intervalo_min": 5.9629331184528604
+   },
+   "notas": "factor de carga objetivo 0,85"
+  },
+  {
+   "nombre": "S2 factor 0,95",
+   "clave": "S2",
+   "horizonte": "h=7",
+   "metricas_global": {
+    "salidas_dia": 407.73972602739724,
+    "programadas_dia": 471.9013698630137,
+    "buses_hora_dia": 1555.7251548706242,
+    "km_dia": 23770.382465753424,
+    "espera_media_min": 5.551843138020806,
+    "intervalo_medio_min": 6.725248655449575,
+    "pct_horas_sobrecarga": 16.21731315591117,
+    "pct_horas_fc_menor_05": 23.557720183220273,
+    "factor_carga_medio": 0.7231486801326298,
+    "horas_sin_servicio_con_demanda": 1,
+    "pax_perdidos_dia_central": 4555.466395619962,
+    "pax_perdidos_dia_e017": 4798.729234441347,
+    "pax_perdidos_dia_e025": 4407.055170791266,
+    "pax_perdidos_pct_central": 12.917133597697012,
+    "bus_horas_ahorradas_anual": 64228.03000000003,
+    "km_ahorrados_anual": 1121961.5,
+    "ahorro_bus_hora_cop_anual": 3853681800.000002,
+    "ahorro_km_cop_anual": 1682942250.0,
+    "ingreso_perdido_cop_anual": 4988235703.203858,
+    "neto_cop_anual": 548388346.7961435,
+    "sensibilidad_elasticidad": {
+     "0.17": {
+      "pax_perdidos_dia": 4798.729234441347,
+      "pct": 13.606911178195052,
+      "neto_cop_anual": 282015538.286726
+     },
+     "0.22": {
+      "pax_perdidos_dia": 4555.466395619962,
+      "pct": 12.917133597697012,
+      "neto_cop_anual": 548388346.7961435
+     },
+     "0.25": {
+      "pax_perdidos_dia": 4407.055170791266,
+      "pct": 12.49631003057481,
+      "neto_cop_anual": 710898637.9835653
+     },
+     "0.4": {
+      "pax_perdidos_dia": 3636.2516810574543,
+      "pct": 10.310678354302128,
+      "neto_cop_anual": 1554928459.2420893
+     },
+     "0.6": {
+      "pax_perdidos_dia": 2528.7380060063083,
+      "pct": 7.170296918129745,
+      "neto_cop_anual": 2767655933.4230943
+     },
+     "0.8": {
+      "pax_perdidos_dia": 1320.5470645882515,
+      "pct": 3.7444426923517358,
+      "neto_cop_anual": 4090625014.2758665
+     },
+     "1.0": {
+      "pax_perdidos_dia": 0.005479452054794521,
+      "pct": 1.553711696831073e-05,
+      "neto_cop_anual": 5536618050.000002
+     }
+    },
+    "elasticidad_equilibrio": null,
+    "pct_horas_menos_salidas": 49.31506849315068,
+    "pct_horas_mas_salidas": 34.27880741337631,
+    "pct_horas_igual": 16.406124093473007,
+    "salidas_menos_dia": 87.35616438356165,
+    "salidas_mas_dia": 35.21643835616438
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "salidas_dia": 95.9068493150685,
+     "programadas_dia": 114.52328767123288,
+     "buses_hora_dia": 368.633595890411,
+     "km_dia": 5466.690410958904,
+     "espera_media_min": 6.36338920232036,
+     "intervalo_medio_min": 9.865318316508617,
+     "pct_horas_sobrecarga": 5.193646260931644,
+     "pct_horas_fc_menor_05": 45.74335177583437,
+     "factor_carga_medio": 0.5534457699884637,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 227.72053973241935,
+     "pax_perdidos_dia_e017": 240.583205963793,
+     "pax_perdidos_dia_e025": 219.91182914693388,
+     "pax_perdidos_pct_central": 3.6371081931132663,
+     "bus_horas_ahorradas_anual": -22087.839444444457,
+     "km_ahorrados_anual": -313728.0,
+     "ahorro_bus_hora_cop_anual": -1325270366.6666675,
+     "ahorro_km_cop_anual": -470592000.0,
+     "ingreso_perdido_cop_anual": 249353991.0069992,
+     "neto_cop_anual": -2045216357.6736667,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 240.583205963793,
+       "pct": 3.8425481977363987,
+       "neto_cop_anual": -2059300977.1970208
+      },
+      "0.22": {
+       "pax_perdidos_dia": 227.72053973241935,
+       "pct": 3.6371081931132663,
+       "neto_cop_anual": -2045216357.6736667
+      },
+      "0.25": {
+       "pax_perdidos_dia": 219.91182914693388,
+       "pct": 3.5123889856079096,
+       "neto_cop_anual": -2036665819.58256
+      },
+      "0.4": {
+       "pax_perdidos_dia": 179.8136578152748,
+       "pct": 2.871948787940162,
+       "neto_cop_anual": -1992758321.9743934
+      },
+      "0.6": {
+       "pax_perdidos_dia": 123.48197701832078,
+       "pct": 1.972230132788589,
+       "neto_cop_anual": -1931075131.5017288
+      },
+      "0.8": {
+       "pax_perdidos_dia": 63.63756454584821,
+       "pct": 1.0164068101693842,
+       "neto_cop_anual": -1865545499.8443713
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": -1795862366.6666675
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 14.585012087026591,
+     "pct_horas_mas_salidas": 62.1273166800967,
+     "pct_horas_igual": 23.28767123287671,
+     "salidas_menos_dia": 4.761643835616439,
+     "salidas_mas_dia": 19.84109589041096
+    },
+    "CRA 54": {
+     "salidas_dia": 201.63013698630138,
+     "programadas_dia": 224.8849315068493,
+     "buses_hora_dia": 752.2047716894978,
+     "km_dia": 11371.939726027398,
+     "espera_media_min": 4.448943826382165,
+     "intervalo_medio_min": 4.800478254717348,
+     "pct_horas_sobrecarga": 29.229452054794518,
+     "pct_horas_fc_menor_05": 2.945205479452055,
+     "factor_carga_medio": 0.8991207966656471,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 2931.1512145738634,
+     "pax_perdidos_dia_e017": 3086.2219927161423,
+     "pax_perdidos_dia_e025": 2836.4692312240995,
+     "pax_perdidos_pct_central": 14.95774892566509,
+     "bus_horas_ahorradas_anual": 56303.57305555558,
+     "km_ahorrados_anual": 933307.2000000002,
+     "ahorro_bus_hora_cop_anual": 3378214383.333335,
+     "ahorro_km_cop_anual": 1399960800.0000002,
+     "ingreso_perdido_cop_anual": 3209610579.95838,
+     "neto_cop_anual": 1568564603.3749547,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 3086.2219927161423,
+       "pct": 15.749079565185486,
+       "neto_cop_anual": 1398762101.3091593
+      },
+      "0.22": {
+       "pax_perdidos_dia": 2931.1512145738634,
+       "pct": 14.95774892566509,
+       "neto_cop_anual": 1568564603.3749547
+      },
+      "0.25": {
+       "pax_perdidos_dia": 2836.4692312240995,
+       "pct": 14.47458404229497,
+       "neto_cop_anual": 1672241375.1429458
+      },
+      "0.4": {
+       "pax_perdidos_dia": 2343.808658899351,
+       "pct": 11.960522976537435,
+       "neto_cop_anual": 2211704701.838546
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1633.316090004231,
+       "pct": 8.334858969083953,
+       "neto_cop_anual": 2989694064.778702
+      },
+      "0.8": {
+       "pax_perdidos_dia": 854.8174543920793,
+       "pct": 4.362158047834379,
+       "neto_cop_anual": 3842150070.7740083
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 4778175183.333335
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 70.6204673650282,
+     "pct_horas_mas_salidas": 20.628525382755843,
+     "pct_horas_igual": 8.751007252215954,
+     "salidas_menos_dia": 54.41917808219178,
+     "salidas_mas_dia": 9.082191780821917
+    },
+    "SILENCIO": {
+     "salidas_dia": 110.2027397260274,
+     "programadas_dia": 132.4931506849315,
+     "buses_hora_dia": 434.88678729071535,
+     "km_dia": 6931.752328767122,
+     "espera_media_min": 7.308720210838514,
+     "intervalo_medio_min": 8.644363295488837,
+     "pct_horas_sobrecarga": 13.766368022053758,
+     "pct_horas_fc_menor_05": 22.88077188146106,
+     "factor_carga_medio": 0.7099109552851004,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 1396.594641313679,
+     "pax_perdidos_dia_e017": 1471.9240357614121,
+     "pax_perdidos_dia_e025": 1350.6741104202335,
+     "pax_perdidos_pct_central": 14.84221016976496,
+     "bus_horas_ahorradas_anual": 30012.296388888906,
+     "km_ahorrados_anual": 502382.30000000075,
+     "ahorro_bus_hora_cop_anual": 1800737783.3333344,
+     "ahorro_km_cop_anual": 753573450.0000011,
+     "ingreso_perdido_cop_anual": 1529271132.2384784,
+     "neto_cop_anual": 1025040101.094857,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 1471.9240357614121,
+       "pct": 15.64276794886592,
+       "neto_cop_anual": 942554414.1745889
+      },
+      "0.22": {
+       "pax_perdidos_dia": 1396.594641313679,
+       "pct": 14.84221016976496,
+       "neto_cop_anual": 1025040101.094857
+      },
+      "0.25": {
+       "pax_perdidos_dia": 1350.6741104202335,
+       "pct": 14.35419299537096,
+       "neto_cop_anual": 1075323082.4231796
+      },
+      "0.4": {
+       "pax_perdidos_dia": 1112.6293643428287,
+       "pct": 11.824389395547733,
+       "neto_cop_anual": 1335982079.377938
+      },
+      "0.6": {
+       "pax_perdidos_dia": 771.9399389837565,
+       "pct": 8.203736770789396,
+       "neto_cop_anual": 1709037000.146122
+      },
+      "0.8": {
+       "pax_perdidos_dia": 402.09204565032394,
+       "pct": 4.273204602531781,
+       "neto_cop_anual": 2114020443.3462307
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.005479452054794521,
+       "pct": 5.8232486797967334e-05,
+       "neto_cop_anual": 2554305233.3333354
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 62.73972602739726,
+     "pct_horas_mas_salidas": 20.08058017727639,
+     "pct_horas_igual": 17.17969379532635,
+     "salidas_menos_dia": 28.175342465753424,
+     "salidas_mas_dia": 6.293150684931507
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Domingo/festivo": {
+     "salidas_dia": 219.14705882352942,
+     "programadas_dia": 278.79411764705884,
+     "buses_hora_dia": 677.5358088235294,
+     "km_dia": 12794.714705882352,
+     "espera_media_min": 9.743463600594856,
+     "intervalo_medio_min": 12.011437240691297,
+     "pct_horas_sobrecarga": 10.799584631360332,
+     "pct_horas_fc_menor_05": 33.29871928002769,
+     "factor_carga_medio": 0.6454951169460516,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 4401.269550687294,
+     "pax_perdidos_dia_e017": 4618.822778014213,
+     "pax_perdidos_dia_e025": 4267.611542056406,
+     "pax_perdidos_pct_central": 26.078438380600172,
+     "bus_horas_ahorradas_anual": 93497.94076797392,
+     "km_ahorrados_anual": 1843957.4558823523,
+     "ahorro_bus_hora_cop_anual": 5609876446.078435,
+     "ahorro_km_cop_anual": 2765936183.8235283,
+     "ingreso_perdido_cop_anual": 4819390158.002587,
+     "neto_cop_anual": 3556422471.899376,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4618.822778014213,
+       "pct": 27.367486544546367,
+       "neto_cop_anual": 3318201687.9763994
+      },
+      "0.22": {
+       "pax_perdidos_dia": 4401.269550687294,
+       "pct": 26.078438380600172,
+       "neto_cop_anual": 3556422471.899376
+      },
+      "0.25": {
+       "pax_perdidos_dia": 4267.611542056406,
+       "pct": 25.286486853430006,
+       "neto_cop_anual": 3702777991.3501987
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3562.2853109228345,
+       "pct": 21.107282093302228,
+       "neto_cop_anual": 4475110214.44146
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2517.164838174721,
+       "pct": 14.914725710426453,
+       "neto_cop_anual": 5619517132.100643
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1336.42915221358,
+       "pct": 7.918620955764263,
+       "neto_cop_anual": 6912422708.228093
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.029411764705882353,
+       "pct": 0.00017427082906732867,
+       "neto_cop_anual": 8375780424.01961
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 57.208765859284895,
+     "pct_horas_mas_salidas": 21.91464821222607,
+     "pct_horas_igual": 20.876585928489042,
+     "salidas_menos_dia": 103.44117647058823,
+     "salidas_mas_dia": 17.102941176470587
+    },
+    "Laboral": {
+     "salidas_dia": 461.7265306122449,
+     "programadas_dia": 526.9265306122448,
+     "buses_hora_dia": 1809.9717857142857,
+     "km_dia": 26912.92979591837,
+     "espera_media_min": 5.059962760354962,
+     "intervalo_medio_min": 6.086529692424723,
+     "pct_horas_sobrecarga": 18.183355886332883,
+     "pct_horas_fc_menor_05": 20.052435723951287,
+     "factor_carga_medio": 0.7509730665900174,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 4522.400833511298,
+     "pax_perdidos_dia_e017": 4768.343946785398,
+     "pax_perdidos_dia_e025": 4372.596179089403,
+     "pax_perdidos_pct_central": 11.067085171518851,
+     "bus_horas_ahorradas_anual": 53442.0235345805,
+     "km_ahorrados_anual": 905071.1326530585,
+     "ahorro_bus_hora_cop_anual": 3206521412.07483,
+     "ahorro_km_cop_anual": 1357606698.9795878,
+     "ingreso_perdido_cop_anual": 4952028912.694871,
+     "neto_cop_anual": -387900801.64045334,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4768.343946785398,
+       "pct": 11.668949862897755,
+       "neto_cop_anual": -657208510.6755924
+      },
+      "0.22": {
+       "pax_perdidos_dia": 4522.400833511298,
+       "pct": 11.067085171518851,
+       "neto_cop_anual": -387900801.64045334
+      },
+      "0.25": {
+       "pax_perdidos_dia": 4372.596179089403,
+       "pct": 10.700487664882134,
+       "neto_cop_anual": -223864705.04847908
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3597.430828351976,
+       "pct": 8.80352601233428,
+       "neto_cop_anual": 624941354.0090041
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2491.745389538501,
+       "pct": 6.097725404484122,
+       "neto_cop_anual": 1835666909.509759
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1295.7836157180757,
+       "pct": 3.1710032274773527,
+       "neto_cop_anual": 3145245051.843125
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 4564128111.054418
+      }
+     },
+     "elasticidad_equilibrio": 0.28956110515346567,
+     "pct_horas_menos_salidas": 46.594637855142054,
+     "pct_horas_mas_salidas": 37.55902360944378,
+     "pct_horas_igual": 15.846338535414164,
+     "salidas_menos_dia": 81.80816326530612,
+     "salidas_mas_dia": 39.910204081632656
+    },
+    "Sábado": {
+     "salidas_dia": 400.0,
+     "programadas_dia": 465.1730769230769,
+     "buses_hora_dia": 1506.2338274572649,
+     "km_dia": 23316.94615384616,
+     "espera_media_min": 5.6184043820200715,
+     "intervalo_medio_min": 6.916673894558948,
+     "pct_horas_sobrecarga": 13.220205209155486,
+     "pct_horas_fc_menor_05": 28.808208366219418,
+     "factor_carga_medio": 0.6818486006432347,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 4912.898091236194,
+     "pax_perdidos_dia_e017": 5177.152975071208,
+     "pax_perdidos_dia_e025": 4751.759396193713,
+     "pax_perdidos_pct_central": 14.911910451983806,
+     "bus_horas_ahorradas_anual": 76770.67715010695,
+     "km_ahorrados_anual": 1199700.2499999981,
+     "ahorro_bus_hora_cop_anual": 4606240629.006416,
+     "ahorro_km_cop_anual": 1799550374.9999971,
+     "ingreso_perdido_cop_anual": 5379623409.903632,
+     "neto_cop_anual": 1026167594.1027813,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 5177.152975071208,
+       "pct": 15.713992052511284,
+       "neto_cop_anual": 736808496.3034401
+      },
+      "0.22": {
+       "pax_perdidos_dia": 4912.898091236194,
+       "pct": 14.911910451983806,
+       "neto_cop_anual": 1026167594.1027813
+      },
+      "0.25": {
+       "pax_perdidos_dia": 4751.759396193713,
+       "pct": 14.422813030014204,
+       "neto_cop_anual": 1202614465.1742973
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3915.882874942001,
+       "pct": 11.885712605306448,
+       "neto_cop_anual": 2117899255.944923
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2718.164283836321,
+       "pct": 8.25032834828229,
+       "neto_cop_anual": 3429401113.2056417
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1416.4521225626888,
+       "pct": 4.299296834358403,
+       "neto_cop_anual": 4854775929.800269
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 6405791004.006413
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 51.80995475113123,
+     "pct_horas_mas_salidas": 34.99245852187028,
+     "pct_horas_igual": 13.197586726998493,
+     "salidas_menos_dia": 92.46153846153847,
+     "salidas_mas_dia": 36.78846153846154
+    }
+   },
+   "buses_pico_mediana": {
+    "CL 72|Domingo/festivo": 13.456666666666663,
+    "CL 72|Laboral": 28.520000000000003,
+    "CL 72|Sábado": 26.151666666666667,
+    "CRA 54|Domingo/festivo": 19.683749999999996,
+    "CRA 54|Laboral": 71.45833333333334,
+    "CRA 54|Sábado": 58.0,
+    "SILENCIO|Domingo/festivo": 13.909999999999997,
+    "SILENCIO|Laboral": 39.454166666666666,
+    "SILENCIO|Sábado": 27.795416666666675
+   },
+   "cotas_activas_pct": {
+    "pct_cota_min_frecuencia": 45.812516787536936,
+    "pct_cota_flota": 0.35992479183454207,
+    "pct_dias_flota_insuficiente": 0.0,
+    "pct_cota_intervalo_min": 3.8302444265377384
+   },
+   "notas": "factor de carga objetivo 0,95"
+  },
+  {
+   "nombre": "S3 = S1, intervalo máx. 8 min",
+   "clave": "S3",
+   "horizonte": "h=7",
+   "metricas_global": {
+    "salidas_dia": 497.16712328767125,
+    "programadas_dia": 576.9561643835616,
+    "buses_hora_dia": 1888.2948573059357,
+    "km_dia": 29045.90328767123,
+    "espera_media_min": 4.517678108527391,
+    "intervalo_medio_min": 5.399846457569341,
+    "pct_horas_sobrecarga": 7.328810807676697,
+    "pct_horas_fc_menor_05": 41.01003072998203,
+    "factor_carga_medio": 0.588801759780676,
+    "horas_sin_servicio_con_demanda": 1,
+    "pax_perdidos_dia_central": 2649.008896681845,
+    "pax_perdidos_dia_e017": 2796.0587757261433,
+    "pax_perdidos_dia_e025": 2559.6015896658105,
+    "pax_perdidos_pct_central": 7.511327896706087,
+    "bus_horas_ahorradas_anual": -57159.91138888872,
+    "km_ahorrados_anual": -803603.5999999996,
+    "ahorro_bus_hora_cop_anual": -3429594683.3333235,
+    "ahorro_km_cop_anual": -1205405399.9999995,
+    "ingreso_perdido_cop_anual": 2900664741.86662,
+    "neto_cop_anual": -7535664825.199943,
+    "sensibilidad_elasticidad": {
+     "0.17": {
+      "pax_perdidos_dia": 2796.0587757261433,
+      "pct": 7.928291335393002,
+      "neto_cop_anual": -7696684442.753449
+     },
+     "0.22": {
+      "pax_perdidos_dia": 2649.008896681845,
+      "pct": 7.511327896706087,
+      "neto_cop_anual": -7535664825.199943
+     },
+     "0.25": {
+      "pax_perdidos_dia": 2559.6015896658105,
+      "pct": 7.2578113455914,
+      "neto_cop_anual": -7437763824.0173855
+     },
+     "0.4": {
+      "pax_perdidos_dia": 2098.8769376170985,
+      "pct": 5.951415607937019,
+      "neto_cop_anual": -6933270330.024046
+     },
+     "0.6": {
+      "pax_perdidos_dia": 1447.088141599346,
+      "pct": 4.10325293380591,
+      "neto_cop_anual": -6219561598.384606
+     },
+     "0.8": {
+      "pax_perdidos_dia": 748.8904091454465,
+      "pct": 2.1234966137093454,
+      "neto_cop_anual": -5455035081.347587
+     },
+     "1.0": {
+      "pax_perdidos_dia": 0.005479452054794521,
+      "pct": 1.553711696831073e-05,
+      "neto_cop_anual": -4635006083.333323
+     }
+    },
+    "elasticidad_equilibrio": null,
+    "pct_horas_menos_salidas": 29.959709911361802,
+    "pct_horas_mas_salidas": 58.871877518130546,
+    "pct_horas_igual": 11.168412570507655,
+    "salidas_menos_dia": 51.56164383561644,
+    "salidas_mas_dia": 88.84931506849315
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "salidas_dia": 132.186301369863,
+     "programadas_dia": 158.5972602739726,
+     "buses_hora_dia": 505.6904459665144,
+     "km_dia": 7534.619178082192,
+     "espera_media_min": 4.651472415123196,
+     "intervalo_medio_min": 7.171795427843227,
+     "pct_horas_sobrecarga": 1.160092807424594,
+     "pct_horas_fc_menor_05": 71.21185079421738,
+     "factor_carga_medio": 0.4071424126823709,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 71.27181726394205,
+     "pax_perdidos_dia_e017": 75.33665613591933,
+     "pax_perdidos_dia_e025": 68.8063143459223,
+     "pax_perdidos_pct_central": 1.138339610530314,
+     "bus_horas_ahorradas_anual": -72113.58972222221,
+     "km_ahorrados_anual": -1068522.0,
+     "ahorro_bus_hora_cop_anual": -4326815383.333333,
+     "ahorro_km_cop_anual": -1602783000.0,
+     "ingreso_perdido_cop_anual": 78042639.90401654,
+     "neto_cop_anual": -6007641023.2373495,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 75.33665613591933,
+       "pct": 1.2032624268134915,
+       "neto_cop_anual": -6012092021.802165
+      },
+      "0.22": {
+       "pax_perdidos_dia": 71.27181726394205,
+       "pct": 1.138339610530314,
+       "neto_cop_anual": -6007641023.2373495
+      },
+      "0.25": {
+       "pax_perdidos_dia": 68.8063143459223,
+       "pct": 1.098961077202529,
+       "neto_cop_anual": -6004941297.542118
+      },
+      "0.4": {
+       "pax_perdidos_dia": 56.171346935157146,
+       "pct": 0.8971578338788845,
+       "neto_cop_anual": -5991106008.22733
+      },
+      "0.6": {
+       "pax_perdidos_dia": 38.49083115055733,
+       "pct": 0.6147680727523807,
+       "neto_cop_anual": -5971745843.443193
+      },
+      "0.8": {
+       "pax_perdidos_dia": 19.792556109113956,
+       "pct": 0.31612285862180356,
+       "neto_cop_anual": -5951271232.272813
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": -5929598383.333333
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 3.5938759065269945,
+     "pct_horas_mas_salidas": 92.68331990330378,
+     "pct_horas_igual": 3.722804190169218,
+     "salidas_menos_dia": 1.6356164383561644,
+     "salidas_mas_dia": 52.99452054794521
+    },
+    "CRA 54": {
+     "salidas_dia": 222.46301369863014,
+     "programadas_dia": 247.62191780821917,
+     "buses_hora_dia": 826.3621750380519,
+     "km_dia": 12546.913972602739,
+     "espera_media_min": 3.947085931276107,
+     "intervalo_medio_min": 4.2502151931904475,
+     "pct_horas_sobrecarga": 15.085616438356164,
+     "pct_horas_fc_menor_05": 6.866438356164384,
+     "factor_carga_medio": 0.7986555696446332,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 2072.5046878243297,
+     "pax_perdidos_dia_e017": 2186.489483010459,
+     "pax_perdidos_dia_e025": 2003.1427186631508,
+     "pax_perdidos_pct_central": 10.57605101149552,
+     "bus_horas_ahorradas_anual": 29236.12083333335,
+     "km_ahorrados_anual": 504441.60000000056,
+     "ahorro_bus_hora_cop_anual": 1754167250.000001,
+     "ahorro_km_cop_anual": 756662400.0000008,
+     "ingreso_perdido_cop_anual": 2269392633.1676407,
+     "neto_cop_anual": 241437016.83236122,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 2186.489483010459,
+       "pct": 11.157718698669193,
+       "neto_cop_anual": 116623666.10354948
+      },
+      "0.22": {
+       "pax_perdidos_dia": 2072.5046878243297,
+       "pct": 10.57605101149552,
+       "neto_cop_anual": 241437016.83236122
+      },
+      "0.25": {
+       "pax_perdidos_dia": 2003.1427186631508,
+       "pct": 10.222094888541463,
+       "neto_cop_anual": 317388373.06385183
+      },
+      "0.4": {
+       "pax_perdidos_dia": 1645.0259324678711,
+       "pct": 8.394614631862234,
+       "neto_cop_anual": 709526253.9476831
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1136.4916963295052,
+       "pct": 5.799549803257541,
+       "neto_cop_anual": 1266371242.5191936
+      },
+      "0.8": {
+       "pax_perdidos_dia": 589.3887396658237,
+       "pct": 3.0076676848680606,
+       "neto_cop_anual": 1865448980.0659251
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 2510829650.000002
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 59.838839645447216,
+     "pct_horas_mas_salidas": 30.66881547139404,
+     "pct_horas_igual": 9.492344883158744,
+     "salidas_menos_dia": 39.66027397260274,
+     "salidas_mas_dia": 15.156164383561643
+    },
+    "SILENCIO": {
+     "salidas_dia": 142.51780821917808,
+     "programadas_dia": 170.73698630136985,
+     "buses_hora_dia": 556.2422363013699,
+     "km_dia": 8964.370136986301,
+     "espera_media_min": 5.616953525434631,
+     "intervalo_medio_min": 6.615006478825624,
+     "pct_horas_sobrecarga": 5.478980013783598,
+     "pct_horas_fc_menor_05": 46.20951068228808,
+     "factor_carga_medio": 0.5530145565047095,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 505.23239159357274,
+     "pax_perdidos_dia_e017": 534.2326365797646,
+     "pax_perdidos_dia_e025": 487.6525566567375,
+     "pax_perdidos_pct_central": 5.36932128964152,
+     "bus_horas_ahorradas_anual": -14282.442500000005,
+     "km_ahorrados_anual": -239523.19999999925,
+     "ahorro_bus_hora_cop_anual": -856946550.0000002,
+     "ahorro_km_cop_anual": -359284799.99999887,
+     "ingreso_perdido_cop_anual": 553229468.7949622,
+     "neto_cop_anual": -1769460818.7949612,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 534.2326365797646,
+       "pct": 5.677519329593082,
+       "neto_cop_anual": -1801216087.0548413
+      },
+      "0.22": {
+       "pax_perdidos_dia": 505.23239159357274,
+       "pct": 5.36932128964152,
+       "neto_cop_anual": -1769460818.7949612
+      },
+      "0.25": {
+       "pax_perdidos_dia": 487.6525566567375,
+       "pct": 5.182492844820298,
+       "neto_cop_anual": -1750210899.5391266
+      },
+      "0.4": {
+       "pax_perdidos_dia": 397.67965821407046,
+       "pct": 4.226312269035711,
+       "neto_cop_anual": -1651690575.7444062
+      },
+      "0.6": {
+       "pax_perdidos_dia": 272.1056141192836,
+       "pct": 2.8917830511883507,
+       "neto_cop_anual": -1514186997.4606147
+      },
+      "0.8": {
+       "pax_perdidos_dia": 139.70911337050902,
+       "pct": 1.4847486607324596,
+       "neto_cop_anual": -1369212829.1407065
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.005479452054794521,
+       "pct": 5.8232486797967334e-05,
+       "neto_cop_anual": -1216237349.999999
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 26.446414182111198,
+     "pct_horas_mas_salidas": 53.2634971796938,
+     "pct_horas_igual": 20.290088638195,
+     "salidas_menos_dia": 10.265753424657534,
+     "salidas_mas_dia": 20.698630136986303
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Domingo/festivo": {
+     "salidas_dia": 365.61764705882354,
+     "programadas_dia": 460.79411764705884,
+     "buses_hora_dia": 1146.825819035948,
+     "km_dia": 21479.43088235294,
+     "espera_media_min": 6.136234146581061,
+     "intervalo_medio_min": 7.424068938428098,
+     "pct_horas_sobrecarga": 2.1460713049498095,
+     "pct_horas_fc_menor_05": 69.22810661128418,
+     "factor_carga_medio": 0.41054791124417295,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 1996.2740947418188,
+     "pax_perdidos_dia_e017": 2102.962427614505,
+     "pax_perdidos_dia_e025": 1931.1726918008794,
+     "pax_perdidos_pct_central": 11.828339612233783,
+     "bus_horas_ahorradas_anual": -77792.91295955885,
+     "km_ahorrados_anual": -1325963.948529411,
+     "ahorro_bus_hora_cop_anual": -4667574777.573531,
+     "ahorro_km_cop_anual": -1988945922.7941167,
+     "ingreso_perdido_cop_anual": 2185920133.742292,
+     "neto_cop_anual": -8842440834.10994,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 2102.962427614505,
+       "pct": 12.460490195765946,
+       "neto_cop_anual": -8959264558.60553
+      },
+      "0.22": {
+       "pax_perdidos_dia": 1996.2740947418188,
+       "pct": 11.828339612233783,
+       "neto_cop_anual": -8842440834.10994
+      },
+      "0.25": {
+       "pax_perdidos_dia": 1931.1726918008794,
+       "pct": 11.442600246459017,
+       "neto_cop_anual": -8771154797.88961
+      },
+      "0.4": {
+       "pax_perdidos_dia": 1592.968514463207,
+       "pct": 9.438670085584237,
+       "neto_cop_anual": -8400821223.70486
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1107.0626241655577,
+       "pct": 6.559576525654663,
+       "neto_cop_anual": -7868754273.828934
+      },
+      "0.8": {
+       "pax_perdidos_dia": 577.5442536080855,
+       "pct": 3.4220699405779875,
+       "neto_cop_anual": -7288931658.068501
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.029411764705882353,
+       "pct": 0.00017427082906732867,
+       "neto_cop_anual": -6656552906.250001
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 26.153402537485583,
+     "pct_horas_mas_salidas": 63.03344867358708,
+     "pct_horas_igual": 10.813148788927336,
+     "salidas_menos_dia": 47.544117647058826,
+     "salidas_mas_dia": 107.67647058823529
+    },
+    "Laboral": {
+     "salidas_dia": 537.5428571428571,
+     "programadas_dia": 613.7591836734694,
+     "buses_hora_dia": 2110.40235260771,
+     "km_dia": 31371.923265306123,
+     "espera_media_min": 4.305119809822893,
+     "intervalo_medio_min": 5.115465669244905,
+     "pct_horas_sobrecarga": 8.990189445196211,
+     "pct_horas_fc_menor_05": 33.364343707713125,
+     "factor_carga_medio": 0.6368536832282315,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 2763.0632331229185,
+     "pax_perdidos_dia_e017": 2917.5126003770292,
+     "pax_perdidos_dia_e025": 2669.2194024303217,
+     "pax_perdidos_pct_central": 6.761686383186271,
+     "bus_horas_ahorradas_anual": -56215.133381519314,
+     "km_ahorrados_anual": -722461.4836734714,
+     "ahorro_bus_hora_cop_anual": -3372908002.891159,
+     "ahorro_km_cop_anual": -1083692225.5102072,
+     "ingreso_perdido_cop_anual": 3025554240.2695956,
+     "neto_cop_anual": -7482154468.670961,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 2917.5126003770292,
+       "pct": 7.1396502932895896,
+       "neto_cop_anual": -7651276525.814213
+      },
+      "0.22": {
+       "pax_perdidos_dia": 2763.0632331229185,
+       "pct": 6.761686383186271,
+       "neto_cop_anual": -7482154468.670961
+      },
+      "0.25": {
+       "pax_perdidos_dia": 2669.2194024303217,
+       "pct": 6.532034544410585,
+       "neto_cop_anual": -7379395474.062569
+      },
+      "0.4": {
+       "pax_perdidos_dia": 2186.354457623126,
+       "pct": 5.350381774730538,
+       "neto_cop_anual": -6850658359.49869
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1505.1835706864279,
+       "pct": 3.6834405858323502,
+       "neto_cop_anual": -6104776238.303005
+      },
+      "0.8": {
+       "pax_perdidos_dia": 777.8084963685479,
+       "pct": 1.903429880132545,
+       "neto_cop_anual": -5308300531.924926
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": -4456600228.401366
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 30.284113645458184,
+     "pct_horas_mas_salidas": 58.63145258103242,
+     "pct_horas_igual": 11.084433773509405,
+     "salidas_menos_dia": 51.48571428571429,
+     "salidas_mas_dia": 85.40408163265306
+    },
+    "Sábado": {
+     "salidas_dia": 478.96153846153845,
+     "programadas_dia": 555.4615384615385,
+     "buses_hora_dia": 1811.4402083333334,
+     "km_dia": 27981.388461538456,
+     "espera_media_min": 4.675585043337122,
+     "intervalo_medio_min": 5.70572076816283,
+     "pct_horas_sobrecarga": 5.485398579321231,
+     "pct_horas_fc_menor_05": 44.514601420678765,
+     "factor_carga_medio": 0.5678110042866185,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 2965.2137832945123,
+     "pax_perdidos_dia_e017": 3130.1811724977642,
+     "pax_perdidos_dia_e025": 2864.92468442562,
+     "pax_perdidos_pct_central": 9.000187177981928,
+     "bus_horas_ahorradas_anual": -34629.65186965808,
+     "km_ahorrados_anual": -502821.192307691,
+     "ahorro_bus_hora_cop_anual": -2077779112.1794848,
+     "ahorro_km_cop_anual": -754231788.4615364,
+     "ingreso_perdido_cop_anual": 3246909092.707491,
+     "neto_cop_anual": -6078919993.348513,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 3130.1811724977642,
+       "pct": 9.500905672364024,
+       "neto_cop_anual": -6259559284.526073
+      },
+      "0.22": {
+       "pax_perdidos_dia": 2965.2137832945123,
+       "pct": 9.000187177981928,
+       "neto_cop_anual": -6078919993.348513
+      },
+      "0.25": {
+       "pax_perdidos_dia": 2864.92468442562,
+       "pct": 8.695783945130264,
+       "neto_cop_anual": -5969103430.087074
+      },
+      "0.4": {
+       "pax_perdidos_dia": 2348.2957909437882,
+       "pct": 7.127682255772797,
+       "neto_cop_anual": -5403394791.724469
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1618.0180465832404,
+       "pct": 4.911101303603872,
+       "neto_cop_anual": -4603740661.64967
+      },
+      "0.8": {
+       "pax_perdidos_dia": 836.7097785085383,
+       "pct": 2.5396295749906455,
+       "neto_cop_anual": -3748208108.1078706
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": -2832010900.6410213
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 33.40874811463046,
+     "pct_horas_mas_salidas": 54.562594268476616,
+     "pct_horas_igual": 12.028657616892911,
+     "salidas_menos_dia": 57.17307692307692,
+     "salidas_mas_dia": 80.46153846153847
+    }
+   },
+   "buses_pico_mediana": {
+    "CL 72|Domingo/festivo": 26.60333333333334,
+    "CL 72|Laboral": 38.02666666666667,
+    "CL 72|Sábado": 34.86888888888889,
+    "CRA 54|Domingo/festivo": 23.706666666666678,
+    "CRA 54|Laboral": 74.33166666666668,
+    "CRA 54|Sábado": 62.5,
+    "SILENCIO|Domingo/festivo": 27.819999999999993,
+    "SILENCIO|Laboral": 44.14583333333333,
+    "SILENCIO|Sábado": 35.37222222222222
+   },
+   "cotas_activas_pct": {
+    "pct_cota_min_frecuencia": 60.558689229116304,
+    "pct_cota_flota": 1.3591189900617782,
+    "pct_dias_flota_insuficiente": 6.210045662100456,
+    "pct_cota_intervalo_min": 5.9629331184528604
+   },
+   "notas": "S1 con intervalo máximo 8 min"
+  },
+  {
+   "nombre": "S4 = S1 con margen 15 %",
+   "clave": "S4",
+   "horizonte": "h=7",
+   "metricas_global": {
+    "salidas_dia": 461.2821917808219,
+    "programadas_dia": 530.9589041095891,
+    "buses_hora_dia": 1760.7731514459665,
+    "km_dia": 26876.514246575345,
+    "espera_media_min": 4.882532291310745,
+    "intervalo_medio_min": 5.957419011703773,
+    "pct_horas_sobrecarga": 5.780715486751319,
+    "pct_horas_fc_menor_05": 26.903229547167623,
+    "factor_carga_medio": 0.6385608278730266,
+    "horas_sin_servicio_con_demanda": 1,
+    "pax_perdidos_dia_central": 2601.551814391165,
+    "pax_perdidos_dia_e017": 2745.7989331675035,
+    "pax_perdidos_dia_e025": 2513.8419983745334,
+    "pax_perdidos_pct_central": 7.376762208175267,
+    "bus_horas_ahorradas_anual": -10614.488749999902,
+    "km_ahorrados_anual": -11776.60000000149,
+    "ahorro_bus_hora_cop_anual": -636869324.9999942,
+    "ahorro_km_cop_anual": -17664900.000002235,
+    "ingreso_perdido_cop_anual": 2848699236.7583256,
+    "neto_cop_anual": -3503233461.758322,
+    "sensibilidad_elasticidad": {
+     "0.17": {
+      "pax_perdidos_dia": 2745.7989331675035,
+      "pct": 7.785778353285752,
+      "neto_cop_anual": -3661184056.818413
+     },
+     "0.22": {
+      "pax_perdidos_dia": 2601.551814391165,
+      "pct": 7.376762208175267,
+      "neto_cop_anual": -3503233461.758322
+     },
+     "0.25": {
+      "pax_perdidos_dia": 2513.8419983745334,
+      "pct": 7.1280589332689726,
+      "neto_cop_anual": -3407191213.220111
+     },
+     "0.4": {
+      "pax_perdidos_dia": 2061.778378529496,
+      "pct": 5.846221758965293,
+      "neto_cop_anual": -2912181549.4897947
+     },
+     "0.6": {
+      "pax_perdidos_dia": 1421.961728205625,
+      "pct": 4.032006389445551,
+      "neto_cop_anual": -2211582317.3851557
+     },
+     "0.8": {
+      "pax_perdidos_dia": 736.1613176477642,
+      "pct": 2.087402971220629,
+      "neto_cop_anual": -1460630867.8242984
+     },
+     "1.0": {
+      "pax_perdidos_dia": 0.005479452054794521,
+      "pct": 1.553711696831073e-05,
+      "neto_cop_anual": -654540224.9999964
+     }
+    },
+    "elasticidad_equilibrio": null,
+    "pct_horas_menos_salidas": 37.61482675261886,
+    "pct_horas_mas_salidas": 46.52162234756916,
+    "pct_horas_igual": 15.86355089981198,
+    "salidas_menos_dia": 54.6,
+    "salidas_mas_dia": 56.0027397260274
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "salidas_dia": 101.34246575342466,
+     "programadas_dia": 121.03287671232877,
+     "buses_hora_dia": 389.11614345509895,
+     "km_dia": 5776.520547945205,
+     "espera_media_min": 6.038783523890153,
+     "intervalo_medio_min": 9.402295996564085,
+     "pct_horas_sobrecarga": 1.731215420310548,
+     "pct_horas_fc_menor_05": 47.59950026771372,
+     "factor_carga_medio": 0.5230356426600604,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 123.84088003310974,
+     "pax_perdidos_dia_e017": 130.95271849687035,
+     "pax_perdidos_dia_e025": 119.52975881506836,
+     "pax_perdidos_pct_central": 1.9779624619722274,
+     "bus_horas_ahorradas_anual": -29563.96930555557,
+     "km_ahorrados_anual": -426816.0,
+     "ahorro_bus_hora_cop_anual": -1773838158.3333342,
+     "ahorro_km_cop_anual": -640224000.0,
+     "ingreso_perdido_cop_anual": 135605763.63625517,
+     "neto_cop_anual": -2549667921.969589,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 130.95271849687035,
+       "pct": 2.091551363417112,
+       "neto_cop_anual": -2557455385.087407
+      },
+      "0.22": {
+       "pax_perdidos_dia": 123.84088003310974,
+       "pct": 1.9779624619722274,
+       "neto_cop_anual": -2549667921.969589
+      },
+      "0.25": {
+       "pax_perdidos_dia": 119.52975881506836,
+       "pct": 1.9091060719335096,
+       "neto_cop_anual": -2544947244.2358336
+      },
+      "0.4": {
+       "pax_perdidos_dia": 97.46662596372083,
+       "pct": 1.5567180029711103,
+       "neto_cop_anual": -2520788113.7636085
+      },
+      "0.6": {
+       "pax_perdidos_dia": 66.67829468992282,
+       "pct": 1.0649727609310307,
+       "neto_cop_anual": -2487074891.0187993
+      },
+      "0.8": {
+       "pax_perdidos_dia": 34.22706373747783,
+       "pct": 0.5466680084812217,
+       "neto_cop_anual": -2451540793.125872
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": -2414062158.333334
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 10.781627719580984,
+     "pct_horas_mas_salidas": 69.0894439967768,
+     "pct_horas_igual": 20.128928283642225,
+     "salidas_menos_dia": 2.786301369863014,
+     "salidas_mas_dia": 23.301369863013697
+    },
+    "CRA 54": {
+     "salidas_dia": 236.95616438356166,
+     "programadas_dia": 263.3534246575342,
+     "buses_hora_dia": 883.0732001522069,
+     "km_dia": 13364.327671232879,
+     "espera_media_min": 3.6982987020694327,
+     "intervalo_medio_min": 3.9788062198515344,
+     "pct_horas_sobrecarga": 10.787671232876713,
+     "pct_horas_fc_menor_05": 7.602739726027398,
+     "factor_carga_medio": 0.7517947869927949,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 1522.4693722603804,
+     "pax_perdidos_dia_e017": 1607.3574550476735,
+     "pax_perdidos_dia_e025": 1470.8789532054527,
+     "pax_perdidos_pct_central": 7.769204981325554,
+     "bus_horas_ahorradas_anual": 8536.596666666737,
+     "km_ahorrados_anual": 206085.59999999963,
+     "ahorro_bus_hora_cop_anual": 512195800.00000423,
+     "ahorro_km_cop_anual": 309128399.99999946,
+     "ingreso_perdido_cop_anual": 1667103962.6251166,
+     "neto_cop_anual": -845779762.6251129,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 1607.3574550476735,
+       "pct": 8.202391308527032,
+       "neto_cop_anual": -938732213.2771989
+      },
+      "0.22": {
+       "pax_perdidos_dia": 1522.4693722603804,
+       "pct": 7.769204981325554,
+       "neto_cop_anual": -845779762.6251129
+      },
+      "0.25": {
+       "pax_perdidos_dia": 1470.8789532054527,
+       "pct": 7.505937589538794,
+       "neto_cop_anual": -789288253.7599672
+      },
+      "0.4": {
+       "pax_perdidos_dia": 1205.283067383644,
+       "pct": 6.150594147665296,
+       "neto_cop_anual": -498460758.7850865
+      },
+      "0.6": {
+       "pax_perdidos_dia": 830.224139233071,
+       "pct": 4.2366576534606,
+       "neto_cop_anual": -87771232.46020901
+      },
+      "0.8": {
+       "pax_perdidos_dia": 429.2586300871499,
+       "pct": 2.190519131559712,
+       "neto_cop_anual": 351286000.05457455
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 821324200.0000037
+      }
+     },
+     "elasticidad_equilibrio": 0.6399816816397638,
+     "pct_horas_menos_salidas": 51.313456889605156,
+     "pct_horas_mas_salidas": 38.46897663174859,
+     "pct_horas_igual": 10.217566478646253,
+     "salidas_menos_dia": 30.838356164383562,
+     "salidas_mas_dia": 20.827397260273973
+    },
+    "SILENCIO": {
+     "salidas_dia": 122.98356164383561,
+     "programadas_dia": 146.57260273972602,
+     "buses_hora_dia": 488.58380783866056,
+     "km_dia": 7735.666027397259,
+     "espera_media_min": 6.579431609284438,
+     "intervalo_medio_min": 7.785849523816163,
+     "pct_horas_sobrecarga": 4.6519641626464505,
+     "pct_horas_fc_menor_05": 26.343900758097867,
+     "factor_carga_medio": 0.6361489208242328,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 955.2415620976742,
+     "pax_perdidos_dia_e017": 1007.48875962296,
+     "pax_perdidos_dia_e025": 923.4332863540121,
+     "pax_perdidos_pct_central": 10.151761726804358,
+     "bus_horas_ahorradas_anual": 10412.8838888889,
+     "km_ahorrados_anual": 208953.80000000075,
+     "ahorro_bus_hora_cop_anual": 624773033.333334,
+     "ahorro_km_cop_anual": 313430700.00000113,
+     "ingreso_perdido_cop_anual": 1045989510.4969532,
+     "neto_cop_anual": -107785777.16361809,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 1007.48875962296,
+       "pct": 10.707015100626622,
+       "neto_cop_anual": -164996458.45380592
+      },
+      "0.22": {
+       "pax_perdidos_dia": 955.2415620976742,
+       "pct": 10.151761726804358,
+       "neto_cop_anual": -107785777.16361809
+      },
+      "0.25": {
+       "pax_perdidos_dia": 923.4332863540121,
+       "pct": 9.813721539795482,
+       "neto_cop_anual": -72955715.22430801
+      },
+      "0.4": {
+       "pax_perdidos_dia": 759.0286851821307,
+       "pct": 8.066523339769315,
+       "neto_cop_anual": 107067323.0589019
+      },
+      "0.6": {
+       "pax_perdidos_dia": 525.0592942826314,
+       "pct": 5.580030287099567,
+       "neto_cop_anual": 363263806.0938537
+      },
+      "0.8": {
+       "pax_perdidos_dia": 272.6756238231366,
+       "pct": 2.897840788754517,
+       "neto_cop_anual": 639623925.2470006
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.005479452054794521,
+       "pct": 5.8232486797967334e-05,
+       "neto_cop_anual": 938197733.3333352
+      }
+     },
+     "elasticidad_equilibrio": 0.31078864898630504,
+     "pct_horas_menos_salidas": 50.74939564867043,
+     "pct_horas_mas_salidas": 32.00644641418211,
+     "pct_horas_igual": 17.24415793714746,
+     "salidas_menos_dia": 20.975342465753425,
+     "salidas_mas_dia": 11.873972602739727
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Domingo/festivo": {
+     "salidas_dia": 246.41176470588235,
+     "programadas_dia": 311.6764705882353,
+     "buses_hora_dia": 756.5102144607844,
+     "km_dia": 14347.20882352941,
+     "espera_media_min": 8.685023394025567,
+     "intervalo_medio_min": 10.820859247587066,
+     "pct_horas_sobrecarga": 3.5998615437867776,
+     "pct_horas_fc_menor_05": 37.48701973001039,
+     "factor_carga_medio": 0.5772023726148856,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 3258.4346538342415,
+     "pax_perdidos_dia_e017": 3428.6005646924855,
+     "pax_perdidos_dia_e025": 3154.398848892757,
+     "pax_perdidos_pct_central": 19.306903691903848,
+     "bus_horas_ahorradas_anual": 64672.282710375854,
+     "km_ahorrados_anual": 1277297.1029411762,
+     "ahorro_bus_hora_cop_anual": 3880336962.6225514,
+     "ahorro_km_cop_anual": 1915945654.4117641,
+     "ingreso_perdido_cop_anual": 3567985945.9484944,
+     "neto_cop_anual": 2228296671.0858207,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 3428.6005646924855,
+       "pct": 20.3151721402888,
+       "neto_cop_anual": 2041964998.696044
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3258.4346538342415,
+       "pct": 19.306903691903848,
+       "neto_cop_anual": 2228296671.0858207
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3154.398848892757,
+       "pct": 18.69046988858931,
+       "neto_cop_anual": 2342215877.496746
+      },
+      "0.4": {
+       "pax_perdidos_dia": 2611.491965292755,
+       "pct": 15.473633576404023,
+       "neto_cop_anual": 2936698915.0387483
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1824.3617519565396,
+       "pct": 10.809723191094472,
+       "neto_cop_anual": 3798606498.6419044
+      },
+      "0.8": {
+       "pax_perdidos_dia": 957.0898129086818,
+       "pct": 5.670956396374676,
+       "neto_cop_anual": 4748269271.899309
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.029411764705882353,
+       "pct": 0.00017427082906732867,
+       "neto_cop_anual": 5796250411.151962
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 53.143021914648216,
+     "pct_horas_mas_salidas": 24.711649365628606,
+     "pct_horas_igual": 22.145328719723185,
+     "salidas_menos_dia": 79.36764705882354,
+     "salidas_mas_dia": 20.294117647058822
+    },
+    "Laboral": {
+     "salidas_dia": 522.4408163265306,
+     "programadas_dia": 593.6938775510204,
+     "buses_hora_dia": 2050.38637585034,
+     "km_dia": 30447.236326530612,
+     "espera_media_min": 4.435341833247655,
+     "intervalo_medio_min": 5.367117642868632,
+     "pct_horas_sobrecarga": 6.850473612990528,
+     "pct_horas_fc_menor_05": 23.28315290933694,
+     "factor_carga_medio": 0.6610503326666117,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 2401.0886596736145,
+     "pax_perdidos_dia_e017": 2536.5651501178654,
+     "pax_perdidos_dia_e025": 2318.8394966289693,
+     "pax_perdidos_pct_central": 5.875872944314843,
+     "bus_horas_ahorradas_anual": -34309.30186507929,
+     "km_ahorrados_anual": -384950.7510204104,
+     "ahorro_bus_hora_cop_anual": -2058558111.9047573,
+     "ahorro_km_cop_anual": -577426126.5306156,
+     "ingreso_perdido_cop_anual": 2629192082.342608,
+     "neto_cop_anual": -5265176320.777981,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 2536.5651501178654,
+       "pct": 6.207406993082668,
+       "neto_cop_anual": -5413523077.814436
+      },
+      "0.22": {
+       "pax_perdidos_dia": 2401.0886596736145,
+       "pct": 5.875872944314843,
+       "neto_cop_anual": -5265176320.777981
+      },
+      "0.25": {
+       "pax_perdidos_dia": 2318.8394966289693,
+       "pct": 5.674595232273896,
+       "neto_cop_anual": -5175113487.244095
+      },
+      "0.4": {
+       "pax_perdidos_dia": 1896.4263149569747,
+       "pct": 4.640878224153998,
+       "neto_cop_anual": -4712571053.31326
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1302.7664309361712,
+       "pct": 3.1880913657474057,
+       "neto_cop_anual": -4062513480.31048
+      },
+      "0.8": {
+       "pax_perdidos_dia": 671.6746832026212,
+       "pct": 1.643702360806621,
+       "neto_cop_anual": -3371468016.542243
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": -2635984238.435373
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 32.71708683473389,
+     "pct_horas_mas_salidas": 52.90916366546619,
+     "pct_horas_igual": 14.37374949979992,
+     "salidas_menos_dia": 47.861224489795916,
+     "salidas_mas_dia": 66.67755102040816
+    },
+    "Sábado": {
+     "salidas_dia": 454.11538461538464,
+     "programadas_dia": 522.1346153846154,
+     "buses_hora_dia": 1709.5162232905982,
+     "km_dia": 26437.396153846155,
+     "espera_media_min": 4.948605153979436,
+     "intervalo_medio_min": 6.149092822563383,
+     "pct_horas_sobrecarga": 3.2754538279400154,
+     "pct_horas_fc_menor_05": 31.728492501973165,
+     "factor_carga_medio": 0.6035760893416202,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 2687.0410417694447,
+     "pax_perdidos_dia_e017": 2838.7175082340937,
+     "pax_perdidos_dia_e025": 2594.9525193826876,
+     "pax_perdidos_pct_central": 8.155861296440818,
+     "bus_horas_ahorradas_anual": 2572.602670940267,
+     "km_ahorrados_anual": 60735.99999999869,
+     "ahorro_bus_hora_cop_anual": 154356160.25641602,
+     "ahorro_km_cop_anual": 91103999.99999803,
+     "ingreso_perdido_cop_anual": 2942309940.737542,
+     "neto_cop_anual": -2696849780.481128,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 2838.7175082340937,
+       "pct": 8.616238418781055,
+       "neto_cop_anual": -2862935511.2599187
+      },
+      "0.22": {
+       "pax_perdidos_dia": 2687.0410417694447,
+       "pct": 8.155861296440818,
+       "neto_cop_anual": -2696849780.481128
+      },
+      "0.25": {
+       "pax_perdidos_dia": 2594.9525193826876,
+       "pct": 7.876348924316424,
+       "neto_cop_anual": -2596012848.467629
+      },
+      "0.4": {
+       "pax_perdidos_dia": 2121.9847569019203,
+       "pct": 6.440770007389676,
+       "neto_cop_anual": -2078113148.5511885
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1457.3395400508953,
+       "pct": 4.42340067223052,
+       "neto_cop_anual": -1350326636.0993161
+      },
+      "0.8": {
+       "pax_perdidos_dia": 751.0860822884895,
+       "pct": 2.2797396145457385,
+       "neto_cop_anual": -576979099.8494819
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 245460160.25641406
+      }
+     },
+     "elasticidad_equilibrio": 0.9403092308057354,
+     "pct_horas_menos_salidas": 40.38461538461539,
+     "pct_horas_mas_salidas": 44.94720965309201,
+     "pct_horas_igual": 14.66817496229261,
+     "salidas_menos_dia": 53.96153846153846,
+     "salidas_mas_dia": 52.40384615384615
+    }
+   },
+   "buses_pico_mediana": {
+    "CL 72|Domingo/festivo": 13.456666666666663,
+    "CL 72|Laboral": 30.0,
+    "CL 72|Sábado": 26.151666666666667,
+    "CRA 54|Domingo/festivo": 24.75222222222222,
+    "CRA 54|Laboral": 76.47166666666666,
+    "CRA 54|Sábado": 68.0,
+    "SILENCIO|Domingo/festivo": 14.909999999999997,
+    "SILENCIO|Laboral": 44.64583333333333,
+    "SILENCIO|Sábado": 34.70125000000001
+   },
+   "cotas_activas_pct": {
+    "pct_cota_min_frecuencia": 29.449368788611334,
+    "pct_cota_flota": 4.157937147461724
+   },
+   "notas": ""
+  },
+  {
+   "nombre": "S5 = S1, intervalo máx. 15 min",
+   "clave": "S5",
+   "horizonte": "h=7",
+   "metricas_global": {
+    "salidas_dia": 407.24383561643833,
+    "programadas_dia": 471.66301369863015,
+    "buses_hora_dia": 1554.761568112633,
+    "km_dia": 23723.216164383564,
+    "espera_media_min": 5.620108107443113,
+    "intervalo_medio_min": 6.914649642044561,
+    "pct_horas_sobrecarga": 12.407955006667827,
+    "pct_horas_fc_menor_05": 15.950600104365979,
+    "factor_carga_medio": 0.7368250041238728,
+    "horas_sin_servicio_con_demanda": 1,
+    "pax_perdidos_dia_central": 4138.540017399353,
+    "pax_perdidos_dia_e017": 4361.057223521313,
+    "pax_perdidos_dia_e025": 4002.868776277629,
+    "pax_perdidos_pct_central": 11.734928909927245,
+    "bus_horas_ahorradas_anual": 64579.73916666675,
+    "km_ahorrados_anual": 1139177.1999999993,
+    "ahorro_bus_hora_cop_anual": 3874784350.0000052,
+    "ahorro_km_cop_anual": 1708765799.9999988,
+    "ingreso_perdido_cop_anual": 4531701319.052292,
+    "neto_cop_anual": 1051848830.947712,
+    "sensibilidad_elasticidad": {
+     "0.17": {
+      "pax_perdidos_dia": 4361.057223521313,
+      "pct": 12.36588175419084,
+      "neto_cop_anual": 808192490.2441654
+     },
+     "0.22": {
+      "pax_perdidos_dia": 4138.540017399353,
+      "pct": 11.734928909927245,
+      "neto_cop_anual": 1051848830.947712
+     },
+     "0.25": {
+      "pax_perdidos_dia": 4002.868776277629,
+      "pct": 11.350229870412944,
+      "neto_cop_anual": 1200408839.9760008
+     },
+     "0.4": {
+      "pax_perdidos_dia": 3299.221245655216,
+      "pct": 9.355020517649768,
+      "neto_cop_anual": 1970902886.0075426
+     },
+     "0.6": {
+      "pax_perdidos_dia": 2290.968425715343,
+      "pct": 6.4960956031908905,
+      "neto_cop_anual": 3074939723.841703
+     },
+     "0.8": {
+      "pax_perdidos_dia": 1194.5405842542518,
+      "pct": 3.3871483125238395,
+      "neto_cop_anual": 4275528210.241598
+     },
+     "1.0": {
+      "pax_perdidos_dia": 0.005479452054794521,
+      "pct": 1.553711696831073e-05,
+      "neto_cop_anual": 5583544150.000004
+     }
+    },
+    "elasticidad_equilibrio": null,
+    "pct_horas_menos_salidas": 53.05936073059361,
+    "pct_horas_mas_salidas": 28.482406661294657,
+    "pct_horas_igual": 18.45823260811174,
+    "salidas_menos_dia": 82.91506849315068,
+    "salidas_mas_dia": 30.279452054794522
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "salidas_dia": 81.56986301369864,
+     "programadas_dia": 100.13698630136986,
+     "buses_hora_dia": 312.02561377473364,
+     "km_dia": 4649.482191780822,
+     "espera_media_min": 7.563936461498615,
+     "intervalo_medio_min": 11.79269976343719,
+     "pct_horas_sobrecarga": 8.120649651972158,
+     "pct_horas_fc_menor_05": 27.89577012314831,
+     "factor_carga_medio": 0.6520850114602366,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 467.1356191345975,
+     "pax_perdidos_dia_e017": 493.22338480728035,
+     "pax_perdidos_dia_e025": 451.2811811261422,
+     "pax_perdidos_pct_central": 7.460999300484278,
+     "bus_horas_ahorradas_anual": -1425.9259722222341,
+     "km_ahorrados_anual": -15447.0,
+     "ahorro_bus_hora_cop_anual": -85555558.33333404,
+     "ahorro_km_cop_anual": -23170500.0,
+     "ingreso_perdido_cop_anual": 511513502.9523843,
+     "neto_cop_anual": -620239561.2857183,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 493.22338480728035,
+       "pct": 7.877668022504814,
+       "neto_cop_anual": -648805664.6973062
+      },
+      "0.22": {
+       "pax_perdidos_dia": 467.1356191345975,
+       "pct": 7.460999300484278,
+       "neto_cop_anual": -620239561.2857183
+      },
+      "0.25": {
+       "pax_perdidos_dia": 451.2811811261422,
+       "pct": 7.2077752986199,
+       "neto_cop_anual": -602878951.6664598
+      },
+      "0.4": {
+       "pax_perdidos_dia": 369.67060163681026,
+       "pct": 5.904306987618383,
+       "neto_cop_anual": -513515367.1256413
+      },
+      "0.6": {
+       "pax_perdidos_dia": 254.48642606073437,
+       "pct": 4.064607726423013,
+       "neto_cop_anual": -387388694.8698382
+      },
+      "0.8": {
+       "pax_perdidos_dia": 131.4784395738115,
+       "pct": 2.0999480782610247,
+       "neto_cop_anual": -252694949.66665763
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": -108726058.33333404
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 32.7477840451249,
+     "pct_horas_mas_salidas": 36.4867042707494,
+     "pct_horas_igual": 30.765511684125705,
+     "salidas_menos_dia": 8.92876712328767,
+     "salidas_mas_dia": 9.67123287671233
+    },
+    "CRA 54": {
+     "salidas_dia": 217.1013698630137,
+     "programadas_dia": 241.81095890410958,
+     "buses_hora_dia": 810.8678500761035,
+     "km_dia": 12244.51726027397,
+     "espera_media_min": 4.098898613497317,
+     "intervalo_medio_min": 4.417361577910999,
+     "pct_horas_sobrecarga": 17.945205479452056,
+     "pct_horas_fc_menor_05": 3.8356164383561646,
+     "factor_carga_medio": 0.8318961946446333,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 2245.8599587234708,
+     "pax_perdidos_dia_e017": 2367.3231459558187,
+     "pax_perdidos_dia_e025": 2171.841788074563,
+     "pax_perdidos_pct_central": 11.460687943277623,
+     "bus_horas_ahorradas_anual": 34891.54944444448,
+     "km_ahorrados_anual": 614816.4000000013,
+     "ahorro_bus_hora_cop_anual": 2093492966.6666687,
+     "ahorro_km_cop_anual": 922224600.0000019,
+     "ingreso_perdido_cop_anual": 2459216654.8022003,
+     "neto_cop_anual": 556500911.8644705,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 2367.3231459558187,
+       "pct": 12.080518080085028,
+       "neto_cop_anual": 423498721.8450489
+      },
+      "0.22": {
+       "pax_perdidos_dia": 2245.8599587234708,
+       "pct": 11.460687943277623,
+       "neto_cop_anual": 556500911.8644705
+      },
+      "0.25": {
+       "pax_perdidos_dia": 2171.841788074563,
+       "pct": 11.082971090254619,
+       "neto_cop_anual": 637550808.7250247
+      },
+      "0.4": {
+       "pax_perdidos_dia": 1788.4165953265995,
+       "pct": 9.126341307259077,
+       "neto_cop_anual": 1057401394.7840445
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1240.3001304502866,
+       "pct": 6.329287227319723,
+       "neto_cop_anual": 1657588923.823607
+      },
+      "0.8": {
+       "pax_perdidos_dia": 645.8596463600774,
+       "pct": 3.2958403454041383,
+       "neto_cop_anual": 2308501253.902386
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 3015717566.666671
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 62.77195809830781,
+     "pct_horas_mas_salidas": 27.767929089444,
+     "pct_horas_igual": 9.460112812248186,
+     "salidas_menos_dia": 43.556164383561644,
+     "salidas_mas_dia": 13.69041095890411
+    },
+    "SILENCIO": {
+     "salidas_dia": 108.57260273972602,
+     "programadas_dia": 129.71506849315068,
+     "buses_hora_dia": 431.868104261796,
+     "km_dia": 6829.216712328767,
+     "espera_media_min": 7.494740948508287,
+     "intervalo_medio_min": 8.869644731464064,
+     "pct_horas_sobrecarga": 10.975189524465884,
+     "pct_horas_fc_menor_05": 16.6092350103377,
+     "factor_carga_medio": 0.7229694607491505,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 1425.5444395412849,
+     "pax_perdidos_dia_e017": 1500.510692758214,
+     "pax_perdidos_dia_e025": 1379.7458070769235,
+     "pax_perdidos_pct_central": 15.149872090379409,
+     "bus_horas_ahorradas_anual": 31114.115694444452,
+     "km_ahorrados_anual": 539807.8000000003,
+     "ahorro_bus_hora_cop_anual": 1866846941.6666672,
+     "ahorro_km_cop_anual": 809711700.0000005,
+     "ingreso_perdido_cop_anual": 1560971161.2977068,
+     "neto_cop_anual": 1115587480.368961,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 1500.510692758214,
+       "pct": 15.9465706118909,
+       "neto_cop_anual": 1033499433.0964236
+      },
+      "0.22": {
+       "pax_perdidos_dia": 1425.5444395412849,
+       "pct": 15.149872090379409,
+       "neto_cop_anual": 1115587480.368961
+      },
+      "0.25": {
+       "pax_perdidos_dia": 1379.7458070769235,
+       "pct": 14.663150382866286,
+       "neto_cop_anual": 1165736982.9174368
+      },
+      "0.4": {
+       "pax_perdidos_dia": 1141.1340486918066,
+       "pct": 12.127320900091087,
+       "neto_cop_anual": 1427016858.3491397
+      },
+      "0.6": {
+       "pax_perdidos_dia": 796.181869204322,
+       "pct": 8.461366159167948,
+       "neto_cop_anual": 1804739494.8879354
+      },
+      "0.8": {
+       "pax_perdidos_dia": 417.20249832036285,
+       "pct": 4.433789863032312,
+       "neto_cop_anual": 2219721906.005871
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.005479452054794521,
+       "pct": 5.8232486797967334e-05,
+       "neto_cop_anual": 2676552641.666668
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 63.65834004834811,
+     "pct_horas_mas_salidas": 21.19258662369057,
+     "pct_horas_igual": 15.149073327961322,
+     "salidas_menos_dia": 30.43013698630137,
+     "salidas_mas_dia": 6.917808219178082
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Domingo/festivo": {
+     "salidas_dia": 229.38235294117646,
+     "programadas_dia": 291.5735294117647,
+     "buses_hora_dia": 706.8777205882352,
+     "km_dia": 13373.70588235294,
+     "espera_media_min": 9.302817947831292,
+     "intervalo_medio_min": 11.518424979335187,
+     "pct_horas_sobrecarga": 6.645898234683282,
+     "pct_horas_fc_menor_05": 34.33714087919695,
+     "factor_carga_medio": 0.6166586350075446,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 3954.5085203518993,
+     "pax_perdidos_dia_e017": 4154.941878349295,
+     "pax_perdidos_dia_e025": 3831.638999832679,
+     "pax_perdidos_pct_central": 23.43128626544838,
+     "bus_horas_ahorradas_anual": 82788.14297385627,
+     "km_ahorrados_anual": 1632625.6764705875,
+     "ahorro_bus_hora_cop_anual": 4967288578.431376,
+     "ahorro_km_cop_anual": 2448938514.705881,
+     "ingreso_perdido_cop_anual": 4330186829.78533,
+     "neto_cop_anual": 3086040263.3519278,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4154.941878349295,
+       "pct": 24.618895639460845,
+       "neto_cop_anual": 2866565736.34478
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3954.5085203518993,
+       "pct": 23.43128626544838,
+       "neto_cop_anual": 3086040263.3519278
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3831.638999832679,
+       "pct": 22.70325877637673,
+       "neto_cop_anual": 3220582388.3204737
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3186.5122614510055,
+       "pct": 18.880748543633352,
+       "neto_cop_anual": 3926996166.8484063
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2239.9884921676985,
+       "pct": 13.272398155465567,
+       "neto_cop_anual": 4963439694.213627
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1182.787826586258,
+       "pct": 7.008264115097653,
+       "neto_cop_anual": 6121074423.025305
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.029411764705882353,
+       "pct": 0.00017427082906732867,
+       "neto_cop_anual": 7416194887.254905
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 56.11303344867359,
+     "pct_horas_mas_salidas": 22.722029988465977,
+     "pct_horas_igual": 21.16493656286044,
+     "salidas_menos_dia": 94.1470588235294,
+     "salidas_mas_dia": 18.044117647058822
+    },
+    "Laboral": {
+     "salidas_dia": 462.30204081632655,
+     "programadas_dia": 528.1591836734694,
+     "buses_hora_dia": 1816.6515090702949,
+     "km_dia": 26933.737551020407,
+     "espera_media_min": 5.130747828025117,
+     "intervalo_medio_min": 6.276685344893873,
+     "pct_horas_sobrecarga": 14.047699594046009,
+     "pct_horas_fc_menor_05": 11.705006765899864,
+     "factor_carga_medio": 0.7662921580370523,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 4037.162314531725,
+     "pax_perdidos_dia_e017": 4257.298985823273,
+     "pax_perdidos_dia_e025": 3903.1139968795483,
+     "pax_perdidos_pct_central": 9.879623861531636,
+     "bus_horas_ahorradas_anual": 51003.92450963715,
+     "km_ahorrados_anual": 897476.3020408144,
+     "ahorro_bus_hora_cop_anual": 3060235470.578229,
+     "ahorro_km_cop_anual": 1346214453.0612216,
+     "ingreso_perdido_cop_anual": 4420692734.412239,
+     "neto_cop_anual": -14242810.772789001,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4257.298985823273,
+       "pct": 10.418335793588891,
+       "neto_cop_anual": -255292465.83703423
+      },
+      "0.22": {
+       "pax_perdidos_dia": 4037.162314531725,
+       "pct": 9.879623861531636,
+       "neto_cop_anual": -14242810.772789001
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3903.1139968795483,
+       "pct": 9.5515847948566,
+       "neto_cop_anual": 132540097.05634451
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3209.9044252584395,
+       "pct": 7.855182893902956,
+       "neto_cop_anual": 891604577.9814587
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2222.2130684163003,
+       "pct": 5.438133903387449,
+       "neto_cop_anual": 1973126613.7236013
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1155.0806815713665,
+       "pct": 2.8266791807131892,
+       "neto_cop_anual": 3141636577.318804
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 4406449923.63945
+      }
+     },
+     "elasticidad_equilibrio": 0.2229109950845303,
+     "pct_horas_menos_salidas": 50.236094437775115,
+     "pct_horas_mas_salidas": 31.852741096438574,
+     "pct_horas_igual": 17.911164465786314,
+     "salidas_menos_dia": 77.43265306122449,
+     "salidas_mas_dia": 36.11020408163265
+    },
+    "Sábado": {
+     "salidas_dia": 380.4230769230769,
+     "programadas_dia": 440.9807692307692,
+     "buses_hora_dia": 1429.6282238247861,
+     "km_dia": 22130.696153846155,
+     "espera_media_min": 6.01285127037825,
+     "intervalo_medio_min": 7.558799466970118,
+     "pct_horas_sobrecarga": 11.32596685082873,
+     "pct_horas_fc_menor_05": 14.798737174427782,
+     "factor_carga_medio": 0.736328166123729,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 4856.841536664658,
+     "pax_perdidos_dia_e017": 5119.453602515869,
+     "pax_perdidos_dia_e025": 4696.783117638902,
+     "pax_perdidos_pct_central": 14.741764378018093,
+     "bus_horas_ahorradas_anual": 104731.72247596172,
+     "km_ahorrados_anual": 1632681.4999999998,
+     "ahorro_bus_hora_cop_anual": 6283903348.557703,
+     "ahorro_km_cop_anual": 2449022249.9999995,
+     "ingreso_perdido_cop_anual": 5318241482.6478,
+     "neto_cop_anual": 3414684115.9099026,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 5119.453602515869,
+       "pct": 15.538859603048166,
+       "neto_cop_anual": 3127123903.802827
+      },
+      "0.22": {
+       "pax_perdidos_dia": 4856.841536664658,
+       "pct": 14.741764378018093,
+       "neto_cop_anual": 3414684115.9099026
+      },
+      "0.25": {
+       "pax_perdidos_dia": 4696.783117638902,
+       "pct": 14.255945871858602,
+       "neto_cop_anual": 3589948084.743106
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3867.429551868613,
+       "pct": 11.738644296264933,
+       "neto_cop_anual": 4498090239.261572
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2681.578003013522,
+       "pct": 8.139279567446813,
+       "neto_cop_anual": 5796597685.257896
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1395.8264242298376,
+       "pct": 4.236692530170258,
+       "neto_cop_anual": 7204495664.026031
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 8732925598.557703
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 62.368024132730014,
+     "pct_horas_mas_salidas": 20.13574660633484,
+     "pct_horas_igual": 17.49622926093514,
+     "salidas_menos_dia": 94.0576923076923,
+     "salidas_mas_dia": 18.807692307692307
+    }
+   },
+   "buses_pico_mediana": {
+    "CL 72|Domingo/festivo": 13.456666666666663,
+    "CL 72|Laboral": 25.445,
+    "CL 72|Sábado": 18.557916666666667,
+    "CRA 54|Domingo/festivo": 21.560000000000002,
+    "CRA 54|Laboral": 74.33166666666668,
+    "CRA 54|Sábado": 62.5,
+    "SILENCIO|Domingo/festivo": 13.909999999999997,
+    "SILENCIO|Laboral": 43.64583333333333,
+    "SILENCIO|Sábado": 30.565972222222232
+   },
+   "cotas_activas_pct": {
+    "pct_cota_min_frecuencia": 17.356970185334408,
+    "pct_cota_flota": 1.3644910018802041
+   },
+   "notas": ""
+  },
+  {
+   "nombre": "S1 con carga real (oráculo)",
+   "clave": "S1_oraculo",
+   "horizonte": "h=7",
+   "metricas_global": {
+    "salidas_dia": 430.94246575342464,
+    "programadas_dia": null,
+    "buses_hora_dia": 1645.773201674277,
+    "km_dia": 25125.220273972598,
+    "espera_media_min": 5.236596747464361,
+    "intervalo_medio_min": 6.354223105600035,
+    "pct_horas_sobrecarga": 3.183162289093756,
+    "pct_horas_fc_menor_05": 22.919928103438277,
+    "factor_carga_medio": 0.674388714248709,
+    "horas_sin_servicio_con_demanda": 1,
+    "pax_perdidos_dia_central": 3431.026637519172,
+    "pax_perdidos_dia_e017": 3616.7164114986394,
+    "pax_perdidos_dia_e025": 3317.877907993416,
+    "pax_perdidos_pct_central": 9.728757849405854,
+    "bus_horas_ahorradas_anual": 31360.49291666667,
+    "km_ahorrados_anual": 627445.7000000011,
+    "ahorro_bus_hora_cop_anual": 1881629575.0000002,
+    "ahorro_km_cop_anual": 941168550.0000017,
+    "ingreso_perdido_cop_anual": 3756974168.083493,
+    "neto_cop_anual": -934176043.0834913,
+    "sensibilidad_elasticidad": {
+     "0.17": {
+      "pax_perdidos_dia": 3616.7164114986394,
+      "pct": 10.25528563161607,
+      "neto_cop_anual": -1137506345.5910082
+     },
+     "0.22": {
+      "pax_perdidos_dia": 3431.026637519172,
+      "pct": 9.728757849405854,
+      "neto_cop_anual": -934176043.0834913
+     },
+     "0.25": {
+      "pax_perdidos_dia": 3317.877907993416,
+      "pct": 9.407921928609875,
+      "neto_cop_anual": -810278184.2527885
+     },
+     "0.4": {
+      "pax_perdidos_dia": 2731.845641354851,
+      "pct": 7.746213461610779,
+      "neto_cop_anual": -168572852.2835598
+     },
+     "0.6": {
+      "pax_perdidos_dia": 1894.343677209953,
+      "pct": 5.3714566706058395,
+      "neto_cop_anual": 748491798.4551034
+     },
+     "0.8": {
+      "pax_perdidos_dia": 986.3283371806486,
+      "pct": 2.7967575207681667,
+      "neto_cop_anual": 1742768595.7871916
+     },
+     "1.0": {
+      "pax_perdidos_dia": 0.005479452054794521,
+      "pct": 1.553711696831073e-05,
+      "neto_cop_anual": 2822792125.000002
+     }
+    },
+    "elasticidad_equilibrio": 0.43676356997247257,
+    "pct_horas_menos_salidas": 42.91700241740532,
+    "pct_horas_mas_salidas": 41.03679828095622,
+    "pct_horas_igual": 16.046199301638463,
+    "salidas_menos_dia": 70.12054794520547,
+    "salidas_mas_dia": 41.18356164383562
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "salidas_dia": 99.18630136986302,
+     "programadas_dia": null,
+     "buses_hora_dia": 381.38439611872144,
+     "km_dia": 5653.619178082192,
+     "espera_media_min": 6.141750382667964,
+     "intervalo_medio_min": 9.538718750639678,
+     "pct_horas_sobrecarga": 0.053542744958058185,
+     "pct_horas_fc_menor_05": 45.61841870426557,
+     "factor_carga_medio": 0.5284975753518345,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 145.79102579185184,
+     "pax_perdidos_dia_e017": 153.9671303625699,
+     "pax_perdidos_dia_e025": 140.82460689162022,
+     "pax_perdidos_pct_central": 2.3285459230555383,
+     "bus_horas_ahorradas_anual": -26741.88152777776,
+     "km_ahorrados_anual": -381957.0,
+     "ahorro_bus_hora_cop_anual": -1604512891.6666656,
+     "ahorro_km_cop_anual": -572935500.0,
+     "ingreso_perdido_cop_anual": 159641173.24207777,
+     "neto_cop_anual": -2337089564.9087434,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 153.9671303625699,
+       "pct": 2.459133075873866,
+       "neto_cop_anual": -2346042399.4136796
+      },
+      "0.22": {
+       "pax_perdidos_dia": 145.79102579185184,
+       "pct": 2.3285459230555383,
+       "neto_cop_anual": -2337089564.9087434
+      },
+      "0.25": {
+       "pax_perdidos_dia": 140.82460689162022,
+       "pct": 2.2492232458227766,
+       "neto_cop_anual": -2331651336.21299
+      },
+      "0.4": {
+       "pax_perdidos_dia": 115.28710713357589,
+       "pct": 1.841343264022488,
+       "neto_cop_anual": -2303687773.977931
+      },
+      "0.6": {
+       "pax_perdidos_dia": 79.30915209040842,
+       "pct": 1.266710359969451,
+       "neto_cop_anual": -2264291913.2056627
+      },
+      "0.8": {
+       "pax_perdidos_dia": 40.951029817264455,
+       "pct": 0.654061887609315,
+       "neto_cop_anual": -2222289769.3165703
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": -2177448391.6666656
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 11.087832393231265,
+     "pct_horas_mas_salidas": 68.47703464947624,
+     "pct_horas_igual": 20.435132957292506,
+     "salidas_menos_dia": 3.3753424657534246,
+     "salidas_mas_dia": 21.734246575342464
+    },
+    "CRA 54": {
+     "salidas_dia": 214.74794520547945,
+     "programadas_dia": null,
+     "buses_hora_dia": 800.5902279299846,
+     "km_dia": 12111.78410958904,
+     "espera_media_min": 4.158166190950325,
+     "intervalo_medio_min": 4.482266203590328,
+     "pct_horas_sobrecarga": 8.065068493150685,
+     "pct_horas_fc_menor_05": 1.7465753424657535,
+     "factor_carga_medio": 0.8293730508685563,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 2202.7189568848694,
+     "pax_perdidos_dia_e017": 2321.5334179808538,
+     "pax_perdidos_dia_e025": 2130.301402628165,
+     "pax_perdidos_pct_central": 11.24053817048698,
+     "bus_horas_ahorradas_anual": 38642.88152777788,
+     "km_ahorrados_anual": 663264.0000000009,
+     "ahorro_bus_hora_cop_anual": 2318572891.6666727,
+     "ahorro_km_cop_anual": 994896000.0000014,
+     "ingreso_perdido_cop_anual": 2411977257.788932,
+     "neto_cop_anual": 901491633.8777423,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 2321.5334179808538,
+       "pct": 11.846851781663233,
+       "neto_cop_anual": 771389798.9776392
+      },
+      "0.22": {
+       "pax_perdidos_dia": 2202.7189568848694,
+       "pct": 11.24053817048698,
+       "neto_cop_anual": 901491633.8777423
+      },
+      "0.25": {
+       "pax_perdidos_dia": 2130.301402628165,
+       "pct": 10.870989308934986,
+       "neto_cop_anual": 980788855.7888336
+      },
+      "0.4": {
+       "pax_perdidos_dia": 1754.9951060602534,
+       "pct": 8.955790486584172,
+       "neto_cop_anual": 1391749250.5306966
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1217.9413204095094,
+       "pct": 6.21518957681171,
+       "neto_cop_anual": 1979823145.8182611
+      },
+      "0.8": {
+       "pax_perdidos_dia": 634.7040987155016,
+       "pct": 3.2389132650248627,
+       "neto_cop_anual": 2618467903.5731997
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 3313468891.666674
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 63.12651087832393,
+     "pct_horas_mas_salidas": 26.833199033037875,
+     "pct_horas_igual": 10.040290088638194,
+     "salidas_menos_dia": 43.20821917808219,
+     "salidas_mas_dia": 10.98904109589041
+    },
+    "SILENCIO": {
+     "salidas_dia": 117.00821917808219,
+     "programadas_dia": null,
+     "buses_hora_dia": 463.7985776255708,
+     "km_dia": 7359.816986301369,
+     "espera_media_min": 6.880230547303302,
+     "intervalo_medio_min": 8.13378924492044,
+     "pct_horas_sobrecarga": 1.292212267401792,
+     "pct_horas_fc_menor_05": 22.312198483804274,
+     "factor_carga_medio": 0.6592818095931752,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 1082.5166548424506,
+     "pax_perdidos_dia_e017": 1141.215863155216,
+     "pax_perdidos_dia_e025": 1046.7518984736305,
+     "pax_perdidos_pct_central": 11.50436871813393,
+     "bus_horas_ahorradas_anual": 19459.49291666667,
+     "km_ahorrados_anual": 346138.70000000065,
+     "ahorro_bus_hora_cop_anual": 1167569575.0000002,
+     "ahorro_km_cop_anual": 519208050.00000095,
+     "ingreso_perdido_cop_anual": 1185355737.0524833,
+     "neto_cop_anual": 501421887.9475179,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 1141.215863155216,
+       "pct": 12.128190377479106,
+       "neto_cop_anual": 437146254.8450396
+      },
+      "0.22": {
+       "pax_perdidos_dia": 1082.5166548424506,
+       "pct": 11.50436871813393,
+       "neto_cop_anual": 501421887.9475179
+      },
+      "0.25": {
+       "pax_perdidos_dia": 1046.7518984736305,
+       "pct": 11.124281314821861,
+       "neto_cop_anual": 540584296.1713758
+      },
+      "0.4": {
+       "pax_perdidos_dia": 861.5634281610215,
+       "pct": 9.156204024469664,
+       "neto_cop_anual": 743365671.1636826
+      },
+      "0.6": {
+       "pax_perdidos_dia": 597.0932047100351,
+       "pct": 6.3455655442790455,
+       "neto_cop_anual": 1032960565.8425127
+      },
+      "0.8": {
+       "pax_perdidos_dia": 310.6732086478827,
+       "pct": 3.301657417595271,
+       "neto_cop_anual": 1346590461.5305696
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.005479452054794521,
+       "pct": 5.8232486797967334e-05,
+       "neto_cop_anual": 1686771625.0000012
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 54.53666398066076,
+     "pct_horas_mas_salidas": 27.800161160354552,
+     "pct_horas_igual": 17.66317485898469,
+     "salidas_menos_dia": 23.53698630136986,
+     "salidas_mas_dia": 8.46027397260274
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Domingo/festivo": {
+     "salidas_dia": 231.41176470588235,
+     "programadas_dia": null,
+     "buses_hora_dia": 713.1352798202615,
+     "km_dia": 13497.023529411765,
+     "espera_media_min": 9.277513648025932,
+     "intervalo_medio_min": 11.472609085115877,
+     "pct_horas_sobrecarga": 0.4153686396677051,
+     "pct_horas_fc_menor_05": 32.22568362755279,
+     "factor_carga_medio": 0.603560843437111,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 3808.0179654701014,
+     "pax_perdidos_dia_e017": 4001.450533277385,
+     "pax_perdidos_dia_e025": 3689.4686337351504,
+     "pax_perdidos_pct_central": 22.563299230155728,
+     "bus_horas_ahorradas_anual": 80504.1338541667,
+     "km_ahorrados_anual": 1587614.7352941171,
+     "ahorro_bus_hora_cop_anual": 4830248031.250003,
+     "ahorro_km_cop_anual": 2381422102.9411755,
+     "ingreso_perdido_cop_anual": 4169779672.189761,
+     "neto_cop_anual": 3041890462.001417,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4001.450533277385,
+       "pct": 23.709427464809245,
+       "neto_cop_anual": 2830081800.2524414
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3808.0179654701014,
+       "pct": 22.563299230155728,
+       "neto_cop_anual": 3041890462.001417
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3689.4686337351504,
+       "pct": 21.860869759043585,
+       "neto_cop_anual": 3171701980.2511883
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3067.3492325207208,
+       "pct": 18.17468278887429,
+       "neto_cop_anual": 3852922724.5809894
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2155.4160727662656,
+       "pct": 12.771288963524771,
+       "neto_cop_anual": 4851489534.512117
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1137.7512436655088,
+       "pct": 6.741412985203064,
+       "neto_cop_anual": 5965832522.377446
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.029411764705882353,
+       "pct": 0.00017427082906732867,
+       "neto_cop_anual": 7211637928.3088255
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 55.853517877739336,
+     "pct_horas_mas_salidas": 22.92387543252595,
+     "pct_horas_igual": 21.222606689734718,
+     "salidas_menos_dia": 91.80882352941177,
+     "salidas_mas_dia": 17.735294117647058
+    },
+    "Laboral": {
+     "salidas_dia": 488.2204081632653,
+     "programadas_dia": null,
+     "buses_hora_dia": 1916.1803316326532,
+     "km_dia": 28464.957959183674,
+     "espera_media_min": 4.758358376735178,
+     "intervalo_medio_min": 5.730961543785826,
+     "pct_horas_sobrecarga": 4.237144790257105,
+     "pct_horas_fc_menor_05": 19.485791610284167,
+     "factor_carga_medio": 0.6991581907253954,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 3263.5436306892943,
+     "pax_perdidos_dia_e017": 3443.2690120177117,
+     "pax_perdidos_dia_e025": 3154.1982399653284,
+     "pax_perdidos_pct_central": 7.986447166330343,
+     "bus_horas_ahorradas_anual": 14675.904274376415,
+     "km_ahorrados_anual": 338580.8530612226,
+     "ahorro_bus_hora_cop_anual": 880554256.4625849,
+     "ahorro_km_cop_anual": 507871279.5918339,
+     "ingreso_perdido_cop_anual": 3573580275.6047773,
+     "neto_cop_anual": -2185154739.550359,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 3443.2690120177117,
+       "pct": 8.426265788312367,
+       "neto_cop_anual": -2381954032.1049747
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3263.5436306892943,
+       "pct": 7.986447166330343,
+       "neto_cop_anual": -2185154739.550359
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3154.1982399653284,
+       "pct": 7.718860369669605,
+       "neto_cop_anual": -2065421536.707616
+      },
+      "0.4": {
+       "pax_perdidos_dia": 2589.8671502738257,
+       "pct": 6.337846066763873,
+       "neto_cop_anual": -1447478993.4954202
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1788.9884040124405,
+       "pct": 4.377959355427798,
+       "neto_cop_anual": -570516766.3392036
+      },
+      "0.8": {
+       "pax_perdidos_dia": 927.7309708062775,
+       "pct": 2.2703157124171116,
+       "neto_cop_anual": 372560123.02154493
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 1388425536.0544188
+      }
+     },
+     "elasticidad_equilibrio": 0.7209905094219667,
+     "pct_horas_menos_salidas": 38.55142056822729,
+     "pct_horas_mas_salidas": 46.53861544617847,
+     "pct_horas_igual": 14.909963985594239,
+     "salidas_menos_dia": 63.27755102040816,
+     "salidas_mas_dia": 47.8734693877551
+    },
+    "Sábado": {
+     "salidas_dia": 422.0,
+     "programadas_dia": null,
+     "buses_hora_dia": 1591.343044871795,
+     "km_dia": 24596.021153846155,
+     "espera_media_min": 5.324390301256295,
+     "intervalo_medio_min": 6.567726184464624,
+     "pct_horas_sobrecarga": 1.420678768745067,
+     "pct_horas_fc_menor_05": 28.334648776637728,
+     "factor_carga_medio": 0.6395613381296757,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 3727.1406062241094,
+     "pax_perdidos_dia_e017": 3930.806653650039,
+     "pax_perdidos_dia_e025": 3603.1346256173274,
+     "pax_perdidos_pct_central": 11.312831231144408,
+     "bus_horas_ahorradas_anual": 45705.812793803496,
+     "km_ahorrados_anual": 732837.8749999987,
+     "ahorro_bus_hora_cop_anual": 2742348767.6282096,
+     "ahorro_km_cop_anual": 1099256812.499998,
+     "ingreso_perdido_cop_anual": 4081218963.8154,
+     "neto_cop_anual": -239613383.68719244,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 3930.806653650039,
+       "pct": 11.931010115567545,
+       "neto_cop_anual": -462627705.6185851
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3727.1406062241094,
+       "pct": 11.312831231144408,
+       "neto_cop_anual": -239613383.68719244
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3603.1346256173274,
+       "pct": 10.936441156695809,
+       "neto_cop_anual": -103826834.92276573
+      },
+      "0.4": {
+       "pax_perdidos_dia": 2962.047297423543,
+       "pct": 8.990576078203654,
+       "neto_cop_anual": 598163789.4494286
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2049.3267355861312,
+       "pct": 6.2202342080796695,
+       "neto_cop_anual": 1597592804.6613941
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1064.3975125796967,
+       "pct": 3.230720462371518,
+       "neto_cop_anual": 2676090303.85344
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 3841605580.1282077
+      }
+     },
+     "elasticidad_equilibrio": 0.2721855174381325,
+     "pct_horas_menos_salidas": 46.568627450980394,
+     "pct_horas_mas_salidas": 38.800904977375566,
+     "pct_horas_igual": 14.630467571644044,
+     "salidas_menos_dia": 74.0,
+     "salidas_mas_dia": 40.32692307692308
+    }
+   },
+   "buses_pico_mediana": {
+    "CL 72|Domingo/festivo": 13.456666666666663,
+    "CL 72|Laboral": 29.520000000000003,
+    "CL 72|Sábado": 26.151666666666667,
+    "CRA 54|Domingo/festivo": 23.936666666666667,
+    "CRA 54|Laboral": 73.83166666666668,
+    "CRA 54|Sábado": 64.0,
+    "SILENCIO|Domingo/festivo": 14.866666666666674,
+    "SILENCIO|Laboral": 43.442499999999995,
+    "SILENCIO|Sábado": 32.50861111111112
+   },
+   "cotas_activas_pct": null,
+   "notas": ""
+  },
+  {
+   "nombre": "S1 con pronóstico manual B1",
+   "clave": "S1_B1",
+   "horizonte": "h=7",
+   "metricas_global": {
+    "salidas_dia": 434.5068493150685,
+    "programadas_dia": null,
+    "buses_hora_dia": 1652.2555502283105,
+    "km_dia": 25320.558630136988,
+    "espera_media_min": 5.248862498016141,
+    "intervalo_medio_min": 6.378983184278184,
+    "pct_horas_sobrecarga": 11.909317562474634,
+    "pct_horas_fc_menor_05": 26.27703368701803,
+    "factor_carga_medio": 0.6852734131219218,
+    "horas_sin_servicio_con_demanda": 1,
+    "pax_perdidos_dia_central": 3745.629861307226,
+    "pax_perdidos_dia_e017": 3949.0458346303158,
+    "pax_perdidos_dia_e025": 3621.7106917953693,
+    "pax_perdidos_pct_central": 10.620822792710834,
+    "bus_horas_ahorradas_anual": 28994.43569444446,
+    "km_ahorrados_anual": 556147.1999999993,
+    "ahorro_bus_hora_cop_anual": 1739666141.6666675,
+    "ahorro_km_cop_anual": 834220799.9999989,
+    "ingreso_perdido_cop_anual": 4101464698.1314125,
+    "neto_cop_anual": -1527577756.464746,
+    "sensibilidad_elasticidad": {
+     "0.17": {
+      "pax_perdidos_dia": 3949.0458346303158,
+      "pct": 11.197613635871544,
+      "neto_cop_anual": -1750318247.253529
+     },
+     "0.22": {
+      "pax_perdidos_dia": 3745.629861307226,
+      "pct": 10.620822792710834,
+      "neto_cop_anual": -1527577756.464746
+     },
+     "0.25": {
+      "pax_perdidos_dia": 3621.7106917953693,
+      "pct": 10.269447032494634,
+      "neto_cop_anual": -1391886265.8492627
+     },
+     "0.4": {
+      "pax_perdidos_dia": 2980.2861008804075,
+      "pct": 8.450672309084752,
+      "neto_cop_anual": -689526338.7973795
+     },
+     "0.6": {
+      "pax_perdidos_dia": 2064.835754822827,
+      "pct": 5.854891022353419,
+      "neto_cop_anual": 312891790.13567114
+     },
+     "0.8": {
+      "pax_perdidos_dia": 1074.0491425162754,
+      "pct": 3.045491956150531,
+      "neto_cop_anual": 1397803130.611345
+     },
+     "1.0": {
+      "pax_perdidos_dia": 0.005479452054794521,
+      "pct": 1.553711696831073e-05,
+      "neto_cop_anual": 2573880941.6666665
+     }
+    },
+    "elasticidad_equilibrio": 0.5375725994762872,
+    "pct_horas_menos_salidas": 43.851732473811445,
+    "pct_horas_mas_salidas": 39.65081923180231,
+    "pct_horas_igual": 16.497448294386245,
+    "salidas_menos_dia": 71.97534246575343,
+    "salidas_mas_dia": 46.602739726027394
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "salidas_dia": 98.03835616438356,
+     "programadas_dia": null,
+     "buses_hora_dia": 376.09269216133947,
+     "km_dia": 5588.186301369863,
+     "espera_media_min": 6.264620652354135,
+     "intervalo_medio_min": 9.718655973142708,
+     "pct_horas_sobrecarga": 4.676066393003748,
+     "pct_horas_fc_menor_05": 46.8677494199536,
+     "factor_carga_medio": 0.5440566913767392,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 203.55316270203753,
+     "pax_perdidos_dia_e017": 215.04727274911957,
+     "pax_perdidos_dia_e025": 196.5752833024294,
+     "pax_perdidos_pct_central": 3.251111545175648,
+     "bus_horas_ahorradas_anual": -24810.409583333356,
+     "km_ahorrados_anual": -358074.0,
+     "ahorro_bus_hora_cop_anual": -1488624575.0000014,
+     "ahorro_km_cop_anual": -537111000.0,
+     "ingreso_perdido_cop_anual": 222890713.15873107,
+     "neto_cop_anual": -2248626288.1587324,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 215.04727274911957,
+       "pct": 3.4346932364623037,
+       "neto_cop_anual": -2261212338.6602874
+      },
+      "0.22": {
+       "pax_perdidos_dia": 203.55316270203753,
+       "pct": 3.251111545175648,
+       "neto_cop_anual": -2248626288.1587324
+      },
+      "0.25": {
+       "pax_perdidos_dia": 196.5752833024294,
+       "pct": 3.139662211862576,
+       "neto_cop_anual": -2240985510.2161617
+      },
+      "0.4": {
+       "pax_perdidos_dia": 160.74283851350253,
+       "pct": 2.5673533693039583,
+       "neto_cop_anual": -2201748983.1722865
+      },
+      "0.6": {
+       "pax_perdidos_dia": 110.39897719295823,
+       "pct": 1.763271002833781,
+       "neto_cop_anual": -2146622455.0262907
+      },
+      "0.8": {
+       "pax_perdidos_dia": 56.904285277529404,
+       "pct": 0.9088641826044821,
+       "neto_cop_anual": -2088045767.3788962
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": -2025735575.0000014
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 13.295729250604351,
+     "pct_horas_mas_salidas": 64.27074939564868,
+     "pct_horas_igual": 22.433521353746976,
+     "salidas_menos_dia": 4.145205479452055,
+     "salidas_mas_dia": 21.356164383561644
+    },
+    "CRA 54": {
+     "salidas_dia": 220.23013698630137,
+     "programadas_dia": null,
+     "buses_hora_dia": 817.3444642313547,
+     "km_dia": 12420.979726027395,
+     "espera_media_min": 4.073160856523912,
+     "intervalo_medio_min": 4.3884335812788695,
+     "pct_horas_sobrecarga": 19.726027397260275,
+     "pct_horas_fc_menor_05": 7.363013698630137,
+     "factor_carga_medio": 0.8245926959658534,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 2286.047571142033,
+     "pax_perdidos_dia_e017": 2409.9314269392507,
+     "pax_perdidos_dia_e025": 2210.5662205208937,
+     "pax_perdidos_pct_central": 11.665766484940711,
+     "bus_horas_ahorradas_anual": 32527.585277777805,
+     "km_ahorrados_anual": 550407.6000000006,
+     "ahorro_bus_hora_cop_anual": 1951655116.6666684,
+     "ahorro_km_cop_anual": 825611400.0000008,
+     "ingreso_perdido_cop_anual": 2503222090.4005265,
+     "neto_cop_anual": 274044426.26614285,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 2409.9314269392507,
+       "pct": 12.29794936303473,
+       "neto_cop_anual": 138391604.16818953
+      },
+      "0.22": {
+       "pax_perdidos_dia": 2286.047571142033,
+       "pct": 11.665766484940711,
+       "neto_cop_anual": 274044426.26614285
+      },
+      "0.25": {
+       "pax_perdidos_dia": 2210.5662205208937,
+       "pct": 11.280582982449443,
+       "neto_cop_anual": 356696505.1962905
+      },
+      "0.4": {
+       "pax_perdidos_dia": 1819.7083328464107,
+       "pct": 9.286023943535895,
+       "neto_cop_anual": 784685892.1998496
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1261.4026509187267,
+       "pct": 6.436973996018732,
+       "neto_cop_anual": 1396030613.9106636
+      },
+      "0.8": {
+       "pax_perdidos_dia": 656.5058411375894,
+       "pct": 3.35016818345766,
+       "neto_cop_anual": 2058392620.6210089
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 2777266516.6666694
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 61.33763094278808,
+     "pct_horas_mas_salidas": 29.073327961321517,
+     "pct_horas_igual": 9.58904109589041,
+     "salidas_menos_dia": 42.50684931506849,
+     "salidas_mas_dia": 15.76986301369863
+    },
+    "SILENCIO": {
+     "salidas_dia": 116.23835616438356,
+     "programadas_dia": null,
+     "buses_hora_dia": 458.8183938356164,
+     "km_dia": 7311.392602739726,
+     "espera_media_min": 7.021475699500627,
+     "intervalo_medio_min": 8.302274514515386,
+     "pct_horas_sobrecarga": 11.026878015161957,
+     "pct_horas_fc_menor_05": 25.430737422467264,
+     "factor_carga_medio": 0.681416190539168,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 1256.029127463155,
+     "pax_perdidos_dia_e017": 1324.0671349419447,
+     "pax_perdidos_dia_e025": 1214.5691879720455,
+     "pax_perdidos_pct_central": 13.34836017387206,
+     "bus_horas_ahorradas_anual": 21277.26000000001,
+     "km_ahorrados_anual": 363813.60000000056,
+     "ahorro_bus_hora_cop_anual": 1276635600.0000005,
+     "ahorro_km_cop_anual": 545720400.0000008,
+     "ingreso_perdido_cop_anual": 1375351894.5721545,
+     "neto_cop_anual": 447004105.4278469,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 1324.0671349419447,
+       "pct": 14.071429256811086,
+       "neto_cop_anual": 372502487.2385721
+      },
+      "0.22": {
+       "pax_perdidos_dia": 1256.029127463155,
+       "pct": 13.34836017387206,
+       "neto_cop_anual": 447004105.4278469
+      },
+      "0.25": {
+       "pax_perdidos_dia": 1214.5691879720455,
+       "pct": 12.907747617193507,
+       "neto_cop_anual": 492402739.1706116
+      },
+      "0.4": {
+       "pax_perdidos_dia": 999.8349295204944,
+       "pct": 10.625674565854403,
+       "neto_cop_anual": 727536752.17506
+      },
+      "0.6": {
+       "pax_perdidos_dia": 693.0341267111421,
+       "pct": 7.365170865750151,
+       "neto_cop_anual": 1063483631.2513008
+      },
+      "0.8": {
+       "pax_perdidos_dia": 360.63901610115676,
+       "pct": 3.8326654807695135,
+       "neto_cop_anual": 1427456277.3692348
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.005479452054794521,
+       "pct": 5.8232486797967334e-05,
+       "neto_cop_anual": 1822350000.0000014
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 56.9218372280419,
+     "pct_horas_mas_salidas": 25.608380338436742,
+     "pct_horas_igual": 17.469782433521353,
+     "salidas_menos_dia": 25.323287671232876,
+     "salidas_mas_dia": 9.476712328767123
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Domingo/festivo": {
+     "salidas_dia": 267.69117647058823,
+     "programadas_dia": null,
+     "buses_hora_dia": 821.20514501634,
+     "km_dia": 15600.067647058822,
+     "espera_media_min": 8.549839827118419,
+     "intervalo_medio_min": 10.62881962821269,
+     "pct_horas_sobrecarga": 4.534440983039114,
+     "pct_horas_fc_menor_05": 42.71374177916234,
+     "factor_carga_medio": 0.5659776610188848,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 3242.667552664775,
+     "pax_perdidos_dia_e017": 3407.592173717189,
+     "pax_perdidos_dia_e025": 3141.6002407034243,
+     "pax_perdidos_pct_central": 19.213480334948944,
+     "bus_horas_ahorradas_anual": 41058.633057598054,
+     "km_ahorrados_anual": 820003.6323529413,
+     "ahorro_bus_hora_cop_anual": 2463517983.455883,
+     "ahorro_km_cop_anual": 1230005448.529412,
+     "ingreso_perdido_cop_anual": 3550720970.1679287,
+     "neto_cop_anual": 142802461.8173666,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 3407.592173717189,
+       "pct": 20.190693050059195,
+       "neto_cop_anual": -37789998.23502636
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3242.667552664775,
+       "pct": 19.213480334948944,
+       "neto_cop_anual": 142802461.8173666
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3141.6002407034243,
+       "pct": 18.61463547054717,
+       "neto_cop_anual": 253471168.41504622
+      },
+      "0.4": {
+       "pax_perdidos_dia": 2611.3495233959597,
+       "pct": 15.472789578510774,
+       "neto_cop_anual": 834095703.8667192
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1834.4625235297333,
+       "pct": 10.869572365527997,
+       "neto_cop_anual": 1684786968.7202373
+      },
+      "0.8": {
+       "pax_perdidos_dia": 968.0280418741456,
+       "pct": 5.735767680206223,
+       "neto_cop_anual": 2633532726.1331058
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.029411764705882353,
+       "pct": 0.00017427082906732867,
+       "neto_cop_anual": 3693491226.1029425
+      }
+     },
+     "elasticidad_equilibrio": 0.18046278405645033,
+     "pct_horas_menos_salidas": 47.3760092272203,
+     "pct_horas_mas_salidas": 31.805074971164938,
+     "pct_horas_igual": 20.81891580161476,
+     "salidas_menos_dia": 76.82352941176471,
+     "salidas_mas_dia": 39.029411764705884
+    },
+    "Laboral": {
+     "salidas_dia": 482.74285714285713,
+     "programadas_dia": null,
+     "buses_hora_dia": 1893.3456626984128,
+     "km_dia": 28133.69265306122,
+     "espera_media_min": 4.862954042791521,
+     "intervalo_medio_min": 5.863949289729434,
+     "pct_horas_sobrecarga": 14.758119079837616,
+     "pct_horas_fc_menor_05": 21.405615696887686,
+     "factor_carga_medio": 0.7233532365110014,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 3873.9183813923764,
+     "pax_perdidos_dia_e017": 4086.9068751534483,
+     "pax_perdidos_dia_e025": 3744.3088436075977,
+     "pax_perdidos_pct_central": 9.480138150667706,
+     "bus_horas_ahorradas_anual": 23010.558435374187,
+     "km_ahorrados_anual": 459492.68979591783,
+     "ahorro_bus_hora_cop_anual": 1380633506.1224513,
+     "ahorro_km_cop_anual": 689239034.6938767,
+     "ingreso_perdido_cop_anual": 4241940627.6246524,
+     "neto_cop_anual": -2172068086.8083243,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4086.9068751534483,
+       "pct": 10.001357274709202,
+       "neto_cop_anual": -2405290487.476698
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3873.9183813923764,
+       "pct": 9.480138150667706,
+       "neto_cop_anual": -2172068086.8083243
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3744.3088436075977,
+       "pct": 9.162961534416368,
+       "neto_cop_anual": -2030145642.9339914
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3075.1044655010087,
+       "pct": 7.525304430963947,
+       "neto_cop_anual": -1297366848.9072762
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2124.7074471210867,
+       "pct": 5.199521039268955,
+       "neto_cop_anual": -256682113.78126192
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1102.0281579821026,
+       "pct": 2.696850618685765,
+       "neto_cop_anual": 863151707.8259256
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 2069872540.816328
+      }
+     },
+     "elasticidad_equilibrio": 0.6458428936202107,
+     "pct_horas_menos_salidas": 42.31292517006803,
+     "pct_horas_mas_salidas": 41.912765106042414,
+     "pct_horas_igual": 15.774309723889557,
+     "salidas_menos_dia": 70.26938775510204,
+     "salidas_mas_dia": 49.38775510204081
+    },
+    "Sábado": {
+     "salidas_dia": 425.38461538461536,
+     "programadas_dia": null,
+     "buses_hora_dia": 1603.1084348290597,
+     "km_dia": 24777.780769230772,
+     "espera_media_min": 5.2927704694047675,
+     "intervalo_medio_min": 6.541850857795676,
+     "pct_horas_sobrecarga": 7.02446724546172,
+     "pct_horas_fc_menor_05": 30.26835043409629,
+     "factor_carga_medio": 0.6435960635059776,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 3798.9135068230826,
+     "pax_perdidos_dia_e017": 4007.5630272057974,
+     "pax_perdidos_dia_e025": 3671.9215279541418,
+     "pax_perdidos_pct_central": 11.530680461219058,
+     "bus_horas_ahorradas_anual": 41411.44545940182,
+     "km_ahorrados_anual": 666495.6153846141,
+     "ahorro_bus_hora_cop_anual": 2484686727.564109,
+     "ahorro_km_cop_anual": 999743423.0769211,
+     "ingreso_perdido_cop_anual": 4159810289.971276,
+     "neto_cop_anual": -675380139.330246,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4007.5630272057974,
+       "pct": 12.163985468979462,
+       "neto_cop_anual": -903851364.1493182
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3798.9135068230826,
+       "pct": 11.530680461219058,
+       "neto_cop_anual": -675380139.330246
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3671.9215279541418,
+       "pct": 11.145227113348499,
+       "neto_cop_anual": -536323922.4687557
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3016.001253513008,
+       "pct": 9.154340224496769,
+       "neto_cop_anual": 181908778.04428577
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2084.005276262382,
+       "pct": 6.325492506453941,
+       "neto_cop_anual": 1202444373.1337218
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1080.8679127958371,
+       "pct": 3.2807123670620593,
+       "neto_cop_anual": 2300879786.129588
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 3484430150.64103
+      }
+     },
+     "elasticidad_equilibrio": 0.3620090860703614,
+     "pct_horas_menos_salidas": 46.49321266968326,
+     "pct_horas_mas_salidas": 39.25339366515837,
+     "pct_horas_igual": 14.25339366515837,
+     "salidas_menos_dia": 73.67307692307692,
+     "salidas_mas_dia": 43.38461538461539
+    }
+   },
+   "buses_pico_mediana": {
+    "CL 72|Domingo/festivo": 13.456666666666663,
+    "CL 72|Laboral": 28.520000000000003,
+    "CL 72|Sábado": 26.151666666666667,
+    "CRA 54|Domingo/festivo": 23.217013888888893,
+    "CRA 54|Laboral": 73.97333333333333,
+    "CRA 54|Sábado": 64.5,
+    "SILENCIO|Domingo/festivo": 13.909999999999997,
+    "SILENCIO|Laboral": 42.64583333333333,
+    "SILENCIO|Sábado": 31.73805555555556
+   },
+   "cotas_activas_pct": null,
+   "notas": ""
+  },
+  {
+   "nombre": "S1 sin tope de flota",
+   "clave": "S1_sinflota",
+   "horizonte": "h=7",
+   "metricas_global": {
+    "salidas_dia": 431.95342465753424,
+    "programadas_dia": null,
+    "buses_hora_dia": 1648.9994315068493,
+    "km_dia": 25177.486301369863,
+    "espera_media_min": 5.229626581694826,
+    "intervalo_medio_min": 6.360543702823122,
+    "pct_horas_sobrecarga": 9.642256624340465,
+    "pct_horas_fc_menor_05": 24.41004232620166,
+    "factor_carga_medio": 0.6823906613050488,
+    "horas_sin_servicio_con_demanda": 1,
+    "pax_perdidos_dia_central": 3569.3538591588285,
+    "pax_perdidos_dia_e017": 3763.254933882783,
+    "pax_perdidos_dia_e025": 3451.2366163901934,
+    "pax_perdidos_pct_central": 10.120987985015168,
+    "bus_horas_ahorradas_anual": 30182.919027777854,
+    "km_ahorrados_anual": 608368.5999999996,
+    "ahorro_bus_hora_cop_anual": 1810975141.6666713,
+    "ahorro_km_cop_anual": 912552899.9999994,
+    "ingreso_perdido_cop_anual": 3908442475.7789173,
+    "neto_cop_anual": -1184914434.1122465,
+    "sensibilidad_elasticidad": {
+     "0.17": {
+      "pax_perdidos_dia": 3763.254933882783,
+      "pct": 10.67079910629894,
+      "neto_cop_anual": -1397236110.9349766
+     },
+     "0.22": {
+      "pax_perdidos_dia": 3569.3538591588285,
+      "pct": 10.120987985015168,
+      "neto_cop_anual": -1184914434.1122465
+     },
+     "0.25": {
+      "pax_perdidos_dia": 3451.2366163901934,
+      "pct": 9.786063726436277,
+      "neto_cop_anual": -1055576053.280591
+     },
+     "0.4": {
+      "pax_perdidos_dia": 2839.901098932106,
+      "pct": 8.05260728833897,
+      "neto_cop_anual": -386163661.66398525
+     },
+     "0.6": {
+      "pax_perdidos_dia": 1967.516784208201,
+      "pct": 5.578940760437725,
+      "neto_cop_anual": 569097162.9586906
+     },
+     "0.8": {
+      "pax_perdidos_dia": 1023.424158776963,
+      "pct": 2.9019436075180653,
+      "neto_cop_anual": 1602878587.8058963
+     },
+     "1.0": {
+      "pax_perdidos_dia": 0.005479452054794521,
+      "pct": 1.553711696831073e-05,
+      "neto_cop_anual": 2723522041.666671
+     }
+    },
+    "elasticidad_equilibrio": 0.4808498897286023,
+    "pct_horas_menos_salidas": 44.03438087563792,
+    "pct_horas_mas_salidas": 39.60247112543648,
+    "pct_horas_igual": 16.363147998925598,
+    "salidas_menos_dia": 71.46849315068494,
+    "salidas_mas_dia": 43.54246575342466
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "salidas_dia": 97.7068493150685,
+     "programadas_dia": null,
+     "buses_hora_dia": 375.07158295281585,
+     "km_dia": 5569.290410958904,
+     "espera_media_min": 6.254644079140225,
+     "intervalo_medio_min": 9.717116332829237,
+     "pct_horas_sobrecarga": 3.6230590754952705,
+     "pct_horas_fc_menor_05": 46.135998572193465,
+     "factor_carga_medio": 0.5429577284570835,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 180.19082491280088,
+     "pax_perdidos_dia_e017": 190.50388613085224,
+     "pax_perdidos_dia_e025": 173.93736298496276,
+     "pax_perdidos_pct_central": 2.8779728275028504,
+     "bus_horas_ahorradas_anual": -24437.70472222223,
+     "km_ahorrados_anual": -351177.0,
+     "ahorro_bus_hora_cop_anual": -1466262283.333334,
+     "ahorro_km_cop_anual": -526765500.0,
+     "ingreso_perdido_cop_anual": 197308953.27951697,
+     "neto_cop_anual": -2190336736.612851,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 190.50388613085224,
+       "pct": 3.042691036480963,
+       "neto_cop_anual": -2201629538.646617
+      },
+      "0.22": {
+       "pax_perdidos_dia": 180.19082491280088,
+       "pct": 2.8779728275028504,
+       "neto_cop_anual": -2190336736.612851
+      },
+      "0.25": {
+       "pax_perdidos_dia": 173.93736298496276,
+       "pct": 2.7780937492265227,
+       "neto_cop_anual": -2183489195.8018684
+      },
+      "0.4": {
+       "pax_perdidos_dia": 141.91251756637126,
+       "pct": 2.266599143636658,
+       "neto_cop_anual": -2148421990.0685105
+      },
+      "0.6": {
+       "pax_perdidos_dia": 97.16252761070743,
+       "pct": 1.5518610031916573,
+       "neto_cop_anual": -2099420751.0670586
+      },
+      "0.8": {
+       "pax_perdidos_dia": 49.91795618859513,
+       "pct": 0.7972798924960615,
+       "neto_cop_anual": -2047687945.3598456
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": -1993027783.333334
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 13.408541498791296,
+     "pct_horas_mas_salidas": 64.3190975020145,
+     "pct_horas_igual": 22.2723609991942,
+     "salidas_menos_dia": 3.8465753424657536,
+     "salidas_mas_dia": 20.726027397260275
+    },
+    "CRA 54": {
+     "salidas_dia": 217.83287671232875,
+     "programadas_dia": null,
+     "buses_hora_dia": 812.9677545662101,
+     "km_dia": 12285.774246575342,
+     "espera_media_min": 4.076783907420592,
+     "intervalo_medio_min": 4.393898800467461,
+     "pct_horas_sobrecarga": 17.294520547945204,
+     "pct_horas_fc_menor_05": 4.280821917808219,
+     "factor_carga_medio": 0.8260970093865484,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 2221.727059974806,
+     "pax_perdidos_dia_e017": 2342.095239493351,
+     "pax_perdidos_dia_e025": 2148.3873370427164,
+     "pax_perdidos_pct_central": 11.337537067083915,
+     "bus_horas_ahorradas_anual": 34125.08430555556,
+     "km_ahorrados_anual": 599757.6000000006,
+     "ahorro_bus_hora_cop_anual": 2047505058.3333335,
+     "ahorro_km_cop_anual": 899636400.0000008,
+     "ingreso_perdido_cop_anual": 2432791130.6724124,
+     "neto_cop_anual": 514350327.66092205,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 2342.095239493351,
+       "pct": 11.951779348043662,
+       "neto_cop_anual": 382547171.0881152
+      },
+      "0.22": {
+       "pax_perdidos_dia": 2221.727059974806,
+       "pct": 11.337537067083915,
+       "neto_cop_anual": 514350327.66092205
+      },
+      "0.25": {
+       "pax_perdidos_dia": 2148.3873370427164,
+       "pct": 10.963282352266848,
+       "neto_cop_anual": 594657324.2715602
+      },
+      "0.4": {
+       "pax_perdidos_dia": 1768.6099778386483,
+       "pct": 9.025267568729852,
+       "neto_cop_anual": 1010513532.6000144
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1226.0867332419361,
+       "pct": 6.256755852695925,
+       "neto_cop_anual": 1604576485.4334145
+      },
+      "0.8": {
+       "pax_perdidos_dia": 638.196613664234,
+       "pct": 3.256735669226505,
+       "neto_cop_anual": 2248316166.3709984
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 2947141458.3333344
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 62.256244963738915,
+     "pct_horas_mas_salidas": 28.21917808219178,
+     "pct_horas_igual": 9.524576954069298,
+     "salidas_menos_dia": 43.00547945205479,
+     "salidas_mas_dia": 13.871232876712329
+    },
+    "SILENCIO": {
+     "salidas_dia": 116.41369863013699,
+     "programadas_dia": null,
+     "buses_hora_dia": 460.96009398782337,
+     "km_dia": 7322.421643835616,
+     "espera_media_min": 6.948473243863364,
+     "intervalo_medio_min": 8.222806786893164,
+     "pct_horas_sobrecarga": 7.753273604410752,
+     "pct_horas_fc_menor_05": 23.69055823569952,
+     "factor_carga_medio": 0.672397148202222,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 1167.4359742712222,
+     "pax_perdidos_dia_e017": 1230.6558082585793,
+     "pax_perdidos_dia_e025": 1128.9119163625146,
+     "pax_perdidos_pct_central": 12.406842742557847,
+     "bus_horas_ahorradas_anual": 20495.53944444447,
+     "km_ahorrados_anual": 359788.00000000047,
+     "ahorro_bus_hora_cop_anual": 1229732366.6666682,
+     "ahorro_km_cop_anual": 539682000.0000007,
+     "ingreso_perdido_cop_anual": 1278342391.8269882,
+     "neto_cop_anual": 491071974.8396807,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 1230.6558082585793,
+       "pct": 13.078707029574865,
+       "neto_cop_anual": 421846256.6235244
+      },
+      "0.22": {
+       "pax_perdidos_dia": 1167.4359742712222,
+       "pct": 12.406842742557847,
+       "neto_cop_anual": 491071974.8396807
+      },
+      "0.25": {
+       "pax_perdidos_dia": 1128.9119163625146,
+       "pct": 11.997431058480785,
+       "neto_cop_anual": 533255818.2497153
+      },
+      "0.4": {
+       "pax_perdidos_dia": 929.378603527086,
+       "pct": 9.876904974987296,
+       "neto_cop_anual": 751744795.8045096
+      },
+      "0.6": {
+       "pax_perdidos_dia": 644.2675233555572,
+       "pct": 6.84690725878949,
+       "neto_cop_anual": 1063941428.5923338
+      },
+      "0.8": {
+       "pax_perdidos_dia": 335.309588924134,
+       "pct": 3.5634787958718093,
+       "neto_cop_anual": 1402250366.794742
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.005479452054794521,
+       "pct": 5.8232486797967334e-05,
+       "neto_cop_anual": 1769408366.666669
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 56.43835616438356,
+     "pct_horas_mas_salidas": 26.26913779210314,
+     "pct_horas_igual": 17.292506043513296,
+     "salidas_menos_dia": 24.616438356164384,
+     "salidas_mas_dia": 8.945205479452055
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Domingo/festivo": {
+     "salidas_dia": 229.38235294117646,
+     "programadas_dia": null,
+     "buses_hora_dia": 706.8777205882352,
+     "km_dia": 13373.70588235294,
+     "espera_media_min": 9.302817947831292,
+     "intervalo_medio_min": 11.518424979335187,
+     "pct_horas_sobrecarga": 6.645898234683282,
+     "pct_horas_fc_menor_05": 34.33714087919695,
+     "factor_carga_medio": 0.6166586350075446,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 3954.5085203518993,
+     "pax_perdidos_dia_e017": 4154.941878349295,
+     "pax_perdidos_dia_e025": 3831.638999832679,
+     "pax_perdidos_pct_central": 23.43128626544838,
+     "bus_horas_ahorradas_anual": 82788.14297385627,
+     "km_ahorrados_anual": 1632625.6764705875,
+     "ahorro_bus_hora_cop_anual": 4967288578.431376,
+     "ahorro_km_cop_anual": 2448938514.705881,
+     "ingreso_perdido_cop_anual": 4330186829.78533,
+     "neto_cop_anual": 3086040263.3519278,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4154.941878349295,
+       "pct": 24.618895639460845,
+       "neto_cop_anual": 2866565736.34478
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3954.5085203518993,
+       "pct": 23.43128626544838,
+       "neto_cop_anual": 3086040263.3519278
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3831.638999832679,
+       "pct": 22.70325877637673,
+       "neto_cop_anual": 3220582388.3204737
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3186.5122614510055,
+       "pct": 18.880748543633352,
+       "neto_cop_anual": 3926996166.8484063
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2239.9884921676985,
+       "pct": 13.272398155465567,
+       "neto_cop_anual": 4963439694.213627
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1182.787826586258,
+       "pct": 7.008264115097653,
+       "neto_cop_anual": 6121074423.025305
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.029411764705882353,
+       "pct": 0.00017427082906732867,
+       "neto_cop_anual": 7416194887.254905
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 56.11303344867359,
+     "pct_horas_mas_salidas": 22.722029988465977,
+     "pct_horas_igual": 21.16493656286044,
+     "salidas_menos_dia": 94.1470588235294,
+     "salidas_mas_dia": 18.044117647058822
+    },
+    "Laboral": {
+     "salidas_dia": 490.40408163265306,
+     "programadas_dia": null,
+     "buses_hora_dia": 1923.8044795918365,
+     "km_dia": 28586.697959183675,
+     "espera_media_min": 4.746171210267966,
+     "intervalo_medio_min": 5.730903752907158,
+     "pct_horas_sobrecarga": 10.893098782138026,
+     "pct_horas_fc_menor_05": 20.90663058186739,
+     "factor_carga_medio": 0.7058799644255063,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 3393.2486573713118,
+     "pax_perdidos_dia_e017": 3581.0232532640703,
+     "pax_perdidos_dia_e025": 3279.0513182390605,
+     "pax_perdidos_pct_central": 8.303857460178508,
+     "bus_horas_ahorradas_anual": 11893.090269274448,
+     "km_ahorrados_anual": 294145.75306122284,
+     "ahorro_bus_hora_cop_anual": 713585416.1564668,
+     "ahorro_km_cop_anual": 441218629.59183425,
+     "ingreso_perdido_cop_anual": 3715607279.821586,
+     "neto_cop_anual": -2560803234.073285,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 3581.0232532640703,
+       "pct": 8.76337388127805,
+       "neto_cop_anual": -2766416416.5758557
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3393.2486573713118,
+       "pct": 8.303857460178508,
+       "neto_cop_anual": -2560803234.073285
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3279.0513182390605,
+       "pct": 8.024397119296655,
+       "neto_cop_anual": -2435757147.7234697
+      },
+      "0.4": {
+       "pax_perdidos_dia": 2690.227636028546,
+       "pct": 6.5834452705036535,
+       "neto_cop_anual": -1790995215.7029567
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1856.1855909341375,
+       "pct": 4.542402317988346,
+       "neto_cop_anual": -877719176.3245795
+      },
+      "0.8": {
+       "pax_perdidos_dia": 961.3829660767585,
+       "pct": 2.352667877021858,
+       "neto_cop_anual": 102089697.8942504
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 1154804045.748301
+      }
+     },
+     "elasticidad_equilibrio": 0.7791613036826915,
+     "pct_horas_menos_salidas": 39.9359743897559,
+     "pct_horas_mas_salidas": 44.625850340136054,
+     "pct_horas_igual": 15.438175270108042,
+     "salidas_menos_dia": 64.34693877551021,
+     "salidas_mas_dia": 51.1265306122449
+    },
+    "Sábado": {
+     "salidas_dia": 421.46153846153845,
+     "programadas_dia": null,
+     "buses_hora_dia": 1586.2501923076925,
+     "km_dia": 24550.56730769231,
+     "espera_media_min": 5.326287149947355,
+     "intervalo_medio_min": 6.584863604578873,
+     "pct_horas_sobrecarga": 7.221783741120758,
+     "pct_horas_fc_menor_05": 29.439621152328332,
+     "factor_carga_medio": 0.6477270085336211,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 3895.4165029436876,
+     "pax_perdidos_dia_e017": 4109.64050172628,
+     "pax_perdidos_dia_e025": 3765.045000485166,
+     "pax_perdidos_pct_central": 11.823591897559579,
+     "bus_horas_ahorradas_anual": 47564.70397970086,
+     "km_ahorrados_anual": 749428.5288461532,
+     "ahorro_bus_hora_cop_anual": 2853882238.7820516,
+     "ahorro_km_cop_anual": 1124142793.2692297,
+     "ingreso_perdido_cop_anual": 4265481070.723338,
+     "neto_cop_anual": -287456038.67205715,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4109.64050172628,
+       "pct": 12.4738168823217,
+       "neto_cop_anual": -522031317.338995
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3895.4165029436876,
+       "pct": 11.823591897559579,
+       "neto_cop_anual": -287456038.67205715
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3765.045000485166,
+       "pct": 11.427880825591693,
+       "neto_cop_anual": -144699243.47997618
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3091.8326250876225,
+       "pct": 9.38450795876932,
+       "neto_cop_anual": 592468307.5803347
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2135.7488267255026,
+       "pct": 6.482547502638406,
+       "neto_cop_anual": 1639380066.7868557
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1107.3349818638487,
+       "pct": 3.361046735196561,
+       "neto_cop_anual": 2765493226.9103665
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 3978025032.051281
+      }
+     },
+     "elasticidad_equilibrio": 0.2794436271520322,
+     "pct_horas_menos_salidas": 47.549019607843135,
+     "pct_horas_mas_salidas": 38.009049773755656,
+     "pct_horas_igual": 14.441930618401205,
+     "salidas_menos_dia": 75.36538461538461,
+     "salidas_mas_dia": 41.15384615384615
+    }
+   },
+   "buses_pico_mediana": {
+    "CL 72|Domingo/festivo": 13.456666666666663,
+    "CL 72|Laboral": 28.520000000000003,
+    "CL 72|Sábado": 26.151666666666667,
+    "CRA 54|Domingo/festivo": 21.560000000000002,
+    "CRA 54|Laboral": 74.33166666666668,
+    "CRA 54|Sábado": 62.5,
+    "SILENCIO|Domingo/festivo": 13.909999999999997,
+    "SILENCIO|Laboral": 43.64583333333333,
+    "SILENCIO|Sábado": 30.623333333333342
+   },
+   "cotas_activas_pct": null,
+   "notas": ""
+  },
+  {
+   "nombre": "S1 con tope de flota ciclo/intervalo",
+   "clave": "S1_regimen",
+   "horizonte": "h=7",
+   "metricas_global": {
+    "salidas_dia": 411.9890410958904,
+    "programadas_dia": null,
+    "buses_hora_dia": 1573.9160216894977,
+    "km_dia": 24001.578356164384,
+    "espera_media_min": 5.413276239058226,
+    "intervalo_medio_min": 6.537315459767464,
+    "pct_horas_sobrecarga": 12.532637075718014,
+    "pct_horas_fc_menor_05": 24.369016536118362,
+    "factor_carga_medio": 0.706234747275811,
+    "horas_sin_servicio_con_demanda": 21,
+    "pax_perdidos_dia_central": 4516.368696453771,
+    "pax_perdidos_dia_e017": 4758.084074563762,
+    "pax_perdidos_dia_e025": 4368.939820418371,
+    "pax_perdidos_pct_central": 12.80627113935952,
+    "bus_horas_ahorradas_anual": 57588.363611111185,
+    "km_ahorrados_anual": 1037575.0,
+    "ahorro_bus_hora_cop_anual": 3455301816.6666713,
+    "ahorro_km_cop_anual": 1556362500.0,
+    "ingreso_perdido_cop_anual": 4945423722.616879,
+    "neto_cop_anual": 66240594.04979229,
+    "sensibilidad_elasticidad": {
+     "0.17": {
+      "pax_perdidos_dia": 4758.084074563762,
+      "pct": 13.491660858108547,
+      "neto_cop_anual": -198437744.98064804
+     },
+     "0.22": {
+      "pax_perdidos_dia": 4516.368696453771,
+      "pct": 12.80627113935952,
+      "neto_cop_anual": 66240594.04979229
+     },
+     "0.25": {
+      "pax_perdidos_dia": 4368.939820418371,
+      "pct": 12.388233045666503,
+      "neto_cop_anual": 227675213.3085556
+     },
+     "0.4": {
+      "pax_perdidos_dia": 3603.707332700144,
+      "pct": 10.218398078459119,
+      "neto_cop_anual": 1065604787.360014
+     },
+     "0.6": {
+      "pax_perdidos_dia": 2505.582787696638,
+      "pct": 7.104639744436744,
+      "neto_cop_anual": 2268051164.1388526
+     },
+     "0.8": {
+      "pax_perdidos_dia": 1309.4997413294477,
+      "pct": 3.7131177438090095,
+      "neto_cop_anual": 3577762099.9109263
+     },
+     "1.0": {
+      "pax_perdidos_dia": 4.405479452054794,
+      "pct": 0.012491842042521826,
+      "neto_cop_anual": 5006840316.666672
+     }
+    },
+    "elasticidad_equilibrio": 0.20748658573791073,
+    "pct_horas_menos_salidas": 46.56459844211657,
+    "pct_horas_mas_salidas": 36.846629062583936,
+    "pct_horas_igual": 16.58877249529949,
+    "salidas_menos_dia": 85.93150684931507,
+    "salidas_mas_dia": 38.04109589041096
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "salidas_dia": 96.78630136986301,
+     "programadas_dia": null,
+     "buses_hora_dia": 372.2062678843227,
+     "km_dia": 5516.819178082192,
+     "espera_media_min": 6.28616976669322,
+     "intervalo_medio_min": 9.753518276261088,
+     "pct_horas_sobrecarga": 4.203183688070113,
+     "pct_horas_fc_menor_05": 46.16347701663388,
+     "factor_carga_medio": 0.5450221396382191,
+     "horas_sin_servicio_con_demanda": 20,
+     "pax_perdidos_dia_central": 208.7009249474694,
+     "pax_perdidos_dia_e017": 220.40199515929726,
+     "pax_perdidos_dia_e025": 201.6061404416402,
+     "pax_perdidos_pct_central": 3.3333306030659005,
+     "bus_horas_ahorradas_anual": -23391.864722222235,
+     "km_ahorrados_anual": -332025.0,
+     "ahorro_bus_hora_cop_anual": -1403511883.3333342,
+     "ahorro_km_cop_anual": -498037500.0,
+     "ingreso_perdido_cop_anual": 228527512.81747898,
+     "neto_cop_anual": -2130076896.150813,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 220.40199515929726,
+       "pct": 3.520217821872075,
+       "neto_cop_anual": -2142889568.0327647
+      },
+      "0.22": {
+       "pax_perdidos_dia": 208.7009249474694,
+       "pct": 3.3333306030659005,
+       "neto_cop_anual": -2130076896.150813
+      },
+      "0.25": {
+       "pax_perdidos_dia": 201.6061404416402,
+       "pct": 3.2200140841219103,
+       "neto_cop_anual": -2122308107.1169302
+      },
+      "0.4": {
+       "pax_perdidos_dia": 165.2769059653148,
+       "pct": 2.639770613249068,
+       "neto_cop_anual": -2082527595.3653538
+      },
+      "0.6": {
+       "pax_perdidos_dia": 114.52559855436316,
+       "pct": 1.8291805970279555,
+       "neto_cop_anual": -2026954913.750362
+      },
+      "0.8": {
+       "pax_perdidos_dia": 60.96525866038367,
+       "pct": 0.9737252600468144,
+       "neto_cop_anual": -1968306341.5664544
+      },
+      "1.0": {
+       "pax_perdidos_dia": 4.4,
+       "pct": 0.07027594466666404,
+       "neto_cop_anual": -1906367383.3333342
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 14.43996776792909,
+     "pct_horas_mas_salidas": 62.91700241740532,
+     "pct_horas_igual": 22.643029814665592,
+     "salidas_menos_dia": 4.358904109589041,
+     "salidas_mas_dia": 20.317808219178083
+    },
+    "CRA 54": {
+     "salidas_dia": 206.3835616438356,
+     "programadas_dia": null,
+     "buses_hora_dia": 768.3366590563166,
+     "km_dia": 11640.032876712328,
+     "espera_media_min": 4.2345397640911955,
+     "intervalo_medio_min": 4.551880065350944,
+     "pct_horas_sobrecarga": 21.695205479452053,
+     "pct_horas_fc_menor_05": 4.212328767123288,
+     "factor_carga_medio": 0.8611519595180523,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 2767.1521512087515,
+     "pax_perdidos_dia_e017": 2917.5073866039656,
+     "pax_perdidos_dia_e025": 2675.557575972845,
+     "pax_perdidos_pct_central": 14.120856989942759,
+     "bus_horas_ahorradas_anual": 50415.4341666667,
+     "km_ahorrados_anual": 835453.2000000002,
+     "ahorro_bus_hora_cop_anual": 3024926050.000002,
+     "ahorro_km_cop_anual": 1253179800.0000002,
+     "ingreso_perdido_cop_anual": 3030031605.5735826,
+     "neto_cop_anual": 1248074244.4264193,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 2917.5073866039656,
+       "pct": 14.888124079241614,
+       "neto_cop_anual": 1083435261.6686597
+      },
+      "0.22": {
+       "pax_perdidos_dia": 2767.1521512087515,
+       "pct": 14.120856989942759,
+       "neto_cop_anual": 1248074244.4264193
+      },
+      "0.25": {
+       "pax_perdidos_dia": 2675.557575972845,
+       "pct": 13.653447238948111,
+       "neto_cop_anual": 1348370304.3097367
+      },
+      "0.4": {
+       "pax_perdidos_dia": 2201.4695016673522,
+       "pct": 11.234162164587127,
+       "neto_cop_anual": 1867496745.674251
+      },
+      "0.6": {
+       "pax_perdidos_dia": 1524.9608887169713,
+       "pct": 7.7819192614406685,
+       "neto_cop_anual": 2608273676.8549185
+      },
+      "0.8": {
+       "pax_perdidos_dia": 793.0329142762432,
+       "pct": 4.0468697631681385,
+       "neto_cop_anual": 3409734808.8675156
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 4278105850.000002
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 67.12328767123287,
+     "pct_horas_mas_salidas": 23.2232070910556,
+     "pct_horas_igual": 9.653505237711522,
+     "salidas_menos_dia": 50.6986301369863,
+     "salidas_mas_dia": 10.115068493150686
+    },
+    "SILENCIO": {
+     "salidas_dia": 108.81917808219178,
+     "programadas_dia": null,
+     "buses_hora_dia": 433.3730947488584,
+     "km_dia": 6844.726301369862,
+     "espera_media_min": 7.287678171198293,
+     "intervalo_medio_min": 8.533615330895897,
+     "pct_horas_sobrecarga": 11.337008959338387,
+     "pct_horas_fc_menor_05": 23.656099241902137,
+     "factor_carga_medio": 0.7056529364224489,
+     "horas_sin_servicio_con_demanda": 1,
+     "pax_perdidos_dia_central": 1540.5156202975502,
+     "pax_perdidos_dia_e017": 1620.1746928005007,
+     "pax_perdidos_dia_e025": 1491.7761040038856,
+     "pax_perdidos_pct_central": 16.37172013258972,
+     "bus_horas_ahorradas_anual": 30564.79416666669,
+     "km_ahorrados_anual": 534146.8000000007,
+     "ahorro_bus_hora_cop_anual": 1833887650.0000012,
+     "ahorro_km_cop_anual": 801220200.0000011,
+     "ingreso_perdido_cop_anual": 1686864604.2258174,
+     "neto_cop_anual": 948243245.774185,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 1620.1746928005007,
+       "pct": 17.218291257125333,
+       "neto_cop_anual": 861016561.3834541
+      },
+      "0.22": {
+       "pax_perdidos_dia": 1540.5156202975502,
+       "pct": 16.37172013258972,
+       "neto_cop_anual": 948243245.774185
+      },
+      "0.25": {
+       "pax_perdidos_dia": 1491.7761040038856,
+       "pct": 15.853744391452118,
+       "neto_cop_anual": 1001613016.1157477
+      },
+      "0.4": {
+       "pax_perdidos_dia": 1236.9609250674766,
+       "pct": 13.145714209793278,
+       "neto_cop_anual": 1280635637.0511155
+      },
+      "0.6": {
+       "pax_perdidos_dia": 866.0963004253033,
+       "pct": 9.204376801901981,
+       "neto_cop_anual": 1686732401.0342953
+      },
+      "0.8": {
+       "pax_perdidos_dia": 455.50156839282096,
+       "pct": 4.840810504889626,
+       "neto_cop_anual": 2136333632.6098635
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.005479452054794521,
+       "pct": 5.8232486797967334e-05,
+       "neto_cop_anual": 2635101850.0000024
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 58.13053988718775,
+     "pct_horas_mas_salidas": 24.399677679290892,
+     "pct_horas_igual": 17.469782433521353,
+     "salidas_menos_dia": 30.873972602739727,
+     "salidas_mas_dia": 7.608219178082192
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Domingo/festivo": {
+     "salidas_dia": 228.35294117647058,
+     "programadas_dia": null,
+     "buses_hora_dia": 703.6911335784314,
+     "km_dia": 13314.951470588234,
+     "espera_media_min": 9.312286034023874,
+     "intervalo_medio_min": 11.528821938558483,
+     "pct_horas_sobrecarga": 6.569343065693431,
+     "pct_horas_fc_menor_05": 34.445603058741746,
+     "factor_carga_medio": 0.615859157642265,
+     "horas_sin_servicio_con_demanda": 21,
+     "pax_perdidos_dia_central": 3978.1261674107227,
+     "pax_perdidos_dia_e017": 4178.559525408118,
+     "pax_perdidos_dia_e025": 3855.256646891502,
+     "pax_perdidos_pct_central": 23.571225741189444,
+     "bus_horas_ahorradas_anual": 83951.24723243469,
+     "km_ahorrados_anual": 1654071.0367647056,
+     "ahorro_bus_hora_cop_anual": 5037074833.946081,
+     "ahorro_km_cop_anual": 2481106555.1470585,
+     "ingreso_perdido_cop_anual": 4356048153.314741,
+     "neto_cop_anual": 3162133235.7783985,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4178.559525408118,
+       "pct": 24.758835115201908,
+       "neto_cop_anual": 2942658708.7712507
+      },
+      "0.22": {
+       "pax_perdidos_dia": 3978.1261674107227,
+       "pct": 23.571225741189444,
+       "neto_cop_anual": 3162133235.7783985
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3855.256646891502,
+       "pct": 22.843198252117794,
+       "neto_cop_anual": 3296675360.746945
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3210.129908509829,
+       "pct": 19.020688019374415,
+       "neto_cop_anual": 4003089139.274877
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2263.606139226522,
+       "pct": 13.412337631206633,
+       "neto_cop_anual": 5039532666.640099
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1206.4054736450814,
+       "pct": 7.148203590838715,
+       "neto_cop_anual": 6197167395.451776
+      },
+      "1.0": {
+       "pax_perdidos_dia": 23.647058823529413,
+       "pct": 0.14011374657013226,
+       "neto_cop_anual": 7492287859.681375
+      }
+     },
+     "elasticidad_equilibrio": null,
+     "pct_horas_menos_salidas": 56.68973471741637,
+     "pct_horas_mas_salidas": 21.309111880046135,
+     "pct_horas_igual": 22.001153402537486,
+     "salidas_menos_dia": 94.44117647058823,
+     "salidas_mas_dia": 17.308823529411764
+    },
+    "Laboral": {
+     "salidas_dia": 461.8734693877551,
+     "programadas_dia": null,
+     "buses_hora_dia": 1816.299900793651,
+     "km_dia": 26905.362040816322,
+     "espera_media_min": 4.974895537699467,
+     "intervalo_medio_min": 5.9501956022179,
+     "pct_horas_sobrecarga": 14.893437077131258,
+     "pct_horas_fc_menor_05": 20.830514208389715,
+     "factor_carga_medio": 0.739693045479052,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 4755.744438262525,
+     "pax_perdidos_dia_e017": 5012.485508967388,
+     "pax_perdidos_dia_e025": 4599.26029462639,
+     "pax_perdidos_pct_central": 11.638116719380566,
+     "bus_horas_ahorradas_anual": 51132.2615306122,
+     "km_ahorrados_anual": 907833.3632653056,
+     "ahorro_bus_hora_cop_anual": 3067935691.836732,
+     "ahorro_km_cop_anual": 1361750044.8979585,
+     "ingreso_perdido_cop_anual": 5207540159.897466,
+     "neto_cop_anual": -777854423.162775,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 5012.485508967388,
+       "pct": 12.266405851883567,
+       "neto_cop_anual": -1058985895.5845995
+      },
+      "0.22": {
+       "pax_perdidos_dia": 4755.744438262525,
+       "pct": 11.638116719380566,
+       "neto_cop_anual": -777854423.162775
+      },
+      "0.25": {
+       "pax_perdidos_dia": 4599.26029462639,
+       "pct": 11.255173364872851,
+       "neto_cop_anual": -606504285.8812065
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3788.31716288776,
+       "pct": 9.270657387937339,
+       "neto_cop_anual": 281478443.3725939
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2628.1890566044995,
+       "pct": 6.431626299191269,
+       "neto_cop_anual": 1551818719.7527637
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1369.0361327492985,
+       "pct": 3.3502646142623096,
+       "neto_cop_anual": 2930591171.3742085
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 4429685736.734691
+      }
+     },
+     "elasticidad_equilibrio": 0.35245204088443327,
+     "pct_horas_menos_salidas": 43.32933173269308,
+     "pct_horas_mas_salidas": 41.06442577030812,
+     "pct_horas_igual": 15.606242496998798,
+     "salidas_menos_dia": 85.15102040816326,
+     "salidas_mas_dia": 43.4
+    },
+    "Sábado": {
+     "salidas_dia": 417.09615384615387,
+     "programadas_dia": null,
+     "buses_hora_dia": 1569.9014449786325,
+     "km_dia": 24295.109615384616,
+     "espera_media_min": 5.366865936053803,
+     "intervalo_medio_min": 6.629287426254208,
+     "pct_horas_sobrecarga": 8.287292817679557,
+     "pct_horas_fc_menor_05": 29.439621152328332,
+     "factor_carga_medio": 0.6527223768814102,
+     "horas_sin_servicio_con_demanda": 0,
+     "pax_perdidos_dia_central": 4092.3962970649727,
+     "pax_perdidos_dia_e017": 4317.301726750216,
+     "pax_perdidos_dia_e025": 3955.5155823195673,
+     "pax_perdidos_pct_central": 12.421476281936808,
+     "bus_horas_ahorradas_anual": 53531.99675480774,
+     "km_ahorrados_anual": 842670.5865384612,
+     "ahorro_bus_hora_cop_anual": 3211919805.2884645,
+     "ahorro_km_cop_anual": 1264005879.8076918,
+     "ingreso_perdido_cop_anual": 4481173945.286145,
+     "neto_cop_anual": -5248260.18998909,
+     "sensibilidad_elasticidad": {
+      "0.17": {
+       "pax_perdidos_dia": 4317.301726750216,
+       "pct": 13.104122159247773,
+       "neto_cop_anual": -251519705.69533062
+      },
+      "0.22": {
+       "pax_perdidos_dia": 4092.3962970649727,
+       "pct": 12.421476281936808,
+       "neto_cop_anual": -5248260.18998909
+      },
+      "0.25": {
+       "pax_perdidos_dia": 3955.5155823195673,
+       "pct": 12.006008074988223,
+       "neto_cop_anual": 144636122.45623016
+      },
+      "0.4": {
+       "pax_perdidos_dia": 3248.5891874881368,
+       "pct": 9.860304480062334,
+       "neto_cop_anual": 918720524.7966466
+      },
+      "0.6": {
+       "pax_perdidos_dia": 2244.3496379570565,
+       "pct": 6.812178922224851,
+       "neto_cop_anual": 2018362831.5331793
+      },
+      "0.8": {
+       "pax_perdidos_dia": 1163.8073241116288,
+       "pct": 3.532454831797397,
+       "neto_cop_anual": 3201556665.1939225
+      },
+      "1.0": {
+       "pax_perdidos_dia": 0.0,
+       "pct": 0.0,
+       "neto_cop_anual": 4475925685.096156
+      }
+     },
+     "elasticidad_equilibrio": 0.22105046171535633,
+     "pct_horas_menos_salidas": 48.56711915535445,
+     "pct_horas_mas_salidas": 37.29260935143288,
+     "pct_horas_igual": 14.14027149321267,
+     "salidas_menos_dia": 78.48076923076923,
+     "salidas_mas_dia": 39.90384615384615
+    }
+   },
+   "buses_pico_mediana": {
+    "CL 72|Domingo/festivo": 13.456666666666663,
+    "CL 72|Laboral": 28.520000000000003,
+    "CL 72|Sábado": 26.151666666666667,
+    "CRA 54|Domingo/festivo": 21.560000000000002,
+    "CRA 54|Laboral": 66.975,
+    "CRA 54|Sábado": 59.5,
+    "SILENCIO|Domingo/festivo": 13.909999999999997,
+    "SILENCIO|Laboral": 35.0,
+    "SILENCIO|Sábado": 29.623333333333342
+   },
+   "cotas_activas_pct": {
+    "pct_cota_flota": 10.49153908138598
+   },
+   "notas": ""
+  }
+ ],
+ "calidad_decision": {
+  "S1_lightgbm_vs_oraculo": {
+   "MAE_salidas": 0.7312152133580705,
+   "pct_exacto": 60.604128014842296,
+   "pct_suboferta": 20.205241187384043,
+   "pct_sobreoferta": 19.190630797773657,
+   "pct_suboferta_2_o_mas": 9.39239332096475,
+   "WAPE_salidas": 8.42164306176005
+  },
+  "S1_B1_manual_vs_oraculo": {
+   "MAE_salidas": 0.991245361781076,
+   "pct_exacto": 56.68483302411874,
+   "pct_suboferta": 22.396799628942485,
+   "pct_sobreoferta": 20.918367346938776,
+   "pct_suboferta_2_o_mas": 11.821660482374769,
+   "WAPE_salidas": 11.416494721448748
+  },
+  "S0_real_vs_oraculo": {
+   "MAE_salidas": 2.1982838589981446,
+   "pct_exacto": 15.311920222634509,
+   "pct_suboferta": 39.98724489795919,
+   "pct_sobreoferta": 44.70083487940631,
+   "pct_suboferta_2_o_mas": 22.698283858998145,
+   "WAPE_salidas": 25.318349058808604
+  },
+  "por_ruta": {
+   "CL 72": {
+    "lightgbm": {
+     "MAE_salidas": 0.2512939496698197,
+     "pct_exacto": 85.16865964661788,
+     "pct_suboferta": 10.190969123683741,
+     "pct_sobreoferta": 4.640371229698376,
+     "pct_suboferta_2_o_mas": 4.194181688381224,
+     "WAPE_salidas": 4.182758006060245
+    },
+    "B1": {
+     "MAE_salidas": 0.35373906835623775,
+     "pct_exacto": 82.75923612350526,
+     "pct_suboferta": 10.851329644833125,
+     "pct_sobreoferta": 6.38943423166161,
+     "pct_suboferta_2_o_mas": 4.961627699446725,
+     "WAPE_salidas": 5.887944863644465
+    },
+    "S0": {
+     "MAE_salidas": 1.4452971622345172,
+     "pct_exacto": 19.75727288952347,
+     "pct_suboferta": 68.4990183830091,
+     "pct_sobreoferta": 11.743708727467428,
+     "pct_suboferta_2_o_mas": 38.44369087988578,
+     "WAPE_salidas": 24.05679995246866
+    }
+   },
+   "CRA 54": {
+    "lightgbm": {
+     "MAE_salidas": 1.325513698630137,
+     "pct_exacto": 33.8013698630137,
+     "pct_suboferta": 29.65753424657534,
+     "pct_sobreoferta": 36.54109589041096,
+     "pct_suboferta_2_o_mas": 15.325342465753424,
+     "WAPE_salidas": 10.287726759253106
+    },
+    "B1": {
+     "MAE_salidas": 1.7352739726027397,
+     "pct_exacto": 29.982876712328764,
+     "pct_suboferta": 32.87671232876712,
+     "pct_sobreoferta": 37.140410958904106,
+     "pct_suboferta_2_o_mas": 19.297945205479454,
+     "WAPE_salidas": 13.468004518572663
+    },
+    "S0": {
+     "MAE_salidas": 3.2222602739726027,
+     "pct_exacto": 9.606164383561644,
+     "pct_suboferta": 25.54794520547945,
+     "pct_sobreoferta": 64.8458904109589,
+     "pct_suboferta_2_o_mas": 16.90068493150685,
+     "WAPE_salidas": 25.00897069572729
+    }
+   },
+   "SILENCIO": {
+    "lightgbm": {
+     "MAE_salidas": 0.5965546942291128,
+     "pct_exacto": 63.858742463393625,
+     "pct_suboferta": 20.361757105943152,
+     "pct_sobreoferta": 15.779500430663221,
+     "pct_suboferta_2_o_mas": 8.440999138673558,
+     "WAPE_salidas": 8.477356181150551
+    },
+    "B1": {
+     "MAE_salidas": 0.8580534022394487,
+     "pct_exacto": 58.38070628768304,
+     "pct_suboferta": 22.997416020671835,
+     "pct_sobreoferta": 18.621877691645132,
+     "pct_suboferta_2_o_mas": 10.921619293712318,
+     "WAPE_salidas": 12.193390452876377
+    },
+    "S0": {
+     "MAE_salidas": 1.8949181739879415,
+     "pct_exacto": 16.761412575366062,
+     "pct_suboferta": 26.99397071490095,
+     "pct_sobreoferta": 56.24461670973299,
+     "pct_suboferta_2_o_mas": 13.333333333333334,
+     "WAPE_salidas": 26.92778457772338
+    }
+   }
+  },
+  "por_tipo_dia": {
+   "Domingo/festivo": {
+    "lightgbm": {
+     "MAE_salidas": 0.4844290657439446,
+     "pct_exacto": 70.51903114186851,
+     "pct_suboferta": 15.813148788927336,
+     "pct_sobreoferta": 13.667820069204154,
+     "pct_suboferta_2_o_mas": 6.71280276816609,
+     "WAPE_salidas": 9.713453132588636
+    },
+    "B1": {
+     "MAE_salidas": 1.1429065743944637,
+     "pct_exacto": 59.61937716262976,
+     "pct_suboferta": 11.626297577854672,
+     "pct_sobreoferta": 28.75432525951557,
+     "pct_suboferta_2_o_mas": 4.463667820069204,
+     "WAPE_salidas": 22.91681121210019
+    },
+    "S0": {
+     "MAE_salidas": 2.316262975778547,
+     "pct_exacto": 17.716262975778545,
+     "pct_suboferta": 18.235294117647058,
+     "pct_sobreoferta": 64.0484429065744,
+     "pct_suboferta_2_o_mas": 6.98961937716263,
+     "WAPE_salidas": 46.44418233539166
+    }
+   },
+   "Laboral": {
+    "lightgbm": {
+     "MAE_salidas": 0.7985453315290933,
+     "pct_exacto": 57.49323410013532,
+     "pct_suboferta": 21.684709066305818,
+     "pct_sobreoferta": 20.822056833558864,
+     "pct_suboferta_2_o_mas": 10.055818673883627,
+     "WAPE_salidas": 8.269181927257122
+    },
+    "B1": {
+     "MAE_salidas": 1.0052435723951285,
+     "pct_exacto": 54.61772665764547,
+     "pct_suboferta": 25.98105548037889,
+     "pct_sobreoferta": 19.401217861975642,
+     "pct_suboferta_2_o_mas": 14.183017591339647,
+     "WAPE_salidas": 10.409605633062716
+    },
+    "S0": {
+     "MAE_salidas": 2.1636502029769957,
+     "pct_exacto": 14.876522327469555,
+     "pct_suboferta": 45.82205683355886,
+     "pct_sobreoferta": 39.30142083897159,
+     "pct_suboferta_2_o_mas": 26.420838971583223,
+     "WAPE_salidas": 22.40526172897892
+    }
+   },
+   "Sábado": {
+    "lightgbm": {
+     "MAE_salidas": 0.6985003946329913,
+     "pct_exacto": 63.812154696132595,
+     "pct_suboferta": 18.310970797158642,
+     "pct_sobreoferta": 17.876874506708763,
+     "pct_suboferta_2_o_mas": 9.352801894238358,
+     "WAPE_salidas": 8.36444402438448
+    },
+    "B1": {
+     "MAE_salidas": 0.7529597474348856,
+     "pct_exacto": 62.98342541436463,
+     "pct_suboferta": 17.955801104972377,
+     "pct_sobreoferta": 19.060773480662984,
+     "pct_suboferta_2_o_mas": 9.19494869771113,
+     "WAPE_salidas": 9.016587117811067
+    },
+    "S0": {
+     "MAE_salidas": 2.2253354380426202,
+     "pct_exacto": 14.601420678768745,
+     "pct_suboferta": 37.569060773480665,
+     "pct_sobreoferta": 47.829518547750595,
+     "pct_suboferta_2_o_mas": 23.24388318863457,
+     "WAPE_salidas": 26.648079013279148
+    }
+   }
+  }
+ },
+ "resumen_ruta_tipo_dia_salidas_dia": [
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Domingo/festivo",
+   "S0": 54.4,
+   "S1": 61.0,
+   "S2": 61.0,
+   "S3": 120.0,
+   "oraculo": 61.4,
+   "exceso": 4.8,
+   "deficit": 11.4
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Laboral",
+   "S0": 87.9,
+   "S1": 107.1,
+   "S2": 104.7,
+   "S3": 136.0,
+   "oraculo": 109.1,
+   "exceso": 3.2,
+   "deficit": 22.4
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Sábado",
+   "S0": 81.8,
+   "S1": 101.3,
+   "S2": 100.3,
+   "S3": 130.3,
+   "oraculo": 101.8,
+   "exceso": 5.5,
+   "deficit": 24.9
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Domingo/festivo",
+   "S0": 161.1,
+   "S1": 106.9,
+   "S2": 96.9,
+   "S3": 124.6,
+   "oraculo": 107.1,
+   "exceso": 58.3,
+   "deficit": 4.0
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "S0": 271.8,
+   "S1": 250.3,
+   "S2": 232.6,
+   "S3": 251.9,
+   "oraculo": 246.2,
+   "exceso": 38.9,
+   "deficit": 17.5
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Sábado",
+   "S0": 242.4,
+   "S1": 209.5,
+   "S2": 192.5,
+   "S3": 211.7,
+   "oraculo": 207.2,
+   "exceso": 42.5,
+   "deficit": 9.6
+  },
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Domingo/festivo",
+   "S0": 89.9,
+   "S1": 61.5,
+   "S2": 61.3,
+   "S3": 121.0,
+   "oraculo": 62.9,
+   "exceso": 31.0,
+   "deficit": 2.6
+  },
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Laboral",
+   "S0": 143.9,
+   "S1": 131.5,
+   "S2": 124.4,
+   "S3": 149.7,
+   "oraculo": 132.9,
+   "exceso": 22.7,
+   "deficit": 10.4
+  },
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Sábado",
+   "S0": 131.5,
+   "S1": 110.7,
+   "S2": 107.2,
+   "S3": 136.9,
+   "oraculo": 112.9,
+   "exceso": 27.4,
+   "deficit": 6.6
+  }
+ ],
+ "top_exceso": [
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Sábado",
+   "hora": 5,
+   "salidas_reales_med": 18.0,
+   "salidas_S1_med": 12.0,
+   "need_S1_med": 12.0,
+   "need_oraculo_med": 11.0,
+   "exceso_S1_media": 5.519230769230769,
+   "exceso_demanda_oraculo_media": 6.461538461538462,
+   "pct_dias_exceso2": 94.23076923076923,
+   "pct_dias_deficit": 1.9230769230769231,
+   "pct_dias_deficit_demanda": 0.0,
+   "fc_real_S0_med": 0.48,
+   "fc_real_S1_med": 0.7427272727272727
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Domingo/festivo",
+   "hora": 13,
+   "salidas_reales_med": 12.0,
+   "salidas_S1_med": 7.0,
+   "need_S1_med": 7.0,
+   "need_oraculo_med": 6.0,
+   "exceso_S1_media": 4.985294117647059,
+   "exceso_demanda_oraculo_media": 5.544117647058823,
+   "pct_dias_exceso2": 92.64705882352942,
+   "pct_dias_deficit": 1.4705882352941175,
+   "pct_dias_deficit_demanda": 0.0,
+   "fc_real_S0_med": 0.4,
+   "fc_real_S1_med": 0.715
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Domingo/festivo",
+   "hora": 10,
+   "salidas_reales_med": 12.0,
+   "salidas_S1_med": 6.5,
+   "need_S1_med": 6.5,
+   "need_oraculo_med": 6.0,
+   "exceso_S1_media": 5.176470588235294,
+   "exceso_demanda_oraculo_media": 5.176470588235294,
+   "pct_dias_exceso2": 94.11764705882352,
+   "pct_dias_deficit": 1.4705882352941175,
+   "pct_dias_deficit_demanda": 1.4705882352941175,
+   "fc_real_S0_med": 0.425,
+   "fc_real_S1_med": 0.7871428571428571
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Domingo/festivo",
+   "hora": 11,
+   "salidas_reales_med": 10.0,
+   "salidas_S1_med": 6.0,
+   "need_S1_med": 6.0,
+   "need_oraculo_med": 5.0,
+   "exceso_S1_media": 4.514705882352941,
+   "exceso_demanda_oraculo_media": 5.088235294117647,
+   "pct_dias_exceso2": 92.64705882352942,
+   "pct_dias_deficit": 2.941176470588235,
+   "pct_dias_deficit_demanda": 1.4705882352941175,
+   "fc_real_S0_med": 0.4,
+   "fc_real_S1_med": 0.7
+  },
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Domingo/festivo",
+   "hora": 5,
+   "salidas_reales_med": 9.0,
+   "salidas_S1_med": 4.0,
+   "need_S1_med": 4.0,
+   "need_oraculo_med": 3.5,
+   "exceso_S1_media": 4.220588235294118,
+   "exceso_demanda_oraculo_media": 5.073529411764706,
+   "pct_dias_exceso2": 89.70588235294117,
+   "pct_dias_deficit": 0.0,
+   "pct_dias_deficit_demanda": 0.0,
+   "fc_real_S0_med": 0.28500000000000003,
+   "fc_real_S1_med": 0.585
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 17,
+   "salidas_reales_med": 16.0,
+   "salidas_S1_med": 10.0,
+   "need_S1_med": 10.0,
+   "need_oraculo_med": 10.0,
+   "exceso_S1_media": 4.83265306122449,
+   "exceso_demanda_oraculo_media": 5.069387755102041,
+   "pct_dias_exceso2": 84.08163265306122,
+   "pct_dias_deficit": 7.346938775510205,
+   "pct_dias_deficit_demanda": 4.489795918367347,
+   "fc_real_S0_med": 0.53,
+   "fc_real_S1_med": 0.7854545454545454
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Domingo/festivo",
+   "hora": 9,
+   "salidas_reales_med": 13.0,
+   "salidas_S1_med": 7.0,
+   "need_S1_med": 7.0,
+   "need_oraculo_med": 7.0,
+   "exceso_S1_media": 5.382352941176471,
+   "exceso_demanda_oraculo_media": 5.029411764705882,
+   "pct_dias_exceso2": 97.05882352941177,
+   "pct_dias_deficit": 1.4705882352941175,
+   "pct_dias_deficit_demanda": 0.0,
+   "fc_real_S0_med": 0.48,
+   "fc_real_S1_med": 0.8142857142857143
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Domingo/festivo",
+   "hora": 14,
+   "salidas_reales_med": 11.5,
+   "salidas_S1_med": 7.0,
+   "need_S1_med": 7.0,
+   "need_oraculo_med": 6.0,
+   "exceso_S1_media": 4.323529411764706,
+   "exceso_demanda_oraculo_media": 4.955882352941177,
+   "pct_dias_exceso2": 82.35294117647058,
+   "pct_dias_deficit": 7.352941176470589,
+   "pct_dias_deficit_demanda": 1.4705882352941175,
+   "fc_real_S0_med": 0.42,
+   "fc_real_S1_med": 0.7057142857142857
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 18,
+   "salidas_reales_med": 13.0,
+   "salidas_S1_med": 9.0,
+   "need_S1_med": 9.0,
+   "need_oraculo_med": 8.0,
+   "exceso_S1_media": 4.53469387755102,
+   "exceso_demanda_oraculo_media": 4.828571428571428,
+   "pct_dias_exceso2": 84.08163265306122,
+   "pct_dias_deficit": 8.571428571428571,
+   "pct_dias_deficit_demanda": 5.3061224489795915,
+   "fc_real_S0_med": 0.52,
+   "fc_real_S1_med": 0.75
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Domingo/festivo",
+   "hora": 12,
+   "salidas_reales_med": 11.0,
+   "salidas_S1_med": 7.0,
+   "need_S1_med": 7.0,
+   "need_oraculo_med": 6.0,
+   "exceso_S1_media": 4.147058823529412,
+   "exceso_demanda_oraculo_media": 4.632352941176471,
+   "pct_dias_exceso2": 83.82352941176471,
+   "pct_dias_deficit": 4.411764705882353,
+   "pct_dias_deficit_demanda": 1.4705882352941175,
+   "fc_real_S0_med": 0.44,
+   "fc_real_S1_med": 0.7425
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Sábado",
+   "hora": 16,
+   "salidas_reales_med": 15.0,
+   "salidas_S1_med": 10.0,
+   "need_S1_med": 10.0,
+   "need_oraculo_med": 10.0,
+   "exceso_S1_media": 4.269230769230769,
+   "exceso_demanda_oraculo_media": 4.576923076923077,
+   "pct_dias_exceso2": 80.76923076923077,
+   "pct_dias_deficit": 7.6923076923076925,
+   "pct_dias_deficit_demanda": 3.8461538461538463,
+   "fc_real_S0_med": 0.54,
+   "fc_real_S1_med": 0.78
+  },
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Domingo/festivo",
+   "hora": 6,
+   "salidas_reales_med": 8.0,
+   "salidas_S1_med": 4.0,
+   "need_S1_med": 4.0,
+   "need_oraculo_med": 4.0,
+   "exceso_S1_media": 4.161764705882353,
+   "exceso_demanda_oraculo_media": 4.5588235294117645,
+   "pct_dias_exceso2": 94.11764705882352,
+   "pct_dias_deficit": 0.0,
+   "pct_dias_deficit_demanda": 0.0,
+   "fc_real_S0_med": 0.32,
+   "fc_real_S1_med": 0.665
+  }
+ ],
+ "top_deficit": [
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 14,
+   "salidas_reales_med": 17.0,
+   "salidas_S1_med": 20.0,
+   "need_S1_med": 21.0,
+   "need_oraculo_med": 22.0,
+   "exceso_S1_media": -3.3877551020408165,
+   "exceso_demanda_oraculo_media": -4.975510204081632,
+   "pct_dias_exceso2": 4.489795918367347,
+   "pct_dias_deficit": 86.53061224489797,
+   "pct_dias_deficit_demanda": 97.14285714285714,
+   "fc_real_S0_med": 1.11,
+   "fc_real_S1_med": 0.912
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 15,
+   "salidas_reales_med": 16.0,
+   "salidas_S1_med": 18.0,
+   "need_S1_med": 18.0,
+   "need_oraculo_med": 18.0,
+   "exceso_S1_media": -2.8448979591836734,
+   "exceso_demanda_oraculo_media": -2.853061224489796,
+   "pct_dias_exceso2": 8.16326530612245,
+   "pct_dias_deficit": 75.51020408163265,
+   "pct_dias_deficit_demanda": 86.93877551020408,
+   "fc_real_S0_med": 1.0,
+   "fc_real_S1_med": 0.830375
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Sábado",
+   "hora": 19,
+   "salidas_reales_med": 3.0,
+   "salidas_S1_med": 6.0,
+   "need_S1_med": 3.0,
+   "need_oraculo_med": 3.0,
+   "exceso_S1_media": -2.826923076923077,
+   "exceso_demanda_oraculo_media": 0.15384615384615385,
+   "pct_dias_exceso2": 0.0,
+   "pct_dias_deficit": 98.07692307692307,
+   "pct_dias_deficit_demanda": 30.76923076923077,
+   "fc_real_S0_med": 0.58,
+   "fc_real_S1_med": 0.3333333333333333
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Sábado",
+   "hora": 20,
+   "salidas_reales_med": 2.0,
+   "salidas_S1_med": 5.0,
+   "need_S1_med": 2.0,
+   "need_oraculo_med": 2.0,
+   "exceso_S1_media": -2.6346153846153846,
+   "exceso_demanda_oraculo_media": 0.019230769230769232,
+   "pct_dias_exceso2": 0.0,
+   "pct_dias_deficit": 98.07692307692307,
+   "pct_dias_deficit_demanda": 28.846153846153843,
+   "fc_real_S0_med": 0.62,
+   "fc_real_S1_med": 0.28400000000000003
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Sábado",
+   "hora": 18,
+   "salidas_reales_med": 4.0,
+   "salidas_S1_med": 6.0,
+   "need_S1_med": 3.0,
+   "need_oraculo_med": 3.0,
+   "exceso_S1_media": -2.269230769230769,
+   "exceso_demanda_oraculo_media": 1.1153846153846154,
+   "pct_dias_exceso2": 0.0,
+   "pct_dias_deficit": 96.15384615384616,
+   "pct_dias_deficit_demanda": 9.615384615384617,
+   "fc_real_S0_med": 0.42,
+   "fc_real_S1_med": 0.2733333333333333
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Laboral",
+   "hora": 11,
+   "salidas_reales_med": 4.0,
+   "salidas_S1_med": 6.0,
+   "need_S1_med": 4.0,
+   "need_oraculo_med": 4.0,
+   "exceso_S1_media": -2.1510204081632653,
+   "exceso_demanda_oraculo_media": 0.2653061224489796,
+   "pct_dias_exceso2": 0.0,
+   "pct_dias_deficit": 97.14285714285714,
+   "pct_dias_deficit_demanda": 20.408163265306122,
+   "fc_real_S0_med": 0.69,
+   "fc_real_S1_med": 0.42833333333333334
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Sábado",
+   "hora": 11,
+   "salidas_reales_med": 4.0,
+   "salidas_S1_med": 6.0,
+   "need_S1_med": 4.0,
+   "need_oraculo_med": 3.0,
+   "exceso_S1_media": -2.0384615384615383,
+   "exceso_demanda_oraculo_media": 0.6153846153846154,
+   "pct_dias_exceso2": 0.0,
+   "pct_dias_deficit": 90.38461538461539,
+   "pct_dias_deficit_demanda": 15.384615384615385,
+   "fc_real_S0_med": 0.58,
+   "fc_real_S1_med": 0.39
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Laboral",
+   "hora": 16,
+   "salidas_reales_med": 4.0,
+   "salidas_S1_med": 6.0,
+   "need_S1_med": 4.0,
+   "need_oraculo_med": 4.0,
+   "exceso_S1_media": -2.020408163265306,
+   "exceso_demanda_oraculo_media": -0.2163265306122449,
+   "pct_dias_exceso2": 0.40816326530612246,
+   "pct_dias_deficit": 90.20408163265307,
+   "pct_dias_deficit_demanda": 41.224489795918366,
+   "fc_real_S0_med": 0.79,
+   "fc_real_S1_med": 0.52
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Sábado",
+   "hora": 17,
+   "salidas_reales_med": 4.0,
+   "salidas_S1_med": 6.0,
+   "need_S1_med": 3.5,
+   "need_oraculo_med": 3.0,
+   "exceso_S1_media": -1.8653846153846154,
+   "exceso_demanda_oraculo_media": 0.8076923076923077,
+   "pct_dias_exceso2": 0.0,
+   "pct_dias_deficit": 86.53846153846155,
+   "pct_dias_deficit_demanda": 15.384615384615385,
+   "fc_real_S0_med": 0.56,
+   "fc_real_S1_med": 0.37333333333333335
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Sábado",
+   "hora": 16,
+   "salidas_reales_med": 4.0,
+   "salidas_S1_med": 6.0,
+   "need_S1_med": 3.0,
+   "need_oraculo_med": 4.0,
+   "exceso_S1_media": -1.7884615384615385,
+   "exceso_demanda_oraculo_media": 0.5576923076923077,
+   "pct_dias_exceso2": 0.0,
+   "pct_dias_deficit": 84.61538461538461,
+   "pct_dias_deficit_demanda": 13.461538461538462,
+   "fc_real_S0_med": 0.64,
+   "fc_real_S1_med": 0.44
+  },
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Laboral",
+   "hora": 6,
+   "salidas_reales_med": 9.0,
+   "salidas_S1_med": 11.0,
+   "need_S1_med": 11.0,
+   "need_oraculo_med": 11.0,
+   "exceso_S1_media": -1.763265306122449,
+   "exceso_demanda_oraculo_media": -2.2285714285714286,
+   "pct_dias_exceso2": 4.081632653061225,
+   "pct_dias_deficit": 78.36734693877551,
+   "pct_dias_deficit_demanda": 90.61224489795919,
+   "fc_real_S0_med": 1.04,
+   "fc_real_S1_med": 0.8427272727272728
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Laboral",
+   "hora": 18,
+   "salidas_reales_med": 4.0,
+   "salidas_S1_med": 6.0,
+   "need_S1_med": 3.0,
+   "need_oraculo_med": 3.0,
+   "exceso_S1_media": -1.7551020408163265,
+   "exceso_demanda_oraculo_media": 0.8693877551020408,
+   "pct_dias_exceso2": 0.8163265306122449,
+   "pct_dias_deficit": 83.6734693877551,
+   "pct_dias_deficit_demanda": 15.510204081632653,
+   "fc_real_S0_med": 0.58,
+   "fc_real_S1_med": 0.38666666666666666
+  }
+ ],
+ "top_deficit_demanda": [
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 5,
+   "salidas_reales_med": 32.0,
+   "salidas_S1_med": 29.0,
+   "need_S1_med": 38.0,
+   "need_oraculo_med": 39.0,
+   "exceso_S1_media": 1.6857142857142857,
+   "exceso_demanda_oraculo_media": -6.926530612244898,
+   "pct_dias_exceso2": 69.38775510204081,
+   "pct_dias_deficit": 17.142857142857142,
+   "pct_dias_deficit_demanda": 88.57142857142857,
+   "fc_real_S0_med": 1.07,
+   "fc_real_S1_med": 1.1393103448275863
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 6,
+   "salidas_reales_med": 25.0,
+   "salidas_S1_med": 26.0,
+   "need_S1_med": 32.0,
+   "need_oraculo_med": 33.0,
+   "exceso_S1_media": -0.5224489795918368,
+   "exceso_demanda_oraculo_media": -6.702040816326531,
+   "pct_dias_exceso2": 28.163265306122447,
+   "pct_dias_deficit": 50.61224489795918,
+   "pct_dias_deficit_demanda": 98.36734693877551,
+   "fc_real_S0_med": 1.08,
+   "fc_real_S1_med": 1.0480769230769231
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 14,
+   "salidas_reales_med": 17.0,
+   "salidas_S1_med": 20.0,
+   "need_S1_med": 21.0,
+   "need_oraculo_med": 22.0,
+   "exceso_S1_media": -3.3877551020408165,
+   "exceso_demanda_oraculo_media": -4.975510204081632,
+   "pct_dias_exceso2": 4.489795918367347,
+   "pct_dias_deficit": 86.53061224489797,
+   "pct_dias_deficit_demanda": 97.14285714285714,
+   "fc_real_S0_med": 1.11,
+   "fc_real_S1_med": 0.912
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Sábado",
+   "hora": 6,
+   "salidas_reales_med": 22.0,
+   "salidas_S1_med": 22.0,
+   "need_S1_med": 27.0,
+   "need_oraculo_med": 26.5,
+   "exceso_S1_media": 0.2692307692307692,
+   "exceso_demanda_oraculo_media": -4.115384615384615,
+   "pct_dias_exceso2": 34.61538461538461,
+   "pct_dias_deficit": 38.46153846153847,
+   "pct_dias_deficit_demanda": 88.46153846153845,
+   "fc_real_S0_med": 1.02,
+   "fc_real_S1_med": 1.0036363636363637
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 15,
+   "salidas_reales_med": 16.0,
+   "salidas_S1_med": 18.0,
+   "need_S1_med": 18.0,
+   "need_oraculo_med": 18.0,
+   "exceso_S1_media": -2.8448979591836734,
+   "exceso_demanda_oraculo_media": -2.853061224489796,
+   "pct_dias_exceso2": 8.16326530612245,
+   "pct_dias_deficit": 75.51020408163265,
+   "pct_dias_deficit_demanda": 86.93877551020408,
+   "fc_real_S0_med": 1.0,
+   "fc_real_S1_med": 0.830375
+  },
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Laboral",
+   "hora": 6,
+   "salidas_reales_med": 9.0,
+   "salidas_S1_med": 11.0,
+   "need_S1_med": 11.0,
+   "need_oraculo_med": 11.0,
+   "exceso_S1_media": -1.763265306122449,
+   "exceso_demanda_oraculo_media": -2.2285714285714286,
+   "pct_dias_exceso2": 4.081632653061225,
+   "pct_dias_deficit": 78.36734693877551,
+   "pct_dias_deficit_demanda": 90.61224489795919,
+   "fc_real_S0_med": 1.04,
+   "fc_real_S1_med": 0.8427272727272728
+  },
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Sábado",
+   "hora": 6,
+   "salidas_reales_med": 10.0,
+   "salidas_S1_med": 11.0,
+   "need_S1_med": 11.0,
+   "need_oraculo_med": 12.0,
+   "exceso_S1_media": -0.8461538461538461,
+   "exceso_demanda_oraculo_media": -1.5384615384615385,
+   "pct_dias_exceso2": 7.6923076923076925,
+   "pct_dias_deficit": 61.53846153846154,
+   "pct_dias_deficit_demanda": 76.92307692307693,
+   "fc_real_S0_med": 1.0,
+   "fc_real_S1_med": 0.8861538461538462
+  },
+  {
+   "ruta": "SILENCIO",
+   "tipo_dia": "Laboral",
+   "hora": 14,
+   "salidas_reales_med": 8.0,
+   "salidas_S1_med": 9.0,
+   "need_S1_med": 9.0,
+   "need_oraculo_med": 10.0,
+   "exceso_S1_media": -1.0040816326530613,
+   "exceso_demanda_oraculo_media": -1.4122448979591837,
+   "pct_dias_exceso2": 12.653061224489795,
+   "pct_dias_deficit": 58.77551020408164,
+   "pct_dias_deficit_demanda": 73.06122448979592,
+   "fc_real_S0_med": 0.97,
+   "fc_real_S1_med": 0.854
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Laboral",
+   "hora": 14,
+   "salidas_reales_med": 5.0,
+   "salidas_S1_med": 6.0,
+   "need_S1_med": 6.0,
+   "need_oraculo_med": 6.0,
+   "exceso_S1_media": -1.0204081632653061,
+   "exceso_demanda_oraculo_media": -1.1020408163265305,
+   "pct_dias_exceso2": 3.6734693877551026,
+   "pct_dias_deficit": 63.26530612244898,
+   "pct_dias_deficit_demanda": 79.59183673469387,
+   "fc_real_S0_med": 0.96,
+   "fc_real_S1_med": 0.8070238095238096
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 13,
+   "salidas_reales_med": 18.0,
+   "salidas_S1_med": 19.0,
+   "need_S1_med": 19.0,
+   "need_oraculo_med": 19.0,
+   "exceso_S1_media": -0.3306122448979592,
+   "exceso_demanda_oraculo_media": -1.0938775510204082,
+   "pct_dias_exceso2": 31.428571428571427,
+   "pct_dias_deficit": 52.244897959183675,
+   "pct_dias_deficit_demanda": 54.69387755102041,
+   "fc_real_S0_med": 0.88,
+   "fc_real_S1_med": 0.8688888888888889
+  },
+  {
+   "ruta": "CRA 54",
+   "tipo_dia": "Laboral",
+   "hora": 4,
+   "salidas_reales_med": 6.0,
+   "salidas_S1_med": 7.0,
+   "need_S1_med": 7.0,
+   "need_oraculo_med": 7.0,
+   "exceso_S1_media": -0.9428571428571428,
+   "exceso_demanda_oraculo_media": -1.0693877551020408,
+   "pct_dias_exceso2": 2.4489795918367347,
+   "pct_dias_deficit": 69.38775510204081,
+   "pct_dias_deficit_demanda": 69.79591836734694,
+   "fc_real_S0_med": 0.93,
+   "fc_real_S1_med": 0.8
+  },
+  {
+   "ruta": "CL 72",
+   "tipo_dia": "Laboral",
+   "hora": 6,
+   "salidas_reales_med": 6.0,
+   "salidas_S1_med": 6.0,
+   "need_S1_med": 6.0,
+   "need_oraculo_med": 6.0,
+   "exceso_S1_media": -0.8857142857142857,
+   "exceso_demanda_oraculo_media": -0.8,
+   "pct_dias_exceso2": 2.4489795918367347,
+   "pct_dias_deficit": 61.224489795918366,
+   "pct_dias_deficit_demanda": 64.48979591836735,
+   "fc_real_S0_med": 0.9,
+   "fc_real_S1_med": 0.7833333333333333
+  }
+ ],
+ "mejor_variante": "S1 factor 0,85 con flota simulada: acierta las salidas del oráculo en el 60,6 % de las horas (MAE 0,73), ahorra 31.600 buses-hora al año (−5,0 %) y baja la sobrecarga de 11,7 % a 9,9 %. S2 (0,95) ahorra el doble pero sube la sobrecarga a 16,2 %; S5 (intervalo máx. 15 min) es el único con neto positivo bajo la elasticidad pesimista; S3 (8 min) añade 9 % de buses-hora sin demanda.",
+ "tiempo_s": 6.926806449890137
+}

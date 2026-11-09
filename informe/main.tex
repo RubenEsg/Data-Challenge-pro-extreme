@@ -1,0 +1,101 @@
+% Informe técnico final del Data Challenge Pro Extreme -- Sobusa 2026.
+% Compilar: python EntregaFinal/informe/compilar.py   (Tectonic: LaTeX + BibTeX; copia el PDF a EntregaFinal/)
+% Preámbulo y estilo: los de la sección de metodología (documentos/metodologia/main.tex), con la ruta de figuras
+% cambiada a figuras/, paquetes para tablas y listas (tabularx, multirow, enumitem) y la bibliografía a dos columnas
+% (multicol).
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[spanish,es-tabla,es-noshorthands]{babel}
+\usepackage[a4paper,textwidth=6.3in,textheight=9.4in,headheight=14pt]{geometry}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{caption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage[authoryear,round]{natbib}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!55!black,citecolor=blue!55!black,urlcolor=blue!55!black]{hyperref}
+
+\graphicspath{{figuras/}}
+\captionsetup{font=small,labelfont=bf,width=0.95\linewidth}
+% Las figuras grandes pueden ocupar casi toda una página sin irse al final del documento.
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.6}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.7}
+\widowpenalty=10000 \clubpenalty=10000
+\setlength{\parskip}{3pt plus 1pt}
+\setlist{nosep,leftmargin=*}
+\renewcommand{\algorithmicrequire}{\textbf{Entrada:}}
+\renewcommand{\algorithmicensure}{\textbf{Salida:}}
+\algrenewcommand\algorithmicfor{\textbf{para}}
+\algrenewcommand\algorithmicdo{\textbf{hacer}}
+\algrenewcommand\algorithmicend{\textbf{fin}}
+\algrenewcommand\algorithmicif{\textbf{si}}
+\algrenewcommand\algorithmicthen{\textbf{entonces}}
+\algrenewcommand\algorithmicreturn{\textbf{devolver}}
+\floatname{algorithm}{Algoritmo}
+
+% Notación
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\yhat}{\hat{y}}
+\newcommand{\wape}{\mathrm{WAPE}}
+\newcommand{\mae}{\mathrm{MAE}}
+\newcommand{\rmse}{\mathrm{RMSE}}
+% Fuente de una figura o tabla, debajo del pie.
+\newcommand{\fuente}[1]{\par\vspace{2pt}{\footnotesize\textit{Fuente:} #1\par}}
+% Comillas latinas. Tectonic compila con XeTeX y este preámbulo usa fuentes T1: los caracteres « » ¿ escritos tal cual
+% saldrían como otras letras, así que se escriben con sus comandos.
+\newcommand{\comi}[1]{\guillemotleft#1\guillemotright}
+% Bibliografía en letra pequeña y con poco espacio entre entradas.
+\renewcommand{\bibfont}{\footnotesize}
+\setlength{\bibsep}{0.5pt plus 0.5pt}
+
+\title{\textbf{\textquestiondown Cuántos buses y cada cuánto? Pronóstico de demanda y despacho para las rutas SILENCIO, CRA~54 y CL~72 de Sobusa}\\[4pt]
+\large Informe técnico final}
+\author{Abrahan Basto Martínez \and Rubén Esguerra Fernández \and Paula Gómez\\[4pt]
+\small Data Challenge Pro Extreme -- Sobusa 2026. Machine Learning, Universidad del Norte}
+\date{8 de noviembre de 2026}
+
+\begin{document}
+\maketitle
+
+\input{secciones/00_resumen}
+\input{secciones/01_introduccion}
+\input{secciones/02_datos}
+\input{secciones/03_metodologia}
+\input{secciones/04_resultados}
+\input{secciones/05_discusion}
+\input{secciones/06_recomendaciones}
+\input{secciones/07_conclusiones}
+
+% Referencias a dos columnas para ahorrar espacio; el encabezado va en el preámbulo de multicols para que no quede
+% solo al pie de una página.
+\begingroup
+\renewcommand{\bibsection}{}
+\setlength{\premulticols}{20pt}
+\raggedcolumns
+\begin{multicols}{2}[\section*{\refname}\addcontentsline{toc}{section}{\refname}]
+\bibliographystyle{elsarticle-harv}
+\bibliography{referencias}
+\end{multicols}
+\endgroup
+
+\appendix
+\input{secciones/anexo_a}
+
+\end{document}

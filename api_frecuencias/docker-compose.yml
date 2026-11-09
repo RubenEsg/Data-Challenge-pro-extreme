@@ -1,0 +1,55 @@
+# API de frecuencias Sobusa: PostgreSQL 14 + PostGIS (esquema ai_frecuencias) y la API FastAPI.
+# Uso:  copy .env.example .env   (y cambie POSTGRES_PASSWORD)
+#       docker compose -p sobusa_api up -d --build
+name: sobusa_api
+
+services:
+  db:
+    image: postgis/postgis:14-3.4
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ai_frecuencias}
+      POSTGRES_USER: ${POSTGRES_USER:-sobusa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD en el archivo .env}
+      TZ: America/Bogota
+      PGTZ: America/Bogota
+    ports:
+      - "${DB_PUERTO_HOST:-5433}:5432"
+    volumes:
+      - datos_pg:/var/lib/postgresql/data
+    healthcheck:
+      # por TCP: durante la inicialización de un volumen nuevo el servidor temporal solo escucha el socket local
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  api:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-sobusa}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-ai_frecuencias}
+      DATA_DIR: /app/datos
+      TZ: America/Bogota
+      # envío SIMULADO (solo deja el registro en notification_log, destinatarios enmascarados; sin credenciales)
+      NOTIFICACIONES_CANALES: ${NOTIFICACIONES_CANALES:-correo,whatsapp}
+      NOTIFICACIONES_SEVERIDAD: ${NOTIFICACIONES_SEVERIDAD:-critica}
+      # destinatarios de PRUEBA (dominio reservado example.com y número ficticio): no se envía nada real
+      NOTIF_CORREO_DESTINATARIOS: ${NOTIF_CORREO_DESTINATARIOS:-despacho@example.com}
+      NOTIF_WHATSAPP_NUMEROS: ${NOTIF_WHATSAPP_NUMEROS:-+570000000000}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${API_PUERTO_HOST:-8000}:8000"
+    volumes:
+      # artefactos de los modelos entrenados por POST /models/train: sobreviven a reinicios (RNF-001)
+      - modelos:/app/datos/modelos
+    command: ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+    restart: unless-stopped
+
+volumes:
+  datos_pg:
+  modelos:

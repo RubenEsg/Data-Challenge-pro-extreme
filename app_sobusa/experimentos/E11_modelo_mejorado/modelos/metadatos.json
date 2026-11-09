@@ -1,0 +1,250 @@
+{
+ "variante": "V4",
+ "nombre": "V4 = V3 + rezagos corregidos por fallas",
+ "configuracion": {
+  "nombre": "V4 = V3 + rezagos corregidos por fallas",
+  "cal": true,
+  "clim": true,
+  "atipicos": true,
+  "fallas": true,
+  "nowcast": false,
+  "recencia": false,
+  "desc": "V3 con los rezagos calculados sobre pasajeros corregidos por viajes sin registro (regla mecánica, observable el mismo día: 0 pasajeros y < 30 eventos GPS)."
+ },
+ "params": {
+  "n_estimators": 600,
+  "learning_rate": 0.03,
+  "num_leaves": 31,
+  "min_child_samples": 40,
+  "subsample": 0.8,
+  "subsample_freq": 1,
+  "colsample_bytree": 0.8,
+  "reg_lambda": 1.0,
+  "random_state": 42,
+  "n_jobs": 2,
+  "verbose": -1
+ },
+ "ultimo_dia_observado": "2025-12-31",
+ "modelos": {
+  "H7": {
+   "archivo": "modelos/modelo_V4_H7.txt",
+   "n_variables": 77,
+   "importancia_top20": {
+    "pasajeros_total_m4sem": 57.46,
+    "pasajeros_total_b1": 26.67,
+    "tipo_dia": 2.92,
+    "pasajeros_total_roll7_h7": 2.12,
+    "festivo": 1.95,
+    "pasajeros_total_lag7": 1.09,
+    "viajes_validos_m4sem": 1.05,
+    "pasajeros_total_roll28_h7": 0.69,
+    "pasajeros_total_sd8sem": 0.57,
+    "carnaval_central": 0.5,
+    "viajes_validos_b1": 0.48,
+    "hora": 0.47,
+    "pasajeros_total_lag14": 0.45,
+    "pasajeros_total_lag364": 0.43,
+    "dia_anio": 0.38,
+    "vac_escolar": 0.28,
+    "carnaval": 0.24,
+    "viajes_validos_roll28_h7": 0.24,
+    "semana_santa": 0.21,
+    "dia_semana": 0.18
+   }
+  },
+  "H14": {
+   "archivo": "modelos/modelo_V4_H14.txt",
+   "n_variables": 77,
+   "importancia_top20": {
+    "pasajeros_total_m4sem": 52.1,
+    "pasajeros_total_b1": 31.3,
+    "tipo_dia": 2.99,
+    "festivo": 1.99,
+    "viajes_validos_m4sem": 1.49,
+    "pasajeros_total_roll7_h7": 1.47,
+    "pasajeros_total_lag7": 0.98,
+    "viajes_validos_b1": 0.9,
+    "pasajeros_total_lag364": 0.77,
+    "pasajeros_total_sd8sem": 0.7,
+    "hora": 0.54,
+    "carnaval_central": 0.5,
+    "vac_escolar": 0.41,
+    "pasajeros_total_lag14": 0.41,
+    "pasajeros_total_roll28_h7": 0.37,
+    "dia_anio": 0.35,
+    "viajes_validos_roll28_h7": 0.35,
+    "carnaval": 0.21,
+    "semana_anio": 0.19,
+    "dia_semana": 0.18
+   }
+  },
+  "H21": {
+   "archivo": "modelos/modelo_V4_H21.txt",
+   "n_variables": 77,
+   "importancia_top20": {
+    "pasajeros_total_m4sem": 51.16,
+    "pasajeros_total_b1": 31.98,
+    "tipo_dia": 2.97,
+    "festivo": 2.01,
+    "viajes_validos_m4sem": 1.58,
+    "viajes_validos_b1": 0.95,
+    "pasajeros_total_lag364": 0.94,
+    "pasajeros_total_roll7_h7": 0.94,
+    "pasajeros_total_lag7": 0.73,
+    "pasajeros_total_sd8sem": 0.72,
+    "hora": 0.68,
+    "pasajeros_total_roll28_h7": 0.64,
+    "vac_escolar": 0.48,
+    "carnaval_central": 0.44,
+    "viajes_validos_roll28_h7": 0.39,
+    "dia_anio": 0.3,
+    "pasajeros_total_lag14": 0.26,
+    "frac_vac_escolar_ventana": 0.23,
+    "carnaval": 0.23,
+    "dia_semana": 0.2
+   }
+  },
+  "H28": {
+   "archivo": "modelos/modelo_V4_H28.txt",
+   "n_variables": 77,
+   "importancia_top20": {
+    "pasajeros_total_m4sem": 50.81,
+    "pasajeros_total_b1": 32.21,
+    "tipo_dia": 2.97,
+    "festivo": 2.08,
+    "viajes_validos_m4sem": 1.65,
+    "pasajeros_total_lag364": 1.04,
+    "pasajeros_total_roll28_h7": 0.98,
+    "viajes_validos_b1": 0.91,
+    "hora": 0.73,
+    "pasajeros_total_sd8sem": 0.72,
+    "vac_escolar": 0.56,
+    "pasajeros_total_roll7_h7": 0.52,
+    "pasajeros_total_lag7": 0.43,
+    "viajes_validos_roll28_h7": 0.43,
+    "carnaval_central": 0.37,
+    "frac_vac_escolar_ventana": 0.36,
+    "dia_anio": 0.29,
+    "carnaval": 0.25,
+    "dia_semana": 0.21,
+    "semana_anio": 0.18
+   }
+  }
+ },
+ "resumen_semanal": [
+  {
+   "ruta": "CL 72",
+   "semana": 1,
+   "desde": "2026-01-01",
+   "hasta": "2026-01-07",
+   "pronostico": 30066.28,
+   "real_2025_alineado": 32606.0,
+   "variacion_pct": -7.79
+  },
+  {
+   "ruta": "CL 72",
+   "semana": 2,
+   "desde": "2026-01-08",
+   "hasta": "2026-01-14",
+   "pronostico": 34804.71,
+   "real_2025_alineado": 39600.0,
+   "variacion_pct": -12.11
+  },
+  {
+   "ruta": "CL 72",
+   "semana": 3,
+   "desde": "2026-01-15",
+   "hasta": "2026-01-21",
+   "pronostico": 39332.93,
+   "real_2025_alineado": 43741.0,
+   "variacion_pct": -10.08
+  },
+  {
+   "ruta": "CL 72",
+   "semana": 4,
+   "desde": "2026-01-22",
+   "hasta": "2026-01-28",
+   "pronostico": 41742.12,
+   "real_2025_alineado": 44776.0,
+   "variacion_pct": -6.78
+  },
+  {
+   "ruta": "CRA 54",
+   "semana": 1,
+   "desde": "2026-01-01",
+   "hasta": "2026-01-07",
+   "pronostico": 87434.89,
+   "real_2025_alineado": 100240.0,
+   "variacion_pct": -12.77
+  },
+  {
+   "ruta": "CRA 54",
+   "semana": 2,
+   "desde": "2026-01-08",
+   "hasta": "2026-01-14",
+   "pronostico": 103422.66,
+   "real_2025_alineado": 124960.0,
+   "variacion_pct": -17.24
+  },
+  {
+   "ruta": "CRA 54",
+   "semana": 3,
+   "desde": "2026-01-15",
+   "hasta": "2026-01-21",
+   "pronostico": 117322.07,
+   "real_2025_alineado": 132321.0,
+   "variacion_pct": -11.34
+  },
+  {
+   "ruta": "CRA 54",
+   "semana": 4,
+   "desde": "2026-01-22",
+   "hasta": "2026-01-28",
+   "pronostico": 127992.84,
+   "real_2025_alineado": 141984.0,
+   "variacion_pct": -9.85
+  },
+  {
+   "ruta": "SILENCIO",
+   "semana": 1,
+   "desde": "2026-01-01",
+   "hasta": "2026-01-07",
+   "pronostico": 44554.0,
+   "real_2025_alineado": 48426.0,
+   "variacion_pct": -8.0
+  },
+  {
+   "ruta": "SILENCIO",
+   "semana": 2,
+   "desde": "2026-01-08",
+   "hasta": "2026-01-14",
+   "pronostico": 52317.04,
+   "real_2025_alineado": 62140.0,
+   "variacion_pct": -15.81
+  },
+  {
+   "ruta": "SILENCIO",
+   "semana": 3,
+   "desde": "2026-01-15",
+   "hasta": "2026-01-21",
+   "pronostico": 57185.08,
+   "real_2025_alineado": 62261.0,
+   "variacion_pct": -8.15
+  },
+  {
+   "ruta": "SILENCIO",
+   "semana": 4,
+   "desde": "2026-01-22",
+   "hasta": "2026-01-28",
+   "pronostico": 61614.21,
+   "real_2025_alineado": 67289.0,
+   "variacion_pct": -8.43
+  }
+ ],
+ "total_por_ruta": {
+  "CL 72": 145946.0,
+  "CRA 54": 436172.0,
+  "SILENCIO": 215670.0
+ },
+ "filas": 1428
+}

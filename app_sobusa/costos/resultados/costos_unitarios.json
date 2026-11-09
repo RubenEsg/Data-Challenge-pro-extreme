@@ -1,0 +1,35 @@
+{
+  "2025": {
+    "combustible_km": 842.0364927981881,
+    "mant_km": 700.0,
+    "llantas_km": 220.0,
+    "lub_km": 120.0,
+    "costo_km_evitable": 1882.0364927981882,
+    "hora_conductor": 17251.948307692306,
+    "bus_hora_conductor": 20012.260036923075,
+    "fijo_bus_anio": 65222448.86745982,
+    "tarifa_efectiva": 2838.0,
+    "rendimiento_sistema": 12.570714084878647
+  },
+  "2026": {
+    "combustible_km": 898.198775643301,
+    "mant_km": 735.6999999999999,
+    "llantas_km": 231.22,
+    "lub_km": 126.11999999999999,
+    "costo_km_evitable": 1991.2387756433009,
+    "hora_conductor": 22758.813356703293,
+    "bus_hora_conductor": 26400.22349377582,
+    "fijo_bus_anio": 68548793.75970027,
+    "tarifa_efectiva": 3182.0,
+    "rendimiento_sistema": 12.570714084878647
+  },
+  "2026_bajo": {
+    "costo_km_evitable": 1445.3234316621415,
+    "bus_hora_conductor": 19731.6459838022
+  },
+  "2026_alto": {
+    "costo_km_evitable": 2716.2819309990955,
+    "bus_hora_conductor": 35853.696746571426
+  },
+  "fijo_por_bus_hora_2025": 19718.64910034003
+}

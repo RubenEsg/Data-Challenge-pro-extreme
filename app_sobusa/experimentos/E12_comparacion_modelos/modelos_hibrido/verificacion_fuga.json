@@ -1,0 +1,36 @@
+{
+ "origen": "2025-11-30",
+ "variables_V4": {
+  "H7": {
+   "dias": 7,
+   "dif_max": 0.0,
+   "mismos_vacios": true
+  },
+  "H14": {
+   "dias": 7,
+   "dif_max": 0.0,
+   "mismos_vacios": true
+  },
+  "H21": {
+   "dias": 7,
+   "dif_max": 0.0,
+   "mismos_vacios": true
+  },
+  "H28": {
+   "dias": 7,
+   "dif_max": 0.0,
+   "mismos_vacios": true
+  }
+ },
+ "control_lag1_franjas_distintas": 1377,
+ "chronos2_truncado_vs_completo_dif_max": 0.0,
+ "chronos2_cpu_vs_cache": null,
+ "chronos2_un_origen_cpu_s": 46.5,
+ "dispositivo": "cpu",
+ "tiempos_s": {
+  "panel_s": 4.9,
+  "carga_chronos2_s": 0.4,
+  "chronos2_fuga_s": 92.4,
+  "total": 108.4
+ }
+}

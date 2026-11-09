@@ -1,0 +1,13 @@
+Mediciones de rendimiento 2026-11-08 23:04:46 (portátil Windows 11, Docker Desktop)
+RNF-002: 50 GET paginados por recurso (limite=50), secuenciales, tras 3 de calentamiento; API http://127.0.0.1:8000
+   GET /api/v1/predictions            filas en la tabla=   28  p50=    9.1 ms  p95=   12.9 ms  máx=  101.7 ms  -> cumple p95 < 2 s
+   GET /api/v1/recommendations        filas en la tabla=   29  p50=   12.4 ms  p95=   16.6 ms  máx=   28.4 ms  -> cumple p95 < 2 s
+   GET /api/v1/alerts                 filas en la tabla=   50  p50=   10.4 ms  p95=   18.6 ms  máx=   80.4 ms  -> cumple p95 < 2 s
+   GET /api/v1/frequency/executions   filas en la tabla=    4  p50=    7.1 ms  p95=    9.0 ms  máx=   21.3 ms  -> cumple p95 < 2 s
+RNF-003: lote de 111,792 filas (serie de 55,896 filas + réplica con fechas -3 años)
+   lectura incremental (Parquet, 55,896 filas):   0.86 s
+   validación de calidad (6 dimensiones, 111,792 filas):   0.40 s; válidas=111,690 errores=102
+   inserción con upsert en PostgreSQL local (lotes de 5.000, transacción revertida): 111,690 filas en 152.57 s
+   total 153.82 s (727 filas/s); memoria pico (tracemalloc) 102 MiB
+   Nota: las 102 filas apartadas son duplicados de clave (ruta, fecha, hora) creados por la réplica (29-02-2024 menos 3 años cae en 28-02-2021); la dimensión de unicidad los detecta y los pone en cuarentena.
+   Nota: la inserción corrió mientras la API reentrenaba un modelo en el mismo portátil; el cuello de botella es el upsert fila a fila en Python (lotes de 5.000). Mejora: COPY a una tabla de paso + INSERT ... ON CONFLICT.

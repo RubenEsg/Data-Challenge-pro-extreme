@@ -1,0 +1,30 @@
+{
+  "descripcion": "Costos evitables con fuente para reemplazar los supuestos 60.000 COP/bus-hora, 1.500 COP/km y tarifa 3.000 (costos/README.md). Precios de oct-2026. 'bajo' y 'alto' son el rango de la sección 3 del README.",
+  "costo_bus_hora": {
+    "central": 26400,
+    "bajo": 19732,
+    "alto": 35854,
+    "unidad": "COP por bus-hora en ruta",
+    "nota": "Conductor pagado por hora o turno (42 h/semana, 182 h/mes; Ley 2101 de 2021). Si se paga por producido usar 0 y multiplicar la tarifa neta por (1 − participacion_producido)."
+  },
+  "costo_km": {
+    "central": 1991,
+    "bajo": 1445,
+    "alto": 2716,
+    "unidad": "COP por km",
+    "nota": "ACPM (11.291 COP/gal, 12,6 km/gal) + mantenimiento + llantas + lubricantes y filtros."
+  },
+  "tarifa_neta_2026": {
+    "central": 3182,
+    "bajo": 3071,
+    "alto": 3420,
+    "unidad": "COP por pasajero",
+    "nota": "Tarifa 3.700 (laboral 2026) × 0,86 que retiene el operador tras FET, factor de calidad y descuentos SIBUS."
+  },
+  "participacion_producido": 0.2,
+  "elasticidad_beta": {
+    "central": 0.7,
+    "bajo": 0.55,
+    "alto": 0.9
+  }
+}

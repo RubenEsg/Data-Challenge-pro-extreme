@@ -1,0 +1,179 @@
+{
+ "generado": "2026-11-08 23:42",
+ "generador": "dash_app/preparar_datos.py",
+ "archivos": {
+  "pronosticos_2025.parquet": {
+   "fuentes": [
+    "experimentos/E11_modelo_mejorado/predicciones_2025.parquet",
+    "experimentos/E1_lgbm_salida/predicciones_2025.parquet",
+    "experimentos/E12_comparacion_modelos/predicciones/hibrido_V4_chronos2cov.parquet"
+   ],
+   "filas": 18615,
+   "bytes": 400855
+  },
+  "insumos_d5_2025.parquet": {
+   "fuentes": [
+    "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+    "experimentos/E1_lgbm_salida/predicciones_2025.parquet",
+    "experimentos/D1_optimizacion/parametros_operativos.parquet",
+    "costos/resultados/d5_reoptimizado_decisiones.parquet"
+   ],
+   "filas": 18615,
+   "bytes": 798237
+  },
+  "costos_fuente.json": {
+   "fuentes": [
+    "costos/resultados/costos_unitarios.json",
+    "costos/resultados/costos_para_planificador.json"
+   ],
+   "filas": null,
+   "bytes": 1557
+  },
+  "cifras_app.json": {
+   "fuentes": [
+    "app/datos_app.js (window.DATOS_APP, generado por app/generar_datos_app.py)"
+   ],
+   "filas": null,
+   "bytes": 972650
+  },
+  "ficha_modelos.json": {
+   "fuentes": [
+    "app/ficha_modelos.json"
+   ],
+   "filas": null,
+   "bytes": 131134
+  },
+  "sensibilidad_beta.csv": {
+   "fuentes": [
+    "simulacion_ahorro/resultados/sensibilidad_beta.csv"
+   ],
+   "filas": null,
+   "bytes": 1143
+  },
+  "beta_equilibrio.csv": {
+   "fuentes": [
+    "costos/resultados/beta_equilibrio.csv"
+   ],
+   "filas": null,
+   "bytes": 494
+  },
+  "ahorro_anual.json": {
+   "fuentes": [
+    "costos/resultados/d5_reoptimizado.csv",
+    "costos/resultados/d5_reoptimizado_decisiones.parquet",
+    "experimentos/D5_optimizacion_milp/escenarios.csv",
+    "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+    "experimentos/D5_optimizacion_milp/resultados.json",
+    "costos/resultados/costos_para_planificador.json",
+    "costos/resultados/costos_unitarios.json",
+    "costos/resultados/ahorros_por_escenario.csv",
+    "costos/resultados/beta_equilibrio.csv",
+    "costos/resultados/linea_base_2025.csv",
+    "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+    "simulacion_ahorro/resultados/sensibilidad_beta.csv",
+    "experimentos/D6_simulador/resultados_escenarios.json"
+   ],
+   "filas": null,
+   "bytes": 81042
+  },
+  "despacho/indice.json": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/indice.js (meta, mapa y los días con ejemplo = true)"
+   ],
+   "filas": null,
+   "bytes": 21062
+  },
+  "despacho/2025-03-03.json.gz": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/2025-03-03.js"
+   ],
+   "filas": null,
+   "bytes": 146850
+  },
+  "despacho/calles/2025-03-03.json.gz": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/calles/2025-03-03.js"
+   ],
+   "filas": null,
+   "bytes": 55286
+  },
+  "despacho/2025-05-17.json.gz": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/2025-05-17.js"
+   ],
+   "filas": null,
+   "bytes": 280571
+  },
+  "despacho/calles/2025-05-17.json.gz": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/calles/2025-05-17.js"
+   ],
+   "filas": null,
+   "bytes": 86149
+  },
+  "despacho/2025-05-18.json.gz": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/2025-05-18.js"
+   ],
+   "filas": null,
+   "bytes": 179097
+  },
+  "despacho/calles/2025-05-18.json.gz": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/calles/2025-05-18.js"
+   ],
+   "filas": null,
+   "bytes": 52932
+  },
+  "despacho/2025-06-03.json.gz": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/2025-06-03.js"
+   ],
+   "filas": null,
+   "bytes": 316525
+  },
+  "despacho/calles/2025-06-03.json.gz": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/calles/2025-06-03.js"
+   ],
+   "filas": null,
+   "bytes": 100058
+  },
+  "despacho/2025-08-18.json.gz": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/2025-08-18.js"
+   ],
+   "filas": null,
+   "bytes": 175125
+  },
+  "despacho/calles/2025-08-18.json.gz": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/calles/2025-08-18.js"
+   ],
+   "filas": null,
+   "bytes": 48745
+  },
+  "despacho/2025-10-10.json.gz": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/2025-10-10.js"
+   ],
+   "filas": null,
+   "bytes": 282419
+  },
+  "despacho/calles/2025-10-10.json.gz": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/calles/2025-10-10.js"
+   ],
+   "filas": null,
+   "bytes": 81390
+  },
+  "despacho/calles/rutas.json": {
+   "fuentes": [
+    "sistema_tiempo_real/replay/dias/calles/rutas.js"
+   ],
+   "filas": null,
+   "bytes": 99406
+  }
+ },
+ "total_bytes": 4312727
+}

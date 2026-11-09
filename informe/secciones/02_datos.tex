@@ -1,0 +1,30 @@
+% Sección 2. Cifras: Entrega1/README.md (ETL y EDA), documentos/informe_resultados.md (sección 2),
+% experimentos/E7_elasticidad/README.md (sección 1), insumos_sobusa/README.md y insumos_sobusa/analisis_flota.md;
+% las mismas cifras están en app/DATOS.md (metodo_datos_crudos, metodo_capacidad_flota, metodo_ultimo_dia_mes,
+% inicio_cancelados_que_corrieron, demanda_dias_con_problema_datos).
+\section{Datos}
+\label{sec:datos-fuentes}
+
+La fuente principal es la base operativa de Sobusa (sección~\ref{sec:datos}): 1.096 días de 2023--2025, de solo
+lectura; se exportaron a Parquet 15 tablas analíticas (3.405.814 filas) y los eventos GPS se agregaron en el servidor,
+sin escribir nunca en la base. Completan los datos los
+agregados de Sobusa de viajes y subidas de enero a agosto de 2026 (E8), la lluvia horaria de Open-Meteo
+\citep{zippenfenig2023openmeteo} (E9), los calendarios escolar, universitario y de festivos y la prensa (E10), y fuentes
+públicas de costos (precios del ACPM de la CREG, tarifa del Área Metropolitana, salario mínimo y estudios de costos
+del transporte urbano), porque la base no trae costos ni consumo de combustible.
+
+\paragraph{Validez de los registros.} La marca \texttt{cancelada} no significa que el bus no salió: de los 44.156
+viajes \comi{cancelados automáticamente}, 36.180 (81,9~\%) recorrieron la ruta y llevaron 2,85 millones de pasajeros,
+el 6,3~\% del total; al revés, 19.737 viajes \comi{válidos} no salieron. Por eso el objetivo corregido de E13, con
+todos los viajes que recorrieron al menos 20~km, es un 5,6, 6,7 y 7,7~\% mayor que el original en 2023, 2024 y 2025.
+El 20,8~\% de los días tiene algún problema de datos; en el 18,8~\%, más del 10~\% de los pasajeros viajó en buses
+marcados como cancelados. Solo el 73,5--78~\% de los viajes tiene contadores consistentes, y la cobertura mensual del
+GPS, con mediana de 96,0~\%, es nula el último día de cada mes.
+
+\paragraph{Insumos del 2 de noviembre de 2026.} Los organizadores enviaron un reporte de la flota, una lista de 40
+vehículos y ocho guiones SQL. El reporte trae datos personales y no se versiona (solo sus columnas del vehículo). De
+los 418 vehículos con viajes válidos en 2025 en las tres rutas, 417 traen capacidad, con mediana de 50 pasajeros (33,5
+sentados y 18,4 de pie en promedio): se confirma la capacidad $Q = 50$ de la ecuación~\eqref{eq:buses}, del
+optimizador y del simulador, y ningún resultado cambia. El aviso de que los últimos días de cada mes ya tenían datos se
+comprobó el mismo día: solo el 31 de enero de 2025 estaba cargado y los otros once seguían vacíos, así que los análisis con GPS siguen
+excluyéndolos y los días de 2025 que se pueden reproducir son 353.

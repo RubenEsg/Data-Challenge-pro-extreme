@@ -1,0 +1,47 @@
+{
+ "descripcion": "Costos unitarios con fuente, precios 2026 (costos/README.md). central = el plan que reasigna (x_corrida_1).",
+ "central": {
+  "bus_hora_conductor": 26400.22349377582,
+  "costo_km_evitable": 1991.2387756433009,
+  "tarifa_efectiva": 3182.0
+ },
+ "bajo": {
+  "bus_hora_conductor": 19731.6459838022,
+  "costo_km_evitable": 1445.3234316621415,
+  "tarifa_efectiva": 3071.0
+ },
+ "alto": {
+  "bus_hora_conductor": 35853.696746571426,
+  "costo_km_evitable": 2716.2819309990955,
+  "tarifa_efectiva": 3420.0
+ },
+ "redondeados": {
+  "costo_bus_hora": {
+   "central": 26400,
+   "bajo": 19732,
+   "alto": 35854,
+   "unidad": "COP por bus-hora en ruta",
+   "nota": "Conductor pagado por hora o turno (42 h/semana, 182 h/mes; Ley 2101 de 2021). Si se paga por producido usar 0 y multiplicar la tarifa neta por (1 − participacion_producido)."
+  },
+  "costo_km": {
+   "central": 1991,
+   "bajo": 1445,
+   "alto": 2716,
+   "unidad": "COP por km",
+   "nota": "ACPM (11.291 COP/gal, 12,6 km/gal) + mantenimiento + llantas + lubricantes y filtros."
+  },
+  "tarifa_neta_2026": {
+   "central": 3182,
+   "bajo": 3071,
+   "alto": 3420,
+   "unidad": "COP por pasajero",
+   "nota": "Tarifa 3.700 (laboral 2026) × 0,86 que retiene el operador tras FET, factor de calidad y descuentos SIBUS."
+  },
+  "elasticidad_beta": {
+   "central": 0.7,
+   "bajo": 0.55,
+   "alto": 0.9
+  }
+ },
+ "fuente": "costos/resultados/costos_unitarios.json (claves 2026, 2026_bajo, 2026_alto); costos/resultados/costos_para_planificador.json"
+}

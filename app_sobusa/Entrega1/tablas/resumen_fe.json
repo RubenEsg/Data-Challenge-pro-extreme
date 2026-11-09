@@ -1,0 +1,146 @@
+{
+ "fecha": "2026-10-11 16:38",
+ "firma": "ec58410b52c82be5",
+ "semilla": 42,
+ "unidad": "ruta × día × hora de salida programada (4–20 h)",
+ "periodo": "2023-01-01 a 2025-12-31",
+ "filas": 55896,
+ "columnas": 129,
+ "rutas": 3,
+ "dias": 1096,
+ "horas": 17,
+ "viajes": {
+  "programados": 564832,
+  "validos": 520638,
+  "pax_ok": 516274,
+  "limpios": 490318,
+  "sin_registro": 12329,
+  "fantasmas": 3160,
+  "corrieron": 537081,
+  "cancelados_que_corrieron": 36178,
+  "operaron": 548477,
+  "parciales": 6034
+ },
+ "objetivos_por_anio": {
+  "2023": {
+   "original": 15305192,
+   "corregido": 16167991,
+   "pax_cancelados_corrieron": 882216,
+   "corregido_sobre_original_pct": 5.64
+  },
+  "2024": {
+   "original": 13988686,
+   "corregido": 14926045,
+   "pax_cancelados_corrieron": 960933,
+   "corregido_sobre_original_pct": 6.7
+  },
+  "2025": {
+   "original": 12872401,
+   "corregido": 13859620,
+   "pax_cancelados_corrieron": 1006501,
+   "corregido_sobre_original_pct": 7.67
+  }
+ },
+ "franjas_sin_viajes_pct": 1.84,
+ "vacios_pct": {
+  "pasajeros_por_viaje": 2.49,
+  "carga_max": 6.78,
+  "media_variables_modelo_h1": 3.07
+ },
+ "variables": {
+  "h7": 77,
+  "h1": 92,
+  "e1_h7": 67,
+  "e1_h1": 82,
+  "columnas_rezago_desplazables": 44
+ },
+ "variables_por_familia": {
+  "identificación": 10,
+  "objetivo": 4,
+  "calidad (solo peso)": 4,
+  "agregado contemporáneo": 3,
+  "objetivo corregido (E13)": 12,
+  "calendario base": 10,
+  "calendario especial": 6,
+  "eventos": 4,
+  "calendario escolar y universitario": 6,
+  "climatología": 4,
+  "nowcast (cota, no desplegable)": 5,
+  "rezagos de pasajeros_total": 13,
+  "rezagos de pasajeros_por_viaje": 13,
+  "rezagos de carga_max": 13,
+  "rezagos de viajes_validos": 13,
+  "totales diarios rezagados": 8,
+  "referencia (línea base)": 1
+ },
+ "pesos": {
+  "filas_0_25": 1336,
+  "filas_0_1": 1412,
+  "filas_ambas_reglas": 211,
+  "filas_peso_1": 53148,
+  "dias_atipicos_no_predecibles": 31,
+  "dias_atipicos_total": 69
+ },
+ "calendario": {
+  "festivo": 53,
+  "carnaval": 12,
+  "semana_santa": 21,
+  "vac_escolar": 256,
+  "vac_univ": 385,
+  "partido_dia": 8,
+  "evento_otro_dia": 8
+ },
+ "prueba_fugas": {
+  "T": "2025-03-10",
+  "h7_ok": true,
+  "h1_ok": true,
+  "controles_ok": true,
+  "determinismo_ok": true
+ },
+ "replicas": {
+  "e1_panel_e1_max_dif": 0.0,
+  "e1_columnas_comunes": 89,
+  "e12_panel_v4_columnas_comunes": 109,
+  "e12_panel_v4_columnas_iguales": 109,
+  "e12_columnas_que_difieren": [],
+  "v4_columnas_que_cambian_frente_a_e1": 18
+ },
+ "correlaciones": {
+  "variable_mas_correlacionada": "pasajeros_total_b1",
+  "rho": 0.896,
+  "pares_rho_mayor_0_9": 56,
+  "rho_b1_objetivo": 0.897,
+  "rho_lag7_objetivo": 0.848
+ },
+ "objetivo_transformacion": {
+  "pct_ceros": 2.24,
+  "varianza_sobre_media": 489.1,
+  "asimetria": 1.4,
+  "asimetria_log1p": -2.96,
+  "decision": "sin transformar; pérdida de conteo (Poisson/Tweedie) dentro de cada pliegue; métricas en pasajeros"
+ },
+ "atipicos_z_modificado": {
+  "dias": 34,
+  "en_comun_con_e10": 12,
+  "solo_z": 22,
+  "solo_e10": 19
+ },
+ "pliegues": {
+  "n": 12,
+  "anio": 2025,
+  "filas_prueba": 18615,
+  "filas_entrenamiento_primero": 36821,
+  "filas_entrenamiento_ultimo": 53855,
+  "horizontes": [
+   1,
+   7
+  ],
+  "horizontes_extendidos": [
+   14,
+   21,
+   28
+  ]
+ },
+ "figuras": 11,
+ "tiempo_s": 41.0
+}

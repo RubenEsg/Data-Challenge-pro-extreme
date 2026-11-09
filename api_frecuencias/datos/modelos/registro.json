@@ -1,0 +1,70 @@
+{
+  "activo": "hgb_fv1_20250831_s42",
+  "modelos": {
+    "hgb_fv1_20250831_s42": {
+      "model_id": "hgb_fv1_20250831_s42",
+      "tipo": "candidato",
+      "algoritmo": "hist_gradient_boosting",
+      "estado": "activo",
+      "artefacto": "modelo.joblib",
+      "sha256": "fac427c003cf74d65475e3a0f37d3d90f8e6a20dc6ba6a513c41046b6498a728",
+      "feature_version": "fv1-2026-11-08",
+      "data_cutoff": "2025-08-31",
+      "semilla": 42,
+      "supera_linea_base_validacion": true,
+      "creado_en": "2026-11-09T03:39:13+00:00",
+      "wape_validacion": 13.632,
+      "wape_prueba": 15.067
+    },
+    "b1_manual_8sem": {
+      "model_id": "b1_manual_8sem",
+      "tipo": "linea_base",
+      "estado": "referencia",
+      "descripcion": "Regla manual de Sobusa: media de la misma hora y el mismo día de la semana de las 8 semanas anteriores",
+      "artefacto": null,
+      "feature_version": "fv1-2026-11-08"
+    },
+    "b2_ultima_semana": {
+      "model_id": "b2_ultima_semana",
+      "tipo": "linea_base",
+      "estado": "referencia",
+      "descripcion": "Última semana: pasajeros de la misma hora hace 7 días",
+      "artefacto": null,
+      "feature_version": "fv1-2026-11-08"
+    }
+  },
+  "historial_activacion": [
+    {
+      "en": "2026-11-09T03:39:13+00:00",
+      "de": "b1_manual_8sem",
+      "a": "hgb_fv1_20250831_s42",
+      "usuario": "entrenamiento",
+      "motivo": "activado: mejora a B1 en validación"
+    }
+  ],
+  "referencias_proyecto": {
+    "nota": "Modelos publicados por el proyecto (WAPE horario 2025, horizonte de una semana, validación mensual expansiva). Se registran como referencia: no se ejecutan dentro de la API.",
+    "modelos": [
+      {
+        "model_id": "ref_B1_regla_manual",
+        "wape_pct": 20.04,
+        "fuente": "app/DATOS.md (C1); experimentos/E11_modelo_mejorado/resultados.json"
+      },
+      {
+        "model_id": "ref_E1_lightgbm",
+        "wape_pct": 14.4,
+        "fuente": "experimentos/E1_lgbm_salida/README.md"
+      },
+      {
+        "model_id": "ref_E11_modelo_final",
+        "wape_pct": 13.94,
+        "fuente": "app/DATOS.md (C1); experimentos/E11_modelo_mejorado"
+      },
+      {
+        "model_id": "ref_E12_hibrido",
+        "wape_pct": 13.62,
+        "fuente": "app/DATOS.md (C1, C18); experimentos/E12_comparacion_modelos"
+      }
+    ]
+  }
+}

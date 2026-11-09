@@ -1,0 +1,92 @@
+{
+  "P": {
+    "precio_acpm_2025": 10585.0,
+    "precio_acpm_2026": 11291.0,
+    "rend_nqr": 13.0,
+    "f_nqr": 1.0,
+    "f_npr": 1.1,
+    "f_grande": 0.92,
+    "f_b70": 0.85,
+    "f_agrale": 0.85,
+    "penal_edad": 0.0075,
+    "edad_ref": 5.0,
+    "mant_km": 700.0,
+    "llantas_km": 220.0,
+    "lub_km": 120.0,
+    "smmlv_2025": 1423500.0,
+    "smmlv_2026": 1750905.0,
+    "aux_transporte_2025": 200000.0,
+    "aux_transporte_2026": 249095.0,
+    "prest_aux": 0.1766,
+    "multiplo_salario": 1.3,
+    "factor_prestacional": 1.44,
+    "recargos": 0.16,
+    "horas_mes_2025": 195.0,
+    "horas_mes_2026": 182.0,
+    "factor_horas_pagadas": 1.16,
+    "participacion_producido": 0.2,
+    "soat": 640300.0,
+    "seguros_rc": 3500000.0,
+    "rtm": 490000.0,
+    "impuesto": 0.0,
+    "gps_sibus": 80000.0,
+    "parqueadero": 290000.0,
+    "administracion": 750000.0,
+    "precio_bus": 390000000.0,
+    "residual": 0.3,
+    "vida_util": 20.0,
+    "tasa_capital": 0.11,
+    "reserva_flota": 0.1,
+    "tarifa_2025": 3300.0,
+    "tarifa_2026": 3700.0,
+    "factor_ingreso": 0.86,
+    "ef_co2": 9.16,
+    "ipc_2025": 0.051,
+    "valor_espera": 7000.0,
+    "beta": 0.7
+  },
+  "unit": {
+    "2025": {
+      "combustible_km": 842.0364927981881,
+      "mant_km": 700.0,
+      "llantas_km": 220.0,
+      "lub_km": 120.0,
+      "costo_km_evitable": 1882.0364927981882,
+      "hora_conductor": 17251.948307692306,
+      "bus_hora_conductor": 20012.260036923075,
+      "fijo_bus_anio": 65222448.86745982,
+      "tarifa_efectiva": 2838.0,
+      "rendimiento_sistema": 12.570714084878647
+    },
+    "2026": {
+      "combustible_km": 898.198775643301,
+      "mant_km": 735.6999999999999,
+      "llantas_km": 231.22,
+      "lub_km": 126.11999999999999,
+      "costo_km_evitable": 1991.2387756433009,
+      "hora_conductor": 22758.813356703293,
+      "bus_hora_conductor": 26400.22349377582,
+      "fijo_bus_anio": 68548793.75970027,
+      "tarifa_efectiva": 3182.0,
+      "rendimiento_sistema": 12.570714084878647
+    },
+    "2026_bajo": {
+      "costo_km_evitable": 1445.3234316621415,
+      "bus_hora_conductor": 19731.6459838022
+    },
+    "2026_alto": {
+      "costo_km_evitable": 2716.2819309990955,
+      "bus_hora_conductor": 35853.696746571426
+    },
+    "fijo_por_bus_hora_2025": 19718.64910034003
+  },
+  "info": {
+    "n_dias": 365,
+    "dias_laborales": 245,
+    "pax_dia_total_D5": 35266.85205479452
+  },
+  "valor_espera_cl72_cop": 340150927.05771893,
+  "horas_espera_ahorradas_cl72": 48592.98957967413,
+  "rend_sistema": 12.570714084878647,
+  "rend_cra54": 12.476554984772468
+}

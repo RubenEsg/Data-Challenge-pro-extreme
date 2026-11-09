@@ -1,0 +1,161 @@
+=== Ciclo de demostración API de frecuencias Sobusa (§14.2) ===
+0. GET /health -> {'estado': 'ok', 'base_datos': 'ok', 'version': '1.0.0', 'fuente': 'parquet'}
+
+1. Registro de modelos (línea base y candidato sembrados desde el manifiesto)
+   b1_manual_8sem               tipo=linea_base  estado=candidato sha256=… feature_version=fv1-2026-11-08 corte=None WAPE prueba=None
+   b2_ultima_semana             tipo=linea_base  estado=candidato sha256=… feature_version=fv1-2026-11-08 corte=None WAPE prueba=None
+   hgb_fv1_20250831_s42         tipo=candidato   estado=activo    sha256=fac427c003cf… feature_version=fv1-2026-11-08 corte=2025-08-31T00:00:00-05:00 WAPE prueba=None
+
+2. Ejecución 1: llegan los datos hasta 2025-11-03 (carga inicial incremental desde cero)
+   POST /frequency/executions {'hasta': '2025-11-03'} -> 202 (job en segundo plano)
+     … en_cola 0 %
+     … calidad 25 %
+     … prediccion 45 %
+   ejecución af2dec2e-4b93-497f-b701-9fd7791ff617 estado=ok en 83.8 s, intentos=1
+   filas leídas=52938 válidas=52938 errores por dimensión={}
+   marca de agua None -> 2025-11-03T23:59:59-05:00; data_cutoff=2025-11-03T23:59:59-05:00
+   model_id=hgb_fv1_20250831_s42 feature_version=fv1-2026-11-08 umbrales_version=1 correlation_id=demo-carga-inicial
+   predicciones=9 recomendaciones=9 alertas=25
+   evaluación del modelo activo sobre lo recién llegado: {'n': 52479, 'mae': 98.608, 'pico': {'n': 18522, 'mae': 92.726, 'rmse': 134.567, 'wape': 12.636, 'sesgo_pct': 0.089}, 'rmse': 142.965, 'wape': 12.947, 'desde': '2023-01-01', 'hasta': '2025-11-03', 'valle': {'n': 33957, 'mae': 101.817, 'rmse': 147.345, 'wape': 13.107, 'sesgo_pct': 0.057}, 'model_id': 'hgb_fv1_20250831_s42', 'por_ruta': {'CL 72': {'n': 17493, 'mae': 71.81, 'rmse': 97.077, 'wape': 17.801, 'sesgo_pct': 0.389}, 'CRA 54': {'n': 17493, 'mae': 133.697, 'rmse': 189.824, 'wape': 10.549, 'sesgo_pct': -0.001}, 'SILENCIO': {'n': 17493, 'mae': 90.319, 'rmse': 125.936, 'wape': 14.707, 'sesgo_pct': 0.0}}, 'sesgo_pct': 0.068, 'fuera_de_muestra': False, 'cobertura_p10_p90': 79.53}
+   errores de calidad guardados por lote, fila y causa: total=0 muestra=[]
+
+3. Predicciones de la ejecución 1 (30/60/120 min con P10/P90, versión y explicación)
+   total=9 por horizonte={30: 3, 60: 3, 120: 3} rutas=['CL 72', 'CRA 54', 'SILENCIO']
+   CL 72     instante=2025-11-04T06:00:00-05:00 h= 30 min objetivo=2025-11-04T06:30:00-05:00 pasajeros=274.4 P10=209.0 P90=339.6 model_id=hgb_fv1_20250831_s42 feature_version=fv1-2026-11-08 data_cutoff=2025-08-31T00:00:00-05:00
+      explicación: ['Hora 6:00 del martes (laboral)', 'Misma hora hace 7 días: 534 pasajeros', 'Regla manual (media de 8 semanas): 518 pasajeros']
+   CL 72     instante=2025-11-04T06:00:00-05:00 h= 60 min objetivo=2025-11-04T07:00:00-05:00 pasajeros=548.8 P10=418.0 P90=679.2 model_id=hgb_fv1_20250831_s42 feature_version=fv1-2026-11-08 data_cutoff=2025-08-31T00:00:00-05:00
+      explicación: ['Hora 6:00 del martes (laboral)', 'Misma hora hace 7 días: 534 pasajeros', 'Regla manual (media de 8 semanas): 518 pasajeros']
+   CL 72     instante=2025-11-04T06:00:00-05:00 h=120 min objetivo=2025-11-04T08:00:00-05:00 pasajeros=1064.1 P10=798.6 P90=1298.1 model_id=hgb_fv1_20250831_s42 feature_version=fv1-2026-11-08 data_cutoff=2025-08-31T00:00:00-05:00
+      explicación: ['Hora 6:00 del martes (laboral)', 'Misma hora hace 7 días: 534 pasajeros', 'Regla manual (media de 8 semanas): 518 pasajeros']
+   POST /predictions/run (en línea) CL 72 07:00 +60 min -> 518.2 pasajeros [P10 382.7, P90 622.4] en 2937.09 ms; recomendación: 6 buses/h, headway 10.0 min, viable=True
+
+4. Recomendaciones de la ejecución 1 (§10.3)
+   total=9 viables=4 no viables=5
+   SILENCIO  2025-11-04  6 h demanda=431.54 buses/h=6 headway=10.0 min vehículos=26 capacidad efectiva=42.5 ocupación=0.5898 viable=True motivo=None actual=7.2 diferencia=2.8
+   SILENCIO  2025-11-04  7 h demanda=863.07 buses/h=11 headway=5.45 min vehículos=47 capacidad efectiva=42.5 ocupación=0.6434 viable=False motivo=La flota disponible (45 vehículos) no alcanza: con un ciclo de 255,4 min y un headway de 5,45 min se requieren 47 vehículos; la flota solo sostiene 10 buses/h. actual=7.2 diferencia=-1.75
+   SILENCIO  2025-11-04  8 h demanda=1554.59 buses/h=18 headway=3.33 min vehículos=77 capacidad efectiva=42.5 ocupación=0.7082 viable=False motivo=La flota disponible (45 vehículos) no alcanza: con un ciclo de 255,4 min y un headway de 3,33 min se requieren 77 vehículos; la flota solo sostiene 10 buses/h. actual=7.2 diferencia=-3.87
+   CRA 54    2025-11-04  6 h demanda=1248.28 buses/h=16 headway=3.75 min vehículos=64 capacidad efectiva=42.5 ocupación=0.7068 viable=True motivo=None actual=3.5 diferencia=0.25
+   POST /recommendations/calculate CRA 54 7 h 1200 pas -> buses/h=13 headway=4.62 vehículos=52 viable=True
+      fórmula: capacidad_efectiva = 50 × 0,85 = 42,5; carga_critica = 0,453 × demanda 1.200,0 = 543,6; buses_hora = max(ceil(543,6 / 42,5) = 13, ceil(60 / 10,00) = 6) = 13; headway = 60 / 13 = 4,62 → [2,00, 10,00] = 4,62 min; vehiculos_requeridos = ceil(239,2 / 4,62) = 52
+
+5. Alertas (estructura §5.3) y deduplicación
+   abiertas tras la ejecución 1: total=25 por código={'ALT-001': 9, 'ALT-002': 9, 'ALT-003': 7} por severidad={'critica': 18, 'preventiva': 7}
+      alert_id: 73c56b4e-89ef-4760-be48-a25f4376de39
+      codigo: ALT-001
+      ruta: CL 72
+      vehiculo: None
+      detectada_en: 2026-11-08T22:56:45.028114-05:00
+      ventana_inicio: 2025-11-04T08:00:00-05:00
+      ventana_fin: 2025-11-04T09:00:00-05:00
+      horizonte_min: 120
+      severidad: critica
+      estado: nueva
+      observado: 1298.1
+      esperado: 1064.14
+      umbral: 258.6207
+      puntaje: 1.0
+      explicacion: La demanda proyectada (P90 1.298,1 pasajeros) supera la capacidad disponible (259 = 5 buses/h × 50 puestos); incluso el pronóstico puntual (1.064,1) la supera.
+      recomendacion: Aumentar buses por hora o reducir el headway.
+      clave_dedup: ALT-001|CL 72|2025-11-04T08:00:00-05:00|2025-11-04T09:00:00-05:00
+      ocurrencias: 1
+      variables: {'p90': 1298.1, 'capacidad': 50, 'demanda_prevista': 1064.14, 'umbrales_version': 1, 'buses_hora_actual': 5.172413793103448}
+   Ejecución 1-bis: mismo corte y mismo instante (sin datos nuevos, se fuerza el recálculo): las alertas repetidas no se duplican, suman ocurrencias
+   POST /frequency/executions {'hasta': '2025-11-03', 'instante': '2025-11-04T06:00:00-05:00'} -> 202 (job en segundo plano)
+     … corriendo 0 %
+     … prediccion 45 %
+   ejecución 3127e73e-aa72-47bd-b645-d658afd7aace estado=ok en 21.6 s, intentos=1
+   filas leídas=0 válidas=0 errores por dimensión={}
+   marca de agua 2025-11-03T23:59:59-05:00 -> 2025-11-03T23:59:59-05:00; data_cutoff=2025-11-03T23:59:59-05:00
+   model_id=hgb_fv1_20250831_s42 feature_version=fv1-2026-11-08 umbrales_version=1 correlation_id=demo-repeticion
+   predicciones=9 recomendaciones=9 alertas=0
+   alertas abiertas antes=25 después=25 ocurrencias máximas=2 (filas leídas en la repetición=0, filas en demanda_observada sin duplicar)
+
+6. Ciclo de vida de la alerta 73c56b4e-89ef-4760-be48-a25f4376de39 (ALT-001 CL 72)
+   PATCH reconocer -> 200 estado=reconocida asignado_a=None
+   PATCH asignar   -> 200 estado=asignada asignado_a=supervisor_ruta
+   PATCH cerrar    -> 200 estado=cerrada asignado_a=supervisor_ruta
+   transición inválida (reconocer una alerta cerrada) -> 409 transicion_invalida
+   historial: 2026-11-08T22:55:21.524188-05:00 crear     None -> nueva por sistema Detectada por la ejecución af2dec2e-4b93-497f-b701-9fd7791ff617
+   historial: 2026-11-08T22:57:09.845115-05:00 reconocer nueva -> reconocida por despachador_1 
+   historial: 2026-11-08T22:57:09.875905-05:00 asignar   reconocida -> asignada por despachador_1 Revisar refuerzo de la hora pico
+   historial: 2026-11-08T22:57:09.886065-05:00 cerrar    asignada -> cerrada por supervisor_ruta Se programó el refuerzo
+
+7. Llegan datos nuevos (2025-11-04): la ejecución 2 solo lee las filas nuevas y evalúa el error
+   POST /frequency/executions {'hasta': '2025-11-04'} -> 202 (job en segundo plano)
+     … corriendo 0 %
+     … calidad 25 %
+     … prediccion 45 %
+   ejecución 4423364d-2376-430b-acf5-95bc097f7899 estado=ok en 18.4 s, intentos=1
+   filas leídas=51 válidas=51 errores por dimensión={}
+   marca de agua 2025-11-03T23:59:59-05:00 -> 2025-11-04T23:59:59-05:00; data_cutoff=2025-11-04T23:59:59-05:00
+   model_id=hgb_fv1_20250831_s42 feature_version=fv1-2026-11-08 umbrales_version=1 correlation_id=demo-dia-siguiente
+   predicciones=9 recomendaciones=9 alertas=25
+   evaluación del modelo activo sobre lo recién llegado: {'n': 51, 'mae': 111.562, 'pico': {'n': 18, 'mae': 74.118, 'rmse': 107.064, 'wape': 9.574, 'sesgo_pct': -1.507}, 'rmse': 161.273, 'wape': 13.126, 'desde': '2025-11-04', 'hasta': '2025-11-04', 'valle': {'n': 33, 'mae': 131.986, 'rmse': 184.237, 'wape': 14.809, 'sesgo_pct': -0.74}, 'model_id': 'hgb_fv1_20250831_s42', 'por_ruta': {'CL 72': {'n': 17, 'mae': 73.75, 'rmse': 90.357, 'wape': 16.637, 'sesgo_pct': 0.651}, 'CRA 54': {'n': 17, 'mae': 159.665, 'rmse': 225.074, 'wape': 11.127, 'sesgo_pct': -2.97}, 'SILENCIO': {'n': 17, 'mae': 101.272, 'rmse': 138.578, 'wape': 15.079, 'sesgo_pct': 2.171}}, 'sesgo_pct': -0.986, 'fuera_de_muestra': True, 'cobertura_p10_p90': 82.35}
+
+8. Reentrenamiento: candidato con corte 2025-10-31, comparación con el activo y decisión
+   POST /models/train -> 202
+     … corriendo 0 %
+     … entrenamiento 20 %
+   entrenamiento ok en 408.4 s: Candidato hgb_fv1_20251031_s42 registrado model_id=hgb_fv1_20251031_s42
+   ACTIVADO hgb_fv1_20251031_s42 (anterior hgb_fv1_20250831_s42) aprobado_por=comite_operacion
+   comparación en la misma ventana: {'ventana': {'desde': '2025-11-01', 'hasta': '2025-11-28'}, 'candidato': {'n': 1428, 'mae': 86.965, 'rmse': 124.447, 'wape': 12.673, 'sesgo_pct': 1.891, 'cobertura_p10_p90': 84.1, 'por_ruta': {'CL 72': {'n': 476, 'mae': 60.879, 'rmse': 81.839, 'wape': 16.767, 'sesgo_pct': 1.687}, 'CRA 54': {'n': 476, 'mae': 122.881, 'rmse': 168.309, 'wape': 10.762, 'sesgo_pct': 1.676}, 'SILENCIO': {'n': 476, 'mae': 77.137, 'rmse': 106.936, 'wape': 13.93, 'sesgo_pct': 2.469}}, 'pico': {'n': 504, 'mae': 80.458, 'rmse': 111.367, 'wape': 12.411, 'sesgo_pct': 1.914}, 'valle': {'n': 924, 'mae': 90.515, 'rmse': 131.032, 'wape': 12.804, 'sesgo_pct': 1.88}, 'model_id': 'hgb_fv1_20251031_s42', 'desde': '2025-11-01', 'hasta': '2025-11-28', 'fuera_de_muestra': True}, 'activo': {'n': 1428, 'mae': 87.551, 'rmse': 124.674, 'wape': 12.759, 'sesgo_pct': 2.139, 'cobertura_p10_p90': 84.66, 'por_ruta': {'CL 72': {'n': 476, 'mae': 62.203, 'rmse': 83.121, 'wape': 17.132, 'sesgo_pct': 2.561}, 'CRA 54': {'n': 476, 'mae': 123.21, 'rmse': 168.115, 'wape': 10.791, 'sesgo_pct': 1.808}, 'SILENCIO': {'n': 476, 'mae': 77.24, 'rmse': 107.048, 'wape': 13.948, 'sesgo_pct': 2.546}}, 'pico': {'n': 504, 'mae': 81.338, 'rmse': 112.854, 'wape': 12.547, 'sesgo_pct': 2.31}, 'valle': {'n': 924, 'mae': 90.94, 'rmse': 130.672, 'wape': 12.864, 'sesgo_pct': 2.054}, 'model_id': 'hgb_fv1_20250831_s42', 'desde': '2025-11-01', 'hasta': '2025-11-28', 'fuera_de_muestra': True}, 'activo_model_id': 'hgb_fv1_20250831_s42', 'wape_max': 0.2}
+   POST /models/rollback -> 200; activo ahora: hgb_fv1_20250831_s42
+   Gobierno del modelo: activar el candidato que viaja en la entrega e intentar volver a una línea base peor
+   RECHAZADO b1_manual_8sem (409 activacion_rechazada): WAPE del candidato 16.95% > WAPE del activo hgb_fv1_20250831_s42 12.76% en la validación 2025-11-01..2025-11-28
+   registro: b1_manual_8sem               linea_base  rechazado  aprobado_por=None anterior=None motivo=WAPE del candidato 16.95% > WAPE del activo hgb_fv1_20250831_s42 12.76% en la validación 2025-11-01..2025-11-28
+      auditoría: {'en': '2026-11-09T03:54:49.688698+00:00', 'estado': 'candidato', 'evento': 'registro'}
+      auditoría: {'en': '2026-11-09T04:04:23.594891+00:00', 'evento': 'activacion_rechazada', 'motivo': 'WAPE del candidato 16.95% > WAPE del activo hgb_fv1_20250831_s42 12.76% en la validación 2025-11-01..2025-11-28', 'usuario': 'comite_operacion', 'comparacion': {'activo': {'n': 1428, 'mae': 87.551, 'pico': {'n': 504, 'mae': 81.338, 'rmse': 112.854, 'wape': 12.547, 'sesgo_pct': 2.31}, 'rmse': 124.674, 'wape': 12.759, 'desde': '2025-11-01', 'hasta': '2025-11-28', 'valle': {'n': 924, 'mae': 90.94, 'rmse': 130.672, 'wape': 12.864, 'sesgo_pct': 2.054}, 'model_id': 'hgb_fv1_20250831_s42', 'por_ruta': {'CL 72': {'n': 476, 'mae': 62.203, 'rmse': 83.121, 'wape': 17.132, 'sesgo_pct': 2.561}, 'CRA 54': {'n': 476, 'mae': 123.21, 'rmse': 168.115, 'wape': 10.791, 'sesgo_pct': 1.808}, 'SILENCIO': {'n': 476, 'mae': 77.24, 'rmse': 107.048, 'wape': 13.948, 'sesgo_pct': 2.546}}, 'sesgo_pct': 2.139, 'fuera_de_muestra': True, 'cobertura_p10_p90': 84.66}, 'ventana': {'desde': '2025-11-01', 'hasta': '2025-11-28'}, 'wape_max': 0.2, 'candidato': {'n': 1428, 'mae': 116.312, 'pico': {'n': 504, 'mae': 103.067, 'rmse': 164.751, 'wape': 15.899, 'sesgo_pct': 0.48}, 'rmse': 186.339, 'wape': 16.95, 'desde': '2025-11-01', 'hasta': '2025-11-28', 'valle': {'n': 924, 'mae': 123.537, 'rmse': 197.121, 'wape': 17.476, 'sesgo_pct': 2.871}, 'model_id': 'b1_manual_8sem', 'por_ruta': {'CL 72': {'n': 476, 'mae': 76.284, 'rmse': 107.959, 'wape': 21.01, 'sesgo_pct': 2.161}, 'CRA 54': {'n': 476, 'mae': 170.92, 'rmse': 259.823, 'wape': 14.969, 'sesgo_pct': 1.374}, 'SILENCIO': {'n': 476, 'mae': 101.733, 'rmse': 158.126, 'wape': 18.372, 'sesgo_pct': 3.459}}, 'sesgo_pct': 2.074, 'fuera_de_muestra': True, 'cobertura_p10_p90': 72.97}, 'activo_model_id': 'hgb_fv1_20250831_s42'}}
+   registro: b2_ultima_semana             linea_base  candidato  aprobado_por=None anterior=None motivo=None
+      auditoría: {'en': '2026-11-09T03:54:49.689903+00:00', 'estado': 'candidato', 'evento': 'registro'}
+   registro: hgb_fv1_20250831_s42         candidato   activo     aprobado_por=comite_operacion anterior=None motivo=None
+      auditoría: {'en': '2026-11-09T03:54:49.686275+00:00', 'evento': 'activacion_inicial'}
+      auditoría: {'en': '2026-11-09T04:04:22.931195+00:00', 'evento': 'retirado', 'usuario': 'comite_operacion', 'reemplazado_por': 'hgb_fv1_20251031_s42'}
+      auditoría: {'en': '2026-11-09T04:04:22.960486+00:00', 'desde': 'hgb_fv1_20251031_s42', 'evento': 'reactivado_por_reversion', 'motivo': 'prueba de reversión', 'usuario': 'comite_operacion'}
+   registro: hgb_fv1_20251031_s42         candidato   retirado   aprobado_por=comite_operacion anterior=hgb_fv1_20250831_s42 motivo=ciclo de demostración §14.2
+      auditoría: {'en': '2026-11-09T04:04:16.167823+00:00', 'estado': 'candidato', 'evento': 'registro'}
+      auditoría: {'en': '2026-11-09T04:04:22.933729+00:00', 'evento': 'activado', 'motivo': 'ciclo de demostración §14.2', 'usuario': 'comite_operacion', 'comparacion': {'activo': {'n': 1428, 'mae': 87.551, 'pico': {'n': 504, 'mae': 81.338, 'rmse': 112.854, 'wape': 12.547, 'sesgo_pct': 2.31}, 'rmse': 124.674, 'wape': 12.759, 'desde': '2025-11-01', 'hasta': '2025-11-28', 'valle': {'n': 924, 'mae': 90.94, 'rmse': 130.672, 'wape': 12.864, 'sesgo_pct': 2.054}, 'model_id': 'hgb_fv1_20250831_s42', 'por_ruta': {'CL 72': {'n': 476, 'mae': 62.203, 'rmse': 83.121, 'wape': 17.132, 'sesgo_pct': 2.561}, 'CRA 54': {'n': 476, 'mae': 123.21, 'rmse': 168.115, 'wape': 10.791, 'sesgo_pct': 1.808}, 'SILENCIO': {'n': 476, 'mae': 77.24, 'rmse': 107.048, 'wape': 13.948, 'sesgo_pct': 2.546}}, 'sesgo_pct': 2.139, 'fuera_de_muestra': True, 'cobertura_p10_p90': 84.66}, 'ventana': {'desde': '2025-11-01', 'hasta': '2025-11-28'}, 'wape_max': 0.2, 'candidato': {'n': 1428, 'mae': 86.965, 'pico': {'n': 504, 'mae': 80.458, 'rmse': 111.367, 'wape': 12.411, 'sesgo_pct': 1.914}, 'rmse': 124.447, 'wape': 12.673, 'desde': '2025-11-01', 'hasta': '2025-11-28', 'valle': {'n': 924, 'mae': 90.515, 'rmse': 131.032, 'wape': 12.804, 'sesgo_pct': 1.88}, 'model_id': 'hgb_fv1_20251031_s42', 'por_ruta': {'CL 72': {'n': 476, 'mae': 60.879, 'rmse': 81.839, 'wape': 16.767, 'sesgo_pct': 1.687}, 'CRA 54': {'n': 476, 'mae': 122.881, 'rmse': 168.309, 'wape': 10.762, 'sesgo_pct': 1.676}, 'SILENCIO': {'n': 476, 'mae': 77.137, 'rmse': 106.936, 'wape': 13.93, 'sesgo_pct': 2.469}}, 'sesgo_pct': 1.891, 'fuera_de_muestra': True, 'cobertura_p10_p90': 84.1}, 'activo_model_id': 'hgb_fv1_20250831_s42'}}
+      auditoría: {'en': '2026-11-09T04:04:22.955573+00:00', 'evento': 'revertido', 'motivo': 'prueba de reversión', 'usuario': 'comite_operacion', 'vuelve_a': 'hgb_fv1_20250831_s42'}
+   (activo antes de la decisión: hgb_fv1_20250831_s42)
+
+9. Exportación (RF-017)
+   GET /predictions/export?formato=csv -> 200 text/csv; charset=utf-8 13272 bytes
+      ﻿prediction_id,execution_id,ruta,instante,horizonte_min,objetivo,fecha,hora,pasajeros,p10,p90,model_id,feature_version,data_cutoff,generated_at,latencia_ms,explicacion,variables,creado_en
+      e51a796d-c6f1-43f9-88f7-90a4d393abfb,af2dec2e-4b93-497f-b701-9fd7791ff617,CL 72,2025-11-04T06:00:00-05:00,120,2025-11-04T08:00:00-05:00,2025-11-04,8,1064.14,798.6,1298.1,hgb_fv1_20250831_s42,fv1-2026-11-08,2025-08-31T00:00:00-05:00,2026-11-08T22:56:45.026251-05:00,3164.54,"[""Hora 6:00 del martes (laboral)"", ""Misma hora hace 7 días: 534 pasajeros"", ""Regla manual (media de 8 semanas): 518 pasajeros"", ""Factor intradía 1,01: observado 1328 frente a esperado 1239 en las 2 h previas (razón 1,07, peso 0,1, recortado a 0,8-1,25)"", ""Ventana de 120 min prorrateada por minutos sobre 2 hora(s) de servicio"", ""Variables más influyentes del modelo: b8, tipo_dia, m4""]","{""hora"": 6, ""lag7"": 534.0, ""fecha"": ""2025-11-04"", ""festivo"": false, ""por_hora"": [{""hora"": 6, ""fecha"": ""2025-11-04"", ""fraccion"": 1.0, ""p10_hora"": 415.0, ""p90_hora"": 674.4, ""pasajeros_hora"": 544.9}, {""hora"": 7, ""fecha"": ""2025-11-04"", ""fraccion"": 1.0, ""p10_hora"": 377.9, ""p90_hora"": 614.5, ""pasajeros_hora"": 511.7}], ""tipo_dia"": ""Laboral"", ""dia_semana"": ""martes"", ""nivel_7_34"": 487.5, ""esperado_2h"": 1239.3, ""razon_cruda"": 1.0716, ""observado_2h"": 1328.0, ""horas_nowcast"": [{""hora"": 4, ""fecha"": ""2025-11-04"", ""esperado"": 263.7, ""fraccion"": 1.0, ""observado"": 311.0}, {""hora"": 5, ""fecha"": ""2025-11-04"", ""esperado"": 975.6, ""fraccion"": 1.0, ""observado"": 1017.0}], ""factor_nowcast"": 1.0072, ""b8_regla_manual"": 518.5, ""nowcast_aplicado"": true}",2026-11-08T22:55:21.524188-05:00
+      df8b27f0-4b63-4b1c-bc09-424509f6c1a7,af2dec2e-4b93-497f-b701-9fd7791ff617,CL 72,2025-11-04T06:00:00-05:00,60,2025-11-04T07:00:00-05:00,2025-11-04,7,548.77,418.01,679.21,hgb_fv1_20250831_s42,fv1-2026-11-08,2025-08-31T00:00:00-05:00,2026-11-08T22:56:41.858982-05:00,2728.43,"[""Hora 6:00 del martes (laboral)"", ""Misma hora hace 7 días: 534 pasajeros"", ""Regla manual (media de 8 semanas): 518 pasajeros"", ""Factor intradía 1,01: observado 1328 frente a esperado 1239 en las 2 h previas (razón 1,07, peso 0,1, recortado a 0,8-1,25)"", ""Ventana de 60 min prorrateada por minutos sobre 1 hora(s) de servicio"", ""Variables más influyentes del modelo: b8, tipo_dia, m4""]","{""hora"": 6, ""lag7"": 534.0, ""fecha"": ""2025-11-04"", ""festivo"": false, ""por_hora"": [{""hora"": 6, ""fecha"": ""2025-11-04"", ""fraccion"": 1.0, ""p10_hora"": 415.0, ""p90_hora"": 674.4, ""pasajeros_hora"": 544.9}], ""tipo_dia"": ""Laboral"", ""dia_semana"": ""martes"", ""nivel_7_34"": 487.5, ""esperado_2h"": 1239.3, ""razon_cruda"": 1.0716, ""observado_2h"": 1328.0, ""horas_nowcast"": [{""hora"": 4, ""fecha"": ""2025-11-04"", ""esperado"": 263.7, ""fraccion"": 1.0, ""observado"": 311.0}, {""hora"": 5, ""fecha"": ""2025-11-04"", ""esperado"": 975.6, ""fraccion"": 1.0, ""observado"": 1017.0}], ""factor_nowcast"": 1.0072, ""b8_regla_manual"": 518.5, ""nowcast_aplicado"": true}",2026-11-08T22:55:21.524188-05:00
+   GET /recommendations/export?formato=xlsx -> 200 application/vnd.openxmlformats-officedocument.spreadsheetml.sheet 8641 bytes
+
+10. Umbrales vigentes: {'baja_utilizacion': 0.3, 'caida_demanda': 0.3, 'demanda_minima_patron': 10.0, 'error_pronostico': 0.15, 'espera_max_min': 5.0, 'headway_maximo_min': 10.0} …
+
+RESULTADO: OK, todos los pasos cumplidos
+
+11. Otro día de datos (2025-11-05) con los canales simulados de correo y WhatsApp activos (NOTIFICACIONES_CANALES=correo,whatsapp en docker-compose.yml)
+   POST /frequency/executions {'hasta': '2025-11-05'} -> 202 (job en segundo plano)
+     … corriendo 0 %
+     … calidad 25 %
+   ejecución 2fc0c65d-849f-451f-9e9e-57a73801f52e estado=ok en 2.1 s, intentos=1
+   filas leídas=51 válidas=51 errores por dimensión={}
+   marca de agua 2025-11-04T23:59:59-05:00 -> 2025-11-05T23:59:59-05:00; data_cutoff=2025-11-05T23:59:59-05:00
+   model_id=hgb_fv1_20250831_s42 feature_version=fv1-2026-11-08 umbrales_version=1 correlation_id=demo-notificaciones
+   predicciones=9 recomendaciones=9 alertas=25 (nuevas=25, repetidas=0, notificaciones simuladas=50, incorporadas al histórico=51)
+   evaluación del modelo activo sobre lo recién llegado: {'n': 51, 'mae': 89.222, 'pico': {'n': 18, 'mae': 71.758, 'rmse': 79.52, 'wape': 9.734, 'sesgo_pct': 2.517}, 'rmse': 117.752, 'wape': 10.442, 'desde': '2025-11-05', 'hasta': '2025-11-05', 'valle': {'n': 33, 'mae': 98.748, 'rmse': 134.087, 'wape': 10.753, 'sesgo_pct': -4.453}, 'model_id': 'hgb_fv1_20250831_s42', 'por_ruta': {'CL 72': {'n': 17, 'mae': 55.879, 'rmse': 72.471, 'wape': 12.421, 'sesgo_pct': -2.041}, 'CRA 54': {'n': 17, 'mae': 92.271, 'rmse': 107.273, 'wape': 6.502, 'sesgo_pct': -2.543}, 'SILENCIO': {'n': 17, 'mae': 119.516, 'rmse': 157.598, 'wape': 17.213, 'sesgo_pct': -2.085}}, 'sesgo_pct': -2.331, 'fuera_de_muestra': True, 'cobertura_p10_p90': 88.24}
+RESULTADO del paso 11: OK
+
+11. Otro día de datos (2025-11-06) con los canales simulados de correo y WhatsApp activos (NOTIFICACIONES_CANALES=correo,whatsapp en docker-compose.yml)
+   POST /frequency/executions {'hasta': '2025-11-06'} -> 202 (job en segundo plano)
+     … en_cola 0 %
+     … corriendo 0 %
+     … calidad 25 %
+   ejecución 53f8a2b5-0080-4451-b098-65c2860410b4 estado=ok en 3.2 s, intentos=1
+   filas leídas=51 válidas=51 errores por dimensión={}
+   marca de agua 2025-11-05T23:59:59-05:00 -> 2025-11-06T23:59:59-05:00; data_cutoff=2025-11-06T23:59:59-05:00
+   model_id=hgb_fv1_20250831_s42 feature_version=fv1-2026-11-08 umbrales_version=1 correlation_id=demo-notificaciones
+   predicciones=9 recomendaciones=9 alertas=25 (nuevas=25, repetidas=0, notificaciones simuladas=50, incorporadas al histórico=51)
+   evaluación del modelo activo sobre lo recién llegado: {'n': 51, 'mae': 89.755, 'pico': {'n': 18, 'mae': 64.827, 'rmse': 76.94, 'wape': 8.764, 'sesgo_pct': 0.082}, 'rmse': 128.815, 'wape': 11.067, 'desde': '2025-11-06', 'hasta': '2025-11-06', 'valle': {'n': 33, 'mae': 103.352, 'rmse': 149.718, 'wape': 12.16, 'sesgo_pct': 1.124}, 'model_id': 'hgb_fv1_20250831_s42', 'por_ruta': {'CL 72': {'n': 17, 'mae': 63.32, 'rmse': 101.469, 'wape': 15.451, 'sesgo_pct': 4.631}, 'CRA 54': {'n': 17, 'mae': 131.792, 'rmse': 179.237, 'wape': 9.685, 'sesgo_pct': -0.723}, 'SILENCIO': {'n': 17, 'mae': 74.152, 'rmse': 85.782, 'wape': 11.193, 'sesgo_pct': 1.516}}, 'sesgo_pct': 0.788, 'fuera_de_muestra': True, 'cobertura_p10_p90': 88.24}
+RESULTADO del paso 11: OK
+
+notification_log por canal y estado (psql al terminar). La primera vez, el paso 11 corrió sin destinatarios y todo quedó «omitida»; la segunda, con destinatarios de prueba: 17 alertas críticas × 2 canales simuladas y 8 preventivas omitidas por el filtro de severidad:
+ correo   | omitida  |    33
+ correo   | simulada |    17
+ whatsapp | omitida  |    33
+ whatsapp | simulada |    17
+

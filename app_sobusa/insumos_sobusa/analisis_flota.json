@@ -1,0 +1,217 @@
+{
+  "generado": "2026-11-02 16:05",
+  "generador": "insumos_sobusa/analizar_flota.py",
+  "fuentes": [
+    "insumos_sobusa/flota_sobusa.csv (derivado del reporte de flota de Sobusa, 2-nov-2026, sin datos personales)",
+    "datos/vehiculos.parquet (656 filas, exportado de la base el 3-oct-2026)",
+    "datos/progvehiculos.parquet (viajes válidos de 2025 en SILENCIO, CRA 54 y CL 72: finalizado = S y cancelada = N)",
+    "insumos_sobusa/vehiculos_sobusa_2026-11.xlsx (40 vehículos)"
+  ],
+  "capacidad_vehiculos_2025": {
+    "que_es": "Capacidad (sentados + de pie) según el reporte de flota de Sobusa de los vehículos (placas) que hicieron viajes válidos en 2025 en las tres rutas",
+    "vehiculos_2025": 418,
+    "idvehiculo_2025": 418,
+    "vehiculos_en_reporte": 417,
+    "vehiculos_con_dato": 417,
+    "mediana_total": 50.0,
+    "media_total": 51.84412470023981,
+    "media_sentados": 33.47721822541966,
+    "media_depie": 18.366906474820144,
+    "p25": 48.0,
+    "p75": 55.0,
+    "mediana_ponderada_por_viajes": 50.0,
+    "mediana_parquet_mismos_vehiculos": 50.0,
+    "vehiculos_con_dato_parquet": 391,
+    "mediana_combinada": 50.0,
+    "vehiculos_con_dato_combinado": 417,
+    "capacidad_usada_en_D1_D5": 50,
+    "por_ruta": {
+      "SILENCIO": {
+        "vehiculos": 221,
+        "con_dato": 221,
+        "mediana": 50.0,
+        "media": 51.61538461538461,
+        "misma_ruta_en_reporte": 72
+      },
+      "CRA 54": {
+        "vehiculos": 210,
+        "con_dato": 210,
+        "mediana": 50.0,
+        "media": 52.319047619047616,
+        "misma_ruta_en_reporte": 123
+      },
+      "CL 72": {
+        "vehiculos": 296,
+        "con_dato": 295,
+        "mediana": 50.0,
+        "media": 51.16949152542373,
+        "misma_ruta_en_reporte": 101
+      }
+    }
+  },
+  "flota_reporte": {
+    "filas": 765,
+    "filas_relleno": 3,
+    "placas_distintas": 643,
+    "placas_repetidas": 120,
+    "placas_con_capacidad_distinta_entre_filas": 11,
+    "placas_en_varias_rutas": 84,
+    "filas_por_ruta": {
+      "KRA. 54 UNINORTE": 196,
+      "72": 156,
+      "SILENCIO": 145,
+      "KR50": 131,
+      "VIVERO_S": 131,
+      "CALDAS": 6
+    },
+    "placas_por_ruta": {
+      "72": 151,
+      "CALDAS": 6,
+      "KR50": 129,
+      "KRA. 54 UNINORTE": 188,
+      "SILENCIO": 137,
+      "VIVERO_S": 125
+    },
+    "capacidad_total": {
+      "n": 643,
+      "con_dato": 643,
+      "sin_dato": 0,
+      "mediana": 50.0,
+      "media": 53.93157076205288,
+      "media_sentados": 33.93312597200622,
+      "media_pie": 19.998444790046655,
+      "p10": 46.0,
+      "p25": 49.0,
+      "p75": 58.0,
+      "p90": 72.0,
+      "min": 33.0,
+      "max": 82.0
+    },
+    "capacidad_tres_rutas": {
+      "n": 443,
+      "con_dato": 443,
+      "sin_dato": 0,
+      "mediana": 51.0,
+      "media": 55.417607223476296,
+      "media_sentados": 34.591422121896166,
+      "media_pie": 20.826185101580137,
+      "p10": 46.0,
+      "p25": 49.0,
+      "p75": 58.0,
+      "p90": 72.0,
+      "min": 39.0,
+      "max": 82.0
+    },
+    "capacidad_por_ruta": {
+      "SILENCIO": {
+        "n": 137,
+        "con_dato": 137,
+        "sin_dato": 0,
+        "mediana": 52.0,
+        "media": 58.284671532846716,
+        "media_sentados": 35.90510948905109,
+        "media_pie": 22.37956204379562,
+        "p10": 46.6,
+        "p25": 49.0,
+        "p75": 72.0,
+        "p90": 72.0,
+        "min": 41.0,
+        "max": 82.0
+      },
+      "CRA 54": {
+        "n": 187,
+        "con_dato": 187,
+        "sin_dato": 0,
+        "mediana": 55.0,
+        "media": 57.17112299465241,
+        "media_sentados": 35.213903743315505,
+        "media_pie": 21.9572192513369,
+        "p10": 47.0,
+        "p25": 50.0,
+        "p75": 63.0,
+        "p90": 72.0,
+        "min": 39.0,
+        "max": 80.0
+      },
+      "CL 72": {
+        "n": 150,
+        "con_dato": 150,
+        "sin_dato": 0,
+        "mediana": 50.0,
+        "media": 52.07333333333333,
+        "media_sentados": 33.20666666666666,
+        "media_pie": 18.866666666666667,
+        "p10": 46.0,
+        "p25": 47.0,
+        "p75": 55.0,
+        "p90": 58.0,
+        "min": 39.0,
+        "max": 74.0
+      }
+    },
+    "cruce_parquet": {
+      "placas_parquet": 629,
+      "coinciden_por_placa": 604,
+      "solo_en_reporte": 39,
+      "solo_en_parquet": 25,
+      "ambos_con_dato": 443,
+      "sentados_y_pie_iguales": 438,
+      "total_igual": 438,
+      "parquet_0_reporte_dato": 161,
+      "reporte_0_parquet_dato": 0,
+      "ninguno_con_dato": 0
+    },
+    "anios_modelo": {
+      "total": {
+        "n": 636,
+        "sin_dato": 7,
+        "mediana": 2016.0,
+        "min": 2001,
+        "max": 2027,
+        "hasta_2009": 178,
+        "2010_2015": 80,
+        "2016_2019": 178,
+        "desde_2020": 200
+      },
+      "tres_rutas": {
+        "n": 442,
+        "sin_dato": 1,
+        "mediana": 2016.0,
+        "min": 2001,
+        "max": 2027,
+        "hasta_2009": 133,
+        "2010_2015": 50,
+        "2016_2019": 124,
+        "desde_2020": 135
+      },
+      "vehiculos_2025": {
+        "n": 417,
+        "sin_dato": 0,
+        "mediana": 2017.0,
+        "min": 2005,
+        "max": 2026,
+        "hasta_2009": 41,
+        "2010_2015": 61,
+        "2016_2019": 175,
+        "desde_2020": 140
+      }
+    }
+  },
+  "archivo_40_vehiculos": {
+    "vehiculos": 40,
+    "en_parquet": 40,
+    "sentados_y_pie_iguales_al_parquet": 40,
+    "con_capacidad": 6,
+    "corrieron_en_2025_tres_rutas": 19,
+    "en_reporte_de_flota": 35,
+    "con_capacidad_en_reporte": 35,
+    "estado": {
+      "N": 39,
+      "Y": 1
+    }
+  },
+  "rutas_base_vs_parquet": {
+    "campos_que_cambiaron": [],
+    "comprobado": "2026-11-02"
+  }
+}

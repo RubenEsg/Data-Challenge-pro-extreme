@@ -1,0 +1,267 @@
+/* ==========================================================================
+   Sobusa Despacho · tokens.css
+   Única fuente de color, tipografía, espaciado, radios, sombras y movimiento
+   de la app. Todas las pantallas y todos los módulos embebidos leen de aquí.
+
+   Solo modo claro (19-oct-2026): la app y sus módulos embebidos se ven
+   siempre en claro, aunque el sistema esté en oscuro. No hay tema oscuro,
+   ni botón de tema, ni islas de tema: todo token nace y vive en :root.
+   app.html lleva data-theme="light" fijo y color-scheme: light.
+
+   Convenciones: nombres en español; los colores de las rutas y los roles de
+   serie son tokens semánticos; el acento es uno solo (verde azulado del
+   Caribe, tono OKLCH 190), distinto del azul de SILENCIO, del naranja de
+   CRA 54, del morado de CL 72 y de los tres colores de estado.
+
+   Paleta de pantallas (estilo Ajustes del iPhone): cada pantalla tiene su
+   color, que solo pinta el cuadro redondeado de su ícono (barra lateral,
+   barra del teléfono, hoja «Más» y cabecera). Los gráficos y los estados
+   conservan sus colores. Hoja de la paleta: app/paleta.html.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* --- Neutros (grises neutros, inspirados en apple.com; 19-oct-2026) ----- */
+  --fondo: #f5f5f7;            /* plano de la página: las tarjetas blancas se separan por tono, sin borde */
+  --superficie: #ffffff;       /* tarjetas, tablas, popovers */
+  --superficie-2: #ececf0;     /* pista del interruptor, botón secundario, elemento elegido de la barra */
+  --superficie-hover: #f0f0f3; /* fila o botón bajo el puntero */
+  --linea: #e3e3e8;            /* líneas entre filas de tabla y separadores */
+  --linea-fuerte: #d2d2d7;     /* bordes de controles, eje base */
+  --tinta: #1d1d1f;            /* texto principal (16,9:1) */
+  --tinta-2: #5e5e63;          /* texto secundario (6,4:1) */
+  --tinta-3: #6e6e73;          /* texto terciario: notas y ejes (5,1:1 sobre blanco; 4,6:1 sobre el fondo: no bajar más) */
+
+  /* --- Acento (verde azulado, tono 190) --------------------------------- */
+  --acento: #0e7974;           /* texto, enlaces, botones (5,2:1 sobre blanco) */
+  --acento-fuerte: #0a625e;    /* hover y pulsado */
+  --acento-suave: #e5f3f2;     /* fondo de lo seleccionado (muy pálido) */
+  --acento-sobre-suave: #0a625e; /* texto sobre el acento suave (6,2:1) */
+  --acento-contraste: #ffffff; /* texto sobre el acento */
+  --foco: #11938d;             /* anillo de foco */
+
+  /* --- Paleta de colores con nombre (19-oct-2026) -------------------------
+     Parte de los colores del sistema de Apple (blue #007AFF, indigo #5856D6,
+     orange #FF9500, red #FF3B30, cyan #32ADE6, green #34C759, yellow #FFCC00,
+     gray #8E8E93), bajando solo la luminosidad (OKLCH, mismo tono) hasta el
+     contraste pedido. Tres tonos por color:
+       --color-X        cuadro del ícono: glifo blanco ≥ 3:1 (WCAG 1.4.11)
+       --color-X-texto  texto: ≥ 4,5:1 sobre #ffffff y sobre --fondo
+       --color-X-suave  tinte para fondos (el tono de texto se lee sobre él ≥ 4,5:1)
+     En cada línea: glifo blanco · texto sobre blanco / sobre --fondo · texto sobre su tinte.
+     Contrastes comprobados con scratchpad/diseno/claro/contrastes_paleta.py
+     y escritos en app/paleta.html. ------------------------------------------ */
+  --glifo-sobre-color: #ffffff;
+  --color-turquesa: #0a9396;   --color-turquesa-texto: #0e7974; --color-turquesa-suave: #e5f3f2; /* glifo 3,73 · texto 5,24 / 4,81 · sobre tinte 4,60 (cuadro más vivo que el acento) */
+  --color-azul: #007aff;       --color-azul-texto: #0068db;     --color-azul-suave: #eff6ff;     /* glifo 4,02 · texto 5,25 / 4,82 · sobre tinte 4,82 */
+  --color-indigo: #5856d6;     --color-indigo-texto: #5856d6;   --color-indigo-suave: #f3f4ff;   /* glifo 5,65 · texto 5,65 / 5,19 · sobre tinte 5,16 */
+  --color-naranja: #d37a03;    --color-naranja-texto: #a45e03;  --color-naranja-suave: #fef3e9;  /* glifo 3,20 · texto 5,02 / 4,61 · sobre tinte 4,59 */
+  --color-coral: #ff3b30;      --color-coral-texto: #d70015;    --color-coral-suave: #fff2f0;    /* glifo 3,55 · texto 5,38 / 4,94 · sobre tinte 4,93 */
+  --color-cian: #0b99d1;       --color-cian-texto: #0677a4;     --color-cian-suave: #ebf7fe;     /* glifo 3,24 · texto 5,02 / 4,61 · sobre tinte 4,61 */
+  --color-verde: #06a63f;      --color-verde-texto: #01812f;    --color-verde-suave: #e8fbea;    /* glifo 3,21 · texto 5,02 / 4,61 · sobre tinte 4,64 */
+  --color-morado: #af52de;     --color-morado-texto: #8e3bb8;   --color-morado-suave: #f7effc;   /* glifo 4,13 · texto 6,06 / 5,56 · sobre tinte 5,39 (base Apple purple) */
+  --color-gris: #8e8e93;       --color-gris-texto: #6e6e73;     --color-gris-suave: #f4f4fa;     /* glifo 3,26 · texto 5,07 / 4,66 · sobre tinte 4,63 */
+
+  /* --- Color de cada pantalla (cuadro de su ícono) ----------------------- */
+  --pantalla-inicio: var(--color-turquesa);
+  --pantalla-demanda: var(--color-azul);
+  --pantalla-modelo: var(--color-indigo);
+  --pantalla-horario: var(--color-naranja);
+  --pantalla-despacho: var(--color-coral);
+  --pantalla-ciudad: var(--color-cian);
+  --pantalla-resultado: var(--color-verde);
+  --pantalla-piloto: var(--color-morado);
+  --pantalla-metodo: var(--color-gris);
+
+  /* --- Series de los gráficos (escenarios) ------------------------------- */
+  --serie-modelo: #169a94;     /* «Con el modelo»: paso 500 de la rampa del acento (3,5:1, OKLCH C 0,10) */
+  --serie-hoy: #8b9ca0;        /* «Hoy» (regla manual, oferta real): gris de desénfasis */
+  --serie-real: #162428;       /* lo que de verdad pasó: tinta */
+  --serie-oraculo: #162428;    /* la decisión con la demanda que llegó: tinta a trazos */
+  /* Añadidos el 8-nov-2026 desde el laboratorio Dash (aditivos: la app todavía no los usa, así que se ve igual).
+     Validados con validate_palette.js de dataviz: ver EntregaFinal/dash_app/DISENO.md §2. */
+  --serie-recorta: #a33460;    /* plan que recorta (supuestos iniciales): el --plan-a del simulador de ahorro; frente a --serie-modelo, CVD 11,6 · normal 28,1 */
+  --serie-contexto: #c4ccce;   /* contexto: lo que se quita, pasos de una cascada, «hoy» tenue (≈ --serie-hoy al 45 %); 1,63:1, siempre con alivio */
+  --franja: color-mix(in srgb, var(--acento) 8%, transparent); /* franja de rango o de selección en un gráfico */
+  --lavado: 10%;               /* lavado de área: color-mix(in srgb, var(--c) var(--lavado), transparent) */
+
+  /* --- Rutas (fijas en todo el proyecto) --------------------------------- */
+  --ruta-silencio: #2f6fb3;
+  --ruta-cra54: #d9731a;
+  --ruta-cl72: #6a3d9a;
+
+  /* --- Estado (bien / atención / crítico): siempre con icono y texto ----- */
+  --bien: #317229;             --bien-suave: #e0f6dd;
+  --atencion: #b26f0b;         --atencion-suave: #fef0d8;   --atencion-texto: #925b08;
+  --critico: #ba2b2e;          --critico-suave: #fdf2f1;
+
+  /* --- Mobiliario de los gráficos ---------------------------------------- */
+  --rejilla: #e8e8ed;          /* un paso por encima de la superficie */
+  --eje: #d2d2d7;              /* línea base */
+
+  /* --- Sombras ----------------------------------------------------------- */
+  --sombra-1: 0 1px 2px rgba(0, 0, 0, 0.06);           /* solo el segmento elegido del interruptor */
+  --sombra-2: 0 8px 24px rgba(0, 0, 0, 0.08);          /* lo que flota (cabecera compacta, hoja «Más») */
+  --sombra-3: 0 12px 40px rgba(0, 0, 0, 0.14);         /* popovers */
+
+  /* --- Tipografía (pila del sistema) ------------------------------------- */
+  --fuente-texto: -apple-system, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --fuente-titulos: -apple-system, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --fuente-mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --t-xs: 12px;                /* etiquetas mínimas: pestañas del teléfono, ejes */
+  --t-s: 14px;                 /* texto secundario, tablas, notas */
+  --t-m: 17px;                 /* texto corriente (cuerpo de Apple) */
+  --t-l: 21px;                 /* subtítulo de la pantalla, título de gráfico, h3 */
+  --t-xl: 28px;                /* título de sección (h2) */
+  --t-2xl: 32px;               /* título de bloque grande */
+  --t-3xl: clamp(34px, 3.2vw, 44px); /* pregunta de la pantalla (h1) */
+  --t-cifra: 36px;             /* valor de una ficha de cifra */
+  --t-hero: clamp(48px, 5vw, 64px); /* pareja protagonista de Inicio */
+  --lh-texto: 1.47;
+  --lh-titulo: 1.1;
+  --lh-cifra: 1.05;
+  --ls-titulo: -0.02em;
+  --ls-texto: -0.01em;         /* tracking del cuerpo (SF Pro Text) */
+  --ls-etiqueta: 0.06em;       /* ya no se usa en la app: solo lo leen páginas antiguas */
+  --lh-compacto: 1.35;         /* subtítulos y etiquetas (8-nov-2026, aditivo: la app lo escribe a mano) */
+  --ls-h1: -0.025em;           /* tracking del h1 (8-nov-2026, aditivo: la app lo escribe a mano en .cabecera__pregunta) */
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --peso-fuerte: 600;
+
+  /* --- Espaciado (escala de 8 px, con medio paso) ------------------------ */
+  --e-1: 4px;
+  --e-2: 8px;
+  --e-3: 12px;
+  --e-4: 16px;
+  --e-5: 24px;
+  --e-6: 32px;
+  --e-7: 48px;
+  --e-8: 64px;
+  --e-9: 96px;
+  --gutter: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-der: max(16px, env(safe-area-inset-right, 0px));
+
+  /* --- Radios ------------------------------------------------------------ */
+  --radio-s: 8px;              /* chips de código, foco */
+  --radio-m: 12px;             /* controles, elementos anidados */
+  --radio-l: 18px;             /* tarjetas, gráficos, avisos, desplegables */
+  --radio-pill: 999px;
+
+  /* --- Movimiento -------------------------------------------------------- */
+  --dur-1: 120ms;              /* hover, foco */
+  --dur-2: 200ms;              /* abrir y cerrar, cambio de estado */
+  --dur-3: 320ms;              /* plegar la barra, entrar una pantalla */
+  --dur-4: 600ms;              /* contar una cifra al cambiar */
+  --curva: cubic-bezier(0.2, 0, 0, 1);        /* salida suave (lo habitual) */
+  --curva-simetrica: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Disposición ------------------------------------------------------- */
+  --ancho-lateral: 240px;
+  --ancho-lateral-plegada: 68px;
+  --alto-pestanas-movil: 60px;
+  --alto-cabecera: 88px;
+  --ancho-texto: 68ch;
+  --ancho-contenido: 1200px;
+  --z-cabecera: 10;
+  --z-lateral: 20;
+  --z-popover: 100;
+  --z-tooltip: 110;
+}
+
+/* --------------------------------------------------------------------------
+   Puente para los módulos embebidos. Cuando una de las páginas existentes
+   (tablero, planificador, consola, vista 3D, simulador) se abre dentro de la
+   app con ?embebido=1, pone html[data-embebido] y carga este archivo al final
+   de su <head>: los nombres que esas páginas ya usan pasan a leer los tokens
+   de la app. El atributo repetido sube la especificidad a (0,2,1) para ganar
+   al :root de cada página. Solo valores claros: cada página fija
+   data-theme="light" en su <head> antes de pintar y ya no tiene bloque oscuro.
+   Los tokens propios de cada página (--occ-*, --plan, --plan-a, --plan-b,
+   --div-*, --manana, --tarde, --mapa-vacio, --sin-dato) se conservan.
+   -------------------------------------------------------------------------- */
+:root[data-embebido][data-embebido] {
+  --bg: var(--fondo);
+  --surface: var(--superficie);
+  --surface-2: var(--superficie-2);
+  --fg: var(--tinta);
+  --muted: var(--tinta-2);
+  --line: var(--linea);
+  --accent: var(--acento);
+  --accent-soft: var(--acento-suave);
+  --shadow: var(--sombra-2);
+  --shadow-pop: var(--sombra-3);
+  --font-body: var(--fuente-texto);
+  --font-display: var(--fuente-titulos);
+  --hoy: var(--serie-hoy);
+  --real: var(--serie-hoy);
+  --ok: var(--bien);
+  --warn: var(--atencion);
+  --bad: var(--critico);
+  --r-silencio: var(--ruta-silencio);
+  --r-cra54: var(--ruta-cra54);
+  --r-cl72: var(--ruta-cl72);
+  /* Vista 3D: superficies de sus controles (botones, campos, pistas, hora actual del plan) */
+  --control: var(--superficie);
+  --texto-invertido: var(--superficie);
+  --borde-hover: var(--linea-fuerte);
+  --deshabilitado: var(--tinta-3);
+  --linea-suave: var(--rejilla);
+  --pista: var(--superficie-2);
+  --persona-baja: var(--linea-fuerte);
+  --borde-busito: var(--linea-fuerte);
+  --hora-actual: var(--acento-suave);
+}
+
+/* Teléfono: títulos más contenidos (la escala de escritorio no cabe en 360-400 px). */
+@media (max-width: 600px) {
+  :root {
+    --t-3xl: 30px;
+    --t-xl: 22px;
+    --t-cifra: 32px;
+    --t-hero: 44px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Puente de componentes (solo en las páginas embebidas, html[data-embebido]):
+   el mismo lenguaje que la app dentro del marco. Rótulos en tipo de frase, sin
+   mayúsculas espaciadas; tarjetas internas sin borde ni sombra (se separan por
+   tono); campos de 16 px en el teléfono para que iOS no amplíe la página.
+   Abiertas solas, estas páginas no cargan tokens.css: no cambian.
+   -------------------------------------------------------------------------- */
+html[data-embebido] .tab,
+html[data-embebido] .kpi .label,
+html[data-embebido] .grupo-tit,
+html[data-embebido] table.datos th,
+html[data-embebido] table.datos tr.subtitulo td,
+html[data-embebido] .ejemplos .rot,
+html[data-embebido] .cal-sem span,
+html[data-embebido] .cal-lista h4,
+html[data-embebido] details.como > summary,
+html[data-embebido] li.sep-ahora,
+html[data-embebido] dl.datos-prox dt,
+html[data-embebido] .cal-grid .dow,
+html[data-embebido] .par-enc,
+html[data-embebido] #recorrido .num,
+html[data-embebido] #plan th { text-transform: none; letter-spacing: 0; }
+html[data-embebido] .kpi,
+html[data-embebido] .card,
+html[data-embebido] .tarjeta { border-color: transparent; border-radius: var(--radio-l); box-shadow: none; background: var(--superficie); }
+@media (max-width: 760px) {
+  html[data-embebido] .campo input[type=number],
+  html[data-embebido] .campo select { font-size: 16px; }
+}
+
+/* --------------------------------------------------------------------------
+   Movimiento reducido: todo pasa a ser inmediato.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 0ms;
+    --dur-2: 0ms;
+    --dur-3: 0ms;
+    --dur-4: 0ms;
+  }
+}

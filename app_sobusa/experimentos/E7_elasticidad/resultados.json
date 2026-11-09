@@ -1,0 +1,2904 @@
+{
+ "experimento": "E7_elasticidad",
+ "descripcion": "Elasticidad de los pasajeros totales a la frecuencia con variación de la oferta no decidida por el despachador (viajes registrados que no se realizaron), en tres diseños: panel horario con VI (A), derrame hacia los buses siguientes (B) y panel ruta-día (C).",
+ "definiciones": {
+  "beta": "elasticidad de los pasajeros totales a las salidas realizadas (d log pasajeros / d log salidas)",
+  "relacion_con_D1": "D1 usa e = elasticidad de pasajeros por viaje al intervalo; e = 1 - beta. EDA 0,22 -> beta 0,78; equilibrio de S1 e = 0,46 -> beta 0,54; literatura beta ≈ 0,5",
+  "viaje_realizado": "distancia_recorrida >= 20.0 km",
+  "caida_masiva": "ruta-día con más del 25 % de viajes fallidos (excluida)"
+ },
+ "clasificacion_viajes": {
+  "viajes_registrados": 564837,
+  "canceladas_bandera": 44156,
+  "canceladas_que_si_operaron": 36180,
+  "pct_canceladas_que_si_operaron": 81.9367696349307,
+  "pasajeros_en_canceladas_operadas": 2849886.0,
+  "pct_pasajeros_totales_en_canceladas_operadas": 6.3276431483926086,
+  "validas_eda_no_operadas": 19737,
+  "fallas_reales": 27754,
+  "pct_fallas_reales": 4.913629949879346,
+  "fallas_por_tipo": {
+   "valida_sin_recorrido": 14776,
+   "cancelada_sin_recorrido": 7976,
+   "excedio_plazo": 5002
+  },
+  "pct_fallas_confirmadas_gps_dias_con_gps": 67.92184990100489,
+  "pct_fallas_sin_gps_dias_con_gps": 25.817176584855616,
+  "pct_fallas_vehiculo_no_vuelve": 43.557685378684155,
+  "antelacion_registro_mediana_min": 12.175376033333333,
+  "tasa_falla_por_hora_pct": {
+   "4": 15.23,
+   "5": 11.35,
+   "6": 4.55,
+   "7": 3.27,
+   "8": 3.24,
+   "9": 2.61,
+   "10": 2.44,
+   "11": 2.51,
+   "12": 2.83,
+   "13": 3.19,
+   "14": 3.53,
+   "15": 3.51,
+   "16": 3.76,
+   "17": 4.44,
+   "18": 5.16,
+   "19": 6.17,
+   "20": 7.76
+  },
+  "tasa_falla_por_ruta_pct": {
+   "CL 72": 6.03,
+   "CRA 54": 4.29,
+   "SILENCIO": 5.37
+  },
+  "tasa_falla_por_anio_pct": {
+   "2023": 3.85,
+   "2024": 5.41,
+   "2025": 5.53
+  },
+  "tasa_falla_por_tipo_dia_pct": {
+   "Domingo/festivo": 4.4,
+   "Laboral": 4.99,
+   "Sábado": 4.99
+  }
+ },
+ "pruebas_exogeneidad": [
+  {
+   "fallas": "Todas las fallas",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 54046,
+   "coef_pp_por_log": 0.2918955058094698,
+   "ee": 0.38912365974957885,
+   "pp_por_10pct_mas_demanda": 0.027820613142774942,
+   "t": 0.7501355892811031
+  },
+  {
+   "fallas": "Todas las fallas",
+   "regresor": "log pasajeros/viaje hace 7 días",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 53808,
+   "coef_pp_por_log": 0.13021078203574746,
+   "ee": 0.28788002306947197,
+   "pp_por_10pct_mas_demanda": 0.012410413048288854,
+   "t": 0.45230919689180604
+  },
+  {
+   "fallas": "Todas las fallas",
+   "regresor": "log pasajeros/viaje hora anterior (mismo día)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 51381,
+   "coef_pp_por_log": 1.3137639278647515,
+   "ee": 0.3662208274202366,
+   "pp_por_10pct_mas_demanda": 0.12521507618522565,
+   "t": 3.5873544853231785
+  },
+  {
+   "fallas": "Todas las fallas",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 54046,
+   "coef_pp_por_log": -0.5170684673913842,
+   "ee": 0.30863159037393023,
+   "pp_por_10pct_mas_demanda": -0.04928188859821955,
+   "t": -1.6753582054413716
+  },
+  {
+   "fallas": "Todas las fallas",
+   "regresor": "log pasajeros/viaje hace 7 días",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 53808,
+   "coef_pp_por_log": -0.051808882175111974,
+   "ee": 0.2543975754462736,
+   "pp_por_10pct_mas_demanda": -0.0049379138755710076,
+   "t": -0.20365320732411432
+  },
+  {
+   "fallas": "Todas las fallas",
+   "regresor": "log pasajeros/viaje hora anterior (mismo día)",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 51381,
+   "coef_pp_por_log": 1.406452448762273,
+   "ee": 0.35568543576485223,
+   "pp_por_10pct_mas_demanda": 0.13404923577776534,
+   "t": 3.954203088855443
+  },
+  {
+   "fallas": "Canceladas sin recorrido",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 54046,
+   "coef_pp_por_log": 0.10665776994502647,
+   "ee": 0.2086029677096623,
+   "pp_por_10pct_mas_demanda": 0.010165571230988798,
+   "t": 0.5112955540185548
+  },
+  {
+   "fallas": "Canceladas sin recorrido",
+   "regresor": "log pasajeros/viaje hace 7 días",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 53808,
+   "coef_pp_por_log": -0.01461073459002681,
+   "ee": 0.1569271815284493,
+   "pp_por_10pct_mas_demanda": -0.0013925517408487252,
+   "t": -0.09310518705376757
+  },
+  {
+   "fallas": "Canceladas sin recorrido",
+   "regresor": "log pasajeros/viaje hora anterior (mismo día)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 51381,
+   "coef_pp_por_log": 0.23371192252794343,
+   "ee": 0.19710303670313348,
+   "pp_por_10pct_mas_demanda": 0.022275125358552746,
+   "t": 1.1857347630820543
+  },
+  {
+   "fallas": "Canceladas sin recorrido",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 54046,
+   "coef_pp_por_log": -0.17678818194240328,
+   "ee": 0.168875469763688,
+   "pp_por_10pct_mas_demanda": -0.016849713408210166,
+   "t": -1.046855308173459
+  },
+  {
+   "fallas": "Canceladas sin recorrido",
+   "regresor": "log pasajeros/viaje hace 7 días",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 53808,
+   "coef_pp_por_log": 0.0008360056315848053,
+   "ee": 0.13195507939874274,
+   "pp_por_10pct_mas_demanda": 7.967984706377602e-05,
+   "t": 0.006335532026459989
+  },
+  {
+   "fallas": "Canceladas sin recorrido",
+   "regresor": "log pasajeros/viaje hora anterior (mismo día)",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 51381,
+   "coef_pp_por_log": 0.3137360479256203,
+   "ee": 0.1873676237445116,
+   "pp_por_10pct_mas_demanda": 0.02990223913888918,
+   "t": 1.6744410888906858
+  },
+  {
+   "fallas": "Excedió plazo",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 54046,
+   "coef_pp_por_log": 0.1850431090330382,
+   "ee": 0.2019712062411369,
+   "pp_por_10pct_mas_demanda": 0.017636491993490173,
+   "t": 0.9161855913862892
+  },
+  {
+   "fallas": "Excedió plazo",
+   "regresor": "log pasajeros/viaje hace 7 días",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 53808,
+   "coef_pp_por_log": 0.14574874936209217,
+   "ee": 0.11083352884557962,
+   "pp_por_10pct_mas_demanda": 0.013891339507956494,
+   "t": 1.3150239903049434
+  },
+  {
+   "fallas": "Excedió plazo",
+   "regresor": "log pasajeros/viaje hora anterior (mismo día)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 51381,
+   "coef_pp_por_log": 0.4171757148539895,
+   "ee": 0.15038153457429618,
+   "pp_por_10pct_mas_demanda": 0.03976109239273153,
+   "t": 2.774115293044063
+  },
+  {
+   "fallas": "Excedió plazo",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 54046,
+   "coef_pp_por_log": -0.06382120708350715,
+   "ee": 0.14159813954644915,
+   "pp_por_10pct_mas_demanda": -0.006082810722458123,
+   "t": -0.450720661217244
+  },
+  {
+   "fallas": "Excedió plazo",
+   "regresor": "log pasajeros/viaje hace 7 días",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 53808,
+   "coef_pp_por_log": 0.06530557286745564,
+   "ee": 0.0996694487824107,
+   "pp_por_10pct_mas_demanda": 0.006224285892221641,
+   "t": 0.6552215715572467
+  },
+  {
+   "fallas": "Excedió plazo",
+   "regresor": "log pasajeros/viaje hora anterior (mismo día)",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 51381,
+   "coef_pp_por_log": 0.4461606594372797,
+   "ee": 0.14971718115445287,
+   "pp_por_10pct_mas_demanda": 0.04252365267258331,
+   "t": 2.9800231075484023
+  },
+  {
+   "fallas": "Válidas sin recorrido",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 54046,
+   "coef_pp_por_log": 0.00019462683140501744,
+   "ee": 0.23626793930145817,
+   "pp_por_10pct_mas_demanda": 1.8549918295958248e-05,
+   "t": 0.0008237547251668786
+  },
+  {
+   "fallas": "Válidas sin recorrido",
+   "regresor": "log pasajeros/viaje hace 7 días",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 53808,
+   "coef_pp_por_log": -0.0009272327363180141,
+   "ee": 0.15953500115696845,
+   "pp_por_10pct_mas_demanda": -8.837471881892614e-05,
+   "t": -0.005812095963854969
+  },
+  {
+   "fallas": "Válidas sin recorrido",
+   "regresor": "log pasajeros/viaje hora anterior (mismo día)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 51381,
+   "coef_pp_por_log": 0.6628762904828184,
+   "ee": 0.21628075441587497,
+   "pp_por_10pct_mas_demanda": 0.06317885843394135,
+   "t": 3.064888007595018
+  },
+  {
+   "fallas": "Válidas sin recorrido",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 54046,
+   "coef_pp_por_log": -0.27645907836547423,
+   "ee": 0.16795180151789826,
+   "pp_por_10pct_mas_demanda": -0.026349364467551307,
+   "t": -1.6460620003293778
+  },
+  {
+   "fallas": "Válidas sin recorrido",
+   "regresor": "log pasajeros/viaje hace 7 días",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 53808,
+   "coef_pp_por_log": -0.1179504606741524,
+   "ee": 0.13200214842154534,
+   "pp_por_10pct_mas_demanda": -0.011241879614856422,
+   "t": -0.8935495526745576
+  },
+  {
+   "fallas": "Válidas sin recorrido",
+   "regresor": "log pasajeros/viaje hora anterior (mismo día)",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 51381,
+   "coef_pp_por_log": 0.6465557413993724,
+   "ee": 0.1960132448855108,
+   "pp_por_10pct_mas_demanda": 0.0616233439662928,
+   "t": 3.2985308813035497
+  },
+  {
+   "fallas": "Vehículo no vuelve a operar",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 54046,
+   "coef_pp_por_log": 0.09889814172013635,
+   "ee": 0.33848026866912473,
+   "pp_por_10pct_mas_demanda": 0.009425999669659804,
+   "t": 0.292182885900544
+  },
+  {
+   "fallas": "Vehículo no vuelve a operar",
+   "regresor": "log pasajeros/viaje hace 7 días",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 53808,
+   "coef_pp_por_log": 0.129587349580053,
+   "ee": 0.26643153534532144,
+   "pp_por_10pct_mas_demanda": 0.012350993588840762,
+   "t": 0.48638142407615176
+  },
+  {
+   "fallas": "Vehículo no vuelve a operar",
+   "regresor": "log pasajeros/viaje hora anterior (mismo día)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 51381,
+   "coef_pp_por_log": 1.149858493937077,
+   "ee": 0.34663191700689855,
+   "pp_por_10pct_mas_demanda": 0.10959321980667308,
+   "t": 3.3172320190993636
+  },
+  {
+   "fallas": "Vehículo no vuelve a operar",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 54046,
+   "coef_pp_por_log": -0.4074146939673666,
+   "ee": 0.2283032582196556,
+   "pp_por_10pct_mas_demanda": -0.03883076773695373,
+   "t": -1.7845329810202881
+  },
+  {
+   "fallas": "Vehículo no vuelve a operar",
+   "regresor": "log pasajeros/viaje hace 7 días",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 53808,
+   "coef_pp_por_log": -0.05884214052951025,
+   "ee": 0.22817584390243173,
+   "pp_por_10pct_mas_demanda": -0.005608254993938977,
+   "t": -0.257880674497127
+  },
+  {
+   "fallas": "Vehículo no vuelve a operar",
+   "regresor": "log pasajeros/viaje hora anterior (mismo día)",
+   "efectos_fijos": "ruta×hora×tipo×mes",
+   "n": 51381,
+   "coef_pp_por_log": 1.3404155886652214,
+   "ee": 0.33138289612071975,
+   "pp_por_10pct_mas_demanda": 0.1277552507682023,
+   "t": 4.04491482317458
+  },
+  {
+   "fallas": "Todas las fallas (4–8 h)",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 15546,
+   "coef_pp_por_log": 1.967683432677115,
+   "ee": 1.1161786082940897,
+   "pp_por_10pct_mas_demanda": 0.18754026176644714,
+   "t": 1.7628750614423814
+  },
+  {
+   "fallas": "Todas las fallas (9–15 h)",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 22592,
+   "coef_pp_por_log": -0.5029000856685062,
+   "ee": 0.5803783967517129,
+   "pp_por_10pct_mas_demanda": -0.04793149758867574,
+   "t": -0.8665037990441397
+  },
+  {
+   "fallas": "Todas las fallas (16–20 h)",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 15908,
+   "coef_pp_por_log": 0.07657347027287054,
+   "ee": 0.5551315236971092,
+   "pp_por_10pct_mas_demanda": 0.007298231219948421,
+   "t": 0.1379375283228386
+  },
+  {
+   "fallas": "Todas las fallas (4 h)",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 2635,
+   "coef_pp_por_log": 2.78178158100503,
+   "ee": 4.042609697514965,
+   "pp_por_10pct_mas_demanda": 0.2651321026619487,
+   "t": 0.688115299064122
+  },
+  {
+   "fallas": "Todas las fallas (5 h)",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 3227,
+   "coef_pp_por_log": 0.8367116732281769,
+   "ee": 2.9953365096425038,
+   "pp_por_10pct_mas_demanda": 0.07974714001975511,
+   "t": 0.27933812128776114
+  },
+  {
+   "fallas": "Todas las fallas (19 h)",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 3220,
+   "coef_pp_por_log": -4.3137151467329415,
+   "ee": 2.2090420992475006,
+   "pp_por_10pct_mas_demanda": -0.4111409662597566,
+   "t": -1.9527537063247402
+  },
+  {
+   "fallas": "Todas las fallas (20 h)",
+   "regresor": "log demanda esperada (media 4 semanas)",
+   "efectos_fijos": "ruta×hora×tipo×mes + día",
+   "n": 3014,
+   "coef_pp_por_log": 1.1123803450376315,
+   "ee": 1.4770728496552756,
+   "pp_por_10pct_mas_demanda": 0.10602117069633367,
+   "t": 0.7530978213412037
+  }
+ ],
+ "diseno_A": [
+  {
+   "diseno": "A",
+   "variante": "Principal: ruta×hora×tipo×mes + día",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5319970665005507,
+   "ee_mco": 0.006790468393546446,
+   "beta_vi": 0.7258710295772632,
+   "ee_vi": 0.014131216808306143,
+   "ic95_vi": [
+    0.6981738446329832,
+    0.7535682145215433
+   ],
+   "F_primera_etapa": 2177.025337947361,
+   "primera_etapa": {
+    "z": -0.988329959358986
+   },
+   "primera_etapa_ee": {
+    "z": 0.02118215874881241
+   },
+   "forma_reducida": {
+    "z": -0.717400085161962
+   },
+   "forma_reducida_ee": {
+    "z": 0.022081329002874683
+   },
+   "media_z": 0.047119448320880615,
+   "nota": "instrumento: proporción de viajes registrados que no se realizaron"
+  },
+  {
+   "diseno": "A",
+   "variante": "EF ruta×hora×tipo×año×mes + día",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtym + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5386443599556856,
+   "ee_mco": 0.006963088984962166,
+   "beta_vi": 0.7178065921193602,
+   "ee_vi": 0.013835079642474643,
+   "ic95_vi": [
+    0.6906898360201098,
+    0.7449233482186105
+   ],
+   "F_primera_etapa": 2360.7810974655836,
+   "primera_etapa": {
+    "z": -0.9990153178137026
+   },
+   "primera_etapa_ee": {
+    "z": 0.02056100258575563
+   },
+   "forma_reducida": {
+    "z": -0.7170997807548934
+   },
+   "forma_reducida_ee": {
+    "z": 0.021621928697326334
+   },
+   "media_z": 0.047119448320880615,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "EF ruta×hora×tipo + día",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rht + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5186465913831299,
+   "ee_mco": 0.007127750496204671,
+   "beta_vi": 0.7331150055627197,
+   "ee_vi": 0.015695593478704507,
+   "ic95_vi": [
+    0.7023516423444589,
+    0.7638783687809805
+   ],
+   "F_primera_etapa": 1871.0642287741048,
+   "primera_etapa": {
+    "z": -0.9833155670442122
+   },
+   "primera_etapa_ee": {
+    "z": 0.022732571547002228
+   },
+   "forma_reducida": {
+    "z": -0.7208833974035264
+   },
+   "forma_reducida_ee": {
+    "z": 0.023279756205685006
+   },
+   "media_z": 0.047119448320880615,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "EF ruta×hora×tipo×mes + ruta×día",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_rd",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5379397685383434,
+   "ee_mco": 0.007042133052905583,
+   "beta_vi": 0.7293768054291219,
+   "ee_vi": 0.014381512208854736,
+   "ic95_vi": [
+    0.7011890414997666,
+    0.7575645693584772
+   ],
+   "F_primera_etapa": 2090.0201859290855,
+   "primera_etapa": {
+    "z": -0.9825288054620127
+   },
+   "primera_etapa_ee": {
+    "z": 0.021491664455711403
+   },
+   "forma_reducida": {
+    "z": -0.7166337213699739
+   },
+   "forma_reducida_ee": {
+    "z": 0.022605788865368428
+   },
+   "media_z": 0.047119448320880615,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "EF ruta×hora×tipo×mes (sin EF de día)",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5978723827637887,
+   "ee_mco": 0.01157728843760503,
+   "beta_vi": 0.7418438231125986,
+   "ee_vi": 0.01340416472786584,
+   "ic95_vi": [
+    0.7155716602459815,
+    0.7681159859792156
+   ],
+   "F_primera_etapa": 1762.2597720977049,
+   "primera_etapa": {
+    "z": -1.0679876657388914
+   },
+   "primera_etapa_ee": {
+    "z": 0.025440829843667856
+   },
+   "forma_reducida": {
+    "z": -0.792280052988839
+   },
+   "forma_reducida_ee": {
+    "z": 0.024237592212664815
+   },
+   "media_z": 0.047119448320880615,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Solo días laborales",
+   "grupo": "",
+   "n": 36825,
+   "n_clusters": 730,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5335429292853178,
+   "ee_mco": 0.008393781005522042,
+   "beta_vi": 0.7245357211089242,
+   "ee_vi": 0.017306839297086377,
+   "ic95_vi": [
+    0.6906143160866349,
+    0.7584571261312134
+   ],
+   "F_primera_etapa": 1526.9309191845243,
+   "primera_etapa": {
+    "z": -1.0345379340505443
+   },
+   "primera_etapa_ee": {
+    "z": 0.02647504611106165
+   },
+   "forma_reducida": {
+    "z": -0.7495596880618476
+   },
+   "forma_reducida_ee": {
+    "z": 0.028326965682056227
+   },
+   "media_z": 0.04767031354188635,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Solo sábados, domingos y festivos",
+   "grupo": "",
+   "n": 17354,
+   "n_clusters": 361,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5282182909012874,
+   "ee_mco": 0.011170926728183466,
+   "beta_vi": 0.7291209434602294,
+   "ee_vi": 0.02413045556124937,
+   "ic95_vi": [
+    0.6818252505601806,
+    0.7764166363602781
+   ],
+   "F_primera_etapa": 738.5942828024964,
+   "primera_etapa": {
+    "z": -0.8914250866115399
+   },
+   "primera_etapa_ee": {
+    "z": 0.03280060702733705
+   },
+   "forma_reducida": {
+    "z": -0.6499567001743226
+   },
+   "forma_reducida_ee": {
+    "z": 0.03251934996385889
+   },
+   "media_z": 0.04595051828956012,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Ruta SILENCIO",
+   "grupo": "SILENCIO",
+   "n": 18048,
+   "n_clusters": 1090,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.48395437391279456,
+   "ee_mco": 0.008940449242902314,
+   "beta_vi": 0.6698554940910195,
+   "ee_vi": 0.02261762600284047,
+   "ic95_vi": [
+    0.6255249471254523,
+    0.7141860410565868
+   ],
+   "F_primera_etapa": 926.6739621091656,
+   "primera_etapa": {
+    "z": -0.9642036123547671
+   },
+   "primera_etapa_ee": {
+    "z": 0.0316741722433967
+   },
+   "forma_reducida": {
+    "z": -0.6458770871582487
+   },
+   "forma_reducida_ee": {
+    "z": 0.03162094539063894
+   },
+   "media_z": 0.047036212804056156,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Ruta CRA 54",
+   "grupo": "CRA 54",
+   "n": 18098,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5134485496407888,
+   "ee_mco": 0.012129832759105582,
+   "beta_vi": 0.6567367877364886,
+   "ee_vi": 0.025516046811771317,
+   "ic95_vi": [
+    0.6067253359854168,
+    0.7067482394875604
+   ],
+   "F_primera_etapa": 442.40652228926393,
+   "primera_etapa": {
+    "z": -1.0439860725392403
+   },
+   "primera_etapa_ee": {
+    "z": 0.04963453349763265
+   },
+   "forma_reducida": {
+    "z": -0.6856240597210533
+   },
+   "forma_reducida_ee": {
+    "z": 0.04595374674971388
+   },
+   "media_z": 0.04314181989219137,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Ruta CL 72",
+   "grupo": "CL 72",
+   "n": 18033,
+   "n_clusters": 1089,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5985755618906918,
+   "ee_mco": 0.009024086363849888,
+   "beta_vi": 0.8028123821064723,
+   "ee_vi": 0.01781829205793873,
+   "ic95_vi": [
+    0.7678885296729124,
+    0.8377362345400322
+   ],
+   "F_primera_etapa": 1473.7591077862387,
+   "primera_etapa": {
+    "z": -0.9681501289070333
+   },
+   "primera_etapa_ee": {
+    "z": 0.025219092616873513
+   },
+   "forma_reducida": {
+    "z": -0.7772429112245436
+   },
+   "forma_reducida_ee": {
+    "z": 0.02552015510891732
+   },
+   "media_z": 0.051194718875423165,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Franja 4–8 h",
+   "grupo": "4–8 h",
+   "n": 15587,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5927033594014167,
+   "ee_mco": 0.012903569156146814,
+   "beta_vi": 0.7309176270970045,
+   "ee_vi": 0.02126270993829102,
+   "ic95_vi": [
+    0.689242715617954,
+    0.7725925385760549
+   ],
+   "F_primera_etapa": 1153.088603378344,
+   "primera_etapa": {
+    "z": -0.9692328873680727
+   },
+   "primera_etapa_ee": {
+    "z": 0.02854281495836798
+   },
+   "forma_reducida": {
+    "z": -0.7084294021394499
+   },
+   "forma_reducida_ee": {
+    "z": 0.034682391395827454
+   },
+   "media_z": 0.06874100185123891,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Franja 9–15 h",
+   "grupo": "9–15 h",
+   "n": 22793,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5294523447528496,
+   "ee_mco": 0.00723576952064761,
+   "beta_vi": 0.7442295861309396,
+   "ee_vi": 0.022410862177888367,
+   "ic95_vi": [
+    0.7003042962622784,
+    0.7881548759996008
+   ],
+   "F_primera_etapa": 593.7287243638774,
+   "primera_etapa": {
+    "z": -0.8557168730050372
+   },
+   "primera_etapa_ee": {
+    "z": 0.03511850868894396
+   },
+   "forma_reducida": {
+    "z": -0.6368498142418003
+   },
+   "forma_reducida_ee": {
+    "z": 0.03436733748433405
+   },
+   "media_z": 0.028927098312909263,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Franja 16–20 h",
+   "grupo": "16–20 h",
+   "n": 15799,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5461845897615963,
+   "ee_mco": 0.009386198861164667,
+   "beta_vi": 0.7115245622834059,
+   "ee_vi": 0.022274803966952743,
+   "ic95_vi": [
+    0.6678659465081785,
+    0.7551831780586332
+   ],
+   "F_primera_etapa": 802.9512159426604,
+   "primera_etapa": {
+    "z": -0.965483225800473
+   },
+   "primera_etapa_ee": {
+    "z": 0.034072198149125016
+   },
+   "forma_reducida": {
+    "z": -0.6869650296296523
+   },
+   "forma_reducida_ee": {
+    "z": 0.03253746978502854
+   },
+   "media_z": 0.05203387827556105,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Horas de carga baja (tercil inferior)",
+   "grupo": "carga baja",
+   "n": 18260,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5374666350920025,
+   "ee_mco": 0.009497280808082167,
+   "beta_vi": 0.6964880292386136,
+   "ee_vi": 0.022980842475366546,
+   "ic95_vi": [
+    0.6514455779868952,
+    0.7415304804903321
+   ],
+   "F_primera_etapa": 808.8027141845291,
+   "primera_etapa": {
+    "z": -0.8972930844555428
+   },
+   "primera_etapa_ee": {
+    "z": 0.03155099215169581
+   },
+   "forma_reducida": {
+    "z": -0.6249538920418782
+   },
+   "forma_reducida_ee": {
+    "z": 0.029824116881495496
+   },
+   "media_z": 0.05222804210604531,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Horas de carga alta (tercil superior)",
+   "grupo": "carga alta",
+   "n": 17895,
+   "n_clusters": 910,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.6148766664063968,
+   "ee_mco": 0.011153087347256093,
+   "beta_vi": 0.7741423623973092,
+   "ee_vi": 0.01987101991317527,
+   "ic95_vi": [
+    0.7351951633674856,
+    0.8130895614271327
+   ],
+   "F_primera_etapa": 1051.6000219503553,
+   "primera_etapa": {
+    "z": -1.0383760757057987
+   },
+   "primera_etapa_ee": {
+    "z": 0.03202059370999509
+   },
+   "forma_reducida": {
+    "z": -0.8038509083037337
+   },
+   "forma_reducida_ee": {
+    "z": 0.03818084254913218
+   },
+   "media_z": 0.04659351846154818,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Instrumentos por tipo de falla (3)",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z_cancel, z_exced, z_valida",
+   "controles": "",
+   "beta_mco": 0.5319970665005507,
+   "ee_mco": 0.006790468393546446,
+   "beta_vi": 0.7313830970411114,
+   "ee_vi": 0.014634281715922785,
+   "ic95_vi": [
+    0.7026999048779027,
+    0.7600662892043201
+   ],
+   "F_primera_etapa": 834.7136027010039,
+   "primera_etapa": {
+    "z_cancel": -0.8706098096116369,
+    "z_exced": -1.179298864360238,
+    "z_valida": -0.9906868501030525
+   },
+   "primera_etapa_ee": {
+    "z_cancel": 0.032490480266673505,
+    "z_exced": 0.052830253287895694,
+    "z_valida": 0.025805844623625826
+   },
+   "forma_reducida": {
+    "z_cancel": -0.6381666267599317,
+    "z_exced": -1.0071009817542174,
+    "z_valida": -0.6445622787062
+   },
+   "forma_reducida_ee": {
+    "z_cancel": 0.029659401211099966,
+    "z_exced": 0.061858959626965554,
+    "z_valida": 0.02439860050587515
+   },
+   "media_z": 0.015207953932741469,
+   "nota": "",
+   "sargan_hansen_p": 8.02543587141713e-11
+  },
+  {
+   "diseno": "A",
+   "variante": "Solo canceladas sin recorrido",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z_cancel",
+   "controles": "",
+   "beta_mco": 0.5319970665005507,
+   "ee_mco": 0.006790468393546446,
+   "beta_vi": 0.7370917245999997,
+   "ee_vi": 0.02223282753768002,
+   "ic95_vi": [
+    0.6935153826261469,
+    0.7806680665738526
+   ],
+   "F_primera_etapa": 588.0959487335039,
+   "primera_etapa": {
+    "z_cancel": -0.8720538838707859
+   },
+   "primera_etapa_ee": {
+    "z_cancel": 0.035959962223099856
+   },
+   "forma_reducida": {
+    "z_cancel": -0.6427837012064453
+   },
+   "forma_reducida_ee": {
+    "z_cancel": 0.03233000428612437
+   },
+   "media_z": 0.015207953932741469,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Solo excedió plazo",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z_exced",
+   "controles": "",
+   "beta_mco": 0.5319970665005507,
+   "ee_mco": 0.006790468393546446,
+   "beta_vi": 0.853678651337406,
+   "ee_vi": 0.030397140890633587,
+   "ic95_vi": [
+    0.7941002551917641,
+    0.9132570474830478
+   ],
+   "F_primera_etapa": 425.0618531739196,
+   "primera_etapa": {
+    "z_exced": -1.1902288509057595
+   },
+   "primera_etapa_ee": {
+    "z_exced": 0.057730378861373215
+   },
+   "forma_reducida": {
+    "z_exced": -1.016072960224099
+   },
+   "forma_reducida_ee": {
+    "z_exced": 0.06513671601177029
+   },
+   "media_z": 0.008036008720887795,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Solo válidas sin recorrido",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z_valida",
+   "controles": "",
+   "beta_mco": 0.5319970665005507,
+   "ee_mco": 0.006790468393546446,
+   "beta_vi": 0.6483894646448001,
+   "ee_vi": 0.017086746754066157,
+   "ic95_vi": [
+    0.6148994410068304,
+    0.6818794882827698
+   ],
+   "F_primera_etapa": 1306.942481160586,
+   "primera_etapa": {
+    "z_valida": -0.9734224386903076
+   },
+   "primera_etapa_ee": {
+    "z_valida": 0.026926079008147
+   },
+   "forma_reducida": {
+    "z_valida": -0.6311568538956441
+   },
+   "forma_reducida_ee": {
+    "z_valida": 0.025285006145603396
+   },
+   "media_z": 0.02387548566725135,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Solo fallas confirmadas por GPS",
+   "grupo": "",
+   "n": 52414,
+   "n_clusters": 1055,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z_gps",
+   "controles": "",
+   "beta_mco": 0.5305029648471511,
+   "ee_mco": 0.006943260923881291,
+   "beta_vi": 0.7515974981887134,
+   "ee_vi": 0.016310498690266413,
+   "ic95_vi": [
+    0.7196289207557912,
+    0.7835660756216355
+   ],
+   "F_primera_etapa": 1800.283852837579,
+   "primera_etapa": {
+    "z_gps": -1.0371820190114425
+   },
+   "primera_etapa_ee": {
+    "z_gps": 0.024444687293279747
+   },
+   "forma_reducida": {
+    "z_gps": -0.7795434106553185
+   },
+   "forma_reducida_ee": {
+    "z_gps": 0.0278479231893522
+   },
+   "media_z": 0.031726457114315564,
+   "nota": "excluye el último día de cada mes (sin GPS)"
+  },
+  {
+   "diseno": "A",
+   "variante": "Solo fallas en que el vehículo no vuelve",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z_veh",
+   "controles": "",
+   "beta_mco": 0.5319970665005507,
+   "ee_mco": 0.006790468393546446,
+   "beta_vi": 0.7425980394945044,
+   "ee_vi": 0.017142623600626305,
+   "ic95_vi": [
+    0.7089984972372769,
+    0.7761975817517319
+   ],
+   "F_primera_etapa": 1254.8838204261972,
+   "primera_etapa": {
+    "z_veh": -1.0485403498672277
+   },
+   "primera_etapa_ee": {
+    "z_veh": 0.029599432713598745
+   },
+   "forma_reducida": {
+    "z_veh": -0.7786440081422851
+   },
+   "forma_reducida_ee": {
+    "z_veh": 0.02522321109834203
+   },
+   "media_z": 0.023881341245434576,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Sin horas 4, 19 y 20 (sospecha de discreción)",
+   "grupo": "",
+   "n": 45429,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5261981221013177,
+   "ee_mco": 0.007953747156955071,
+   "beta_vi": 0.7416202533072309,
+   "ee_vi": 0.019338384490882,
+   "ic95_vi": [
+    0.7037170197051021,
+    0.7795234869093597
+   ],
+   "F_primera_etapa": 978.4946890238988,
+   "primera_etapa": {
+    "z": -0.9493516114267984
+   },
+   "primera_etapa_ee": {
+    "z": 0.030349242479748528
+   },
+   "forma_reducida": {
+    "z": -0.7040583825439699
+   },
+   "forma_reducida_ee": {
+    "z": 0.03133931388396074
+   },
+   "media_z": 0.0392515604275666,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Con lluvia de la hora y la anterior",
+   "grupo": "",
+   "n": 51538,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "lluvia_mm, lluvia_prev",
+   "beta_mco": 0.5219554377413067,
+   "ee_mco": 0.007086819028207318,
+   "beta_vi": 0.7260366257910746,
+   "ee_vi": 0.01719949435002283,
+   "ic95_vi": [
+    0.6923256168650299,
+    0.7597476347171194
+   ],
+   "F_primera_etapa": 1376.0505765702221,
+   "primera_etapa": {
+    "z": -0.9605502343498448
+   },
+   "primera_etapa_ee": {
+    "z": 0.02589422301017491
+   },
+   "forma_reducida": {
+    "z": -0.6973946510501907,
+    "lluvia_mm": -0.0015147310558191363,
+    "lluvia_prev": 0.0010352822267629242
+   },
+   "forma_reducida_ee": {
+    "z": 0.02666591479793057,
+    "lluvia_mm": 0.0016880375851820882,
+    "lluvia_prev": 0.001529310671769894
+   },
+   "media_z": 0.042131027131267734,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Incluye días de caída masiva",
+   "grupo": "",
+   "n": 54348,
+   "n_clusters": 1094,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5411774536329058,
+   "ee_mco": 0.008389855763607087,
+   "beta_vi": 0.7427721661999891,
+   "ee_vi": 0.016008639962488327,
+   "ic95_vi": [
+    0.711395231873512,
+    0.7741491005264662
+   ],
+   "F_primera_etapa": 1388.9008895525947,
+   "primera_etapa": {
+    "z": -1.0170525731099922
+   },
+   "primera_etapa_ee": {
+    "z": 0.027290266381763538
+   },
+   "forma_reducida": {
+    "z": -0.7554383428681821
+   },
+   "forma_reducida_ee": {
+    "z": 0.03072153701579619
+   },
+   "media_z": 0.047476123107778274,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Control log(viajes registrados)",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "lreg",
+   "beta_mco": 0.6905416904075854,
+   "ee_mco": 0.01382590981425224,
+   "beta_vi": 0.6726175867151352,
+   "ee_vi": 0.011293947485251069,
+   "ic95_vi": [
+    0.6504814496440431,
+    0.6947537237862272
+   ],
+   "F_primera_etapa": 11791.998721092597,
+   "primera_etapa": {
+    "z": -1.2869091633576586
+   },
+   "primera_etapa_ee": {
+    "z": 0.01185097771742044
+   },
+   "forma_reducida": {
+    "z": -0.865597735779217,
+    "lreg": 0.49997509975830057
+   },
+   "forma_reducida_ee": {
+    "z": 0.019805903045031617,
+    "lreg": 0.006644340342941793
+   },
+   "media_z": 0.047119448320880615,
+   "nota": "control endógeno: el despachador registra según la demanda"
+  },
+  {
+   "diseno": "A",
+   "variante": "Con fallas de h-1 y h+1 (derrame y placebo)",
+   "grupo": "",
+   "n": 47778,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "z_prev, z_next",
+   "beta_mco": 0.5154059340563616,
+   "ee_mco": 0.006881531325444904,
+   "beta_vi": 0.7291705815112686,
+   "ee_vi": 0.01845220988511816,
+   "ic95_vi": [
+    0.693004250136437,
+    0.7653369128861002
+   ],
+   "F_primera_etapa": 1255.1968302637931,
+   "primera_etapa": {
+    "z": -0.9736035337413453
+   },
+   "primera_etapa_ee": {
+    "z": 0.027480600878985083
+   },
+   "forma_reducida": {
+    "z": -0.709923054859597,
+    "z_prev": -0.047434567352855346,
+    "z_next": -0.01974905920233222
+   },
+   "forma_reducida_ee": {
+    "z": 0.02926251985852507,
+    "z_prev": 0.014339467131138674,
+    "z_next": 0.015419709251533175
+   },
+   "media_z": 0.039502753103526446,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Solo horas con ≤ 20 % de fallas",
+   "grupo": "",
+   "n": 50962,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.48052923475953696,
+   "ee_mco": 0.006532445235531855,
+   "beta_vi": 0.6829195876801594,
+   "ee_vi": 0.035095410964911394,
+   "ic95_vi": [
+    0.6141325821889331,
+    0.7517065931713857
+   ],
+   "F_primera_etapa": 408.83902365128466,
+   "primera_etapa": {
+    "z": -0.40617969734079995
+   },
+   "primera_etapa_ee": {
+    "z": 0.020088247032336592
+   },
+   "forma_reducida": {
+    "z": -0.2773880714320312
+   },
+   "forma_reducida_ee": {
+    "z": 0.017321105579106575
+   },
+   "media_z": 0.029631497728240683,
+   "nota": "descarta las horas con muchas fallas, que pesan en la primera etapa"
+  },
+  {
+   "diseno": "A",
+   "variante": "Instrumento binario: alguna falla en la hora",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z_alguna",
+   "controles": "",
+   "beta_mco": 0.5319970665005507,
+   "ee_mco": 0.006790468393546446,
+   "beta_vi": 0.7496038471896856,
+   "ee_vi": 0.021178567237320395,
+   "ic95_vi": [
+    0.7080938554045377,
+    0.7911138389748336
+   ],
+   "F_primera_etapa": 910.0424861558242,
+   "primera_etapa": {
+    "z_alguna": -0.08177718769839458
+   },
+   "primera_etapa_ee": {
+    "z_alguna": 0.0027108240942125
+   },
+   "forma_reducida": {
+    "z_alguna": -0.061300494511069586
+   },
+   "forma_reducida_ee": {
+    "z_alguna": 0.0024427578148940236
+   },
+   "media_z": 0.3138300817659979,
+   "nota": ""
+  },
+  {
+   "diseno": "A-ingenuo",
+   "variante": "Ingenuo: válidos EDA, instrumento bandera cancelada",
+   "grupo": "",
+   "n": 54453,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z_canc_flag",
+   "controles": "",
+   "beta_mco": 0.6367045128120654,
+   "ee_mco": 0.0065599765806800365,
+   "beta_vi": 1.0189955622434057,
+   "ee_vi": 0.010380274630661065,
+   "ic95_vi": [
+    0.9986502239673101,
+    1.0393409005195013
+   ],
+   "F_primera_etapa": 7496.349966286131,
+   "primera_etapa": {
+    "z_canc_flag": -1.1996566563825148
+   },
+   "primera_etapa_ee": {
+    "z_canc_flag": 0.01385581389279071
+   },
+   "forma_reducida": {
+    "z_canc_flag": -1.2224448090695446
+   },
+   "forma_reducida_ee": {
+    "z_canc_flag": 0.013487885481509938
+   },
+   "media_z": 0.08971014932230785,
+   "nota": "pasajeros y salidas de viajes 'válidos'; la mayoría de las 'canceladas' sí operó -> sesgo mecánico"
+  },
+  {
+   "diseno": "A-ingenuo",
+   "variante": "Pasajeros totales, instrumento bandera cancelada",
+   "grupo": "",
+   "n": 54179,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rhtm + fe_dia",
+   "instrumentos": "z_canc_flag",
+   "controles": "",
+   "beta_mco": 0.5319970665005507,
+   "ee_mco": 0.006790468393546446,
+   "beta_vi": 0.6939243394164573,
+   "ee_vi": 0.0747175506030338,
+   "ic95_vi": [
+    0.547477940234511,
+    0.8403707385984035
+   ],
+   "F_primera_etapa": 73.43947398336935,
+   "primera_etapa": {
+    "z_canc_flag": -0.11556806172183208
+   },
+   "primera_etapa_ee": {
+    "z_canc_flag": 0.013485686227508585
+   },
+   "forma_reducida": {
+    "z_canc_flag": -0.08019549088796267
+   },
+   "forma_reducida_ee": {
+    "z_canc_flag": 0.011438727432579888
+   },
+   "media_z": 0.09145239801951988,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Bloques de 2 horas (4–19 h)",
+   "grupo": "2 h",
+   "n": 25730,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rbtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.5006236118488683,
+   "ee_mco": 0.012885289212380597,
+   "beta_vi": 0.6907791692781903,
+   "ee_vi": 0.021768361091900054,
+   "ic95_vi": [
+    0.6481131815380662,
+    0.7334451570183144
+   ],
+   "F_primera_etapa": 415.69787568381446,
+   "primera_etapa": {
+    "z": -1.0068338419464595
+   },
+   "primera_etapa_ee": {
+    "z": 0.04938202581354807
+   },
+   "forma_reducida": {
+    "z": -0.6954998449409441
+   },
+   "forma_reducida_ee": {
+    "z": 0.03449919602109229
+   },
+   "media_z": 0.046960138700469015,
+   "nota": ""
+  },
+  {
+   "diseno": "A",
+   "variante": "Bloques de 4 horas (4–19 h)",
+   "grupo": "4 h",
+   "n": 12668,
+   "n_clusters": 1091,
+   "efectos_fijos": "fe_rbtm + fe_dia",
+   "instrumentos": "z",
+   "controles": "",
+   "beta_mco": 0.487093976508827,
+   "ee_mco": 0.023307675701651903,
+   "beta_vi": 0.6824095451476012,
+   "ee_vi": 0.0333875236513192,
+   "ic95_vi": [
+    0.6169699987910156,
+    0.7478490915041869
+   ],
+   "F_primera_etapa": 369.05726501489363,
+   "primera_etapa": {
+    "z": -1.039064900372873
+   },
+   "primera_etapa_ee": {
+    "z": 0.05408736137352796
+   },
+   "forma_reducida": {
+    "z": -0.7090678060422897
+   },
+   "forma_reducida_ee": {
+    "z": 0.043843070601380284
+   },
+   "media_z": 0.04768069901845964,
+   "nota": ""
+  }
+ ],
+ "diseno_B": {
+  "absorcion": {
+   "Todas": {
+    "eventos": 5698,
+    "dias": 1065,
+    "pax_esperados_viaje_fallido": 83.84246151989215,
+    "num1": 0.13455318093450205,
+    "num1_ic95": [
+     0.12458619067430685,
+     0.14522900996373064
+    ],
+    "num2": 0.16241261495247003,
+    "num2_ic95": [
+     0.1481403866399697,
+     0.17731652547966317
+    ],
+    "num4": 0.16779696764871455,
+    "num4_ic95": [
+     0.14326287645333555,
+     0.19152041311737592
+    ],
+    "pre": 0.03554097812303674,
+    "pre_ic95": [
+     0.019622635949127436,
+     0.048339729589211455
+    ],
+    "num4_corr": 0.09671501140264106,
+    "num4_corr_ic95": [
+     0.06848693057568817,
+     0.12671400363573618
+    ],
+    "num4_mas_pre": 0.2033379457717513,
+    "num4_mas_pre_ic95": [
+     0.171132343185215,
+     0.23663836858784884
+    ],
+    "elasticidad_implicita": 0.903284988597359,
+    "elasticidad_implicita_ic95": [
+     0.8732859963642639,
+     0.9315130694243119
+    ],
+    "elasticidad_implicita_cota_baja": 0.7966620542282488
+   },
+   "Cancelada sin recorrido": {
+    "eventos": 1732,
+    "dias": 843,
+    "pax_esperados_viaje_fallido": 82.50327851282292,
+    "num1": 0.0922383371586291,
+    "num1_ic95": [
+     0.07243813037600313,
+     0.11163120338619306
+    ],
+    "num2": 0.11339032363866076,
+    "num2_ic95": [
+     0.0859137622623147,
+     0.14026626910502613
+    ],
+    "num4": 0.09846544237970466,
+    "num4_ic95": [
+     0.05749165811071505,
+     0.137009465274739
+    ],
+    "pre": 0.018239068122055918,
+    "pre_ic95": [
+     -0.006991207737188646,
+     0.04245210114103627
+    ],
+    "num4_corr": 0.06198730613559282,
+    "num4_corr_ic95": [
+     0.008658426292552535,
+     0.1195674204972361
+    ],
+    "num4_mas_pre": 0.11670451050176057,
+    "num4_mas_pre_ic95": [
+     0.0647798544865079,
+     0.16629237104982628
+    ],
+    "elasticidad_implicita": 0.9380126938644072,
+    "elasticidad_implicita_ic95": [
+     0.8804325795027639,
+     0.9913415737074475
+    ],
+    "elasticidad_implicita_cota_baja": 0.8832954894982394
+   },
+   "Excedió plazo": {
+    "eventos": 580,
+    "dias": 430,
+    "pax_esperados_viaje_fallido": 84.55257525098713,
+    "num1": 0.05900266523143355,
+    "num1_ic95": [
+     0.030318456426778665,
+     0.08749961259420279
+    ],
+    "num2": 0.07083061859416523,
+    "num2_ic95": [
+     0.02848368331864449,
+     0.11976551480036181
+    ],
+    "num4": 0.09501874820015903,
+    "num4_ic95": [
+     0.019078722881383105,
+     0.17244642750500752
+    ],
+    "pre": -0.00786741092963112,
+    "pre_ic95": [
+     -0.0567958385975486,
+     0.03533835799951107
+    ],
+    "num4_corr": 0.11075357005942127,
+    "num4_corr_ic95": [
+     0.01437050645137297,
+     0.22870107493403663
+    ],
+    "num4_mas_pre": 0.0871513372705279,
+    "num4_mas_pre_ic95": [
+     -0.00703046062351784,
+     0.18619975777163375
+    ],
+    "elasticidad_implicita": 0.8892464299405787,
+    "elasticidad_implicita_ic95": [
+     0.7712989250659634,
+     0.9856294935486271
+    ],
+    "elasticidad_implicita_cota_baja": 0.9128486627294721
+   },
+   "Válida sin recorrido": {
+    "eventos": 3386,
+    "dias": 1020,
+    "pax_esperados_viaje_fallido": 84.4058398436396,
+    "num1": 0.16867391293822384,
+    "num1_ic95": [
+     0.15363307908673846,
+     0.18420673657923706
+    ],
+    "num2": 0.2026378540939071,
+    "num2_ic95": [
+     0.18176597010613454,
+     0.22211285992545077
+    ],
+    "num4": 0.2149500161450212,
+    "num4_ic95": [
+     0.1815806302351933,
+     0.249062172881522
+    ],
+    "pre": 0.05164023073440681,
+    "pre_ic95": [
+     0.03319549695233498,
+     0.06852013637223589
+    ],
+    "num4_corr": 0.1116695546762076,
+    "num4_corr_ic95": [
+     0.06995636413311113,
+     0.15463067732756822
+    ],
+    "num4_mas_pre": 0.266590246879428,
+    "num4_mas_pre_ic95": [
+     0.22210967541894475,
+     0.30840368675669133
+    ],
+    "elasticidad_implicita": 0.8883304453237924,
+    "elasticidad_implicita_ic95": [
+     0.8453693226724318,
+     0.9300436358668889
+    ],
+    "elasticidad_implicita_cota_baja": 0.733409753120572
+   },
+   "Confirmada por GPS": {
+    "eventos": 3693,
+    "dias": 991,
+    "pax_esperados_viaje_fallido": 84.37271801023671,
+    "num1": 0.15007069890986385,
+    "num1_ic95": [
+     0.1376474343226641,
+     0.16345514790606572
+    ],
+    "num2": 0.18298007139917027,
+    "num2_ic95": [
+     0.16509338493779352,
+     0.20071216672654602
+    ],
+    "num4": 0.18594368655411478,
+    "num4_ic95": [
+     0.15769035764496753,
+     0.21615644397923586
+    ],
+    "pre": 0.040037654445863866,
+    "pre_ic95": [
+     0.024063133173220112,
+     0.05871830005225564
+    ],
+    "num4_corr": 0.10586837766238705,
+    "num4_corr_ic95": [
+     0.06560664834623793,
+     0.14283588236240888
+    ],
+    "num4_mas_pre": 0.22598134099997863,
+    "num4_mas_pre_ic95": [
+     0.18876943541824065,
+     0.2621059213352738
+    ],
+    "elasticidad_implicita": 0.894131622337613,
+    "elasticidad_implicita_ic95": [
+     0.8571641176375911,
+     0.934393351653762
+    ],
+    "elasticidad_implicita_cota_baja": 0.7740186590000213
+   },
+   "Sin eventos GPS (día con GPS)": {
+    "eventos": 1426,
+    "dias": 766,
+    "pax_esperados_viaje_fallido": 80.2535202636113,
+    "num1": 0.08298370865797343,
+    "num1_ic95": [
+     0.06141784261977126,
+     0.1017905772894984
+    ],
+    "num2": 0.0991749099475818,
+    "num2_ic95": [
+     0.06612217353793141,
+     0.12953851428320118
+    ],
+    "num4": 0.10505305074789653,
+    "num4_ic95": [
+     0.04932868033889326,
+     0.15341371231500134
+    ],
+    "pre": 0.010196790996308595,
+    "pre_ic95": [
+     -0.018418600269126843,
+     0.04133943373476936
+    ],
+    "num4_corr": 0.08465946875527934,
+    "num4_corr_ic95": [
+     0.02037015745805474,
+     0.15270650980414696
+    ],
+    "num4_mas_pre": 0.11524984174420513,
+    "num4_mas_pre_ic95": [
+     0.04814281313587945,
+     0.1791317763712672
+    ],
+    "elasticidad_implicita": 0.9153405312447207,
+    "elasticidad_implicita_ic95": [
+     0.8472934901958531,
+     0.9796298425419453
+    ],
+    "elasticidad_implicita_cota_baja": 0.8847501582557948
+   },
+   "Vehículo no vuelve": {
+    "eventos": 2595,
+    "dias": 969,
+    "pax_esperados_viaje_fallido": 79.69797634792671,
+    "num1": 0.1525948616857349,
+    "num1_ic95": [
+     0.13779533354603418,
+     0.16678473678206412
+    ],
+    "num2": 0.1697301634198854,
+    "num2_ic95": [
+     0.1468678140056398,
+     0.19298558350774275
+    ],
+    "num4": 0.17261026564458978,
+    "num4_ic95": [
+     0.1378485545424655,
+     0.20526440026298595
+    ],
+    "pre": 0.04012918519530966,
+    "pre_ic95": [
+     0.01988314015298484,
+     0.06060497669485746
+    ],
+    "num4_corr": 0.09235189525397046,
+    "num4_corr_ic95": [
+     0.03533307295897092,
+     0.14288239378702153
+    ],
+    "num4_mas_pre": 0.21273945083989945,
+    "num4_mas_pre_ic95": [
+     0.16845369295551643,
+     0.25731889410707887
+    ],
+    "elasticidad_implicita": 0.9076481047460295,
+    "elasticidad_implicita_ic95": [
+     0.8571176062129785,
+     0.9646669270410291
+    ],
+    "elasticidad_implicita_cota_baja": 0.7872605491601006
+   },
+   "SILENCIO": {
+    "eventos": 1949,
+    "dias": 921,
+    "pax_esperados_viaje_fallido": 79.92466628231053,
+    "num1": 0.19118242584046188,
+    "num1_ic95": [
+     0.1720396531925773,
+     0.2124279964110335
+    ],
+    "num2": 0.23479223931921533,
+    "num2_ic95": [
+     0.20257820903634496,
+     0.2666110950908786
+    ],
+    "num4": 0.2446826647369547,
+    "num4_ic95": [
+     0.19953078621273795,
+     0.29248924896251255
+    ],
+    "pre": 0.04097838327658311,
+    "pre_ic95": [
+     0.016639911986192833,
+     0.06664138663385763
+    ],
+    "num4_corr": 0.1627258981837885,
+    "num4_corr_ic95": [
+     0.0959102952405033,
+     0.2230735099851719
+    ],
+    "num4_mas_pre": 0.2856610480135378,
+    "num4_mas_pre_ic95": [
+     0.22841844286103083,
+     0.34861068209465734
+    ],
+    "elasticidad_implicita": 0.8372741018162115,
+    "elasticidad_implicita_ic95": [
+     0.776926490014828,
+     0.9040897047594967
+    ],
+    "elasticidad_implicita_cota_baja": 0.7143389519864622
+   },
+   "CRA 54": {
+    "eventos": 2128,
+    "dias": 942,
+    "pax_esperados_viaje_fallido": 84.77386595787257,
+    "num1": 0.11673501376153789,
+    "num1_ic95": [
+     0.10209052171224461,
+     0.13485565808732483
+    ],
+    "num2": 0.16257729405079713,
+    "num2_ic95": [
+     0.13731374572213428,
+     0.18557631696874072
+    ],
+    "num4": 0.18966450362201848,
+    "num4_ic95": [
+     0.15234921900691037,
+     0.23196227942355385
+    ],
+    "pre": 0.04547354790057882,
+    "pre_ic95": [
+     0.02472148759277682,
+     0.06898734164714868
+    ],
+    "num4_corr": 0.09871740782086083,
+    "num4_corr_ic95": [
+     0.04713380039954522,
+     0.14667807101024116
+    ],
+    "num4_mas_pre": 0.2351380515225973,
+    "num4_mas_pre_ic95": [
+     0.1889627703514461,
+     0.2828545533513225
+    ],
+    "elasticidad_implicita": 0.9012825921791392,
+    "elasticidad_implicita_ic95": [
+     0.8533219289897589,
+     0.9528661996004548
+    ],
+    "elasticidad_implicita_cota_baja": 0.7648619484774026
+   },
+   "CL 72": {
+    "eventos": 1621,
+    "dias": 828,
+    "pax_esperados_viaje_fallido": 87.33028031941357,
+    "num1": 0.09494561472331216,
+    "num1_ic95": [
+     0.07739459719177595,
+     0.11408329849376089
+    ],
+    "num2": 0.08255727894315149,
+    "num2_ic95": [
+     0.054332325504488535,
+     0.10857290076458836
+    ],
+    "num4": 0.055326369316621986,
+    "num4_ic95": [
+     0.012383674618268043,
+     0.10091983091274723
+    ],
+    "pre": 0.01690025367666758,
+    "pre_ic95": [
+     -0.003628863104695722,
+     0.04281397153270352
+    ],
+    "num4_corr": 0.021525861963286826,
+    "num4_corr_ic95": [
+     -0.030823164697468576,
+     0.07189170444101334
+    ],
+    "num4_mas_pre": 0.07222662299328957,
+    "num4_mas_pre_ic95": [
+     0.018318640059343177,
+     0.13320867549037557
+    ],
+    "elasticidad_implicita": 0.9784741380367131,
+    "elasticidad_implicita_ic95": [
+     0.9281082955589867,
+     1.0308231646974686
+    ],
+    "elasticidad_implicita_cota_baja": 0.9277733770067105
+   },
+   "4–8 h": {
+    "eventos": 1278,
+    "dias": 753,
+    "pax_esperados_viaje_fallido": 84.55620379273643,
+    "num1": 0.1182831819987523,
+    "num1_ic95": [
+     0.09564514765857375,
+     0.1385765772821544
+    ],
+    "num2": 0.1345291522678452,
+    "num2_ic95": [
+     0.10361814463646248,
+     0.166642801635177
+    ],
+    "num4": 0.14843436328808376,
+    "num4_ic95": [
+     0.09597534549043366,
+     0.19388750541867505
+    ],
+    "pre": 0.022557580920488072,
+    "pre_ic95": [
+     -0.0023761015541788537,
+     0.04781507912917217
+    ],
+    "num4_corr": 0.10331920144710763,
+    "num4_corr_ic95": [
+     0.038213974851144694,
+     0.15820487020607812
+    ],
+    "num4_mas_pre": 0.17099194420857183,
+    "num4_mas_pre_ic95": [
+     0.11092719970250087,
+     0.2333591451913143
+    ],
+    "elasticidad_implicita": 0.8966807985528924,
+    "elasticidad_implicita_ic95": [
+     0.8417951297939219,
+     0.9617860251488553
+    ],
+    "elasticidad_implicita_cota_baja": 0.8290080557914281
+   },
+   "9–15 h": {
+    "eventos": 2843,
+    "dias": 1000,
+    "pax_esperados_viaje_fallido": 91.46572763665974,
+    "num1": 0.12776799678066145,
+    "num1_ic95": [
+     0.1127542463284223,
+     0.14168056157897743
+    ],
+    "num2": 0.15616382471117882,
+    "num2_ic95": [
+     0.1347874482175318,
+     0.17947976207287372
+    ],
+    "num4": 0.1609186125640191,
+    "num4_ic95": [
+     0.12938551742780452,
+     0.19637851192674186
+    ],
+    "pre": 0.04446208754682316,
+    "pre_ic95": [
+     0.024910380323335205,
+     0.06471944586170097
+    ],
+    "num4_corr": 0.07199443747037278,
+    "num4_corr_ic95": [
+     0.023068797756593984,
+     0.1150954071018401
+    ],
+    "num4_mas_pre": 0.20538070011084225,
+    "num4_mas_pre_ic95": [
+     0.1644323192513324,
+     0.24515150432656715
+    ],
+    "elasticidad_implicita": 0.9280055625296272,
+    "elasticidad_implicita_ic95": [
+     0.8849045928981599,
+     0.976931202243406
+    ],
+    "elasticidad_implicita_cota_baja": 0.7946192998891577
+   },
+   "16–20 h": {
+    "eventos": 1577,
+    "dias": 841,
+    "pax_esperados_viaje_fallido": 69.52089639962252,
+    "num1": 0.1666834223985516,
+    "num1_ic95": [
+     0.1416355221222124,
+     0.19143945798654693
+    ],
+    "num2": 0.2047175907808199,
+    "num2_ic95": [
+     0.16469767981315261,
+     0.2415343935152697
+    ],
+    "num4": 0.20319646957715826,
+    "num4_ic95": [
+     0.14077670255028282,
+     0.26468730706332866
+    ],
+    "pre": 0.0271786755402304,
+    "pre_ic95": [
+     -0.001937412257086792,
+     0.05708034655689322
+    ],
+    "num4_corr": 0.14883911849669745,
+    "num4_corr_ic95": [
+     0.08419933286945609,
+     0.22269550898327203
+    ],
+    "num4_mas_pre": 0.23037514511738866,
+    "num4_mas_pre_ic95": [
+     0.14895473382188876,
+     0.31318137346030306
+    ],
+    "elasticidad_implicita": 0.8511608815033025,
+    "elasticidad_implicita_ic95": [
+     0.7773044910167279,
+     0.9158006671305439
+    ],
+    "elasticidad_implicita_cota_baja": 0.7696248548826113
+   },
+   "Laboral": {
+    "eventos": 3985,
+    "dias": 725,
+    "pax_esperados_viaje_fallido": 89.35688806575357,
+    "num1": 0.13343714915366708,
+    "num1_ic95": [
+     0.11910990544020471,
+     0.14431907638900382
+    ],
+    "num2": 0.16653983732801653,
+    "num2_ic95": [
+     0.14925936628676748,
+     0.1832005551565457
+    ],
+    "num4": 0.17425050540381673,
+    "num4_ic95": [
+     0.14767381461945692,
+     0.2041892715689485
+    ],
+    "pre": 0.03604003381559634,
+    "pre_ic95": [
+     0.021152973976531583,
+     0.05056884206457876
+    ],
+    "num4_corr": 0.10217043777262405,
+    "num4_corr_ic95": [
+     0.0701008469082054,
+     0.13562523031514911
+    ],
+    "num4_mas_pre": 0.21029053921941307,
+    "num4_mas_pre_ic95": [
+     0.17668809620567197,
+     0.24823823640128748
+    ],
+    "elasticidad_implicita": 0.897829562227376,
+    "elasticidad_implicita_ic95": [
+     0.8643747696848509,
+     0.9298991530917946
+    ],
+    "elasticidad_implicita_cota_baja": 0.7897094607805869
+   },
+   "Fin de semana y festivo": {
+    "eventos": 1713,
+    "dias": 340,
+    "pax_esperados_viaje_fallido": 71.01409620450525,
+    "num1": 0.13782004449215443,
+    "num1_ic95": [
+     0.11593660248441534,
+     0.15644519925952138
+    ],
+    "num2": 0.15033135292701708,
+    "num2_ic95": [
+     0.12048495504588541,
+     0.17972900683565726
+    ],
+    "num4": 0.14890608329208488,
+    "num4_ic95": [
+     0.10345704035887701,
+     0.19064292074305741
+    ],
+    "pre": 0.03408013544520354,
+    "pre_ic95": [
+     0.010289475395902166,
+     0.057414739152788594
+    ],
+    "num4_corr": 0.0807458124016778,
+    "num4_corr_ic95": [
+     0.018686287788835625,
+     0.14281870686298132
+    ],
+    "num4_mas_pre": 0.18298621873728843,
+    "num4_mas_pre_ic95": [
+     0.12682214545286277,
+     0.23485214621600592
+    ],
+    "elasticidad_implicita": 0.9192541875983222,
+    "elasticidad_implicita_ic95": [
+     0.8571812931370186,
+     0.9813137122111644
+    ],
+    "elasticidad_implicita_cota_baja": 0.8170137812627116
+   },
+   "Carga esperada baja": {
+    "eventos": 1901,
+    "dias": 827,
+    "pax_esperados_viaje_fallido": 57.9094841525703,
+    "num1": 0.21774091692978734,
+    "num1_ic95": [
+     0.19663537381439336,
+     0.24105847549277504
+    ],
+    "num2": 0.270718039846065,
+    "num2_ic95": [
+     0.2389013628337862,
+     0.30270909683820235
+    ],
+    "num4": 0.31603174112485866,
+    "num4_ic95": [
+     0.2651472026320687,
+     0.3675137621640562
+    ],
+    "pre": 0.04520493603527088,
+    "pre_ic95": [
+     0.01900105960957365,
+     0.07006953061711263
+    ],
+    "num4_corr": 0.22562186905431691,
+    "num4_corr_ic95": [
+     0.15429907321454478,
+     0.29655205868748036
+    ],
+    "num4_mas_pre": 0.3612366771601295,
+    "num4_mas_pre_ic95": [
+     0.2971448787766955,
+     0.41900518169086926
+    ],
+    "elasticidad_implicita": 0.7743781309456831,
+    "elasticidad_implicita_ic95": [
+     0.7034479413125196,
+     0.8457009267854552
+    ],
+    "elasticidad_implicita_cota_baja": 0.6387633228398705
+   },
+   "Carga esperada alta": {
+    "eventos": 1899,
+    "dias": 753,
+    "pax_esperados_viaje_fallido": 109.48080462062629,
+    "num1": 0.08366675939082097,
+    "num1_ic95": [
+     0.06942658707710202,
+     0.09861970260493941
+    ],
+    "num2": 0.07387695917106911,
+    "num2_ic95": [
+     0.05057487172212807,
+     0.09887768726069991
+    ],
+    "num4": 0.04027742346283794,
+    "num4_ic95": [
+     0.0020417527115310363,
+     0.07936390793790318
+    ],
+    "pre": 0.02529953840286095,
+    "pre_ic95": [
+     0.007673857482322081,
+     0.04637723725488055
+    ],
+    "num4_corr": -0.010321653342883957,
+    "num4_corr_ic95": [
+     -0.05873329994258569,
+     0.03611111295476881
+    ],
+    "num4_mas_pre": 0.06557696186569889,
+    "num4_mas_pre_ic95": [
+     0.021371899530559475,
+     0.11630308627546404
+    ],
+    "elasticidad_implicita": 1.010321653342884,
+    "elasticidad_implicita_ic95": [
+     0.9638888870452312,
+     1.0587332999425856
+    ],
+    "elasticidad_implicita_cota_baja": 0.934423038134301
+   }
+  },
+  "intervalos": {
+   "intervalo_mediano_-1_+1_min": 12.0,
+   "minutos_mediana_hasta_+1": 6.0,
+   "minutos_mediana_desde_-1": 6.0,
+   "pct_viajes_limpios_ocup_ge_50": 17.464739118141914
+  },
+  "perfil": [
+   {
+    "grupo": "Todas",
+    "k": -4,
+    "exceso_rel": -0.004231112222832118,
+    "ee": 0.004401062786699069,
+    "exceso_pax": -0.35474686372914715,
+    "minutos_desde_falla": -24.0,
+    "ocup_max_exceso": -3.058662753654632,
+    "pct_ocup_max_ge_50": 13.583713583713584
+   },
+   {
+    "grupo": "Todas",
+    "k": -3,
+    "exceso_rel": 0.0017928510366403403,
+    "ee": 0.004401352502885079,
+    "exceso_pax": 0.1503170440504165,
+    "minutos_desde_falla": -18.0,
+    "ocup_max_exceso": -10.24208533441282,
+    "pct_ocup_max_ge_50": 14.513864513864513
+   },
+   {
+    "grupo": "Todas",
+    "k": -2,
+    "exceso_rel": 0.004230871462519592,
+    "ee": 0.00437201280566048,
+    "exceso_pax": 0.35472667779190875,
+    "minutos_desde_falla": -12.0,
+    "ocup_max_exceso": -10.30069316852498,
+    "pct_ocup_max_ge_50": 14.11021411021411
+   },
+   {
+    "grupo": "Todas",
+    "k": -1,
+    "exceso_rel": 0.031310106660517145,
+    "ee": 0.0044842297615443035,
+    "exceso_pax": 2.625116412868128,
+    "minutos_desde_falla": -6.0,
+    "ocup_max_exceso": -9.6042487761279,
+    "pct_ocup_max_ge_50": 14.531414531414534
+   },
+   {
+    "grupo": "Todas",
+    "k": 1,
+    "exceso_rel": 0.13455318093450205,
+    "ee": 0.005223454837413723,
+    "exceso_pax": 11.281269894880076,
+    "minutos_desde_falla": 6.0,
+    "ocup_max_exceso": -3.0624373805584755,
+    "pct_ocup_max_ge_50": 18.690768690768692
+   },
+   {
+    "grupo": "Todas",
+    "k": 2,
+    "exceso_rel": 0.027859434017967963,
+    "ee": 0.004807785176560739,
+    "exceso_pax": 2.3358035246174533,
+    "minutos_desde_falla": 12.0,
+    "ocup_max_exceso": -5.32023330755077,
+    "pct_ocup_max_ge_50": 16.146016146016144
+   },
+   {
+    "grupo": "Todas",
+    "k": 3,
+    "exceso_rel": 0.006827665022683638,
+    "ee": 0.00465255828971243,
+    "exceso_pax": 0.5724482419350665,
+    "minutos_desde_falla": 18.0,
+    "ocup_max_exceso": -5.975085723282599,
+    "pct_ocup_max_ge_50": 14.566514566514567
+   },
+   {
+    "grupo": "Todas",
+    "k": 4,
+    "exceso_rel": -0.001443312326439125,
+    "ee": 0.004730068542011063,
+    "exceso_pax": -0.12101085819065836,
+    "minutos_desde_falla": 24.0,
+    "ocup_max_exceso": -6.370092358700013,
+    "pct_ocup_max_ge_50": 14.127764127764127
+   },
+   {
+    "grupo": "SILENCIO",
+    "k": -4,
+    "exceso_rel": -0.0024328407474574886,
+    "ee": 0.008140760852260167,
+    "exceso_pax": -0.19444398485854666,
+    "minutos_desde_falla": -26.0,
+    "ocup_max_exceso": 0.2617845794046069,
+    "pct_ocup_max_ge_50": 11.903540277065161
+   },
+   {
+    "grupo": "SILENCIO",
+    "k": -3,
+    "exceso_rel": -0.002216593023975141,
+    "ee": 0.008311190715235107,
+    "exceso_pax": -0.17716045772491068,
+    "minutos_desde_falla": -18.0,
+    "ocup_max_exceso": 0.3043735532265476,
+    "pct_ocup_max_ge_50": 12.9297075423294
+   },
+   {
+    "grupo": "SILENCIO",
+    "k": -2,
+    "exceso_rel": 0.004985858984027772,
+    "ee": 0.008154437676217452,
+    "exceso_pax": 0.39849311542907945,
+    "minutos_desde_falla": -12.0,
+    "ocup_max_exceso": 0.22342489174870755,
+    "pct_ocup_max_ge_50": 11.698306824012313
+   },
+   {
+    "grupo": "SILENCIO",
+    "k": -1,
+    "exceso_rel": 0.03599252429255535,
+    "ee": 0.008605709046505036,
+    "exceso_pax": 2.8766904927404413,
+    "minutos_desde_falla": -6.0,
+    "ocup_max_exceso": 0.8996838135592363,
+    "pct_ocup_max_ge_50": 12.775782452539763
+   },
+   {
+    "grupo": "SILENCIO",
+    "k": 1,
+    "exceso_rel": 0.1911824258404619,
+    "ee": 0.010257027549708963,
+    "exceso_pax": 15.280191584341498,
+    "minutos_desde_falla": 6.0,
+    "ocup_max_exceso": 4.4670453104066015,
+    "pct_ocup_max_ge_50": 17.804002052334532
+   },
+   {
+    "grupo": "SILENCIO",
+    "k": 2,
+    "exceso_rel": 0.04360981347875348,
+    "ee": 0.008974071564042098,
+    "exceso_pax": 3.485499788923179,
+    "minutos_desde_falla": 12.0,
+    "ocup_max_exceso": 1.6940757454999378,
+    "pct_ocup_max_ge_50": 15.443817342226781
+   },
+   {
+    "grupo": "SILENCIO",
+    "k": 3,
+    "exceso_rel": 0.013884009349030904,
+    "ee": 0.008492036767115612,
+    "exceso_pax": 1.1096748138817745,
+    "minutos_desde_falla": 18.0,
+    "ocup_max_exceso": 0.6741921542033867,
+    "pct_ocup_max_ge_50": 12.827090815802974
+   },
+   {
+    "grupo": "SILENCIO",
+    "k": 4,
+    "exceso_rel": -0.0039935839312915345,
+    "ee": 0.0085059462400795,
+    "exceso_pax": -0.31918586297887364,
+    "minutos_desde_falla": 26.0,
+    "ocup_max_exceso": 0.05497455129641292,
+    "pct_ocup_max_ge_50": 11.749615187275527
+   },
+   {
+    "grupo": "CRA 54",
+    "k": -4,
+    "exceso_rel": -0.005137321714349413,
+    "ee": 0.006600261405217544,
+    "exceso_pax": -0.4355106223947253,
+    "minutos_desde_falla": -13.0,
+    "ocup_max_exceso": -7.8609926547573235,
+    "pct_ocup_max_ge_50": 16.682330827067666
+   },
+   {
+    "grupo": "CRA 54",
+    "k": -3,
+    "exceso_rel": 0.00041915746046000793,
+    "ee": 0.006691996790012428,
+    "exceso_pax": 0.03553359836827898,
+    "minutos_desde_falla": -9.0,
+    "ocup_max_exceso": 0.19857575923006862,
+    "pct_ocup_max_ge_50": 17.24624060150376
+   },
+   {
+    "grupo": "CRA 54",
+    "k": -2,
+    "exceso_rel": 0.0081403261797589,
+    "ee": 0.0066769284411537,
+    "exceso_pax": 0.6900869204162419,
+    "minutos_desde_falla": -6.0,
+    "ocup_max_exceso": 0.3957306074814225,
+    "pct_ocup_max_ge_50": 17.99812030075188
+   },
+   {
+    "grupo": "CRA 54",
+    "k": -1,
+    "exceso_rel": 0.03733322172081992,
+    "ee": 0.00683711997461028,
+    "exceso_pax": 3.1648815339363243,
+    "minutos_desde_falla": -3.0,
+    "ocup_max_exceso": 1.3168453746836182,
+    "pct_ocup_max_ge_50": 18.75
+   },
+   {
+    "grupo": "CRA 54",
+    "k": 1,
+    "exceso_rel": 0.11673501376153787,
+    "ee": 0.00794501336034254,
+    "exceso_pax": 9.896078409211022,
+    "minutos_desde_falla": 3.0,
+    "ocup_max_exceso": 3.68694527306006,
+    "pct_ocup_max_ge_50": 22.791353383458645
+   },
+   {
+    "grupo": "CRA 54",
+    "k": 2,
+    "exceso_rel": 0.04584228028925925,
+    "ee": 0.007428237446504303,
+    "exceso_pax": 3.8862273244448873,
+    "minutos_desde_falla": 6.0,
+    "ocup_max_exceso": 1.7757427745933383,
+    "pct_ocup_max_ge_50": 20.25375939849624
+   },
+   {
+    "grupo": "CRA 54",
+    "k": 3,
+    "exceso_rel": 0.020309932831309094,
+    "ee": 0.007093779846288299,
+    "exceso_pax": 1.7217515234547927,
+    "minutos_desde_falla": 10.0,
+    "ocup_max_exceso": 1.244146353761107,
+    "pct_ocup_max_ge_50": 20.159774436090224
+   },
+   {
+    "grupo": "CRA 54",
+    "k": 4,
+    "exceso_rel": 0.006777276739912253,
+    "ee": 0.007337641130476701,
+    "exceso_pax": 0.5745359499087289,
+    "minutos_desde_falla": 13.0,
+    "ocup_max_exceso": 0.5739864500778561,
+    "pct_ocup_max_ge_50": 19.219924812030076
+   },
+   {
+    "grupo": "CL 72",
+    "k": -4,
+    "exceso_rel": -0.005061284012766448,
+    "ee": 0.008382192440142612,
+    "exceso_pax": -0.4420033516110603,
+    "minutos_desde_falla": -42.0,
+    "ocup_max_exceso": -0.5031476305277723,
+    "pct_ocup_max_ge_50": 11.536088834053054
+   },
+   {
+    "grupo": "CL 72",
+    "k": -3,
+    "exceso_rel": 0.008027654022851454,
+    "ee": 0.008026942065214546,
+    "exceso_pax": 0.7010572761228855,
+    "minutos_desde_falla": -31.0,
+    "ocup_max_exceso": -39.85387269606219,
+    "pct_ocup_max_ge_50": 12.83158544108575
+   },
+   {
+    "grupo": "CL 72",
+    "k": -2,
+    "exceso_rel": -0.0015818851844817535,
+    "ee": 0.00805128806585582,
+    "exceso_pax": -0.1381464765939188,
+    "minutos_desde_falla": -20.0,
+    "ocup_max_exceso": -40.0859221270136,
+    "pct_ocup_max_ge_50": 11.906230721776682
+   },
+   {
+    "grupo": "CL 72",
+    "k": -1,
+    "exceso_rel": 0.018482138861149328,
+    "ee": 0.00796137200778051,
+    "exceso_pax": 1.614050367646498,
+    "minutos_desde_falla": -10.0,
+    "ocup_max_exceso": -38.261527386497804,
+    "pct_ocup_max_ge_50": 11.104256631708822
+   },
+   {
+    "grupo": "CL 72",
+    "k": 1,
+    "exceso_rel": 0.09494561472331217,
+    "ee": 0.008858015530083488,
+    "exceso_pax": 8.291627148885892,
+    "minutos_desde_falla": 10.0,
+    "ocup_max_exceso": -22.56013774565437,
+    "pct_ocup_max_ge_50": 14.373843306600865
+   },
+   {
+    "grupo": "CL 72",
+    "k": 2,
+    "exceso_rel": -0.012388335780160669,
+    "ee": 0.00865397300226338,
+    "exceso_pax": -1.0818768363724522,
+    "minutos_desde_falla": 20.0,
+    "ocup_max_exceso": -25.339822424494283,
+    "pct_ocup_max_ge_50": 11.597779148673657
+   },
+   {
+    "grupo": "CL 72",
+    "k": 3,
+    "exceso_rel": -0.018118043027691346,
+    "ee": 0.00877660873429037,
+    "exceso_pax": -1.5822537764474818,
+    "minutos_desde_falla": 30.0,
+    "ocup_max_exceso": -24.959136493956,
+    "pct_ocup_max_ge_50": 9.31523750771129
+   },
+   {
+    "grupo": "CL 72",
+    "k": 4,
+    "exceso_rel": -0.009112866598838166,
+    "ee": 0.008931119012743008,
+    "exceso_pax": -0.7958291945899579,
+    "minutos_desde_falla": 42.0,
+    "ocup_max_exceso": -25.113958032244348,
+    "pct_ocup_max_ge_50": 10.302282541640963
+   }
+  ]
+ },
+ "diseno_C": {
+  "variantes": [
+   {
+    "diseno": "C",
+    "variante": "Ruta-día: ruta×día sem.×festivo×año×mes",
+    "grupo": "",
+    "n": 3194,
+    "n_clusters": 156,
+    "efectos_fijos": "fe_c",
+    "instrumentos": "z",
+    "controles": "",
+    "beta_mco": 0.7573339304440782,
+    "ee_mco": 0.05324618713799642,
+    "beta_vi": 0.660856020730286,
+    "ee_vi": 0.06238562767639066,
+    "ic95_vi": [
+     0.5385801904845604,
+     0.7831318509760117
+    ],
+    "F_primera_etapa": 94.41101519522279,
+    "primera_etapa": {
+     "z": -1.671908972251441
+    },
+    "primera_etapa_ee": {
+     "z": 0.17206846903069198
+    },
+    "forma_reducida": {
+     "z": -1.1048911104253494
+    },
+    "forma_reducida_ee": {
+     "z": 0.197461885673784
+    },
+    "media_z": 0.051097351007861475,
+    "nota": ""
+   },
+   {
+    "diseno": "C",
+    "variante": "Ruta-día: + EF de fecha (entre rutas)",
+    "grupo": "",
+    "n": 3194,
+    "n_clusters": 156,
+    "efectos_fijos": "fe_c + fe_dia",
+    "instrumentos": "z",
+    "controles": "",
+    "beta_mco": 0.42100780492957657,
+    "ee_mco": 0.013680993522506383,
+    "beta_vi": 0.5676682698587818,
+    "ee_vi": 0.03406365494184413,
+    "ic95_vi": [
+     0.5009035061727674,
+     0.6344330335447963
+    ],
+    "F_primera_etapa": 235.0971527431849,
+    "primera_etapa": {
+     "z": -0.9424896380169929
+    },
+    "primera_etapa_ee": {
+     "z": 0.06146854022018156
+    },
+    "forma_reducida": {
+     "z": -0.5350214621729359
+    },
+    "forma_reducida_ee": {
+     "z": 0.03806934655261741
+    },
+    "media_z": 0.051097351007861475,
+    "nota": ""
+   },
+   {
+    "diseno": "C",
+    "variante": "Ruta-día: solo laborales",
+    "grupo": "",
+    "n": 2148,
+    "n_clusters": 155,
+    "efectos_fijos": "fe_c",
+    "instrumentos": "z",
+    "controles": "",
+    "beta_mco": 0.8634896335795762,
+    "ee_mco": 0.04906439442699229,
+    "beta_vi": 0.758755083789056,
+    "ee_vi": 0.0683232242158817,
+    "ic95_vi": [
+     0.6248415643259279,
+     0.8926686032521841
+    ],
+    "F_primera_etapa": 54.56804418398592,
+    "primera_etapa": {
+     "z": -1.7070070288359673
+    },
+    "primera_etapa_ee": {
+     "z": 0.23108199873479585
+    },
+    "forma_reducida": {
+     "z": -1.2952002611929414
+    },
+    "forma_reducida_ee": {
+     "z": 0.2653076908749996
+    },
+    "media_z": 0.05239620733773006,
+    "nota": ""
+   },
+   {
+    "diseno": "C",
+    "variante": "Ruta-día: fallas confirmadas por GPS",
+    "grupo": "",
+    "n": 3090,
+    "n_clusters": 156,
+    "efectos_fijos": "fe_c",
+    "instrumentos": "z_gps",
+    "controles": "",
+    "beta_mco": 0.7441005219992941,
+    "ee_mco": 0.05553280527933492,
+    "beta_vi": 0.6270140532564442,
+    "ee_vi": 0.06577151614452306,
+    "ic95_vi": [
+     0.49810188161317903,
+     0.7559262248997094
+    ],
+    "F_primera_etapa": 97.38858078004743,
+    "primera_etapa": {
+     "z_gps": -1.3739805147137842
+    },
+    "primera_etapa_ee": {
+     "z_gps": 0.13922799060084778
+    },
+    "forma_reducida": {
+     "z_gps": -0.8615050916260648
+    },
+    "forma_reducida_ee": {
+     "z_gps": 0.1476590538191591
+    },
+    "media_z": 0.034647123923692694,
+    "nota": ""
+   },
+   {
+    "diseno": "C",
+    "variante": "Ruta-día: vehículo no vuelve",
+    "grupo": "",
+    "n": 3194,
+    "n_clusters": 156,
+    "efectos_fijos": "fe_c",
+    "instrumentos": "z_veh",
+    "controles": "",
+    "beta_mco": 0.7573339304440782,
+    "ee_mco": 0.05324618713799642,
+    "beta_vi": 0.6728455825737024,
+    "ee_vi": 0.06681689440486396,
+    "ic95_vi": [
+     0.541884469540169,
+     0.8038066956072358
+    ],
+    "F_primera_etapa": 82.47445824643717,
+    "primera_etapa": {
+     "z_veh": -2.603737708737228
+    },
+    "primera_etapa_ee": {
+     "z_veh": 0.2867064722906248
+    },
+    "forma_reducida": {
+     "z_veh": -1.7519134155044178
+    },
+    "forma_reducida_ee": {
+     "z_veh": 0.34079672967398233
+    },
+    "media_z": 0.024232362434553855,
+    "nota": ""
+   },
+   {
+    "diseno": "C",
+    "variante": "Ruta-día: incluye caídas masivas",
+    "grupo": "",
+    "n": 3203,
+    "n_clusters": 156,
+    "efectos_fijos": "fe_c",
+    "instrumentos": "z",
+    "controles": "",
+    "beta_mco": 0.7673272885046231,
+    "ee_mco": 0.05075461876355292,
+    "beta_vi": 0.7816798899298888,
+    "ee_vi": 0.06393151695786285,
+    "ic95_vi": [
+     0.6563741166924776,
+     0.9069856631673
+    ],
+    "F_primera_etapa": 116.22024978175317,
+    "primera_etapa": {
+     "z": -1.5211456607448386
+    },
+    "primera_etapa_ee": {
+     "z": 0.1411009379397732
+    },
+    "forma_reducida": {
+     "z": -1.1890489726583535
+    },
+    "forma_reducida_ee": {
+     "z": 0.14707787516482748
+    },
+    "media_z": 0.05182929736990254,
+    "nota": ""
+   }
+  ],
+  "dias_con_mas_fallas": {
+   "pct_pax_dias_top5_fallas": -8.525377773586573,
+   "pct_salidas_dias_top5_fallas": -10.714034634744529,
+   "exceso_fallas_pp_top5": 5.325032291350653,
+   "n_dias_top5": 160
+  }
+ },
+ "sintesis": {
+  "beta_central": 0.7,
+  "beta_rango": [
+   0.55,
+   0.9
+  ],
+  "e_D1_central": 0.30000000000000004,
+  "e_D1_rango": [
+   0.09999999999999998,
+   0.44999999999999996
+  ],
+  "neto_central": {
+   "S1": -742.3780430952544,
+   "S2": 986.330186428584,
+   "S5": 1452.0411215484094
+  },
+  "neto_rango": {
+   "S1": [
+    -55.00287645150375,
+    -1599.794852031376
+   ],
+   "S2": [
+    1848.4153651115098,
+    -81.74623998556996
+   ],
+   "S5": [
+    2238.4062727107157,
+    475.14698042762757
+   ]
+  },
+  "neto_simetrico_central": {
+   "S1": 2065.4216056242954,
+   "S2": 3228.582108023808,
+   "S5": 3555.6966707871716
+  },
+  "neto_simetrico_rango": {
+   "S1": [
+    2068.4416288872567,
+    2209.306029401749
+   ],
+   "S2": [
+    3541.0975570782966,
+    2968.2506062039774
+   ],
+   "S5": [
+    3835.8874532732593,
+    3312.335502630099
+   ]
+  },
+  "pax_perdidos_dia_central": {
+   "S1": 3274.412611654723,
+   "S2": 4155.519510110882,
+   "S5": 3773.0676058918634
+  }
+ },
+ "d1": {
+  "beta_equilibrio": {
+   "S1": 0.5383671052176601,
+   "S2": 0.8840969452080495,
+   "S5": null
+  },
+  "beta_equilibrio_contando_ganados": {
+   "S1": null,
+   "S2": null,
+   "S5": null
+  },
+  "control_neto_S1_e022": -1093.1480894320841,
+  "neto_en_betas": {
+   "0.0": {
+    "S1": 2843.0977666666668,
+    "S2": 5536.61805,
+    "S5": 5583.54415
+   },
+   "0.1": {
+    "S1": 2267.4060549103524,
+    "S2": 4797.379511259003,
+    "S5": 4915.374006165166
+   },
+   "0.2": {
+    "S1": 1714.6728992849187,
+    "S2": 4090.6250142758645,
+    "S5": 4275.528210241594
+   },
+   "0.3": {
+    "S1": 1183.7562177564196,
+    "S2": 3414.5993561171617,
+    "S5": 3662.5167895688646
+   },
+   "0.4": {
+    "S1": 673.5794996209245,
+    "S2": 2767.6559334230924,
+    "S5": 3074.939723841699
+   },
+   "0.5": {
+    "S1": 183.1276329492359,
+    "S2": 2148.2493315348165,
+    "S5": 2511.4809652169533
+   },
+   "0.54": {
+    "S1": -7.7465055267424585,
+    "S2": 1907.8689351830174,
+    "S5": 2292.57084435718
+   },
+   "0.6": {
+    "S1": -288.5569803610783,
+    "S2": 1554.9284592420875,
+    "S5": 1970.9028860075389
+   },
+   "0.78": {
+    "S1": -1093.1480894320841,
+    "S2": 548.3883467961416,
+    "S5": 1051.8488309477082
+   },
+   "1.0": {
+    "S1": -2004.9577436113377,
+    "S2": -583.561830728693,
+    "S5": 15.110727442605972
+   }
+  }
+ },
+ "tiempo_s": 36.89771389961243,
+ "verificacion": {
+  "veredicto": "confiable_con_reservas",
+  "recalculado_independiente": {
+   "diseno_A_beta_vi": 0.7259,
+   "diseno_A_ic95": [
+    0.698,
+    0.754
+   ],
+   "diseno_A_primera_etapa": -0.9883,
+   "diseno_A_F": 2177,
+   "diseno_A_forma_reducida": -0.7174,
+   "diseno_A_mco": 0.532,
+   "diseno_C_beta_vi": 0.6609,
+   "diseno_C_ee": 0.0624,
+   "diseno_B_num1": 0.1346,
+   "diseno_B_num4_corr": 0.0967,
+   "diseno_B_beta": 0.903,
+   "diseno_B_cota_baja": 0.797
+  },
+  "correcciones": [
+   "Mediana de las 'canceladas' que operaron: 65 km y 74 pasajeros (no 64 km y 75).",
+   "Válidas no operadas: 0 pasajeros en el 71 % (no 'casi siempre').",
+   "Falla confirmada por GPS = hay eventos y menos de 15 subidas (mediana 22 eventos, 0 subidas, 1 punto de control), no 'sin subidas'.",
+   "La prueba de sobreidentificación es la de Wooldridge (linearmodels wooldridge_overid), no la de Hansen.",
+   "El coeficiente de las fallas de h-1 (-0,047; EE 0,014) es significativo: reduce los pasajeros de h (vehículo que no vuelve).",
+   "Vecinos del bus +1 con ocupación >= 50: 14-16 % (no 14-15 %).",
+   "IC del diseño C con EF de fecha (0,50-0,63) cruza el equilibrio de S1 (0,54)."
+  ],
+  "reservas": [
+   "El 92 % de los 'viajes sin registro' de E10 son fallas de E7 (58 % de las válidas no operadas); si en realidad corrieron, empujarían beta hacia 1. El bus siguiente recoge un 11,1 % extra tras ellas (14,8 % en el resto), así que la mayoría no corrió, pero la mezcla no está resuelta.",
+   "La conclusión de que S1 pierde dinero extrapola de fallas imprevistas y pequeñas a recortes planificados y grandes; el extremo bajo del rango (0,55) está pegado al equilibrio (0,54)."
+  ]
+ }
+}

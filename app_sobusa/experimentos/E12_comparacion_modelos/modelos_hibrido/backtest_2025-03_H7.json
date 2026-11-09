@@ -1,0 +1,21 @@
+{
+ "mes": "2025-03",
+ "H": 7,
+ "filas_entrenamiento": 39830,
+ "franjas": 1581,
+ "WAPE_hibrido": 14.399512833061268,
+ "WAPE_V4": 14.265393243210292,
+ "panel": "reconstruido (comun_e11)",
+ "WAPE_hibrido_guardado_E12": 14.402549490368644,
+ "franjas_comparadas": 1581,
+ "dif_max_pax": 16.511948934646625,
+ "dif_media_pax": 1.7356358496176205,
+ "dif_total_pct": -0.018881294484818234,
+ "dif_max_V4_vs_E11_pax": 33.78035539974849,
+ "corte_max_menos_dia": -7,
+ "tiempos_s": {
+  "panel_s": 2.6,
+  "lightgbm_s": 9.8,
+  "total": 14.0
+ }
+}

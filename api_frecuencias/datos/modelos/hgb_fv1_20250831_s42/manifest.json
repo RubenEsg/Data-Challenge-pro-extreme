@@ -1,0 +1,447 @@
+{
+  "model_id": "hgb_fv1_20250831_s42",
+  "tipo": "candidato",
+  "algoritmo": "hist_gradient_boosting",
+  "estado": "activo",
+  "artefacto": "modelo.joblib",
+  "sha256": "fac427c003cf74d65475e3a0f37d3d90f8e6a20dc6ba6a513c41046b6498a728",
+  "feature_version": "fv1-2026-11-08",
+  "data_cutoff": "2025-08-31",
+  "semilla": 42,
+  "hiperparametros": {
+    "learning_rate": 0.05,
+    "max_iter": 400,
+    "max_leaf_nodes": 31,
+    "min_samples_leaf": 40,
+    "l2_regularization": 1.0
+  },
+  "perdidas": {
+    "punto": "poisson",
+    "p10": "quantile 0.1",
+    "p90": "quantile 0.9"
+  },
+  "variables": [
+    "ruta_cod",
+    "hora",
+    "dia_semana",
+    "mes",
+    "tipo_dia",
+    "festivo",
+    "carnaval",
+    "semana_santa",
+    "vacaciones",
+    "navidad",
+    "primero_enero",
+    "lag7",
+    "lag14",
+    "b8",
+    "m4",
+    "sd8",
+    "nivel_7_13",
+    "nivel_7_34",
+    "dia_lag7"
+  ],
+  "filas_entrenamiento": 49215,
+  "filas_validacion": 3111,
+  "filas_prueba": 3111,
+  "particion": {
+    "entrenamiento": "2023-01-08 a 2025-08-31",
+    "validacion": "2025-09-01 a 2025-10-31",
+    "prueba": "2025-11-01 a 2025-12-31"
+  },
+  "metricas": {
+    "validacion": {
+      "candidato": {
+        "n": 3111,
+        "mae": 98.106,
+        "rmse": 139.231,
+        "wape": 13.632,
+        "sesgo_pct": 1.143,
+        "cobertura_p10_p90": 81.58,
+        "por_ruta": {
+          "CL 72": {
+            "n": 1037,
+            "mae": 70.573,
+            "rmse": 94.51,
+            "wape": 18.452,
+            "sesgo_pct": 3.243
+          },
+          "CRA 54": {
+            "n": 1037,
+            "mae": 134.913,
+            "rmse": 183.414,
+            "wape": 11.374,
+            "sesgo_pct": 1.378
+          },
+          "SILENCIO": {
+            "n": 1037,
+            "mae": 88.831,
+            "rmse": 124.832,
+            "wape": 15.046,
+            "sesgo_pct": -0.689
+          }
+        },
+        "pico": {
+          "n": 1098,
+          "mae": 86.198,
+          "rmse": 121.692,
+          "wape": 12.997,
+          "sesgo_pct": 1.807
+        },
+        "valle": {
+          "n": 2013,
+          "mae": 104.601,
+          "rmse": 147.924,
+          "wape": 13.938,
+          "sesgo_pct": 0.823
+        }
+      },
+      "b1_manual_8sem": {
+        "n": 3111,
+        "mae": 108.792,
+        "rmse": 159.966,
+        "wape": 15.117,
+        "sesgo_pct": -0.01,
+        "por_ruta": {
+          "CL 72": {
+            "n": 1037,
+            "mae": 76.527,
+            "rmse": 103.857,
+            "wape": 20.008,
+            "sesgo_pct": 0.743
+          },
+          "CRA 54": {
+            "n": 1037,
+            "mae": 151.706,
+            "rmse": 214.945,
+            "wape": 12.79,
+            "sesgo_pct": 0.06
+          },
+          "SILENCIO": {
+            "n": 1037,
+            "mae": 98.144,
+            "rmse": 140.639,
+            "wape": 16.623,
+            "sesgo_pct": -0.639
+          }
+        },
+        "pico": {
+          "n": 1098,
+          "mae": 94.712,
+          "rmse": 140.799,
+          "wape": 14.281,
+          "sesgo_pct": 0.862
+        },
+        "valle": {
+          "n": 2013,
+          "mae": 116.472,
+          "rmse": 169.51,
+          "wape": 15.52,
+          "sesgo_pct": -0.43
+        }
+      },
+      "b2_ultima_semana": {
+        "n": 3111,
+        "mae": 141.366,
+        "rmse": 210.038,
+        "wape": 19.643,
+        "sesgo_pct": 0.231,
+        "por_ruta": {
+          "CL 72": {
+            "n": 1037,
+            "mae": 104.269,
+            "rmse": 144.486,
+            "wape": 27.262,
+            "sesgo_pct": 0.752
+          },
+          "CRA 54": {
+            "n": 1037,
+            "mae": 194.682,
+            "rmse": 280.295,
+            "wape": 16.413,
+            "sesgo_pct": 0.179
+          },
+          "SILENCIO": {
+            "n": 1037,
+            "mae": 125.149,
+            "rmse": 181.401,
+            "wape": 21.197,
+            "sesgo_pct": -0.001
+          }
+        },
+        "pico": {
+          "n": 1098,
+          "mae": 123.273,
+          "rmse": 184.773,
+          "wape": 18.588,
+          "sesgo_pct": 0.682
+        },
+        "valle": {
+          "n": 2013,
+          "mae": 151.235,
+          "rmse": 222.613,
+          "wape": 20.152,
+          "sesgo_pct": 0.014
+        }
+      },
+      "desde": "2025-09-01",
+      "hasta": "2025-10-31"
+    },
+    "prueba": {
+      "candidato": {
+        "n": 3111,
+        "mae": 98.204,
+        "rmse": 146.024,
+        "wape": 15.067,
+        "sesgo_pct": 2.541,
+        "cobertura_p10_p90": 80.94,
+        "por_ruta": {
+          "CL 72": {
+            "n": 1037,
+            "mae": 68.355,
+            "rmse": 90.744,
+            "wape": 19.484,
+            "sesgo_pct": 2.551
+          },
+          "CRA 54": {
+            "n": 1037,
+            "mae": 143.515,
+            "rmse": 206.093,
+            "wape": 13.326,
+            "sesgo_pct": 2.997
+          },
+          "SILENCIO": {
+            "n": 1037,
+            "mae": 82.743,
+            "rmse": 115.153,
+            "wape": 15.682,
+            "sesgo_pct": 1.604
+          }
+        },
+        "pico": {
+          "n": 1098,
+          "mae": 92.24,
+          "rmse": 128.294,
+          "wape": 14.723,
+          "sesgo_pct": 2.824
+        },
+        "valle": {
+          "n": 2013,
+          "mae": 101.458,
+          "rmse": 154.842,
+          "wape": 15.243,
+          "sesgo_pct": 2.396
+        }
+      },
+      "b1_manual_8sem": {
+        "n": 3111,
+        "mae": 138.062,
+        "rmse": 225.994,
+        "wape": 21.182,
+        "sesgo_pct": 5.847,
+        "por_ruta": {
+          "CL 72": {
+            "n": 1037,
+            "mae": 88.639,
+            "rmse": 123.923,
+            "wape": 25.266,
+            "sesgo_pct": 4.338
+          },
+          "CRA 54": {
+            "n": 1037,
+            "mae": 213.169,
+            "rmse": 326.569,
+            "wape": 19.794,
+            "sesgo_pct": 5.944
+          },
+          "SILENCIO": {
+            "n": 1037,
+            "mae": 112.377,
+            "rmse": 176.68,
+            "wape": 21.299,
+            "sesgo_pct": 6.651
+          }
+        },
+        "pico": {
+          "n": 1098,
+          "mae": 121.359,
+          "rmse": 199.955,
+          "wape": 19.37,
+          "sesgo_pct": 3.311
+        },
+        "valle": {
+          "n": 2013,
+          "mae": 147.172,
+          "rmse": 239.005,
+          "wape": 22.112,
+          "sesgo_pct": 7.149
+        }
+      },
+      "b2_ultima_semana": {
+        "n": 3111,
+        "mae": 172.05,
+        "rmse": 279.222,
+        "wape": 26.396,
+        "sesgo_pct": 3.843,
+        "por_ruta": {
+          "CL 72": {
+            "n": 1037,
+            "mae": 116.209,
+            "rmse": 161.134,
+            "wape": 33.125,
+            "sesgo_pct": 3.199
+          },
+          "CRA 54": {
+            "n": 1037,
+            "mae": 261.8,
+            "rmse": 401.278,
+            "wape": 24.309,
+            "sesgo_pct": 3.864
+          },
+          "SILENCIO": {
+            "n": 1037,
+            "mae": 138.139,
+            "rmse": 216.582,
+            "wape": 26.182,
+            "sesgo_pct": 4.227
+          }
+        },
+        "pico": {
+          "n": 1098,
+          "mae": 156.418,
+          "rmse": 255.927,
+          "wape": 24.966,
+          "sesgo_pct": 2.932
+        },
+        "valle": {
+          "n": 2013,
+          "mae": 180.576,
+          "rmse": 291.144,
+          "wape": 27.13,
+          "sesgo_pct": 4.31
+        }
+      },
+      "desde": "2025-11-01",
+      "hasta": "2025-12-31"
+    }
+  },
+  "supera_linea_base_validacion": true,
+  "nowcast": {
+    "peso": 0.1,
+    "wape_por_peso": {
+      "0.0": 13.95,
+      "0.1": 13.895,
+      "0.2": 13.909,
+      "0.3": 14.01,
+      "0.5": 14.453,
+      "1.0": 16.136
+    },
+    "regla": "factor = clip(1 + peso*(obs/esp - 1), 0,8, 1,25)",
+    "calibrado_en": "validación 2025-09-01 a 2025-10-31",
+    "prueba": {
+      "peso": 0.1,
+      "wape_por_peso": {
+        "0.0": 15.688,
+        "0.1": 15.522,
+        "1.0": 16.984
+      },
+      "regla": "factor = clip(1 + peso*(obs/esp - 1), 0,8, 1,25)"
+    }
+  },
+  "importancia_global": [
+    {
+      "variable": "b8",
+      "aumento_mae": 223.755
+    },
+    {
+      "variable": "tipo_dia",
+      "aumento_mae": 38.32
+    },
+    {
+      "variable": "m4",
+      "aumento_mae": 19.853
+    },
+    {
+      "variable": "nivel_7_13",
+      "aumento_mae": 16.312
+    },
+    {
+      "variable": "hora",
+      "aumento_mae": 12.371
+    },
+    {
+      "variable": "sd8",
+      "aumento_mae": 6.761
+    },
+    {
+      "variable": "ruta_cod",
+      "aumento_mae": 6.164
+    },
+    {
+      "variable": "nivel_7_34",
+      "aumento_mae": 4.391
+    },
+    {
+      "variable": "festivo",
+      "aumento_mae": 3.794
+    },
+    {
+      "variable": "lag7",
+      "aumento_mae": 2.742
+    },
+    {
+      "variable": "dia_lag7",
+      "aumento_mae": 2.29
+    },
+    {
+      "variable": "dia_semana",
+      "aumento_mae": 2.07
+    },
+    {
+      "variable": "lag14",
+      "aumento_mae": 0.982
+    },
+    {
+      "variable": "mes",
+      "aumento_mae": 0.219
+    },
+    {
+      "variable": "carnaval",
+      "aumento_mae": 0.0
+    },
+    {
+      "variable": "semana_santa",
+      "aumento_mae": 0.0
+    },
+    {
+      "variable": "vacaciones",
+      "aumento_mae": 0.0
+    },
+    {
+      "variable": "navidad",
+      "aumento_mae": 0.0
+    },
+    {
+      "variable": "primero_enero",
+      "aumento_mae": 0.0
+    }
+  ],
+  "nota_importancia": "aumento del MAE (pasajeros) al permutar la variable en 3000 horas de validación",
+  "segundos_entrenamiento": 52.73,
+  "creado_en": "2026-11-09T03:39:13+00:00",
+  "versiones": {
+    "sklearn": "1.5.2",
+    "pandas": "2.2.3",
+    "numpy": "2.5.4"
+  },
+  "version_datos": {
+    "sha256_serie": "df29bf4ae8d281a041d4b42206d07614323c1614ced0c558ef8359858c349305",
+    "filas_serie": 55896,
+    "desde": "2023-01-01",
+    "hasta": "2025-12-31"
+  },
+  "codigo_sha256": {
+    "variables.py": "9f1bc539daf75d03bd900bbdd962a063eb3f28ca12772a106342ece5af8e32c4",
+    "inferencia.py": "8c052c6a9828182dfb2706018c948cbc3379d7800cf4520fdfb44d16376d577e"
+  }
+}

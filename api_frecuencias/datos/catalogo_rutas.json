@@ -1,0 +1,89 @@
+[
+  {
+    "ruta": "SILENCIO",
+    "idruta": 2,
+    "codigo": "2",
+    "capacidad": 50,
+    "tiempo_ciclo_min": 255.4,
+    "flota": 45,
+    "frecuencia_actual_min": 7.2,
+    "flota_programada_tabla_rutas": 41,
+    "frecuenciadespachos_tabla_rutas": 5,
+    "primer_despacho": "04:40:00",
+    "por_tipo_dia": {
+      "Domingo/festivo": {
+        "tiempo_ciclo_min": 202.7,
+        "flota": 27,
+        "frecuencia_actual_min": 8.9
+      },
+      "Laboral": {
+        "tiempo_ciclo_min": 255.4,
+        "flota": 45,
+        "frecuencia_actual_min": 7.2
+      },
+      "Sábado": {
+        "tiempo_ciclo_min": 248.1,
+        "flota": 43,
+        "frecuencia_actual_min": 7.2
+      }
+    }
+  },
+  {
+    "ruta": "CRA 54",
+    "idruta": 16,
+    "codigo": "10",
+    "capacidad": 50,
+    "tiempo_ciclo_min": 239.2,
+    "flota": 79,
+    "frecuencia_actual_min": 3.5,
+    "flota_programada_tabla_rutas": 62,
+    "frecuenciadespachos_tabla_rutas": 5,
+    "primer_despacho": "04:30:00",
+    "por_tipo_dia": {
+      "Domingo/festivo": {
+        "tiempo_ciclo_min": 173.0,
+        "flota": 45,
+        "frecuencia_actual_min": 4.7
+      },
+      "Laboral": {
+        "tiempo_ciclo_min": 239.2,
+        "flota": 79,
+        "frecuencia_actual_min": 3.5
+      },
+      "Sábado": {
+        "tiempo_ciclo_min": 223.7,
+        "flota": 75,
+        "frecuencia_actual_min": 3.8
+      }
+    }
+  },
+  {
+    "ruta": "CL 72",
+    "idruta": 21,
+    "codigo": "15",
+    "capacidad": 50,
+    "tiempo_ciclo_min": 253.2,
+    "flota": 45,
+    "frecuencia_actual_min": 11.6,
+    "flota_programada_tabla_rutas": 44,
+    "frecuenciadespachos_tabla_rutas": 5,
+    "primer_despacho": "04:30:00",
+    "por_tipo_dia": {
+      "Domingo/festivo": {
+        "tiempo_ciclo_min": 196.0,
+        "flota": 27,
+        "frecuencia_actual_min": 14.5
+      },
+      "Laboral": {
+        "tiempo_ciclo_min": 253.2,
+        "flota": 45,
+        "frecuencia_actual_min": 11.6
+      },
+      "Sábado": {
+        "tiempo_ciclo_min": 239.3,
+        "flota": 43,
+        "frecuencia_actual_min": 11.8
+      }
+    }
+  }
+]

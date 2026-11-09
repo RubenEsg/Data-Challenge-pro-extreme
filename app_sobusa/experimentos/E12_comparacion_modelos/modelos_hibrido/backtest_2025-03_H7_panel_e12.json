@@ -1,0 +1,20 @@
+{
+ "mes": "2025-03",
+ "H": 7,
+ "filas_entrenamiento": 39830,
+ "franjas": 1581,
+ "WAPE_hibrido": 14.402549490368644,
+ "WAPE_V4": 14.243243662782593,
+ "panel": "cache/panel_v4.parquet (arnés E12)",
+ "WAPE_hibrido_guardado_E12": 14.402549490368644,
+ "franjas_comparadas": 1581,
+ "dif_max_pax": 0.0,
+ "dif_media_pax": 0.0,
+ "dif_total_pct": 0.0,
+ "dif_max_V4_vs_E11_pax": 0.0,
+ "corte_max_menos_dia": -7,
+ "tiempos_s": {
+  "lightgbm_s": 10.0,
+  "total": 11.6
+ }
+}

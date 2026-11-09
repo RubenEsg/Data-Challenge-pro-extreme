@@ -1,0 +1,1108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<script>/* Modo embebido: dentro de la app Sobusa Despacho (iframe o ?embebido=1). Abierta sola, nada cambia. */
+try { if (new URLSearchParams(location.search).get('embebido') === '1' || window.parent !== window) document.documentElement.setAttribute('data-embebido', '1'); } catch (e) {}
+/* Solo modo claro (19-oct-2026): el tema claro se fija antes del primer pintado, abierta sola o embebida, aunque el sistema esté en oscuro. */
+document.documentElement.setAttribute('data-theme', 'light');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Planificador de despacho</title>
+<meta name="description" content="Planificador interactivo de salidas por hora para las tres rutas de Sobusa: optimiza con costos con fuente de 2026, reproduce la optimización D5 con sus supuestos y permite cambiar cada parámetro.">
+<link rel="stylesheet" href="lib/fuentes.css">  <!-- Barlow Condensed e IBM Plex Sans, copia local (antes: Google Fonts) -->
+<style>
+/* Tokens, cabecera, chips, pestañas, KPI y controles segmentados copiados de EDA_visual.html para que ambas páginas se vean como un solo producto. */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --surface-2: #eaeef3; --fg: #182230; --muted: #5a6776; --line: #d9e0e8;
+  --accent: #1c3f6e; --accent-soft: #dce7f5;
+  --r-silencio: #2f6fb3; --r-cra54: #d9731a; --r-cl72: #6a3d9a;
+  --ok: #2e8b57; --warn: #b88a00; --bad: #c0392b;
+  --manana: #c2185b; --tarde: #00897b;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --shadow: 0 1px 2px rgba(24, 34, 48, 0.06), 0 4px 16px rgba(24, 34, 48, 0.05);
+  --hoy: #8a96a3;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.1; margin: 0; text-wrap: balance; }
+h1 { font-size: 30px; letter-spacing: 0.2px; }
+h2 { font-size: 26px; margin-bottom: 4px; }
+h3 { font-size: 19px; color: var(--fg); }
+p { margin: 0; max-width: 72ch; }
+.muted { color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 10px 20px; }
+.brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.brand .sub { color: var(--muted); font-size: 13px; letter-spacing: 0.4px; text-transform: uppercase; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: 500 13px var(--font-body); cursor: pointer; }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chip[aria-pressed="false"] { opacity: 0.45; }
+.chip[aria-pressed="true"] { border-color: var(--c, var(--accent)); }
+.chip:focus-visible, .tab:focus-visible, .seg button:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+nav.tabs { display: flex; gap: 2px; overflow-x: auto; padding: 0 20px; background: var(--surface); border-bottom: 1px solid var(--line); scrollbar-width: thin; }
+.tab { flex: none; padding: 10px 14px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--muted); font: 600 15px var(--font-display); letter-spacing: 0.4px; text-transform: uppercase; cursor: pointer; }
+.tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+main { padding-block: 22px 40px; padding-inline: 20px; max-width: 1480px; margin: 0 auto; }
+section.panel { display: none; }
+section.panel.activa { display: block; }
+.lead { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.lead p { max-width: 90ch; color: var(--muted); }
+
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 22px; }
+@media (max-width: 1180px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { header.top { position: static; } .kpis { gap: 8px; } .kpi { padding: 10px 12px; } .kpi .value { font-size: 27px; } .kpi .value small { font-size: 15px; } .kpi .delta { font-size: 12px; line-height: 1.35; } .kpi .label { font-size: 11.5px; } }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); min-width: 0; }
+.kpi .label { font-size: 12.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi .value { font: 700 34px/1.05 var(--font-display); margin-top: 4px; overflow-wrap: anywhere; }
+.kpi .value small { font: 600 18px var(--font-display); color: var(--muted); margin-left: 4px; }
+.kpi .delta { font-size: 13px; margin-top: 4px; color: var(--muted); }
+.kpi .delta.bad { color: var(--bad); } .kpi .delta.ok { color: var(--ok); }
+
+.grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+.bloque { grid-column: span 12; min-width: 0; }
+.bloque.mitad { grid-column: span 6; }
+@media (max-width: 900px) { .bloque.mitad { grid-column: span 12; } }
+.bloque-cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 14px; margin-bottom: 4px; }
+.bloque-cab p { font-size: 13.5px; color: var(--muted); }
+.chart { width: 100%; height: 340px; }
+@media (max-width: 600px) { .chart { height: 300px; } }
+
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; color: var(--muted); padding: 5px 12px; font: 500 13px var(--font-body); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--fg); }
+.controles { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 14px; }
+.controles label { font-size: 13px; color: var(--muted); }
+
+table.datos { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.datos th, table.datos td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.datos th { color: var(--muted); font-weight: 500; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.4px; }
+table.datos td.num, table.datos th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.datos tr.total td { font-weight: 600; }
+.tabla-wrap { overflow-x: auto; }
+ul.notas { padding-left: 20px; margin: 0; display: grid; gap: 8px; max-width: 90ch; }
+ul.notas li { line-height: 1.45; }
+footer { padding: 24px 20px; color: var(--muted); font-size: 12.5px; border-top: 1px solid var(--line); text-align: center; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* Propio del planificador: panel de parámetros a la izquierda y resultados a la derecha. */
+.layout { display: grid; grid-template-columns: 310px minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 980px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+aside.parametros { position: sticky; top: calc(var(--alto-cab, 110px) + 12px); max-height: calc(100vh - var(--alto-cab, 110px) - 24px); overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+@media (max-width: 980px) { aside.parametros { position: static; max-height: none; } }
+/* En escritorio el panel se desplaza por dentro: un degradado fijo abajo indica que hay más controles (al final solo cubre espacio vacío). */
+@media (min-width: 981px) { aside.parametros::after { content: ""; position: sticky; bottom: 0; display: block; height: 28px; background: linear-gradient(to bottom, transparent, var(--surface) 85%); pointer-events: none; } }
+aside.parametros > details > summary { list-style: none; cursor: pointer; padding: 12px 16px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+aside.parametros > details > summary::-webkit-details-marker { display: none; }
+aside.parametros > details > summary h3 { font-size: 20px; }
+aside.parametros > details > summary .abrir { font-size: 12.5px; color: var(--muted); }
+aside.parametros > details[open] > summary .abrir::after { content: "ocultar"; }
+aside.parametros > details:not([open]) > summary .abrir::after { content: "mostrar"; }
+.cuerpo-param { padding: 0 16px 16px; }
+.grupo { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+.grupo-tit { font: 600 14px var(--font-display); letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.campo { display: grid; gap: 4px; margin-bottom: 12px; }
+.campo .fila { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; }
+.campo .fila label { color: var(--fg); font-weight: 500; }
+.campo .fila output { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 600; white-space: nowrap; }
+.campo .ayuda { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.campo input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
+.campo input[type=number], .campo select { width: 100%; font: 500 13.5px var(--font-body); padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); font-variant-numeric: tabular-nums; }
+.campo .seg { width: 100%; }
+.campo .seg button { flex: 1 1 auto; padding: 5px 8px; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; }
+.check input { margin-top: 3px; accent-color: var(--accent); }
+.boton { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 8px; padding: 6px 12px; font: 500 13px var(--font-body); cursor: pointer; }
+.boton:hover { background: var(--surface-2); }
+.boton.primario { background: var(--accent-soft); }
+.estado-d5 { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 4px 10px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); }
+.estado-d5 .dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+.estado-d5.ok .dot { background: var(--ok); }
+.estado-d5.dif .dot { background: var(--warn); }
+.estado-d5.info .dot { background: var(--accent); }
+/* Selector de juego de costos, arriba del panel de parámetros (visible aunque el panel esté plegado en el teléfono). */
+.costos-sel { display: grid; gap: 8px; padding: 12px 16px 14px; border-bottom: 1px solid var(--line); }
+.costos-sel .tit { font: 600 20px/1.1 var(--font-display); color: var(--fg); }
+.seg.vertical { display: flex; flex-direction: column; flex-wrap: nowrap; width: 100%; }
+.seg.vertical button { text-align: left; padding: 6px 10px; line-height: 1.35; border-top: 1px solid var(--line); }
+.seg.vertical button:first-child { border-top: 0; }
+.seg.vertical button[aria-pressed="true"] { box-shadow: inset 3px 0 0 var(--accent); }
+.seg.vertical button[disabled] { cursor: default; }
+.seg.vertical button[disabled][aria-pressed="false"] { font-style: italic; }
+.costos-sel .ayuda { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.costos-sel .ayuda b { color: var(--fg); font-weight: 600; }
+table.datos tr.subtitulo td { background: var(--surface-2); color: var(--muted); font: 600 14px var(--font-display); letter-spacing: 0.5px; text-transform: uppercase; }
+table.datos td .sub { display: block; color: var(--muted); font-size: 12.5px; }
+.aviso { font-size: 13.5px; margin-top: 6px; padding: 8px 12px; border-left: 3px solid var(--line); background: var(--surface); border-radius: 0 8px 8px 0; }
+.aviso.bad { border-left-color: var(--bad); }
+.aviso.ok { border-left-color: var(--ok); }
+.aviso.warn { border-left-color: var(--warn); }
+.horas-lista { display: grid; gap: 8px; }
+details.hora-det { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+details.hora-det > summary { cursor: pointer; padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+details.hora-det > summary .h { font: 600 19px var(--font-display); min-width: 52px; }
+details.hora-det > summary .info { font-size: 13.5px; color: var(--muted); }
+details.hora-det > summary .info b { color: var(--fg); font-weight: 600; }
+.tiempos { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 12px; }
+.tiempos .t { font-variant-numeric: tabular-nums; padding: 2px 8px; border-radius: 6px; background: var(--surface-2); font-size: 13.5px; }
+.tiempos .t small { color: var(--muted); font-size: 11.5px; margin-left: 4px; }
+.leyenda-linea { display: inline-block; width: 18px; border-top: 2px dashed var(--accent); vertical-align: middle; margin-right: 4px; }
+#t-fuentes code { white-space: nowrap; overflow-wrap: normal; }
+code { font-size: 12.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+/* Modo embebido: sin marca, sin enlaces a otras páginas y sin pie; se conservan rutas, pestañas y parámetros. */
+html[data-embebido] header.top .brand, html[data-embebido] header.top a.chip, html[data-embebido] footer { display: none; }
+html[data-embebido] .top-inner { padding: 8px 16px; }
+html[data-embebido] nav.tabs { padding: 0 16px; }
+html[data-embebido] main { padding-inline: 16px; padding-block: 16px 24px; }
+</style>
+<script>if (document.documentElement.hasAttribute('data-embebido')) document.write('<link rel="stylesheet" href="app/tokens.css">');</script>
+</head>
+<body>
+<header class="top" id="cabecera">
+  <div class="top-inner">
+    <div class="brand">
+      <h1>Planificador de despacho</h1>
+      <span class="sub">Cuántos buses y cada cuánto · día típico 2025</span>
+    </div>
+    <div class="chips" id="chips-rutas" role="group" aria-label="Ruta"></div>
+    <a class="chip" href="EDA_visual.html" style="text-decoration:none">Tablero de datos →</a>
+    <a class="chip" href="consola_despacho.html" style="text-decoration:none">Consola de despacho →</a>
+    <a class="chip" href="simulador_ahorro.html" style="text-decoration:none">Simulador de ahorro →</a>
+  </div>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+</header>
+
+<main>
+  <div class="layout">
+    <aside class="parametros" aria-label="Parámetros del planificador">
+      <div class="costos-sel">
+        <div class="tit" id="tit-costos">Costos</div>
+        <div class="seg vertical" id="seg-costos" role="group" aria-labelledby="tit-costos"></div>
+        <div class="ayuda" id="ayuda-costos"></div>
+      </div>
+      <details id="det-param" open>
+        <summary><h3>Parámetros</h3><span class="abrir"></span></summary>
+        <div class="cuerpo-param">
+          <div class="campo">
+            <div class="fila"><label>Tipo de día</label></div>
+            <div class="seg" id="seg-tipo" role="group" aria-label="Tipo de día">
+              <button type="button" data-v="Laboral" aria-pressed="true">Laboral</button>
+              <button type="button" data-v="Sábado" aria-pressed="false">Sábado</button>
+              <button type="button" data-v="Domingo/festivo" aria-pressed="false">Domingo y festivo</button>
+            </div>
+          </div>
+
+          <div class="grupo">
+            <div class="grupo-tit">Servicio</div>
+            <div class="campo">
+              <div class="fila"><label for="in-fc">Factor de carga objetivo</label><output id="out-fc"></output></div>
+              <input type="range" id="in-fc" min="0.6" max="1" step="0.05">
+              <div class="ayuda">El bus cuenta como lleno a esta fracción de su capacidad (50). 1,00 = D5; 0,85 = regla de D1.</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label>Margen de seguridad</label></div>
+              <div class="seg" id="seg-margen" role="group" aria-label="Margen de seguridad">
+                <button type="button" data-v="esperado" aria-pressed="true">Esperado (D5)</button>
+                <button type="button" data-v="p50" aria-pressed="false">p50</button>
+                <button type="button" data-v="p80" aria-pressed="false">p80</button>
+                <button type="button" data-v="p90" aria-pressed="false">p90</button>
+              </div>
+              <div class="ayuda">p50/p80/p90 exigen además capacidad para ese percentil de la carga crítica prevista con el factor de carga elegido.</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-imin">Intervalo mínimo</label><output id="out-imin"></output></div>
+              <input type="range" id="in-imin" min="1" max="5" step="0.5">
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-imax">Intervalo máximo</label></div>
+              <select id="in-imax">
+                <option value="politica">Política D5: 10 min (15 dom. y festivos)</option>
+                <option value="6">6 min</option><option value="8">8 min</option><option value="10">10 min</option>
+                <option value="12">12 min</option><option value="15">15 min</option><option value="20">20 min</option>
+              </select>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-delta">Cambio máximo entre horas</label><output id="out-delta"></output></div>
+              <input type="range" id="in-delta" min="2" max="15" step="1">
+              <div class="ayuda">Suavidad: salidas por hora que puede subir o bajar de una hora a la siguiente (desde las 7 h).</div>
+            </div>
+          </div>
+
+          <div class="grupo">
+            <div class="grupo-tit">Flota</div>
+            <div class="campo">
+              <div class="fila"><label for="in-flota">Flota disponible</label><output id="out-flota"></output></div>
+              <input type="range" id="in-flota" min="50" max="100" step="1">
+            </div>
+            <label class="check"><input type="checkbox" id="in-ajustar"> <span>Ajustar el plan para no superar la flota (como el MILP de D5). Sin marcar, solo se señalan las horas que la superan.</span></label>
+          </div>
+
+          <div class="grupo">
+            <div class="grupo-tit">Costos y valoraciones</div>
+            <div class="campo">
+              <div class="fila"><label for="in-bh">Costo por bus-hora</label><output id="out-bh"></output></div>
+              <input type="number" id="in-bh" min="0" step="1" inputmode="numeric">
+              <div class="ayuda">Lo que se ahorra por cada hora que un bus deja de rodar: el conductor si se paga por hora o turno; 0 si se paga por producido.</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-km">Costo por km</label><output id="out-km"></output></div>
+              <input type="number" id="in-km" min="0" step="1" inputmode="numeric">
+              <div class="ayuda">ACPM, mantenimiento, llantas y lubricantes.</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-tarifa">Tarifa neta</label><output id="out-tarifa"></output></div>
+              <input type="number" id="in-tarifa" min="0" step="1" inputmode="numeric">
+              <div class="ayuda">Lo que retiene el operador por pasajero (con pago por producido, después de la parte del conductor).</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-vte">Valor del tiempo de espera</label><output id="out-vte"></output></div>
+              <input type="number" id="in-vte" min="0" step="500" inputmode="numeric">
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-penal">Penalidad por pasajero sobre la capacidad</label><output id="out-penal"></output></div>
+              <input type="number" id="in-penal" min="0" step="1000" inputmode="numeric">
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-e">Elasticidad a la frecuencia</label><output id="out-e"></output></div>
+              <input type="range" id="in-e" min="0" max="1" step="0.01">
+              <div class="ayuda">0 = demanda cautiva; 0,5 = literatura (TCRP 95, como D5), el valor que se usa para planear. La medida en Sobusa es 0,70 (E7, rango 0,55–0,90), pero sale de salidas que fallan: con 0,70 el optimizador añade salidas porque acredita pasajeros ganados que todavía nadie ha medido.</div>
+            </div>
+          </div>
+          <div class="grupo" style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" class="boton primario" id="btn-reset">Restablecer valores por defecto</button>
+          </div>
+        </div>
+      </details>
+    </aside>
+
+    <div class="contenido">
+      <section class="panel" id="p-plan" role="tabpanel">
+        <div class="lead">
+          <h2 id="tit-plan">Plan del día</h2>
+          <p>Para cada hora de salida (4 a 20 h) el planificador elige cuántos buses despachar minimizando la suma de costo operativo, espera de los pasajeros, sobrecarga esperada y pasajes perdidos, con el mismo modelo que la optimización D5. Cambia los parámetros del panel: todo se recalcula al instante.</p>
+          <div><span class="estado-d5" id="estado-d5"><span class="dot"></span><span id="estado-d5-txt"></span></span></div>
+        </div>
+        <div class="kpis" id="kpis"></div>
+        <div class="grid">
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Salidas por hora: hoy frente a lo recomendado</h3><p>Salidas válidas por hora de salida. Hoy = mediana de 2025 para este tipo de día. <span class="leyenda-linea"></span>solución D5 del día típico con sus supuestos (60.000 / 1.500 / 3.000).</p></div>
+            <div class="chart" id="c-salidas"></div>
+          </div>
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Buses en ruta frente a la flota disponible</h3><p>Buses circulando cada 15 minutos con el ciclo de cada hora; la línea roja es la flota disponible.</p></div>
+            <div class="chart" id="c-buses"></div>
+            <div class="aviso" id="aviso-flota"></div>
+          </div>
+          <div class="bloque">
+            <div class="bloque-cab"><h3>De dónde sale el valor (millones de pesos por día)</h3><p>Componentes del costo con la carga prevista; la sobrecarga se mide sobre la capacidad física de 50 pasajeros.</p></div>
+            <div class="tabla-wrap"><table class="datos" id="t-componentes"></table></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="p-horario" role="tabpanel">
+        <div class="lead">
+          <h2>Horario minuto a minuto</h2>
+          <p>Salidas válidas equiespaciadas dentro de cada hora, igual que el horario de D5. Para que salgan esas salidas válidas hay que programar algunas más, porque una parte de los viajes programados no termina como viaje válido (columna «programar»).</p>
+        </div>
+        <div class="controles">
+          <button type="button" class="boton" id="btn-expandir">Abrir todas las horas</button>
+          <button type="button" class="boton" id="btn-contraer">Cerrar todas</button>
+          <button type="button" class="boton" id="btn-csv">Descargar CSV</button>
+          <span class="muted" id="resumen-horario" style="font-size:13.5px"></span>
+        </div>
+        <div class="horas-lista" id="lista-horas"></div>
+      </section>
+
+      <section class="panel" id="p-supuestos" role="tabpanel">
+        <div class="lead">
+          <h2>Supuestos y validación</h2>
+          <p>Qué calcula el planificador, de dónde vienen los datos y qué tan fiel es a la optimización D5.</p>
+        </div>
+        <div class="grid">
+          <div class="bloque mitad">
+            <h3 style="margin-bottom:8px">Cómo decide</h3>
+            <ul class="notas" id="notas-metodo"></ul>
+          </div>
+          <div class="bloque mitad">
+            <h3 style="margin-bottom:8px">Supuestos que hay que leer antes de usarlo</h3>
+            <ul class="notas" id="notas-supuestos"></ul>
+          </div>
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Validación frente al día típico de D5 (siempre con los supuestos de D5)</h3><p>Calculado en vivo en este navegador para las nueve combinaciones de ruta y tipo de día con todos los parámetros de D5 (60.000 COP por bus-hora, 1.500 COP/km, tarifa 3.000, e = 0,5), sea cual sea el juego de costos elegido arriba.</p></div>
+            <div class="tabla-wrap"><table class="datos" id="t-validacion"></table></div>
+          </div>
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Parámetros por defecto y su fuente</h3><p>Los costos por defecto vienen del módulo costos/ (precios de octubre de 2026); al lado, el supuesto de D5 que reemplazan. El resto son los parámetros de D5.</p></div>
+            <div class="tabla-wrap"><table class="datos" id="t-fuentes"></table></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+<footer>Planificador del Data Challenge Sobusa 2026 (Universidad del Norte). Modelo y datos: optimización D5 sobre los pronósticos E1/E3 de 2025. Costos por defecto: módulo costos/ (fuentes de 2026); valor del tiempo, penalidad por sobrecarga y elasticidad: supuestos de D5.</footer>
+
+<script src="lib/echarts.min.js"></script>  <!-- ECharts 5.5.1, copia local (antes: cdn.jsdelivr.net) -->
+<script src="./planificador_datos.js"></script>
+<script>
+/* MODELO-INICIO: modelo del planificador, autocontenido (se prueba también en node con experimentos/P1_planificador/prueba_modelo_node.js) */
+function crearModelo(D) {
+  'use strict';
+  const P = D.param;
+  const HORAS = []; for (let h = 4; h <= 20; h++) HORAS.push(h);
+  const T_FLOTA = []; for (let q = 17; q <= 96; q++) T_FLOTA.push(q / 4);  // instantes 04:15 a 24:00 cada 15 min (como D5)
+  const CI = {}; D.campos_hora.forEach((c, i) => { CI[c] = i; });
+  const Z = { p50: 0, p80: 0.8416212335729143, p90: 1.2815515655446004 };
+  const LIM_NODOS = 20000, LIM_MS = 2500, ITER_NODO = 8;
+
+  // erfc de Numerical Recipes (Chebyshev; error relativo < 1,2e-7)
+  function erfc(x) {
+    const z = Math.abs(x), t = 1 / (1 + 0.5 * z);
+    const r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+    return x >= 0 ? r : 2 - r;
+  }
+  const Phi = (x) => 0.5 * erfc(-x / Math.SQRT2);
+  // E[(L - c)+] con L lognormal(mu, s)
+  function sobrecarga(mu, s, c) {
+    s = Math.max(s, 1e-6);
+    if (c <= 0) return Math.exp(mu + s * s / 2);
+    const d1 = (mu + s * s - Math.log(c)) / s;
+    return Math.exp(mu + s * s / 2) * Phi(d1) - c * Phi(d1 - s);
+  }
+  const probSobre = (mu, s, c) => c <= 0 ? 1 : 1 - Phi((Math.log(c) - mu) / Math.max(s, 1e-6));
+
+  const DEF = { fc: 1, margen: 'esperado', imin: P.INTERVALO_MIN, imax: 'politica', pctFlota: Math.round(P.FACTOR_FLOTA * 100), ajustar: true,
+    costoBH: P.COSTO_BUS_HORA, costoKm: P.COSTO_KM, tarifa: P.TARIFA, vte: P.VALOR_TIEMPO_ESPERA, penal: P.PENALIDAD_SOBRECARGA,
+    e: P.ELASTICIDAD, delta: P.DELTA };
+
+  function preparar(ruta, tipo, U) {
+    const R = D.rutas[ruta], T = R.tipos[tipo];
+    const imax = U.imax === 'politica' ? P.INTERVALO_MAX[tipo] : Number(U.imax);
+    const capu = R.capacidad * U.fc;
+    const ent = T.horas.map((row) => {
+      const g = (c) => row[CI[c]];
+      const M = g('minutos_operados');
+      const iminJ = g('intervalo_min');
+      // Excepción de D5: en el pico de 5 h de SILENCIO y CRA 54 laboral Sobusa ya programa más de 30 salidas/h
+      const imin = iminJ < P.INTERVALO_MIN - 1e-9 ? Math.min(U.imin, iminJ) : U.imin;
+      let nmin = M > 0 ? Math.ceil(M / imax - 1e-9) : 0;
+      const nmax = M > 0 ? Math.max(Math.floor(M / imin + 1e-9), nmin) : 0;
+      const mu = Math.log(Math.max(g('carga_critica_p50'), 1e-9)), s = g('sigma_log');
+      let req = 0;
+      if (U.margen !== 'esperado' && M > 0) {
+        req = Math.ceil(Math.exp(mu + Z[U.margen] * s) / capu - 1e-9);
+        nmin = Math.min(Math.max(nmin, req), nmax);
+      }
+      const k0 = g('salidas_actuales');
+      return { hora: g('hora'), M, nmin, nmax, req, ciclo: g('ciclo_min'), km: R.km, cv: g('cv'), pax: Math.max(g('pasajeros_p50'), 0),
+        pax10: g('pasajeros_p10'), pax90: g('pasajeros_p90'), mu, s, L50: g('carga_critica_p50'), L10: g('carga_critica_p10'), L90: g('carga_critica_p90'),
+        k0, k0c: Math.max(k0, 1), cap: R.capacidad, capu, tasa: g('tasa_no_valido'), s1: g('salidas_S1_D1'), d5: g('solucion_D5') };
+    });
+    const flota = Math.floor(U.pctFlota / 100 * T.vehiculos_dia + 1e-9);
+    return { ent, flota, imax, R, T };
+  }
+
+  function componentes(e, k, U, capDecision) {
+    const op = k * e.ciclo / 60 * U.costoBH + k * e.km * U.costoKm;
+    const esp = k > 0 ? e.M / k / 2 * (1 + e.cv * e.cv) : 0;
+    const wait = e.pax * esp / 60 * U.vte;
+    const over = U.penal * sobrecarga(e.mu, e.s, k * capDecision);
+    const rev = e.pax * U.e * (e.k0c - k) / e.k0c * U.tarifa;
+    return { op, esp, wait, over, rev };
+  }
+  function tablaCostos(ent, U) {
+    return ent.map((e) => {
+      const tot = new Float64Array(e.nmax - e.nmin + 1);
+      for (let k = e.nmin; k <= e.nmax; k++) { const c = componentes(e, k, U, e.capu); tot[k - e.nmin] = c.op + c.wait + c.over + c.rev; }
+      return { lo: e.nmin, hi: e.nmax, tot };
+    });
+  }
+  function fracciones(ent) {
+    return ent.map((e, i) => T_FLOTA.map((t) => { const h = HORAS[i]; return Math.min(1, Math.max(0, Math.min(h + 1, t) - Math.max(h, t - e.ciclo / 60))); }));
+  }
+  const enRuta = (x, fr) => T_FLOTA.map((_, j) => x.reduce((s, xi, i) => s + xi * fr[i][j], 0));
+  function peorInstante(x, fr, F) {
+    const B = enRuta(x, fr);
+    let j = 0; for (let q = 1; q < B.length; q++) if (B[q] > B[j]) j = q;
+    return { j, exceso: B[j] - F, B };
+  }
+
+  // Programación dinámica exacta sobre las 17 horas: cotas lo/hi por hora y suavidad |x_h/f_h - x_{h-1}/f_{h-1}| <= DELTA
+  // (desde HORA_INICIO_SUAVIDAD). w (opcional) es un precio por salida de cada hora (multiplicadores de la flota).
+  // Devuelve x, c = costo verdadero y v = costo con precios; null si no hay solución.
+  function dp(ent, tabs, lo, hi, suave, delta, w) {
+    const n = ent.length, back = [];
+    let prevLo = 0, prevV = null, prevC = null;
+    for (let i = 0; i < n; i++) {
+      const L = Math.max(lo[i], tabs[i].lo), H = Math.min(hi[i], tabs[i].hi);
+      if (H < L) return null;
+      const m = H - L + 1, curV = new Float64Array(m).fill(Infinity), curC = new Float64Array(m), bk = new Int32Array(m).fill(-1);
+      const wi = w ? w[i] : 0, tot = tabs[i].tot, off = tabs[i].lo;
+      if (i === 0) { for (let k = L; k <= H; k++) { curC[k - L] = tot[k - off]; curV[k - L] = tot[k - off] + wi * k; } }
+      else {
+        const a = ent[i - 1], e = ent[i];
+        const aplica = suave && HORAS[i] >= P.HORA_INICIO_SUAVIDAD && a.M > 0 && e.M > 0;
+        const fa = a.M / 60, fb = e.M / 60;
+        let alguno = false;
+        for (let k = L; k <= H; k++) {
+          let best = Infinity, arg = -1;
+          for (let j = 0; j < prevV.length; j++) {
+            const cp = prevV[j];
+            if (cp === Infinity) continue;
+            if (aplica && Math.abs(k / fb - (prevLo + j) / fa) > delta + 1e-9) continue;
+            if (cp < best) { best = cp; arg = j; }
+          }
+          if (arg >= 0) { curV[k - L] = best + tot[k - off] + wi * k; curC[k - L] = prevC[arg] + tot[k - off]; bk[k - L] = prevLo + arg; alguno = true; }
+        }
+        if (!alguno) return null;
+      }
+      back.push({ L, bk }); prevLo = L; prevV = curV; prevC = curC;
+    }
+    let jb = -1;
+    for (let j = 0; j < prevV.length; j++) if (jb < 0 || prevV[j] < prevV[jb]) jb = j;
+    if (jb < 0 || prevV[jb] === Infinity) return null;
+    const x = new Array(n);
+    x[n - 1] = prevLo + jb;
+    for (let i = n - 1; i > 0; i--) x[i - 1] = back[i].bk[x[i] - back[i].L];
+    return { x, c: prevC[jb], v: prevV[jb] };
+  }
+
+  // Ajuste a la flota: ramificación y acotamiento exacto (límite de nodos y tiempo). Cota de cada nodo = máx(DP sin flota,
+  // DP con multiplicadores de Lagrange de la raíz); ramificación en la hora que más aporta al instante más excedido
+  // (x_i <= v - 1 | x_i >= v). Incumbente inicial: reducción voraz de topes.
+  function ajustarFlota(ent, tabs, fr, F, suave, delta, s0) {
+    const n = ent.length, NT = T_FLOTA.length;
+    const lo0 = ent.map((e) => e.nmin), hi0 = ent.map((e) => e.nmax);
+    const factible = (x) => peorInstante(x, fr, F).exceso <= 1e-9;
+    let inc = null, UB = Infinity;
+    // Búsqueda local sobre una solución factible: mover una salida (±1 en una hora, o −1 en una y +1 en otra) si sigue
+    // cumpliendo cotas, suavidad y flota y baja el costo.
+    const costoX = (x) => x.reduce((a, k, i) => a + tabs[i].tot[k - tabs[i].lo], 0);
+    const valida = (x) => {
+      for (let i = 0; i < n; i++) if (x[i] < lo0[i] || x[i] > hi0[i]) return false;
+      for (let i = 1; i < n; i++) {
+        const a = ent[i - 1], e = ent[i];
+        if (suave && HORAS[i] >= P.HORA_INICIO_SUAVIDAD && a.M > 0 && e.M > 0 && Math.abs(x[i] / (e.M / 60) - x[i - 1] / (a.M / 60)) > delta + 1e-9) return false;
+      }
+      return factible(x);
+    };
+    function mejorarLocal(x0, c0) {
+      let x = x0.slice(), c = c0, mejora = true, vueltas = 0;
+      while (mejora && vueltas++ < 50) {
+        mejora = false;
+        for (let i = 0; i < n && !mejora; i++) {
+          for (const d of [-1, 1]) {
+            const y = x.slice(); y[i] += d;
+            if (valida(y)) { const cy = costoX(y); if (cy < c - 1e-6) { x = y; c = cy; mejora = true; break; } }
+          }
+          for (let j = 0; j < n && !mejora; j++) {
+            if (j === i) continue;
+            const y = x.slice(); y[i] -= 1; y[j] += 1;
+            if (valida(y)) { const cy = costoX(y); if (cy < c - 1e-6) { x = y; c = cy; mejora = true; } }
+          }
+        }
+      }
+      return { x, c };
+    }
+    const nuevoIncumbente = (x, c) => { const m = mejorarLocal(x, c); if (m.c < UB) { UB = m.c; inc = m.x; } };
+    // 1) incumbente voraz
+    let hi = hi0.slice(), s = s0;
+    for (let it = 0; it < 600 && s; it++) {
+      const pi = peorInstante(s.x, fr, F);
+      if (pi.exceso <= 1e-9) { nuevoIncumbente(s.x, s.c); break; }
+      let mejor = null;
+      for (let i = 0; i < n; i++) {
+        if (!(fr[i][pi.j] > 0) || !(s.x[i] > lo0[i])) continue;
+        const h2 = hi.slice(); h2[i] = s.x[i] - 1;
+        const s2 = dp(ent, tabs, lo0, h2, suave, delta, null);
+        if (!s2) continue;
+        const lib = Math.max(pi.B[pi.j] - s2.x.reduce((a, xi, ii) => a + xi * fr[ii][pi.j], 0), 1e-9);
+        const score = (s2.c - s.c) / lib;
+        if (!mejor || score < mejor.score) mejor = { score, h2, s2 };
+      }
+      if (!mejor) break;
+      hi = mejor.h2; s = mejor.s2;
+    }
+    // 2) multiplicadores de Lagrange en la raíz (subgradiente)
+    let lam = new Float64Array(NT), mejorL = -Infinity, lamMejor = new Float64Array(NT), theta = 1.5, sinMejora = 0;
+    const pesos = (lm) => fr.map((row) => row.reduce((a, f, j) => a + f * lm[j], 0));
+    for (let it = 0; it < 120; it++) {
+      const sl = dp(ent, tabs, lo0, hi0, suave, delta, pesos(lam));
+      if (!sl) break;
+      const Lval = sl.v - F * lam.reduce((a, b) => a + b, 0);
+      if (Lval > mejorL + 1e-9) { mejorL = Lval; lamMejor = lam.slice(); sinMejora = 0; } else if (++sinMejora >= 6) { theta /= 2; sinMejora = 0; }
+      const B = enRuta(sl.x, fr);
+      if (B.every((b) => b <= F + 1e-9) && sl.c < UB) nuevoIncumbente(sl.x, sl.c);
+      const g = B.map((b, j) => (lam[j] <= 0 && b - F < 0) ? 0 : b - F);
+      const norma = g.reduce((a, b) => a + b * b, 0);
+      if (norma < 1e-12 || theta < 1e-4) break;
+      const objetivo = isFinite(UB) ? UB : Math.abs(Lval) * 1.02 + 1;
+      const paso = theta * Math.max(objetivo - Lval, 1e-6 * Math.abs(objetivo)) / norma;
+      lam = lam.map((l, j) => Math.max(0, l + paso * g[j]));
+    }
+    const wL = pesos(lamMejor), sumLam = F * lamMejor.reduce((a, b) => a + b, 0);
+    // 3) ramificación y acotamiento (búsqueda en profundidad)
+    // Cada nodo refina sus multiplicadores con unas pocas iteraciones de subgradiente partiendo de los del padre.
+    const t0 = Date.now();
+    const pila = [{ lo: lo0, hi: hi0, lam: lamMejor, cota: mejorL }];
+    let nodos = 0, cortado = false;
+    const tol = (u) => u - 1e-9 * Math.abs(u) - 1e-6;
+    void wL; void sumLam;
+    while (pila.length) {
+      if (nodos >= LIM_NODOS || Date.now() - t0 > LIM_MS) { cortado = true; break; }
+      const nd = pila.pop(); nodos++;
+      if (nd.cota >= tol(UB)) continue;
+      const a = dp(ent, tabs, nd.lo, nd.hi, suave, delta, null);
+      if (!a || a.c >= tol(UB)) continue;
+      const pi = peorInstante(a.x, fr, F);
+      if (pi.exceso <= 1e-9) { nuevoIncumbente(a.x, a.c); continue; }
+      let lm = nd.lam, cota = Math.max(nd.cota, a.c), lmMejor = lm, podado = false;
+      for (let it = 0; it < ITER_NODO; it++) {
+        const b = dp(ent, tabs, nd.lo, nd.hi, suave, delta, pesos(lm));
+        if (!b) { podado = true; break; }
+        const Lb = b.v - F * lm.reduce((s2, v) => s2 + v, 0);
+        if (Lb > cota) { cota = Lb; lmMejor = lm; }
+        const B = enRuta(b.x, fr);
+        if (b.c < UB && B.every((v) => v <= F + 1e-9)) nuevoIncumbente(b.x, b.c);
+        if (cota >= tol(UB)) { podado = true; break; }
+        const g = B.map((v, j) => (lm[j] <= 0 && v - F < 0) ? 0 : v - F);
+        const norma = g.reduce((s2, v) => s2 + v * v, 0);
+        if (norma < 1e-12) break;
+        const paso = Math.max(UB - Lb, 1e-6 * Math.abs(UB)) / norma;
+        lm = lm.map((l, j) => Math.max(0, l + paso * g[j]));
+      }
+      if (podado) continue;
+      let ib = -1;
+      for (let i = 0; i < n; i++) if (fr[i][pi.j] > 0 && a.x[i] > nd.lo[i] && (ib < 0 || fr[i][pi.j] > fr[ib][pi.j] + 1e-12)) ib = i;
+      if (ib < 0) continue;  // todas las horas que aportan ya están en su mínimo: nodo infactible
+      const loB = nd.lo.slice(); loB[ib] = a.x[ib];
+      const hiA = nd.hi.slice(); hiA[ib] = a.x[ib] - 1;
+      pila.push({ lo: loB, hi: nd.hi, lam: lmMejor, cota });
+      pila.push({ lo: nd.lo, hi: hiA, lam: lmMejor, cota });
+    }
+    const cotaAbierta = cortado && pila.length ? Math.min(...pila.map((p) => p.cota)) : UB;
+    return { x: inc, c: UB, nodos, exacto: !cortado, cota: Math.min(cotaAbierta, UB), ms: Date.now() - t0 };
+  }
+
+  function planificar(ruta, tipo, U) {
+    const pr = preparar(ruta, tipo, U);
+    const { ent, flota } = pr;
+    const tabs = tablaCostos(ent, U);
+    const lo = ent.map((e) => e.nmin), hi = ent.map((e) => e.nmax);
+    let suave = true;
+    let sol = dp(ent, tabs, lo, hi, true, U.delta, null);
+    if (!sol) { suave = false; sol = dp(ent, tabs, lo, hi, false, U.delta, null); }
+    const fr = fracciones(ent);
+    let x = sol.x, c = sol.c, info = { nodos: 0, exacto: true, ajustado: false, sinSolucion: false, brecha: 0, ms: 0 };
+    if (U.ajustar && peorInstante(x, fr, flota).exceso > 1e-9) {
+      const r = ajustarFlota(ent, tabs, fr, flota, suave, U.delta, sol);
+      if (r.x) { x = r.x; c = r.c; info = { nodos: r.nodos, exacto: r.exacto, ajustado: true, sinSolucion: false, brecha: r.exacto ? 0 : Math.max(0, (r.c - r.cota) / Math.abs(r.c)), ms: r.ms }; }
+      else info = { nodos: r.nodos, exacto: r.exacto, ajustado: false, sinSolucion: true, brecha: null, ms: r.ms };
+    }
+    return Object.assign(pr, { x, c, suave, fr, info, solSinFlota: sol.x, B: enRuta(x, fr), B0: enRuta(ent.map((e) => e.k0), fr) });
+  }
+
+  // Evaluación de una oferta por hora (x puede ser fraccionaria para la oferta actual). Sobrecarga sobre la capacidad física.
+  function evaluar(ent, x, U, esHoy) {
+    let op = 0, wait = 0, overPax = 0, horasSobre = 0, rev = 0, bh = 0, km = 0, salidas = 0, prog = 0, paxEsp = 0, paxTot = 0;
+    const porHora = ent.map((e, i) => {
+      const k = x[i];
+      const c = componentes(e, k, U, e.cap);
+      const ov = sobrecarga(e.mu, e.s, k * e.cap);
+      const pS = probSobre(e.mu, e.s, k * e.cap);
+      op += c.op; wait += c.wait; overPax += ov; horasSobre += (e.M > 0 || k > 0) ? pS : 0;
+      if (!esHoy) rev += c.rev;
+      bh += k * e.ciclo / 60; km += k * e.km; salidas += k;
+      const pr = esHoy ? k : Math.ceil(k / (1 - e.tasa) - 1e-9);
+      prog += pr;
+      if (k > 0 && e.pax > 0) { paxEsp += e.pax * c.esp; paxTot += e.pax; }
+      return { k, esp: c.esp, intervalo: k > 0 ? e.M / k : null, fc: k > 0 ? e.L50 / (e.cap * k) : null, pS, ov, prog: pr };
+    });
+    return { op, wait, overPax, over: overPax * U.penal, horasSobre, rev, paxCambio: -rev / Math.max(U.tarifa, 1e-9), bh, km, salidas, prog,
+      espera: paxTot > 0 ? paxEsp / paxTot : null, porHora };
+  }
+
+  // Horario: salidas equiespaciadas dentro de cada hora, centradas en su subintervalo (mismo método que D5).
+  function horario(ent, x) {
+    const out = [];
+    const ops = HORAS.filter((h, i) => x[i] > 0);
+    if (!ops.length) return out;
+    const primera = Math.min(...ops);
+    ent.forEach((e, i) => {
+      const k = x[i]; if (k <= 0) return;
+      const h = HORAS[i];
+      const ini = (h === primera && e.M < 60) ? (h + 1) * 60 - e.M : h * 60;
+      const H = e.M / k, mins = [];
+      for (let q = 0; q < k; q++) mins.push(Math.floor(ini + (q + 0.5) * H + 0.5));
+      out.push({ hora: h, mins, prog: Math.ceil(k / (1 - e.tasa) - 1e-9) });
+    });
+    return out;
+  }
+
+  function calcular(ruta, tipo, U) {
+    const pl = planificar(ruta, tipo, U);
+    const hoy = evaluar(pl.ent, pl.ent.map((e) => e.k0), U, true);
+    const rec = evaluar(pl.ent, pl.x, U, false);
+    const netoOperador = (hoy.op - rec.op) - rec.rev;
+    const netoSocial = netoOperador + (hoy.wait - rec.wait) + (hoy.over - rec.over);
+    const exceso = [];
+    pl.B.forEach((b, j) => { if (b > pl.flota + 1e-9) exceso.push(j); });
+    return Object.assign(pl, { hoy, rec, netoOperador, netoSocial, exceso, horario: horario(pl.ent, pl.x) });
+  }
+
+  // Solución D5 comparable con los parámetros actuales (solo si todo está en los valores de D5, salvo una elasticidad publicada).
+  function referenciaD5(ruta, tipo, U) {
+    const T = D.rutas[ruta].tipos[tipo];
+    if (Object.keys(DEF).some((k) => k !== 'e' && U[k] !== DEF[k])) return null;
+    const clave = Object.keys(T.D5.x_por_elasticidad).find((k) => Math.abs(Number(k) - U.e) < 1e-9);
+    return clave ? { x: T.D5.x_por_elasticidad[clave], e: Number(clave) } : null;
+  }
+
+  return { calcular, DEF, referenciaD5, horario, preparar, HORAS, T_FLOTA, costoDe: (ent, U, x) => x.reduce((a, k, i) => { const c = componentes(ent[i], k, U, ent[i].capu); return a + c.op + c.wait + c.over + c.rev; }, 0) };
+}
+/* MODELO-FIN */
+</script>
+<script>
+(function () {
+  'use strict';
+  const D = window.PLAN;
+  if (!D) { document.querySelector('main').innerHTML = '<p>No se encontró el archivo planificador_datos.js junto a esta página.</p>'; return; }
+
+  /* COSTOS-INICIO: juegos de costos del selector «Costos». Entre la primera y la última llave va JSON estricto, porque también lo
+     leen experimentos/P1_planificador/validacion_costos_fuente.py y validacion_costos_fuente.js. Valores centrales de
+     costos/resultados/costos_para_planificador.json (precios de oct-2026); por producido: tarifa neta × (1 − participación). */
+  const COSTOS = {
+    "defecto": "hora",
+    "participacion_producido": 0.2,
+    "juegos": {
+      "hora": {"nombre": "Con fuente 2026 · conductor por hora", "costoBH": 26400, "costoKm": 1991, "tarifa": 3182},
+      "producido": {"nombre": "Con fuente 2026 · conductor por producido", "costoBH": 0, "costoKm": 1991, "tarifa": 2546},
+      "d5": {"nombre": "Supuestos de D5 (60.000 / 1.500 / 3.000)", "costoBH": 60000, "costoKm": 1500, "tarifa": 3000}
+    }
+  };
+  /* COSTOS-FIN */
+
+  // ================= utilidades =================
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fmt = (n, d = 0) => (n == null || !isFinite(n)) ? '–' : Number(n).toLocaleString('es-CO', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const fmtSig = (n, d = 1) => (n == null || !isFinite(n)) ? '–' : (n > 0 ? '+' : n < 0 ? '−' : '') + fmt(Math.abs(n), d);
+  const fmtPct = (n, d = 1) => (n == null || !isFinite(n)) ? '–' : fmtSig(n, d) + ' %';
+  const cop = (n) => fmt(n) + ' COP';
+  const mcop = (n, d = 1) => fmt(n / 1e6, d) + ' M';
+  const hhmm = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const reducida = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const RUTAS = D.meta.rutas.map((r) => r.nombre);
+  const VAR_COLOR = { 'SILENCIO': '--r-silencio', 'CRA 54': '--r-cra54', 'CL 72': '--r-cl72' };
+  const colorRuta = (r) => css(VAR_COLOR[r]);
+  const NOMBRE_TIPO = { 'Laboral': 'laboral', 'Sábado': 'sábado', 'Domingo/festivo': 'domingo o festivo' };
+  const MOD = crearModelo(D);
+  const { calcular, DEF, referenciaD5, HORAS, T_FLOTA } = MOD;
+  window.planificador = MOD;
+
+  // Juegos de costos. DEF (del modelo) sigue siendo el conjunto de parámetros de D5: lo usan la validación en vivo y
+  // referenciaD5. La página arranca con DEF_PAGINA = DEF con los costos del juego por defecto; el resto de parámetros no cambia.
+  const CLAVES_COSTO = ['costoBH', 'costoKm', 'tarifa'];
+  const JUEGOS = COSTOS.juegos;
+  const costosDe = (j) => ({ costoBH: JUEGOS[j].costoBH, costoKm: JUEGOS[j].costoKm, tarifa: JUEGOS[j].tarifa });
+  const DEF_PAGINA = Object.assign({}, DEF, costosDe(COSTOS.defecto));
+  window.planificadorCostos = { COSTOS, DEF_PAGINA };
+
+  // ================= estado e interfaz =================
+  const estado = Object.assign({ ruta: 'CRA 54', tipo: 'Laboral', tab: 'plan' }, DEF_PAGINA);
+  // El selector muestra el juego cuyos tres costos coinciden con los actuales; si se edita uno a mano, «Personalizado».
+  const juegoActual = () => Object.keys(JUEGOS).find((j) => CLAVES_COSTO.every((k) => Math.abs(estado[k] - JUEGOS[j][k]) < 1e-9)) || 'personalizado';
+  const charts = {};
+  let ultimo = null;
+
+  const chipsEl = document.getElementById('chips-rutas');
+  D.meta.rutas.forEach((r) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.r = r.nombre;
+    b.innerHTML = `<span class="dot"></span>${esc(r.nombre)} <span class="muted num">${fmt(r.km, 1)} km</span>`;
+    b.addEventListener('click', () => { estado.ruta = r.nombre; pintarChips(); recalcular(); });
+    chipsEl.appendChild(b);
+  });
+  function pintarChips() {
+    chipsEl.querySelectorAll('.chip').forEach((b) => { b.style.setProperty('--c', colorRuta(b.dataset.r)); b.setAttribute('aria-pressed', b.dataset.r === estado.ruta ? 'true' : 'false'); });
+  }
+
+  const TABS = [['plan', 'Plan del día'], ['horario', 'Horario'], ['supuestos', 'Supuestos y validación']];
+  const tabsEl = document.getElementById('tabs');
+  TABS.forEach(([k, n]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tab'; b.setAttribute('role', 'tab'); b.dataset.k = k; b.textContent = n;
+    b.addEventListener('click', () => activar(k)); tabsEl.appendChild(b);
+  });
+  function activar(k) {
+    estado.tab = k;
+    document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-selected', b.dataset.k === k ? 'true' : 'false'));
+    document.querySelectorAll('section.panel').forEach((s) => s.classList.toggle('activa', s.id === 'p-' + k));
+    if (location.hash !== '#' + k) history.replaceState(null, '', '#' + k);
+    dibujar();
+    requestAnimationFrame(() => Object.values(charts).forEach((c) => c.resize()));
+  }
+
+  // --- controles ---
+  const $ = (id) => document.getElementById(id);
+  const salidaTxt = {
+    fc: (v) => fmt(v, 2), imin: (v) => fmt(v, 1) + ' min', delta: (v) => fmt(v) + ' salidas/h', pctFlota: (v) => fmt(v) + ' %',
+    costoBH: (v) => cop(v), costoKm: (v) => cop(v), tarifa: (v) => cop(v), vte: (v) => cop(v) + '/h', penal: (v) => cop(v), e: (v) => fmt(v, 2),
+  };
+  const ENTRADAS = { fc: 'in-fc', imin: 'in-imin', delta: 'in-delta', pctFlota: 'in-flota', costoBH: 'in-bh', costoKm: 'in-km', tarifa: 'in-tarifa', vte: 'in-vte', penal: 'in-penal', e: 'in-e' };
+  const SALIDAS = { fc: 'out-fc', imin: 'out-imin', delta: 'out-delta', pctFlota: 'out-flota', costoBH: 'out-bh', costoKm: 'out-km', tarifa: 'out-tarifa', vte: 'out-vte', penal: 'out-penal', e: 'out-e' };
+  function sincronizarControles() {
+    Object.entries(ENTRADAS).forEach(([k, id]) => { $(id).value = estado[k]; });
+    $('in-imax').value = String(estado.imax);
+    $('in-ajustar').checked = !!estado.ajustar;
+    document.querySelectorAll('#seg-tipo button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === estado.tipo ? 'true' : 'false'));
+    document.querySelectorAll('#seg-margen button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === estado.margen ? 'true' : 'false'));
+    rotular();
+  }
+  function rotular() {
+    Object.entries(SALIDAS).forEach(([k, id]) => { $(id).textContent = salidaTxt[k](estado[k]); });
+    const T = D.rutas[estado.ruta].tipos[estado.tipo];
+    $('out-flota').textContent = `${fmt(estado.pctFlota)} % · ${fmt(Math.floor(estado.pctFlota / 100 * T.vehiculos_dia + 1e-9))} buses`;
+    const j = juegoActual();
+    document.querySelectorAll('#seg-costos button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === j ? 'true' : 'false'));
+    $('ayuda-costos').innerHTML = ayudaCostos(j);
+  }
+  function ayudaCostos(j) {
+    if (j === 'personalizado') return `Editados a mano en «Costos y valoraciones»: <b>${fmt(estado.costoBH)}</b> COP por bus-hora, <b>${fmt(estado.costoKm)}</b> COP/km y tarifa neta de <b>${fmt(estado.tarifa)}</b> COP.`;
+    const J = JUEGOS[j];
+    const base = `<b>${fmt(J.costoBH)}</b> COP por bus-hora, <b>${fmt(J.costoKm)}</b> COP/km y tarifa ${j === 'd5' ? 'de' : 'neta de'} <b>${fmt(J.tarifa)}</b> COP`;
+    if (j === 'hora') return `${base}. Conductor pagado por hora o turno; precios de 2026 con fuente (detalle en «Supuestos y validación»).`;
+    if (j === 'producido') return `${base} (${fmt(JUEGOS.hora.tarifa)} × ${fmt(1 - COSTOS.participacion_producido, 1)}): el conductor se lleva el ${fmt(COSTOS.participacion_producido * 100)} % de cada pasaje, así que una hora menos de bus no ahorra conductor.`;
+    return `${base}: supuestos sin fuente de D1 y D5. Con el resto por defecto reproduce la solución D5.`;
+  }
+  // «Personalizado» no se elige: se marca solo cuando los tres costos no coinciden con ningún juego.
+  $('seg-costos').innerHTML = Object.entries(JUEGOS).map(([k, J]) => `<button type="button" data-v="${k}" aria-pressed="false">${esc(J.nombre)}</button>`).join('') +
+    '<button type="button" data-v="personalizado" aria-pressed="false" disabled>Personalizado (al editar un costo)</button>';
+  document.querySelectorAll('#seg-costos button').forEach((b) => b.addEventListener('click', () => {
+    if (!JUEGOS[b.dataset.v]) return;
+    Object.assign(estado, costosDe(b.dataset.v));
+    sincronizarControles(); recalcular();
+  }));
+  Object.entries(ENTRADAS).forEach(([k, id]) => {
+    $(id).addEventListener('input', (ev) => {
+      const v = parseFloat(ev.target.value);
+      if (!isFinite(v) || v < 0) return;
+      estado[k] = v; rotular(); recalcular();
+    });
+  });
+  $('in-imax').addEventListener('change', (ev) => { estado.imax = ev.target.value === 'politica' ? 'politica' : Number(ev.target.value); recalcular(); });
+  $('in-ajustar').addEventListener('change', (ev) => { estado.ajustar = ev.target.checked; recalcular(); });
+  document.querySelectorAll('#seg-tipo button').forEach((b) => b.addEventListener('click', () => { estado.tipo = b.dataset.v; sincronizarControles(); recalcular(); }));
+  document.querySelectorAll('#seg-margen button').forEach((b) => b.addEventListener('click', () => { estado.margen = b.dataset.v; sincronizarControles(); recalcular(); }));
+  $('btn-reset').addEventListener('click', () => { Object.assign(estado, DEF_PAGINA); sincronizarControles(); recalcular(); });
+
+  // --- tema: solo claro (19-oct-2026) ---
+  // data-theme="light" se fija en <head> antes del primer pintado; no hay botón de tema ni se lee el que quedó guardado.
+  const EMBEBIDO = document.documentElement.hasAttribute('data-embebido');
+  function aplicarTema() {
+    document.documentElement.setAttribute('data-theme', 'light');
+    Object.values(charts).forEach((c) => c.dispose()); for (const k in charts) delete charts[k];
+    pintarChips(); dibujar();
+  }
+
+  // --- gráficos ---
+  function temaG() { return { texto: css('--fg'), muted: css('--muted'), linea: css('--line'), fondo: css('--surface'), accent: css('--accent') }; }
+  const angosto = () => window.innerWidth < 600;
+  function base(extra) {
+    const t = temaG();
+    return Object.assign({
+      animation: !reducida, animationDuration: 300, backgroundColor: 'transparent', textStyle: { fontFamily: css('--font-body'), color: t.texto },
+      grid: { left: angosto() ? 40 : 54, right: angosto() ? 10 : 20, top: angosto() ? 78 : 58, bottom: 30, containLabel: false },
+      tooltip: { trigger: 'axis', confine: true, backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 }, axisPointer: { type: 'shadow' } },
+      legend: { top: 0, left: 0, inactiveColor: t.linea, textStyle: { color: t.muted, fontSize: 12.5 }, icon: 'roundRect', itemWidth: 14, itemHeight: 6, itemGap: angosto() ? 8 : 14 },
+    }, extra);
+  }
+  function eje(xData, yName, opts = {}) {
+    const t = temaG();
+    return {
+      xAxis: Object.assign({ type: 'category', data: xData, axisLine: { lineStyle: { color: t.linea } }, axisTick: { show: false }, axisLabel: { color: t.muted, fontSize: 12 } }, opts.x || {}),
+      yAxis: Object.assign({ type: 'value', name: yName, nameTextStyle: { color: t.muted, align: 'left', padding: [0, 0, 0, angosto() ? -34 : -44] }, splitLine: { lineStyle: { color: t.linea } }, axisLabel: { color: t.muted, fontSize: 12, formatter: (v) => fmt(v) } }, opts.y || {}),
+    };
+  }
+  function chart(id, option) {
+    const el = $(id);
+    if (!charts[id]) charts[id] = echarts.init(el, null, { renderer: 'canvas' });
+    charts[id].setOption(option, true);
+    return charts[id];
+  }
+
+  function dibujarSalidas(r) {
+    const t = temaG(), col = colorRuta(estado.ruta);
+    const ref = referenciaD5(estado.ruta, estado.tipo, estado);
+    const d5 = r.ent.map((e) => e.d5);
+    const series = [
+      { name: 'Hoy (mediana 2025)', type: 'bar', data: r.ent.map((e) => e.k0), itemStyle: { color: css('--hoy'), borderRadius: [3, 3, 0, 0] }, barGap: '8%', barCategoryGap: '28%' },
+      { name: 'Recomendado', type: 'bar', data: r.x, itemStyle: { color: col, borderRadius: [3, 3, 0, 0] } },
+      { name: 'D5 con sus supuestos', type: 'line', data: ref ? ref.x : d5, symbol: 'circle', symbolSize: 5, lineStyle: { type: 'dashed', width: 1.5, color: t.accent }, itemStyle: { color: t.accent }, z: 5 },
+      { name: 'Regla D1 (factor 0,85)', type: 'line', data: r.ent.map((e) => e.s1), symbol: 'none', lineStyle: { type: 'dotted', width: 1.5, color: t.muted }, itemStyle: { color: t.muted } },
+    ];
+    chart('c-salidas', base(Object.assign(eje(HORAS.map((h) => h + ' h'), 'salidas por hora', { x: { axisLabel: { color: t.muted, fontSize: 12, interval: angosto() ? 1 : 0 } } }), {
+      legend: Object.assign(base().legend, { selected: { 'Regla D1 (factor 0,85)': false } }),
+      tooltip: Object.assign(base().tooltip, {
+        formatter: (ps) => {
+          const i = ps[0].dataIndex, e = r.ent[i], ph = r.rec.porHora[i], p0 = r.hoy.porHora[i];
+          const lin = [`<b>${HORAS[i]} h</b> · ${fmt(e.pax)} pasajeros previstos <span style="color:${t.muted}">(p10–p90 ${fmt(e.pax10)}–${fmt(e.pax90)})</span>`];
+          lin.push(`Hoy: <b>${fmt(e.k0, e.k0 % 1 ? 1 : 0)}</b> salidas${p0.intervalo ? ' · cada ' + fmt(p0.intervalo, 1) + ' min' : ''}`);
+          lin.push(`Recomendado: <b>${fmt(ph.k)}</b> salidas${ph.intervalo ? ' · cada ' + fmt(ph.intervalo, 1) + ' min' : ''} · programar ${fmt(ph.prog)}`);
+          lin.push(`D5: ${fmt((ref ? ref.x : d5)[i])} · regla D1: ${fmt(e.s1, e.s1 % 1 ? 1 : 0)}`);
+          lin.push(`Carga crítica prevista: ${fmt(e.L50)} (p90 ${fmt(e.L90)}) → factor de carga ${ph.fc != null ? fmt(ph.fc, 2) : '–'}`);
+          lin.push(`Probabilidad de superar la capacidad: ${fmt(ph.pS * 100)} % (hoy ${fmt(p0.pS * 100)} %)`);
+          if (e.req > 0) lin.push(`Mínimo por margen ${estado.margen}: ${fmt(Math.min(e.req, e.nmax))} salidas`);
+          return lin.join('<br>');
+        },
+      }),
+      series,
+    })));
+  }
+
+  function dibujarBuses(r) {
+    const t = temaG(), col = colorRuta(estado.ruta), bad = css('--bad');
+    const etiquetas = T_FLOTA.map((v) => hhmm(Math.round(v * 60)));
+    const areas = [];
+    let ini = null;
+    r.B.forEach((b, j) => {
+      const sobre = b > r.flota + 1e-9;
+      if (sobre && ini === null) ini = j;
+      if ((!sobre || j === r.B.length - 1) && ini !== null) { areas.push([{ xAxis: etiquetas[ini] }, { xAxis: etiquetas[sobre ? j : j - 1] }]); ini = null; }
+    });
+    chart('c-buses', base(Object.assign(eje(etiquetas, 'buses en ruta', {
+      x: { boundaryGap: false, axisLabel: { color: t.muted, fontSize: 12, interval: (i, v) => v.endsWith(':00') && (Number(v.slice(0, 2)) % (angosto() ? 4 : 2) === 0), formatter: (v) => String(Number(v.slice(0, 2))) + ' h' } },
+    }), {
+      tooltip: Object.assign(base().tooltip, { axisPointer: { type: 'line', lineStyle: { color: t.muted } }, valueFormatter: (v) => fmt(v, 1) }),
+      series: [
+        { name: 'Hoy', type: 'line', data: r.B0, symbol: 'none', lineStyle: { width: 2, color: css('--hoy') }, itemStyle: { color: css('--hoy') } },
+        { name: 'Recomendado', type: 'line', data: r.B, symbol: 'none', lineStyle: { width: 2.5, color: col }, itemStyle: { color: col }, areaStyle: { color: col, opacity: 0.12 },
+          markArea: areas.length ? { silent: true, itemStyle: { color: bad, opacity: 0.14 }, data: areas } : undefined },
+        { name: 'Flota disponible', type: 'line', data: T_FLOTA.map(() => r.flota), symbol: 'none', lineStyle: { width: 1.5, type: 'dashed', color: bad }, itemStyle: { color: bad } },
+      ],
+    })));
+    const picoJ = r.B.indexOf(Math.max(...r.B));
+    const av = $('aviso-flota');
+    if (r.exceso.length) {
+      const horasEx = [...new Set(r.exceso.map((j) => etiquetas[j]))];
+      av.className = 'aviso bad';
+      av.innerHTML = `<b>Supera la flota</b> durante ${fmt(horasEx.length)} cuartos de hora, entre ${esc(horasEx[0])} y ${esc(horasEx[horasEx.length - 1])}: pico de ${fmt(r.B[picoJ], 1)} buses en ruta a las ${etiquetas[picoJ]} frente a ${fmt(r.flota)} disponibles. ${estado.ajustar ? 'Ni con el mínimo de salidas que permite el intervalo máximo cabe: hay que subir la flota o aceptar intervalos más largos.' : 'Activa «Ajustar el plan para no superar la flota» o sube la flota disponible.'}`;
+    } else {
+      const holg = r.flota - r.B[picoJ];
+      const sinFlota = r.solSinFlota.reduce((a, b) => a + b, 0);
+      av.className = holg < 1 ? 'aviso warn' : 'aviso ok';
+      av.innerHTML = `<b>Cabe en la flota.</b> Pico de ${fmt(r.B[picoJ], 1)} buses en ruta a las ${etiquetas[picoJ]} de ${fmt(r.flota)} disponibles (${fmt(estado.pctFlota)} % de ${fmt(r.T.vehiculos_dia, r.T.vehiculos_dia % 1 ? 1 : 0)} vehículos por día); hoy el pico es ${fmt(Math.max(...r.B0), 1)}.` +
+        (r.info.ajustado ? ` La flota obliga a reacomodar: sin ese límite el plan tendría ${fmt(sinFlota)} salidas en lugar de ${fmt(r.rec.salidas)} (${r.info.exacto ? 'óptimo exacto' : 'mejor solución encontrada, a menos de ' + fmt(r.info.brecha * 100, 2) + ' % del óptimo'}; ${fmt(r.info.nodos)} subproblemas).` : '');
+    }
+  }
+
+  function kpi(label, value, delta, cls) {
+    return `<div class="kpi"><div class="label">${label}</div><div class="value num">${value}</div><div class="delta ${cls || ''}">${delta}</div></div>`;
+  }
+  const rel = (a, b) => b ? (a / b - 1) * 100 : null;
+  const clase = (d, menosEsMejor) => (d == null || Math.abs(d) < 1e-9) ? '' : ((d < 0) === menosEsMejor ? 'ok' : 'bad');
+
+  function dibujarKpis(r) {
+    const h = r.hoy, c = r.rec, dias = r.T.dias_2025;
+    const dSal = rel(c.salidas, h.salidas), dBh = rel(c.bh, h.bh), dKm = rel(c.km, h.km), dOp = rel(c.op, h.op);
+    const dEsp = c.espera - h.espera;
+    const tiles = [
+      kpi('Salidas por día', fmt(c.salidas), `${fmtPct(dSal)} frente a hoy (${fmt(h.salidas)}) · programar ${fmt(c.prog)}`, clase(dSal, true)),
+      kpi('Buses-hora por día', fmt(c.bh), `${fmtPct(dBh)} frente a hoy (${fmt(h.bh)})`, clase(dBh, true)),
+      kpi('Kilómetros por día', fmt(c.km), `${fmtPct(dKm)} frente a hoy (${fmt(h.km)})`, clase(dKm, true)),
+      kpi('Costo operativo por día', mcop(c.op) + '<small>COP</small>', `${fmtPct(dOp)} · hoy ${mcop(h.op)} COP`, clase(dOp, true)),
+      kpi('Espera media', fmt(c.espera, 2) + '<small>min</small>', `${fmtSig(dEsp, 2)} min frente a hoy (${fmt(h.espera, 2)})`, Math.abs(dEsp) < 0.005 ? '' : (dEsp < 0 ? 'ok' : 'bad')),
+      kpi('Horas con sobrecarga', fmt(c.horasSobre, 1) + '<small>de 17 h</small>', `esperadas (suma de probabilidades) · hoy ${fmt(h.horasSobre, 1)}`, clase(c.horasSobre - h.horasSobre, true)),
+      kpi('Pasajeros en riesgo', fmt(c.overPax), `esperados por encima de la capacidad al día · hoy ${fmt(h.overPax)}`, clase(c.overPax - h.overPax, true)),
+      kpi('Valor neto frente a hoy', fmtSig(r.netoSocial / 1e6, 1) + '<small>M COP/día</small>', `social; operador ${fmtSig(r.netoOperador / 1e6, 1)} M · ≈ ${fmtSig(r.netoSocial * dias / 1e6, 0)} M COP en los ${fmt(dias)} días ${NOMBRE_TIPO[estado.tipo] === 'laboral' ? 'laborales' : NOMBRE_TIPO[estado.tipo] === 'sábado' ? 'sábados' : 'domingos y festivos'} de 2025`, r.netoSocial > 0 ? 'ok' : r.netoSocial < 0 ? 'bad' : ''),
+    ];
+    $('kpis').innerHTML = tiles.join('');
+  }
+
+  function dibujarComponentes(r) {
+    const h = r.hoy, c = r.rec;
+    const filas = [
+      ['Operación (bus-hora y km)', h.op, c.op],
+      ['Espera de los pasajeros, valorada', h.wait, c.wait],
+      ['Sobrecarga esperada, valorada', h.over, c.over],
+      [`Pasajes perdidos (+) o ganados (−) frente a hoy: ${fmt(Math.abs(c.paxCambio))} pasajeros ${c.paxCambio < 0 ? 'perdidos' : 'ganados'} al día`, 0, c.rev],
+    ];
+    const tot = filas.reduce((a, f) => [a[0] + f[1], a[1] + f[2]], [0, 0]);
+    $('t-componentes').innerHTML = '<thead><tr><th>Componente</th><th class="num">Hoy</th><th class="num">Recomendado</th><th class="num">Diferencia</th></tr></thead><tbody>' +
+      filas.map((f) => `<tr><td>${f[0]}</td><td class="num">${fmt(f[1] / 1e6, 2)}</td><td class="num">${fmt(f[2] / 1e6, 2)}</td><td class="num">${fmtSig((f[2] - f[1]) / 1e6, 2)}</td></tr>`).join('') +
+      `<tr class="total"><td>Costo total (operador + pasajeros)</td><td class="num">${fmt(tot[0] / 1e6, 2)}</td><td class="num">${fmt(tot[1] / 1e6, 2)}</td><td class="num">${fmtSig((tot[1] - tot[0]) / 1e6, 2)}</td></tr></tbody>`;
+  }
+
+  function dibujarEstado(r) {
+    const ref = referenciaD5(estado.ruta, estado.tipo, estado);
+    const el = $('estado-d5'), txt = $('estado-d5-txt');
+    $('tit-plan').textContent = `Plan del día · ${estado.ruta} · ${NOMBRE_TIPO[estado.tipo]}`;
+    const j = juegoActual();
+    if (j !== 'd5') {
+      // Costos con fuente o personalizados: insignia neutra que dice qué costos se usan; la línea punteada es D5 con sus supuestos.
+      const otros = Object.keys(DEF).some((k) => !CLAVES_COSTO.includes(k) && estado[k] !== DEF[k]);
+      const quien = j === 'personalizado'
+        ? `Costos personalizados (${fmt(estado.costoBH)} COP por bus-hora, ${fmt(estado.costoKm)} COP/km, tarifa ${fmt(estado.tarifa)} COP)`
+        : 'Costos ' + JUEGOS[j].nombre.charAt(0).toLowerCase() + JUEGOS[j].nombre.slice(1);
+      el.className = 'estado-d5 info';
+      txt.textContent = `${quien}${otros ? ', con otros parámetros cambiados' : ''}. La línea punteada es D5 con sus supuestos (60.000 / 1.500 / 3.000 y e = 0,5).`;
+      return;
+    }
+    if (!ref) { el.className = 'estado-d5'; txt.textContent = 'Supuestos de D5 con otros parámetros cambiados: la línea punteada sigue siendo la solución D5 con sus valores por defecto.'; return; }
+    const dif = HORAS.filter((_, i) => ref.x[i] !== r.x[i]);
+    if (!dif.length) { el.className = 'estado-d5 ok'; txt.textContent = `Reproduce la solución D5 (elasticidad ${fmt(ref.e, 2)}) en las 17 horas.`; }
+    else { el.className = 'estado-d5 dif'; txt.textContent = `Difiere de D5 en ${dif.length} hora(s): ${dif.map((h) => h + ' h').join(', ')}.`; }
+  }
+
+  function dibujarHorario(r) {
+    const tot = r.horario.reduce((a, b) => a + b.mins.length, 0);
+    const prog = r.horario.reduce((a, b) => a + b.prog, 0);
+    const primeras = r.horario.length ? hhmm(r.horario[0].mins[0]) : '–';
+    const ult = r.horario.length ? hhmm(r.horario[r.horario.length - 1].mins.slice(-1)[0]) : '–';
+    $('resumen-horario').textContent = `${estado.ruta} · ${NOMBRE_TIPO[estado.tipo]}: ${fmt(tot)} salidas válidas (programar ${fmt(prog)}), de ${primeras} a ${ult}.`;
+    const abiertas = new Set([...document.querySelectorAll('details.hora-det[open]')].map((d) => d.dataset.h));
+    let previo = null;
+    $('lista-horas').innerHTML = r.horario.map((b) => {
+      const i = HORAS.indexOf(b.hora), e = r.ent[i];
+      const chips = b.mins.map((m) => { const gap = previo === null ? null : m - previo; previo = m; return `<span class="t">${hhmm(m)}${gap !== null ? `<small>+${gap}</small>` : ''}</span>`; }).join('');
+      return `<details class="hora-det" data-h="${b.hora}"${abiertas.has(String(b.hora)) ? ' open' : ''}><summary><span class="h">${String(b.hora).padStart(2, '0')} h</span><span class="info"><b>${fmt(b.mins.length)}</b> salidas válidas · cada ${fmt(e.M / b.mins.length, 1)} min · programar <b>${fmt(b.prog)}</b> · hoy ${fmt(e.k0, e.k0 % 1 ? 1 : 0)}</span></summary><div class="tiempos">${chips}</div></details>`;
+    }).join('') || '<p class="muted">Sin salidas.</p>';
+  }
+  $('btn-expandir').addEventListener('click', () => document.querySelectorAll('details.hora-det').forEach((d) => { d.open = true; }));
+  $('btn-contraer').addEventListener('click', () => document.querySelectorAll('details.hora-det').forEach((d) => { d.open = false; }));
+  $('btn-csv').addEventListener('click', () => {
+    if (!ultimo) return;
+    const lineas = ['ruta;tipo_dia;n;hora;hora_salida;salidas_validas_hora;programar_hora'];
+    let n = 0;
+    ultimo.horario.forEach((b) => b.mins.forEach((m) => { n++; lineas.push([estado.ruta, estado.tipo, n, b.hora, hhmm(m), b.mins.length, b.prog].join(';')); }));
+    const blob = new Blob(['﻿' + lineas.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `horario_${estado.ruta.replace(/\s+/g, '_')}_${estado.tipo.replace(/\W+/g, '_')}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+
+  let validacionHecha = false;
+  function dibujarSupuestos() {
+    const metodo = [
+      'Para cada hora de 4 a 20 h y cada número posible de salidas válidas k (entre el intervalo máximo y el mínimo) se calcula un costo: <b>operación</b> k · ciclo/60 · costo por bus-hora + k · km · costo por km; <b>espera</b> pasajeros · (minutos/k)/2 · (1 + CV²)/60 · valor del tiempo; <b>sobrecarga</b> penalidad · E[(L − capacidad útil · k)⁺] con la carga crítica L lognormal; <b>pasajes</b> pasajeros · e · (k0 − k)/k0 · tarifa, con k0 la oferta actual.',
+      'Una <b>programación dinámica</b> recorre las 17 horas y elige la combinación de menor costo total respetando la suavidad (el cambio entre horas consecutivas no supera el máximo elegido, desde las 7 h; la salida de la flota de 4 a 6 h queda libre, como en D5). Es exacta para ese problema.',
+      'Luego cuenta los <b>buses en ruta</b> cada 15 minutos (cada salida ocupa un bus durante el ciclo de su hora) y los compara con la flota disponible. Si se pasa y el ajuste está activo, busca el plan de menor costo que cabe en la flota con <b>ramificación y acotamiento</b>: la cota de cada subproblema sale de la misma programación dinámica (sin flota y con precios de Lagrange por bus en ruta) y se ramifica en la hora que más aporta al cuarto de hora más excedido. Es exacto salvo que se agote el límite de 2,5 s; entonces muestra la mejor solución encontrada y su distancia máxima al óptimo.',
+      'El <b>horario</b> reparte las salidas de cada hora a intervalos iguales, centradas en su subintervalo, como el de D5. «Programar» = ⌈salidas válidas / (1 − tasa de salidas no válidas)⌉ por hora.',
+      'Los indicadores comparan con la oferta actual (mediana 2025 por hora) usando la misma demanda prevista. «Horas con sobrecarga» suma la probabilidad de que la carga crítica supere 50 · k en cada hora; «Pasajeros en riesgo» es el número esperado por encima de la capacidad física.',
+    ];
+    const supuestos = [
+      'La demanda es la del <b>día típico</b>: mediana de los pronósticos de 2025 (LightGBM E1 y cuantiles E3 a 7 días) para cada ruta, tipo de día y hora. Un día concreto puede ser muy distinto; D5 reoptimiza cada día y gana 371 M COP/año frente a una plantilla fija.',
+      'Por defecto los costos son los <b>costos con fuente</b> del módulo costos/ (precios de octubre de 2026): 26.400 COP por bus-hora (solo el conductor, pagado por hora o turno), 1.991 COP/km y tarifa neta de 3.182 COP. Son estimaciones con rango, no la contabilidad de Sobusa: falta confirmar cómo se paga al conductor, el rendimiento y el mantenimiento. El valor del tiempo (7.000 COP/h) y la penalidad por sobrecarga (10.000 COP) siguen siendo supuestos del equipo.',
+      'Con los <b>supuestos de D5</b> (60.000 COP por bus-hora, que incluía costos fijos que no se ahorran al quitar salidas) el día típico recorta 11 % de los buses-hora y sube los pasajeros sobre la capacidad de 464 a 654 al día (día promedio de 2025, tres rutas). Con los costos con fuente recorta solo 1,5 %, baja esos pasajeros a 311 y deja la espera media igual: <b>reasigna</b>, quitando salidas en las horas valle y los domingos de SILENCIO y CRA 54 y poniéndolas en las horas cargadas y en CL 72.',
+      'La elasticidad por defecto es <b>0,5</b> (literatura). E7 la midió en <b>0,70</b> (rango 0,55–0,90), pero con salidas que fallan, es decir, con pasajeros que se pierden; nadie ha medido cuántos se ganan al añadir salidas. Como el modelo cuenta igual los ganados que los perdidos (lineal y simétrico), con 0,70 añade salidas acreditando pasajeros sin medir (con los costos con fuente, de 1.755 a 1.982 buses-hora en el día promedio); por eso se planea con 0,5. Con la contabilidad de D1 (solo pérdidas) algunas variantes cambian de signo.',
+      'El CV de los intervalos es fijo por hora (no empeora con más buses), el ciclo es fijo por hora, todos los buses tienen 50 plazas y la flota disponible es la mediana de 2025. No se arman bloques de vehículos ni turnos, no se comparte flota entre rutas y no incluye el recorrido corto de D3.',
+      'El <b>factor de carga objetivo</b> y el <b>margen p50/p80/p90</b> no existen en D5: son extensiones del planificador. Con 1,00 y «Esperado» el modelo es exactamente el de D5.',
+      'La suavidad se aplica en minutos operados: en la última hora (pocos minutos) obliga a veces a subir la hora anterior. Ejemplo: CL 72 domingo, a las 19 h el plan pone 8 salidas cuando sin esa transición pondría 4 (el mínimo de la política de 15 min; hoy hay 3); D5 tiene el mismo efecto.',
+    ];
+    $('notas-metodo').innerHTML = metodo.map((x) => `<li>${x}</li>`).join('');
+    $('notas-supuestos').innerHTML = supuestos.map((x) => `<li>${x}</li>`).join('');
+    const unidades = { COSTO_BUS_HORA: ' COP', COSTO_KM: ' COP', TARIFA: ' COP', VALOR_TIEMPO_ESPERA: ' COP/h', PENALIDAD_SOBRECARGA: ' COP por pasajero', CAPACIDAD: ' pasajeros', INTERVALO_MIN: ' min', DELTA: ' salidas/h', HORIZONTE: ' días' };
+    const valor = (k, v) => typeof v === 'object' ? Object.entries(v).map(([a, b]) => `${a}: ${fmt(b)} min`).join(' · ') : (k === 'FACTOR_FLOTA' || k === 'ELASTICIDAD' ? fmt(v, 2) : fmt(v)) + (unidades[k] || '') + (k === 'HORA_INICIO_SUAVIDAD' ? ' h' : '');
+    const NOMBRES = { COSTO_BUS_HORA: 'Costo por bus-hora', COSTO_KM: 'Costo por km', TARIFA: 'Tarifa neta por pasajero', participacion_producido: 'Parte del conductor con pago por producido',
+      VALOR_TIEMPO_ESPERA: 'Valor del tiempo de espera', PENALIDAD_SOBRECARGA: 'Penalidad por pasajero sobre la capacidad', ELASTICIDAD: 'Elasticidad a la frecuencia', CAPACIDAD: 'Capacidad por bus',
+      INTERVALO_MIN: 'Intervalo mínimo', INTERVALO_MAX: 'Intervalo máximo', DELTA: 'Cambio máximo entre horas', HORA_INICIO_SUAVIDAD: 'Hora desde la que se suaviza', FACTOR_FLOTA: 'Flota disponible (fracción)', HORIZONTE: 'Horizonte del pronóstico' };
+    const celdaNombre = (k) => `<td>${esc(NOMBRES[k] || k)}<span class="sub"><code>${esc(k)}</code></span></td>`;
+    const jh = JUEGOS.hora, jp = JUEGOS.producido, jd = JUEGOS.d5, part = COSTOS.participacion_producido;
+    // Costos con fuente: valor del juego por defecto (y rango de costos/resultados/costos_para_planificador.json), fuente y supuesto de D5.
+    const filasCostos = [
+      ['COSTO_BUS_HORA', `${fmt(jh.costoBH)} COP<span class="sub">rango 19.732–35.854; ${fmt(jp.costoBH)} si se paga por producido</span>`,
+        'Conductor pagado por hora o turno: salario de 1,3 SMMLV de 2026 (1.750.905 COP, Decreto 0159 de 2026; el múltiplo 1,3 es supuesto) con factor prestacional 1,44, auxilio de transporte y recargos nocturno y dominical (16 %), repartido en 182 h al mes (jornada de 42 h semanales desde el 15-jul-2026, Ley 2101 de 2021) y multiplicado por 1,16 horas pagadas por hora en ruta (descansos medidos en D2). No incluye costos fijos, que no se ahorran al quitar salidas.',
+        `${fmt(jd.costoBH)} COP<span class="sub">supuesto del equipo (D1); incluía costos fijos</span>`],
+      ['COSTO_KM', `${fmt(jh.costoKm)} COP<span class="sub">rango 1.445–2.716</span>`,
+        'ACPM 898 COP/km: 11.291 COP/gal en Barranquilla (CREG, circulares 335 y 339 de 2026) entre 12,6 km/gal, rendimiento estimado por tipo de bus de la flota. Mantenimiento 736, llantas 231 y lubricantes y filtros 126 COP/km: estudio de costos del transporte urbano de Soacha 2026 (ARM) y otras fuentes de costos/parametros_costos.csv, llevados a 2026 con el IPC (5,1 %).',
+        `${fmt(jd.costoKm)} COP<span class="sub">supuesto del equipo (D1)</span>`],
+      ['TARIFA', `${fmt(jh.tarifa)} COP<span class="sub">rango 3.071–3.420; ${fmt(jp.tarifa)} si se paga por producido</span>`,
+        'Tarifa de 2026 de 3.700 COP (día laboral, desde el 19-ene-2026) × 0,86 que retiene el operador después del FET, el factor de calidad y los descuentos del SIBUS (Res. AMB 396-2024).',
+        `${fmt(jd.tarifa)} COP<span class="sub">supuesto del equipo (D1)</span>`],
+      ['participacion_producido', `${fmt(part * 100)} % del recaudo<span class="sub">rango 15–25 %; solo en el juego por producido</span>`,
+        `Supuesto del módulo costos/ (sin cifra verificada; los ayudantes reciben cerca del 10 %, El Heraldo 2019). Con pago por producido quitar una hora de bus no ahorra conductor (0 COP por bus-hora) y el operador retiene el resto de cada pasaje: ${fmt(jh.tarifa)} × ${fmt(1 - part, 1)} = ${fmt(jp.tarifa)} COP.`,
+        '<span class="muted">D5 no distingue cómo se paga al conductor</span>'],
+    ];
+    const fuenteResto = (k) => k === 'ELASTICIDAD'
+      ? 'Literatura (TCRP 95, +0,5): el valor que se usa para planear. Medida en Sobusa (E7): 0,70, rango 0,55–0,90, pero con salidas que fallan (pasajeros perdidos); los pasajeros ganados al añadir salidas no se han medido.'
+      : (D.fuentes_param[k] || '');
+    $('t-fuentes').innerHTML = '<thead><tr><th>Parámetro</th><th>Valor por defecto</th><th>Fuente</th><th>Supuesto de D5 que reemplaza</th></tr></thead><tbody>' +
+      '<tr class="subtitulo"><td colspan="4">Costos con fuente (juego por defecto: conductor pagado por hora)</td></tr>' +
+      filasCostos.map(([k, v, f, d5]) => `<tr>${celdaNombre(k)}<td class="num" style="text-align:left">${v}</td><td>${esc(f)}</td><td class="num" style="text-align:left">${d5}</td></tr>`).join('') +
+      '<tr class="subtitulo"><td colspan="4">Resto de parámetros: los de D5</td></tr>' +
+      Object.entries(D.param).filter(([k]) => !['COSTO_BUS_HORA', 'COSTO_KM', 'TARIFA'].includes(k))
+        .map(([k, v]) => `<tr>${celdaNombre(k)}<td class="num" style="text-align:left">${valor(k, v)}</td><td>${esc(fuenteResto(k))}</td><td><span class="muted">el mismo</span></td></tr>`).join('') + '</tbody>';
+    if (validacionHecha) return;
+    const filas = [];
+    RUTAS.forEach((ruta) => D.meta.tipos.forEach((tipo) => {
+      const r = calcular(ruta, tipo, Object.assign({}, DEF));
+      const T = D.rutas[ruta].tipos[tipo];
+      const iguales = HORAS.filter((_, i) => T.D5.x[i] === r.x[i]).length;
+      const horT = r.horario.flatMap((b) => b.mins.map(hhmm));
+      const horIg = horT.length === T.D5.horario.length && horT.every((v, i) => v === T.D5.horario[i]);
+      const sum = r.x.reduce((a, b) => a + b, 0);
+      filas.push(`<tr><td>${esc(ruta)}</td><td>${esc(tipo)}</td><td class="num">${fmt(T.D5.salidas_dia)}</td><td class="num">${fmt(sum)}</td><td class="num">${fmt(iguales)} de 17</td><td>${horIg ? 'idéntico' : 'distinto'}</td><td class="num">${fmt(T.D5.buses_hora_D5, 1)}</td><td class="num">${fmt(r.rec.bh, 1)}</td><td>${r.info.ajustado ? 'sí, ' + (r.info.exacto ? 'óptimo exacto' : 'aproximado') : 'no'}</td></tr>`);
+    }));
+    $('t-validacion').innerHTML = '<thead><tr><th>Ruta</th><th>Tipo de día</th><th class="num">Salidas D5</th><th class="num">Salidas planificador</th><th class="num">Horas iguales</th><th>Horario minuto a minuto</th><th class="num">Buses-hora D5</th><th class="num">Buses-hora planificador</th><th>¿Ajuste por flota?</th></tr></thead><tbody>' + filas.join('') + '</tbody>';
+    validacionHecha = true;
+  }
+
+  // Los cambios seguidos de un deslizador se agrupan: se calcula una vez con el último valor.
+  let pendiente = null;
+  function recalcular() {
+    if (pendiente !== null) return;
+    document.body.dataset.calculando = '1';
+    pendiente = setTimeout(() => {
+      pendiente = null;
+      try { ultimo = calcular(estado.ruta, estado.tipo, estado); dibujar(); } finally { delete document.body.dataset.calculando; }
+    }, 0);
+  }
+  function dibujar() {
+    if (!ultimo) return;
+    if (estado.tab === 'plan') { dibujarEstado(ultimo); dibujarKpis(ultimo); dibujarSalidas(ultimo); dibujarBuses(ultimo); dibujarComponentes(ultimo); }
+    else if (estado.tab === 'horario') dibujarHorario(ultimo);
+    else dibujarSupuestos();
+  }
+
+  function medirCabecera() { document.documentElement.style.setProperty('--alto-cab', $('cabecera').offsetHeight + 'px'); }
+  let tRes = null;
+  window.addEventListener('resize', () => { medirCabecera(); clearTimeout(tRes); tRes = setTimeout(() => { Object.values(charts).forEach((c) => c.resize()); dibujar(); }, 150); });
+
+  // ---------- inicio ----------
+  if (window.innerWidth < 980) $('det-param').open = false;
+  if (!window.echarts) { document.querySelectorAll('.chart').forEach((el) => { el.innerHTML = '<p class="muted">No se pudo cargar la biblioteca de gráficos (se necesita conexión a internet).</p>'; el.style.height = 'auto'; }); }
+  medirCabecera();
+  pintarChips();
+  sincronizarControles();
+  ultimo = calcular(estado.ruta, estado.tipo, estado);
+  const h0 = location.hash.replace('#', '');
+  activar(TABS.some((t) => t[0] === h0) ? h0 : 'plan');
+
+  // ---------- modo embebido (dentro de la app Sobusa Despacho) ----------
+  // La app manda {tipo:'tema'}, {tipo:'pestana'} y {tipo:'ruta'}; el planificador es un día típico ({tipo:'dia'} se ignora).
+  if (EMBEBIDO) {
+    const avisarApp = (m) => { if (window.parent !== window) { try { window.parent.postMessage(Object.assign({ pagina: 'planificador.html' }, m), '*'); } catch (e) { /* sin padre */ } } };
+    window.addEventListener('message', (ev) => {
+      if (ev.source !== window.parent || !ev.data || typeof ev.data !== 'object') return;
+      const m = ev.data;
+      if (m.tipo === 'tema') { if (m.tema === 'light' && document.documentElement.getAttribute('data-theme') !== 'light') aplicarTema(); }   // solo claro: otro tema se ignora
+      else if (m.tipo === 'pestana') { const k = m.pestana || m.k; if (TABS.some((t) => t[0] === k) && k !== estado.tab) activar(k); }
+      else if (m.tipo === 'ruta') { if (D.meta.rutas.some((r) => r.nombre === m.ruta) && m.ruta !== estado.ruta) { estado.ruta = m.ruta; pintarChips(); recalcular(); } }
+    });
+    window.addEventListener('hashchange', () => { const k = location.hash.replace('#', ''); if (TABS.some((t) => t[0] === k) && k !== estado.tab) activar(k); });
+    avisarApp({ tipo: 'listo', pestana: estado.tab, ruta: estado.ruta });
+  }
+})();
+</script>
+</body>
+</html>

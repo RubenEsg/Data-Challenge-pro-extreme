@@ -1,0 +1,1669 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<script>/* Modo embebido: dentro de la app Sobusa Despacho (iframe o ?embebido=1). Abierta sola, nada cambia. */
+try { if (new URLSearchParams(location.search).get('embebido') === '1' || window.parent !== window) document.documentElement.setAttribute('data-embebido', '1'); } catch (e) {}
+/* Solo modo claro (19-oct-2026): el tema claro se fija antes del primer pintado, abierta sola o embebida, aunque el sistema esté en oscuro. */
+document.documentElement.setAttribute('data-theme', 'light');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sobusa · Vista 3D</title>
+<link rel="stylesheet" href="lib/fuentes.css">  <!-- Barlow Condensed e IBM Plex Sans, copia local (antes: Google Fonts) -->
+<link rel="stylesheet" href="lib/maplibre-gl.css">  <!-- MapLibre GL JS 5.6.0, copia local (antes: unpkg.com) -->
+<script src="lib/maplibre-gl.js"></script>
+<script src="lib/deck.gl.min.js"></script>  <!-- deck.gl 9.1.14, copia local (antes: unpkg.com) -->
+<style>
+:root {
+  color-scheme: light;
+  --bg: #eef1f5; --surface: rgba(255, 255, 255, 0.94); --fg: #15233b; --muted: #5b6676; --line: #d5dbe3; --accent: #a8530c;
+  --r-silencio: #2f6fb3; --r-cra54: #d9731a; --r-cl72: #6a3d9a;
+  --occ-0: #d4efe9; --occ-1: #92d4c6; --occ-2: #44b09e; --occ-3: #13857a; --occ-4: #0a554d;
+  --real: #1e6fa8; --plan: #c2185b; --perdido: #707782;     /* serie real, serie plan y gris oscuro de quien se va en otro bus */
+  --shadow: 0 6px 22px rgba(21, 35, 59, 0.16);
+  --font-body: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif; --font-display: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+  /* superficies de los controles (antes colores fijos; mismos valores): botones, campos, pistas y la hora actual */
+  --surface-2: #f5f7fa; --control: #fff; --texto-invertido: #fff; --borde-hover: #9aa6b5; --deshabilitado: #a3abb7;
+  --linea-suave: #edf0f4; --pista: #e6eaf0; --persona-baja: #c7cdd6; --borde-busito: #b7bfca; --hora-actual: #fff1e4;
+}
+/* Solo modo claro (19-oct-2026): los paneles son siempre claros. Los colores del mapa y de las capas 3D siguen la
+   hora del sol (luz por hora: de noche el mapa se oscurece y se encienden las ventanas): es la escena del día, no un tema. */
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 14px; }
+#mapa { position: absolute; inset: 0; }
+.panel { position: absolute; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); backdrop-filter: blur(6px); }
+button { font: inherit; color: inherit; cursor: pointer; }
+.boton { border: 1px solid var(--line); background: var(--control); border-radius: 8px; padding: 5px 10px; line-height: 1.2; }
+.boton:hover { border-color: var(--borde-hover); }
+.boton[aria-pressed="true"], .boton.primario { background: var(--fg); color: var(--texto-invertido); border-color: var(--fg); }
+.boton:disabled { opacity: 0.45; cursor: not-allowed; }
+.boton:focus-visible, a:focus-visible, input:focus-visible, .segmento button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* barra superior */
+#barra { top: 12px; left: 12px; right: 12px; padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
+#barra .titulo { display: flex; flex-direction: column; min-width: 150px; }
+#barra .titulo b { font-family: var(--font-display); font-size: 22px; font-weight: 600; line-height: 1; }
+#barra .titulo span { color: var(--muted); font-size: 12px; }
+.grupo { display: flex; align-items: center; gap: 6px; }
+#fecha { font: inherit; border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; background: var(--control); color: var(--fg); }
+#etiqueta-dia { color: var(--muted); font-size: 12.5px; max-width: 190px; }
+#reloj { font-family: var(--font-display); font-size: 30px; font-weight: 600; letter-spacing: 0.5px; min-width: 112px; font-variant-numeric: tabular-nums; }
+.velocidades { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.velocidades button { border: 0; border-right: 1px solid var(--line); background: var(--control); padding: 5px 9px; }
+.velocidades button:last-child { border-right: 0; }
+.velocidades button[aria-pressed="true"] { background: var(--fg); color: var(--texto-invertido); }
+#deslizador { flex: 1 1 220px; min-width: 160px; accent-color: var(--accent); }
+.enlace { color: var(--accent); text-decoration: none; font-weight: 500; white-space: nowrap; }
+.enlace:hover { text-decoration: underline; }
+
+/* panel izquierdo */
+#lateral { left: 12px; bottom: 30px; width: 300px; padding: 12px 14px; max-height: calc(100% - 150px); overflow: auto; }
+#lateral h2 { font-family: var(--font-display); font-size: 17px; font-weight: 600; margin: 0 0 6px; display: flex; align-items: baseline; gap: 6px; }
+#lateral h2 small { font-family: var(--font-body); font-weight: 500; font-size: 12px; color: var(--plan); }
+.cifras { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+.cifra { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 7px; }
+.cifra .par { display: flex; gap: 8px; align-items: baseline; }
+.cifra b { display: block; font-family: var(--font-display); font-size: 22px; font-weight: 600; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.cifra b.pl { color: var(--plan); display: none; }
+.cifras.ambos .cifra b { font-size: 19px; }
+.cifras.ambos .cifra b.pl { display: block; }
+.cifras.plan .cifra b { color: var(--plan); }
+.cifra span { color: var(--muted); font-size: 11.5px; line-height: 1.2; display: block; }
+.par-enc { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: -2px 0 3px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px; }
+.par-enc span { padding: 0 7px; display: flex; gap: 8px; }
+.par-enc i { font-style: normal; color: var(--muted); }
+.par-enc i.pl { color: var(--plan); }
+.par-enc[hidden] { display: none; }
+.ver { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.ver > span { color: var(--muted); font-size: 12.5px; }
+.segmento { display: inline-flex; flex: 1; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--control); }
+.segmento button { flex: 1; border: 0; border-right: 1px solid var(--line); background: var(--control); padding: 5px 6px; white-space: nowrap; }
+.segmento button:last-child { border-right: 0; }
+.segmento button[aria-pressed="true"] { background: var(--fg); color: var(--texto-invertido); }
+.segmento button:disabled { color: var(--deshabilitado); background: var(--surface-2); cursor: not-allowed; }
+.rutas { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.ruta { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; background: var(--control); text-align: left; }
+.ruta .sw { width: 22px; height: 10px; border-radius: 3px; background: var(--c); flex: none; }
+.ruta .n { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12.5px; }
+.ruta[aria-pressed="false"] { opacity: 0.45; }
+.leyenda { font-size: 12.5px; color: var(--muted); display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+.leyenda .grad { height: 9px; border-radius: 5px; background: linear-gradient(90deg, var(--occ-0), var(--occ-1), var(--occ-2), var(--occ-3), var(--occ-4)); border: 1px solid var(--line); }
+.leyenda .ticks { display: flex; justify-content: space-between; font-size: 11.5px; }
+.leyenda .fila { display: flex; align-items: center; gap: 7px; }
+.leyenda .fila[hidden] { display: none; }
+.leyenda .persona { width: 8px; height: 14px; border-radius: 3px 3px 1px 1px; background: #4a7fb5; flex: none; }
+.leyenda .persona.baja { background: var(--persona-baja); }
+.leyenda .persona.perdido { background: var(--perdido); }
+.leyenda .busito { width: 24px; height: 12px; border-radius: 3px; background: var(--control); border: 1px solid var(--borde-busito); border-top: 3px solid var(--plan); flex: none; position: relative; }
+.leyenda .busito::after { content: ''; position: absolute; left: 2px; right: 2px; top: 4px; height: 2px; background: var(--r-cra54); }
+.leyenda .grad.noche { background: linear-gradient(90deg, #fff3c4, #ffd27a, #ffa83c, #ff7418, #e03416); }   /* ventanas encendidas de noche */
+.leyenda .marca { width: 14px; height: 14px; flex: none; box-sizing: border-box; }
+.leyenda .marca.pegados { width: 18px; height: 0; border-top: 2px solid #d62828; }
+.leyenda .marca.lleno { border: 2px solid #d62828; border-radius: 50%; }
+.leyenda .marca.cola { background: rgba(245, 158, 11, 0.55); border-radius: 50%; }
+.camaras { display: flex; flex-wrap: wrap; gap: 6px; }
+.nota { color: var(--muted); font-size: 11.5px; line-height: 1.4; margin: 10px 0 0; }
+
+/* alertas de Sobusa: fila de contadores e interruptor de las marcas */
+.alertas { display: flex; align-items: center; gap: 8px; margin: -4px 0 10px; font-size: 12.5px; }
+.alertas .txt { flex: 1; line-height: 1.3; color: var(--muted); }
+.alertas .txt b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.alertas .txt b.on { color: #b4332b; }
+.boton.chico { padding: 3px 8px; font-size: 12px; }
+.modos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+/* contexto del día en «Hoy con el plan»: pronóstico, salidas válidas y a programar, y el bloque «Todo 2025» */
+#plan .pron { margin: 0 0 8px; font-size: 12px; line-height: 1.4; }
+#plan .pron:empty { display: none; }
+#plan .pron b { font-variant-numeric: tabular-nums; }
+#plan td .sub { display: block; font-size: 10.5px; color: var(--muted); line-height: 1.2; }
+#anual { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+#anual[hidden], #anual-cuerpo[hidden] { display: none; }
+#anual h3 { margin: 0; font-family: var(--font-display); font-size: 15px; font-weight: 600; }
+#anual h3 button { border: 0; background: transparent; padding: 0; font: inherit; width: 100%; display: flex; align-items: center; gap: 8px; text-align: left; }
+#anual h3 .flecha { margin-left: auto; color: var(--muted); font-size: 13px; transition: transform 0.2s; }
+#anual h3 button[aria-expanded="false"] .flecha { transform: rotate(-90deg); }
+#anual table { font-size: 11.5px; margin-top: 6px; }
+#anual th.g { text-align: center; padding-left: 0; color: var(--fg); border-bottom: 1px solid var(--line); }
+#anual .extra { font-size: 11.5px; }
+#anual .nota { margin-top: 6px; }
+
+/* modo cine («Un día en 60 segundos»): solo el mapa, el reloj grande, la fecha y tres contadores */
+body.cine #barra, body.cine #lateral, body.cine #columna-der, body.cine #ayuda-mov, body.cine #insignia-mapa, body.cine .maplibregl-ctrl-top-right { display: none; }
+#cine { position: absolute; inset: 0; pointer-events: none; }
+#cine[hidden] { display: none; }
+#cine .reloj-cine { position: absolute; left: 50%; top: 22px; transform: translateX(-50%); text-align: center; color: #fff; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 0, 0, 0.8); white-space: nowrap; }
+#cine-hora { font-family: var(--font-display); font-size: 84px; font-weight: 600; line-height: 1; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+#cine-fecha { font-size: 16px; margin-top: 2px; opacity: 0.95; }
+#cine .contadores { position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); display: flex; gap: 12px; }
+#cine .contadores div { background: rgba(12, 17, 30, 0.6); color: #fff; border-radius: 12px; padding: 10px 18px; min-width: 160px; text-align: center; backdrop-filter: blur(6px); }
+#cine .contadores b { display: block; font-family: var(--font-display); font-size: 36px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+#cine .contadores span { font-size: 12px; opacity: 0.85; }
+#cine-salir { position: absolute; right: 14px; top: 14px; pointer-events: auto; background: rgba(12, 17, 30, 0.6); color: #fff; border-color: rgba(255, 255, 255, 0.35); }
+#cine-salir:hover { border-color: #fff; }
+#cine-final { left: 50%; top: 50%; transform: translate(-50%, -50%); width: 440px; max-width: calc(100% - 32px); padding: 18px 22px; pointer-events: auto; }
+#cine-final[hidden] { display: none; }
+#cine-final h2 { margin: 0 0 4px; font-family: var(--font-display); font-size: 26px; font-weight: 600; }
+#cine-final .sub { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
+#cine-final .cifras { grid-template-columns: 1fr 1fr; }
+#cine-final .acciones { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* recorrido guiado: la tarjeta de la escena ocupa el sitio del panel lateral; el panel del plan solo en la escena del saldo */
+body.recorrido #lateral, body.recorrido #ficha, body.recorrido #ayuda-mov, body.recorrido #columna-der { display: none; }
+body.recorrido.con-plan #columna-der { display: flex; }
+#recorrido { left: 12px; bottom: 30px; width: 380px; max-width: calc(100% - 24px); padding: 14px 16px; }
+#recorrido[hidden] { display: none; }
+#recorrido .num { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+#recorrido h2 { margin: 2px 0 6px; font-family: var(--font-display); font-size: 22px; font-weight: 600; }
+#recorrido p { margin: 0 0 10px; font-size: 13.5px; line-height: 1.45; }
+#recorrido p b { font-variant-numeric: tabular-nums; }
+#recorrido .acciones { display: flex; gap: 6px; }
+#recorrido .acciones #rec-salir { margin-left: auto; }
+
+/* insignia del mapa sin internet, bajo los botones de navegación */
+#insignia-mapa { right: 12px; top: calc(var(--alto-barra, 110px) + 104px); padding: 4px 9px; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+#insignia-mapa[hidden] { display: none; }
+
+/* columna derecha: «Hoy con el plan» arriba y la ficha del bus abajo */
+#columna-der { position: absolute; right: 12px; bottom: 30px; width: 300px; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; max-height: calc(100% - 150px); pointer-events: none; }
+#columna-der > .panel { position: static; pointer-events: auto; }
+#plan { padding: 10px 14px; overflow: auto; min-height: 0; }
+#plan h2 { margin: 0; font-family: var(--font-display); font-size: 17px; font-weight: 600; }
+#plan h2 button { border: 0; background: transparent; padding: 0; font: inherit; width: 100%; display: flex; align-items: center; gap: 8px; text-align: left; }
+#plan h2 .flecha { margin-left: auto; color: var(--muted); font-size: 13px; transition: transform 0.2s; }
+#plan h2 button[aria-expanded="false"] .flecha { transform: rotate(-90deg); }
+#plan .meta { color: var(--muted); font-size: 11.5px; line-height: 1.35; margin: 4px 0 8px; }
+#plan .meta:empty { display: none; }
+#plan .sin-plan { color: var(--muted); font-size: 12px; margin: 4px 0 0; }
+#plan-cuerpo[hidden], #plan .sin-plan[hidden] { display: none; }
+#plan table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+#plan th { font-weight: 500; color: var(--muted); font-size: 11px; text-align: right; padding: 0 0 4px 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+#plan th:first-child, #plan td:first-child { text-align: left; padding-left: 0; }
+#plan td { text-align: right; padding: 2.5px 0 2.5px 6px; border-top: 1px solid var(--linea-suave); white-space: nowrap; }
+#plan td:first-child { color: var(--muted); white-space: normal; }
+#plan .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
+#plan .sw.re { background: var(--real); }
+#plan .sw.pl { background: var(--plan); }
+#plan td.d { font-size: 11px; color: var(--muted); }
+#plan td.d.mejor { color: #11795a; }
+#plan td.d.peor { color: #b4332b; }
+#plan .extra { margin: 8px 0 0; font-size: 12px; line-height: 1.45; }
+#plan .extra b { font-variant-numeric: tabular-nums; }
+#plan .extra small { color: var(--muted); }
+#plan .horas-titulo { font-size: 11.5px; color: var(--muted); margin: 10px 0 4px; display: flex; align-items: center; gap: 6px; }
+#plan .horas { display: grid; grid-template-columns: repeat(17, 1fr); gap: 2px; height: 54px; align-items: end; }
+#plan .hora { height: 100%; display: flex; align-items: flex-end; gap: 1px; padding: 0 1px; border-radius: 3px 3px 0 0; }
+#plan .hora.actual { background: var(--hora-actual); box-shadow: inset 0 -2px 0 var(--accent); }
+#plan .hora i { display: block; flex: 1; min-height: 1px; border-radius: 2px 2px 0 0; }
+#plan .hora i.re { background: var(--real); }
+#plan .hora i.pl { background: var(--plan); }
+#plan .ejes { display: grid; grid-template-columns: repeat(17, 1fr); font-size: 9.5px; color: var(--muted); text-align: center; margin-top: 2px; }
+
+/* ficha del bus */
+#ficha { width: 300px; padding: 12px 14px; }
+#ficha h3 { margin: 0 0 6px; font-family: var(--font-display); font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+#ficha h3 .sw { width: 14px; height: 14px; border-radius: 4px; background: var(--c); flex: none; }
+#ficha h3 .sw.plan { background: var(--control); box-shadow: inset 0 0 0 3px var(--c); border-top: 4px solid var(--plan); border-radius: 4px 4px 4px 4px; }
+#ficha dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 0 0 10px; font-size: 13px; }
+#ficha dt { color: var(--muted); }
+#ficha dd { margin: 0; font-variant-numeric: tabular-nums; }
+#ficha .barra-occ { height: 8px; border-radius: 4px; background: var(--pista); overflow: hidden; margin-top: 3px; }
+#ficha .barra-occ i { display: block; height: 100%; background: var(--occ-3); }
+#ficha .acciones { display: flex; gap: 6px; }
+#cerrar-ficha { margin-left: auto; border: 0; background: transparent; font-size: 18px; line-height: 1; color: var(--muted); }
+
+#aviso { left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 16px 20px; max-width: 460px; text-align: center; }
+#aviso[hidden], #ficha[hidden] { display: none; }
+#ayuda-mov { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); padding: 5px 10px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.maplibregl-ctrl-top-right { top: var(--alto-barra, 110px); }
+@media (max-width: 760px) {
+  #lateral { width: auto; right: 12px; bottom: 12px; max-height: 38%; }
+  #columna-der { left: 12px; right: 12px; width: auto; bottom: 12px; }
+  #plan { display: none; }
+  #ficha { width: auto; }
+  #ayuda-mov { display: none; }
+}
+@media (max-width: 1180px) { #ayuda-mov { display: none; } }
+/* Teléfono: la hora, «Reproducir» y las cuatro velocidades no cabían en una fila (15 px de más a 400 px). */
+@media (max-width: 480px) {
+  #barra { gap: 8px 12px; padding: 8px 10px; }
+  #barra .grupo { flex-wrap: wrap; }
+  #reloj { font-size: 26px; min-width: 0; }
+  .velocidades button { padding: 5px 7px; }
+}
+/* Modo embebido: sin el título de la página (la app ya lo dice); «Consola de despacho →» pide a la app abrir Despacho. */
+html[data-embebido] #barra .titulo { display: none; }
+/* Embebida en la app: las alertas y «mejor/peor» toman los colores de estado de la app. */
+html[data-embebido] .alertas .txt b.on, html[data-embebido] #plan td.d.peor { color: var(--critico); }
+html[data-embebido] #plan td.d.mejor { color: var(--bien); }
+/* Embebida, la insignia «Mapa sin internet» tapaba «Hoy con el plan»: baja al pie, centrada entre los dos paneles. */
+/* Embebida, con la letra de la app, «2.698 3.424» y «pasajeros a bordo» no cabían en la tercera ficha: tres columnas
+   iguales que pueden encoger, y la cifra del plan baja de línea si no cabe al lado de la real. */
+html[data-embebido] .cifras, html[data-embebido] .par-enc { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+html[data-embebido] .cifra { min-width: 0; }
+html[data-embebido] .cifra .par { flex-wrap: wrap; gap: 0 6px; }
+html[data-embebido] .cifra span { overflow-wrap: anywhere; }
+html[data-embebido] #insignia-mapa { top: auto; right: auto; left: 50%; bottom: 6px; transform: translateX(-50%); }
+</style>
+<script>if (document.documentElement.hasAttribute('data-embebido')) document.write('<link rel="stylesheet" href="app/tokens.css">');</script>
+</head>
+<body>
+<div id="mapa" aria-label="Mapa 3D de Barranquilla con los buses de Sobusa"></div>
+
+<header id="barra" class="panel">
+  <div class="titulo"><b>Sobusa · Vista 3D</b><span>Replay de 2025: buses y pasajeros por las calles</span></div>
+  <div class="grupo">
+    <button class="boton" id="dia-ant" title="Día anterior" aria-label="Día anterior">◀</button>
+    <input type="date" id="fecha" min="2025-01-01" max="2025-12-31" aria-label="Día">
+    <button class="boton" id="dia-sig" title="Día siguiente" aria-label="Día siguiente">▶</button>
+    <span id="etiqueta-dia"></span>
+  </div>
+  <div class="grupo">
+    <div id="reloj" role="timer" aria-label="Hora del replay">06:30:00</div>
+    <button class="boton primario" id="btn-play" aria-pressed="false">Reproducir</button>
+    <div class="velocidades" role="group" aria-label="Velocidad">
+      <button data-v="1" aria-pressed="false" title="Tiempo real: 1 segundo = 1 segundo">x1</button>
+      <button data-v="10" aria-pressed="true" title="10 segundos por segundo">x10</button>
+      <button data-v="60" aria-pressed="false" title="1 minuto por segundo">x60</button>
+      <button data-v="300" aria-pressed="false" title="5 minutos por segundo">x300</button>
+    </div>
+  </div>
+  <input type="range" id="deslizador" min="14400" max="81000" step="60" value="23400" aria-label="Hora del día">
+  <a class="enlace" id="a-consola" href="consola_despacho.html">Consola de despacho →</a>
+</header>
+
+<aside id="lateral" class="panel" aria-label="Resumen y controles">
+  <h2>En la calle ahora <small id="h2-modo"></small></h2>
+  <div class="par-enc" id="par-enc" hidden aria-hidden="true"><span><i>real</i><i class="pl">plan</i></span><span><i>real</i><i class="pl">plan</i></span><span><i>real</i><i class="pl">plan</i></span></div>
+  <div class="cifras" id="cifras">
+    <div class="cifra"><div class="par"><b id="n-buses">–</b><b id="n-buses-plan" class="pl" title="Buses del plan en ruta">–</b></div><span>buses en ruta</span></div>
+    <div class="cifra"><div class="par"><b id="n-espera">–</b><b id="n-espera-plan" class="pl" title="Personas que esperan un bus del plan">–</b></div><span>personas esperando</span></div>
+    <div class="cifra"><div class="par"><b id="n-bordo">–</b><b id="n-bordo-plan" class="pl" title="Pasajeros a bordo de los buses del plan">–</b></div><span>pasajeros a bordo</span></div>
+  </div>
+  <div class="alertas" id="alertas">
+    <span class="txt" id="alertas-txt" title="Lo que Sobusa vigila: buses de la misma ruta y sentido a menos de 250 m, buses con 50 o más a bordo y paraderos con 15 o más personas esperando">Alertas ahora: <b id="al-pegados">0</b> pegados · <b id="al-llenos">0</b> llenos · <b id="al-colas">0</b> paraderos con cola</span>
+    <button class="boton chico" id="alertas-marcas" aria-pressed="true" title="Mostrar u ocultar las marcas de las alertas en el mapa">Marcas</button>
+  </div>
+  <div class="ver">
+    <span id="ver-et">Ver</span>
+    <div class="segmento" id="ver" role="group" aria-labelledby="ver-et">
+      <button data-ver="real" aria-pressed="true" title="Lo que pasó ese día">Real</button>
+      <button data-ver="plan" aria-pressed="false" title="El mismo día con las salidas del plan">Plan</button>
+      <button data-ver="ambos" aria-pressed="false" title="Buses reales sólidos y los del plan como fantasmas">Los dos</button>
+    </div>
+  </div>
+  <div class="rutas" id="rutas"></div>
+  <div class="leyenda">
+    <div>Ventanas: pasajeros a bordo</div>
+    <div class="grad" id="grad-occ" aria-hidden="true"></div>
+    <div class="ticks"><span>0</span><span>25</span><span>50 o más</span></div>
+    <div class="fila"><span class="persona"></span>esperando el bus · <span class="persona baja"></span>se acaba de bajar</div>
+    <div class="fila solo-plan" hidden><span class="persona perdido"></span><span>se fue en otro bus (con el plan) · <span id="n-perdidos">0</span> hasta ahora</span></div>
+    <div class="fila solo-plan" hidden><span class="busito"></span>bus del plan: blanco, con techo magenta y franja del color de la ruta</div>
+    <div class="fila"><span class="marca pegados"></span><span>pegados: misma ruta y sentido a menos de 250 m · <span class="marca lleno" style="display:inline-block;vertical-align:-3px"></span> 50 o más a bordo · <span class="marca cola" style="display:inline-block;vertical-align:-3px"></span> 15 o más esperando<span id="alertas-ambos" hidden> (en «Los dos», sobre los buses reales)</span></span></div>
+  </div>
+  <div class="camaras">
+    <button class="boton" id="cam-ciudad">Toda la ciudad</button>
+    <button class="boton" id="cam-centro">Donde más suben</button>
+    <button class="boton" id="cam-plano" aria-pressed="false">Vista plana</button>
+    <button class="boton" id="luz" aria-pressed="false" title="La luz sigue la hora del replay (amanecer, día, atardecer, noche); pulse para ver siempre de día">Luz: automática</button>
+  </div>
+  <div class="modos">
+    <button class="boton" id="btn-cine" title="El día entero en un minuto: las estelas de todos los viajes, la luz del amanecer a la noche y la cámara sola (también con &amp;cine=1 en la dirección; Escape para salir)">Un día en 60 segundos</button>
+    <button class="boton" id="btn-recorrido" title="Seis escenas con las cifras del día abierto (también con &amp;recorrido=1 en la dirección)">Recorrido guiado</button>
+  </div>
+  <p class="nota">Clic en un bus para ver sus datos o seguirlo. Las personas se ubican con los conteos reales de subidas y bajadas de cada tramo y zona; son una representación, no personas identificadas. Sin internet, el mapa sale de la copia local de <code>mapa_local/</code>.</p>
+</aside>
+
+<div id="columna-der">
+  <section id="plan" class="panel" aria-label="Hoy con el plan">
+    <h2><button id="plan-plegar" aria-expanded="true" aria-controls="plan-cuerpo">Hoy con el plan <span class="flecha" aria-hidden="true">▾</span></button></h2>
+    <p class="meta" id="plan-meta"></p>
+    <p class="sin-plan" id="plan-sin" hidden></p>
+    <div id="plan-cuerpo" hidden>
+      <p class="pron" id="plan-pron"></p>
+      <table id="plan-tabla" aria-label="El día real frente al plan"></table>
+      <p class="extra" id="plan-extra"></p>
+      <div class="horas-titulo">Salidas por hora · <i class="sw re"></i>real <i class="sw pl"></i>plan</div>
+      <div class="horas" id="plan-horas" role="img" aria-label="Salidas por hora, reales frente al plan"></div>
+      <div class="ejes" id="plan-ejes" aria-hidden="true"></div>
+    </div>
+    <div id="anual" hidden>
+      <h3><button id="anual-plegar" aria-expanded="false" aria-controls="anual-cuerpo">Todo 2025 con este modelo <span class="flecha" aria-hidden="true">▾</span></button></h3>
+      <div id="anual-cuerpo" hidden>
+        <table id="anual-tabla" aria-label="Promedio por día de 2025, real frente a plan"></table>
+        <p class="extra" id="anual-extra"></p>
+        <p class="nota" id="anual-nota"></p>
+      </div>
+    </div>
+  </section>
+  <section id="ficha" class="panel" hidden aria-live="polite">
+    <h3><span class="sw" id="ficha-sw"></span><span id="ficha-titulo">Bus</span><button id="cerrar-ficha" aria-label="Cerrar">×</button></h3>
+    <dl>
+      <dt>Salió</dt><dd id="ficha-salio">–</dd>
+      <dt>A bordo</dt><dd><span id="ficha-bordo">–</span><div class="barra-occ"><i id="ficha-barra"></i></div></dd>
+      <dt>Recorrido</dt><dd id="ficha-km">–</dd>
+      <dt>En el viaje</dt><dd id="ficha-sub">–</dd>
+    </dl>
+    <div class="acciones"><button class="boton primario" id="btn-seguir">Seguir este bus</button></div>
+  </section>
+</div>
+
+<div id="cine" hidden aria-label="Modo cine: un día en 60 segundos">
+  <button class="boton chico" id="cine-salir" title="Volver a la vista normal (también con la tecla Escape)">Salir del cine</button>
+  <div class="reloj-cine"><div id="cine-hora" role="timer" aria-label="Hora del replay">04:00</div><div id="cine-fecha"></div></div>
+  <div class="contadores">
+    <div><b id="cine-buses">0</b><span>buses en la calle</span></div>
+    <div><b id="cine-bordo">0</b><span>pasajeros a bordo</span></div>
+    <div><b id="cine-subidas">0</b><span>subidas en el día</span></div>
+  </div>
+  <section id="cine-final" class="panel" hidden aria-live="polite">
+    <h2 id="cine-final-titulo">Así fue el día</h2>
+    <p class="sub" id="cine-final-sub"></p>
+    <div class="cifras">
+      <div class="cifra"><b id="cf-salidas">–</b><span>salidas</span></div>
+      <div class="cifra"><b id="cf-pax">–</b><span>pasajeros que subieron</span></div>
+      <div class="cifra"><b id="cf-bh">–</b><span>buses-hora</span></div>
+      <div class="cifra"><b id="cf-km">–</b><span>kilómetros</span></div>
+    </div>
+    <div class="acciones"><button class="boton primario" id="cine-repetir">Repetir</button><button class="boton" id="cine-salir-2">Salir</button></div>
+  </section>
+</div>
+<section id="recorrido" class="panel" hidden aria-live="polite" aria-label="Recorrido guiado">
+  <div class="num" id="rec-num"></div>
+  <h2 id="rec-titulo"></h2>
+  <p id="rec-texto"></p>
+  <div class="acciones"><button class="boton" id="rec-ant">Anterior</button><button class="boton primario" id="rec-sig">Siguiente</button><button class="boton" id="rec-salir">Salir</button></div>
+</section>
+<div id="ayuda-mov" class="panel">Arrastrar: mover · Ctrl + arrastrar o clic derecho: girar e inclinar</div>
+<div id="insignia-mapa" class="panel" hidden title="No respondió el mapa en línea: se usa el paquete de teselas de mapa_local/">Mapa sin internet (copia local)</div>
+<div id="aviso" class="panel" hidden></div>
+
+<script src="sistema_tiempo_real/replay/dias/indice.js"></script>
+<script src="sistema_tiempo_real/replay/dias/calles/rutas.js"></script>
+<script src="sistema_tiempo_real/replay/dias/calles/resumen_2025.js"></script>  <!-- todo 2025 con el modelo (resumen_calles.py); si falta, el bloque no se muestra -->
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const BASE = 'sistema_tiempo_real/replay/dias/';
+  const aviso = (html) => { $('aviso').innerHTML = html; $('aviso').hidden = !html; };
+  let tAviso = 0;
+  const avisoCorto = (html) => { aviso(html); clearTimeout(tAviso); tAviso = setTimeout(() => aviso(''), 3500); };
+
+  if (!window.maplibregl || !window.deck) { aviso('Faltan las bibliotecas en <code>lib/</code> (<code>maplibre-gl.js</code> y <code>deck.gl.min.js</code>): la vista las carga de esa carpeta, sin internet. Cómo recuperarlas: <code>lib/README.md</code>.'); return; }
+  const IDX = window.REPLAY_INDICE, CALLES = window.REPLAY_CALLES_RUTAS && window.REPLAY_CALLES_RUTAS.rutas;
+  if (!IDX || !CALLES || !CALLES['CRA 54'] || !CALLES['CRA 54'].subidas) {
+    aviso('Faltan los datos de las rutas por las calles (<code>sistema_tiempo_real/replay/dias/calles/</code>). Se generan con <code>python sistema_tiempo_real/calles.py --todos</code>.');
+    return;
+  }
+  // todo 2025 con el modelo del plan (replay/dias/calles/resumen_2025.js, de resumen_calles.py); si falta, el bloque del panel no se muestra
+  const RES = window.REPLAY_CALLES_RESUMEN && window.REPLAY_CALLES_RESUMEN.total ? window.REPLAY_CALLES_RESUMEN : null;
+
+  // ================= utilidades =================
+  const pad = (n) => String(n).padStart(2, '0');
+  const hhmmss = (s) => { s = Math.max(0, Math.floor(s)); return pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60); };
+  const hhmm = (s) => hhmmss(s).slice(0, 5);
+  const fmt = (n, d = 0) => (n == null || !isFinite(n)) ? '–' : Number(n).toLocaleString('es-CO', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const durTxt = (seg) => { const m = Math.floor(seg / 60); return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h ' + pad(m % 60) + ' min'; };
+  function hexRgb(h) { const n = parseInt(String(h).replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  // generador pseudoaleatorio con semilla (mulberry32) y hash FNV-1a: las mismas personas cada vez que se abre un día
+  function semilla(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function azar(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function cargarScript(src) {
+    return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.async = true;
+      s.onload = () => { s.remove(); res(); }; s.onerror = () => { s.remove(); rej(new Error('No se pudo cargar ' + src)); }; document.head.appendChild(s); });
+  }
+  async function descomprimir(b64) {
+    const bin = atob(b64), u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    const flujo = new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'));
+    return JSON.parse(await new Response(flujo).text());
+  }
+
+  // ================= rutas: trazado, rumbo y densidad de subidas =================
+  const RUTAS = ['SILENCIO', 'CRA 54', 'CL 72'];
+  const VAR_COLOR = { 'SILENCIO': '--r-silencio', 'CRA 54': '--r-cra54', 'CL 72': '--r-cl72' };
+  const COLOR = Object.fromEntries(RUTAS.map((r) => [r, hexRgb(css(VAR_COLOR[r]))]));
+  const OCC = [0, 1, 2, 3, 4].map((i) => hexRgb(css('--occ-' + i)));
+  const M_GRADO = 111320;
+  const G = {};
+  RUTAS.forEach((r) => {
+    const c = CALLES[r];
+    const acum = (xs) => { const a = new Float64Array(xs.length + 1); for (let i = 0; i < xs.length; i++) a[i + 1] = a[i] + Math.max(0, xs[i]); return a; };
+    G[r] = { lat: c.lat, lon: c.lon, s: c.s, largo: c.largo_m, paso: c.dens_paso_m || 50, cumSub: acum(c.subidas), cumBaj: acum(c.bajadas),
+             ruta: c.lat.map((la, i) => [c.lon[i], la]), parada: paraderos(c) };
+  });
+  // Paraderos: en cada ventana de 300 m (6 bins de 50 m), el bin con más subidas y bajadas de 2025. Las personas de esa ventana
+  // esperan y se bajan ahí, como en un paradero (Sobusa no publica sus paraderos; esta es la mejor aproximación con los datos).
+  function paraderos(c) {
+    const paso = c.dens_paso_m || 50, nb = c.subidas.length, W = 6, out = new Float64Array(nb);
+    for (let w = 0; w * W < nb; w++) {
+      let mejor = w * W, vmax = -1;
+      for (let b = w * W; b < Math.min(nb, (w + 1) * W); b++) { const v = (c.subidas[b] || 0) + (c.bajadas[b] || 0); if (v > vmax) { vmax = v; mejor = b; } }
+      for (let b = w * W; b < Math.min(nb, (w + 1) * W); b++) out[b] = (mejor + 0.5) * paso;
+    }
+    return out;
+  }
+  // el patio de Soledad: donde empiezan los tres trazados (sus primeros vértices están a menos de 60 m uno de otro)
+  const PATIO = [RUTAS.reduce((s, r) => s + G[r].lon[0], 0) / RUTAS.length, RUTAS.reduce((s, r) => s + G[r].lat[0], 0) / RUTAS.length];
+  // posición [lon, lat] a s metros del inicio del trazado
+  function punto(r, s) {
+    const g = G[r], S = g.s, n = S.length;
+    if (!(s > S[0])) return [g.lon[0], g.lat[0]];
+    if (s >= S[n - 1]) return [g.lon[n - 1], g.lat[n - 1]];
+    let lo = 0, hi = n - 1;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (S[mid] <= s) lo = mid; else hi = mid; }
+    const f = (s - S[lo]) / ((S[hi] - S[lo]) || 1);
+    return [g.lon[lo] + (g.lon[hi] - g.lon[lo]) * f, g.lat[lo] + (g.lat[hi] - g.lat[lo]) * f];
+  }
+  // rumbo (grados desde el norte, en sentido horario) del trazado en s, medido entre s - 7 m y s + 7 m
+  function rumbo(r, s) {
+    const a = punto(r, s - 7), b = punto(r, s + 7);
+    const de = (b[0] - a[0]) * Math.cos(a[1] * Math.PI / 180), dn = b[1] - a[1];
+    return (Math.atan2(de, dn) * 180 / Math.PI + 360) % 360;
+  }
+  // desplaza un punto `der` metros a la derecha y `ade` metros adelante del rumbo h
+  function desplazar(p, h, der, ade) {
+    const hr = h * Math.PI / 180, de = Math.sin(hr) * ade + Math.cos(hr) * der, dn = Math.cos(hr) * ade - Math.sin(hr) * der;
+    return [p[0] + de / (M_GRADO * Math.cos(p[1] * Math.PI / 180)), p[1] + dn / M_GRADO];
+  }
+  // posición dentro de [lo, hi] (m) elegida según la densidad de subidas o bajadas de la ruta
+  function sortearPosicion(r, cum, lo, hi, u) {
+    const g = G[r], paso = g.paso, nb = cum.length - 1;
+    const b0 = Math.max(0, Math.min(nb - 1, Math.floor(lo / paso))), b1 = Math.max(0, Math.min(nb - 1, Math.floor(hi / paso)));
+    const masa = cum[b1 + 1] - cum[b0];
+    if (!(masa > 0) || hi - lo < 1) { const s = lo + (hi - lo) * u; return Math.max(lo, Math.min(hi, g.parada[Math.min(nb - 1, Math.floor(s / paso))])); }
+    const x = cum[b0] + u * masa;
+    let a = b0, b = b1 + 1;
+    while (b - a > 1) { const mid = (a + b) >> 1; if (cum[mid] <= x) a = mid; else b = mid; }
+    return Math.max(lo, Math.min(hi, g.parada[Math.min(a, g.parada.length - 1)]));     // al paradero de su ventana
+  }
+
+  // ================= mallas 3D (cajas) =================
+  // Frente del bus = +x. Unidades: metros.
+  function cajas(lista) {
+    const pos = [], nor = [], idx = [];
+    lista.forEach(([cx, cy, lx, ly, z0, z1]) => {
+      const x0 = cx - lx / 2, x1 = cx + lx / 2, y0 = cy - ly / 2, y1 = cy + ly / 2;
+      const v = [[x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0], [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]];
+      [[0, 1, 2, 3, [0, 0, -1]], [4, 5, 6, 7, [0, 0, 1]], [0, 1, 5, 4, [0, -1, 0]], [1, 2, 6, 5, [1, 0, 0]], [2, 3, 7, 6, [0, 1, 0]], [3, 0, 4, 7, [-1, 0, 0]]]
+        .forEach(([a, b, c, d, n]) => { const k = pos.length / 3; [a, b, c, d].forEach((i) => { pos.push(...v[i]); nor.push(...n); }); idx.push(k, k + 1, k + 2, k, k + 2, k + 3); });
+    });
+    return { attributes: { positions: { value: new Float32Array(pos), size: 3 }, normals: { value: new Float32Array(nor), size: 3 } }, indices: { value: new Uint32Array(idx), size: 1 } };
+  }
+  const MALLA = {
+    cuerpo: cajas([[0, 0, 12, 2.5, 0.45, 3.1]]),
+    ventanas: cajas([[0, 0, 12.04, 2.56, 1.45, 2.55]]),
+    franja: cajas([[0, 0, 12.08, 2.6, 0.95, 1.3]]),        // franja bajo las ventanas: solo los buses del plan, del color de la ruta
+    ruedas: cajas([[3.9, 0, 1.0, 2.62, 0.0, 0.95], [-3.6, 0, 1.0, 2.62, 0.0, 0.95]]),
+    techo: cajas([[-0.5, 0, 9.5, 2.3, 3.1, 3.3]]),
+    piernas: cajas([[0, 0, 0.26, 0.36, 0, 0.82]]),
+    torso: cajas([[0, 0, 0.26, 0.44, 0.82, 1.42]]),
+    cabeza: cajas([[0, 0, 0.22, 0.22, 1.46, 1.72]]),
+  };
+  const CAMISAS = [[214, 69, 65], [52, 120, 180], [242, 178, 56], [96, 160, 96], [235, 235, 235], [140, 90, 160], [40, 40, 40], [230, 120, 160]];
+  const PIELES = [[233, 196, 160], [198, 143, 104], [150, 100, 70], [104, 70, 50]];
+  const PANTALON = [[44, 52, 70], [70, 80, 96], [110, 90, 70]];
+  const GRIS_BAJA = [199, 205, 214], GRIS_PERDIDO = hexRgb(css('--perdido'));   // quien se baja; quien se va en otro bus (más oscuro)
+  // Bus del plan: carrocería blanca, techo del color del plan (magenta) y franja del color de la ruta. El techo magenta se ve desde
+  // la cámara inclinada a cualquier distancia, así que un bus del plan nunca se confunde con uno real (que lleva la carrocería del
+  // color de la ruta y el techo claro). El alfa va en la escala 0-255 de deck.gl.
+  const BLANCO_PLAN = [250, 250, 250], TECHO_REAL = [236, 238, 240], TECHO_PLAN = hexRgb(css('--plan')), ALFA_FANTASMA = 150;
+
+  // ================= estado =================
+  const VER = ['real', 'plan', 'ambos'];
+  // luz: 'auto' (según la hora del replay) o 'dia' (siempre de día); alertas: si se dibujan las marcas de las alertas
+  const estado = { fecha: null, t: 6.5 * 3600, jugando: false, vel: 10, rutas: new Set(RUTAS), seguir: null, sel: null, plano: false, ver: 'real', luz: 'auto', alertas: true };
+  const EMBEBIDO = document.documentElement.hasAttribute('data-embebido');   // dentro de la app (ver «modo embebido» al final)
+  let avisoListo = false, callarEstado = false;
+  let VIAJES = [], VIAJES_PLAN = [], EV = null, EVP = null, PLAN = null, cargando = 0;
+  let SUBIDAS_T = new Float64Array(0);      // horas de todas las subidas reales del día, ordenadas (contador del cine)
+  let ultimasCapas = [];                    // capas de deck.gl del último cuadro (para las pruebas)
+  // modo cine y recorrido guiado (secciones de abajo); `antes` guarda lo que se restaura al salir
+  const cine = { activo: false, fecha: null, estelas: null, antes: null, camaraLibre: false, msEstelas: 0, perf: { n: 0, ms: 0, msMax: 0 } };
+  const recorrido = { activo: false, i: 0, escenas: [], antes: null };
+
+  // ================= un día: viajes y personas =================
+  async function cargarDia(fecha) {
+    const n = ++cargando;
+    if (cine.activo) salirCine();
+    if (recorrido.activo) salirRecorrido();
+    aviso('Cargando el ' + fecha + '…');
+    try {
+      const reg = (window.REPLAY_CALLES_GZ = window.REPLAY_CALLES_GZ || {});
+      if (!reg[fecha]) await cargarScript(BASE + 'calles/' + fecha + '.js');
+      const b64 = reg[fecha]; delete reg[fecha];
+      if (!b64) throw new Error('el archivo del día no trae datos');
+      const d = await descomprimir(b64);
+      if (n !== cargando) return;
+      if (!d.pax) throw new Error('el archivo del día es de una versión anterior (sin subidas y bajadas); regenérelo con calles.py');
+      construir(d);
+      PLAN = d.plan ? { resumen: d.resumen || null, meta: d.plan_meta || {} } : null;     // versión 3: el mismo día con el plan
+      estado.fecha = fecha; estado.sel = null; estado.seguir = null; $('ficha').hidden = true;
+      $('fecha').value = fecha;
+      const info = IDX.dias.find((x) => x.fecha === fecha);
+      $('etiqueta-dia').textContent = info ? (info.etiqueta_previa || info.etiqueta || '') : '';
+      pintarPlan();
+      aviso('');
+      ponerVer(estado.ver);
+    } catch (e) {
+      if (n !== cargando) return;
+      aviso('No se pudo abrir el ' + fecha + ': ' + e.message);
+    }
+  }
+  // Un último nudo que llega más de 2 h después del anterior es una visita registrada cuando el viaje ya había terminado (el patio
+  // al día siguiente): sin esta regla el bus seguía dibujado avanzando despacio hasta allí durante horas. Es la misma regla con
+  // que calles.py cuenta la duración de los viajes (real y plan); las subidas, bajadas y perdidos de los tramos quitados pasan al
+  // último tramo que queda, como en el modelo. Nunca quedan menos de 2 nudos.
+  const HUECO_FIN = 2 * 3600;
+  function recortarCola(kn, cuentas, perdidos) {
+    const nTot = kn.length >> 1;
+    let n = nTot;
+    while (n > 2 && kn[2 * (n - 1)] - kn[2 * (n - 2)] > HUECO_FIN) n--;
+    if (n === nTot) return [kn, cuentas, perdidos];
+    const k = n - 2, cu = cuentas.slice(0, 2 * (n - 1)), pe = perdidos ? perdidos.slice(0, n - 1) : null;
+    while (cu.length < 2 * (n - 1)) cu.push(0);
+    if (pe) while (pe.length < n - 1) pe.push(0);
+    for (let i = n - 1; i < nTot - 1; i++) {
+      cu[2 * k] += cuentas[2 * i] || 0; cu[2 * k + 1] += cuentas[2 * i + 1] || 0;
+      if (pe) pe[k] += perdidos[i] || 0;
+    }
+    return [kn.slice(0, 2 * n), cu, pe];
+  }
+  function construir(d) {
+    VIAJES = []; VIAJES_PLAN = [];
+    const conPlan = !!d.plan;
+    RUTAS.forEach((r) => {
+      const rr = d.rutas[r] || {}, pp = d.pax[r] || {}, pe = (d.perdidos && d.perdidos[r]) || {};
+      Object.keys(rr).forEach((clave) => {
+        rr[clave].forEach((kn0, j) => {
+          if (kn0.length < 4) return;                       // sin visitas: el bus no se movió del patio
+          const [veh, sal] = clave.split('|');
+          const [kn, cuentas, perdidos] = recortarCola(kn0, (pp[clave] && pp[clave][j]) || [], (pe[clave] && pe[clave][j]) || null);
+          VIAJES.push({ r, clave, veh, plan: false, salida: +sal * 60, kn, cuentas, perdidos, t0: kn[0], t1: kn[kn.length - 2], subT: null, bajT: null });
+        });
+      });
+      if (!conPlan) return;
+      // Viajes del plan: clave "P|minuto de salida" (o "P|minuto|2" si el plan repite el minuto); sus pasajeros son las personas
+      // reales que con el plan toman ese bus (pax_plan).
+      const qq = d.plan[r] || {}, qp = (d.pax_plan && d.pax_plan[r]) || {};
+      Object.keys(qq).forEach((clave) => {
+        qq[clave].forEach((kn0, j) => {
+          if (kn0.length < 4) return;
+          const [kn, cuentas] = recortarCola(kn0, (qp[clave] && qp[clave][j]) || [], null);
+          VIAJES_PLAN.push({ r, clave, veh: 'P', plan: true, salida: +clave.split('|')[1] * 60, kn, cuentas,
+                             perdidos: null, t0: kn[0], t1: kn[kn.length - 2], subT: null, bajT: null });
+        });
+      });
+    });
+    VIAJES.sort((a, b) => a.t0 - b.t0);
+    VIAJES_PLAN.sort((a, b) => a.t0 - b.t0);
+    const ev = [], evp = [];
+    VIAJES.forEach((v) => personasViaje(v, ev, conPlan ? evp : null));
+    VIAJES_PLAN.forEach((v) => personasViaje(v, evp, null));
+    EV = indiceEventos(ev);
+    EVP = conPlan ? indiceEventos(evp) : null;
+    const sub = [];
+    VIAJES.forEach((v) => { for (let i = 0; i < v.subT.length; i++) sub.push(v.subT[i]); });
+    SUBIDAS_T = Float64Array.from(sub.sort((a, b) => a - b));
+  }
+  // Personas de un viaje: cada subida y bajada de cada tramo se ubica con la densidad de su ruta dentro del tramo; su hora es la hora
+  // en que el bus pasa por ese punto. Quien sube (tipo 0) espera de 1 a 7 minutos en la acera y camina hasta la puerta en los últimos
+  // 5 s; quien baja (tipo 1) sale por la puerta, va a la acera y se aleja en 25 s. Quien se va en otro bus con el plan (tipo 2, solo en
+  // los viajes reales de un día con plan) llega al paradero 3 a 5 min antes del bus real y, cuando este pasa, se va caminando más
+  // lejos; esas personas van a la lista del plan (evPerd) y usan su propio sorteo para no alterar a las demás.
+  function personasViaje(v, ev, evPerd) {
+    const kn = v.kn, cu = v.cuentas, pe = evPerd ? v.perdidos : null;
+    const rnd = azar(semilla(v.r + v.clave + v.t0)), rndP = azar(semilla('perdidos' + v.r + v.clave + v.t0));
+    const subT = [], bajT = [];
+    for (let i = 0; 2 * i + 3 < kn.length; i++) {
+      const ta = kn[2 * i], sa = kn[2 * i + 1], tb = kn[2 * i + 2], sb = kn[2 * i + 3];
+      const lo = Math.min(sa, sb), hi = Math.max(sa, sb), sentido = sb >= sa ? 1 : -1;
+      for (let tipo = 0; tipo < 3; tipo++) {
+        const cant = tipo === 2 ? ((pe && pe[i]) || 0) : (cu[2 * i + tipo] || 0);
+        if (!(cant > 0)) continue;
+        const cum = tipo === 1 ? G[v.r].cumBaj : G[v.r].cumSub, rn = tipo === 2 ? rndP : rnd, lista = tipo === 2 ? evPerd : ev;
+        for (let k = 0; k < cant; k++) {
+          const s = sortearPosicion(v.r, cum, lo, hi, rn());
+          const t = Math.abs(sb - sa) < 1 ? ta + (tb - ta) * rn() : ta + (tb - ta) * ((s - sa) / (sb - sa));
+          let h = rumbo(v.r, s); if (sentido < 0) h = (h + 180) % 360;
+          const p = punto(v.r, s), ade = (rn() - 0.5) * 12;
+          const acera = desplazar(p, h, 5.0 + rn() * 2.2, ade), puerta = desplazar(p, h, 2.4, 3.5);
+          const lejos = desplazar(p, h, (tipo === 2 ? 22 : 13) + rn() * 6, ade + (rn() - 0.5) * 14);
+          const espera = tipo === 0 ? 60 + rn() * 360 : tipo === 2 ? 180 + rn() * 120 : 0;
+          lista.push({ tA: tipo === 1 ? t : t - espera, tB: tipo === 0 ? t : t + 25, tP: t, tipo, acera, puerta, lejos, yaw: 90 - (h - 90), parada: p,
+                       camisa: tipo === 0 ? CAMISAS[Math.floor(rn() * CAMISAS.length)] : tipo === 1 ? GRIS_BAJA : GRIS_PERDIDO,
+                       piel: PIELES[Math.floor(rn() * PIELES.length)], pantalon: tipo === 2 ? PANTALON[0] : PANTALON[Math.floor(rn() * PANTALON.length)],
+                       r: v.r, plan: v.plan });
+          if (tipo === 0) subT.push(t); else if (tipo === 1) bajT.push(t);
+        }
+      }
+    }
+    v.subT = Float64Array.from(subT.sort((a, b) => a - b));
+    v.bajT = Float64Array.from(bajT.sort((a, b) => a - b));
+  }
+  // lista de personas ordenada por su primera aparición; tP: horas de paso del bus real de quienes se van en otro bus (para contarlos)
+  function indiceEventos(ev) {
+    ev.sort((a, b) => a.tA - b.tA);
+    const tP = ev.filter((e) => e.tipo === 2).map((e) => e.tP).sort((a, b) => a - b);
+    return { lista: ev, tA: Float64Array.from(ev.map((e) => e.tA)), tP: Float64Array.from(tP), maxDur: 7 * 60 + 30 };
+  }
+  const cuantosHasta = (arr, t) => { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m] <= t) lo = m + 1; else hi = m; } return lo; };
+  // metros recorridos y sentido del viaje en el segundo t
+  function estadoViaje(v, t) {
+    const kn = v.kn, n = kn.length >> 1;
+    if (t <= kn[0]) return { s: kn[1], sentido: 1 };
+    if (t >= kn[2 * n - 2]) return { s: kn[2 * n - 1], sentido: kn[2 * n - 1] >= kn[2 * n - 3] ? 1 : -1 };
+    let lo = 0, hi = n - 1;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (kn[2 * mid] <= t) lo = mid; else hi = mid; }
+    const t0 = kn[2 * lo], t1 = kn[2 * hi], s0 = kn[2 * lo + 1], s1 = kn[2 * hi + 1];
+    return { s: s0 + (s1 - s0) * ((t - t0) / ((t1 - t0) || 1)), sentido: s1 >= s0 ? 1 : -1 };
+  }
+  const aBordo = (v, t) => Math.max(0, cuantosHasta(v.subT, t) - cuantosHasta(v.bajT, t));
+
+  // ================= escena =================
+  // buses y personas reales (buses, personas), del plan (busesPlan; sus personas van en `personas` o, en «Los dos», en `fantasmas`),
+  // y contadores de cada conjunto (real, plan). `espera`, `bordo` y `porRuta` son los del conjunto que muestran las cifras grandes.
+  const escena = { buses: [], busesPlan: [], personas: [], fantasmas: [], espera: 0, bordo: 0, porRuta: {}, porRutaPlan: {},
+                   real: { buses: 0, espera: 0, bordo: 0 }, plan: { buses: 0, espera: 0, bordo: 0, perdidos: 0 } };
+  // color de las ventanas según los pasajeros a bordo: de día la escala verde-azulada de la leyenda; de noche, ventanas encendidas,
+  // de amarillo pálido (vacío) a rojo (50 o más), para que la ocupación se siga leyendo con el mapa oscuro
+  const OCC_NOCHE = ['#fff3c4', '#ffd27a', '#ffa83c', '#ff7418', '#e03416'].map(hexRgb);
+  function colorOcc(n, paleta = OCC) {
+    const x = Math.max(0, Math.min(1, n / 50)) * 4, i = Math.min(3, Math.floor(x)), f = x - i, a = paleta[i], b = paleta[i + 1];
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+  }
+  // buses de una lista de viajes en el segundo t, corridos `lado` metros a la derecha del trazado (negativo: a la izquierda)
+  function busesEn(lista, t, lado, porRuta, cnt) {
+    const out = [], paleta = luz.noche ? OCC_NOCHE : OCC;
+    for (const v of lista) {
+      if (v.t0 > t) break;
+      if (t > v.t1 + 30 || !estado.rutas.has(v.r)) continue;
+      const e = estadoViaje(v, t);
+      let h = rumbo(v.r, e.s); if (e.sentido < 0) h = (h + 180) % 360;
+      const p = desplazar(punto(v.r, e.s), h, lado, 0), occ = aBordo(v, t);
+      out.push({ v, p: [p[0], p[1], 0], h, yaw: 90 - h, occ, color: v.plan ? BLANCO_PLAN : COLOR[v.r], ventana: colorOcc(occ, paleta), s: e.s, sentido: e.sentido });
+      porRuta[v.r]++; cnt.bordo += occ;
+    }
+    cnt.buses = out.length;
+    return out;
+  }
+  // personas de un índice de eventos en el segundo t: las de tipo 0 y 1 van a `lista`, las que se van en otro bus (tipo 2) a `solidas`
+  function personasEn(ix, t, lista, solidas, cnt) {
+    const L = ix.lista, desde = cuantosHasta(ix.tA, t - ix.maxDur), hasta = cuantosHasta(ix.tA, t);
+    for (let i = desde; i < hasta; i++) {
+      const e = L[i];
+      if (e.tB < t || !estado.rutas.has(e.r)) continue;
+      let p;
+      if (e.tipo === 0) {                                      // espera y sube
+        const f = Math.max(0, Math.min(1, (t - (e.tB - 5)) / 5));
+        p = [e.acera[0] + (e.puerta[0] - e.acera[0]) * f, e.acera[1] + (e.puerta[1] - e.acera[1]) * f];
+        cnt.espera++;
+      } else if (e.tipo === 1) {                               // se baja y se aleja
+        const u = t - e.tA;
+        if (u < 4) { const f = u / 4; p = [e.puerta[0] + (e.acera[0] - e.puerta[0]) * f, e.puerta[1] + (e.acera[1] - e.puerta[1]) * f]; }
+        else { const f = (u - 4) / 21; p = [e.acera[0] + (e.lejos[0] - e.acera[0]) * f, e.acera[1] + (e.lejos[1] - e.acera[1]) * f]; }
+      } else {                                                 // espera en el paradero y, cuando pasa el bus real, se va en otro
+        const f = Math.max(0, Math.min(1, (t - e.tP) / 25));
+        p = [e.acera[0] + (e.lejos[0] - e.acera[0]) * f, e.acera[1] + (e.lejos[1] - e.acera[1]) * f];
+      }
+      (e.tipo === 2 ? solidas : lista).push({ p: [p[0], p[1], 0], yaw: e.yaw, camisa: e.camisa, piel: e.piel, pantalon: e.pantalon, tipo: e.tipo, parada: e.parada });
+    }
+  }
+  function calcularEscena(t) {
+    const ver = estado.ver, conReal = ver !== 'plan', conPlan = ver !== 'real' && !!EVP;
+    const re = { buses: 0, espera: 0, bordo: 0 }, pl = { buses: 0, espera: 0, bordo: 0, perdidos: 0 }, porRuta = {}, porRutaPlan = {};
+    RUTAS.forEach((r) => { porRuta[r] = 0; porRutaPlan[r] = 0; });
+    const buses = conReal ? busesEn(VIAJES, t, 1.6, porRuta, re) : [];
+    const busesPlan = conPlan ? busesEn(VIAJES_PLAN, t, ver === 'ambos' ? -1.6 : 1.6, porRutaPlan, pl) : [];
+    const personas = [], fantasmas = [];
+    if (conReal && EV) personasEn(EV, t, personas, personas, re);
+    if (conPlan) { personasEn(EVP, t, ver === 'ambos' ? fantasmas : personas, personas, pl); pl.perdidos = cuantosHasta(EVP.tP, t); }
+    const uno = ver === 'plan' ? pl : re;
+    escena.buses = buses; escena.busesPlan = busesPlan; escena.personas = personas; escena.fantasmas = fantasmas;
+    escena.espera = uno.espera; escena.bordo = uno.bordo; escena.porRuta = ver === 'plan' ? porRutaPlan : porRuta; escena.porRutaPlan = porRutaPlan;
+    escena.real = re; escena.plan = pl;
+    calcularAlertas();
+  }
+
+  // ================= alertas de Sobusa =================
+  // Lo que la empresa dijo que vigila: buses demasiado juntos, buses llenos y la distribución de los buses (paraderos con mucha gente).
+  // Se calculan cada cuadro sobre el conjunto que se ve: los buses reales (también en «Los dos») o, en «Plan», los del plan.
+  const ALERTA_PEGADOS_M = 250;   // dos buses de la misma ruta y el mismo sentido a menos de esto, en metros de recorrido (|Δs|)
+  const ALERTA_LLENO = 50;        // pasajeros a bordo desde los que el bus va lleno (la capacidad con que trabaja el proyecto)
+  const ALERTA_COLA = 15;         // personas esperando en el mismo paradero
+  const ALERTA_CELDA_M = 25;      // celda con que se agrupan las personas que esperan: la posición de su paradero redondeada a 25 m
+  escena.alertas = { pegados: [], llenos: [], colas: [], nPegados: 0, nLlenos: 0, nColas: 0 };
+  function calcularAlertas() {
+    const A = escena.alertas, buses = estado.ver === 'plan' ? escena.busesPlan : escena.buses;
+    A.pegados = []; A.llenos = []; A.colas = [];
+    // (a) pegados: ordenados por ruta, sentido y metros, dos vecinos a menos de ALERTA_PEGADOS_M. Un bus que ya terminó su viaje
+    // (parado en el patio) no cuenta. El contador son los buses que están pegados a otro.
+    const enRuta = buses.filter((b) => estado.t <= b.v.t1)
+      .sort((x, y) => (x.v.r < y.v.r ? -1 : x.v.r > y.v.r ? 1 : (x.sentido - y.sentido) || (x.s - y.s)));
+    const marcados = new Set();
+    for (let i = 1; i < enRuta.length; i++) {
+      const a = enRuta[i - 1], b = enRuta[i];
+      if (a.v.r === b.v.r && a.sentido === b.sentido && b.s - a.s < ALERTA_PEGADOS_M) { A.pegados.push([a, b]); marcados.add(a); marcados.add(b); }
+    }
+    A.nPegados = marcados.size;
+    // (b) llenos
+    for (const b of buses) if (b.occ >= ALERTA_LLENO) A.llenos.push(b);
+    A.nLlenos = A.llenos.length;
+    // (c) paraderos con cola: las personas que esperan (tipo 0) agrupadas por su paradero (el punto del trazado donde esperan,
+    // redondeado a una celda de ALERTA_CELDA_M, así un paradero compartido por dos rutas cuenta como uno); la marca va en el
+    // centro del grupo
+    const celdas = new Map();
+    for (const p of escena.personas) {
+      if (p.tipo !== 0) continue;
+      const k = Math.round(p.parada[0] * M_GRADO * COS_LAT / ALERTA_CELDA_M) + ',' + Math.round(p.parada[1] * M_GRADO / ALERTA_CELDA_M);
+      let c = celdas.get(k);
+      if (!c) { c = { n: 0, x: 0, y: 0 }; celdas.set(k, c); }
+      c.n++; c.x += p.p[0]; c.y += p.p[1];
+    }
+    celdas.forEach((c) => { if (c.n >= ALERTA_COLA) A.colas.push({ p: [c.x / c.n, c.y / c.n, 0], n: c.n }); });
+    A.nColas = A.colas.length;
+  }
+
+  // ================= mapa =================
+  const VISTAS = {
+    ciudad: { center: [-74.805, 10.955], zoom: 12.4, pitch: 50, bearing: -18 },
+    centro: { center: [-74.8200, 11.0070], zoom: 17.3, pitch: 62, bearing: -35 },     // donde más suben, en las tres rutas
+  };
+  const ESTILO_LINEA = 'https://tiles.openfreemap.org/styles/liberty';
+  let mapa = null, capa = null, mapaLocal = false, localForzado = false;
+  const CAPAS_CLIC = ['bus-cuerpo', 'bus-ventanas', 'bus-plan-cuerpo', 'bus-plan-techo', 'bus-plan-ventanas', 'bus-plan-franja'];
+  // Protocolo local://: sirve teselas, relieve, glifos y sprite desde el paquete en memoria (base64 -> bytes). Lo que no está en el
+  // paquete (fuera del recuadro de Barranquilla y Soledad) se responde vacío, y el mapa lo deja en blanco.
+  function registrarProtocoloLocal() {
+    const b64 = (s) => { const bin = atob(s); const out = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out.buffer; };
+    maplibregl.addProtocol('local', async (params) => {
+      const ruta = params.url.replace('local://', ''), M = window.MAPA_LOCAL;
+      let dato = null;
+      if (ruta.startsWith('teselas/')) dato = M.teselas[ruta.slice(8).replace('.pbf', '')];
+      else if (ruta.startsWith('relieve/')) dato = M.relieve[ruta.slice(8).replace('.png', '')];
+      else if (ruta.startsWith('glifos/')) dato = M.glifos[decodeURIComponent(ruta.slice(7))];
+      else if (ruta.startsWith('sprite/')) dato = M.sprite[ruta.slice(7)];
+      if (!dato) return { data: ruta.endsWith('.json') ? {} : new ArrayBuffer(0) };
+      return { data: ruta.endsWith('.json') ? JSON.parse(new TextDecoder().decode(b64(dato))) : b64(dato) };
+    });
+  }
+  // El estilo en línea si responde en 6 s; si no (o con &local=1 en la dirección), la copia de mapa_local/: el estilo y el paquete
+  // de teselas se cargan con etiquetas <script> (desde file:// el navegador no permite fetch de archivos locales) y el protocolo
+  // local:// los sirve. Devuelve null si no hay ni lo uno ni lo otro.
+  async function elegirEstilo() {
+    localForzado = leerHash().local === '1';
+    if (!localForzado && navigator.onLine !== false) {           // sin red, el navegador ya lo sabe: ni se intenta
+      try {
+        const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 6000);
+        const r = await fetch(ESTILO_LINEA, { signal: ctl.signal, cache: 'no-store' });
+        clearTimeout(tm);
+        if (r.ok) return { estilo: ESTILO_LINEA, local: false };
+      } catch (e) { /* sin internet o sin respuesta a tiempo */ }
+    }
+    try { await cargarScript('mapa_local/estilo_liberty.js'); await cargarScript('mapa_local/paquete_mapa.js'); } catch (e) { return null; }
+    if (!window.ESTILO_LOCAL || !window.MAPA_LOCAL) return null;
+    registrarProtocoloLocal();
+    return { estilo: window.ESTILO_LOCAL, local: true };
+  }
+  async function crearMapa() {
+    const eleccion = await elegirEstilo();
+    if (!eleccion) { aviso('El mapa base no cargó: no respondió el mapa en línea y falta la copia local (<code>mapa_local/paquete_mapa.js</code> y <code>estilo_liberty.js</code>, ver <code>mapa_local/README.md</code>).'); return; }
+    mapaLocal = eleccion.local;
+    $('insignia-mapa').hidden = !mapaLocal;
+    mapa = new maplibregl.Map({ container: 'mapa', style: eleccion.estilo, ...VISTAS.ciudad, maxPitch: 75,
+      attributionControl: { compact: true }, canvasContextAttributes: { preserveDrawingBuffer: true, antialias: true } });
+    mapa.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+    const errorMapa = setTimeout(() => { if (!mapa.loaded()) aviso(mapaLocal ? 'La copia local del mapa no terminó de cargar.' : 'El mapa base no cargó: revise la conexión a internet.'); }, 15000);
+    mapa.on('load', () => {
+      clearTimeout(errorMapa);
+      // menos íconos de comercios y lugares: deja calles, nombres de barrios y edificios
+      (mapa.getStyle().layers || []).forEach((l) => { if (/^poi/.test(l.id)) mapa.setLayoutProperty(l.id, 'visibility', 'none'); });
+      tomarCapas();
+      capa = new deck.MapboxOverlay({ interleaved: true, layers: [], effects: [EFECTO_LUZ], pickingRadius: 8, getCursor: ({ isHovering }) => (isHovering ? 'pointer' : '') });
+      mapa.addControl(capa);
+      // Clic sobre un bus (real o del plan): con el clic del mapa (el "tap" de deck.gl no cuenta un clic de más de 250 ms) y con 8 px
+      // de margen, porque de lejos los buses son pequeños.
+      mapa.on('click', (e) => {
+        if (cine.activo) return;                                        // en el cine no hay ficha
+        const info = capa.pickObject({ x: e.point.x, y: e.point.y, radius: 8, layerIds: CAPAS_CLIC });
+        if (info && info.object) seleccionar(info.object.v);
+      });
+      window.__mapa3d = mapa;
+      arrancarDia();
+    });
+    mapa.on('dragstart', () => { if (estado.seguir) dejarDeSeguir(); if (cine.activo) cine.camaraLibre = true; });   // quien arrastra se queda con la cámara
+    mapa.on('error', (e) => { if (!mapaLocal && e && e.error && /Failed to fetch|NetworkError/i.test(String(e.error.message))) aviso('El mapa base no cargó: revise la conexión a internet.'); });
+  }
+
+  // ================= luz según la hora =================
+  // El reloj del replay manda la luz. La posición del sol en Barranquilla (declinación y ecuación del tiempo por día del año,
+  // ángulo horario; fórmulas de la NOAA) con la fecha del día abierto y la hora de Colombia (UTC−5, sin cambio de horario) da la
+  // elevación y el azimut; la elevación elige y mezcla cuatro paletas (noche, crepúsculo, día bajo, día pleno) para las capas del
+  // estilo, el cielo, la luz de los edificios y la de los buses y personas. Se aplica solo cuando la elevación cambia más de
+  // LUZ_PASO grados (o el azimut más de 5°) desde la última vez, no en cada cuadro.
+  const LAT = 10.96, LON = -74.80, HUSO = -5, COS_LAT = Math.cos(LAT * Math.PI / 180);
+  const LUZ_PASO = 0.5;
+  function sol(fecha, t) {
+    const [a, m, d] = fecha.split('-').map(Number);
+    const n = Math.round((Date.UTC(a, m - 1, d) - Date.UTC(a, 0, 1)) / 86400000) + 1;     // día del año
+    const g = 2 * Math.PI / 365 * (n - 1 + (t / 3600 - 12) / 24);
+    const decl = 0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g) - 0.006758 * Math.cos(2 * g) + 0.000907 * Math.sin(2 * g)
+               - 0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g);
+    const eot = 229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g) - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));   // minutos
+    const H = ((t / 60 + eot + 4 * LON - 60 * HUSO) / 4 - 180) * Math.PI / 180;         // ángulo horario (hora solar verdadera)
+    const lat = LAT * Math.PI / 180;
+    const el = Math.asin(Math.sin(lat) * Math.sin(decl) + Math.cos(lat) * Math.cos(decl) * Math.cos(H));
+    const az = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(lat) - Math.tan(decl) * Math.cos(lat)) + Math.PI;    // desde el norte, horario
+    return { el: el * 180 / Math.PI, az: (az * 180 / Math.PI) % 360 };
+  }
+  // Colores CSS a [r, g, b, a] con un lienzo 2D (acepta hex, rgb, rgba, hsl y hsla, que es lo que trae el estilo)
+  const lienzo = document.createElement('canvas').getContext('2d'), cacheColor = new Map();
+  function parsear(s) {
+    if (cacheColor.has(s)) return cacheColor.get(s);
+    let out = null;
+    if (typeof s === 'string' && s.trim()) {
+      lienzo.fillStyle = '#010203'; lienzo.fillStyle = s;
+      const v = lienzo.fillStyle, m = /^rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?\)$/.exec(v);
+      if (m) out = [+m[1], +m[2], +m[3], m[4] == null ? 1 : +m[4]];
+      else if (/^#[0-9a-f]{6}$/i.test(v) && v !== '#010203') { const n = parseInt(v.slice(1), 16); out = [(n >> 16) & 255, (n >> 8) & 255, n & 255, 1]; }
+    }
+    cacheColor.set(s, out);
+    return out;
+  }
+  const mezclar = (a, b, f) => [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f, a[3] + (b[3] - a[3]) * f];
+  const rgba = (c) => `rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},${Math.round(c[3] * 1000) / 1000})`;
+  // Paletas de las capas del estilo por grupo: fondo, agua, suelo (parques y usos del suelo), edificio (planta), edificio3d, calle,
+  // borde (los bordes de las calles y de los edificios), texto y halo. Noche y crepúsculo son colores fijos; «día bajo» es el color
+  // del estilo mezclado con un tinte dorado y algo más oscuro; «día pleno» es el estilo tal cual (se restaura el valor original).
+  const PALETA = {
+    noche:      { fondo: '#0e1322', agua: '#0b1a33', suelo: '#121a2c', edificio: '#1c2236', edificio3d: '#1f2539', calle: '#3a4260', borde: '#262c44', texto: '#8d96b3', halo: '#0e1322' },
+    crepusculo: { fondo: '#3a3450', agua: '#263258', suelo: '#352f4c', edificio: '#4a4262', edificio3d: '#4f4766', calle: '#7a7094', borde: '#5a5272', texto: '#d0c8e0', halo: '#3a3450' },
+  };
+  const TINTE_BAJO = { color: [255, 190, 110, 1], mezcla: { fondo: 0.22, agua: 0.15, suelo: 0.22, edificio: 0.25, edificio3d: 0.25, calle: 0.18, borde: 0.18, texto: 0.08, halo: 0.15 }, sombra: 0.95 };
+  // Cielo y luces por paleta: cielo, horizonte y niebla de setSky con la mezcla niebla-suelo; luz del mapa (edificios: intensidad y
+  // color de setLight); luz de deck.gl (ambiente y sol: intensidad y color). De noche el «sol» es una luz alta y azulada (alumbrado)
+  // y el ambiente baja a 0,65 (nunca menos de 0,35: con menos, buses y personas quedan negros sobre el mapa oscuro).
+  const ESCENA_LUZ = {
+    noche:      { cielo: '#05070f', horizonte: '#1a2140', niebla: '#0e1322', nieblaSuelo: 0.5,  intMapa: 0.25, colorMapa: '#aab4ff', ambiente: 0.65, colorAmb: '#c8d2ff', sol: 0.45, colorSol: '#bccdff' },
+    crepusculo: { cielo: '#2a3160', horizonte: '#f08a4b', niebla: '#6a4e66', nieblaSuelo: 0.55, intMapa: 0.35, colorMapa: '#ffb088', ambiente: 0.72, colorAmb: '#e1d7f5', sol: 0.5,  colorSol: '#ffa070' },
+    bajo:       { cielo: '#5f9bd9', horizonte: '#f4c78f', niebla: '#e6dccb', nieblaSuelo: 0.6,  intMapa: 0.45, colorMapa: '#ffd9a8', ambiente: 0.75, colorAmb: '#fff0e1', sol: 0.9,  colorSol: '#ffcd96' },
+    pleno:      { cielo: '#79b2e8', horizonte: '#e8d3b4', niebla: '#eef1f5', nieblaSuelo: 0.6,  intMapa: 0.5,  colorMapa: '#fff8ee', ambiente: 0.85, colorAmb: '#ffffff', sol: 1.0,  colorSol: '#fff8eb' },
+  };
+  Object.values(ESCENA_LUZ).forEach((e) => ['cielo', 'horizonte', 'niebla', 'colorMapa', 'colorAmb', 'colorSol'].forEach((k) => { e[k] = parsear(e[k]); }));
+  // capas con patrón (humedales, zonas peatonales): no tienen color, así que de noche se atenúa su opacidad
+  const OPACIDAD_PATRON = { noche: 0.12, crepusculo: 0.4, bajo: 1, pleno: 1 };
+  // tramos de elevación solar (grados) entre paletas: noche hasta −8°, crepúsculo en −2°, día bajo en 5°, día pleno desde 22°
+  const TRAMOS = [[-8, 'noche'], [-2, 'crepusculo'], [5, 'bajo'], [22, 'pleno']];
+  function tramo(el) {
+    if (el <= TRAMOS[0][0]) return ['noche', 'noche', 0];
+    for (let i = 1; i < TRAMOS.length; i++) if (el <= TRAMOS[i][0]) return [TRAMOS[i - 1][1], TRAMOS[i][1], (el - TRAMOS[i - 1][0]) / (TRAMOS[i][0] - TRAMOS[i - 1][0])];
+    return ['pleno', 'pleno', 0];
+  }
+  const LUZ_DECK = { ambiente: new deck.AmbientLight({ color: [255, 255, 255], intensity: 0.85 }), sol: new deck.DirectionalLight({ color: [255, 248, 235], intensity: 1.0, direction: [-1, -2, -3] }) };
+  const EFECTO_LUZ = new deck.LightingEffect(LUZ_DECK);
+  // Materiales de deck.gl (specularColor va en 0-255). Las ventanas de noche: ambient 1 sobre la luz ambiente (1 / intensidad, así el
+  // color queda tal cual, como luz propia) y diffuse 0: no las sombrea el sol.
+  const MATERIAL = { bus: { ambient: 0.7, diffuse: 0.6, shininess: 32, specularColor: [38, 38, 38] }, ventanaNoche: { ambient: 2, diffuse: 0, shininess: 1, specularColor: [0, 0, 0] } };
+  const luz = { capas: [], el: null, az: null, elAplicada: null, azAplicado: null, noche: false, ms: 0, msMax: 0, n: 0, hist: [], cielo: '' };
+  const PROPS_COLOR = { background: ['background-color'], fill: ['fill-color', 'fill-outline-color'], 'fill-extrusion': ['fill-extrusion-color'], line: ['line-color'], symbol: ['text-color', 'text-halo-color'] };
+  function grupoCapa(l) {
+    if (/^poi/.test(l.id)) return null;                                   // ocultas
+    if (l.type === 'background') return 'fondo';
+    if (l.type === 'fill') return l.id === 'water' ? 'agua' : l.id === 'building' ? 'edificio' : /^(landuse|landcover|park|aeroway)/.test(l.id) ? 'suelo' : null;
+    if (l.type === 'fill-extrusion') return 'edificio3d';
+    if (l.type === 'line') return /^waterway/.test(l.id) ? 'agua' : /casing$/.test(l.id) ? 'borde' : 'calle';
+    if (l.type === 'symbol') return 'texto';
+    return null;
+  }
+  // color de día de cada propiedad: el del estilo (texto) o el último color literal de una expresión (el de los zooms altos)
+  function colorDe(v) {
+    if (typeof v === 'string') return parsear(v);
+    if (Array.isArray(v)) for (let i = v.length - 1; i >= 0; i--) { const c = colorDe(v[i]); if (c) return c; }
+    return null;
+  }
+  // la lista de capas y propiedades que cambian con la luz se toma una vez, al cargar el estilo
+  function tomarCapas() {
+    luz.capas = []; luz.elAplicada = null; luz.cielo = '';
+    (mapa.getStyle().layers || []).forEach((l) => {
+      if (l.type === 'fill' && l.paint && l.paint['fill-pattern'] !== undefined) {
+        const orig = mapa.getPaintProperty(l.id, 'fill-opacity');
+        luz.capas.push({ id: l.id, prop: 'fill-opacity', grupo: 'patron', orig, dia: typeof orig === 'number' ? orig : 1, num: true, ultimo: 'orig' });
+        return;
+      }
+      const g = grupoCapa(l);
+      if (!g) return;
+      (PROPS_COLOR[l.type] || []).forEach((prop) => {
+        let orig = mapa.getPaintProperty(l.id, prop), grupo = g;
+        if (prop === 'text-halo-color') { grupo = 'halo'; if (orig === undefined) orig = 'rgba(0,0,0,0)'; }       // valores por defecto del estilo
+        else if (prop === 'text-color') { if (orig === undefined) orig = '#000000'; }
+        else if (prop === 'fill-outline-color') { grupo = 'borde'; }
+        const dia = colorDe(orig);
+        if (!dia) return;
+        luz.capas.push({ id: l.id, prop, grupo, orig: mapa.getPaintProperty(l.id, prop), dia, ultimo: 'orig' });
+      });
+    });
+  }
+  function colorPaleta(nombre, e) {
+    if (nombre === 'pleno') return e.dia;
+    if (nombre === 'bajo') { const c = mezclar(e.dia, TINTE_BAJO.color, TINTE_BAJO.mezcla[e.grupo] || 0), s = TINTE_BAJO.sombra; return [c[0] * s, c[1] * s, c[2] * s, e.dia[3]]; }
+    const c = parsear(PALETA[nombre][e.grupo]);
+    return [c[0], c[1], c[2], e.grupo === 'halo' ? Math.max(e.dia[3], 0.85) : e.dia[3]];     // el halo siempre se ve de noche
+  }
+  function aplicarLuz(el, az) {
+    const t0 = performance.now(), [a, b, f] = tramo(el), pleno = a === 'pleno';
+    const num = (k) => ESCENA_LUZ[a][k] + (ESCENA_LUZ[b][k] - ESCENA_LUZ[a][k]) * f, col = (k) => mezclar(ESCENA_LUZ[a][k], ESCENA_LUZ[b][k], f);
+    // 1) paleta de las capas del estilo: solo las propiedades cuyo color cambió; en día pleno, el valor original
+    luz.capas.forEach((e) => {
+      const val = pleno ? 'orig' : e.num ? String(Math.round(e.dia * (OPACIDAD_PATRON[a] + (OPACIDAD_PATRON[b] - OPACIDAD_PATRON[a]) * f) * 1000) / 1000)
+                                        : rgba(mezclar(colorPaleta(a, e), colorPaleta(b, e), f));
+      if (val === e.ultimo) return;
+      e.ultimo = val;
+      mapa.setPaintProperty(e.id, e.prop, val === 'orig' ? e.orig : e.num ? +val : val, { validate: false });
+    });
+    // 2) cielo: noche oscura, amanecer y atardecer anaranjados, día azul
+    const cielo = { 'sky-color': rgba(col('cielo')), 'horizon-color': rgba(col('horizonte')), 'fog-color': rgba(col('niebla')), 'sky-horizon-blend': 0.7, 'horizon-fog-blend': 0.6, 'fog-ground-blend': num('nieblaSuelo') };
+    const cieloTxt = JSON.stringify(cielo);
+    if (cieloTxt !== luz.cielo) { luz.cielo = cieloTxt; mapa.setSky(cielo, { validate: false }); }
+    // 3) luz del mapa (sombrea los edificios): donde está el sol (polar entre 25° y 65°: más rasante apaga los techos); bajo el
+    // horizonte sube hasta una luz alta y azulada
+    const polar = el >= 0 ? Math.max(25, Math.min(65, 90 - el)) : 65 - 30 * Math.min(1, -el / 8);
+    mapa.setLight({ anchor: 'map', position: [1.15, az, polar], intensity: num('intMapa'), color: rgba(col('colorMapa')) }, { validate: false });
+    // 4) luz de deck.gl: ambiente y sol (desde el azimut y la elevación del sol; de noche, desde arriba)
+    LUZ_DECK.ambiente.intensity = num('ambiente'); LUZ_DECK.ambiente.color = col('colorAmb').slice(0, 3);
+    LUZ_DECK.sol.intensity = num('sol'); LUZ_DECK.sol.color = col('colorSol').slice(0, 3);
+    const elS = (el >= 4 ? el : el >= 0 ? 4 : 4 + 66 * Math.min(1, -el / 8)) * Math.PI / 180, azS = az * Math.PI / 180;
+    LUZ_DECK.sol.direction = [-Math.sin(azS) * Math.cos(elS), -Math.cos(azS) * Math.cos(elS), -Math.sin(elS)];
+    MATERIAL.ventanaNoche = { ...MATERIAL.ventanaNoche, ambient: 1 / LUZ_DECK.ambiente.intensity };
+    luz.noche = el < 0;
+    $('grad-occ').classList.toggle('noche', luz.noche);
+    luz.elAplicada = el; luz.azAplicado = az; luz.n++;
+    luz.ms = performance.now() - t0; luz.msMax = Math.max(luz.msMax, luz.ms);
+    luz.hist.push(Math.round(luz.ms * 100) / 100); if (luz.hist.length > 60) luz.hist.shift();
+  }
+  // cada cuadro: calcula el sol y aplica la luz solo si se movió lo suficiente
+  function actualizarLuz() {
+    const s = estado.luz === 'dia' ? { el: 58, az: 160 } : sol(estado.fecha, estado.t);
+    luz.el = s.el; luz.az = s.az;
+    if (luz.elAplicada !== null && Math.abs(s.el - luz.elAplicada) <= LUZ_PASO && Math.abs(s.az - luz.azAplicado) <= 5) return;
+    aplicarLuz(s.el, s.az);
+  }
+  function ponerLuz(modo) {
+    estado.luz = modo === 'dia' ? 'dia' : 'auto';
+    $('luz').textContent = estado.luz === 'dia' ? 'Luz: día' : 'Luz: automática';
+    $('luz').setAttribute('aria-pressed', String(estado.luz === 'dia'));
+    luz.elAplicada = null;
+    if (estado.fecha) ponerHash();
+  }
+  $('luz').addEventListener('click', () => ponerLuz(estado.luz === 'dia' ? 'auto' : 'dia'));
+
+  // trazado de las rutas visibles
+  function capaRutas(z) {
+    return new deck.PathLayer({ id: 'rutas', data: RUTAS.filter((r) => estado.rutas.has(r)), getPath: (r) => G[r].ruta,
+      getColor: (r) => [...COLOR[r], z >= 17 ? 70 : 125], getWidth: z >= 17 ? 0.7 : 2, widthUnits: 'meters', widthMinPixels: 1.5, parameters: { depthTest: false },
+      updateTriggers: { getColor: z >= 17, getWidth: z >= 17 } });
+  }
+  // Un conjunto de buses: carrocería, y de cerca ventanas, ruedas y techo (los del plan llevan además la franja de la ruta).
+  // Los fantasmas llevan el alfa en el color y no en `opacity`: SimpleMeshLayer multiplica el alfa por `opacity` después del
+  // filtro de picking, y eso corrompe el índice de capa que deck.gl codifica en el canal alfa (el clic abría otro bus).
+  function capasBuses(L, z, escalaBus, id, datos, alfa, plan) {
+    const c = (rgb) => [rgb[0], rgb[1], rgb[2], alfa];
+    const base = { data: datos, getPosition: (b) => b.p, getOrientation: (b) => [0, b.yaw, 0], sizeScale: escalaBus, material: MATERIAL.bus,
+      updateTriggers: { getPosition: estado.t, getOrientation: estado.t, getColor: [estado.t, luz.noche] } };
+    L.push(new deck.SimpleMeshLayer({ id: id + '-cuerpo', mesh: MALLA.cuerpo, getColor: (b) => c(b.color), pickable: true, ...base }));
+    // el techo del plan (magenta, el color del plan) se dibuja a todo zoom: de lejos la carrocería blanca se perdería sobre el
+    // mapa claro y el techo es lo que se ve desde la cámara inclinada
+    if (plan) L.push(new deck.SimpleMeshLayer({ id: id + '-techo', mesh: MALLA.techo, getColor: c(TECHO_PLAN), pickable: true, ...base }));
+    if (z < 15) return;
+    // de noche las ventanas van encendidas: color cálido según la ocupación y material sin sombra del sol
+    L.push(new deck.SimpleMeshLayer({ id: id + '-ventanas', mesh: MALLA.ventanas, getColor: (b) => c(b.ventana), pickable: true, ...base, material: luz.noche ? MATERIAL.ventanaNoche : MATERIAL.bus }),
+           new deck.SimpleMeshLayer({ id: id + '-ruedas', mesh: MALLA.ruedas, getColor: [35, 35, 38, alfa], ...base }));
+    if (plan) L.push(new deck.SimpleMeshLayer({ id: id + '-franja', mesh: MALLA.franja, getColor: (b) => c(COLOR[b.v.r]), pickable: true, ...base }));
+    else L.push(new deck.SimpleMeshLayer({ id: id + '-techo', mesh: MALLA.techo, getColor: c(TECHO_REAL), ...base }));
+  }
+  function capas() {
+    const z = mapa.getZoom(), escalaBus = Math.max(1, Math.min(22, Math.pow(2, 16.2 - z))), ambos = estado.ver === 'ambos';
+    if (cine.activo) return capasCine(z, escalaBus);
+    const L = [capaRutas(z)];
+    // Marcas de las alertas, debajo de los buses y las personas (se dibujan antes y sin prueba de profundidad, así se ven siempre):
+    // halo ámbar en los paraderos con cola, anillo rojo bajo los buses llenos y línea roja entre los buses pegados.
+    if (estado.alertas) {
+      const A = escena.alertas, ROJO = [214, 40, 40], tr = { getPosition: estado.t };
+      if (A.colas.length) L.push(new deck.ScatterplotLayer({ id: 'al-colas', data: A.colas, getPosition: (c) => c.p, getRadius: 14, radiusUnits: 'meters', radiusMinPixels: 5,
+        getFillColor: [245, 158, 11, 90], updateTriggers: tr, parameters: { depthTest: false } }));
+      if (A.llenos.length) L.push(new deck.ScatterplotLayer({ id: 'al-llenos', data: A.llenos, getPosition: (b) => b.p, getRadius: 9 * escalaBus, radiusUnits: 'meters', radiusMinPixels: 7,
+        filled: false, stroked: true, getLineColor: [...ROJO, 235], getLineWidth: 0.6 * escalaBus, lineWidthUnits: 'meters', lineWidthMinPixels: 2, updateTriggers: tr, parameters: { depthTest: false } }));
+      if (A.pegados.length) L.push(new deck.LineLayer({ id: 'al-pegados', data: A.pegados, getSourcePosition: (d) => d[0].p, getTargetPosition: (d) => d[1].p, getColor: [...ROJO, 240],
+        getWidth: 2, widthUnits: 'pixels', updateTriggers: { getSourcePosition: estado.t, getTargetPosition: estado.t }, parameters: { depthTest: false } }));
+    }
+    if (estado.ver !== 'plan') capasBuses(L, z, escalaBus, 'bus', escena.buses, 255, false);
+    if (estado.ver !== 'real') capasBuses(L, z, escalaBus, 'bus-plan', escena.busesPlan, ambos ? ALFA_FANTASMA : 255, true);
+    // personas: de cerca, muñecos; de lejos, puntos. En «Los dos» las del plan van como fantasmas.
+    const personas = (id, datos, alfa) => {
+      if (!datos.length) return;
+      const c = (rgb) => [rgb[0], rgb[1], rgb[2], alfa];
+      if (z >= 16.2) {
+        const escalaPer = Math.max(1.6, Math.min(3.2, Math.pow(2, 19.2 - z)));
+        const bp = { data: datos, getPosition: (p) => p.p, getOrientation: (p) => [0, p.yaw, 0], sizeScale: escalaPer, material: MATERIAL.bus, updateTriggers: { getPosition: estado.t } };
+        L.push(new deck.SimpleMeshLayer({ id: id + '-piernas', mesh: MALLA.piernas, getColor: (p) => c(p.pantalon), ...bp }),
+               new deck.SimpleMeshLayer({ id: id + '-torso', mesh: MALLA.torso, getColor: (p) => c(p.camisa), ...bp }),
+               new deck.SimpleMeshLayer({ id: id + '-cabeza', mesh: MALLA.cabeza, getColor: (p) => c(p.piel), ...bp }));
+      } else if (z >= 13.2) {
+        const a = Math.min(alfa, 230);
+        L.push(new deck.ScatterplotLayer({ id: id + '-puntos', data: datos, getPosition: (p) => p.p, getRadius: 1.5, radiusMinPixels: 2,
+          getFillColor: (p) => (p.tipo === 2 ? [96, 104, 116, a] : p.tipo ? [150, 158, 170, Math.min(a, 200)] : [74, 127, 181, a]), updateTriggers: { getPosition: estado.t }, parameters: { depthTest: false } }));
+      }
+    };
+    personas('per', escena.personas, 255);
+    personas('per-plan', escena.fantasmas, ALFA_FANTASMA);
+    return L;
+  }
+
+  // ================= bucle =================
+  let ultimo = performance.now(), ultimoDom = 0, rumboCam = null, horaMarcada = -1;
+  function cuadro(ahora) {
+    // Paso del reloj acotado: por arriba 0,25 s (1 s en el cine, para seguir al reloj real aunque un cuadro tarde) y por abajo 0.
+    // La marca `ahora` es la del inicio del cuadro y puede ser anterior a `ultimo` cuando reproducir() lo fijó al final de una
+    // tarea larga (descomprimir el día, construir las estelas): sin la cota de 0 el reloj retrocedía en el primer cuadro (hasta
+    // 25 min en el cine a x1000). `ultimo` tampoco va hacia atrás, para que el cuadro siguiente no sume lo que duró esa tarea.
+    const dt = Math.max(0, Math.min(cine.activo ? 1 : 0.25, (ahora - ultimo) / 1000));
+    ultimo = Math.max(ultimo, ahora);
+    if (estado.jugando && estado.fecha) {
+      estado.t += dt * estado.vel;
+      if (cine.activo && estado.t >= CINE_FIN) { estado.t = CINE_FIN; pausar(); finalCine(); }
+      else if (estado.t >= 81000) { estado.t = 81000; pausar(); }
+    }
+    if (capa && estado.fecha) {
+      const t0 = cine.activo ? performance.now() : 0;
+      actualizarLuz();
+      calcularEscena(estado.t);
+      ultimasCapas = capas();
+      capa.setProps({ layers: ultimasCapas });
+      if (cine.activo) camaraCine(); else if (estado.seguir) seguirCamara();
+      if (cine.activo) { const ms = performance.now() - t0; cine.perf.n++; cine.perf.ms += ms; cine.perf.msMax = Math.max(cine.perf.msMax, ms); }   // JS del cuadro, sin el render
+      if (ahora - ultimoDom > 120) { pintarDom(); ultimoDom = ahora; }
+    }
+    requestAnimationFrame(cuadro);
+  }
+  function pintarDom() {
+    $('reloj').textContent = hhmmss(estado.t);
+    if (document.activeElement !== $('deslizador')) $('deslizador').value = Math.round(estado.t);
+    const ver = estado.ver, uno = ver === 'plan' ? escena.plan : escena.real;
+    $('n-buses').textContent = fmt(uno.buses);
+    $('n-espera').textContent = fmt(uno.espera);
+    $('n-bordo').textContent = fmt(uno.bordo);
+    if (ver === 'ambos') { $('n-buses-plan').textContent = fmt(escena.plan.buses); $('n-espera-plan').textContent = fmt(escena.plan.espera); $('n-bordo-plan').textContent = fmt(escena.plan.bordo); }
+    if (ver !== 'real') $('n-perdidos').textContent = fmt(escena.plan.perdidos);
+    const A = escena.alertas;
+    [['al-pegados', A.nPegados], ['al-llenos', A.nLlenos], ['al-colas', A.nColas]].forEach(([id, n]) => { $(id).textContent = fmt(n); $(id).classList.toggle('on', n > 0); });
+    RUTAS.forEach((r) => {
+      const el = document.querySelector(`.ruta[data-r="${r}"] .n`);
+      if (!el) return;
+      el.textContent = !estado.rutas.has(r) ? 'oculta' : ver === 'ambos' ? `${fmt(escena.porRuta[r] || 0)} · plan ${fmt(escena.porRutaPlan[r] || 0)}` : `${fmt(escena.porRuta[r] || 0)} en la calle`;
+    });
+    const h = Math.floor(estado.t / 3600);
+    if (h !== horaMarcada) { horaMarcada = h; document.querySelectorAll('#plan-horas .hora').forEach((el) => el.classList.toggle('actual', +el.dataset.h === h)); }
+    if (estado.sel) pintarFicha();
+    if (cine.activo) {
+      $('cine-hora').textContent = hhmm(estado.t);
+      $('cine-buses').textContent = fmt(escena.real.buses); $('cine-bordo').textContent = fmt(escena.real.bordo); $('cine-subidas').textContent = fmt(cuantosHasta(SUBIDAS_T, estado.t));
+    }
+  }
+
+  // ================= ficha y seguimiento =================
+  function seleccionar(v) { estado.sel = v; $('ficha').hidden = false; pintarFicha(); }
+  function pintarFicha() {
+    const v = estado.sel, t = estado.t;
+    $('ficha-sw').style.setProperty('--c', `rgb(${COLOR[v.r].join(',')})`);
+    $('ficha-sw').classList.toggle('plan', !!v.plan);
+    $('ficha-titulo').textContent = v.plan ? `Bus del plan · ${v.r} · sale ${hhmm(v.salida)}` : `Bus ${v.veh} · ${v.r}`;
+    const enCalle = t >= v.t0 && t <= v.t1 + 30;
+    $('ficha-salio').textContent = t < v.t0 ? `sale a las ${hhmm(v.t0)}` : `${hhmm(v.t0)} (hace ${durTxt(t - v.t0)})` + (t > v.t1 + 30 ? ' · ya terminó' : '');
+    const occ = aBordo(v, t);
+    $('ficha-bordo').textContent = `${fmt(occ)} pasajeros (${fmt(occ / 50 * 100)} % de 50)`;
+    $('ficha-barra').style.width = Math.min(100, occ / 50 * 100) + '%';
+    const e = estadoViaje(v, t), s0 = v.kn[1];
+    $('ficha-km').textContent = `${fmt(Math.abs(e.s - s0) / 1000, 1)} km de ${fmt(G[v.r].largo / 1000, 1)} km`;
+    $('ficha-sub').textContent = `subieron ${fmt(cuantosHasta(v.subT, t))} · bajaron ${fmt(cuantosHasta(v.bajT, t))}`;
+    $('btn-seguir').textContent = estado.seguir === v ? 'Dejar de seguir' : 'Seguir este bus';
+    $('btn-seguir').disabled = !enCalle && estado.seguir !== v;
+  }
+  function seguirCamara() {
+    const b = escena.buses.find((x) => x.v === estado.seguir) || escena.busesPlan.find((x) => x.v === estado.seguir);
+    if (!b) { if (estado.t > estado.seguir.t1 + 30) dejarDeSeguir(); return; }
+    if (rumboCam == null) rumboCam = b.h;
+    let d = ((b.h - rumboCam + 540) % 360) - 180;
+    rumboCam = (rumboCam + d * 0.06 + 360) % 360;
+    const cam = estado.plano ? { pitch: 0, zoom: 17.6 } : { pitch: 64, zoom: 18.7 };
+    mapa.jumpTo({ center: desplazar([b.p[0], b.p[1]], rumboCam, 0, 25), bearing: rumboCam, ...cam });
+  }
+  function dejarDeSeguir() { estado.seguir = null; rumboCam = null; if (estado.sel) pintarFicha(); }
+  $('btn-seguir').addEventListener('click', () => {
+    if (estado.seguir === estado.sel) { dejarDeSeguir(); return; }
+    estado.seguir = estado.sel; rumboCam = null;
+    if (!estado.jugando) reproducir();
+    pintarFicha();
+  });
+  $('cerrar-ficha').addEventListener('click', () => { $('ficha').hidden = true; estado.sel = null; dejarDeSeguir(); });
+
+  // ================= real | plan | los dos =================
+  const SIN_PLAN = 'Este día aún no tiene el plan (genera calles.py --dia)';
+  function ponerVer(ver) {
+    if (!VER.includes(ver)) ver = 'real';
+    if (ver !== 'real' && !PLAN) { if (estado.fecha) avisoCorto(SIN_PLAN.replace('--dia', '--dia ' + estado.fecha)); ver = 'real'; }
+    estado.ver = ver;
+    document.querySelectorAll('#ver button').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.ver === ver));
+      const sinPlan = b.dataset.ver !== 'real' && !PLAN;
+      b.disabled = sinPlan;
+      if (sinPlan) { b.dataset.titulo = b.dataset.titulo || b.title; b.title = SIN_PLAN; } else if (b.dataset.titulo) b.title = b.dataset.titulo;
+    });
+    $('cifras').className = 'cifras ' + ver;
+    $('par-enc').hidden = ver !== 'ambos';
+    $('h2-modo').textContent = ver === 'plan' ? '· con el plan' : ver === 'ambos' ? '· real y plan' : '';
+    document.querySelectorAll('.solo-plan').forEach((el) => { el.hidden = ver === 'real'; });
+    $('alertas-ambos').hidden = ver !== 'ambos';
+    $('alertas-txt').title = (ver === 'plan' ? 'Sobre los buses del plan. ' : ver === 'ambos' ? 'Sobre los buses reales. ' : '') + 'Lo que Sobusa vigila: buses de la misma ruta y sentido a menos de 250 m, buses con 50 o más a bordo y paraderos con 15 o más personas esperando';
+    // un bus seleccionado que este modo ya no muestra
+    if (estado.sel && ((estado.sel.plan && ver === 'real') || (!estado.sel.plan && ver === 'plan'))) { $('ficha').hidden = true; estado.sel = null; dejarDeSeguir(); }
+    if (estado.fecha) { calcularEscena(estado.t); pintarDom(); ponerHash(); }
+  }
+  document.querySelectorAll('#ver button').forEach((b) => b.addEventListener('click', () => ponerVer(b.dataset.ver)));
+
+  // Panel «Hoy con el plan»: resumen.dia del archivo (real frente a plan) y salidas por hora. Sentido de cada fila: −1 si menos es
+  // mejor, +1 si más es mejor, 0 si no se califica.
+  const FILAS = [['Salidas', 'salidas', 0, 0], ['Buses-hora', 'buses_hora', 0, -1], ['Kilómetros', 'km', 0, -1], ['Costo del día (M COP)', 'costo_Mcop', 1, -1],
+                 ['Pasajeros', 'pax', 0, 1], ['Espera media (min)', 'espera_media_min', 2, -1], ['Sobre la capacidad', 'sobre_capacidad', 0, -1]];
+  let planPlegado = false;
+  function pintarPlan() {
+    const R = PLAN && PLAN.resumen && PLAN.resumen.dia && PLAN.resumen.dia.real, Q = PLAN && PLAN.resumen && PLAN.resumen.dia && PLAN.resumen.dia.plan;
+    horaMarcada = -1;
+    if (!R || !Q) {
+      $('plan-meta').textContent = ''; $('plan-cuerpo').hidden = true; $('plan-sin').hidden = false;
+      $('plan-sin').textContent = estado.fecha || PLAN ? SIN_PLAN.replace('--dia', '--dia ' + (estado.fecha || '')) + '.' : '';
+      pintarAnual();
+      return;
+    }
+    const m = PLAN.meta || {};
+    $('plan-meta').textContent = `Plan: D5 con costos con fuente (${fmt(m.bus_hora)} COP/bus-hora, ${fmt(m.km)} COP/km); β = ${fmt(m.beta, 2)}`;
+    $('plan-meta').title = [m.fuente, m.metodo, m.viajes_plan_sin_patio ? `${fmt(m.viajes_plan_sin_patio)} viajes del plan sin patio` : ''].filter(Boolean).join(' · ');
+    // El pronóstico con que se hizo el plan (resumen.dia.pronostico): previstos frente a reales de la tabla de D5, con el signo y el
+    // porcentaje calculados; si la tabla no trae el real (fechas futuras), solo lo previsto. Sin pronóstico (archivo anterior), nada.
+    const F = PLAN.resumen.dia.pronostico, pron = $('plan-pron');
+    if (F && F.pax_previsto != null) {
+      const dias = (/h\s*=\s*(\d+)\s*d/.exec(F.fuente || '') || [])[1] || 7;
+      let txt = `El plan se hizo ${dias} días antes: previó <b>${fmt(F.pax_previsto)}</b> pasajeros`;
+      if (F.pax_real_tabla != null && +F.pax_previsto > 0) {
+        const d = (+F.pax_real_tabla - +F.pax_previsto) / +F.pax_previsto * 100;
+        txt += ` y hubo <b>${fmt(F.pax_real_tabla)}</b> (${d >= 0 ? '+' : ''}${fmt(d)} %)`;
+      }
+      pron.innerHTML = txt + '.';
+      pron.title = `${F.fuente || 'Pronóstico del plan'}. Pasajeros de la tabla de D5 por hora de salida programada: previstos ${fmt(F.pax_previsto)}`
+        + (F.pax_real_tabla != null ? `, reales ${fmt(F.pax_real_tabla)}` : '') + (F.salidas_validas_real != null ? `; salidas válidas reales ${fmt(F.salidas_validas_real)}` : '')
+        + (F.salidas_plan != null ? `, salidas del plan ${fmt(F.salidas_plan)}` : '') + '. La tabla cuenta todos los viajes válidos, el panel solo los que tienen trayectoria GPS.';
+    } else { pron.innerHTML = ''; pron.title = ''; }
+    let html = '<tr><th>Hoy</th><th><i class="sw re"></i>real</th><th><i class="sw pl"></i>plan</th><th>dif.</th></tr>';
+    FILAS.forEach(([et, campo, dec, sentido]) => {
+      const a = +R[campo], b = +Q[campo], d = b - a, nulo = !isFinite(d) || Math.abs(d) < 0.5 * Math.pow(10, -dec);
+      const cls = sentido === 0 || nulo ? '' : (d * sentido > 0 ? 'mejor' : 'peor');
+      let ca = fmt(a, dec), cb = fmt(b, dec), tit = '';
+      // Salidas: el plan se expresa en salidas válidas (cerradas y no canceladas), así que lo real lleva sus válidas y el plan las que
+      // Sobusa tendría que programar para que salgan las suyas (parte de lo programado no llega a salir)
+      if (campo === 'salidas' && (R.salidas_validas != null || Q.salidas_programar != null)) {
+        if (R.salidas_validas != null) ca += `<small class="sub">(${fmt(R.salidas_validas)} válidas)</small>`;
+        if (Q.salidas_programar != null) cb += `<small class="sub">(${fmt(Q.salidas_programar)} a programar)</small>`;
+        tit = ` title="El plan se expresa en salidas válidas (cerradas y no canceladas): sus ${fmt(b)} se comparan con las ${fmt(R.salidas_validas != null ? R.salidas_validas : a)} válidas de las ${fmt(a)} reales. Sobusa programa de más para cubrir las que no llegan a salir: para que salgan las ${fmt(b)} del plan habría que programar ${fmt(Q.salidas_programar != null ? Q.salidas_programar : b)} (tasa histórica de salidas no válidas por ruta, tipo de día y hora)."`;
+      }
+      html += `<tr${tit}><td>${et}</td><td>${ca}</td><td>${cb}</td><td class="d ${cls}">${nulo ? '=' : (d > 0 ? '+' : '') + fmt(d, dec)}</td></tr>`;
+    });
+    $('plan-tabla').innerHTML = html;
+    const perd = (+Q.perdidos_beta || 0) + (+Q.perdidos_sin_bus || 0), ahorro = +R.costo_Mcop - +Q.costo_Mcop, balance = ahorro - (+Q.pasajes_perdidos_Mcop || 0);
+    $('plan-extra').innerHTML = `Se van en otro bus: <b>${fmt(perd)}</b> personas <small>(${fmt(Q.perdidos_beta)} por β, ${fmt(Q.perdidos_sin_bus)} sin bus en ${fmt(m.espera_max_min || 20)} min)</small>`
+      + ` · <b>${fmt(Q.pasajes_perdidos_Mcop, 2)} M COP</b> en pasajes.<br>Balance del día: ahorro ${fmt(ahorro, 1)} M − pasajes ${fmt(Q.pasajes_perdidos_Mcop, 1)} M = <b>${balance > 0 ? '+' : ''}${fmt(balance, 1)} M COP</b>`
+      + ` <small>(contabilidad conservadora)</small>.<br>Ganados: <b>+${fmt(Q.ganados_simetrico)}</b> pasajeros <small>si la demanda responde igual al alza (contabilidad simétrica)</small>`;
+    const PH = PLAN.resumen.por_hora || {};
+    const sal = (h, k) => (PH[h] && PH[h][k] && +PH[h][k].salidas) || 0;
+    let max = 1, hb = '', ej = '';
+    for (let h = 4; h <= 20; h++) max = Math.max(max, sal(h, 'real'), sal(h, 'plan'));
+    for (let h = 4; h <= 20; h++) {
+      const a = sal(h, 'real'), b = sal(h, 'plan');
+      hb += `<div class="hora" data-h="${h}" title="${pad(h)}:00 a ${pad(h + 1)}:00 · real ${a} salidas · plan ${b}"><i class="re" style="height:${a / max * 100}%"></i><i class="pl" style="height:${b / max * 100}%"></i></div>`;
+      ej += `<span>${h % 2 === 0 ? h : ''}</span>`;
+    }
+    $('plan-horas').innerHTML = hb; $('plan-ejes').innerHTML = ej;
+    $('plan-sin').hidden = true; $('plan-cuerpo').hidden = planPlegado;
+    pintarAnual();
+  }
+  function plegarPlan(plegado) {
+    planPlegado = plegado;
+    $('plan-plegar').setAttribute('aria-expanded', String(!planPlegado));
+    if (PLAN && PLAN.resumen) $('plan-cuerpo').hidden = planPlegado;
+    $('anual').hidden = planPlegado || !RES;
+  }
+  $('plan-plegar').addEventListener('click', () => plegarPlan(!planPlegado));
+
+  // ================= todo 2025 con este modelo =================
+  // Bloque plegable del panel: el promedio por día de todo 2025 (replay/dias/calles/resumen_2025.js, suma de los archivos de calles/
+  // hecha por resumen_calles.py) real frente a plan, para todos los días y para el tipo del día abierto (tipo_dia del índice), y el
+  // saldo de todos los días sumados: conservador (ahorro operativo − pasajes perdidos) y simétrico (sumando los pasajeros ganados a
+  // la tarifa). Es el mismo modelo del panel de arriba («el mismo día con nuestro plan»), aplicado a cada día.
+  const ANUAL = [['Salidas', 'salidas', 0], ['Buses-hora', 'buses_hora', 0], ['Costo (M COP)', 'costo_Mcop', 1], ['Pasajeros', 'pax', 0], ['Espera media (min)', 'espera_media_min', 2],
+                 ['Sobre la capacidad', 'sobre_capacidad', 0], ['Perdidos (β + sin bus)', 'perdidos', 0], ['Ganados simétricos', 'ganados_simetrico', 0]];
+  const SOLO_PLAN = new Set(['perdidos', 'ganados_simetrico']);
+  let anualPlegado = true;
+  function valorAnual(bloque, lado, campo) {
+    const b = bloque[lado] || {}, pd = b.por_dia || {}, tot = b.total || {};
+    if (lado === 'real' && SOLO_PLAN.has(campo)) return null;
+    if (campo === 'espera_media_min') return tot.espera_media_min;                      // ponderada por pasajeros, en el total
+    if (campo === 'perdidos') return (+pd.perdidos_beta || 0) + (+pd.perdidos_sin_bus || 0);
+    return pd[campo];
+  }
+  function pintarAnual() {
+    if (!RES || !RES.total.real || !RES.total.plan) { $('anual').hidden = true; return; }
+    const info = estado.fecha && IDX.dias.find((x) => x.fecha === estado.fecha), tipo = info && info.tipo_dia;
+    const grupos = [['Todos los días', RES.total]];
+    if (tipo && RES.por_tipo_dia && RES.por_tipo_dia[tipo]) grupos.push([tipo, RES.por_tipo_dia[tipo]]);
+    let html = '<tr><th></th>' + grupos.map(([n, g]) => `<th class="g" colspan="2">${n} (${fmt(g.dias)})</th>`).join('') + '</tr>';
+    html += '<tr><th>Por día</th>' + grupos.map(() => '<th><i class="sw re"></i>real</th><th><i class="sw pl"></i>plan</th>').join('') + '</tr>';
+    ANUAL.forEach(([et, campo, dec]) => {
+      html += `<tr><td>${et}</td>` + grupos.map(([, g]) => `<td>${fmt(valorAnual(g, 'real', campo), dec)}</td><td>${fmt(valorAnual(g, 'plan', campo), dec)}</td>`).join('') + '</tr>';
+    });
+    $('anual-tabla').innerHTML = html;
+    const TR = RES.total.real.total || {}, TP = RES.total.plan.total || {}, tarifa = (RES.plan_meta && +RES.plan_meta.tarifa) || 3182;
+    const ahorro = +TR.costo_Mcop - +TP.costo_Mcop, perdidos = +TP.pasajes_perdidos_Mcop || 0, saldo = ahorro - perdidos;
+    const ganados = +TP.ganados_simetrico || 0, saldoSim = saldo + ganados * tarifa / 1e6;
+    $('anual-extra').innerHTML = `Saldo de los ${fmt(RES.dias)} días: ahorro ${fmt(ahorro, 1)} M − pasajes perdidos ${fmt(perdidos, 1)} M = <b>${saldo > 0 ? '+' : ''}${fmt(saldo, 1)} M COP</b>`
+      + ` <small>(cuenta conservadora)</small>; con la cuenta simétrica, <b>+${fmt(ganados)}</b> pasajeros ganados <small>(${fmt(ganados * tarifa / 1e6, 1)} M a la tarifa)</small> y saldo <b>${saldoSim > 0 ? '+' : ''}${fmt(saldoSim, 1)} M COP</b>.`;
+    $('anual-nota').textContent = `Mismo modelo que el panel de arriba; ${fmt(RES.dias)} días de ${fmt(DIAS.length)} (${fmt(RES.pendientes)} pendientes).`;
+    $('anual').hidden = planPlegado;
+    $('anual-cuerpo').hidden = anualPlegado;
+    $('anual-plegar').setAttribute('aria-expanded', String(!anualPlegado));
+  }
+  function plegarAnual(plegado) { anualPlegado = plegado; $('anual-cuerpo').hidden = anualPlegado; $('anual-plegar').setAttribute('aria-expanded', String(!anualPlegado)); }
+  $('anual-plegar').addEventListener('click', () => plegarAnual(!anualPlegado));
+
+  // ================= controles =================
+  function reproducir() { estado.jugando = true; ultimo = performance.now(); $('btn-play').textContent = 'Pausa'; $('btn-play').setAttribute('aria-pressed', 'true'); }
+  function pausar() { estado.jugando = false; $('btn-play').textContent = 'Reproducir'; $('btn-play').setAttribute('aria-pressed', 'false'); ponerHash(); }
+  $('btn-play').addEventListener('click', () => (estado.jugando ? pausar() : reproducir()));
+  // velocidad: marca el botón si existe (x1000 solo la usa el cine y no tiene botón)
+  function ponerVel(v) { estado.vel = v; document.querySelectorAll('.velocidades button').forEach((x) => x.setAttribute('aria-pressed', String(+x.dataset.v === v))); }
+  document.querySelectorAll('.velocidades button').forEach((b) => b.addEventListener('click', () => ponerVel(+b.dataset.v)));
+  $('deslizador').addEventListener('input', (e) => { estado.t = +e.target.value; pintarDom(); });
+  $('deslizador').addEventListener('change', ponerHash);
+  const DIAS = IDX.dias.map((d) => d.fecha).sort();
+  const DIAS_SET = new Set(DIAS);
+  function irA(fecha) {
+    if (!DIAS_SET.has(fecha)) { aviso(`El ${fecha} no tiene datos (el último día de cada mes no tiene GPS). Elija otro día.`); setTimeout(() => aviso(''), 3500); $('fecha').value = estado.fecha || ''; return; }
+    if (fecha === estado.fecha) return;
+    cargarDia(fecha);
+  }
+  $('fecha').addEventListener('change', (e) => irA(e.target.value));
+  $('dia-ant').addEventListener('click', () => { const i = DIAS.indexOf(estado.fecha); if (i > 0) irA(DIAS[i - 1]); });
+  $('dia-sig').addEventListener('click', () => { const i = DIAS.indexOf(estado.fecha); if (i >= 0 && i < DIAS.length - 1) irA(DIAS[i + 1]); });
+  $('cam-ciudad').addEventListener('click', () => { dejarDeSeguir(); mapa.flyTo({ ...VISTAS.ciudad, pitch: estado.plano ? 0 : VISTAS.ciudad.pitch, duration: 1500 }); });
+  $('cam-centro').addEventListener('click', () => { dejarDeSeguir(); mapa.flyTo({ ...VISTAS.centro, pitch: estado.plano ? 0 : VISTAS.centro.pitch, duration: 1500 }); });
+  $('cam-plano').addEventListener('click', () => {
+    estado.plano = !estado.plano; $('cam-plano').setAttribute('aria-pressed', String(estado.plano));
+    if (!estado.seguir) mapa.easeTo({ pitch: estado.plano ? 0 : 60, duration: 800 });
+  });
+  function ponerAlertas(ver) {
+    estado.alertas = !!ver; $('alertas-marcas').setAttribute('aria-pressed', String(estado.alertas));
+    if (estado.fecha) ponerHash();
+  }
+  $('alertas-marcas').addEventListener('click', () => ponerAlertas(!estado.alertas));
+  const rutasEl = $('rutas');
+  RUTAS.forEach((r) => {
+    const b = document.createElement('button');
+    b.className = 'ruta'; b.dataset.r = r; b.setAttribute('aria-pressed', 'true'); b.style.setProperty('--c', `rgb(${COLOR[r].join(',')})`);
+    b.innerHTML = `<span class="sw"></span>${r}<span class="n">–</span>`;
+    b.addEventListener('click', () => { if (estado.rutas.has(r)) estado.rutas.delete(r); else estado.rutas.add(r); b.setAttribute('aria-pressed', String(estado.rutas.has(r))); });
+    rutasEl.appendChild(b);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'Escape') { if (cine.activo) salirCine(); else if (recorrido.activo) salirRecorrido(); return; }
+    if (recorrido.activo && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { e.preventDefault(); irEscena(recorrido.i + (e.key === 'ArrowRight' ? 1 : -1)); return; }
+    if (e.code === 'Space') { e.preventDefault(); estado.jugando ? pausar() : reproducir(); }
+  });
+
+  // ================= modo cine: un día en 60 segundos =================
+  // El día entero a x1000 (las 17 h de 04:00 a 21:00 caben en 61 s) con la luz automática (amanece y anochece), solo el mapa, el reloj
+  // grande, la fecha y tres contadores. Capas: las estelas de luz de todos los viajes reales del día (deck.TripsLayer, en lotes por
+  // ruta y hora de salida: por viaje, los vértices del trazado entre nudos consecutivos con marcas de tiempo lineales entre los
+  // tiempos de los nudos, separados ESTELA_PASO m como mínimo y sin pasar de ESTELA_PUNTOS puntos; se construyen una vez por día y
+  // cada cuadro solo cambia currentTime), los buses como siempre y los «pulsos de demanda»: una columna por paradero con las subidas reales de los últimos
+  // PULSO_S segundos (PULSO_M m por persona, tope PULSO_MAX m, color de la ruta). Las alertas y las personas no se dibujan. La cámara
+  // sigue fotogramas clave (CINE_CAM) hasta que el usuario arrastra el mapa; a las 21:00 se pausa y sale la tarjeta final. Al salir
+  // vuelven la velocidad, la luz, el modo, la cámara y la reproducción de antes (`cine.antes`).
+  const CINE_VEL = 1000, CINE_INICIO = 4 * 3600, CINE_FIN = 21 * 3600;
+  const ESTELA_S = 720, ESTELA_PASO = 80, ESTELA_PUNTOS = 480, PULSO_S = 600, PULSO_M = 15, PULSO_MAX = 400;
+  function estelaViaje(v) {
+    const S = G[v.r].s, kn = v.kn, n = kn.length >> 1;
+    let total = 0;
+    for (let i = 1; i < n; i++) total += Math.abs(kn[2 * i + 1] - kn[2 * i - 1]);
+    // El trazo va plano ([lon0, lat0, lon1, lat1, …], positionFormat 'XY') porque con _pathType 'open' deck.gl no normaliza el
+    // camino: así no cierra en bucle un viaje que vuelve al patio (sumaría dos vértices sin marca de tiempo) y cuenta bien los puntos.
+    const paso = Math.max(ESTELA_PASO, total / ESTELA_PUNTOS), xy = [], ts = [];
+    let sUlt = 0, pUlt = null;
+    const agregar = (s, t) => {                 // un punto repetido (bus parado) no se añade: la estela sigue desde el mismo sitio
+      const p = punto(v.r, s);
+      if (pUlt && Math.abs(p[0] - pUlt[0]) < 1e-7 && Math.abs(p[1] - pUlt[1]) < 1e-7) return;
+      xy.push(p[0], p[1]); ts.push(t); pUlt = p; sUlt = s;
+    };
+    agregar(kn[1], kn[0]);
+    for (let i = 0; i + 1 < n; i++) {
+      const ta = kn[2 * i], sa = kn[2 * i + 1], tb = kn[2 * i + 2], sb = kn[2 * i + 3];
+      if (Math.abs(sb - sa) < 1) continue;
+      const f = (s) => ta + (tb - ta) * ((s - sa) / (sb - sa));
+      if (sb > sa) { for (let j = cuantosHasta(S, sa); j < S.length && S[j] < sb; j++) if (S[j] - sUlt >= paso) agregar(S[j], f(S[j])); }
+      else { for (let j = cuantosHasta(S, sa) - 1; j >= 0 && S[j] > sb; j--) if (sUlt - S[j] >= paso) agregar(S[j], f(S[j])); }   // sentido contrario: vértices en orden decreciente
+      agregar(sb, tb);
+    }
+    return { v, path: Float64Array.from(xy), ts, color: COLOR[v.r] };
+  }
+  // subidas reales de los últimos PULSO_S segundos por paradero (celda de ALERTA_CELDA_M), con la ruta que más subidas aporta
+  function pulsosDemanda(t) {
+    if (!EV) return [];
+    const L = EV.lista, desde = cuantosHasta(EV.tA, t - PULSO_S - EV.maxDur), hasta = cuantosHasta(EV.tA, t), celdas = new Map();
+    for (let i = desde; i < hasta; i++) {
+      const e = L[i];
+      if (e.tipo !== 0 || e.tB < t - PULSO_S || e.tB > t || !estado.rutas.has(e.r)) continue;
+      const k = Math.round(e.parada[0] * M_GRADO * COS_LAT / ALERTA_CELDA_M) + ',' + Math.round(e.parada[1] * M_GRADO / ALERTA_CELDA_M);
+      let c = celdas.get(k);
+      if (!c) { c = { n: 0, x: 0, y: 0, rutas: {} }; celdas.set(k, c); }
+      c.n++; c.x += e.parada[0]; c.y += e.parada[1]; c.rutas[e.r] = (c.rutas[e.r] || 0) + 1;
+    }
+    const out = [];
+    celdas.forEach((c) => out.push({ p: [c.x / c.n, c.y / c.n], n: c.n, r: Object.keys(c.rutas).sort((a, b) => c.rutas[b] - c.rutas[a])[0] }));
+    return out;
+  }
+  function capasCine(z, escalaBus) {
+    const L = [capaRutas(z)];
+    if (cine.estelas) cine.estelas.forEach((lote) => {
+      if (!estado.rutas.has(lote.r) || estado.t < lote.t0 || estado.t > lote.t1 + ESTELA_S) return;      // sin estela visible a esta hora
+      L.push(new deck.TripsLayer({ id: lote.id, data: lote.data, getPath: (d) => d.path, getTimestamps: (d) => d.ts, getColor: (d) => d.color, positionFormat: 'XY',
+        currentTime: estado.t, trailLength: ESTELA_S, widthMinPixels: 3, fadeTrail: true, capRounded: true, jointRounded: true, opacity: 0.9, _pathType: 'open', parameters: { depthTest: false } }));
+    });
+    // pulsos de demanda: columnas con prueba de profundidad (los edificios las tapan); de lejos, más anchas para que se vean
+    const pulsos = pulsosDemanda(estado.t), radio = 25 * Math.max(1, Math.min(6, Math.pow(2, 14.6 - z)));
+    if (pulsos.length) L.push(new deck.ColumnLayer({ id: 'pulsos', data: pulsos, diskResolution: 10, radius: radio, extruded: true, getPosition: (d) => d.p,
+      getElevation: (d) => Math.min(PULSO_MAX, PULSO_M * d.n), getFillColor: (d) => [COLOR[d.r][0], COLOR[d.r][1], COLOR[d.r][2], 160], material: MATERIAL.bus }));
+    capasBuses(L, z, escalaBus, 'bus', escena.buses, 255, false);
+    return L;
+  }
+  // Fotogramas clave de la cámara: segundo del día → centro, zoom, inclinación y rumbo; entre dos, interpolación lineal (la órbita) o
+  // suavizada (los acercamientos). 04:00 el patio de cerca; hasta las 06:30 se aleja a toda la ciudad girando 90°; hasta las 17:00
+  // órbita lenta (+180°) sobre la ciudad; hasta las 21:00 se acerca a donde más suben y termina de noche.
+  const CINE_CAM = [
+    { t: CINE_INICIO, c: PATIO, z: 15, p: 60, b: 20, suave: true },
+    { t: 6.5 * 3600, c: VISTAS.ciudad.center, z: 12.4, p: 55, b: 110 },
+    { t: 17 * 3600, c: VISTAS.ciudad.center, z: 12.4, p: 55, b: 290, suave: true },
+    { t: CINE_FIN, c: VISTAS.centro.center, z: 14, p: 62, b: 330 },
+  ];
+  function camaraCine() {
+    if (cine.camaraLibre) return;
+    const K = CINE_CAM, t = estado.t;
+    let i = 0;
+    while (i < K.length - 2 && t >= K[i + 1].t) i++;
+    const a = K[i], b = K[i + 1], f = Math.max(0, Math.min(1, (t - a.t) / (b.t - a.t))), u = a.suave ? f * f * (3 - 2 * f) : f;
+    mapa.jumpTo({ center: [a.c[0] + (b.c[0] - a.c[0]) * u, a.c[1] + (b.c[1] - a.c[1]) * u], zoom: a.z + (b.z - a.z) * u, pitch: a.p + (b.p - a.p) * u, bearing: a.b + (b.b - a.b) * u });
+  }
+  const fechaLarga = (f, mayuscula = true) => {
+    const s = new Date(f + 'T12:00:00').toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return mayuscula ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  };
+  const etiquetaDia = () => { const info = IDX.dias.find((x) => x.fecha === estado.fecha) || {}; return info.etiqueta_previa || info.etiqueta || ''; };
+  function entrarCine(t0) {
+    if (!estado.fecha || cine.activo) return;
+    if (recorrido.activo) salirRecorrido();
+    cine.antes = { vel: estado.vel, luz: estado.luz, ver: estado.ver, jugando: estado.jugando,
+                   cam: { center: mapa.getCenter().toArray(), zoom: mapa.getZoom(), pitch: mapa.getPitch(), bearing: mapa.getBearing() } };
+    if (cine.fecha !== estado.fecha) {           // las estelas se construyen una vez por día
+      const t = performance.now();
+      // Lotes por ruta y hora del primer nudo: cada cuadro solo entran los lotes que pueden tener estela visible (entre su primera
+      // salida y su última llegada más la cola), así la tarjeta gráfica no procesa los 600 viajes del día en cada cuadro. Un viaje
+      // que no se movió (un solo punto) no tiene estela: con un punto el teselador de deck.gl no reserva vértices y las marcas de
+      // tiempo se salen del búfer («offset is out of bounds»).
+      const lotes = new Map();
+      cine.estelas = [];
+      VIAJES.forEach((v) => {
+        const e = estelaViaje(v);
+        if (e.ts.length < 2) return;
+        const h = Math.floor(v.t0 / 3600), k = v.r + '|' + h;
+        let lote = lotes.get(k);
+        if (!lote) { lote = { id: 'estelas-' + v.r + '-' + h, r: v.r, data: [], t0: Infinity, t1: -Infinity }; lotes.set(k, lote); cine.estelas.push(lote); }
+        lote.data.push(e); lote.t0 = Math.min(lote.t0, e.ts[0]); lote.t1 = Math.max(lote.t1, e.ts[e.ts.length - 1]);
+      });
+      cine.fecha = estado.fecha; cine.msEstelas = Math.round(performance.now() - t);
+    }
+    dejarDeSeguir(); estado.sel = null; $('ficha').hidden = true;
+    cine.activo = true; cine.camaraLibre = false; cine.perf = { n: 0, ms: 0, msMax: 0 };
+    document.body.classList.add('cine'); $('cine').hidden = false; $('cine-final').hidden = true;
+    const et = etiquetaDia();
+    $('cine-fecha').textContent = fechaLarga(estado.fecha) + (et ? ' · ' + et : '');
+    ponerVer('real');
+    if (estado.luz !== 'auto') ponerLuz('auto');
+    ponerVel(CINE_VEL);
+    estado.t = t0 != null ? Math.max(CINE_INICIO, Math.min(CINE_FIN, t0)) : CINE_INICIO;
+    luz.elAplicada = null;
+    camaraCine();
+    calcularEscena(estado.t); pintarDom();
+    reproducir(); ponerHash();
+  }
+  function salirCine() {
+    if (!cine.activo) return;
+    cine.activo = false; cine.camaraLibre = false;
+    document.body.classList.remove('cine'); $('cine').hidden = true; $('cine-final').hidden = true;
+    const a = cine.antes || {};
+    if (a.jugando) reproducir(); else pausar();          // como el recorrido: si antes estaba reproduciendo, sigue (abierto con &cine=1, en pausa)
+    ponerVel(a.vel || 10);
+    if (a.luz === 'dia') ponerLuz('dia');
+    if (a.ver && a.ver !== 'real') ponerVer(a.ver);
+    luz.elAplicada = null;
+    if (a.cam) mapa.jumpTo(a.cam);
+    calcularEscena(estado.t); pintarDom(); ponerHash();
+  }
+  // tarjeta final: las cifras del día (resumen.dia.real del archivo; sin resumen, contadas de los viajes dibujados)
+  function finalCine() {
+    const R = PLAN && PLAN.resumen && PLAN.resumen.dia && PLAN.resumen.dia.real;
+    const sal = R ? R.salidas : VIAJES.length, pax = R ? R.pax : SUBIDAS_T.length;
+    const bh = R ? R.buses_hora : VIAJES.reduce((s, v) => s + (v.t1 - v.t0), 0) / 3600;
+    const km = R ? R.km : VIAJES.reduce((s, v) => { let d = 0; for (let i = 3; i < v.kn.length; i += 2) d += Math.abs(v.kn[i] - v.kn[i - 2]); return s + d / 1000; }, 0);
+    $('cine-final-titulo').textContent = 'Así fue el ' + fechaLarga(estado.fecha, false);
+    $('cine-final-sub').textContent = [etiquetaDia(), R ? 'salidas registradas de 04:00 a 20:59, según el resumen del archivo' : 'viajes con trayectoria del archivo'].filter(Boolean).join(' · ');
+    $('cf-salidas').textContent = fmt(sal); $('cf-pax').textContent = fmt(pax); $('cf-bh').textContent = fmt(bh); $('cf-km').textContent = fmt(km);
+    $('cine-final').hidden = false;
+  }
+  function repetirCine() {
+    if (!cine.activo) return;
+    $('cine-final').hidden = true; cine.camaraLibre = false; cine.perf = { n: 0, ms: 0, msMax: 0 };
+    estado.t = CINE_INICIO; luz.elAplicada = null;
+    camaraCine(); reproducir();
+  }
+  $('btn-cine').addEventListener('click', () => entrarCine());
+  $('cine-salir').addEventListener('click', salirCine);
+  $('cine-salir-2').addEventListener('click', salirCine);
+  $('cine-repetir').addEventListener('click', repetirCine);
+
+  // ================= recorrido guiado =================
+  // Seis escenas sobre el día abierto. Cada una fija la hora, el modo Ver, la luz, la cámara (flyTo de 2 s) y la velocidad, y
+  // reproduce; el texto de la tarjeta se calcula al entrar en la escena con los datos del día (la escena a esa hora, las alertas,
+  // resumen.por_hora y resumen.dia, y resumen_2025 si está), nunca con cifras fijas. Si el día no tiene plan (archivo de la
+  // versión 2), las escenas 4 a 6 se cambian por una nota. Salir devuelve lo que había antes (modo, luz, velocidad, paneles, cámara).
+  const CAM_PATIO = { center: PATIO, zoom: 16.3, pitch: 60, bearing: 25 }, CAM_MEDIA = { center: VISTAS.centro.center, zoom: 15.2, pitch: 60, bearing: -35 };
+  const salidasEntre = (h0, h1, lado) => {
+    const ph = (PLAN && PLAN.resumen && PLAN.resumen.por_hora) || {};
+    let s = 0;
+    for (let h = h0; h <= h1; h++) s += (ph[h] && ph[h][lado] && +ph[h][lado].salidas) || 0;
+    return s;
+  };
+  // cifras de la escena real en el segundo t sin alterar el cuadro: calcula con el reloj puesto en t (las alertas miran estado.t),
+  // copia y vuelve a la hora del reloj
+  function cifrasEn(t) {
+    const t0 = estado.t;
+    estado.t = t; calcularEscena(t);
+    const c = { buses: escena.real.buses, bordo: escena.real.bordo, llenos: escena.alertas.nLlenos, pares: escena.alertas.pegados.length };
+    estado.t = t0; calcularEscena(t0);
+    return c;
+  }
+  const ESCENAS = [
+    { t: 4.75 * 3600, ver: 'real', vel: 10, cam: CAM_PATIO, titulo: 'El patio de Soledad', texto: () => {
+        const n = {}; RUTAS.forEach((r) => { n[r] = VIAJES.filter((v) => v.r === r).length; });
+        return `Cada día salen de este patio los buses de las tres rutas. Hoy, <b>${fmt(VIAJES.length)}</b> viajes: <b>${fmt(n['SILENCIO'])}</b> de SILENCIO, <b>${fmt(n['CRA 54'])}</b> de CRA 54 y <b>${fmt(n['CL 72'])}</b> de CL 72. A las 04:45 ya van saliendo los primeros.`; } },
+    { t: 6.5 * 3600, ver: 'real', vel: 10, alertas: true, cam: VISTAS.centro, titulo: 'Donde más suben', texto: () => {
+        const c = cifrasEn(estado.t);
+        return `A esta hora hay <b>${fmt(c.buses)}</b> buses en la calle y <b>${fmt(c.bordo)}</b> pasajeros a bordo; <b>${fmt(c.llenos)}</b> buses van llenos (50 o más) y <b>${fmt(c.pares)}</b> pares van pegados (misma ruta y sentido a menos de 250 m). Las marcas rojas y ámbar son las alertas que Sobusa vigila.`; } },
+    { t: 10.5 * 3600, ver: 'real', vel: 10, cam: VISTAS.centro, titulo: 'El valle', texto: () => {
+        const c = cifrasEn(estado.t), m = cifrasEn(6.5 * 3600), media = (x) => (x.buses ? x.bordo / x.buses : 0);
+        return `En el valle los buses van más vacíos: <b>${fmt(c.bordo)}</b> pasajeros a bordo en <b>${fmt(c.buses)}</b> buses, <b>${fmt(media(c), 1)}</b> por bus de media, frente a ${fmt(media(m), 1)} a las 06:30.`; } },
+    { t: 14.25 * 3600, ver: 'ambos', vel: 60, cam: CAM_MEDIA, plan: true, titulo: 'El plan en el valle', texto: () => {
+        const x = salidasEntre(13, 15, 'plan'), y = salidasEntre(13, 15, 'real');
+        const frase = x > y ? 'El plan pone más salidas en el valle' : x < y ? 'En el valle el plan recorta salidas' : 'En el valle el plan deja las mismas salidas';
+        return `${frase}: entre las 13 y las 16 programa <b>${fmt(x)}</b> frente a <b>${fmt(y)}</b> reales. Los buses blancos con techo magenta son los del plan; los sólidos, los reales.`; } },
+    { t: 18 * 3600, ver: 'ambos', vel: 60, cam: { ...CAM_MEDIA, bearing: 145 }, plan: true, titulo: 'La tarde', texto: () => {
+        const x = salidasEntre(17, 19, 'plan'), y = salidasEntre(17, 19, 'real'), D = PLAN.resumen.dia, a = +D.real.sobre_capacidad, b = +D.plan.sobre_capacidad;
+        const frase = x < y ? 'Pero recorta la tarde' : x > y ? 'En la tarde el plan añade salidas' : 'En la tarde el plan mantiene las salidas';
+        return `${frase}: de 17 a 20 el plan tiene <b>${fmt(x)}</b> salidas frente a <b>${fmt(y)}</b> reales, y las personas por encima de 50 a bordo pasan de <b>${fmt(a)}</b> a <b>${fmt(b)}</b> en el día; es el punto a vigilar.`; } },
+    { t: 20 * 3600, ver: 'real', vel: 60, cam: VISTAS.ciudad, plan: true, panelPlan: true, titulo: 'El saldo del día', texto: () => {
+        const D = PLAN.resumen.dia, s = +D.real.costo_Mcop - +D.plan.costo_Mcop, p = +D.plan.pasajes_perdidos_Mcop || 0, g = +D.plan.ganados_simetrico || 0, saldo = s - p;
+        let txt = `Saldo del día: ahorro <b>${fmt(s, 1)} M COP</b> frente a <b>${fmt(p, 1)} M</b> en pasajes perdidos, ${saldo > 0 ? '+' : ''}${fmt(saldo, 1)} M (cuenta conservadora); ganados simétricos <b>${fmt(g)}</b>.`;
+        if (RES) {
+          const TR = RES.total.real.total, TP = RES.total.plan.total, A = +TR.costo_Mcop - +TP.costo_Mcop, P = +TP.pasajes_perdidos_Mcop || 0;
+          txt += ` Todo 2025 (${fmt(RES.dias)} días): ahorro ${fmt(A, 1)} M − pasajes ${fmt(P, 1)} M = <b>${A - P > 0 ? '+' : ''}${fmt(A - P, 1)} M COP</b>; el detalle, en el panel de la derecha.`;
+        }
+        return txt; } },
+  ];
+  const NOTA_SIN_PLAN = { nota: true, titulo: 'Sin plan para este día', texto: () => `Este día aún no tiene el plan (archivo de la versión 2: genera <code>calles.py --dia ${estado.fecha}</code>), así que las tres escenas del plan (el valle, la tarde y el saldo) se saltan.` };
+  function iniciarRecorrido() {
+    if (!estado.fecha || recorrido.activo) return;
+    if (cine.activo) salirCine();
+    recorrido.antes = { ver: estado.ver, luz: estado.luz, vel: estado.vel, alertas: estado.alertas, plano: estado.plano, jugando: estado.jugando, planPlegado, anualPlegado,
+                        cam: { center: mapa.getCenter().toArray(), zoom: mapa.getZoom(), pitch: mapa.getPitch(), bearing: mapa.getBearing() } };
+    dejarDeSeguir(); estado.sel = null; $('ficha').hidden = true;
+    recorrido.activo = true; recorrido.escenas = PLAN ? ESCENAS : ESCENAS.slice(0, 3).concat([NOTA_SIN_PLAN]);
+    document.body.classList.add('recorrido'); $('recorrido').hidden = false;
+    irEscena(0);
+  }
+  function irEscena(i) {
+    const E = recorrido.escenas;
+    if (!recorrido.activo || !E.length) return;
+    i = Math.max(0, Math.min(E.length - 1, i)); recorrido.i = i;
+    const e = E[i];
+    pausar();
+    $('rec-num').textContent = `Escena ${i + 1} de ${E.length}`; $('rec-titulo').textContent = e.titulo;
+    if (e.nota) document.body.classList.remove('con-plan');
+    else {
+      estado.t = e.t; luz.elAplicada = null;
+      if (e.alertas != null) ponerAlertas(e.alertas);
+      ponerLuz(e.luz || 'auto');
+      if (estado.plano) { estado.plano = false; $('cam-plano').setAttribute('aria-pressed', 'false'); }
+      ponerVer(e.ver);                                                   // calcula la escena a la hora fijada
+      ponerVel(e.vel);
+      document.body.classList.toggle('con-plan', !!e.panelPlan);
+      if (e.panelPlan) { plegarPlan(false); plegarAnual(false); }
+      mapa.flyTo({ ...e.cam, duration: 2000 });
+      reproducir();
+    }
+    $('rec-texto').innerHTML = e.texto();
+    $('rec-ant').disabled = i === 0; $('rec-sig').disabled = i === E.length - 1;
+    pintarDom(); ponerHash();
+  }
+  function salirRecorrido() {
+    if (!recorrido.activo) return;
+    recorrido.activo = false;
+    document.body.classList.remove('recorrido', 'con-plan'); $('recorrido').hidden = true;
+    const a = recorrido.antes || {};
+    pausar();
+    ponerVel(a.vel || 10);
+    ponerLuz(a.luz || 'auto');
+    if (a.alertas != null) ponerAlertas(a.alertas);
+    if (a.ver) ponerVer(a.ver);
+    if (a.planPlegado != null) plegarPlan(a.planPlegado);
+    if (a.anualPlegado != null) plegarAnual(a.anualPlegado);
+    if (a.plano) { estado.plano = true; $('cam-plano').setAttribute('aria-pressed', 'true'); }
+    if (a.cam) mapa.flyTo({ ...a.cam, duration: 1200 });
+    if (a.jugando) reproducir();
+    pintarDom(); ponerHash();
+  }
+  $('btn-recorrido').addEventListener('click', iniciarRecorrido);
+  $('rec-ant').addEventListener('click', () => irEscena(recorrido.i - 1));
+  $('rec-sig').addEventListener('click', () => irEscena(recorrido.i + 1));
+  $('rec-salir').addEventListener('click', salirRecorrido);
+
+  // ================= dirección: #dia=AAAA-MM-DD&hora=HH:MM[&ver=plan|ambos][&pausa=1][&luz=dia][&alertas=0][&local=1][&cine=1][&recorrido=1] =================
+  function leerHash() {
+    const out = {};
+    decodeURIComponent(location.hash || '').replace(/^#/, '').split('&').forEach((p) => { const [a, b] = p.split('='); if (a && b != null) out[a] = b; });
+    if (out.hora && /^\d{1,2}:\d{2}(:\d{2})?$/.test(out.hora)) { const q = out.hora.split(':').map(Number); out.t = q[0] * 3600 + q[1] * 60 + (q[2] || 0); }
+    return out;
+  }
+  function ponerHash() {
+    if (!estado.fecha) return;
+    const ver = (estado.ver !== 'real' ? `&ver=${estado.ver}` : '') + (estado.luz === 'dia' ? '&luz=dia' : '') + (estado.alertas ? '' : '&alertas=0') + (localForzado ? '&local=1' : '')
+              + (cine.activo ? '&cine=1' : '') + (recorrido.activo ? '&recorrido=1' : '');
+    try { history.replaceState(null, '', `#dia=${estado.fecha}&hora=${hhmm(estado.t)}${ver}`); } catch (e) { /* file:// */ }
+    $('a-consola').href = `consola_despacho.html#dia=${estado.fecha}&hora=${hhmm(estado.t)}`;
+    avisarEstado();
+  }
+  function arrancarDia() {
+    const h = leerHash();
+    const fecha = h.dia && DIAS_SET.has(h.dia) ? h.dia : (DIAS_SET.has('2025-06-03') ? '2025-06-03' : DIAS[0]);
+    if (h.t != null) estado.t = Math.max(14400, Math.min(81000, h.t));
+    if (VER.includes(h.ver)) estado.ver = h.ver;
+    if (h.luz === 'dia') ponerLuz('dia');
+    if (h.alertas === '0') ponerAlertas(false);
+    cargarDia(fecha).then(() => {
+      if (!estado.fecha) return;
+      if (h.cine === '1') entrarCine(h.t);                 // el cine arranca a las 04:00 o a la hora de la dirección
+      else if (h.recorrido === '1') iniciarRecorrido();
+      else if (h.pausa !== '1') reproducir();
+    });
+    requestAnimationFrame(cuadro);
+  }
+  function medirBarra() { document.documentElement.style.setProperty('--alto-barra', ($('barra').getBoundingClientRect().bottom + 8) + 'px'); }
+  medirBarra(); window.addEventListener('resize', medirBarra);
+  window.__vista3d = { estado, escena, get viajes() { return VIAJES; }, get viajesPlan() { return VIAJES_PLAN; }, get eventos() { return EV; },
+                       get eventosPlan() { return EVP; }, get plan() { return PLAN; }, get mapaLocal() { return mapaLocal; }, luz, sol, calcularEscena, ponerVer, ponerLuz, ponerAlertas,
+                       cine, recorrido, entrarCine, salirCine, repetirCine, iniciarRecorrido, irEscena, salirRecorrido, PATIO, CINE_CAM,
+                       get capas() { return ultimasCapas; }, get resumen2025() { return RES; }, get subidas() { return SUBIDAS_T; } };
+
+  // ================= modo embebido (dentro de la app Sobusa Despacho) =================
+  // La app manda {tipo:'tema'}, {tipo:'dia', dia, hora} y {tipo:'ver', ver}; la vista avisa {tipo:'listo'} con el primer día
+  // abierto y {tipo:'estado', dia, hora, ver} al cambiar de día, pausar o cambiar de modo. «Consola de despacho →» pide a la app
+  // abrir Despacho en vez de navegar. Abierta sola, nada de esto actúa.
+  function avisarApp(m) { if (EMBEBIDO && window.parent !== window) { try { window.parent.postMessage(Object.assign({ pagina: 'vista_3d.html' }, m), '*'); } catch (e) { /* sin padre */ } } }
+  function avisarEstado() {
+    if (!EMBEBIDO || !estado.fecha) return;
+    if (!avisoListo) { avisoListo = true; avisarApp({ tipo: 'listo', dia: estado.fecha, hora: hhmm(estado.t), ver: estado.ver }); return; }
+    if (!callarEstado) avisarApp({ tipo: 'estado', dia: estado.fecha, hora: hhmm(estado.t), ver: estado.ver, jugando: !!estado.jugando });
+  }
+  // Día y hora pedidos desde fuera (mensaje o fragmento): lo mismo que hace arrancarDia() al abrir.
+  function irADiaHora(dia, t, ver) {
+    if (VER.includes(ver) && ver !== estado.ver) ponerVer(ver);
+    if (t != null) estado.t = Math.max(14400, Math.min(81000, t));
+    if (dia && DIAS_SET.has(dia) && dia !== estado.fecha) {
+      callarEstado = true;
+      cargarDia(dia).then(() => { callarEstado = false; }, () => { callarEstado = false; });
+    } else if (t != null && estado.fecha) { calcularEscena(estado.t); pintarDom(); }
+  }
+  if (EMBEBIDO) {
+    window.addEventListener('message', (ev) => {
+      if (ev.source !== window.parent || !ev.data || typeof ev.data !== 'object') return;
+      const m = ev.data;
+      if (m.tipo === 'tema') {
+        if (m.tema === 'light') document.documentElement.setAttribute('data-theme', 'light');   // solo claro: otro tema se ignora
+      } else if (m.tipo === 'dia') {
+        const q = /^\d{1,2}:\d{2}(:\d{2})?$/.test(m.hora || '') ? String(m.hora).split(':').map(Number) : null;
+        irADiaHora(m.dia, q ? q[0] * 3600 + q[1] * 60 + (q[2] || 0) : null, m.ver);
+      } else if (m.tipo === 'ver') irADiaHora(null, null, m.ver);
+    });
+    window.addEventListener('hashchange', () => { const h = leerHash(); irADiaHora(h.dia, h.t, h.ver); });
+    $('a-consola').addEventListener('click', (e) => { e.preventDefault(); avisarApp({ tipo: 'navegar', pantalla: 'despacho', parametros: { dia: estado.fecha, hora: hhmm(estado.t) } }); });
+  }
+  crearMapa();
+})();
+</script>
+</body>
+</html>

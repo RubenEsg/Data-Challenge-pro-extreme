@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Paleta de Sobusa Despacho</title>
+<meta name="description" content="Los colores de Sobusa Despacho (solo modo claro): el color de cada pantalla, los de los gráficos, las rutas, los estados y los neutros, con su contraste medido. Se abre con doble clic, sin internet.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f5f5f7">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="componentes.css">
+<style>
+/* Propio de la hoja de la paleta. Todo color sale de tokens.css: esta página no escribe ningún color a mano. */
+.hoja-paleta { max-width: var(--ancho-contenido); margin: 0 auto; padding: var(--e-7) max(var(--e-6), var(--gutter-der)) var(--e-9) max(var(--e-6), var(--gutter)); display: grid; gap: var(--e-8); }
+.cab-paleta { display: grid; gap: var(--e-3); max-width: var(--ancho-texto); }
+.cab-paleta__marca { display: flex; align-items: center; gap: var(--e-3); color: var(--tinta-2); font-size: var(--t-s); font-weight: var(--peso-medio); }
+.cab-paleta h1 { font-size: var(--t-3xl); letter-spacing: -0.025em; }
+.cab-paleta p { color: var(--tinta-2); font-size: var(--t-l); line-height: 1.35; text-wrap: pretty; }
+.reglas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: var(--e-4); margin: 0; padding: 0; list-style: none; }
+.reglas li { background: var(--superficie); border-radius: var(--radio-l); padding: var(--e-4) var(--e-5); font-size: var(--t-s); color: var(--tinta-2); }
+.reglas b { display: block; color: var(--tinta); font-size: var(--t-m); font-weight: var(--peso-fuerte); margin-bottom: 2px; }
+
+.colores { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: var(--e-4); }
+.color { display: grid; grid-template-rows: auto 1fr; background: var(--superficie); border-radius: var(--radio-l); overflow: hidden; min-width: 0; }
+.color__muestra { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--e-3); height: 132px; padding: var(--e-4) var(--e-5); background: var(--c); color: var(--glifo-sobre-color); }
+.color__muestra .icono { width: 44px; height: 44px; stroke-width: 1.75; }
+.color__tinte { position: absolute; top: var(--e-4); right: var(--e-5); display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: var(--radio-pill); background: var(--superficie); color: var(--tinta-2); font-size: var(--t-xs); }
+.color__tinte i { width: 18px; height: 18px; border-radius: 50%; background: var(--t); box-shadow: inset 0 0 0 1px var(--linea); }
+.color__cuerpo { display: grid; align-content: start; gap: var(--e-3); padding: var(--e-4) var(--e-5) var(--e-5); }
+.color__nombre { display: flex; align-items: baseline; justify-content: space-between; gap: var(--e-3); flex-wrap: wrap; }
+.color__nombre h3 { font-size: var(--t-l); }
+.color__pantalla { display: inline-flex; align-items: center; gap: var(--e-2); color: var(--tinta-2); font-size: var(--t-s); font-weight: var(--peso-medio); }
+.color__uso { font-size: var(--t-s); color: var(--tinta-2); text-wrap: pretty; }
+.color__ejemplo { font-size: var(--t-m); font-weight: var(--peso-fuerte); color: var(--x); }
+.medidas { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px var(--e-3); margin: 0; font-size: var(--t-s); align-items: baseline; }
+.medidas dt { color: var(--tinta); font-weight: var(--peso-medio); }
+.medidas dt.sangria { color: var(--tinta-2); font-weight: var(--peso-normal); padding-left: var(--e-3); }
+.medidas dd { margin: 0; }
+.medidas .hex { font-family: var(--fuente-mono); font-size: 13px; color: var(--tinta); }
+.medidas .razon { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--tinta); }
+.cumple { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; font-size: var(--t-xs); color: var(--bien); font-weight: var(--peso-medio); }
+.cumple .icono { width: 13px; height: 13px; stroke-width: 2.25; }
+.no-cumple { color: var(--critico); }
+
+.lista-colores { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: var(--e-3); }
+.fila-color { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: var(--e-3); align-items: center; background: var(--superficie); border-radius: var(--radio-m); padding: var(--e-3) var(--e-4); min-width: 0; }
+.fila-color__muestra { width: 48px; height: 48px; border-radius: 10px; background: var(--c); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tinta) 8%, transparent); display: grid; place-items: center; }
+.fila-color__muestra svg { width: 40px; height: 12px; overflow: visible; }
+.fila-color__texto { display: grid; gap: 1px; min-width: 0; font-size: var(--t-s); }
+.fila-color__texto b { font-size: var(--t-m); font-weight: var(--peso-fuerte); }
+.fila-color__texto span { color: var(--tinta-2); }
+.fila-color__texto code { color: var(--tinta); font-size: 13px; }
+.muestra-linea { background: var(--superficie) !important; }
+.pie-paleta { display: grid; gap: var(--e-2); padding-top: var(--e-5); border-top: 1px solid var(--linea); color: var(--tinta-3); font-size: var(--t-s); }
+@media (max-width: 600px) {
+  .hoja-paleta { padding: var(--e-6) var(--gutter-der) var(--e-8) var(--gutter); gap: var(--e-7); }
+  .cab-paleta p { font-size: var(--t-m); }
+  .color__muestra { height: 112px; }
+}
+</style>
+</head>
+<body>
+<main class="hoja-paleta">
+  <header class="cab-paleta">
+    <span class="cab-paleta__marca"><span class="cuadro-color" style="--cuadro: var(--color-turquesa)" aria-hidden="true" id="logo"></span>Sobusa Despacho · Data Challenge 2026</span>
+    <h1>Paleta de Sobusa Despacho</h1>
+    <p>La app es solo clara. Cada pantalla tiene su color, como en Ajustes del iPhone: su ícono va en blanco dentro de un cuadro redondeado de ese color. Los gráficos, las rutas y los estados conservan los suyos.</p>
+  </header>
+
+  <ul class="reglas" aria-label="Reglas de uso">
+    <li><b>Un color por pantalla</b>Solo pinta el cuadro del ícono: barra lateral, barra del teléfono, hoja «Más» y cabecera. No tiñe fichas ni secciones.</li>
+    <li><b>Contraste medido</b>Glifo blanco sobre el cuadro ≥ 3:1 (ícono, WCAG 1.4.11). Tono de texto ≥ 4,5:1 sobre blanco y sobre el fondo de la app.</li>
+    <li><b>Una sola fuente</b>Todos los valores se leen de <code>app/tokens.css</code> al abrir esta hoja, y los contrastes se calculan aquí mismo.</li>
+  </ul>
+
+  <section class="seccion" aria-labelledby="t-pantallas">
+    <div class="seccion__cab"><h2 class="seccion__titulo" id="t-pantallas">Colores de las pantallas</h2><span class="pequeno">Parten de los colores del sistema de Apple; solo se bajó la luminosidad (mismo tono) hasta el contraste pedido. Tres tonos por color: cuadro, texto y tinte.</span></div>
+    <div class="colores" id="colores"></div>
+  </section>
+
+  <section class="seccion" aria-labelledby="t-graficos">
+    <div class="seccion__cab"><h2 class="seccion__titulo" id="t-graficos">Gráficos</h2><span class="pequeno">Roles de serie fijos en toda la app. No cambian con la paleta de pantallas.</span></div>
+    <div class="lista-colores" id="graficos"></div>
+  </section>
+
+  <section class="seccion" aria-labelledby="t-rutas">
+    <div class="seccion__cab"><h2 class="seccion__titulo" id="t-rutas">Rutas</h2><span class="pequeno">Los mismos tres colores en todo el proyecto: tablero, planificador, consola, vista 3D y app.</span></div>
+    <div class="lista-colores" id="rutas"></div>
+  </section>
+
+  <section class="seccion" aria-labelledby="t-estados">
+    <div class="seccion__cab"><h2 class="seccion__titulo" id="t-estados">Estados</h2><span class="pequeno">Bien, atención y crítico: siempre con ícono y texto, nunca solo con el color.</span></div>
+    <div class="lista-colores" id="estados"></div>
+  </section>
+
+  <section class="seccion" aria-labelledby="t-neutros">
+    <div class="seccion__cab"><h2 class="seccion__titulo" id="t-neutros">Neutros</h2><span class="pequeno">Fondo, superficies, separadores y tintas. Las tarjetas blancas se separan del fondo por tono, sin borde.</span></div>
+    <div class="lista-colores" id="neutros"></div>
+  </section>
+
+  <footer class="pie-paleta">
+    <span>Fuente: <code>app/tokens.css</code> (paleta del 19 de octubre de 2026). Guía: <code>app/DISEÑO.md</code>, secciones 2.1 y 11.</span>
+    <span>Equipo: Abrahan Basto Martínez, Rubén Esguerra Fernández, Paula Gómez · Universidad del Norte.</span>
+  </footer>
+</main>
+
+<script src="iconos.js"></script>
+<script>
+(function () {
+  'use strict';
+  const cs = getComputedStyle(document.documentElement);
+  const v = function (n) { return cs.getPropertyValue(n).trim(); };
+  const icono = function (n) { return window.ICONOS ? ICONOS.svg(n) : ''; };
+
+  // Contraste WCAG 2.x entre dos colores #rrggbb.
+  function lum(hex) {
+    const h = hex.replace('#', '');
+    const c = [0, 2, 4].map(function (i) { const x = parseInt(h.substr(i, 2), 16) / 255; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
+  function razon(a, b) { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+  const fmt = new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function celda(r, minimo) {
+    const ok = r >= minimo;
+    return '<dd class="razon">' + fmt.format(r) + ':1<span class="cumple' + (ok ? '' : ' no-cumple') + '">' + icono(ok ? 'bien' : 'alerta') + (ok ? '≥ ' : '< ') + String(minimo).replace('.', ',') + '</span></dd>';
+  }
+  const BLANCO = '#ffffff';
+  const FONDO = v('--fondo');
+
+  // ---- Colores de las pantallas ----------------------------------------------------------------------------
+  const PANTALLAS = [
+    { color: 'turquesa', nombre: 'Turquesa', pantalla: 'Inicio', id: 'inicio', uso: 'Marca y acento de la app: logotipo, enlaces, botones principales y lo seleccionado.' },
+    { color: 'azul', nombre: 'Azul', pantalla: 'Demanda', id: 'demanda', uso: 'Cuántos pasajeros habrá: el pronóstico y su error.' },
+    { color: 'indigo', nombre: 'Índigo', pantalla: 'Modelo', id: 'modelo', uso: 'Qué modelo es y por qué: experimentos y comparación.' },
+    { color: 'naranja', nombre: 'Naranja', pantalla: 'Horario', id: 'horario', uso: 'Cuántos buses y cada cuánto: el planificador de despacho.' },
+    { color: 'coral', nombre: 'Coral', pantalla: 'Despacho', id: 'despacho', uso: 'Qué hago ahora: la consola de despacho.' },
+    { color: 'cian', nombre: 'Cian', pantalla: 'Ciudad', id: 'ciudad', uso: 'Cómo se ve en la calle: la vista 3D.' },
+    { color: 'verde', nombre: 'Verde', pantalla: 'Resultado', id: 'resultado', uso: 'Qué gana Sobusa: costos, ahorro y canje.' },
+    { color: 'morado', nombre: 'Morado', pantalla: 'Piloto', id: 'piloto', uso: 'Cómo lo comprobamos: el piloto para medir β.' },
+    { color: 'gris', nombre: 'Gris', pantalla: 'Método y datos', id: 'metodo', uso: 'De dónde sale todo. También el botón «Más» del teléfono.' },
+  ];
+  const ICONO = { inicio: 'inicio', demanda: 'demanda', modelo: 'modelo', horario: 'horario', despacho: 'despacho', ciudad: 'ciudad', resultado: 'resultado', piloto: 'piloto', metodo: 'metodo' };
+  document.getElementById('colores').innerHTML = PANTALLAS.map(function (p) {
+    const fuerte = v('--color-' + p.color), texto = v('--color-' + p.color + '-texto'), tinte = v('--color-' + p.color + '-suave');
+    return '<article class="color" aria-labelledby="c-' + p.color + '">' +
+      '<div class="color__muestra" style="--c: ' + fuerte + '; --t: ' + tinte + '">' + icono(ICONO[p.id]) +
+        '<span class="color__tinte"><i></i>Tinte ' + tinte + '</span></div>' +
+      '<div class="color__cuerpo">' +
+        '<div class="color__nombre"><h3 id="c-' + p.color + '">' + p.nombre + '</h3><span class="color__pantalla"><span class="cuadro-color" style="--cuadro: var(--pantalla-' + p.id + ')" aria-hidden="true">' + icono(ICONO[p.id]) + '</span>' + p.pantalla + '</span></div>' +
+        '<p class="color__uso">' + p.uso + '</p>' +
+        '<dl class="medidas">' +
+          '<dt>Cuadro</dt><dd class="hex">' + fuerte + '</dd><dd class="razon"></dd>' +
+          '<dt class="sangria">glifo blanco</dt><dd></dd>' + celda(razon(fuerte, BLANCO), 3) +
+          '<dt>Texto</dt><dd class="hex">' + texto + '</dd><dd class="razon"></dd>' +
+          '<dt class="sangria">sobre blanco</dt><dd></dd>' + celda(razon(texto, BLANCO), 4.5) +
+          '<dt class="sangria">sobre el fondo</dt><dd></dd>' + celda(razon(texto, FONDO), 4.5) +
+          '<dt>Tinte</dt><dd class="hex">' + tinte + '</dd><dd class="razon"></dd>' +
+          '<dt class="sangria">texto sobre el tinte</dt><dd></dd>' + celda(razon(texto, tinte), 4.5) +
+        '</dl>' +
+        '<p class="color__ejemplo" style="--x: ' + texto + '">Texto de ejemplo en ' + p.nombre.toLowerCase() + '</p>' +
+      '</div></article>';
+  }).join('');
+  const logo = document.getElementById('logo'); if (logo) logo.innerHTML = icono('bus');
+
+  // ---- Filas: gráficos, rutas, estados y neutros -----------------------------------------------------------
+  function linea(color, trazos, grosor) {
+    return '<svg viewBox="0 0 40 12" aria-hidden="true"><path d="M1 6H39" stroke="' + color + '" stroke-width="' + (grosor || 2.5) + '" stroke-linecap="round"' + (trazos ? ' stroke-dasharray="5 4"' : '') + '/></svg>';
+  }
+  function filas(id, lista) {
+    document.getElementById(id).innerHTML = lista.map(function (f) {
+      const hex = v(f.token);
+      const sobre = f.sobre ? v(f.sobre) : BLANCO;
+      const r = razon(hex, sobre);
+      const contraste = f.sinContraste ? '' : '<span>' + fmt.format(r) + ':1 sobre ' + (f.sobre ? f.sobreNombre : 'blanco') + '</span>';
+      const muestra = f.linea ? '<span class="fila-color__muestra muestra-linea">' + linea(hex, f.linea === 'trazos', f.grosor) + '</span>' : '<span class="fila-color__muestra" style="--c: ' + hex + '"></span>';
+      return '<div class="fila-color">' + muestra + '<div class="fila-color__texto"><b>' + f.nombre + '</b><code>' + f.token + ' · ' + hex + '</code><span>' + f.uso + '</span>' + contraste + '</div></div>';
+    }).join('');
+  }
+  filas('graficos', [
+    { token: '--serie-hoy', nombre: 'Hoy', uso: 'La regla manual y la oferta real: gris de desénfasis.' },
+    { token: '--serie-modelo', nombre: 'Con el modelo', uso: 'La propuesta: turquesa, paso 500 de la rampa del acento.' },
+    { token: '--serie-oraculo', nombre: 'Oráculo', uso: 'La decisión con la demanda que llegó: tinta a trazos.', linea: 'trazos' },
+    { token: '--serie-real', nombre: 'Real', uso: 'Lo que de verdad pasó: tinta, línea más gruesa.', linea: 'continua', grosor: 3.5 },
+    { token: '--serie-recorta', nombre: 'Plan que recorta', uso: 'El plan con los supuestos iniciales: el magenta del simulador de ahorro. Añadido el 8-nov-2026 desde el laboratorio Dash; la app todavía no lo usa.' },
+    { token: '--serie-contexto', nombre: 'Contexto', uso: 'Lo que acompaña sin ser el tema (salidas que se quitan, pasos de una cascada, hoy tenue): el gris de hoy al 45 %. Siempre con alivio: etiqueta, dirección o tabla gemela. Añadido el 8-nov-2026 desde el laboratorio Dash.' },
+    { token: '--rejilla', nombre: 'Rejilla', uso: 'Líneas de guía de los gráficos.', sinContraste: true },
+    { token: '--eje', nombre: 'Eje', uso: 'Línea base de los gráficos.', sinContraste: true },
+  ]);
+  filas('rutas', [
+    { token: '--ruta-silencio', nombre: 'SILENCIO', uso: 'Azul de la ruta SILENCIO.' },
+    { token: '--ruta-cra54', nombre: 'CRA 54', uso: 'Naranja de la ruta CRA 54.' },
+    { token: '--ruta-cl72', nombre: 'CL 72', uso: 'Morado de la ruta CL 72.' },
+  ]);
+  filas('estados', [
+    { token: '--bien', nombre: 'Bien', uso: 'Mejora, verificado, dentro del objetivo.' },
+    { token: '--bien-suave', nombre: 'Bien, fondo', uso: 'Fondo de un aviso o chip «bien».', sinContraste: true },
+    { token: '--atencion', nombre: 'Atención', uso: 'Parcial, revisar. Ícono y borde.' },
+    { token: '--atencion-texto', nombre: 'Atención, texto', uso: 'Texto de atención.' },
+    { token: '--atencion-suave', nombre: 'Atención, fondo', uso: 'Fondo de un aviso o chip de atención.', sinContraste: true },
+    { token: '--critico', nombre: 'Crítico', uso: 'Error, sin revisor, empeora.' },
+    { token: '--critico-suave', nombre: 'Crítico, fondo', uso: 'Fondo de un aviso o chip crítico.', sinContraste: true },
+  ]);
+  filas('neutros', [
+    { token: '--fondo', nombre: 'Fondo', uso: 'Plano de la página.', sinContraste: true },
+    { token: '--superficie', nombre: 'Superficie', uso: 'Tarjetas, tablas y popovers.', sinContraste: true },
+    { token: '--superficie-2', nombre: 'Superficie 2', uso: 'Selección de la barra lateral (gris de iOS), pista del interruptor.', sinContraste: true },
+    { token: '--superficie-hover', nombre: 'Superficie bajo el puntero', uso: 'Fila o botón bajo el puntero.', sinContraste: true },
+    { token: '--linea', nombre: 'Separador', uso: 'Líneas entre filas y separadores.', sinContraste: true },
+    { token: '--linea-fuerte', nombre: 'Separador fuerte', uso: 'Bordes de controles.', sinContraste: true },
+    { token: '--tinta', nombre: 'Tinta', uso: 'Texto principal.', sobre: '--fondo', sobreNombre: 'el fondo' },
+    { token: '--tinta-2', nombre: 'Tinta 2', uso: 'Texto secundario.', sobre: '--fondo', sobreNombre: 'el fondo' },
+    { token: '--tinta-3', nombre: 'Tinta 3', uso: 'Notas y ejes. No bajar más.', sobre: '--fondo', sobreNombre: 'el fondo' },
+    { token: '--acento-fuerte', nombre: 'Acento fuerte', uso: 'Enlace y botón bajo el puntero o pulsados.' },
+    { token: '--acento-suave', nombre: 'Acento suave', uso: 'Fondo de lo seleccionado.', sinContraste: true },
+    { token: '--foco', nombre: 'Foco', uso: 'Anillo de foco del teclado.' },
+  ]);
+})();
+</script>
+</body>
+</html>

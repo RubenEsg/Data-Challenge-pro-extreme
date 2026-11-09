@@ -1,0 +1,26 @@
+% Sección 6. Fuentes: documentos/propuesta_sobusa.md (secciones 3, 5, 6, 8 y 9) y documentos/informe_resultados.md
+% (sección 7, «Recomendación para Sobusa»).
+\section{Recomendaciones para Sobusa}
+\label{sec:recomendaciones}
+
+La propuesta para la gerencia cabe en una frase: no quitar buses sino cambiarlos de hora. En orden de prioridad:
+\begin{enumerate}
+  \item \textbf{Un horario semanal que reasigna}: el híbrido, entrenado con el objetivo corregido y reentrenado cada
+        semana, alimenta al optimizador con costos reales, una penalidad por hacinamiento que fija la gerencia en el
+        planificador y una restricción de cupo por bus.
+  \item \textbf{Reasignar, no recortar}: mover salidas de los valles de CRA~54, de SILENCIO y de domingos y festivos a la
+        franja de 13 a 15~h y a CL~72; ningún recorte general mientras $\beta$ medida supere 0,53.
+  \item \textbf{Fijar por escrito el intervalo máximo}: con 15 minutos, CL~72 queda como hoy y el optimizador es la única
+        variante que paga con $\beta = 0{,}70$ (+390 M COP al año), a cambio de más espera.
+  \item \textbf{Medir $\beta$ con el piloto de ocho semanas}: calendario, planilla y análisis semanal están listos.
+  \item \textbf{Despachar con la consola, primero en modo sombra} cuatro semanas; después, con el despachador de CRA~54
+        y umbrales de alerta más altos.
+  \item \textbf{Palancas sin costo}: regularizar el despacho de CL~72 (espera de 9,5 a 8,0 minutos con las mismas
+        salidas) y el giro corto en el punto 35 en el valle de CRA~54 (+248 M COP al año).
+  \item \textbf{Datos que Sobusa debe entregar}: costos reales por hora de bus y por km; pago y jornada real de los
+        conductores; qué significan \texttt{cancelada} y \texttt{finalizado}; los viajes de 2026 y los últimos días de
+        cada mes, y acceso de lectura casi en vivo a despachos, GPS y contadores.
+\end{enumerate}
+Indicadores de éxito: error del pronóstico semanal de 14 o menos de cada 100 pasajeros (hoy, 20); 4,30 minutos de
+espera y 267 pasajeros diarios sobre la capacidad (hoy, 4,43 y 317) con las mismas horas de bus; $\beta$ medida con un
+margen de $\pm 0{,}11$, y un saldo diario de pasajeros no negativo contando perdidos y ganados.

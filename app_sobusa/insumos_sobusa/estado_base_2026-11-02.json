@@ -1,0 +1,12 @@
+{
+  "que_es": "Estado del último día de cada mes de 2025 en la tabla de eventos de conteo (conteo_pasajeros) de la base del reto, para las rutas SILENCIO, CRA 54 y CL 72",
+  "fecha_comprobacion": "2026-11-02",
+  "como": "Consulta de solo lectura a la base del reto el 2 de noviembre de 2026, tras el correo de los organizadores (Extreme Technologies) que decía que las tablas vacías del último día de cada mes ya tenían la información. Se contó, por día, cuántos viajes programados tienen al menos un evento de conteo.",
+  "cargados": 1,
+  "pendientes": 11,
+  "dias_cargados": ["2025-01-31"],
+  "dias_pendientes": ["2025-02-28", "2025-03-31", "2025-04-30", "2025-05-31", "2025-06-30", "2025-07-31", "2025-08-31", "2025-09-30", "2025-10-31", "2025-11-30", "2025-12-31"],
+  "detalle_2025_01_31": {"viajes_programados": 40, "viajes_con_eventos": 38},
+  "eventos_en_dias_pendientes": 0,
+  "nota": "Los Parquet de datos/ y los resúmenes de conteo se exportaron el 3 de octubre de 2026, antes de esta carga: no incluyen el 31 de enero. Cuando estén los 12 días habrá que volver a exportar y agregar (ver insumos_sobusa/README.md)."
+}

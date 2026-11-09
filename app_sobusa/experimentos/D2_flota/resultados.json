@@ -1,0 +1,834 @@
+{
+  "experimento": "D2_flota",
+  "descripcion": "Dimensionamiento de flota por ruta × hora × tipo de día: buses en operación observados, flota implicada por la oferta (ciclo/intervalo), flota necesaria por la demanda (carga máxima vs 50 × 0,85), vehículos distintos por día y tiempos de regulación. Descriptivo, sin pronóstico.",
+  "parametros": {
+    "capacidad": 50,
+    "factor_carga_objetivo": 0.85,
+    "pasajeros_por_bus": 42.5,
+    "disponibilidad": 0.85,
+    "umbral_consistencia_ocupacion_min": -3,
+    "umbral_carga_max": 150,
+    "dias_excluidos": [
+      "2024-09-06",
+      "2024-09-22"
+    ]
+  },
+  "bases": {
+    "viajes_validos": 520275,
+    "limpios": 490084,
+    "duracion_anomala": 25233,
+    "reparados_gps": 7221,
+    "ampliado": 502263,
+    "limpios_con_conteo": 474326,
+    "consistentes": 382646,
+    "descartados_carga_mayor_umbral": 11,
+    "pares_layover": 301993
+  },
+  "variantes": [
+    {
+      "nombre": "observado",
+      "horizonte": "descriptivo",
+      "metricas_global": {
+        "buses_pico_laboral_mediana": {
+          "SILENCIO": 39.2,
+          "CRA 54": 73.8,
+          "CL 72": 23.8
+        }
+      },
+      "metricas_por_ruta": {
+        "SILENCIO": {
+          "Laboral": 39.2,
+          "Sábado": 36.0,
+          "Domingo/festivo": 22.0
+        },
+        "CRA 54": {
+          "Laboral": 73.8,
+          "Sábado": 70.0,
+          "Domingo/festivo": 34.0
+        },
+        "CL 72": {
+          "Laboral": 23.8,
+          "Sábado": 22.5,
+          "Domingo/festivo": 12.5
+        }
+      },
+      "metricas_por_tipo_dia": {
+        "Laboral": 97.9,
+        "Sábado": 87.0,
+        "Domingo/festivo": 46.6
+      },
+      "notas": "Buses en ruta a la hora h (mediana diaria, muestreo cada 15 min; incluye viajes con fin reparado por GPS)."
+    },
+    {
+      "nombre": "oferta",
+      "horizonte": "descriptivo",
+      "metricas_global": {
+        "buses_pico_laboral_mediana": {
+          "SILENCIO": 89.9,
+          "CRA 54": 109.0,
+          "CL 72": 49.5
+        }
+      },
+      "metricas_por_ruta": {
+        "SILENCIO": {
+          "Laboral": 89.9,
+          "Sábado": 61.0,
+          "Domingo/festivo": 25.5
+        },
+        "CRA 54": {
+          "Laboral": 109.0,
+          "Sábado": 93.4,
+          "Domingo/festivo": 36.6
+        },
+        "CL 72": {
+          "Laboral": 49.5,
+          "Sábado": 39.8,
+          "Domingo/festivo": 15.1
+        }
+      },
+      "metricas_por_tipo_dia": {
+        "Laboral": 118.9,
+        "Sábado": 106.3,
+        "Domingo/festivo": 56.6
+      },
+      "notas": "Flota en régimen implicada por la tasa real de despacho: ciclo GPS mediano × salidas válidas por hora / 60."
+    },
+    {
+      "nombre": "demanda",
+      "horizonte": "descriptivo",
+      "metricas_global": {
+        "buses_pico_laboral_mediana": {
+          "SILENCIO": 89.9,
+          "CRA 54": 137.2,
+          "CL 72": 49.5
+        }
+      },
+      "metricas_por_ruta": {
+        "SILENCIO": {
+          "Laboral": 89.9,
+          "Sábado": 47.1,
+          "Domingo/festivo": 13.7
+        },
+        "CRA 54": {
+          "Laboral": 137.2,
+          "Sábado": 96.9,
+          "Domingo/festivo": 27.2
+        },
+        "CL 72": {
+          "Laboral": 49.5,
+          "Sábado": 27.6,
+          "Domingo/festivo": 10.0
+        }
+      },
+      "metricas_por_tipo_dia": {
+        "Laboral": 115.6,
+        "Sábado": 88.3,
+        "Domingo/festivo": 37.3
+      },
+      "notas": "Flota en régimen necesaria para llevar la carga máxima observada con 42,5 pasajeros por bus (50 × 0,85)."
+    },
+    {
+      "nombre": "simulado_real",
+      "horizonte": "descriptivo",
+      "metricas_global": {
+        "buses_pico_laboral_mediana": {
+          "SILENCIO": 45.8,
+          "CRA 54": 79.8,
+          "CL 72": 26.8
+        }
+      },
+      "metricas_por_ruta": {
+        "SILENCIO": {
+          "Laboral": 45.8,
+          "Sábado": 40.5,
+          "Domingo/festivo": 23.2
+        },
+        "CRA 54": {
+          "Laboral": 79.8,
+          "Sábado": 71.2,
+          "Domingo/festivo": 34.2
+        },
+        "CL 72": {
+          "Laboral": 26.8,
+          "Sábado": 25.2,
+          "Domingo/festivo": 13.2
+        }
+      },
+      "metricas_por_tipo_dia": {
+        "Laboral": 101.4,
+        "Sábado": 90.5,
+        "Domingo/festivo": 48.5
+      },
+      "notas": "Buses en ruta simulados con las salidas reales medianas por hora y el ciclo GPS (comprobación de (a))."
+    },
+    {
+      "nombre": "simulado_necesario",
+      "horizonte": "descriptivo",
+      "metricas_global": {
+        "buses_pico_laboral_mediana": {
+          "SILENCIO": 48.5,
+          "CRA 54": 92.0,
+          "CL 72": 28.8
+        }
+      },
+      "metricas_por_ruta": {
+        "SILENCIO": {
+          "Laboral": 48.5,
+          "Sábado": 34.0,
+          "Domingo/festivo": 13.8
+        },
+        "CRA 54": {
+          "Laboral": 92.0,
+          "Sábado": 69.8,
+          "Domingo/festivo": 23.8
+        },
+        "CL 72": {
+          "Laboral": 28.8,
+          "Sábado": 21.0,
+          "Domingo/festivo": 10.0
+        }
+      },
+      "metricas_por_tipo_dia": {
+        "Laboral": 98.5,
+        "Sábado": 75.3,
+        "Domingo/festivo": 32.1
+      },
+      "notas": "Buses en ruta simulados con las salidas necesarias por la demanda y el ciclo GPS."
+    }
+  ],
+  "mejor_variante": "demanda (como referencia de dimensionamiento) comparada con observado",
+  "por_ruta": {
+    "SILENCIO": {
+      "pico_buses_oper_laboral": {
+        "hora": 8,
+        "mediana": 39.2,
+        "p75": 42.0,
+        "max": 54
+      },
+      "pico_buses_oper_laboral_estricto": 38.5,
+      "vehiculos_distintos_dia": {
+        "Laboral": 54.0,
+        "Sábado": 52.0,
+        "Domingo/festivo": 33.0
+      },
+      "vehiculos_distintos_dia_laboral_por_anio": {
+        "2023": 53.0,
+        "2024": 54.0,
+        "2025": 53.0
+      },
+      "pico_simultaneo_laboral_por_anio": {
+        "2023": 43.0,
+        "2024": 41.0,
+        "2025": 41.0
+      },
+      "flota_catalogo": 41,
+      "pct_flota_catalogo_laboral": 131.7,
+      "vehiculos_distintos_periodo": 282,
+      "vehiculos_distintos_2025": 221,
+      "vehiculos_activos_catalogo": 55,
+      "uso_pico_laboral": 0.782,
+      "flota_requerida_85_laboral": 49.4,
+      "viajes_por_bus_laboral": 2.72,
+      "ciclo_gps_med_laboral_14h": 285.9,
+      "ciclo_gps_med_laboral_20h": 171.8,
+      "ciclo_llegada_med_laboral_14h": 268.3,
+      "espera_llegada_a_fechafin_med": 5.7,
+      "intervalo_med_laboral_14h": 6.0,
+      "layover": {
+        "med": 40.4,
+        "p25": 28.1,
+        "p75": 62.1,
+        "p90": 284.0,
+        "pct_menos_10": 1.4,
+        "pct_mas_120": 15.0,
+        "pct_mas_240": 12.2
+      },
+      "layover_corto_med": 36.5,
+      "horas_exceso_laboral": [
+        9,
+        10,
+        11,
+        17,
+        18,
+        19,
+        20
+      ],
+      "horas_deficit_laboral": [
+        4,
+        6,
+        14,
+        15
+      ],
+      "diario": {
+        "Laboral": {
+          "salidas": 146.0,
+          "salidas_nec": 131.0,
+          "buses_h_oferta": 586.1,
+          "buses_h_nec": 533.5,
+          "buses_h_exceso": 82.7,
+          "buses_h_deficit": 38.4,
+          "salidas_exceso": 22.0,
+          "salidas_deficit": 9.0,
+          "pct_buses_h_exceso": 14.1,
+          "pct_salidas_exceso": 15.1
+        },
+        "Sábado": {
+          "salidas": 138.0,
+          "salidas_nec": 102.0,
+          "buses_h_oferta": 536.3,
+          "buses_h_nec": 395.7,
+          "buses_h_exceso": 141.8,
+          "buses_h_deficit": 7.8,
+          "salidas_exceso": 37.0,
+          "salidas_deficit": 2.0,
+          "pct_buses_h_exceso": 26.4,
+          "pct_salidas_exceso": 26.8
+        },
+        "Domingo/festivo": {
+          "salidas": 92.0,
+          "salidas_nec": 54.5,
+          "buses_h_oferta": 302.5,
+          "buses_h_nec": 179.1,
+          "buses_h_exceso": 127.7,
+          "buses_h_deficit": 0.0,
+          "salidas_exceso": 39.0,
+          "salidas_deficit": 0.0,
+          "pct_buses_h_exceso": 42.2,
+          "pct_salidas_exceso": 42.4
+        }
+      },
+      "comparacion_simulado_vs_observado": {
+        "MAE": 1.28,
+        "WAPE": 5.05,
+        "sesgo": 1.06
+      },
+      "pico_en_ruta_simulado_necesario": {
+        "Laboral": 48.5,
+        "Sábado": 34.0,
+        "Domingo/festivo": 13.8
+      },
+      "pico_en_ruta_simulado_real": {
+        "Laboral": 45.8,
+        "Sábado": 40.5,
+        "Domingo/festivo": 23.2
+      },
+      "pico_en_ruta_observado": {
+        "Laboral": 39.2,
+        "Sábado": 36.0,
+        "Domingo/festivo": 22.0
+      }
+    },
+    "CRA 54": {
+      "pico_buses_oper_laboral": {
+        "hora": 8,
+        "mediana": 73.8,
+        "p75": 77.8,
+        "max": 89
+      },
+      "pico_buses_oper_laboral_estricto": 73.2,
+      "vehiculos_distintos_dia": {
+        "Laboral": 95.0,
+        "Sábado": 92.0,
+        "Domingo/festivo": 54.0
+      },
+      "vehiculos_distintos_dia_laboral_por_anio": {
+        "2023": 97.0,
+        "2024": 95.0,
+        "2025": 93.0
+      },
+      "pico_simultaneo_laboral_por_anio": {
+        "2023": 82.0,
+        "2024": 78.0,
+        "2025": 75.0
+      },
+      "flota_catalogo": 62,
+      "pct_flota_catalogo_laboral": 153.2,
+      "vehiculos_distintos_periodo": 296,
+      "vehiculos_distintos_2025": 210,
+      "vehiculos_activos_catalogo": 88,
+      "uso_pico_laboral": 0.826,
+      "flota_requerida_85_laboral": 91.8,
+      "viajes_por_bus_laboral": 3.03,
+      "ciclo_gps_med_laboral_14h": 257.9,
+      "ciclo_gps_med_laboral_20h": 161.9,
+      "ciclo_llegada_med_laboral_14h": 237.8,
+      "espera_llegada_a_fechafin_med": 9.3,
+      "intervalo_med_laboral_14h": 3.0,
+      "layover": {
+        "med": 39.4,
+        "p25": 27.0,
+        "p75": 58.4,
+        "p90": 102.8,
+        "pct_menos_10": 1.2,
+        "pct_mas_120": 8.9,
+        "pct_mas_240": 6.3
+      },
+      "layover_corto_med": 37.0,
+      "horas_exceso_laboral": [
+        9,
+        10,
+        11,
+        12,
+        17,
+        18,
+        19,
+        20
+      ],
+      "horas_deficit_laboral": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        13,
+        14,
+        15
+      ],
+      "diario": {
+        "Laboral": {
+          "salidas": 288.0,
+          "salidas_nec": 282.0,
+          "buses_h_oferta": 1077.6,
+          "buses_h_nec": 1067.4,
+          "buses_h_exceso": 106.2,
+          "buses_h_deficit": 111.3,
+          "salidas_exceso": 31.0,
+          "salidas_deficit": 29.0,
+          "pct_buses_h_exceso": 9.9,
+          "pct_salidas_exceso": 10.8
+        },
+        "Sábado": {
+          "salidas": 262.0,
+          "salidas_nec": 231.0,
+          "buses_h_oferta": 938.9,
+          "buses_h_nec": 830.4,
+          "buses_h_exceso": 139.6,
+          "buses_h_deficit": 34.0,
+          "salidas_exceso": 40.0,
+          "salidas_deficit": 10.0,
+          "pct_buses_h_exceso": 14.9,
+          "pct_salidas_exceso": 15.3
+        },
+        "Domingo/festivo": {
+          "salidas": 168.0,
+          "salidas_nec": 114.0,
+          "buses_h_oferta": 478.2,
+          "buses_h_nec": 324.1,
+          "buses_h_exceso": 156.5,
+          "buses_h_deficit": 2.7,
+          "salidas_exceso": 55.0,
+          "salidas_deficit": 1.0,
+          "pct_buses_h_exceso": 32.7,
+          "pct_salidas_exceso": 32.7
+        }
+      },
+      "comparacion_simulado_vs_observado": {
+        "MAE": 1.7,
+        "WAPE": 3.78,
+        "sesgo": 1.48
+      },
+      "pico_en_ruta_simulado_necesario": {
+        "Laboral": 92.0,
+        "Sábado": 69.8,
+        "Domingo/festivo": 23.8
+      },
+      "pico_en_ruta_simulado_real": {
+        "Laboral": 79.8,
+        "Sábado": 71.2,
+        "Domingo/festivo": 34.2
+      },
+      "pico_en_ruta_observado": {
+        "Laboral": 73.8,
+        "Sábado": 70.0,
+        "Domingo/festivo": 34.0
+      }
+    },
+    "CL 72": {
+      "pico_buses_oper_laboral": {
+        "hora": 8,
+        "mediana": 23.8,
+        "p75": 25.8,
+        "max": 35
+      },
+      "pico_buses_oper_laboral_estricto": 23.8,
+      "vehiculos_distintos_dia": {
+        "Laboral": 56.0,
+        "Sábado": 55.0,
+        "Domingo/festivo": 32.0
+      },
+      "vehiculos_distintos_dia_laboral_por_anio": {
+        "2023": 57.0,
+        "2024": 58.0,
+        "2025": 54.0
+      },
+      "pico_simultaneo_laboral_por_anio": {
+        "2023": 27.0,
+        "2024": 27.0,
+        "2025": 25.0
+      },
+      "flota_catalogo": 44,
+      "pct_flota_catalogo_laboral": 127.3,
+      "vehiculos_distintos_periodo": 345,
+      "vehiculos_distintos_2025": 296,
+      "vehiculos_activos_catalogo": 58,
+      "uso_pico_laboral": 0.467,
+      "flota_requerida_85_laboral": 30.6,
+      "viajes_por_bus_laboral": 1.62,
+      "ciclo_gps_med_laboral_14h": 278.4,
+      "ciclo_gps_med_laboral_20h": 165.1,
+      "ciclo_llegada_med_laboral_14h": 271.5,
+      "espera_llegada_a_fechafin_med": -0.5,
+      "intervalo_med_laboral_14h": 10.0,
+      "layover": {
+        "med": 53.2,
+        "p25": 32.9,
+        "p75": 314.5,
+        "p90": 383.0,
+        "pct_menos_10": 0.6,
+        "pct_mas_120": 36.9,
+        "pct_mas_240": 34.3
+      },
+      "layover_corto_med": 37.0,
+      "horas_exceso_laboral": [],
+      "horas_deficit_laboral": [
+        6,
+        13,
+        14,
+        15
+      ],
+      "diario": {
+        "Laboral": {
+          "salidas": 92.0,
+          "salidas_nec": 88.0,
+          "buses_h_oferta": 355.3,
+          "buses_h_nec": 347.2,
+          "buses_h_exceso": 34.1,
+          "buses_h_deficit": 26.8,
+          "salidas_exceso": 10.0,
+          "salidas_deficit": 6.0,
+          "pct_buses_h_exceso": 9.6,
+          "pct_salidas_exceso": 10.9
+        },
+        "Sábado": {
+          "salidas": 89.0,
+          "salidas_nec": 72.0,
+          "buses_h_oferta": 331.3,
+          "buses_h_nec": 265.8,
+          "buses_h_exceso": 67.1,
+          "buses_h_deficit": 4.0,
+          "salidas_exceso": 19.0,
+          "salidas_deficit": 1.0,
+          "pct_buses_h_exceso": 20.3,
+          "pct_salidas_exceso": 21.3
+        },
+        "Domingo/festivo": {
+          "salidas": 54.0,
+          "salidas_nec": 39.0,
+          "buses_h_oferta": 170.7,
+          "buses_h_nec": 123.7,
+          "buses_h_exceso": 47.2,
+          "buses_h_deficit": 3.0,
+          "salidas_exceso": 15.0,
+          "salidas_deficit": 1.0,
+          "pct_buses_h_exceso": 27.6,
+          "pct_salidas_exceso": 27.8
+        }
+      },
+      "comparacion_simulado_vs_observado": {
+        "MAE": 0.93,
+        "WAPE": 6.03,
+        "sesgo": 0.53
+      },
+      "pico_en_ruta_simulado_necesario": {
+        "Laboral": 28.8,
+        "Sábado": 21.0,
+        "Domingo/festivo": 10.0
+      },
+      "pico_en_ruta_simulado_real": {
+        "Laboral": 26.8,
+        "Sábado": 25.2,
+        "Domingo/festivo": 13.2
+      },
+      "pico_en_ruta_observado": {
+        "Laboral": 23.8,
+        "Sábado": 22.5,
+        "Domingo/festivo": 12.5
+      }
+    }
+  },
+  "sensibilidad_factor_carga": [
+    {
+      "ruta": "CL 72",
+      "tipo_dia": "Domingo/festivo",
+      "factor_carga": 0.75,
+      "pct_salidas_exceso": 20.4,
+      "pct_salidas_deficit": 1.9
+    },
+    {
+      "ruta": "CL 72",
+      "tipo_dia": "Laboral",
+      "factor_carga": 0.75,
+      "pct_salidas_exceso": 6.5,
+      "pct_salidas_deficit": 15.2
+    },
+    {
+      "ruta": "CL 72",
+      "tipo_dia": "Sábado",
+      "factor_carga": 0.75,
+      "pct_salidas_exceso": 13.5,
+      "pct_salidas_deficit": 4.5
+    },
+    {
+      "ruta": "CRA 54",
+      "tipo_dia": "Domingo/festivo",
+      "factor_carga": 0.75,
+      "pct_salidas_exceso": 24.4,
+      "pct_salidas_deficit": 1.8
+    },
+    {
+      "ruta": "CRA 54",
+      "tipo_dia": "Laboral",
+      "factor_carga": 0.75,
+      "pct_salidas_exceso": 6.6,
+      "pct_salidas_deficit": 18.8
+    },
+    {
+      "ruta": "CRA 54",
+      "tipo_dia": "Sábado",
+      "factor_carga": 0.75,
+      "pct_salidas_exceso": 9.5,
+      "pct_salidas_deficit": 9.2
+    },
+    {
+      "ruta": "SILENCIO",
+      "tipo_dia": "Domingo/festivo",
+      "factor_carga": 0.75,
+      "pct_salidas_exceso": 35.9,
+      "pct_salidas_deficit": 0.0
+    },
+    {
+      "ruta": "SILENCIO",
+      "tipo_dia": "Laboral",
+      "factor_carga": 0.75,
+      "pct_salidas_exceso": 11.0,
+      "pct_salidas_deficit": 13.0
+    },
+    {
+      "ruta": "SILENCIO",
+      "tipo_dia": "Sábado",
+      "factor_carga": 0.75,
+      "pct_salidas_exceso": 20.3,
+      "pct_salidas_deficit": 3.6
+    },
+    {
+      "ruta": "CL 72",
+      "tipo_dia": "Domingo/festivo",
+      "factor_carga": 0.85,
+      "pct_salidas_exceso": 27.8,
+      "pct_salidas_deficit": 1.9
+    },
+    {
+      "ruta": "CL 72",
+      "tipo_dia": "Laboral",
+      "factor_carga": 0.85,
+      "pct_salidas_exceso": 10.9,
+      "pct_salidas_deficit": 6.5
+    },
+    {
+      "ruta": "CL 72",
+      "tipo_dia": "Sábado",
+      "factor_carga": 0.85,
+      "pct_salidas_exceso": 21.3,
+      "pct_salidas_deficit": 1.1
+    },
+    {
+      "ruta": "CRA 54",
+      "tipo_dia": "Domingo/festivo",
+      "factor_carga": 0.85,
+      "pct_salidas_exceso": 32.7,
+      "pct_salidas_deficit": 0.6
+    },
+    {
+      "ruta": "CRA 54",
+      "tipo_dia": "Laboral",
+      "factor_carga": 0.85,
+      "pct_salidas_exceso": 10.8,
+      "pct_salidas_deficit": 10.1
+    },
+    {
+      "ruta": "CRA 54",
+      "tipo_dia": "Sábado",
+      "factor_carga": 0.85,
+      "pct_salidas_exceso": 15.3,
+      "pct_salidas_deficit": 3.8
+    },
+    {
+      "ruta": "SILENCIO",
+      "tipo_dia": "Domingo/festivo",
+      "factor_carga": 0.85,
+      "pct_salidas_exceso": 42.4,
+      "pct_salidas_deficit": 0.0
+    },
+    {
+      "ruta": "SILENCIO",
+      "tipo_dia": "Laboral",
+      "factor_carga": 0.85,
+      "pct_salidas_exceso": 15.1,
+      "pct_salidas_deficit": 6.2
+    },
+    {
+      "ruta": "SILENCIO",
+      "tipo_dia": "Sábado",
+      "factor_carga": 0.85,
+      "pct_salidas_exceso": 26.8,
+      "pct_salidas_deficit": 1.4
+    },
+    {
+      "ruta": "CL 72",
+      "tipo_dia": "Domingo/festivo",
+      "factor_carga": 0.9,
+      "pct_salidas_exceso": 31.5,
+      "pct_salidas_deficit": 0.0
+    },
+    {
+      "ruta": "CL 72",
+      "tipo_dia": "Laboral",
+      "factor_carga": 0.9,
+      "pct_salidas_exceso": 13.0,
+      "pct_salidas_deficit": 4.3
+    },
+    {
+      "ruta": "CL 72",
+      "tipo_dia": "Sábado",
+      "factor_carga": 0.9,
+      "pct_salidas_exceso": 24.7,
+      "pct_salidas_deficit": 1.1
+    },
+    {
+      "ruta": "CRA 54",
+      "tipo_dia": "Domingo/festivo",
+      "factor_carga": 0.9,
+      "pct_salidas_exceso": 35.7,
+      "pct_salidas_deficit": 0.0
+    },
+    {
+      "ruta": "CRA 54",
+      "tipo_dia": "Laboral",
+      "factor_carga": 0.9,
+      "pct_salidas_exceso": 12.8,
+      "pct_salidas_deficit": 6.9
+    },
+    {
+      "ruta": "CRA 54",
+      "tipo_dia": "Sábado",
+      "factor_carga": 0.9,
+      "pct_salidas_exceso": 18.3,
+      "pct_salidas_deficit": 1.9
+    },
+    {
+      "ruta": "SILENCIO",
+      "tipo_dia": "Domingo/festivo",
+      "factor_carga": 0.9,
+      "pct_salidas_exceso": 45.7,
+      "pct_salidas_deficit": 0.0
+    },
+    {
+      "ruta": "SILENCIO",
+      "tipo_dia": "Laboral",
+      "factor_carga": 0.9,
+      "pct_salidas_exceso": 17.8,
+      "pct_salidas_deficit": 4.1
+    },
+    {
+      "ruta": "SILENCIO",
+      "tipo_dia": "Sábado",
+      "factor_carga": 0.9,
+      "pct_salidas_exceso": 30.4,
+      "pct_salidas_deficit": 0.7
+    },
+    {
+      "ruta": "CL 72",
+      "tipo_dia": "Domingo/festivo",
+      "factor_carga": 1.0,
+      "pct_salidas_exceso": 37.0,
+      "pct_salidas_deficit": 0.0
+    },
+    {
+      "ruta": "CL 72",
+      "tipo_dia": "Laboral",
+      "factor_carga": 1.0,
+      "pct_salidas_exceso": 17.4,
+      "pct_salidas_deficit": 1.1
+    },
+    {
+      "ruta": "CL 72",
+      "tipo_dia": "Sábado",
+      "factor_carga": 1.0,
+      "pct_salidas_exceso": 29.2,
+      "pct_salidas_deficit": 0.0
+    },
+    {
+      "ruta": "CRA 54",
+      "tipo_dia": "Domingo/festivo",
+      "factor_carga": 1.0,
+      "pct_salidas_exceso": 41.7,
+      "pct_salidas_deficit": 0.0
+    },
+    {
+      "ruta": "CRA 54",
+      "tipo_dia": "Laboral",
+      "factor_carga": 1.0,
+      "pct_salidas_exceso": 18.1,
+      "pct_salidas_deficit": 2.4
+    },
+    {
+      "ruta": "CRA 54",
+      "tipo_dia": "Sábado",
+      "factor_carga": 1.0,
+      "pct_salidas_exceso": 25.2,
+      "pct_salidas_deficit": 0.4
+    },
+    {
+      "ruta": "SILENCIO",
+      "tipo_dia": "Domingo/festivo",
+      "factor_carga": 1.0,
+      "pct_salidas_exceso": 49.5,
+      "pct_salidas_deficit": 0.0
+    },
+    {
+      "ruta": "SILENCIO",
+      "tipo_dia": "Laboral",
+      "factor_carga": 1.0,
+      "pct_salidas_exceso": 22.6,
+      "pct_salidas_deficit": 1.4
+    },
+    {
+      "ruta": "SILENCIO",
+      "tipo_dia": "Sábado",
+      "factor_carga": 1.0,
+      "pct_salidas_exceso": 36.2,
+      "pct_salidas_deficit": 0.0
+    }
+  ],
+  "archivos": [
+    "flota_por_hora.parquet",
+    "vehiculos_por_dia.parquet",
+    "layover.parquet",
+    "layover_por_hora.parquet",
+    "exceso_deficit_diario.parquet",
+    "fig1_cl72_buses_por_hora.png",
+    "fig1_cra54_buses_por_hora.png",
+    "fig1_silencio_buses_por_hora.png",
+    "fig2_layover.png",
+    "fig3_vehiculos_por_dia.png",
+    "fig4_exceso_deficit_salidas.png",
+    "fig5_ciclo_intervalo.png"
+  ],
+  "tiempo_s": 10.7,
+  "verificacion": {
+    "fecha": "2026-10-04",
+    "metodo": "recalculo independiente desde datos locales (conteo de buses en ruta por eventos +1/-1 muestreado cada 15 min, vehiculos por dia, layover, exceso/deficit diario) y desde los parquet guardados",
+    "resultado": "todas las cifras numericas confirmadas; en README se corrigio el orden de rutas de los despachos sobrantes/faltantes (22 / 31 / 10 y 9 / 29 / 6 en orden SILENCIO / CRA 54 / CL 72), el % de dias con deficit en CRA 54 a las 14 h (97 %, no 80 %) y el rango de carga maxima dominical (16-27 / 20-40)",
+    "nota": "la banda de la fig. 1 mezcla el p25 de la variante estricta con el p75 de la ampliada (diferencia <= 1,5 buses)"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "generado_en": "2026-11-09T03:39:25+00:00",
+  "script": "scripts/preparar_datos_api.py",
+  "demanda_horaria.parquet": {
+    "fuente": "experimentos/E1_lgbm_salida/datos_modelado_salida.parquet",
+    "filas": 55896,
+    "desde": "2023-01-01",
+    "hasta": "2025-12-31",
+    "columnas": {
+      "pasajeros": "pasajeros_total: suma de numeropasajeros de los viajes válidos que salen en esa hora (dato <= 300, ceros incluidos)",
+      "salidas": "viajes_validos: salidas válidas en esa hora",
+      "tipo_dia": "0 Laboral, 1 Sábado, 2 Domingo/festivo",
+      "festivo, carnaval, semana_santa, vacaciones, navidad, primero_enero": "calendario del proyecto (se conoce por adelantado)",
+      "excluido": "1 = hora marcada como dato no confiable en la tabla de modelado (102 horas de 2024); no se usa para entrenar ni evaluar",
+      "ultima_actualizacion": "fin del día (23:59:59 America/Bogota): marca para la lectura incremental (RF-013)"
+    }
+  },
+  "catalogo_rutas.json": {
+    "idruta, codigo, flota_programada_tabla_rutas, frecuenciadespachos_tabla_rutas, primer_despacho": "datos/rutas.parquet (exportación de la tabla rutas)",
+    "capacidad": "50 puestos por bus (parametros_operativos.capacidad; regla del reto)",
+    "tiempo_ciclo_min": "mediana de ciclo (min) en día laboral, horas 6-19, experimentos/D1_optimizacion/parametros_operativos.parquet",
+    "flota": "mediana de flota_disp en día laboral, horas 6-19 (misma fuente; es la flota que usa el MILP D5)",
+    "frecuencia_actual_min": "mediana de intervalo_prog_med (intervalo programado) en día laboral, horas 6-19 (misma fuente)",
+    "por_tipo_dia": "los mismos tres valores por tipo de día"
+  },
+  "parametros_operativos_hora.parquet": {
+    "fuente": "experimentos/D1_optimizacion/parametros_operativos.parquet + nmin/nmax de EntregaFinal/dash_app/datos/insumos_d5_2025.parquet"
+  }
+}

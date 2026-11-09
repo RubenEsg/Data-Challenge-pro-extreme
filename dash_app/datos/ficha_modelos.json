@@ -1,0 +1,1984 @@
+{
+  "meta": {
+    "trabajo": "A2 · Ficha de los dos modelos para la pantalla «Modelo · ¿Qué modelo es y por qué?»",
+    "fecha": "2026-10-18",
+    "proposito": "Texto llano pero exacto para el jurado. Cada entrada lleva `fuente` (archivo y sección) y, cuando la cifra vive en un JSON de resultados, `ruta_json` para que app/generar_datos_app.py la lea en vez de copiarla a mano.",
+    "modelos": {
+      "E11_V4": "Modelo final de E11 (LightGBM V4): el de las tablas del informe; respaldo en producción (`modelo_final.py`).",
+      "E12_hibrido": "Híbrido de E12 (`hibrido_V4_chronos2cov`): el mismo LightGBM V4 con 4 variables de Chronos-2; recomendado para producción (`modelo_final_hibrido.py`)."
+    },
+    "rutas_relativas_a": "carpeta del proyecto",
+    "archivos_fuente": [
+      "experimentos/E11_modelo_mejorado/README.md",
+      "experimentos/E11_modelo_mejorado/modelo_final.py",
+      "experimentos/E11_modelo_mejorado/comun_e11.py",
+      "experimentos/E11_modelo_mejorado/resultados.json",
+      "experimentos/E11_modelo_mejorado/seleccion.json",
+      "experimentos/E11_modelo_mejorado/modelos/metadatos.json",
+      "experimentos/E11_modelo_mejorado/modelos/modelo_V4_H7.txt",
+      "experimentos/E12_comparacion_modelos/README.md",
+      "experimentos/E12_comparacion_modelos/modelo_final_hibrido.py",
+      "experimentos/E12_comparacion_modelos/comun_e12.py",
+      "experimentos/E12_comparacion_modelos/resultados.json",
+      "experimentos/E12_comparacion_modelos/resultados/hibrido_V4_chronos2cov.json",
+      "experimentos/E12_comparacion_modelos/resultados/V4_lightgbm.json",
+      "experimentos/E12_comparacion_modelos/resultados/chronos2_cov.json",
+      "experimentos/E12_comparacion_modelos/modelos_hibrido/metadatos_pronostico_2026_enero_hibrido.json",
+      "experimentos/E12_comparacion_modelos/modelos_hibrido/emulacion_produccion_2025.json",
+      "experimentos/E12_comparacion_modelos/modelos_hibrido/verificacion_fuga.json",
+      "experimentos/E12_comparacion_modelos/modelos_hibrido/backtest_2025-03_H7.json",
+      "experimentos/E12_comparacion_modelos/modelos_hibrido/backtest_2025-03_H7_panel_e12.json",
+      "experimentos/E12_comparacion_modelos/modelos_hibrido/modelo_hibrido_H7.txt",
+      "experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md",
+      "experimentos/E12_comparacion_modelos/modelos_fundacionales/hibrido_v4_chronos2.py",
+      "experimentos/E12_comparacion_modelos/modelos_fundacionales/validacion_2024_hibrido.json",
+      "experimentos/E12_comparacion_modelos/requisitos_e12.txt",
+      "experimentos/E1_lgbm_salida/README.md",
+      "experimentos/E6_por_ruta/README.md",
+      "experimentos/E9_clima/README.md",
+      "experimentos/E13_limpieza_datos/README.md",
+      "documentos/informe_resultados.md",
+      "README.md"
+    ]
+  },
+  "convenciones": {
+    "WAPE": {
+      "texto": "Error porcentual absoluto ponderado: suma de los errores absolutos dividida por la suma de pasajeros reales. «20 %» quiere decir que el pronóstico se equivoca en 20 de cada 100 pasajeros.",
+      "fuente": "informe_resultados.md § 2 Datos y método, «Protocolo»"
+    },
+    "IC_95": {
+      "texto": "Intervalo de confianza del 95 % de la diferencia de WAPE entre dos modelos, en puntos, por bootstrap pareado de días (se remuestrean días completos para respetar que los dos modelos se evalúan sobre los mismos días). Si el intervalo incluye el 0, la diferencia puede ser azar.",
+      "fuente": "experimentos/E11_modelo_mejorado/README.md § 1 Método, «Protocolo y selección»; experimentos/E12_comparacion_modelos/README.md § 1.1"
+    },
+    "h_y_H": {
+      "texto": "h = antelación evaluada en el protocolo (h = 1: con datos de ayer; h = 7: con datos de hace una semana). H = antelación del modelo de producción (7, 14, 21 o 28 días): sus rezagos solo miran datos con al menos H días de antigüedad.",
+      "fuente": "experimentos/E11_modelo_mejorado/README.md § 1 y § 4"
+    },
+    "puntos": {
+      "texto": "Las diferencias entre modelos se dan en puntos de WAPE (13,94 % − 13,62 % = 0,32 puntos), negativas cuando el candidato mejora.",
+      "fuente": "experimentos/E12_comparacion_modelos/README.md § 2"
+    }
+  },
+  "comun": {
+    "unidad_de_prediccion": {
+      "texto": "Pasajeros por ruta × día × hora de salida programada. Tres rutas (SILENCIO = idruta 2, CRA 54 = 16, CL 72 = 21) y 17 horas de salida, de las 4 a las 20 h: 51 series. No existe ninguna salida válida a las 21 h en los tres años, por eso la rejilla termina a las 20 h.",
+      "fuente": "experimentos/E1_lgbm_salida/README.md § 1 Qué se hizo; experimentos/E11_modelo_mejorado/comun_e11.py (RUTAS, HORAS)"
+    },
+    "objetivo": {
+      "nombre_columna": "pasajeros_total",
+      "texto": "Suma de `numeropasajeros` de los viajes válidos (finalizado = 'S' y cancelada = 'N') que salen en esa hora, con dato y ≤ 300 pasajeros, ceros incluidos; una franja sin viajes vale 0. Es la demanda servida (los pasajeros que subieron a los buses que salieron), no la demanda latente.",
+      "cifras": {
+        "pasajeros_2023_2025": {
+          "valor": 42166279,
+          "texto": "42.166.279 pasajeros en el periodo",
+          "fuente": "experimentos/E1_lgbm_salida/README.md § 1"
+        },
+        "pasajeros_2025": {
+          "valor": 12872401,
+          "texto": "12.872.401 pasajeros en 2025 (objetivo de prueba recalculado desde `progvehiculos`)",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 8 Verificación"
+        }
+      },
+      "fuente": "experimentos/E1_lgbm_salida/README.md § 1; experimentos/E11_modelo_mejorado/comun_e11.py, construir_panel(); experimentos/E1_lgbm_salida/README.md § 5 (limitación 1: demanda observada = demanda servida)"
+    },
+    "regla_manual_B1": {
+      "texto": "Lo que Sobusa hace hoy: para cada ruta, hora y día de la semana, el promedio de las ocho semanas anteriores. En el protocolo se llama B1 y es la referencia de todas las comparaciones.",
+      "wape_h7": {
+        "valor": 20.045,
+        "texto": "20,04 %",
+        "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: horizontes.B1_H7.global_.WAPE"
+      },
+      "mae_h7": {
+        "valor": 138.6,
+        "texto": "138,6 pasajeros por franja"
+      },
+      "total_diario_por_ruta": {
+        "valor": 12.75,
+        "texto": "12,75 %"
+      },
+      "por_ruta": {
+        "SILENCIO": 21.5,
+        "CRA 54": 18.0,
+        "CL 72": 24.3
+      },
+      "por_tipo_dia": {
+        "Laboral": 17.6,
+        "Sábado": 15.1,
+        "Domingo/festivo": 48.6
+      },
+      "por_franja": {
+        "4-8 h": 19.4,
+        "9-15 h": 19.9,
+        "16-20 h": 21.7
+      },
+      "por_antelacion": {
+        "H7": 20.0447,
+        "H14": 20.4807,
+        "H21": 20.881,
+        "H28": 21.1932
+      },
+      "festivos_E1": {
+        "texto": "En los 17 festivos de 2025 B1 se equivoca 145,8 % (el modelo de E1, 25,0 %): la media de 8 semanas nunca acierta un festivo.",
+        "fuente": "experimentos/E1_lgbm_salida/README.md § 2, Desagregación"
+      },
+      "fuente": "experimentos/E11_modelo_mejorado/README.md § 2, Tablas 1, 2 y 6; informe_resultados.md § 1 punto 1"
+    },
+    "protocolo_validacion": {
+      "texto": "Doce pliegues mensuales de 2025: cada mes se pronostica con un modelo entrenado solo con los días estrictamente anteriores a ese mes. La predicción del día d usa información hasta d − 7 (h = 7); E11 evalúa además h = 1. Son 18.615 franjas de prueba (365 días × 51 series). El objetivo de prueba no se corrige ni se pondera: se evalúa completo, con sus días atípicos. Las comparaciones entre modelos usan la diferencia de WAPE con IC 95 % por bootstrap pareado de días, la cuenta de meses en que mejora y pruebas t pareada y de Wilcoxon sobre los 12 meses.",
+      "sin_fuga": "Los pesos y la corrección de rezagos solo tocan filas de entrenamiento anteriores al mes de prueba; todas las variables respetan h y H; en E12 cada predicción lleva la columna `corte` y el arnés comprueba d − corte ≥ 7 en los 55 resultados.",
+      "prueba_2024_E12": "Los finalistas de E12 se repitieron en 2024 con el mismo protocolo (12 pliegues mensuales, h = 7, 18.564 franjas de 364 días sin los dos días R5; enero de 2024 solo ve 2023) como prueba fuera de la muestra de selección.",
+      "cifras": {
+        "pliegues": 12,
+        "franjas_prueba_2025": {
+          "valor": 18615,
+          "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: panel.filas_prueba_2025"
+        },
+        "franjas_prueba_2024": {
+          "valor": 18564,
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados.json: validacion_2024.franjas"
+        },
+        "bootstrap_replicas_E12": 2000,
+        "semilla": 42
+      },
+      "fuente": "experimentos/E11_modelo_mejorado/README.md § 1 «Protocolo y selección» y § 8; experimentos/E12_comparacion_modelos/README.md § 1.1 y § 6; experimentos/protocolo_evaluacion.md"
+    }
+  },
+  "modelos": {
+    "E11_V4": {
+      "nombre": "Modelo final de E11: LightGBM V4",
+      "nombre_tecnico": "V4 = V3 + rezagos corregidos por fallas (seleccion.json)",
+      "rol": "Modelo de las tablas del informe (Tabla 1). Pipeline de producción `modelo_final.py`. En el híbrido de E12 es la cadena base y el «V4 en sombra» de respaldo.",
+      "resumen_para_jurado": "Un modelo de árboles (LightGBM con pérdida de Poisson) que, para cada ruta, día y hora de salida, parte de la media de las cuatro mismas semanas anteriores y la corrige con el calendario. Lo que lo distingue de la primera versión (E1) no son variables nuevas sino con qué filas aprende: da menos peso a los días atípicos y a las franjas con viajes sin registro. Se equivoca en 13,9 de cada 100 pasajeros a una semana; la regla manual de Sobusa, en 20,0.",
+      "que_es": {
+        "texto": "Un LightGBM con pérdida de Poisson (600 árboles, 31 hojas, tasa 0,03) entrenado con 77 variables de calendario, demanda reciente rezagada y oferta rezagada, heredado del LightGBM de E1 y entrenado con peso 0,25 en los días atípicos no predecibles y 0,1 en las franjas con fallas de registro, con los rezagos calculados sobre pasajeros corregidos por viajes sin registro.",
+        "origen": "V0 reproduce exactamente la variante (a) de E1 (WAPE 14,40 % con h = 7, diferencia máxima 0 en las 83 columnas del panel). V4 = V0 + calendarios escolar y universitario + climatología + pesos a días atípicos y franjas con fallas + rezagos corregidos.",
+        "fuente": "experimentos/E11_modelo_mejorado/README.md § 1 Método (Panel, Variantes); experimentos/E11_modelo_mejorado/seleccion.json; experimentos/E11_modelo_mejorado/comun_e11.py (VARIANTES['V4'], PARAMS_BASE, entrenar())"
+      },
+      "que_predice": {
+        "unidad": "Pasajeros por ruta × día × hora de salida (4–20 h), `pasajeros_total` (ver comun.objetivo).",
+        "antelacion": "Evaluado con h = 1 y h = 7 en los 12 pliegues de 2025, y con H = 14, 21 y 28 (Tabla 6). En producción entrena un modelo por antelación H = 7, 14, 21 y 28 días y pronostica cualquier rango futuro: la fecha d usa el modelo H = 7 × ⌈(d − último día observado) / 7⌉. Fuera de 28 días entrena H = 35, 42… a pedido, pero esos horizontes no se evaluaron.",
+        "salida": "Pronóstico puntual (media de Poisson), recortado a 0. No da cuantiles; los cuantiles de E3 están pendientes de pasar a este modelo (§ 6).",
+        "fuente": "experimentos/E11_modelo_mejorado/README.md § 1, § 2 Tabla 6, § 4 (b) Pronóstico, § 6; experimentos/E11_modelo_mejorado/modelo_final.py, horizonte() y pronosticar()"
+      },
+      "datos_entrenamiento": {
+        "periodo": "Panel del 1-1-2023 al 31-12-2025 (1.096 días). En la evaluación, cada pliegue entrena con todo lo anterior al mes de prueba. En producción, con todos los días observados hasta el 31-12-2025.",
+        "filas": {
+          "panel": {
+            "valor": 55896,
+            "texto": "55.896 filas = 3 rutas × 1.096 días × 17 horas",
+            "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: panel.filas"
+          },
+          "prueba_2025": {
+            "valor": 18615,
+            "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: panel.filas_prueba_2025"
+          },
+          "produccion_por_H_segun_readme": {
+            "H7": 55538,
+            "H14": 55181,
+            "H21": 54824,
+            "H28": 54467,
+            "texto": "55.538, 55.181, 54.824 y 54.467 filas (README § 4). AVISO: ese conteo incluye las 102 filas de los dos días R5, que `entrenar()` descarta; el conjunto que de verdad entrena tiene 102 filas menos (55.436, 55.079, 54.722 y 54.365; coincide con el V4 en sombra del híbrido). Ver avisos_y_contradicciones[0]."
+          }
+        },
+        "filtros": [
+          "Viajes válidos: finalizado = 'S', cancelada = 'N', hora de salida 4–20 h, 2023-01-01 a 2025-12-31.",
+          "Objetivo con dato y ≤ 300 pasajeros (pax_ok); los dos días R5 (2024-09-06 y 2024-09-22) se enmascaran antes de calcular rezagos y se excluyen del entrenamiento.",
+          "Solo entrenan las filas con `pasajeros_total` y `pasajeros_total_m4sem` no vacíos: por eso las filas de entrenamiento empiezan el 8-1-2023 (hace falta al menos un rezago de 7 días).",
+          "Pesos: 0,25 en las filas de los 31 días atípicos no predecibles de E10 (fallas de registro, Sibus, paro, aguaceros, día cívico, sin explicación; 1.547 filas) y 0,1 en las franjas con ≥ 25 % de viajes válidos sin registro (0 pasajeros y < 30 eventos GPS; 1.412 franjas, el 2,5 %). Los pesos solo afectan a filas anteriores al mes de prueba.",
+          "Rezagos corregidos: para calcular los rezagos, los pasajeros de cada franja se escalan por los viajes con registro (pax × válidos / con registro); si más del 80 % de los viajes no tiene registro la franja queda vacía. El objetivo evaluado no se toca."
+        ],
+        "cifras": {
+          "dias_atipicos": {
+            "valor": 31,
+            "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: panel.dias_atipicos_no_predecibles"
+          },
+          "filas_peso_0_25": {
+            "valor": 1547,
+            "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: panel.filas_con_peso_atipico"
+          },
+          "franjas_peso_0_1": {
+            "valor": 1412,
+            "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: panel.franjas_con_fallas_25pct"
+          },
+          "pct_franjas_con_fallas": {
+            "valor": 2.526,
+            "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: panel.pct_franjas_con_fallas_25pct"
+          }
+        },
+        "fuentes_de_datos": "datos/progvehiculos.parquet, datos/conteo_viajes.parquet (eventos GPS y ocupación), datos/novedades_viales*.parquet, calendarios de E10 (`calendario_escolar.csv`, `calendario_universitario.csv`, `dias_atipicos.csv`), `calendario_2026.csv`, climatología Open-Meteo 2013–2022 (copia de E9). No se conecta a la base de datos.",
+        "fuente": "experimentos/E11_modelo_mejorado/README.md § 1 Método («Días atípicos: solo como peso») y § 4 (a); experimentos/E11_modelo_mejorado/comun_e11.py (construir_panel, pesos, entrenar, DIAS_EXCLUIDOS); experimentos/E12_comparacion_modelos/modelos_hibrido/metadatos_pronostico_2026_enero_hibrido.json (filas por H)"
+      },
+      "variables": {
+        "total": {
+          "valor": 77,
+          "texto": "77 variables con h = 7 (67 de E1 + 6 de calendario nuevo + 4 de climatología). Con h = 1 se añaden 15 más (rezagos de 1 y 2 días y medias de los últimos 7 días), solo en la evaluación.",
+          "fuente": "experimentos/E11_modelo_mejorado/comun_e11.py, variables_e1() y variables_variante() (calculado: 77 / 92; E1: 67 / 82); experimentos/E11_modelo_mejorado/modelos/metadatos.json: modelos.H7.n_variables = 77"
+        },
+        "categoricas": [
+          "idruta",
+          "dia_semana",
+          "tipo_dia"
+        ],
+        "grupos": [
+          {
+            "nombre": "Calendario base (E1)",
+            "n": 12,
+            "variables": [
+              "idruta",
+              "hora",
+              "dia_semana",
+              "tipo_dia",
+              "mes",
+              "dia_mes",
+              "dia_anio",
+              "semana_anio",
+              "tendencia",
+              "festivo",
+              "vacaciones",
+              "quincena"
+            ],
+            "definiciones": "tipo_dia: 0 laboral, 1 sábado, 2 domingo o festivo; festivo: paquete `holidays` (Colombia); vacaciones: 16–31 de diciembre, enero, junio y julio; quincena: días 14–16, 29–31 y 1; tendencia: días desde el 1-1-2023.",
+            "por_que": "El patrón de la demanda es sobre todo calendario: hora, día de la semana, festivos y vacaciones. Entre todas suman el 7,2 % de la ganancia del modelo final (tipo_dia 2,9 %, festivo 2,0 %).",
+            "fuente": "experimentos/E11_modelo_mejorado/comun_e11.py (BASE_CAL, construir_panel); experimentos/E1_lgbm_salida/README.md § 1; importancia calculada desde modelos/modelo_V4_H7.txt"
+          },
+          {
+            "nombre": "Calendario especial (E1)",
+            "n": 6,
+            "variables": [
+              "carnaval",
+              "carnaval_central",
+              "semana_santa",
+              "jueves_viernes_santo",
+              "primero_enero",
+              "navidad"
+            ],
+            "definiciones": "Carnaval: sábado a martes antes del Miércoles de Ceniza (de `novedades_viales` o calculado desde la Pascua); carnaval_central: lunes y martes; semana_santa: del lunes santo al domingo de Resurrección; jueves_viernes_santo.",
+            "por_que": "Son los días en que la regla manual más falla. Sin este grupo el WAPE de E1 sube de 14,4 % a 15,9 % (variante c').",
+            "fuente": "experimentos/E11_modelo_mejorado/comun_e11.py (CAL_ESPECIAL, carnaval_fechas); experimentos/E1_lgbm_salida/README.md § 2, variante (c')"
+          },
+          {
+            "nombre": "Eventos (E1)",
+            "n": 4,
+            "variables": [
+              "partido_dia",
+              "partido_franja",
+              "evento_otro_dia",
+              "evento_otro_franja"
+            ],
+            "definiciones": "Partidos de la selección y Guacherna, Batalla de Flores y conciertos de `novedades_viales`; la franja afectada va de hora_inicio − 3 h a hora_fin. Solo hay registro hasta el 6-6-2025; en 2026 valen 0.",
+            "por_que": "No aportan (E1: quitarlos no cambia nada, 14,38 % frente a 14,40 %; 0,04 % de la ganancia). Se conservan por compatibilidad con E1.",
+            "fuente": "experimentos/E11_modelo_mejorado/comun_e11.py (EVENTOS); experimentos/E1_lgbm_salida/README.md § 2, variante (c); experimentos/E11_modelo_mejorado/README.md § 5 limitación 6"
+          },
+          {
+            "nombre": "Rezagos de demanda y de oferta (E1): 4 objetivos × 10 rezagos",
+            "n": 40,
+            "objetivos": [
+              "pasajeros_total",
+              "pasajeros_por_viaje",
+              "carga_max",
+              "viajes_validos"
+            ],
+            "sufijos": [
+              "lag7",
+              "lag14",
+              "lag21",
+              "lag28",
+              "m4sem",
+              "roll7_h7",
+              "roll28_h7",
+              "b1",
+              "sd8sem",
+              "lag364"
+            ],
+            "variables": [
+              "pasajeros_total_lag7",
+              "pasajeros_total_lag14",
+              "pasajeros_total_lag21",
+              "pasajeros_total_lag28",
+              "pasajeros_total_m4sem",
+              "pasajeros_total_roll7_h7",
+              "pasajeros_total_roll28_h7",
+              "pasajeros_total_b1",
+              "pasajeros_total_sd8sem",
+              "pasajeros_total_lag364",
+              "pasajeros_por_viaje_lag7",
+              "pasajeros_por_viaje_lag14",
+              "pasajeros_por_viaje_lag21",
+              "pasajeros_por_viaje_lag28",
+              "pasajeros_por_viaje_m4sem",
+              "pasajeros_por_viaje_roll7_h7",
+              "pasajeros_por_viaje_roll28_h7",
+              "pasajeros_por_viaje_b1",
+              "pasajeros_por_viaje_sd8sem",
+              "pasajeros_por_viaje_lag364",
+              "carga_max_lag7",
+              "carga_max_lag14",
+              "carga_max_lag21",
+              "carga_max_lag28",
+              "carga_max_m4sem",
+              "carga_max_roll7_h7",
+              "carga_max_roll28_h7",
+              "carga_max_b1",
+              "carga_max_sd8sem",
+              "carga_max_lag364",
+              "viajes_validos_lag7",
+              "viajes_validos_lag14",
+              "viajes_validos_lag21",
+              "viajes_validos_lag28",
+              "viajes_validos_m4sem",
+              "viajes_validos_roll7_h7",
+              "viajes_validos_roll28_h7",
+              "viajes_validos_b1",
+              "viajes_validos_sd8sem",
+              "viajes_validos_lag364"
+            ],
+            "definiciones": "lagK: la misma ruta y hora K días antes (7, 14, 21, 28); m4sem: media de esos cuatro (la «media de las 4 mismas semanas»); roll7_h7 y roll28_h7: media de los días 7–13 y 7–34 atrás; b1: media de las 8 últimas semanas del mismo día de la semana y hora (la regla manual B1) y sd8sem su desviación; lag364: mismo día de la semana hace un año. Con H > 7 el bloque se toma de la fecha d − (H − 7) (mismo día de la semana), y lag364 queda fijo. La oferta (`viajes_validos`) entra solo rezagada, nunca la del día.",
+            "por_que": "Es el corazón del modelo: los rezagos suman el 92 % de la ganancia de los árboles (m4sem 57,5 %, b1 26,7 %). «El modelo sigue siendo la media de las 4 mismas semanas corregida por calendario.»",
+            "fuente": "experimentos/E11_modelo_mejorado/comun_e11.py (OBJETIVOS, construir_panel, desplazar_horizonte); experimentos/E1_lgbm_salida/README.md § 1; experimentos/E11_modelo_mejorado/README.md § 2 «Importancia de variables»; experimentos/E11_modelo_mejorado/modelos/metadatos.json: modelos.H7.importancia_top20"
+          },
+          {
+            "nombre": "Totales diarios rezagados de la ruta (E1)",
+            "n": 5,
+            "variables": [
+              "tot_pax_lag7",
+              "tot_pax_lag14",
+              "tot_viajes_lag7",
+              "tot_viajes_lag14",
+              "tot_pax_roll7_h7"
+            ],
+            "definiciones": "Pasajeros y viajes de toda la ruta hace 7 y 14 días y la media de 7 días; con corrección de fallas, las franjas con > 80 % de viajes sin registro conservan su valor original en el total.",
+            "por_que": "Dan el nivel reciente de la ruta, no solo de la franja.",
+            "fuente": "experimentos/E11_modelo_mejorado/comun_e11.py (construir_panel, bloque «totales diarios»)"
+          },
+          {
+            "nombre": "Calendario nuevo de E11",
+            "n": 6,
+            "variables": [
+              "vac_escolar",
+              "vac_univ",
+              "frac_vac_escolar_ventana",
+              "frac_vac_univ_ventana",
+              "frac_especial_ventana",
+              "dias_desde_pago"
+            ],
+            "definiciones": "vac_escolar: recesos de los colegios oficiales de Barranquilla (E10 y Resolución 07248 de 2025 para 2026); vac_univ: fuera del consenso de clases de las universidades de E10 (2026 supuesto); frac_*_ventana: fracción de los 4 días de referencia de los rezagos (d − 7 … d − 28) en vacaciones o festivo/Carnaval/Semana Santa; dias_desde_pago: días desde el último 15 o último día del mes.",
+            "por_que": "Se probaron porque la hipótesis era que faltaban los calendarios escolar y universitario. Aportan muy poco (−0,05 puntos, no significativo; 0,6 % de la ganancia) porque E1 ya aprendía las vacaciones con `vacaciones`, `mes` y los rezagos. Se quedan porque la variante elegida (V4) los incluye y ayudan en vacaciones escolares (16,3 % → 15,9 % en V2).",
+            "fuente": "experimentos/E11_modelo_mejorado/README.md § 1 «Variables nuevas», § 2 Tabla 1 (V1), Tabla 3 y «Importancia de variables»; experimentos/E11_modelo_mejorado/comun_e11.py (CAL_NUEVO, calendario_escolar_univ, dias_desde_pago)"
+          },
+          {
+            "nombre": "Climatología (E11)",
+            "n": 4,
+            "variables": [
+              "temporada",
+              "clim_p_mes_hora",
+              "clim_prob_mes_hora",
+              "clim_p_viaje4"
+            ],
+            "definiciones": "Lluvia media y probabilidad de lluvia (≥ 0,5 mm) por mes × hora, lluvia esperada de h a h + 3 y temporada (0: dic–mar, 1: abr–jun, 2: jul–ago, 3: sep–nov), de Open-Meteo 2013–2022: se conoce con cualquier antelación y es anterior al periodo evaluado.",
+            "por_que": "Prácticamente nula (−0,03 puntos; 0,1 % de la ganancia). Confirma E9: la lluvia casi no mueve la demanda.",
+            "fuente": "experimentos/E11_modelo_mejorado/README.md § 1 «Variables nuevas», § 2 Tabla 1 (V2) y «Importancia de variables»; experimentos/E11_modelo_mejorado/comun_e11.py (CLIM, climatologia)"
+          }
+        ],
+        "no_incluidas": [
+          {
+            "que": "Lluvia observada del mismo día (`p_h`, `max_prev3`, `p_viaje4`, `p_dia_4_21`)",
+            "por_que": "Solo en la variante N (nowcast), que es una cota: no se conoce con 7 días y empata con V3 (−0,02 puntos). `modelo_final.py --clima` la permite, pero el README no la recomienda.",
+            "fuente": "experimentos/E11_modelo_mejorado/README.md § 1 (Variantes, N) y § 4 (b)"
+          },
+          {
+            "que": "Etiquetas de días atípicos de E10",
+            "por_que": "Solo como peso de entrenamiento, nunca como variable.",
+            "fuente": "experimentos/E11_modelo_mejorado/README.md § 1 «Días atípicos: solo como peso, nunca como variable»"
+          },
+          {
+            "que": "Oferta programada del día",
+            "por_que": "No entra; E1 estimó que valdría 1 a 1,5 puntos (cota b*). Es el siguiente paso.",
+            "fuente": "experimentos/E1_lgbm_salida/README.md § 2 (b*) y § 6; experimentos/E11_modelo_mejorado/README.md § 5 limitación 7"
+          }
+        ],
+        "importancia_modelo_final_H7": {
+          "texto": "Porcentaje de la ganancia total de los árboles, modelo de producción H = 7 entrenado con 2023–2025.",
+          "top": {
+            "pasajeros_total_m4sem": 57.46,
+            "pasajeros_total_b1": 26.67,
+            "tipo_dia": 2.92,
+            "pasajeros_total_roll7_h7": 2.12,
+            "festivo": 1.95,
+            "pasajeros_total_lag7": 1.09,
+            "viajes_validos_m4sem": 1.05,
+            "pasajeros_total_roll28_h7": 0.69,
+            "pasajeros_total_sd8sem": 0.57,
+            "carnaval_central": 0.5,
+            "viajes_validos_b1": 0.48,
+            "hora": 0.47,
+            "pasajeros_total_lag14": 0.45,
+            "pasajeros_total_lag364": 0.43,
+            "dia_anio": 0.38,
+            "vac_escolar": 0.28,
+            "carnaval": 0.24,
+            "viajes_validos_roll28_h7": 0.24,
+            "semana_santa": 0.21,
+            "dia_semana": 0.18
+          },
+          "por_grupo": {
+            "rezagos_y_totales": 92.08,
+            "calendario_base_y_especial": 7.19,
+            "calendario_E11": 0.59,
+            "climatologia": 0.1,
+            "eventos": 0.04
+          },
+          "nota": "Las 10 variables nuevas de E11 suman el 0,7 % de la ganancia (0,68 % en el promedio de los pliegues, verificación). E11 cambia sobre todo con qué filas se aprende la corrección, no las variables.",
+          "ruta_json": "experimentos/E11_modelo_mejorado/modelos/metadatos.json: modelos.H7.importancia_top20 (por grupo: calculado desde modelos/modelo_V4_H7.txt con lightgbm.Booster.feature_importance('gain'))",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 «Importancia de variables» y § 8; experimentos/E11_modelo_mejorado/fig3_importancia_modelo_final.png"
+        }
+      },
+      "hiperparametros": {
+        "texto": "Los de E1 (configuración C0): 600 árboles, tasa de aprendizaje 0,03, 31 hojas, mínimo 40 observaciones por hoja, submuestreo de filas 0,8 en cada árbol, submuestreo de columnas 0,8, regularización L2 λ = 1, pérdida de Poisson, semilla 42, 2 hilos. El ajuste anidado de hiperparámetros empeoró (+0,07 puntos), así que producción usa C0.",
+        "valores": {
+          "objective": "poisson",
+          "n_estimators": 600,
+          "learning_rate": 0.03,
+          "num_leaves": 31,
+          "min_child_samples": 40,
+          "subsample": 0.8,
+          "subsample_freq": 1,
+          "colsample_bytree": 0.8,
+          "reg_lambda": 1.0,
+          "random_state": 42,
+          "n_jobs": 2
+        },
+        "ruta_json": "experimentos/E11_modelo_mejorado/seleccion.json: params; experimentos/E11_modelo_mejorado/resultados.json: ajuste_anidado",
+        "fuente": "experimentos/E11_modelo_mejorado/seleccion.json; experimentos/E11_modelo_mejorado/README.md § 1 «Ajuste anidado» y § 2 «Ajuste anidado»"
+      },
+      "protocolo_validacion": {
+        "texto": "El protocolo común a los dos modelos, con h = 1 y h = 7, más la evaluación por antelación H = 14, 21 y 28. La regla de selección entre variantes se fijó antes de ver resultados: entre V1 y V5, la de menor WAPE con h = 7 cuyo IC 95 % de la diferencia con V0 quede por debajo de 0; si ninguna cumple, se queda V0. Cumplieron V3, V4 y V5; V4 tiene el menor WAPE (13,939 % frente a 13,945 % de V3: operativamente son el mismo modelo).",
+        "reservas": [
+          "Selección optimista: la variante se eligió sobre los mismos 12 pliegues que se reportan (como en E1, E6 y E9).",
+          "En la evaluación por antelación cada pliegue entrena hasta el inicio del mes de prueba, así que con H = 28 los primeros días usan datos posteriores a la fecha de emisión: el 14,4 % de H = 28 puede ser algo optimista. En `modelo_final.py` el entrenamiento termina en la fecha de emisión.",
+          "No se pudo verificar que la regla de selección y los pesos se fijaran antes de ver resultados; el código es coherente con lo que se declara."
+        ],
+        "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: seleccion.regla, seleccion.variantes_significativas, mejor_variante",
+        "fuente": "experimentos/E11_modelo_mejorado/README.md § 1 «Protocolo y selección», § 2 «Selección», § 5 limitación 1 y § 8 «Reservas añadidas»"
+      },
+      "errores": {
+        "nota": "Pasajeros por hora de salida, 2025, 12 pliegues, 18.615 franjas. La mejora se mide frente a V0 (E1) y frente a B1 (regla manual).",
+        "global_h7": {
+          "WAPE": {
+            "valor": 13.939,
+            "texto": "13,94 %",
+            "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: variantes[clave=V4_h7].metricas_global.WAPE"
+          },
+          "MAE": {
+            "valor": 96.4,
+            "texto": "96,4 pasajeros por franja"
+          },
+          "RMSE": {
+            "valor": 144.0,
+            "texto": "144,0"
+          },
+          "sesgo_pax_franja": {
+            "valor": 9.8,
+            "texto": "+9,8 pasajeros por franja"
+          },
+          "sesgo_pct": {
+            "valor": 1.42,
+            "texto": "+1,42 % del total (V0: −0,33 %)",
+            "ruta_json": "experimentos/E12_comparacion_modelos/resultados/V4_lightgbm.json: metricas_global.sesgo_pct"
+          },
+          "total_diario_por_ruta_WAPE": {
+            "valor": 4.86,
+            "texto": "4,86 % (B1: 12,75 %; V0: 5,55 %)"
+          },
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 1 y § 3; § 8 (sesgo)"
+        },
+        "global_h1": {
+          "WAPE": {
+            "valor": 13.831,
+            "texto": "13,83 % (V0: 14,10 %; B1: 20,04 %)",
+            "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: variantes[clave=V4_h1].metricas_global.WAPE"
+          },
+          "nota": "Saber lo de ayer aporta poco: 0,1 puntos frente a h = 7.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 1"
+        },
+        "frente_a_V0_h7": {
+          "dif_pp": {
+            "valor": -0.46,
+            "texto": "−0,46 puntos [−0,60; −0,33]",
+            "ic": [
+              -0.595,
+              -0.332
+            ],
+            "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: comparacion_vs_V0.V4_h7"
+          },
+          "meses_mejor": "10 de 12 (peor en febrero +0,06 y noviembre +0,13)",
+          "pruebas": "t pareada por mes p = 0,10; Wilcoxon p = 0,003; bootstrap por semanas (más conservador) [−0,76; −0,22]",
+          "sin_agosto": {
+            "valor": -0.21,
+            "texto": "−0,21 puntos: el 55 % de la mejora sale de agosto de 2025"
+          },
+          "h1": "−0,27 [−0,39; −0,15], 8 de 12 meses",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 (Tabla 1, «Pruebas por pliegue»), § 3, § 5 limitación 2 y § 8"
+        },
+        "frente_a_B1_h7": {
+          "texto": "B1 queda +6,11 puntos por encima de V4 [+4,77; +7,65], peor en los 12 meses (arnés E12); V0 ya mejoraba a B1 en −5,65 [−7,24; −4,38].",
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados.json: ranking.top (B1_manual) · experimentos/E11_modelo_mejorado/resultados.json: comparacion_vs_V0.V0_vs_B1_h7",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 2 (fila 55); experimentos/E11_modelo_mejorado/README.md § 2 Tabla 1"
+        },
+        "por_ruta_h7": {
+          "V4": {
+            "SILENCIO": 15.5155,
+            "CRA 54": 11.5399,
+            "CL 72": 19.0788
+          },
+          "V0": {
+            "SILENCIO": 16.0372,
+            "CRA 54": 12.0371,
+            "CL 72": 19.3286
+          },
+          "B1": {
+            "SILENCIO": 21.5124,
+            "CRA 54": 17.9738,
+            "CL 72": 24.3205
+          },
+          "texto": "La mejora es pareja: −0,5 puntos en SILENCIO y CRA 54 y −0,25 en CL 72. CL 72 sigue siendo la ruta más difícil (menos viajes por franja).",
+          "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: horizontes.SEL_H7.por_ruta.*.WAPE",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 2"
+        },
+        "por_tipo_dia_h7": {
+          "V4": {
+            "Laboral": 13.3575,
+            "Sábado": 13.4483,
+            "Domingo/festivo": 19.7449
+          },
+          "B1": {
+            "Laboral": 17.6201,
+            "Sábado": 15.101,
+            "Domingo/festivo": 48.5755
+          },
+          "texto": "Donde más gana el modelo es en domingos y festivos: la media de 8 semanas nunca acierta un festivo.",
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados/V4_lightgbm.json: por_tipo_dia.*.WAPE · experimentos/E12_comparacion_modelos/resultados/B1_manual.json: por_tipo_dia.*.WAPE",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 2; experimentos/E1_lgbm_salida/README.md § 2"
+        },
+        "por_franja_h7": {
+          "V4": {
+            "4-8 h": 11.3679,
+            "9-15 h": 14.2448,
+            "16-20 h": 18.3516
+          },
+          "B1": {
+            "4-8 h": 19.4125,
+            "9-15 h": 19.889,
+            "16-20 h": 21.6879
+          },
+          "texto": "Las tardes (16–20 h) son la franja peor en todas las rutas: ahí la oferta cambia más de un día a otro.",
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados/V4_lightgbm.json: por_franja.*.WAPE · experimentos/E12_comparacion_modelos/resultados/B1_manual.json: por_franja.*.WAPE",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 2; experimentos/E1_lgbm_salida/README.md § 2"
+        },
+        "por_mes_h7": {
+          "V4": {
+            "1": 13.6632,
+            "2": 12.6304,
+            "3": 14.2432,
+            "4": 12.9335,
+            "5": 13.3794,
+            "6": 15.9741,
+            "7": 15.5486,
+            "8": 14.0726,
+            "9": 12.6409,
+            "10": 13.3022,
+            "11": 12.8444,
+            "12": 16.6734
+          },
+          "V0": {
+            "1": 13.948,
+            "2": 12.5739,
+            "3": 14.4498,
+            "4": 13.1117,
+            "5": 13.4415,
+            "6": 16.228,
+            "7": 16.32,
+            "8": 17.2034,
+            "9": 12.8165,
+            "10": 13.6563,
+            "11": 12.7105,
+            "12": 16.8746
+          },
+          "B1": {
+            "1": 25.7315,
+            "2": 21.586,
+            "3": 21.56,
+            "4": 21.8226,
+            "5": 16.5997,
+            "6": 23.2206,
+            "7": 17.9633,
+            "8": 20.7933,
+            "9": 13.8656,
+            "10": 16.3888,
+            "11": 17.0146,
+            "12": 25.5452
+          },
+          "nota_redondeo": "Las cifras salen del archivo de resultados con dos decimales. Cuatro celdas del README de E11 están redondeadas hacia arriba (V4 sábado 13,5; V4 julio 15,6; V0 enero 14,0; B1 diciembre 25,6); en el archivo son 13,448, 15,549, 13,948 y 25,545.",
+          "texto": "Agosto de 2025 baja de 17,2 % a 14,1 % (−3,1 puntos): V0 subestimaba agosto un 10,1 % (1.006.003 previstos frente a 1.118.882 reales) porque aprendía de los días de falla de julio; V4 queda en −2,3 %. En los demás meses la mejora es de 0,0 a 0,8 puntos.",
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados/V4_lightgbm.json: por_mes.*.WAPE · experimentos/E11_modelo_mejorado/resultados.json: comparacion_vs_V0.V4_h7.dif_por_mes_pp",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 5 y § 3"
+        },
+        "por_antelacion": {
+          "V4": {
+            "H7": 13.939,
+            "H14": 14.084,
+            "H21": 14.2683,
+            "H28": 14.3967
+          },
+          "V0": {
+            "H7": 14.3989,
+            "H14": 14.5913,
+            "H21": 14.8207,
+            "H28": 14.8035
+          },
+          "B1": {
+            "H7": 20.0447,
+            "H14": 20.4807,
+            "H21": 20.881,
+            "H28": 21.1932
+          },
+          "V4_H28_por_ruta": {
+            "SILENCIO": 16.0281,
+            "CRA 54": 11.9068,
+            "CL 72": 19.7381
+          },
+          "texto": "Pronosticar con 4 semanas de antelación cuesta solo 0,5 puntos: V4 con H = 28 rinde lo mismo que E1 con H = 7. (El revisor independiente advierte que la cifra con H = 28 puede ser algo optimista: cada pliegue entrena hasta el inicio del mes de prueba.)",
+          "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: horizontes.SEL_H{7,14,21,28}.global_.WAPE (13,939 / 14,084 / 14,268 / 14,397)",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 6 y § 8"
+        },
+        "por_subconjunto_h7": {
+          "V4": {
+            "vacaciones escolares (85 días)": 15.8456,
+            "clases escolares (280)": 13.4631,
+            "vacaciones universitarias (134)": 15.2258,
+            "transición de periodo (159)": 14.7684,
+            "días lluviosos ≥ 5 mm (82)": 13.8934,
+            "días secos < 1 mm (173)": 14.0162,
+            "días atípicos no predecibles de E10 (4)": 63.2656,
+            "franjas con ≥ 25 % sin registro (475)": 71.1726,
+            "días normales (362)": 13.3155
+          },
+          "B1": {
+            "vacaciones escolares (85 días)": 28.7108,
+            "clases escolares (280)": 17.8813,
+            "vacaciones universitarias (134)": 22.3213,
+            "transición de periodo (159)": 22.6019,
+            "días lluviosos ≥ 5 mm (82)": 18.0006,
+            "días secos < 1 mm (173)": 21.4181,
+            "días atípicos no predecibles de E10 (4)": 63.6834,
+            "franjas con ≥ 25 % sin registro (475)": 82.8128,
+            "días normales (362)": 19.4055
+          },
+          "texto": "El modelo rinde igual en días lluviosos y secos. En las franjas con fallas de registro (errores de datos, no demanda real) V4 empeora de 67,0 % (V0) a 71,2 %: ya no aprende a prever casi cero, que es el comportamiento deseado para despachar.",
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados/V4_lightgbm.json: por_subconjunto.*.WAPE",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 3 (vacaciones escolares corregido a 15,8 % en § 8)"
+        },
+        "sesgo": {
+          "texto": "V4 sobrestima el total un +1,4 % con h = 7 (V0: −0,3 %). Por mes llega a +4,9 % en diciembre, +3,3 % en enero y +2,7 % en julio; solo agosto queda corto (−2,3 %). Para despachar, pasarse un poco es preferible a quedarse corto (la sub-oferta es el error caro, E1 y D1), pero conviene vigilarlo.",
+          "por_mes_pct": {
+            "1": 3.3356,
+            "2": 0.8402,
+            "3": 0.4384,
+            "4": 1.5927,
+            "5": 1.3158,
+            "6": 0.9581,
+            "7": 2.711,
+            "8": -2.2908,
+            "9": 2.1556,
+            "10": 0.9593,
+            "11": 0.7073,
+            "12": 4.904
+          },
+          "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: sesgo_pct_por_mes_h7.V4",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 3 «El costo es un sesgo positivo» y § 5 limitación 4"
+        },
+        "en_2024": {
+          "WAPE": {
+            "valor": 15.734,
+            "texto": "15,73 % (sesgo +1,96 %) con el protocolo de 2024 de E12",
+            "ruta_json": "experimentos/E12_comparacion_modelos/resultados.json: validacion_2024.V4.WAPE"
+          },
+          "nota": "2024 es un año más duro: enero de 2024 solo entrena con 2023 (V4 marca 18,3 %) y junio tiene 8,8 % de viajes sin registro (23,1 %).",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 6 y § 10 limitación 8"
+        }
+      },
+      "probado_y_descartado": [
+        {
+          "que": "V1: calendarios escolar y universitario (6 variables)",
+          "resultado": "14,35 %: −0,05 [−0,13; +0,02] frente a V0, 6 de 12 meses, p = 0,47. No significativo.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 1"
+        },
+        {
+          "que": "V2: + climatología (4 variables)",
+          "resultado": "14,32 %: −0,03 [−0,07; +0,01] frente a V1. No significativo.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 1 y «Diferencias paso a paso»"
+        },
+        {
+          "que": "V3: + pesos a días atípicos (0,25) y franjas con fallas (0,1)",
+          "resultado": "13,95 %: −0,38 [−0,50; −0,26] frente a V2, 10 de 12 meses, Wilcoxon p = 0,016. Es el único paso que mejora.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 «Diferencias paso a paso»"
+        },
+        {
+          "que": "V4: + rezagos corregidos por fallas (elegida)",
+          "resultado": "13,94 %: −0,01 [−0,05; +0,04] frente a V3. Empate; V4 gana la regla por 0,006 puntos y necesita los eventos GPS del viaje; V3 rinde igual sin ellos y es más sencillo de desplegar.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 «Selección» y § 8 «Reservas»"
+        },
+        {
+          "que": "V5: + pesos por recencia (vida media 365 días)",
+          "resultado": "14,00 %: +0,05 [+0,005; +0,09] frente a V3. Peor.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 1"
+        },
+        {
+          "que": "N: + lluvia observada del mismo día (cota, no pronosticable con 7 días)",
+          "resultado": "13,92 %: −0,02 [−0,06; +0,01] frente a V3. No hay señal aprovechable, como en E9 (donde la lluvia observada sobre E1 daba +0,23, peor).",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 1 y Tabla 3 («Lluvia»); informe_resultados.md § 3 Tabla 1 (E9)"
+        },
+        {
+          "que": "Ajuste anidado de hiperparámetros (C1 más simple, C2 más regularizado)",
+          "resultado": "14,01 %: +0,07 [+0,02; +0,13], peor. Con 12 pliegues completos C1 da 14,15 % y C2 14,19 %. Igual que en E1 (búsqueda aleatoria: 14,50 %), el problema no pide más capacidad.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 «Ajuste anidado»; experimentos/E1_lgbm_salida/README.md § 2 (d)"
+        },
+        {
+          "que": "Descomposición de los pesos: V3a solo etiquetas de E10, V3b solo la regla mecánica de fallas, V3c excluir ambos",
+          "resultado": "13,94 / 14,00 / 13,99 %. La mejora no depende del peso exacto: la regla mecánica sola (V3b, −0,32) da el 84 % de la ganancia sin necesitar etiquetas manuales; fuera de agosto vale ~0,1 punto.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 4 y § 8 «Reservas añadidas»"
+        },
+        {
+          "que": "Un modelo por ruta en vez de uno conjunto (E6)",
+          "resultado": "14,25 % frente a 14,40 %: −0,14 ± 0,52 puntos de media mensual, p = 0,36 (8 de 12 meses). Dentro del ruido: basta un modelo para las tres rutas, que correlacionan 0,97 día a día.",
+          "fuente": "experimentos/E6_por_ruta/README.md, tabla de variantes y conclusión 2; informe_resultados.md § 3 Tabla 1"
+        },
+        {
+          "que": "Demanda reciente de las otras rutas como variable (E6)",
+          "resultado": "14,42 %: +0,01 de media mensual (p = 0,70). No aporta.",
+          "fuente": "experimentos/E6_por_ruta/README.md, tabla de variantes (V4 conjunto + demanda rezagada de otras rutas); informe_resultados.md § 3 Tabla 1"
+        },
+        {
+          "que": "Pronóstico descompuesto pasajeros por viaje × viajes previstos (E1 b)",
+          "resultado": "15,0 % frente a 14,4 %: multiplicar dos pronósticos suma errores. Con la oferta real conocida (b*, cota) bajaría a 13,5 %.",
+          "fuente": "experimentos/E1_lgbm_salida/README.md § 2"
+        },
+        {
+          "que": "Pérdida L2 en vez de Poisson (E1 a')",
+          "resultado": "14,7 % frente a 14,4 %: Poisson gana 0,3 puntos y es más estable en meses con días atípicos.",
+          "fuente": "experimentos/E1_lgbm_salida/README.md § 2"
+        },
+        {
+          "que": "Quitar los eventos (E1 c) / quitar el calendario especial (E1 c')",
+          "resultado": "Sin eventos no cambia nada (14,38 %); sin Carnaval, Semana Santa, 1 de enero y Navidad sube a 15,9 %.",
+          "fuente": "experimentos/E1_lgbm_salida/README.md § 2"
+        }
+      ],
+      "decisiones_de_diseno": {
+        "ayuda": [
+          {
+            "decision": "No aprender de datos corruptos: peso 0,25 a los 31 días atípicos no predecibles y 0,1 a las franjas con ≥ 25 % de viajes sin registro.",
+            "evidencia": "−0,38 puntos [−0,50; −0,26] (V3 frente a V2), 10 de 12 meses. Explicación probable: el pliegue de agosto entrenaba con julio de 2025, que tiene dos días de fallas masivas (9 y 29 de julio, −33 % y −29 %); con `tendencia` y `dia_anio` los árboles ponían esas últimas filas en hojas que se aplicaban a todo agosto.",
+            "fuente": "experimentos/E11_modelo_mejorado/README.md «Respuesta corta», § 2 y § 3"
+          },
+          {
+            "decision": "Rezagos corregidos por fallas (pax × válidos / con registro).",
+            "evidencia": "Empate con V3 (−0,01). Se eligió por la regla; en producción exige los eventos GPS de `conteo_viajes`.",
+            "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 «Selección» y § 8"
+          },
+          {
+            "decision": "Pérdida de Poisson y pocos hiperparámetros, los de E1.",
+            "evidencia": "Poisson gana 0,3 a L2; ajustar hiperparámetros empeora en E1 (+0,10) y en E11 (+0,07).",
+            "fuente": "experimentos/E1_lgbm_salida/README.md § 2; experimentos/E11_modelo_mejorado/README.md § 2"
+          },
+          {
+            "decision": "Calendario especial (Carnaval, Semana Santa, 1 de enero, Navidad) y tipo de día.",
+            "evidencia": "Sin calendario especial el WAPE sube a 15,9 %; en festivos el modelo se equivoca 25 % y la regla manual 146 %.",
+            "fuente": "experimentos/E1_lgbm_salida/README.md § 2"
+          },
+          {
+            "decision": "Un solo modelo para las tres rutas, con la ruta como variable categórica.",
+            "evidencia": "Un modelo por ruta no mejora (E6: −0,14 puntos, p = 0,36); las tres rutas comparten el 95,1 % de su variación.",
+            "fuente": "experimentos/E6_por_ruta/README.md conclusión 2; informe_resultados.md § 3 «Basta un modelo conjunto»"
+          }
+        ],
+        "no_ayuda": [
+          {
+            "decision": "Calendarios escolar y universitario",
+            "evidencia": "−0,05 puntos, no significativo; solo se notan en vacaciones escolares (16,3 % → 15,9 %), el 23 % de los días. E1 ya aprendía las vacaciones.",
+            "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tabla 1 y Tabla 3"
+          },
+          {
+            "decision": "Lluvia: climatología y lluvia observada",
+            "evidencia": "Climatología −0,03; lluvia observada (cota) −0,02 frente a V3; el modelo rinde igual en días lluviosos y secos (13,9 % y 14,0 %). E9: la lluvia explica el 1,9 % de la variación diaria; con 5–10 mm/h hay 1,8 % menos pasajeros pero la vuelta tarda 2,7 % más, así que se necesitan los mismos buses.",
+            "fuente": "experimentos/E11_modelo_mejorado/README.md § 2; experimentos/E9_clima/README.md «Respuesta corta»; informe_resultados.md § 3 «La lluvia casi no mueve la demanda»"
+          },
+          {
+            "decision": "Modelo por ruta y demanda de las otras rutas",
+            "evidencia": "E6: 14,25 % (p = 0,36) y 14,42 % (p = 0,70).",
+            "fuente": "experimentos/E6_por_ruta/README.md; informe_resultados.md § 3 Tabla 1"
+          },
+          {
+            "decision": "Más peso a los datos recientes",
+            "evidencia": "V5 empeora +0,05 [+0,005; +0,09].",
+            "fuente": "experimentos/E11_modelo_mejorado/README.md § 2"
+          },
+          {
+            "decision": "Eventos (partidos, conciertos)",
+            "evidencia": "8 partidos y 8 eventos en tres años no dejan señal (E1 c).",
+            "fuente": "experimentos/E1_lgbm_salida/README.md § 2"
+          }
+        ]
+      },
+      "produccion": {
+        "script": "experimentos/E11_modelo_mejorado/modelo_final.py",
+        "comando": "PYTHONIOENCODING=utf-8 MPLBACKEND=Agg python experimentos/E11_modelo_mejorado/modelo_final.py [--desde AAAA-MM-DD --hasta AAAA-MM-DD --salida archivo.parquet --reentrenar --clima lluvia.parquet]",
+        "que_hace": "Lee `seleccion.json` (V4, parámetros C0), entrena con todos los días observados (2023-01-01 a 2025-12-31, sin los dos días R5, con los pesos de V4 y rezagos corregidos) un modelo por antelación H = 7, 14, 21 y 28 (`modelos/modelo_V4_H{7,14,21,28}.txt`) y pronostica el rango pedido: cada fecha d usa el modelo H = 7 × ⌈(d − 31-12-2025)/7⌉. Si el modelo guardado tiene las mismas variables lo reutiliza; `--reentrenar` lo fuerza. Fuera de 28 días entrena H = 35, 42… a pedido (no evaluados). Con `--clima` usa el nowcast N para las fechas a ≤ 7 días con lluvia disponible (no recomendado).",
+        "reentrenar_cada": "Cada semana, con los datos nuevos de `progvehiculos` y `conteo_viajes` (los rezagos y la regla mecánica de fallas se recalculan solos). Las etiquetas de días atípicos de E10 no existen para las semanas nuevas: en producción solo actúa la regla mecánica (peso 0,1).",
+        "calendarios_futuros": "Festivos del paquete `holidays` (Reyes observado el 12-1-2026); Carnaval calculado desde la Pascua; recesos escolares y universitarios de los CSV de E10 y de `calendario_2026.csv` (para años siguientes basta añadir filas; el script avisa si hay fechas sin calendario documentado).",
+        "computo": {
+          "entrenamiento_4_modelos_s": {
+            "valor": 27,
+            "texto": "27 s los cuatro modelos (6–20 s por reentrenamiento según E12)"
+          },
+          "evaluacion_completa_min": {
+            "valor": 25.4,
+            "texto": "La corrida completa de evaluación (`run.py`) tardó 25,4 min (1.524 s); con caché, 3,5 min y 41 s",
+            "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: tiempo_s_corrida_completa"
+          },
+          "hardware": "CPU, 2 hilos, semilla 42. Python global con LightGBM, pandas, pyarrow y holidays. No se conecta a la base de datos."
+        },
+        "salidas": {
+          "pronostico": "`pronostico_2026_enero.parquet`: 1.428 filas = 3 rutas × 28 días × 17 horas con columnas idruta, ruta, dia, hora, dia_semana, tipo_dia, festivo, vac_escolar, vac_univ, carnaval, semana_santa, horizonte_dias, modelo, pasajeros_pred; `pronostico_2026_enero_semanal.csv` con los totales por ruta y semana (sigue el nombre de `--salida`).",
+          "modelos": "`modelos/modelo_V4_H7.txt`, `_H14`, `_H21`, `_H28` (LightGBM) y `modelos/metadatos.json` (variante, parámetros, importancia top 20 y resumen del pronóstico).",
+          "figuras": "`fig3_importancia_modelo_final.png` y `fig4_pronostico_2026_enero.png` (solo con la salida por defecto)."
+        },
+        "pronostico_enero_2026": {
+          "total": {
+            "valor": 797788,
+            "texto": "797.788 pasajeros del 1 al 28 de enero de 2026 (salidas de 4 a 20 h); verificación: 797.789"
+          },
+          "por_ruta": {
+            "SILENCIO": 215670,
+            "CRA 54": 436172,
+            "CL 72": 145946
+          },
+          "por_semana": {
+            "1 (1-7, H=7)": 162055,
+            "2 (8-14, H=14)": 190545,
+            "3 (15-21, H=21)": 213840,
+            "4 (22-28, H=28)": 231349
+          },
+          "frente_a_2025_alineado": {
+            "valor": -11.4,
+            "texto": "−11,4 % frente a las mismas fechas de 2025 alineadas por día de la semana (900.344): parte es calendario (el 1 y el 12 de enero de 2026 son festivos) y parte la tendencia de −8 % anual que arrastran los rezagos"
+          },
+          "frente_a_E8": {
+            "valor": -2.1,
+            "texto": "−2,1 % frente al ensamble diario de E8 (814.856), un método completamente distinto"
+          },
+          "forma": "La semana 4 tiene un 43 % más de pasajeros que la 1 (fin de vacaciones); el 26-1 (vuelta a clases de los colegios oficiales) sube 12 % frente al lunes anterior; el 1 de enero cae al 16–22 % de un laboral medio; Reyes queda 7–13 % por debajo del domingo anterior.",
+          "ruta_json": "experimentos/E11_modelo_mejorado/modelos/metadatos.json: total_por_ruta, resumen_semanal",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 4 Tabla 7 y § 8"
+        },
+        "fuente": "experimentos/E11_modelo_mejorado/README.md «Ejecución», § 4 y § 7; experimentos/E11_modelo_mejorado/modelo_final.py (docstring, leer_seleccion, entrenar_o_cargar, pronosticar, main)"
+      },
+      "verificacion": {
+        "fecha": "2026-10-05",
+        "veredicto": "Confiable con reservas (revisión adversarial independiente, sin modificar código ni resultados).",
+        "que_se_comprobo": [
+          "No se encontró fuga de información: pesos y corrección de rezagos solo tocan filas anteriores al mes de prueba; el objetivo evaluado no se corrige; todas las variables respetan h y H; el nowcast está rotulado como cota; B1 es la misma regla que en E1 (diferencia 0).",
+          "WAPE recalculados de forma independiente: V4 13,94 %, V0 14,40 %, B1 20,04 %, N 13,92 % (h = 7); V4 13,83 % y V0 14,10 % (h = 1).",
+          "El objetivo real coincide con el recalculado desde `progvehiculos` crudo (diferencia 0; 12.872.401 pasajeros en 2025).",
+          "Bootstrap propio de días (otra semilla, 4.000 réplicas): −0,46 [−0,60; −0,33]; por semanas: [−0,76; −0,22]. 10 de 12 meses; t p = 0,10; Wilcoxon p = 0,003; sin agosto −0,21.",
+          "Tablas por ruta, tipo de día, franja, horizontes, descomposición y ajuste anidado confirmadas desde `cache/`. Pronóstico de enero de 2026 confirmado (797.789; −11,4 %; −2,1 % frente a E8)."
+        ],
+        "correcciones": [
+          "`pronostico_2026_enero_semanal.csv` tenía los totales de la prueba de Carnaval; se regeneró y se corrigió `modelo_final.py` para que el CSV semanal siga el nombre de `--salida`.",
+          "Tabla 3: V4 en vacaciones escolares 15,8 %, no 15,9 %.",
+          "El 12 de enero queda 7–13 % (no 7–12 %) por debajo del domingo anterior.",
+          "`tiempo_s` = 41 s es de la corrida con caché; la completa tardó 1.524 s."
+        ],
+        "reservas": [
+          "Fuera de agosto, la parte desplegable sin etiquetas (regla mecánica) vale ~0,1 punto.",
+          "La evaluación por horizonte mezcla dos cosas: con H = 28 los primeros días usan datos posteriores a la fecha de emisión (algo optimista).",
+          "Las tablas GPS no tienen el último día de cada mes: ese día todo viaje con 0 pasajeros cuenta como sin registro (3,9 % de franjas marcadas frente a 2,5 %; efecto despreciable).",
+          "V4 necesita `conteo_viajes.eventos`; V3 rinde igual sin ellos.",
+          "No se pudo verificar que la regla y los pesos se fijaran antes de ver resultados."
+        ],
+        "ruta_json": "experimentos/E11_modelo_mejorado/resultados.json: verificacion",
+        "fuente": "experimentos/E11_modelo_mejorado/README.md § 8 Verificación"
+      },
+      "limites_y_riesgos": [
+        {
+          "limite": "Nivel de 2026",
+          "texto": "Según los agregados de Sobusa (E8), de enero a agosto de 2026 hubo +7,5 % de subidas y +14,6 % de viajes frente a 2025, cuando todos los modelos esperaban −8 %. Un modelo entrenado hasta el 31-12-2025 no puede anticiparlo porque no recibe la oferta programada ni datos de 2026: para enero de 2026 el pronóstico quedaría ≈ 18 % corto si ese aumento es real. Remedio: reentrenar cada semana con datos de 2026 (con 1–2 semanas el modelo H = 7 ya ve el nuevo nivel; H = 21–28 tardan 3–4 semanas) y, si se confirma el aumento de oferta, añadir la oferta programada como variable. E8 advierte que parte de la subida podría ser un artefacto de `timbradas_anio`; solo `progvehiculos` 2026 lo confirma.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 4 «No se puede evaluar hora a hora» y § 6; experimentos/E12_comparacion_modelos/README.md «(c) Enero de 2026», «Error de nivel de 2026»; experimentos/E8_validacion_2026/README.md «Respuesta corta»; informe_resultados.md § 3 «Validación con 2026 (E8)»"
+        },
+        {
+          "limite": "Días especiales y atípicos",
+          "texto": "Domingos y festivos siguen siendo lo más difícil (19,7 % frente a 13,4 % laboral; 25 % en festivos según E1; 33 % en Carnaval). En los 4 días atípicos no predecibles de 2025 (paro, aguaceros, fallas) el error es de 63 %, igual que la regla manual: ningún modelo los anticipa. Diciembre y enero tienen el mayor sesgo positivo (+4,9 % y +3,3 %).",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 2 Tablas 2 y 3 y § 3; experimentos/E1_lgbm_salida/README.md § 2"
+        },
+        {
+          "limite": "Dependencia del registro a bordo",
+          "texto": "El objetivo es lo que registró el equipo a bordo: una franja con el equipo caído vale 0 y el modelo la trata como falla (peso 0,1) pero no la imputa. V4 necesita los eventos GPS del viaje (`conteo_viajes.eventos`) para corregir rezagos; las tablas GPS no tienen el último día de cada mes. Las etiquetas de E10 se construyeron mirando la prensa después de los hechos: en producción solo actúa la regla mecánica (que da el 84 % de la ganancia en el año, ~0,1 punto fuera de agosto).",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 5 limitación 3 y § 8 «Reservas añadidas»"
+        },
+        {
+          "limite": "Objetivo viejo (E13)",
+          "texto": "El objetivo que usan E1–E12 cuenta solo los viajes marcados como válidos y deja fuera a los pasajeros de los viajes marcados como cancelados que sí corrieron (el total real es 5,6 %, 6,7 % y 7,7 % mayor en 2023, 2024 y 2025). Con el objetivo corregido de E13, V4 reentrenado baja de 13,55 % a 11,77 % contra lo que de verdad sube, y las horas con buses de menos pasan del 44 % al 27 %. Los programas de producción de E11 y E12 siguen entrenando con el objetivo viejo.",
+          "fuente": "experimentos/E13_limpieza_datos/README.md «Respuesta corta» y tabla A; informe_resultados.md § 3 Tabla 1c y § 8"
+        },
+        {
+          "limite": "Ganancia concentrada y selección optimista",
+          "texto": "El 55 % de la mejora frente a E1 sale de agosto de 2025; sin agosto quedan −0,21 puntos (t p = 0,10, Wilcoxon p = 0,003). La variante se eligió sobre los mismos 12 pliegues que se reportan.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 5 limitaciones 1 y 2"
+        },
+        {
+          "limite": "Sesgo positivo",
+          "texto": "+1,4 % en el año, hasta +4,9 % en diciembre, tras quitar peso a los días con caídas de datos.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 5 limitación 4"
+        },
+        {
+          "limite": "Calendarios incompletos y supuestos",
+          "texto": "Solo colegios oficiales de Barranquilla (no Soledad ni privados); el calendario universitario de 2026 es un supuesto; los eventos de `novedades_viales` valen 0 en 2026.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 5 limitaciones 5 y 6"
+        },
+        {
+          "limite": "Demanda servida, no latente; horizontes > 28 días sin validar; clima de un solo punto",
+          "texto": "El modelo no recibe la oferta programada (siguiente mejora, 1–1,5 puntos según E1); los horizontes de más de 28 días no se evaluaron; la lluvia de Open-Meteo suaviza los aguaceros.",
+          "fuente": "experimentos/E11_modelo_mejorado/README.md § 5 limitaciones 7, 8 y 9"
+        }
+      ]
+    },
+    "E12_hibrido": {
+      "nombre": "Híbrido de E12: LightGBM V4 + Chronos-2",
+      "nombre_tecnico": "hibrido_V4_chronos2cov",
+      "rol": "Recomendado para producción (E12 § 7, informe § 3 «Modelo recomendado», README raíz). Pipeline `modelo_final_hibrido.py`, que entrena V4 en sombra como respaldo.",
+      "resumen_para_jurado": "Es el mismo modelo de E11 con cuatro columnas más: el pronóstico que hace Chronos-2, un modelo de series de tiempo preentrenado de Amazon que se usa tal cual, sin reentrenar, con el calendario como dato de entrada. Chronos-2 resume en un número el nivel reciente, el patrón semanal y el calendario; LightGBM decide cuánto confiar en él y lo corrige con lo que Chronos-2 no ve (la oferta, la carga y los totales del sistema). Baja el error de 13,9 a 13,6 de cada 100 pasajeros, la mejora se repite en 2024, corre en CPU y, si Chronos-2 falla, queda el modelo de E11.",
+      "que_es": {
+        "texto": "LightGBM Poisson con las 77 variables de V4 (mismas filas, pesos 0,25/0,1, hiperparámetros C0 y semilla 42) más 4 variables tomadas del pronóstico zero-shot de Chronos-2 con calendario (variante `cov` de E12): la mediana `fm_c2`, los cuantiles `fm_c2_q10` y `fm_c2_q90`, y la razón `fm_c2_ratio` = mediana / media de las 4 mismas semanas de V4. En cada fila d, Chronos-2 se corre con contexto hasta d − H (el mismo corte que los rezagos de V4). Diseño fijado antes de ver resultados.",
+        "chronos2": "`amazon/chronos-2`: modelo fundacional de series de tiempo de Amazon, 119,5 millones de parámetros, pesos abiertos con licencia Apache-2.0, contexto de hasta 8.192 pasos, admite covariables pasadas y futuras (numéricas y categóricas). No se reentrenó ni se ajustó con los datos de Sobusa; los pesos se usan desde la caché local de Hugging Face sin red (`HF_HUB_OFFLINE=1`). Versión fijada: `chronos-forecasting` 2.3.2.",
+        "fuente": "experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 1 (tabla de modelos) y § 6 «Híbrido»; experimentos/E12_comparacion_modelos/modelos_fundacionales/hibrido_v4_chronos2.py (docstring); experimentos/E12_comparacion_modelos/modelo_final_hibrido.py (docstring, EXTRA, VARIABLES_HIB, REPO); experimentos/E12_comparacion_modelos/requisitos_e12.txt"
+      },
+      "que_predice": {
+        "unidad": "Lo mismo que V4: pasajeros por ruta × día × hora de salida (4–20 h), `pasajeros_total` sin corregir.",
+        "antelacion": "Evaluado con h = 7 en el protocolo de E12 (2025 y 2024). En producción, un modelo por antelación H = 7, 14, 21 y 28 días: la fecha d usa H = 7 × ⌈(d − origen)/7⌉, o el que se fije con `--antelacion`. Antelaciones mayores de 28 días no están soportadas (la historia de Chronos-2 se calculó con 28 pasos y no se evaluaron). H = 14–28 solo se probaron en una simulación del modo producción.",
+        "salida": "Pronóstico puntual recortado a 0 (`pasajeros_pred`), el de V4 en sombra (`pasajeros_pred_V4`) y las variables de Chronos-2 usadas (`fm_c2`, `fm_c2_q10`, `fm_c2_q90`). El intervalo q10–q90 de Chronos-2 cubre el 81–85 % de los casos (nominal 80 %), pero el híbrido en sí no entrega cuantiles propios.",
+        "fuente": "experimentos/E12_comparacion_modelos/README.md «Modelo para producción», puntos 1–3 y «Limitaciones» 1–2; experimentos/E12_comparacion_modelos/modelo_final_hibrido.py (HORIZONTES, PASOS, pronosticar); experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 3 («Cobertura del intervalo»)"
+      },
+      "datos_entrenamiento": {
+        "periodo": "El mismo panel de V4 (1-1-2023 a 31-12-2025, sin los dos días R5), observado hasta el origen (los viajes posteriores ni siquiera se leen). En la evaluación, cada pliegue entrena con los días anteriores al mes.",
+        "filas": {
+          "produccion_por_H": {
+            "H7": 55436,
+            "H14": 55079,
+            "H21": 54722,
+            "H28": 54365
+          },
+          "desde_por_H": {
+            "H7": "2023-01-08",
+            "H14": "2023-01-15",
+            "H21": "2023-01-22",
+            "H28": "2023-01-29"
+          },
+          "hasta": "2025-12-31",
+          "filas_con_variables_chronos_por_H": {
+            "H7": 54468,
+            "H14": 54111,
+            "H21": 53754,
+            "H28": 53397
+          },
+          "texto": "Las filas anteriores al 29-1-2023 (+ H) no tienen variables de Chronos-2 (hace falta ≥ 22 días de contexto); LightGBM las trata como vacías. No hay fuga.",
+          "ruta_json": "experimentos/E12_comparacion_modelos/modelos_hibrido/metadatos_pronostico_2026_enero_hibrido.json: modelos.H*.filas, desde, hasta, fuente_chronos_entrenamiento"
+        },
+        "filtros_y_pesos": "Idénticos a V4: filas con objetivo y `m4sem` no vacíos, sin R5, peso 0,25 en días atípicos de E10 y 0,1 en franjas con ≥ 25 % sin registro (`comun_e11.pesos` con `CFG_V4`), rezagos corregidos por fallas.",
+        "contexto_de_chronos2": "51 series diarias (ruta × hora) de `y_ctx_imp`: los pasajeros corregidos por viajes sin registro, con los huecos imputados de forma causal (es la serie de la que salen los rezagos de V4), desde el 1-1-2023 hasta el corte. Covariables pasadas y futuras de calendario (`COV_CAL`): tipo_dia (categórica), festivo, vac_escolar, vac_univ, carnaval, semana_santa. `cross_learning=False`: cada ítem es su propio grupo y no ve otros cortes.",
+        "historia_de_chronos2": "Para entrenar, Chronos-2 se corrió para todos los días históricos: H = 7 desde la caché de E12 (`modelos_fundacionales/cache/chronos2_cov_todos_los_dias.parquet`, del 29-1-2023 al 31-12-2025, corte d − 7); H = 14, 21 y 28 desde `cache_hibrido/` (1.061 cortes del 22-1-2023 al 17-12-2025, cada uno con 28 pasos; 19 MB). El script calcula y guarda solo los cortes que faltan.",
+        "fuente": "experimentos/E12_comparacion_modelos/README.md «Modelo para producción» punto 1; experimentos/E12_comparacion_modelos/modelo_final_hibrido.py (construir_panel, matriz_contexto, chronos_cortes, cortes_necesarios, filas_entrenamiento, entrenar); experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 2 («Contexto corregido como en V4»); experimentos/E12_comparacion_modelos/README.md «Verificación», «(b) Híbrido» (1.070 filas sin variables de Chronos-2)"
+      },
+      "variables": {
+        "total": {
+          "valor": 81,
+          "texto": "81 variables: las 77 de V4 (ver E11_V4.variables) + 4 de Chronos-2.",
+          "fuente": "experimentos/E12_comparacion_modelos/modelo_final_hibrido.py: VARIABLES_HIB = A.VARIABLES_V4 + EXTRA; experimentos/E12_comparacion_modelos/comun_e12.py: VARIABLES_V4 (77); modelos_hibrido/modelo_hibrido_H7.txt tiene 81 columnas"
+        },
+        "grupos_heredados_de_V4": "Calendario base (12), calendario especial (6), eventos (4), rezagos de demanda y oferta (40), totales diarios (5), calendario de E11 (6) y climatología (4): mismas definiciones y mismo porqué que en E11_V4.variables.grupos.",
+        "grupo_nuevo": {
+          "nombre": "Pronóstico de Chronos-2 con calendario",
+          "n": 4,
+          "variables": [
+            "fm_c2",
+            "fm_c2_q10",
+            "fm_c2_q90",
+            "fm_c2_ratio"
+          ],
+          "definiciones": "fm_c2: mediana del pronóstico de Chronos-2 para esa ruta, día y hora, hecho con contexto hasta d − H (paso H del pronóstico de ese corte), recortada a 0; fm_c2_q10 y fm_c2_q90: cuantiles 10 y 90 de ese pronóstico; fm_c2_ratio = fm_c2 / pasajeros_total_m4sem (vacía si la media de 4 semanas es ≤ 0).",
+          "por_que": "Chronos-2 resume en un número el nivel reciente, el patrón semanal y el calendario con una lectura distinta de la de los árboles; LightGBM lo corrige con las variables de V4 que los fundacionales no ven (oferta rezagada, carga, totales del sistema). Las 4 variables se llevan el 92 % de la ganancia de los árboles y los rezagos de V4 pasan de 92 % a 6 %.",
+          "fuente": "experimentos/E12_comparacion_modelos/modelo_final_hibrido.py (chronos_cortes, agregar_chronos); experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 6 «Híbrido» y «Peso en el modelo»; experimentos/E12_comparacion_modelos/README.md § 8 (Fundacionales)"
+        },
+        "importancia_modelo_final_H7": {
+          "texto": "Porcentaje de la ganancia total de los árboles, modelo de producción H = 7 entrenado con 2023–2025 (calculado desde `modelos_hibrido/modelo_hibrido_H7.txt`).",
+          "top": {
+            "fm_c2": 53.16,
+            "fm_c2_q10": 29.46,
+            "fm_c2_q90": 9.28,
+            "pasajeros_total_m4sem": 3.61,
+            "pasajeros_total_b1": 0.44,
+            "pasajeros_total_roll7_h7": 0.34,
+            "carnaval_central": 0.31,
+            "tipo_dia": 0.26,
+            "dia_anio": 0.26,
+            "carnaval": 0.19,
+            "hora": 0.19,
+            "festivo": 0.18,
+            "viajes_validos_m4sem": 0.16,
+            "pasajeros_total_lag7": 0.16,
+            "tendencia": 0.15,
+            "pasajeros_total_roll28_h7": 0.13,
+            "fm_c2_ratio": 0.13,
+            "semana_santa": 0.09,
+            "semana_anio": 0.08,
+            "dia_semana": 0.07
+          },
+          "por_grupo": {
+            "chronos2": 92.03,
+            "rezagos_y_totales": 5.73,
+            "calendario_base_y_especial": 1.9,
+            "calendario_E11": 0.22,
+            "climatologia": 0.08,
+            "eventos": 0.04
+          },
+          "ganancia_chronos_por_H": {
+            "H7": 92.0,
+            "H14": 91.8,
+            "H21": 91.4,
+            "H28": 91.0
+          },
+          "en_los_12_pliegues": "89,8 a 91,9 % (media 91,1 %)",
+          "ruta_json": "experimentos/E12_comparacion_modelos/modelos_hibrido/metadatos_pronostico_2026_enero_hibrido.json: modelos.H*.ganancia_chronos_pct · experimentos/E12_comparacion_modelos/resultados/hibrido_V4_chronos2cov.json: notas[2]",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md «(c) Enero de 2026» («Chronos-2 se lleva el 91-92 % de la ganancia»); experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 6 «Peso en el modelo»"
+        }
+      },
+      "hiperparametros": {
+        "texto": "Exactamente los de V4 (C0): 600 árboles, tasa 0,03, 31 hojas, min_child_samples 40, submuestreo 0,8/0,8, λ = 1, Poisson, semilla 42, 2 hilos. Ninguno se eligió con 2025. Chronos-2 no tiene hiperparámetros ajustados: lote de inferencia 64 (no cambia el pronóstico: diferencia máxima 0,00085 pasajeros entre lote 64 y 256), cuantiles 0,1 / 0,5 / 0,9, float32.",
+        "valores": {
+          "objective": "poisson",
+          "n_estimators": 600,
+          "learning_rate": 0.03,
+          "num_leaves": 31,
+          "min_child_samples": 40,
+          "subsample": 0.8,
+          "subsample_freq": 1,
+          "colsample_bytree": 0.8,
+          "reg_lambda": 1.0,
+          "random_state": 42,
+          "n_jobs": 2
+        },
+        "ruta_json": "experimentos/E12_comparacion_modelos/modelos_hibrido/metadatos_pronostico_2026_enero_hibrido.json: params",
+        "fuente": "experimentos/E12_comparacion_modelos/comun_e12.py (PARAMS_V4); experimentos/E12_comparacion_modelos/README.md «Verificación», «(d) Hiperparámetros»; experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 6 («El lote de inferencia no cambia los pronósticos»)"
+      },
+      "protocolo_validacion": {
+        "texto": "El protocolo común de E12 (arnés `comun_e12.py`, que reproduce V4 con diferencia 0 en las 18.615 predicciones): 12 pliegues mensuales de 2025, h = 7, corte d − 7 verificado en cada predicción (`corte_verificado = true`), mismas filas y pesos de V4, objetivo sin corregir. Regla de selección fijada antes de ver resultados: gana el candidato de menor WAPE cuyo IC 95 % de la diferencia con V4 quede entero bajo 0 y que mejore a V4 en al menos 7 de 12 meses; los ensambles no pueden usar el mes evaluado. Después: corrección por comparaciones múltiples (Holm y Bonferroni con m = 51 y m = 89, bootstrap de 50.000 réplicas) y prueba en 2024 con el mismo protocolo. Para el híbrido, 2024 es una prueba limpia fuera de la muestra de selección: su diseño se fijó a priori y sus hiperparámetros son los de V4.",
+        "fuente": "experimentos/E12_comparacion_modelos/README.md § 1.1, § 1.3, § 4 y § 6; experimentos/E12_comparacion_modelos/HARNESS.md; experimentos/E12_comparacion_modelos/resultados/hibrido_V4_chronos2cov.json: corte_verificado, h_min_dias"
+      },
+      "errores": {
+        "nota": "2025, h = 7, 18.615 franjas (protocolo de E12). Diferencias frente a V4 (negativo = mejor).",
+        "global_2025": {
+          "WAPE": {
+            "valor": 13.619,
+            "texto": "13,62 %",
+            "ruta_json": "experimentos/E12_comparacion_modelos/resultados/hibrido_V4_chronos2cov.json: metricas_global.WAPE"
+          },
+          "MAE": {
+            "valor": 94.2,
+            "texto": "94,2 pasajeros por franja (V4: 96,4)"
+          },
+          "RMSE": {
+            "valor": 141.4,
+            "texto": "141,4 (V4: 144,0)"
+          },
+          "sesgo_pct": {
+            "valor": 1.45,
+            "texto": "+1,45 % (V4: +1,42 %): el mismo sesgo que V4",
+            "ruta_json": "experimentos/E12_comparacion_modelos/resultados/hibrido_V4_chronos2cov.json: metricas_global.sesgo_pct"
+          },
+          "total_diario_por_ruta_WAPE": {
+            "valor": 4.92,
+            "texto": "4,92 % (V4: 4,86 %): en el total del día no cambia"
+          },
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 2 (fila 5), § 5 y § 7; experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 3 y § 6"
+        },
+        "frente_a_V4_2025": {
+          "dif_pp": {
+            "valor": -0.32,
+            "texto": "−0,32 puntos [−0,43; −0,22]",
+            "ic": [
+              -0.43,
+              -0.219
+            ],
+            "ruta_json": "experimentos/E12_comparacion_modelos/resultados/hibrido_V4_chronos2cov.json: vs_V4"
+          },
+          "meses_mejor": "11 de 12 (solo marzo +0,16)",
+          "pruebas": "t pareada por mes p = 0,0003; Wilcoxon p = 0,0015",
+          "sin_mes_de_mayor_ganancia": {
+            "valor": -0.29,
+            "texto": "−0,29 sin agosto"
+          },
+          "sin_enero": "−0,31 [−0,42; −0,21], 10 de 11",
+          "frente_a_V4_con_escala_corregida": "−0,34 [−0,45; −0,23] frente a V4 × β; −0,29 [−0,40; −0,18] con β en ambos: la ganancia no es una corrección de nivel",
+          "comparaciones_multiples": "p de Holm 0,002; IC de Bonferroni (m = 51, 99,90 %) [−0,51; −0,14]; sobrevive también con m = 89",
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados.json: ranking.top[posicion=5], robustez.por_modelo.hibrido_V4_chronos2cov",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 2, § 4 y § 5"
+        },
+        "por_ruta_2025": {
+          "hibrido": {
+            "SILENCIO": 15.32,
+            "CRA 54": 11.15,
+            "CL 72": 18.77
+          },
+          "V4": {
+            "SILENCIO": 15.52,
+            "CRA 54": 11.54,
+            "CL 72": 19.08
+          },
+          "dif": {
+            "SILENCIO": "−0,19 [−0,37; −0,02]",
+            "CRA 54": "−0,38 [−0,54; −0,24]",
+            "CL 72": "−0,31 [−0,49; −0,14]"
+          },
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados.json: robustez.por_modelo.hibrido_V4_chronos2cov.por_ruta",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 5 «Por segmento»"
+        },
+        "por_tipo_dia_2025": {
+          "hibrido": {
+            "Laboral": 13.03,
+            "Sábado": 13.27,
+            "Domingo/festivo": 19.27
+          },
+          "V4": {
+            "Laboral": 13.36,
+            "Sábado": 13.45,
+            "Domingo/festivo": 19.74
+          },
+          "dif": {
+            "Laboral": "−0,33 [−0,44; −0,22]",
+            "Sábado": "−0,17 [−0,43; +0,09]",
+            "Domingo/festivo": "−0,48 [−1,01; +0,02]"
+          },
+          "texto": "En sábados y en domingos o festivos la mejora no alcanza significancia.",
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados.json: robustez.por_modelo.hibrido_V4_chronos2cov.por_tipo_dia",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 5"
+        },
+        "por_franja_2025": {
+          "hibrido": {
+            "4-8 h": 10.95,
+            "9-15 h": 13.92,
+            "16-20 h": 18.26
+          },
+          "V4": {
+            "4-8 h": 11.37,
+            "9-15 h": 14.24,
+            "16-20 h": 18.35
+          },
+          "dif": {
+            "4-8 h": "−0,42 [−0,59; −0,26]",
+            "9-15 h": "−0,33 [−0,46; −0,20]",
+            "16-20 h": "−0,10 [−0,30; +0,10]"
+          },
+          "texto": "En la franja de 16–20 h no alcanza significancia.",
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados.json: robustez.por_modelo.hibrido_V4_chronos2cov.por_franja",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 5"
+        },
+        "por_mes_2025": {
+          "hibrido": {
+            "1": 13.27,
+            "2": 12.11,
+            "3": 14.4,
+            "4": 12.72,
+            "5": 12.98,
+            "6": 15.62,
+            "7": 15.1,
+            "8": 13.41,
+            "9": 12.35,
+            "10": 13.11,
+            "11": 12.43,
+            "12": 16.56
+          },
+          "dif_vs_V4": {
+            "1": -0.39,
+            "2": -0.52,
+            "3": 0.16,
+            "4": -0.22,
+            "5": -0.4,
+            "6": -0.36,
+            "7": -0.45,
+            "8": -0.66,
+            "9": -0.29,
+            "10": -0.19,
+            "11": -0.41,
+            "12": -0.12
+          },
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados/hibrido_V4_chronos2cov.json: por_mes.*.WAPE, vs_V4.dif_por_mes_pp",
+          "fuente": "experimentos/E12_comparacion_modelos/resultados/hibrido_V4_chronos2cov.json; experimentos/E12_comparacion_modelos/fig3_finalistas_mes.png"
+        },
+        "por_subconjunto_2025": {
+          "hibrido": {
+            "vacaciones escolares": 15.49,
+            "clases escolares": 13.15,
+            "vacaciones universitarias": 14.89,
+            "transición de periodo": 14.27,
+            "días lluviosos ≥ 5 mm": 13.49,
+            "días secos < 1 mm": 13.68,
+            "días atípicos no predecibles (E10)": 62.43,
+            "franjas con ≥ 25 % sin registro": 70.85,
+            "días normales": 13.0
+          },
+          "V4": {
+            "vacaciones escolares": 15.85,
+            "clases escolares": 13.46,
+            "vacaciones universitarias": 15.23,
+            "transición de periodo": 14.77,
+            "días lluviosos ≥ 5 mm": 13.89,
+            "días secos < 1 mm": 14.02,
+            "días atípicos no predecibles (E10)": 63.27,
+            "franjas con ≥ 25 % sin registro": 71.17,
+            "días normales": 13.32
+          },
+          "grupos_de_dias": {
+            "texto": "Días especiales (28: festivos entre semana, Carnaval, Semana Santa, 24, 25 y 31 de diciembre y 1 de enero): 23,7 % frente a 25,3 % de V4; laborales de clases 12,19 % frente a 12,47 %; laborales de vacaciones 13,94 % frente a 14,29 %.",
+            "fuente": "experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 5 y § 6"
+          },
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados/hibrido_V4_chronos2cov.json: por_subconjunto.*.WAPE",
+          "fuente": "experimentos/E12_comparacion_modelos/resultados/hibrido_V4_chronos2cov.json"
+        },
+        "sesgo": {
+          "texto": "+1,45 % en 2025 y +1,47 % en 2024, como V4 (+1,42 % y +1,96 %). Chronos-2 solo sobrestima +4,1 %, pero LightGBM aprendió a corregirlo. Por mes el mayor sesgo es diciembre (+5,3 %) y enero (+4,1 %).",
+          "por_mes_pct_2025": {
+            "1": 4.13,
+            "2": 0.35,
+            "3": 2.05,
+            "4": -0.6,
+            "5": 1.58,
+            "6": 0.37,
+            "7": 3.2,
+            "8": -1.51,
+            "9": 1.61,
+            "10": 0.59,
+            "11": 0.89,
+            "12": 5.29
+          },
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados/hibrido_V4_chronos2cov.json: por_mes.*.sesgo_pct · experimentos/E12_comparacion_modelos/resultados/chronos2_cov.json: metricas_global.sesgo_pct",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 7 punto 4 y «(c) Enero de 2026»"
+        },
+        "en_2024": {
+          "WAPE": {
+            "valor": 15.405,
+            "texto": "15,40 % frente a 15,73 % de V4",
+            "ruta_json": "experimentos/E12_comparacion_modelos/resultados.json: validacion_2024.candidatos.hibrido_V4_chronos2cov.WAPE"
+          },
+          "dif_pp": {
+            "valor": -0.33,
+            "texto": "−0,33 puntos [−0,50; −0,14], 10 de 12 meses; t p = 0,042; Wilcoxon p = 0,042; sin enero −0,26 [−0,44; −0,07]",
+            "ic": [
+              -0.504,
+              -0.143
+            ]
+          },
+          "sesgo_pct": {
+            "valor": 1.47,
+            "texto": "+1,47 % (V4: +1,96 %)"
+          },
+          "dif_por_mes": {
+            "1": -1.12,
+            "2": -0.76,
+            "3": -0.02,
+            "4": -0.62,
+            "5": 0.04,
+            "6": -0.68,
+            "7": 0.82,
+            "8": -0.52,
+            "9": -0.36,
+            "10": -0.15,
+            "11": -0.17,
+            "12": -0.38
+          },
+          "estabilidad": "Con semillas 1 a 5 el IC queda entre [−0,51; −0,15] y [−0,50; −0,14].",
+          "cumple_regla_2024": true,
+          "ruta_json": "experimentos/E12_comparacion_modelos/modelos_fundacionales/validacion_2024_hibrido.json; experimentos/E12_comparacion_modelos/resultados.json: validacion_2024.candidatos.hibrido_V4_chronos2cov",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 6 y «Verificación», «Prueba de 2024»"
+        },
+        "por_antelacion_modo_produccion_2025": {
+          "texto": "Simulación del modo producción en 2025: 11 orígenes a fin de mes (31-1 a 30-11), modelos entrenados solo hasta el origen, 28 días pronosticados con su H; 44 semanas y 15.708 franjas. Prueba los modelos H = 14–28, que el protocolo de E12 no evaluó.",
+          "hibrido": {
+            "H7": 13.48,
+            "H14": 13.41,
+            "H21": 14.37,
+            "H28": 13.56,
+            "total": 13.7
+          },
+          "V4": {
+            "H7": 13.85,
+            "H14": 13.53,
+            "H21": 14.65,
+            "H28": 13.96,
+            "total": 13.99
+          },
+          "chronos2_solo": {
+            "H7": 14.52,
+            "H14": 14.31,
+            "H21": 15.54,
+            "H28": 14.16,
+            "total": 14.63
+          },
+          "dif_total": {
+            "valor": -0.3,
+            "texto": "−0,30 puntos [−0,45; −0,15]; mejor en 32 de 44 semanas y en 9 de 11 orígenes (pierden 28-2, +0,21, y 30-11, +0,24)",
+            "ic": [
+              -0.451,
+              -0.145
+            ]
+          },
+          "semanas_mejor_por_H": {
+            "H7": "10 de 11",
+            "H14": "6 de 11",
+            "H21": "7 de 11",
+            "H28": "9 de 11"
+          },
+          "sesgo_total": "+0,8 % (V4: +1,0 %)",
+          "ruta_json": "experimentos/E12_comparacion_modelos/modelos_hibrido/emulacion_produccion_2025.json: global",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md «Simulación del modo producción», tabla «2025: 11 orígenes»"
+        },
+        "por_antelacion_modo_produccion_2024": {
+          "texto": "3 orígenes de 2024 (31-7, 31-8, 30-9; 84 días): híbrido 15,38 % (media) frente a 15,90 % de V4 y 16,33 % de Chronos-2 solo; gana en 11 de 12 semanas, de −0,28 a −0,85 puntos por origen. Evidencia limitada pero coherente: la ventaja no desaparece en H = 14–28.",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md «2024: 3 orígenes»"
+        }
+      },
+      "probado_y_descartado": {
+        "nota": "Ver comparacion_E12 para las familias completas. Aquí, lo que compitió con el híbrido por el puesto de producción.",
+        "alternativas": [
+          {
+            "que": "Ganador formal según la regla: `ens_conj_c_nnls_todos`, apilamiento rodante NNLS de los 40 modelos individuales",
+            "resultado": "13,39 %, −0,55 [−0,69; −0,41], 12 de 12 meses; sobrevive Holm y Bonferroni. Supera al híbrido en −0,23 [−0,35; −0,09] en 2025, pero exige mantener 40 modelos de unas 10 librerías (705 min de cómputo en 2025, GPU), no se pudo repetir en 2024 y su mecanismo (NNLS rodante con TFT) falló en 2024 en los dos apilamientos que sí se repitieron.",
+            "fuente": "experimentos/E12_comparacion_modelos/README.md § 3, § 6 y § 7"
+          },
+          {
+            "que": "Apilamiento diverso de 6 modelos `ens_conj_c_nnls_diverso`",
+            "resultado": "13,42 % (−0,52) en 2025, pero en 2024 −0,23 [−0,49; +0,09] (no cumple) y sin enero −0,04: los pesos estimados con pocos meses son frágiles.",
+            "fuente": "experimentos/E12_comparacion_modelos/README.md § 6 y § 7"
+          },
+          {
+            "que": "Media simple (a) de V4 y el mejor de cada familia (Tweedie, TFT, AutoETS, Chronos-2)",
+            "resultado": "13,59 % (−0,35) en 2025 y −0,49 [−0,71; −0,26] en 2024: cumple en los dos años, pero no se distingue del híbrido (−0,03 [−0,16; +0,13] y −0,16 [−0,43; +0,12]), necesita 5 cadenas (TFT con 3 semillas en GPU) y tiene el doble de sesgo (+2,9 % y +3,9 %).",
+            "fuente": "experimentos/E12_comparacion_modelos/README.md § 6 y § 7"
+          },
+          {
+            "que": "Ad hoc V4 + TFT (NNLS)",
+            "resultado": "13,48 % en 2025, pero no elegible (sus miembros se eligieron mirando 2025) y en 2024 cae a −0,10 [−0,48; +0,42].",
+            "fuente": "experimentos/E12_comparacion_modelos/README.md § 1.3 y § 6"
+          },
+          {
+            "que": "Ensamble NNLS V4 + Chronos-2 (`ens_V4_chronos2_cov_nnls`)",
+            "resultado": "13,79 %, −0,15 [−0,25; −0,03]: menos ganancia que meter Chronos-2 dentro de V4, y cae con la corrección de Holm (p = 0,69); en 2024 −0,20 [−0,48; +0,19].",
+            "fuente": "experimentos/E12_comparacion_modelos/README.md § 2 y § 4; modelos_fundacionales/README.md § 6"
+          },
+          {
+            "que": "Media de 5 boosting (`ens_arboles_media_gbm`)",
+            "resultado": "13,76 %, −0,18 [−0,23; −0,12]: más cara (CatBoost) y con menos ganancia; solo CPU.",
+            "fuente": "experimentos/E12_comparacion_modelos/README.md § 7"
+          },
+          {
+            "que": "Híbrido con TimesFM",
+            "resultado": "No se probó: tras ver resultados sería una elección a posteriori y el híbrido con Chronos-2 ya cumple la regla.",
+            "fuente": "experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 10"
+          },
+          {
+            "que": "Ajuste fino de Chronos-2 o TimesFM; Chronos-2 con `cross_learning=True`",
+            "resultado": "Fuera del alcance (zero-shot); la variante multivariada por ruta no mejoró.",
+            "fuente": "experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 10"
+          }
+        ]
+      },
+      "decisiones_de_diseno": {
+        "ayuda": [
+          {
+            "decision": "Meter el pronóstico del fundacional como variable de V4, en vez de promediarlo con V4.",
+            "evidencia": "Híbrido −0,32 frente a −0,15 del ensamble NNLS V4 + Chronos-2; la media simple 50/50 daría 13,86 %. LightGBM decide cuánto confiar en Chronos-2 y lo corrige con el calendario y la oferta.",
+            "fuente": "experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 6 («Diagnóstico»); experimentos/E12_comparacion_modelos/README.md § 8"
+          },
+          {
+            "decision": "Chronos-2 con el calendario como covariable (variante `cov`), no el modelo univariado.",
+            "evidencia": "Las covariables de calendario bajan a Chronos-2 de 17,08 % a 14,71 %: sin ellas pronostica casi el doble en 28 días especiales.",
+            "fuente": "experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md «Respuesta corta» y § 3"
+          },
+          {
+            "decision": "Mismo corte que los rezagos (contexto hasta d − H) y calendario como única covariable futura.",
+            "evidencia": "Sin fuga: verificado de forma empírica (con contexto hasta d − 1 el pronóstico difiere 16–35 pasajeros; con d − 7 reproduce la caché con diferencia 0).",
+            "fuente": "experimentos/E12_comparacion_modelos/README.md «Verificación», «(b) Híbrido»"
+          },
+          {
+            "decision": "Elegir por robustez en dos años y por costo, no por el menor WAPE de 2025.",
+            "evidencia": "La ganancia de −0,32 se repite en 2024 (−0,33); las de los apilamientos NNLS no. Es la misma cadena de V4 con 4 columnas más, sin GPU, y con V4 de respaldo.",
+            "fuente": "experimentos/E12_comparacion_modelos/README.md § 7 «Por qué el híbrido»"
+          },
+          {
+            "decision": "Mantener V4 en sombra.",
+            "evidencia": "Sirve para comparar el WAPE semanal en 2026 antes de reemplazarlo y como respaldo si Chronos-2 falla (se reentrena en segundos).",
+            "fuente": "experimentos/E12_comparacion_modelos/README.md § 7 «Cómo ponerlo en marcha» y «Modelo para producción» punto 3"
+          }
+        ],
+        "no_ayuda": [
+          {
+            "decision": "Fundacionales solos (Chronos-2, Chronos-Bolt, TimesFM), con o sin calendario",
+            "evidencia": "Ninguno le gana a V4: el mejor, Chronos-2 con calendario, queda +0,77; sin calendario, +3 a +4 puntos; en formulación por ruta con 17 pasos por día, mucho peor (Chronos-Bolt 44–46 %).",
+            "fuente": "experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md «Respuesta corta», § 3 y § 7"
+          },
+          {
+            "decision": "Modelos más grandes",
+            "evidencia": "Chronos-Bolt base (205 M) apenas mejora a small (48 M); Chronos-2 (120 M) gana 0,5–0,6 a su small (28 M).",
+            "fuente": "experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 3 («El tamaño ayuda poco»)"
+          },
+          {
+            "decision": "Ocultar a Chronos-2 las franjas con falla; modelo multivariado por ruta; día de la semana en XReg",
+            "evidencia": "14,72 %, 14,72 % y 14,99 %: no cambian nada.",
+            "fuente": "experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 3 («Variantes que no cambian nada»)"
+          },
+          {
+            "decision": "Pesos NNLS estimados con pocos meses",
+            "evidencia": "Fallan en 2024 (febrero se estima solo con un enero atípico): «el rompecabezas de la combinación de pronósticos». Si se combinan modelos, mejor medias simples o pesos con encogimiento, validados en dos años.",
+            "fuente": "experimentos/E12_comparacion_modelos/README.md § 6 «Por qué fallan los NNLS en 2024» y § 7 punto 5"
+          }
+        ]
+      },
+      "produccion": {
+        "script": "experimentos/E12_comparacion_modelos/modelo_final_hibrido.py",
+        "comando": "PYTHONIOENCODING=utf-8 <Python del entorno E12> experimentos/E12_comparacion_modelos/modelo_final_hibrido.py [--origen 2025-12-31 --desde 2026-01-01 --hasta 2026-01-28 --antelacion auto|7|14|21|28 --salida f.parquet --dispositivo cpu] · comprobaciones: --backtest AAAA-MM [--panel-e12], --verificar-fuga, --solo-historia [--dispositivo cuda]",
+        "que_hace": "1) Entrena un LightGBM por antelación H = 7, 14, 21 y 28 con las 77 variables de V4 desplazadas a H más las 4 de Chronos-2 (contexto hasta d − H en cada fila de entrenamiento). 2) Pronostica [desde, hasta] desde el origen (último día observado): Chronos-2 pronostica 28 días con contexto hasta el origen y el calendario de cada fecha como covariable futura; cada fecha usa su modelo H. El pronóstico del origen se guarda en la caché (la semana siguiente pasa a ser historia). 3) Entrena V4 con las mismas filas, en sombra (`pasajeros_pred_V4`).",
+        "reentrenar_cada": "Cada semana: actualizar `datos/progvehiculos.parquet` y `datos/conteo_viajes.parquet`, mover el origen, correr el script (calcula los cortes de Chronos-2 que falten y reentrena los 8 LightGBM). Primeros meses de 2026: correr en paralelo con V4 y comparar el WAPE semanal antes de reemplazarlo. Antes de pronosticar, revisar que la semana nueva no tenga caídas de registro masivas: la regla mecánica de fallas se aplica sola, las etiquetas de E10 no existen para semanas nuevas.",
+        "computo": {
+          "hardware": "CPU con 2 hilos por defecto (`--dispositivo cpu`); la GPU solo sirvió para precalcular la historia una vez. Chronos-2 en CPU coincide con la GPU: diferencia media 0,16 pasajeros por franja (máximo 38, sobre una media de 735) en la medición de E12 y ≤ 0,001 en las simulaciones.",
+          "tiempos_cpu_2_hilos": {
+            "panel_s": "2–5",
+            "chronos2_pronostico_origen_s": "25–46 (51 series × 28 días)",
+            "ocho_lightgbm_s": "31–45 (híbrido y V4 × 4 antelaciones; 5–10 s cada LightGBM)",
+            "corrida_completa_4_semanas_s": {
+              "valor": 107,
+              "texto": "107 s con la historia ya calculada (enero de 2026: panel 2 s, cargar Chronos-2 11 s, pronóstico del origen 46 s, 8 LightGBM 45 s)"
+            },
+            "cada_semana_nueva": "+ 7 pronósticos de Chronos-2 (6 cortes de historia y el nuevo origen) ≈ 3–5 min; en total unos 4–6 min por semana (E12 midió 228 s para 51 series × 7 días)",
+            "historia_completa_una_vez": "1.061 cortes: 1.398 s (23 min) en la GPU (RTX 3050); en CPU ≈ 7–13 h. Queda guardada en `cache_hibrido/` (19 MB)"
+          },
+          "ruta_json": "experimentos/E12_comparacion_modelos/resultados.json: produccion.chronos2_cpu (inferencia_s 228,3; dif_media_pax 0,158; dif_max_pax 38,0) · modelos_hibrido/metadatos_pronostico_2026_enero_hibrido.json: tiempos_s",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 7 (tabla de costos y «Cómo ponerlo en marcha»), «Modelo para producción» («Tiempos», «(d) Tiempo en CPU»)"
+        },
+        "requisitos": "Entorno de Python aparte (`requisitos_e12.txt`): `chronos-forecasting` 2.3.2 (torch 2.11; basta la versión de CPU), `lightgbm` 4.7.0, `pandas` 2.3.3, `transformers` 5.19.0, `holidays`, `pyarrow`; pesos de `amazon/chronos-2` en la caché local de Hugging Face (`HF_HOME`), sin red. Hay que fijar las versiones de `chronos-forecasting`, de los pesos y de pandas: con otra versión de pandas cambian en 10⁻¹⁴ algunas variables y eso mueve unos pasajeros el pronóstico de LightGBM.",
+        "salidas": {
+          "pronostico": "`pronostico_2026_enero_hibrido.parquet` y `.csv`: 1.428 filas con las columnas de E11 más `pasajeros_pred_V4`, `fm_c2`, `fm_c2_q10` y `fm_c2_q90`; `pronostico_2026_enero_hibrido_semanal.csv` con totales por ruta y semana del híbrido, V4 en sombra, E11, E8 y 2025 alineado.",
+          "modelos": "`modelos_hibrido/modelo_hibrido_H7/14/21/28.txt` y `metadatos_*.json` (filas, ganancia de Chronos-2, totales, tiempos); ahí también quedan los JSON de las comprobaciones (`backtest_*.json`, `verificacion_fuga.json`, `emulacion_produccion_2025.json`).",
+          "cache": "`cache_hibrido/chronos2_cov_cortes_*.parquet` (historia de Chronos-2 para H = 14–28 y los orígenes ya pronosticados)."
+        },
+        "pronostico_enero_2026": {
+          "total": {
+            "valor": 776090,
+            "texto": "776.090 pasajeros del 1 al 28 de enero de 2026"
+          },
+          "por_ruta": {
+            "SILENCIO": 213062,
+            "CRA 54": 421103,
+            "CL 72": 141925
+          },
+          "por_semana": {
+            "1 (1-7, H=7)": 155865,
+            "2 (8-14, H=14)": 181979,
+            "3 (15-21, H=21)": 210539,
+            "4 (22-28, H=28)": 227706
+          },
+          "frente_a_E11": {
+            "valor": -2.7,
+            "texto": "−2,7 % frente a E11 (797.789); por semana −3,8 / −4,5 / −1,5 / −1,6 %. Chronos-2 solo daría 846.633 (+6,1 % sobre E11), pero LightGBM lo baja porque aprendió a corregir su sesgo"
+          },
+          "V4_en_sombra": {
+            "valor": 797953,
+            "texto": "797.953: +0,02 % frente a E11 (la cadena de V4 del script es la de E11; difiere por la versión de pandas)"
+          },
+          "frente_a_2025_alineado": {
+            "valor": -13.8,
+            "texto": "−13,8 % frente a 2025 alineado (900.344)"
+          },
+          "frente_a_E8": {
+            "valor": -4.8,
+            "texto": "−4,8 % frente al ensamble diario de E8 (814.856)"
+          },
+          "forma": "La de E11: la semana 4 tiene 43–49 % más pasajeros que la 1; el 26-1 sube 10–13 % frente al lunes anterior; Reyes queda entre −5,5 % y +7,3 % frente al domingo anterior (E11: −7 a −13 %).",
+          "ruta_json": "experimentos/E12_comparacion_modelos/modelos_hibrido/metadatos_pronostico_2026_enero_hibrido.json: total_por_ruta, resumen_semanal",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md «(c) Enero de 2026 frente a E11 y E8»"
+        },
+        "fuente": "experimentos/E12_comparacion_modelos/README.md «Modelo para producción: modelo_final_hibrido.py» (Qué hace, Salidas, Cómo correrlo cada semana, Requisitos, Tiempos); experimentos/E12_comparacion_modelos/modelo_final_hibrido.py"
+      },
+      "verificacion": {
+        "fecha": "2026-10-07",
+        "veredicto": "Confiable con reservas (verificación independiente de E12, sin conexión a la base de datos y sin modificar código ni resultados). «Recomendación de producción: se sostiene.»",
+        "que_se_comprobo": [
+          "Las 55 predicciones de 2025 tienen exactamente las 18.615 franjas de E11, sin duplicados ni vacíos, y en todas dia − corte ≥ 7; V4, V0 y B1 coinciden con E11 con diferencia 0.",
+          "WAPE, diferencias, IC, meses y regla recalculados con código propio: coinciden en los 55 resultados (diferencia < 10⁻⁹). Híbrido: 13,619 %, −0,320 [−0,430; −0,219], 11 de 12, p de Holm 0,002, IC de Bonferroni [−0,507; −0,144]. Con otra semilla los extremos de los IC se mueven ≤ 0,04 puntos.",
+          "Fuga del híbrido: la caché de Chronos-2 cubre del 29-1-2023 al 31-12-2025 con corte d − 7 en todas sus filas. Prueba empírica en tres días de entrenamiento (14-6-2023, 20-3-2024, 5-11-2024): con contexto hasta d − 7 reproduce la caché con diferencia 0; con contexto hasta d − 1 difiere 16–35 pasajeros de media.",
+          "Hiperparámetros: ninguno se eligió con 2025 (fundacionales sin reentrenar, covariables fijadas a priori).",
+          "Prueba de 2024 reproducida: V4 15,734 % (sesgo +1,96 %); híbrido −0,329 [−0,504; −0,143], 10 de 12; estable con semillas 1 a 5.",
+          "Pipeline de producción: el backtest de marzo de 2025 con el panel del arnés reproduce las predicciones guardadas con diferencia 0,0 en las 1.581 franjas (WAPE 14,403 %); con el panel reconstruido, 1,7 pasajeros de diferencia media (máximo 16,5; WAPE 14,400 %) por la versión de pandas. `--verificar-fuga` (origen simulado 30-11-2025): las variables de V4 de las 28 fechas siguientes son idénticas con y sin los datos de diciembre (diferencia 0 para H = 7–28; un rezago de 1 día, prohibido, sí cambia en 1.377 franjas) y Chronos-2 da lo mismo con la historia truncada en el origen. CPU frente a GPU: diferencia máxima 0,0009 pasajeros."
+        ],
+        "correcciones_al_readme": [
+          "«Se fijó de antemano y no tiene fuga» → la regla se fijó antes de calcularlo, aunque ya se conocían los resultados de las familias en 2025 (limitación 1); los pesos no tienen fuga.",
+          "2024 no es del todo virgen para las familias ni para la media (a); para el híbrido sí es una prueba fuera de la muestra.",
+          "«Único candidato que cumple en los dos años» → único de los candidatos repetidos en 2024 (6 de los 12 que cumplen en 2025 no se repitieron, entre ellos el ganador)."
+        ],
+        "reservas": [
+          "El −0,55 del ganador formal probablemente es optimista: es el mejor de 51 sobre los mismos datos y su mecanismo no se sostuvo en 2024. (No afecta al híbrido.)",
+          "Hay 1.070 filas de entrenamiento (8 al 28-1-2023) sin variables de Chronos-2, que LightGBM trata como vacías: sin fuga.",
+          "Como en E11, el entrenamiento de cada pliegue llega hasta el día anterior al mes, posterior al corte d − 7 de sus primeros 6 días; afecta igual a V4 y a todos los candidatos."
+        ],
+        "ruta_json": "experimentos/E12_comparacion_modelos/modelos_hibrido/backtest_2025-03_H7_panel_e12.json (dif_max_pax 0,0); backtest_2025-03_H7.json (dif_media_pax 1,74; dif_max_pax 16,5); verificacion_fuga.json (variables_V4.H*.dif_max 0,0; control_lag1_franjas_distintas 1.377; chronos2_truncado_vs_completo_dif_max 0,0)",
+        "fuente": "experimentos/E12_comparacion_modelos/README.md «Verificación» (Cobertura, Cifras recalculadas, Fugas, Prueba de 2024, Reservas, Correcciones, Recomendación de producción) y «Comprobaciones» (a), (b), (d)"
+      },
+      "limites_y_riesgos": [
+        {
+          "limite": "Nivel de 2026 (+14,6 % de viajes, +7,5 % de subidas según E8)",
+          "texto": "Ningún modelo entrenado con 2023–2025 (−8 % anual) puede anticipar el cambio que muestra `timbradas_anio`. Si enero de 2026 siguiera ese +7,5 %, el nivel real rondaría 967.900 pasajeros y el híbrido quedaría ≈ 20 % corto (E11 ≈ 18 %, E8 ≈ 16 %): por quedar 2,7 % por debajo de V4, está unos 2 puntos más lejos; es un error de nivel común a todos, no de forma. Se corrige a través de los rezagos y del contexto de Chronos-2 con 1–2 semanas de datos de 2026 (H = 7); H = 21–28 tardan 3–4 semanas. Si Sobusa confirma el aumento de oferta, agregar la oferta programada como variable. Reserva: parte de la subida podría venir del proceso de `timbradas_anio`.",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md «(c) Enero de 2026», «Error de nivel de 2026» y «Limitaciones» 3; experimentos/E8_validacion_2026/README.md «Respuesta corta»"
+        },
+        {
+          "limite": "Días especiales y semanas con fiestas",
+          "texto": "En domingos o festivos (19,27 %), sábados y en la franja de 16–20 h la mejora sobre V4 no alcanza significancia. En la simulación del modo producción el origen 30-11-2025 (diciembre, con fiestas) pierde +0,24, y con H = 14 y 21 pierde +0,84 y +0,59: conviene vigilar las semanas con fiestas. Marzo de 2025 (Carnaval) es el único mes del protocolo en que pierde (+0,16).",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 5 «Por segmento» y «Simulación del modo producción»"
+        },
+        {
+          "limite": "Antelación de Chronos-2 en producción",
+          "texto": "Al entrenar, la variable siempre tiene antelación exactamente H; en producción, el pronóstico desde el origen tiene antelación entre H − 6 y H (información algo más reciente, toda anterior al origen: no es fuga). El modelo no aprendió con esas antelaciones, aunque en las simulaciones de 2024 y 2025 no se ve un problema.",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md «Limitaciones» 1"
+        },
+        {
+          "limite": "H = 14–28 sin evaluación por pliegues",
+          "texto": "E12 solo midió H = 7. La evidencia para H = 14–28 son las simulaciones del modo producción (11 orígenes de 2025, con los mismos datos con que se eligió el híbrido, y 3 de 2024). En H = 14 la ganancia es pequeña (−0,13; 6 de 11 semanas).",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md «Limitaciones» 2"
+        },
+        {
+          "limite": "Dependencia del registro y de las etiquetas",
+          "texto": "Hereda las de V4: el contexto `y_ctx_imp` y los rezagos necesitan los eventos GPS para corregir fallas; en producción solo actúa la regla mecánica de fallas (los pesos de E10 se construyeron a posteriori). Mismas omisiones: no usa la oferta programada y los eventos de `novedades_viales` valen 0 en 2026.",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md «Limitaciones» 4 y 5"
+        },
+        {
+          "limite": "Dependencias y reproducibilidad",
+          "texto": "Suma `chronos-forecasting` (torch, transformers) y los pesos de Chronos-2 a la cadena de V4; hay que fijar versiones de `chronos-forecasting`, de los pesos y de pandas. Si Chronos-2 falla, se vuelve a V4. Historia inicial cara en CPU (7–13 h, una vez).",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 7 «Cómo ponerlo en marcha», «Requisitos» y «Limitaciones» 6"
+        },
+        {
+          "limite": "Selección entre muchos candidatos",
+          "texto": "E12 comparó 51 candidatos en los mismos 12 meses de 2025, lo que infla algo la ventaja del mejor. Para el híbrido lo acotan su diseño a priori, la corrección por comparaciones múltiples y la prueba limpia en 2024; aun así, 2024 es un año más duro y el tamaño de las diferencias depende del año.",
+          "fuente": "experimentos/E12_comparacion_modelos/README.md § 10 limitaciones 1, 6 y 8; informe_resultados.md § 8"
+        },
+        {
+          "limite": "Objetivo viejo (E13)",
+          "texto": "Como V4, el híbrido de E12 se entrena con el objetivo que deja fuera a los pasajeros de los viajes marcados como cancelados que sí corrieron. E13 muestra que con el objetivo corregido el híbrido baja a 11,38 % (2025) y 13,51 % (2024) contra lo que de verdad sube; E13 propone recalcular la historia de Chronos-2 con la serie corregida al pasar a producción (`cache/chronos2_V4c.parquet`). El script `modelo_final_hibrido.py` entregado no lo hace todavía.",
+          "fuente": "experimentos/E13_limpieza_datos/README.md «Respuesta corta», tabla A y «Próximos pasos» 6; informe_resultados.md § 3 Tabla 1c y § 7 recomendación 1"
+        }
+      ]
+    }
+  },
+  "comparacion_E12": {
+    "pregunta": "Con el mismo protocolo de E11, ¿algún modelo o ensamble de las cuatro familias probadas le gana a V4, y cuál conviene llevar a producción?",
+    "candidatos": {
+      "valor": 51,
+      "texto": "51 candidatos registrados: 39 modelos individuales (7 árboles además de V4, 8 clásicos, 5 redes, 18 fundacionales sin reentrenar y el híbrido), 4 ensambles de familia, 3 ensambles ad hoc y 5 ensambles conjuntos fijados de antemano; más 9 referencias (V4, V0, B1, B2 y los clásicos de E4). 12 cumplen la regla, 9 de ellos elegibles; 11 sobreviven Holm y Bonferroni.",
+      "ruta_json": "experimentos/E12_comparacion_modelos/resultados.json: ranking.n_candidatos, n_cumplen, n_elegibles_cumplen, correccion.sobreviven_holm",
+      "fuente": "experimentos/E12_comparacion_modelos/README.md § 1.2, § 2 y § 4"
+    },
+    "respuesta_corta": {
+      "texto": "Ningún modelo individual le gana a V4: los cuatro boosting con Poisson o Tweedie empatan (de −0,03 a 0,00) y el resto pierde. Las mejoras salen de combinar familias o de meter otra familia dentro de V4 (el híbrido). Ganador formal según la regla: el apilamiento NNLS de los 40 modelos (13,39 %, −0,55). Recomendado para producción: el híbrido V4 + Chronos-2 (13,62 %, −0,32), el único de los repetidos en 2024 que cumple en los dos años con el menor costo.",
+      "fuente": "experimentos/E12_comparacion_modelos/README.md «Respuesta corta» y § 7"
+    },
+    "familias": [
+      {
+        "familia": "Árboles (boosting y bosques)",
+        "mejores": [
+          {
+            "modelo": "lgbm_tweedie",
+            "WAPE": 13.91,
+            "dif": "−0,03 [−0,08; +0,02]",
+            "meses_mejor": "6/12",
+            "en_2024": "−0,00 [−0,07; +0,06]"
+          },
+          {
+            "modelo": "lgbm_v4_bag5",
+            "WAPE": 13.92,
+            "dif": "−0,01 [−0,03; +0,00]",
+            "meses_mejor": "9/12"
+          },
+          {
+            "modelo": "hgb_poisson",
+            "WAPE": 13.93,
+            "dif": "−0,00 [−0,08; +0,07]",
+            "meses_mejor": "7/12"
+          },
+          {
+            "modelo": "xgboost_poisson",
+            "WAPE": 13.94,
+            "dif": "−0,00 [−0,08; +0,06]",
+            "meses_mejor": "4/12"
+          },
+          {
+            "modelo": "catboost_poisson",
+            "WAPE": 14.01,
+            "dif": "+0,07 [−0,06; +0,20]",
+            "meses_mejor": "6/12",
+            "en_2024": "+0,82 [+0,57; +1,07]"
+          },
+          {
+            "modelo": "extra_trees",
+            "WAPE": 14.21,
+            "dif": "+0,27 [+0,02; +0,57]"
+          },
+          {
+            "modelo": "random_forest",
+            "WAPE": 14.74,
+            "dif": "+0,80 [+0,38; +1,33]"
+          },
+          {
+            "modelo": "ens_arboles_media_gbm (media de 5 boosting)",
+            "WAPE": 13.76,
+            "dif": "−0,18 [−0,23; −0,12]",
+            "meses_mejor": "11/12",
+            "cumple_regla": true
+          }
+        ],
+        "por_que": "Ven las mismas 77 variables que V4, así que su información es la misma; la diversidad viene de la forma del árbol (árboles simétricos de CatBoost, la hora como categórica). Los bosques no tienen enlace logarítmico y fallan en los cambios de calendario.",
+        "fuente": "experimentos/E12_comparacion_modelos/README.md § 2 y § 8"
+      },
+      {
+        "familia": "Clásicos (estadística de series)",
+        "mejores": [
+          {
+            "modelo": "autoets_cal (AutoETS con calendario)",
+            "WAPE": 14.62,
+            "dif": "+0,68 [+0,38; +1,04]",
+            "meses_mejor": "2/12",
+            "en_2024": "+0,17 [−0,19; +0,60]"
+          },
+          {
+            "modelo": "prophet_semanal",
+            "WAPE": 14.67,
+            "dif": "+0,73 [+0,46; +1,02]",
+            "meses_mejor": "0/12",
+            "en_2024": "+0,74 [+0,40; +1,09]"
+          },
+          {
+            "modelo": "prophet_mensual",
+            "WAPE": 14.79,
+            "dif": "+0,86 [+0,59; +1,16]"
+          },
+          {
+            "modelo": "autoarima_x",
+            "WAPE": 15.89,
+            "dif": "+1,95 [+1,49; +2,53]"
+          },
+          {
+            "modelo": "mstl7_arima_x",
+            "WAPE": 17.76,
+            "dif": "+3,82"
+          },
+          {
+            "modelo": "autoets_s7 (sin regresores)",
+            "WAPE": 19.9,
+            "dif": "+5,96"
+          },
+          {
+            "modelo": "mstl_arima_x (MSTL anual)",
+            "WAPE": 25.51,
+            "dif": "+11,57"
+          },
+          {
+            "modelo": "Referencias de E4 (GLM, SARIMA, ETS de perfil)",
+            "WAPE": "14,34–14,86",
+            "dif": "+0,40 a +0,92"
+          }
+        ],
+        "por_que": "El calendario lo decide todo: sin regresores AutoETS marca 19,90 %. Prophet modela feriados y estacionalidad como efectos suaves, de forma distinta a V4, y por eso aporta como complemento (−0,22 ad hoc; ~0,08 de peso en el apilamiento).",
+        "fuente": "experimentos/E12_comparacion_modelos/README.md § 2 y § 8"
+      },
+      {
+        "familia": "Redes neuronales",
+        "mejores": [
+          {
+            "modelo": "tft_global (Temporal Fusion Transformer, 3 semillas, entrenamiento incremental, GPU)",
+            "WAPE": 14.19,
+            "dif": "+0,26 [+0,01; +0,50]",
+            "meses_mejor": "5/12",
+            "en_2024": "+1,74 [+1,16; +2,46]"
+          },
+          {
+            "modelo": "cnn_cuadricula",
+            "WAPE": 15.06,
+            "dif": "+1,13 [+0,87; +1,40]"
+          },
+          {
+            "modelo": "cnn_cuadricula_anio",
+            "WAPE": 15.12,
+            "dif": "+1,18"
+          },
+          {
+            "modelo": "nhits_global",
+            "WAPE": 15.17,
+            "dif": "+1,24 [+0,96; +1,55]"
+          },
+          {
+            "modelo": "nhits_anio",
+            "WAPE": 15.33,
+            "dif": "+1,39"
+          }
+        ],
+        "por_que": "TFT es casi tan preciso como V4 y se equivoca distinto (correlación de errores 0,91): es el mejor socio de V4 en los apilamientos (0,3–0,5 de peso), pero solo no le gana, necesita GPU, tiene sesgo +6 % y en 2024, con un año menos de historia, empeora mucho.",
+        "fuente": "experimentos/E12_comparacion_modelos/README.md § 2, § 6 y § 8"
+      },
+      {
+        "familia": "Fundacionales sin reentrenar (zero-shot)",
+        "mejores": [
+          {
+            "modelo": "chronos2_cov (Chronos-2 de Amazon con calendario)",
+            "WAPE": 14.71,
+            "dif": "+0,77 [+0,47; +1,14]",
+            "meses_mejor": "2/12",
+            "en_2024": "+0,55 [+0,14; +1,09]"
+          },
+          {
+            "modelo": "chronos2_cov_sinfallas / chronos2_multiruta_cov",
+            "WAPE": 14.72,
+            "dif": "+0,78"
+          },
+          {
+            "modelo": "timesfm25_xreg (TimesFM 2.5 de Google con calendario)",
+            "WAPE": 14.96,
+            "dif": "+1,02 [+0,67; +1,43]",
+            "meses_mejor": "0/12",
+            "en_2024": "+0,72 [+0,36; +1,12]"
+          },
+          {
+            "modelo": "chronos2_small_cov",
+            "WAPE": 15.29,
+            "dif": "+1,35"
+          },
+          {
+            "modelo": "chronos2 (sin calendario)",
+            "WAPE": 17.08,
+            "dif": "+3,14 [+2,04; +4,44]"
+          },
+          {
+            "modelo": "timesfm25 (sin calendario)",
+            "WAPE": 17.9,
+            "dif": "+3,96 [+2,70; +5,45]"
+          },
+          {
+            "modelo": "chronos_bolt_base / chronos_bolt_small",
+            "WAPE": "18,23 / 18,40",
+            "dif": "+4,29 / +4,46"
+          },
+          {
+            "modelo": "Formulación por ruta con 17 pasos por día (ruta17)",
+            "WAPE": "17,20 a 45,93",
+            "dif": "+3,26 a +31,99"
+          },
+          {
+            "modelo": "hibrido_V4_chronos2cov (Chronos-2 como variables de V4)",
+            "WAPE": 13.62,
+            "dif": "−0,32 [−0,43; −0,22]",
+            "meses_mejor": "11/12",
+            "en_2024": "−0,33 [−0,50; −0,14]",
+            "cumple_regla": true
+          },
+          {
+            "modelo": "ens_V4_chronos2_cov_nnls",
+            "WAPE": 13.79,
+            "dif": "−0,15 [−0,25; −0,03]",
+            "meses_mejor": "11/12",
+            "cumple_regla": true,
+            "nota": "cae con Holm (p = 0,69)"
+          }
+        ],
+        "por_que": "Resumen en un número el nivel reciente, el patrón semanal y el calendario, pero sin calendario pronostican casi el doble en los 28 días especiales (68–76 % de su desventaja) y con él siguen perdiendo en esos días (35–38 % frente a 25 %), en los domingos y con un sesgo al alza de +4 %. LightGBM corrige ese resumen con lo que los fundacionales no ven (oferta, carga, totales del sistema): por eso funcionan como variable y no solos.",
+        "fuente": "experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md «Respuesta corta», § 3 y § 5; experimentos/E12_comparacion_modelos/README.md § 8"
+      },
+      {
+        "familia": "Combinaciones (ensambles)",
+        "mejores": [
+          {
+            "modelo": "ens_conj_c_nnls_todos (apilamiento NNLS rodante de 40; ganador formal)",
+            "WAPE": 13.39,
+            "dif": "−0,55 [−0,69; −0,41]",
+            "meses_mejor": "12/12",
+            "en_2024": "no viable (exige los 40 modelos)"
+          },
+          {
+            "modelo": "ens_conj_c_nnls_diverso (NNLS de 6: V4, CatBoost, TFT, Prophet, Chronos-2, TimesFM)",
+            "WAPE": 13.42,
+            "dif": "−0,52 [−0,65; −0,38]",
+            "meses_mejor": "12/12",
+            "en_2024": "−0,23 [−0,49; +0,09]: no cumple"
+          },
+          {
+            "modelo": "ens_adhoc_V4_tft_nnls (no elegible)",
+            "WAPE": 13.48,
+            "dif": "−0,46 [−0,59; −0,34]",
+            "en_2024": "−0,10 [−0,48; +0,42]"
+          },
+          {
+            "modelo": "ens_conj_a_media_V4_mejor_familia (media simple de 5)",
+            "WAPE": 13.59,
+            "dif": "−0,35 [−0,48; −0,21]",
+            "meses_mejor": "12/12",
+            "en_2024": "−0,49 [−0,71; −0,26]: cumple"
+          },
+          {
+            "modelo": "ens_conj_b_top3_rodante / top5",
+            "WAPE": "13,63 / 13,73",
+            "dif": "−0,30 / −0,21"
+          },
+          {
+            "modelo": "ens_adhoc_V4_prophet_semanal_nnls / V4_nhits (no elegibles)",
+            "WAPE": "13,72 / 13,75",
+            "dif": "−0,22 / −0,19"
+          }
+        ],
+        "por_que": "Las ganancias de 0,3 a 0,55 puntos salen de promediar errores poco correlacionados: V4 o el híbrido ponen la base, TFT otra lectura de la secuencia y del calendario, CatBoost y Prophet otra forma de cortar las variables. Los pesos NNLS además corrigen el sesgo al alza de redes y fundacionales (suman 0,96–0,98). Pero los pesos estimados con pocos meses son frágiles: en 2024 los apilamientos con TFT no se sostuvieron y la media simple sí.",
+        "fuente": "experimentos/E12_comparacion_modelos/README.md § 2, § 3, § 6 y § 8"
+      }
+    ],
+    "timesfm": {
+      "texto": "TimesFM 2.5 de Google (200 M de parámetros, Apache-2.0, sin reentrenar) no sirve para Sobusa: 17,90 % sin covariables y 14,96 % con el calendario por XReg (+1,02 [+0,67; +1,43]), peor que V4 en los 12 meses; en 2024 se repite (+0,72, mejor en 1 de 12). Le gana a V4 solo en los laborales de clases (12,20 % frente a 12,47 %) y pierde en los días especiales (38 % frente a 25 %) y en los domingos (23,2 % frente a 18,1 %). En el apilamiento diverso recibe peso 0 de febrero a diciembre. Es barato de correr (351 s para 18.615 pronósticos) pero suma dependencias (timesfm y JAX). TimesFM 3.0 tiene licencia no comercial y no se probó.",
+      "fuente": "experimentos/E12_comparacion_modelos/README.md § 9; experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md § 4 y § 10"
+    },
+    "chronos": {
+      "texto": "Chronos-2 de Amazon (119,5 M de parámetros, Apache-2.0) es el mejor fundacional: 14,71 % con calendario (+0,77), 17,08 % sin él; sesgo +4,1 %; sus cuantiles 10–90 están razonablemente calibrados (cobertura 0,81–0,85). Chronos-2 small pierde 0,5–0,6 puntos más; Chronos-Bolt (sin covariables) queda en 18,2–18,4 % y fracasa del todo por ruta con 17 pasos por día (43,7–45,9 %). Solo no cumple la regla; como 4 variables dentro de V4 (híbrido) da la mejor mejora individual del estudio y se sostiene en 2024.",
+      "fuente": "experimentos/E12_comparacion_modelos/modelos_fundacionales/README.md «Respuesta corta», § 1, § 3 y § 6"
+    },
+    "por_que_gana_la_combinacion": {
+      "texto": "V4 ya usa la mejor información disponible a 7 días (rezagos corregidos, oferta y calendario), así que ningún modelo nuevo le gana solo. Lo que suma es otra lectura de los mismos datos: la correlación de errores del híbrido con V4 es 0,946, la más baja entre los finalistas (0,96–0,99 en los ensambles). La combinación más robusta es la más simple: meter el pronóstico de Chronos-2 como variable (sin pesos que estimar) o una media simple; los pesos NNLS con pocos meses no se sostienen.",
+      "ruta_json": "experimentos/E12_comparacion_modelos/resultados.json: robustez.correlacion_errores",
+      "fuente": "experimentos/E12_comparacion_modelos/README.md § 6 «La lección», § 7 punto 5 y § 8 «El patrón general»"
+    },
+    "costo_y_riesgo": {
+      "tabla": [
+        {
+          "modelo": "V4 (E11)",
+          "WAPE_2025": "13,94 %",
+          "prueba_2024": "referencia (15,73 %)",
+          "modelos_a_mantener": "1 LightGBM",
+          "librerias": "lightgbm",
+          "gpu": "No",
+          "entrenamiento": "6–20 s",
+          "riesgo": "Bajo"
+        },
+        {
+          "modelo": "Híbrido V4 + Chronos-2",
+          "WAPE_2025": "13,62 % (−0,32)",
+          "prueba_2024": "−0,33 [−0,50; −0,14], 10/12: cumple",
+          "modelos_a_mantener": "1 LightGBM + Chronos-2 congelado (solo inferencia)",
+          "librerias": "lightgbm, chronos-forecasting (torch, transformers)",
+          "gpu": "Opcional: 228 s por semana en CPU con 2 hilos",
+          "entrenamiento": "5–10 s + Chronos-2 de los días nuevos; puesta en marcha: historia de 703 días en 19 min de GPU (una vez)",
+          "riesgo": "Bajo: si falla, V4"
+        },
+        {
+          "modelo": "(a) media de 5",
+          "WAPE_2025": "13,59 % (−0,35)",
+          "prueba_2024": "−0,49 [−0,71; −0,26], 10/12: cumple",
+          "modelos_a_mantener": "5: V4, Tweedie, TFT × 3 semillas, AutoETS, Chronos-2",
+          "librerias": "lightgbm, neuralforecast, statsforecast, chronos-forecasting",
+          "gpu": "Recomendable (TFT)",
+          "entrenamiento": "≈ 2–4 min con GPU",
+          "riesgo": "Medio: 4 cadenas; sesgo +2,9 % / +3,9 %"
+        },
+        {
+          "modelo": "c_nnls_diverso",
+          "WAPE_2025": "13,42 % (−0,52)",
+          "prueba_2024": "−0,23 [−0,49; +0,09]: no cumple",
+          "modelos_a_mantener": "6 más los pesos NNLS de cada mes",
+          "librerias": "lightgbm, catboost, neuralforecast, prophet, chronos-forecasting, timesfm (JAX)",
+          "gpu": "Sí en la práctica",
+          "entrenamiento": "≈ 4–8 min con GPU",
+          "riesgo": "Medio-alto"
+        },
+        {
+          "modelo": "Ganador c_nnls_todos",
+          "WAPE_2025": "13,39 % (−0,55)",
+          "prueba_2024": "no viable",
+          "modelos_a_mantener": "40 modelos y sus pesos NNLS",
+          "librerias": "~10",
+          "gpu": "Sí",
+          "entrenamiento": "≈ 30–60 min",
+          "riesgo": "Alto: pesos inestables entre meses"
+        }
+      ],
+      "ruta_json": "experimentos/E12_comparacion_modelos/resultados.json: produccion.costos",
+      "fuente": "experimentos/E12_comparacion_modelos/README.md § 7 «Costo, complejidad y riesgo»"
+    }
+  },
+  "avisos_y_contradicciones": [
+    {
+      "tipo": "inconsistencia_documental",
+      "donde": "experimentos/E11_modelo_mejorado/README.md § 4 (a) frente a modelos_hibrido/metadatos_pronostico_2026_enero_hibrido.json",
+      "texto": "El README de E11 dice que los modelos de producción se entrenan con 55.538 / 55.181 / 54.824 / 54.467 filas (H = 7 / 14 / 21 / 28). Ese número lo imprime `modelo_final.py` contando las filas con objetivo y `m4sem` no vacíos, sin aplicar el filtro `excluido == 0` que `comun_e11.entrenar()` sí aplica; las 102 filas de los dos días R5 (2 días × 3 rutas × 17 horas) no entrenan. El conjunto real es de 55.436 / 55.079 / 54.722 / 54.365 filas, que es exactamente lo que reporta el híbrido para su V4 en sombra con el mismo filtro. Para la app conviene usar 55.436 (H = 7) y anotar la salvedad, o decir «unas 55.400 filas».",
+      "efecto": "Solo documental: no cambia ningún resultado."
+    },
+    {
+      "tipo": "cifras_de_distinta_base_que_pueden_confundir",
+      "donde": "informe_resultados.md § 3 Tabla 1 (fila «E1 + lluvia observada del mismo día», 14,63 %, +0,23, E9) frente a experimentos/E11_modelo_mejorado/README.md Tabla 1 (N nowcast 13,92 %, −0,02 frente a V3)",
+      "texto": "No es una contradicción: E9 añadió la lluvia observada a E1 (empeora +0,23) y E11 la añadió a V3 (empata, −0,02). La conclusión es la misma (no ayuda), pero la app no debe mezclar las dos cifras en una sola frase.",
+      "efecto": "Redacción."
+    },
+    {
+      "tipo": "omision_en_el_informe",
+      "donde": "informe_resultados.md § 3 Tabla 1b, columna «Diferencia en 2024»",
+      "texto": "El informe deja «—» para Chronos-2, AutoETS y TFT aunque E12 § 6 sí los repitió en 2024: chronos2_cov +0,55 [+0,14; +1,09], autoets_cal +0,17 [−0,19; +0,60], prophet_semanal +0,74 [+0,40; +1,09], tft_global +1,74 [+1,16; +2,46], catboost +0,82, lgbm_tweedie −0,00. La app puede mostrarlos con fuente E12 § 6.",
+      "efecto": "Completar, no corregir."
+    },
+    {
+      "tipo": "recomendacion_sin_script",
+      "donde": "informe_resultados.md § 7 recomendación 1 frente a los scripts de producción",
+      "texto": "El informe recomienda entrenar el modelo de producción «con el objetivo corregido de E13» (pasajeros de todos los viajes que corrieron), pero `modelo_final.py` (E11) y `modelo_final_hibrido.py` (E12) entrenan con el objetivo viejo (viajes válidos); E13 solo tiene su `run.py` y su caché (`cache/chronos2_V4c.parquet`) y deja el paso a producción como «próximo paso 6». Las cifras de esta ficha (13,94 % y 13,62 %) son con el objetivo viejo; las de E13 (11,77 % y 11,38 %) se miden contra lo que de verdad sube y no son comparables con las anteriores. La pantalla debe decir con qué objetivo está cada cifra.",
+      "efecto": "Decisión para el orquestador: qué cifra «oficial» muestra la pantalla Modelo (propongo 13,94 / 13,62 con el objetivo viejo, y E13 como «siguiente paso» con sus cifras aparte)."
+    },
+    {
+      "tipo": "reserva_de_verificacion_no_recogida_en_el_informe",
+      "donde": "informe_resultados.md § 3 («a cuatro semanas, en 14,4») frente a experimentos/E11_modelo_mejorado/README.md § 8",
+      "texto": "La verificación de E11 advierte que el 14,4 % con H = 28 puede ser algo optimista (cada pliegue entrena hasta el inicio del mes de prueba, hasta 27 días después de la fecha de emisión). La simulación del modo producción del híbrido, que sí entrena solo hasta el origen, da V4 13,96 % en H = 28 sobre 11 orígenes de 2025 (otra muestra), coherente con la cifra. Conviene citar la reserva junto a la cifra.",
+      "efecto": "Matiz."
+    },
+    {
+      "tipo": "mismo_modelo_dos_nombres",
+      "donde": "experimentos/E11_modelo_mejorado/README.md § 2 «Selección» y § 8",
+      "texto": "V3 y V4 son operativamente el mismo modelo (diferencia 0,006 puntos); V4 ganó la regla por el menor WAPE y es el que entrena producción, pero exige los eventos GPS. Si la app dice «rezagos corregidos por fallas» debe aclarar que esa corrección no aporta error medible: lo que aporta son los pesos.",
+      "efecto": "Redacción honesta."
+    },
+    {
+      "tipo": "ganador_formal_frente_a_recomendado",
+      "donde": "experimentos/E12_comparacion_modelos/README.md «Respuesta corta» y § 7; informe_resultados.md § 3 Tabla 1b",
+      "texto": "El ganador según la regla de E12 es el apilamiento de 40 modelos (13,39 %); el recomendado para producción es el híbrido (13,62 %). Los dos documentos lo dicen igual; la pantalla debe mostrar ambos y explicar por qué se elige el segundo (robustez en 2024, costo, riesgo).",
+      "efecto": "Decisión ya tomada en los documentos; solo hay que respetarla."
+    },
+    {
+      "tipo": "fijado_de_antemano_con_matiz",
+      "donde": "experimentos/E12_comparacion_modelos/README.md «Respuesta corta», § 10 y «Verificación»; modelos_fundacionales/README.md § 6",
+      "texto": "La regla de selección y el diseño del híbrido se fijaron antes de ver resultados; el subconjunto «diverso» y la lista de enero de los ensambles conjuntos se concretaron ya conocidos los resultados de las familias (la verificación corrigió el README). La app no debe decir que «todo E12 se fijó de antemano»: para el híbrido sí vale.",
+      "efecto": "Redacción."
+    },
+    {
+      "tipo": "redondeo",
+      "donde": "experimentos/E11_modelo_mejorado/README.md «Respuesta corta» (797.788) frente a § 8 (797.789) y E12 (797.789)",
+      "texto": "El total de enero de 2026 de E11 aparece como 797.788 y 797.789 según se sumen los redondeos por ruta o por franja. Usar la cifra del JSON (`metadatos.json: total_por_ruta`, suma 797.788).",
+      "efecto": "Trivial."
+    },
+    {
+      "tipo": "redondeo",
+      "donde": "experimentos/E11_modelo_mejorado/README.md § 2, Tablas 2 y 5",
+      "texto": "Cuatro celdas están redondeadas hacia arriba por 0,05 o menos: V4 sábado «13,5 %» (JSON 13,448), V4 julio «15,6» (15,549), V0 enero «14,0» (13,948) y B1 diciembre «25,6» (25,545). El JSON de E11 y el de E12 coinciden entre sí; `verificar_datos_app.py` debe leer del JSON y redondear, no copiar la tabla.",
+      "efecto": "Trivial; detectado por verificar_ficha.py."
+    }
+  ]
+}

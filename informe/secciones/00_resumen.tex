@@ -1,0 +1,25 @@
+% Resumen. Cifras: documentos/informe_resultados.md (sexta versión) y app/DATOS.md.
+% Plan que recorta con la simétrica (+1.939 M COP, -1.512 pasajeros netos al día) y sobre la capacidad (530):
+% costos/resultados/d5_reoptimizado.csv, corrida «D5 original (60.000/1.500/3.000, e=0,5)».
+\begin{abstract}
+\noindent Sobusa programa las salidas de cada ruta y hora con el promedio de las ocho semanas anteriores. Con 1.096
+días de su operación (2023--2025: 520.639 viajes válidos y 175,9 millones de eventos GPS) construimos un pronóstico
+de pasajeros por ruta, día y hora de salida, una medición causal de cuántos pasajeros se pierden cuando salen menos
+buses, un optimizador entero de salidas por hora con costos de fuente pública y un motor de despacho en tiempo real. A
+una semana de antelación, la regla manual tiene un WAPE de 20,04~\%, el primer LightGBM 14,40~\%, el modelo final
+13,94~\% y el híbrido con Chronos-2 que recomendamos 13,62~\%, una ventaja que se repite en 2024. La elasticidad de
+los pasajeros a las salidas es $\beta \approx 0{,}70$ (0,55--0,90), así que, contando solo los pasajeros perdidos,
+recortar no paga: el plan que quita el 9,6~\% de las horas de bus pierde 1.029 millones de pesos (M COP) al año y deja
+de pagar con $\beta > 0{,}53$. Contando también los ganados deja $+1.939$ M COP, pero pierde 1.512 pasajeros netos al
+día y sube a 530 los pasajeros diarios sobre la capacidad. Con
+costos con fuente, el optimizador reasigna: 451 salidas al día frente a 460, $-0{,}5$~\% de horas de bus, espera de
+4,43 a 4,30 minutos y 267 pasajeros diarios sobre la capacidad frente a 317, con un saldo anual entre $-2.825$ M COP
+(solo pasajeros perdidos) y $+1.600$ M COP (también los ganados). En 79 días de 2025 reproducidos como en vivo, el plan
+semanal queda a 1,05 salidas por hora del óptimo, frente a 2,80 de la operación real, y reoptimizar en el día no
+mejora. Recomendamos reasignar (deja menos caja que recortar, pero pierde menos pasajeros y tiene la mitad de sobrecarga),
+añadir un cupo por bus al optimizador y medir $\beta$ con un piloto de ocho semanas.
+
+\medskip
+\noindent\textbf{Palabras clave:} transporte público, pronóstico de demanda, LightGBM, Chronos-2,
+elasticidad, programación entera mixta, despacho en tiempo real.
+\end{abstract}

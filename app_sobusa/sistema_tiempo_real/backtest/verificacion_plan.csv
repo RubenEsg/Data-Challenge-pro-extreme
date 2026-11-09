@@ -1,0 +1,475 @@
+fecha,tipo_dia,ruta,fuente,referencia,estado_solver,salidas_plan,salidas_ref,horas_iguales,salidas_oraculo,salidas_oraculo_ref,horas_oraculo_iguales,salidas_real,salidas_x_D5
+2025-01-03,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,111,111,17,102,,,121,105
+2025-01-03,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,208,208,17,173,,,272,184
+2025-01-03,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,102,102,17,98,,,71,100
+2025-01-04,Sábado,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,105,105,17,99,,,129,102
+2025-01-04,Sábado,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,192,192,17,147,,,265,166
+2025-01-04,Sábado,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,100,100,17,99,,,90,99
+2025-01-05,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,62,62,17,64,,,104,62
+2025-01-05,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,106,106,17,94,,,172,97
+2025-01-05,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,65,65,17,69,,,42,65
+2025-01-06,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,63,63,17,64,,,85,62
+2025-01-06,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,112,112,17,93,,,167,97
+2025-01-06,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,65,65,17,69,,,58,65
+2025-01-08,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,120,120,17,108,,,147,109
+2025-01-08,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,249,249,17,209,,,296,216
+2025-01-08,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,104,104,17,105,,,79,100
+2025-01-09,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,119,119,17,109,,,147,111
+2025-01-09,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,238,238,17,201,,,282,213
+2025-01-09,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,108,108,17,100,,,81,103
+2025-01-10,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,117,117,17,111,,,145,111
+2025-01-10,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,227,227,17,190,,,271,207
+2025-01-10,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,107,107,17,98,,,84,101
+2025-01-12,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,64,64,17,63,,,87,62
+2025-01-12,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,115,115,17,93,,,146,105
+2025-01-12,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,66,66,17,69,,,46,65
+2025-01-22,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,122,122,17,117,,,154,113
+2025-01-22,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,250,250,17,216,,,280,224
+2025-01-22,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,107,107,17,104,,,94,101
+2025-01-30,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,132,132,17,121,,,154,121
+2025-01-30,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,258,258,17,250,,,302,239
+2025-01-30,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,109,109,17,114,,,98,103
+2025-02-04,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,145,145,17,143,,,145,130
+2025-02-04,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,270,270,17,261,,,287,255
+2025-02-04,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,118,118,17,137,,,90,107
+2025-02-06,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,143,143,17,136,,,149,130
+2025-02-06,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,270,270,17,247,,,291,257
+2025-02-06,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,116,116,17,111,,,91,106
+2025-02-18,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,150,150,17,134,,,143,139
+2025-02-18,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,278,278,17,268,,,302,262
+2025-02-18,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,128,128,17,133,,,86,111
+2025-03-01,Sábado,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,113,113,17,104,,,133,107
+2025-03-01,Sábado,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,235,235,17,262,,,176,194
+2025-03-01,Sábado,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,101,101,17,107,,,74,100
+2025-03-02,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,66,66,17,78,,,60,63
+2025-03-02,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,127,127,17,117,,,102,108
+2025-03-02,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,67,67,17,79,,,39,65
+2025-03-03,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,135,135,17,107,,,56,104
+2025-03-03,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,226,226,17,148,,,78,163
+2025-03-03,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,105,105,17,104,,,19,100
+2025-03-04,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,131,131,17,116,,,41,104
+2025-03-04,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,235,235,17,188,,,72,164
+2025-03-04,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,113,113,17,114,,,29,100
+2025-03-09,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,64,64,17,62,,,89,62
+2025-03-09,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,110,110,17,95,,,169,96
+2025-03-09,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,66,66,17,65,,,60,65
+2025-03-21,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,151,151,17,137,,,145,135
+2025-03-21,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,275,275,17,253,,,298,255
+2025-03-21,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,121,121,17,127,,,84,106
+2025-03-22,Sábado,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,117,117,17,117,,,127,109
+2025-03-22,Sábado,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,241,241,17,197,,,237,211
+2025-03-22,Sábado,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,103,103,17,100,,,77,101
+2025-03-24,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,70,70,17,64,,,83,64
+2025-03-24,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,138,138,17,98,,,173,120
+2025-03-24,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,69,69,17,67,,,57,65
+2025-03-30,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,64,64,17,62,,,119,62
+2025-03-30,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,112,112,17,96,,,179,98
+2025-03-30,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,65,65,17,65,,,63,65
+2025-04-17,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,64,64,17,62,,,79,63
+2025-04-17,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,110,110,17,103,,,176,95
+2025-04-17,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,66,66,17,67,,,62,65
+2025-04-18,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,65,65,17,62,,,63,63
+2025-04-18,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,101,101,17,79,,,151,86
+2025-04-18,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,68,68,17,65,,,51,65
+2025-04-19,Sábado,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,104,104,17,98,,,91,102
+2025-04-19,Sábado,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,175,175,17,127,,,158,153
+2025-04-19,Sábado,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,100,100,17,99,,,52,99
+2025-04-25,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,143,143,17,126,,,139,132
+2025-04-25,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,266,266,17,245,,,313,248
+2025-04-25,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,114,114,17,123,,,91,108
+2025-04-26,Sábado,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,113,113,17,111,,,126,108
+2025-04-26,Sábado,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,223,223,17,197,,,269,199
+2025-04-26,Sábado,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,104,104,17,102,,,82,102
+2025-05-01,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,67,67,17,62,,,91,64
+2025-05-01,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,131,131,17,117,,,181,117
+2025-05-01,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,69,69,17,66,,,64,66
+2025-05-07,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,145,145,17,137,,,143,129
+2025-05-07,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,267,267,17,243,,,268,247
+2025-05-07,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,117,117,17,120,,,91,107
+2025-05-09,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,142,142,17,122,,,130,126
+2025-05-09,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,261,261,17,242,,,286,243
+2025-05-09,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,116,116,17,113,,,93,106
+2025-05-13,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,143,143,17,125,,,135,127
+2025-05-13,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,267,267,17,241,,,272,247
+2025-05-13,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,115,115,17,114,,,94,107
+2025-05-28,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,140,140,17,124,,,157,127
+2025-05-28,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,262,262,17,232,,,299,237
+2025-05-28,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,115,115,17,111,,,99,107
+2025-06-02,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,66,66,17,63,,,71,63
+2025-06-02,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,121,121,17,99,,,162,106
+2025-06-02,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,66,66,17,65,,,59,65
+2025-06-06,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,129,129,17,120,,,147,118
+2025-06-06,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,244,244,17,217,,,270,223
+2025-06-06,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,108,108,17,105,,,84,105
+2025-06-10,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,129,129,17,117,,,138,119
+2025-06-10,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,249,249,17,218,,,273,225
+2025-06-10,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,111,111,17,104,,,97,105
+2025-06-12,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,127,127,17,116,,,138,116
+2025-06-12,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,246,246,17,209,,,298,220
+2025-06-12,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,106,106,17,103,,,80,103
+2025-06-13,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,124,124,17,115,,,135,114
+2025-06-13,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,249,249,17,227,,,301,222
+2025-06-13,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,108,108,17,107,,,88,104
+2025-06-19,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,126,126,17,105,,,139,116
+2025-06-19,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,245,245,17,223,,,285,218
+2025-06-19,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,106,106,17,99,,,73,103
+2025-06-23,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,64,64,17,65,,,89,63
+2025-06-23,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,120,120,17,92,,,165,103
+2025-06-23,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,66,66,17,68,,,56,65
+2025-06-24,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,125,125,17,118,,,140,114
+2025-06-24,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,244,244,17,231,,,279,217
+2025-06-24,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,109,109,17,100,,,92,103
+2025-07-09,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,125,125,17,106,,,154,115
+2025-07-09,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,246,246,17,195,,,281,219
+2025-07-09,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,109,109,17,102,,,93,103
+2025-07-12,Sábado,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,108,108,17,101,,,142,106
+2025-07-12,Sábado,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,207,207,17,183,,,259,183
+2025-07-12,Sábado,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,101,101,17,100,,,93,99
+2025-07-13,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,63,63,17,63,,,91,62
+2025-07-13,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,112,112,17,94,,,158,99
+2025-07-13,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,66,66,17,65,,,62,65
+2025-07-15,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,124,124,17,119,,,136,114
+2025-07-15,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,241,241,17,211,,,268,216
+2025-07-15,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,110,110,17,108,,,93,103
+2025-07-23,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,130,130,17,117,,,142,117
+2025-07-23,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,249,249,17,222,,,285,226
+2025-07-23,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,111,111,17,114,,,85,103
+2025-07-29,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,131,131,17,126,,,121,119
+2025-07-29,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,251,251,17,207,,,238,230
+2025-07-29,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,113,113,17,108,,,71,104
+2025-08-07,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,71,71,17,67,,,112,65
+2025-08-07,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,131,131,17,105,,,180,114
+2025-08-07,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,68,68,17,65,,,73,66
+2025-08-10,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,64,64,17,63,,,95,62
+2025-08-10,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,112,112,17,105,,,178,100
+2025-08-10,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,66,66,17,66,,,56,65
+2025-08-16,Sábado,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,112,112,17,106,,,125,105
+2025-08-16,Sábado,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,223,223,17,203,,,239,193
+2025-08-16,Sábado,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,102,102,17,106,,,74,100
+2025-08-17,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,67,67,17,63,,,101,62
+2025-08-17,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,122,122,17,100,,,151,106
+2025-08-17,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,67,67,17,67,,,60,65
+2025-08-18,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,70,70,17,66,,,104,64
+2025-08-18,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,128,128,17,105,,,146,111
+2025-08-18,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,67,67,17,65,,,53,66
+2025-08-23,Sábado,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,112,112,17,111,,,118,106
+2025-08-23,Sábado,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,216,216,17,181,,,234,190
+2025-08-23,Sábado,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,103,103,17,110,,,73,101
+2025-09-01,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,149,149,17,142,,,133,135
+2025-09-01,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,274,274,17,238,,,258,253
+2025-09-01,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,123,123,17,128,,,80,107
+2025-09-04,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,150,150,17,130,,,129,131
+2025-09-04,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,274,274,17,218,,,211,250
+2025-09-04,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,120,120,17,116,,,82,107
+2025-09-05,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,151,151,17,136,,,140,135
+2025-09-05,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,273,273,17,236,,,246,251
+2025-09-05,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,121,121,17,117,,,83,109
+2025-09-07,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,64,64,17,66,,,98,62
+2025-09-07,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,121,121,17,97,,,178,106
+2025-09-07,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,66,66,17,65,,,66,65
+2025-09-27,Sábado,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,113,113,17,111,,,115,106
+2025-09-27,Sábado,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,223,223,17,199,,,231,194
+2025-09-27,Sábado,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,101,101,17,110,,,77,100
+2025-10-06,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,140,140,17,114,,,159,125
+2025-10-06,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,262,262,17,219,,,258,237
+2025-10-06,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,114,114,17,111,,,85,104
+2025-10-07,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,141,141,17,113,,,148,125
+2025-10-07,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,261,261,17,221,,,260,236
+2025-10-07,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,113,113,17,101,,,95,104
+2025-10-08,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,139,139,17,112,,,153,122
+2025-10-08,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,257,257,17,206,,,268,233
+2025-10-08,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,113,113,17,101,,,96,105
+2025-10-10,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,133,133,17,114,,,131,119
+2025-10-10,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,252,252,17,209,,,244,229
+2025-10-10,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,110,110,17,101,,,78,104
+2025-10-16,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,142,142,17,130,,,146,127
+2025-10-16,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,257,257,17,228,,,266,237
+2025-10-16,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,112,112,17,117,,,87,106
+2025-10-21,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,141,141,17,135,,,152,124
+2025-10-21,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,261,261,17,253,,,285,239
+2025-10-21,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,114,114,17,116,,,92,104
+2025-11-04,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,146,146,17,138,,,138,127
+2025-11-04,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,265,265,17,260,,,266,242
+2025-11-04,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,116,116,17,131,,,79,106
+2025-11-10,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,135,135,17,125,,,145,120
+2025-11-10,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,247,247,17,229,,,264,219
+2025-11-10,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,109,109,17,105,,,88,102
+2025-11-12,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,141,141,17,132,,,142,127
+2025-11-12,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,260,260,17,211,,,253,233
+2025-11-12,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,111,111,17,108,,,88,104
+2025-11-16,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,67,67,17,63,,,97,62
+2025-11-16,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,122,122,17,116,,,178,109
+2025-11-16,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,65,65,17,65,,,50,65
+2025-11-21,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,142,142,17,118,,,155,125
+2025-11-21,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,265,265,17,234,,,268,242
+2025-11-21,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,111,111,17,106,,,90,105
+2025-11-22,Sábado,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,113,113,17,105,,,133,107
+2025-11-22,Sábado,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,224,224,17,189,,,243,199
+2025-11-22,Sábado,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,103,103,17,100,,,82,101
+2025-11-23,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,66,66,17,62,,,101,62
+2025-11-23,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,125,125,17,101,,,177,108
+2025-11-23,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,65,65,17,65,,,65,65
+2025-11-24,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,137,137,17,125,,,125,121
+2025-11-24,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,259,259,17,233,,,254,225
+2025-11-24,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,109,109,17,108,,,82,102
+2025-11-28,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,132,132,17,127,,,155,117
+2025-11-28,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,257,257,17,230,,,276,234
+2025-11-28,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,110,110,17,117,,,91,104
+2025-12-01,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,133,133,17,120,,,143,117
+2025-12-01,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,264,264,17,230,,,247,233
+2025-12-01,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,110,110,17,114,,,92,102
+2025-12-03,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,136,136,17,118,,,158,119
+2025-12-03,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,259,259,17,226,,,238,233
+2025-12-03,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,111,111,17,121,,,79,103
+2025-12-13,Sábado,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,108,108,17,105,,,148,105
+2025-12-13,Sábado,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,217,217,17,187,,,205,192
+2025-12-13,Sábado,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,102,102,17,102,,,77,100
+2025-12-19,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,122,122,17,113,,,171,113
+2025-12-19,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,250,250,17,213,,,209,221
+2025-12-19,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,105,105,17,114,,,87,101
+2025-12-21,Domingo/festivo,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,71,71,17,69,,,90,62
+2025-12-21,Domingo/festivo,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,141,141,17,165,,,161,122
+2025-12-21,Domingo/festivo,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,68,68,17,79,,,52,65
+2025-12-23,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,122,122,17,125,,,143,112
+2025-12-23,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,251,251,17,254,,,215,218
+2025-12-23,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,106,106,17,115,,,77,101
+2025-12-26,Laboral,SILENCIO,costos con fuente (2026),x_D5_fuente,Optimal,115,115,17,107,,,134,109
+2025-12-26,Laboral,CRA 54,costos con fuente (2026),x_D5_fuente,Optimal,227,227,17,197,,,246,197
+2025-12-26,Laboral,CL 72,costos con fuente (2026),x_D5_fuente,Optimal,104,104,17,101,,,95,100
+2025-01-03,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,105,105,17,101,101,17,121,105
+2025-01-03,Laboral,CRA 54,supuestos D5,x_D5,Optimal,184,184,17,169,169,17,272,184
+2025-01-03,Laboral,CL 72,supuestos D5,x_D5,Optimal,100,100,17,98,98,17,71,100
+2025-01-04,Sábado,SILENCIO,supuestos D5,x_D5,Optimal,102,102,17,98,98,17,129,102
+2025-01-04,Sábado,CRA 54,supuestos D5,x_D5,Optimal,166,166,17,143,143,17,265,166
+2025-01-04,Sábado,CL 72,supuestos D5,x_D5,Optimal,99,99,17,99,99,17,90,99
+2025-01-05,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,62,62,17,63,63,17,104,62
+2025-01-05,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,97,97,17,89,89,17,172,97
+2025-01-05,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,42,65
+2025-01-06,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,62,62,17,62,62,17,85,62
+2025-01-06,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,97,97,17,92,92,17,167,97
+2025-01-06,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,58,65
+2025-01-08,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,109,109,17,106,106,17,147,109
+2025-01-08,Laboral,CRA 54,supuestos D5,x_D5,Optimal,216,216,17,201,201,17,296,216
+2025-01-08,Laboral,CL 72,supuestos D5,x_D5,Optimal,100,100,17,98,98,17,79,100
+2025-01-09,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,111,111,17,108,108,17,147,111
+2025-01-09,Laboral,CRA 54,supuestos D5,x_D5,Optimal,213,213,17,195,195,17,282,213
+2025-01-09,Laboral,CL 72,supuestos D5,x_D5,Optimal,103,103,17,99,99,17,81,103
+2025-01-10,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,111,111,17,111,111,17,145,111
+2025-01-10,Laboral,CRA 54,supuestos D5,x_D5,Optimal,207,207,17,188,188,17,271,207
+2025-01-10,Laboral,CL 72,supuestos D5,x_D5,Optimal,101,101,17,98,98,17,84,101
+2025-01-12,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,62,62,17,62,62,17,87,62
+2025-01-12,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,105,105,17,88,88,17,146,105
+2025-01-12,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,46,65
+2025-01-22,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,113,113,17,114,114,17,154,113
+2025-01-22,Laboral,CRA 54,supuestos D5,x_D5,Optimal,224,224,17,207,207,17,280,224
+2025-01-22,Laboral,CL 72,supuestos D5,x_D5,Optimal,101,101,17,102,102,17,94,101
+2025-01-30,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,121,121,17,118,118,17,154,121
+2025-01-30,Laboral,CRA 54,supuestos D5,x_D5,Optimal,239,239,17,242,242,17,302,239
+2025-01-30,Laboral,CL 72,supuestos D5,x_D5,Optimal,103,103,17,105,105,17,98,103
+2025-02-04,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,130,130,17,134,134,17,145,130
+2025-02-04,Laboral,CRA 54,supuestos D5,x_D5,Optimal,255,255,17,252,252,17,287,255
+2025-02-04,Laboral,CL 72,supuestos D5,x_D5,Optimal,107,107,17,108,108,17,90,107
+2025-02-06,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,130,130,17,130,130,17,149,130
+2025-02-06,Laboral,CRA 54,supuestos D5,x_D5,Optimal,257,257,17,232,232,17,291,257
+2025-02-06,Laboral,CL 72,supuestos D5,x_D5,Optimal,106,106,17,107,107,17,91,106
+2025-02-18,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,139,139,17,127,127,17,143,139
+2025-02-18,Laboral,CRA 54,supuestos D5,x_D5,Optimal,262,262,17,263,263,17,302,262
+2025-02-18,Laboral,CL 72,supuestos D5,x_D5,Optimal,111,111,17,106,106,17,86,111
+2025-03-01,Sábado,SILENCIO,supuestos D5,x_D5,Optimal,107,107,17,99,99,17,133,107
+2025-03-01,Sábado,CRA 54,supuestos D5,x_D5,Optimal,194,194,17,176,176,17,176,194
+2025-03-01,Sábado,CL 72,supuestos D5,x_D5,Optimal,100,100,17,99,99,17,74,100
+2025-03-02,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,63,63,17,63,63,17,60,63
+2025-03-02,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,108,108,17,82,82,17,102,108
+2025-03-02,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,39,65
+2025-03-03,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,104,104,17,98,98,17,56,104
+2025-03-03,Laboral,CRA 54,supuestos D5,x_D5,Optimal,163,163,17,107,107,17,78,163
+2025-03-03,Laboral,CL 72,supuestos D5,x_D5,Optimal,100,100,17,98,98,17,19,100
+2025-03-04,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,104,104,17,98,98,17,41,104
+2025-03-04,Laboral,CRA 54,supuestos D5,x_D5,Optimal,164,164,17,111,111,17,72,164
+2025-03-04,Laboral,CL 72,supuestos D5,x_D5,Optimal,100,100,17,104,104,17,29,100
+2025-03-09,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,62,62,17,62,62,17,89,62
+2025-03-09,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,96,96,17,92,92,17,169,96
+2025-03-09,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,60,65
+2025-03-21,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,135,135,17,131,131,17,145,135
+2025-03-21,Laboral,CRA 54,supuestos D5,x_D5,Optimal,255,255,17,248,248,17,298,255
+2025-03-21,Laboral,CL 72,supuestos D5,x_D5,Optimal,106,106,17,108,108,17,84,106
+2025-03-22,Sábado,SILENCIO,supuestos D5,x_D5,Optimal,109,109,17,110,110,17,127,109
+2025-03-22,Sábado,CRA 54,supuestos D5,x_D5,Optimal,211,211,17,193,193,17,237,211
+2025-03-22,Sábado,CL 72,supuestos D5,x_D5,Optimal,101,101,17,99,99,17,77,101
+2025-03-24,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,64,64,17,62,62,17,83,64
+2025-03-24,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,120,120,17,94,94,17,173,120
+2025-03-24,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,57,65
+2025-03-30,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,62,62,17,62,62,17,119,62
+2025-03-30,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,98,98,17,91,91,17,179,98
+2025-03-30,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,63,65
+2025-04-17,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,63,63,17,62,62,17,79,63
+2025-04-17,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,95,95,17,101,101,17,176,95
+2025-04-17,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,67,67,17,62,65
+2025-04-18,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,63,63,17,62,62,17,63,63
+2025-04-18,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,86,86,17,74,74,17,151,86
+2025-04-18,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,51,65
+2025-04-19,Sábado,SILENCIO,supuestos D5,x_D5,Optimal,102,102,17,98,98,17,91,102
+2025-04-19,Sábado,CRA 54,supuestos D5,x_D5,Optimal,153,153,17,120,120,17,158,153
+2025-04-19,Sábado,CL 72,supuestos D5,x_D5,Optimal,99,99,17,99,99,17,52,99
+2025-04-25,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,132,132,17,116,116,17,139,132
+2025-04-25,Laboral,CRA 54,supuestos D5,x_D5,Optimal,248,248,17,240,240,17,313,248
+2025-04-25,Laboral,CL 72,supuestos D5,x_D5,Optimal,108,108,17,108,108,17,91,108
+2025-04-26,Sábado,SILENCIO,supuestos D5,x_D5,Optimal,108,108,17,108,108,17,126,108
+2025-04-26,Sábado,CRA 54,supuestos D5,x_D5,Optimal,199,199,17,185,185,17,269,199
+2025-04-26,Sábado,CL 72,supuestos D5,x_D5,Optimal,102,102,17,101,101,17,82,102
+2025-05-01,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,64,64,17,62,62,17,91,64
+2025-05-01,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,117,117,17,101,101,17,181,117
+2025-05-01,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,66,66,17,66,66,17,64,66
+2025-05-07,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,129,129,17,129,129,17,143,129
+2025-05-07,Laboral,CRA 54,supuestos D5,x_D5,Optimal,247,247,17,233,233,17,268,247
+2025-05-07,Laboral,CL 72,supuestos D5,x_D5,Optimal,107,107,17,106,106,17,91,107
+2025-05-09,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,126,126,17,114,114,17,130,126
+2025-05-09,Laboral,CRA 54,supuestos D5,x_D5,Optimal,243,243,17,236,236,17,286,243
+2025-05-09,Laboral,CL 72,supuestos D5,x_D5,Optimal,106,106,17,111,111,17,93,106
+2025-05-13,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,127,127,17,122,122,17,135,127
+2025-05-13,Laboral,CRA 54,supuestos D5,x_D5,Optimal,247,247,17,232,232,17,272,247
+2025-05-13,Laboral,CL 72,supuestos D5,x_D5,Optimal,107,107,17,107,107,17,94,107
+2025-05-28,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,127,127,17,121,121,17,157,127
+2025-05-28,Laboral,CRA 54,supuestos D5,x_D5,Optimal,237,237,17,224,224,17,299,237
+2025-05-28,Laboral,CL 72,supuestos D5,x_D5,Optimal,107,107,17,104,104,17,99,107
+2025-06-02,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,63,63,17,62,62,17,71,63
+2025-06-02,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,106,106,17,92,92,17,162,106
+2025-06-02,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,59,65
+2025-06-06,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,118,118,17,119,119,17,147,118
+2025-06-06,Laboral,CRA 54,supuestos D5,x_D5,Optimal,223,223,17,214,214,17,270,223
+2025-06-06,Laboral,CL 72,supuestos D5,x_D5,Optimal,105,105,17,103,103,17,84,105
+2025-06-10,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,119,119,17,116,116,17,138,119
+2025-06-10,Laboral,CRA 54,supuestos D5,x_D5,Optimal,225,225,17,214,214,17,273,225
+2025-06-10,Laboral,CL 72,supuestos D5,x_D5,Optimal,105,105,17,104,104,17,97,105
+2025-06-12,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,116,116,17,112,112,17,138,116
+2025-06-12,Laboral,CRA 54,supuestos D5,x_D5,Optimal,220,220,17,203,203,17,298,220
+2025-06-12,Laboral,CL 72,supuestos D5,x_D5,Optimal,103,103,17,100,100,17,80,103
+2025-06-13,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,114,114,17,115,115,17,135,114
+2025-06-13,Laboral,CRA 54,supuestos D5,x_D5,Optimal,222,222,17,212,212,17,301,222
+2025-06-13,Laboral,CL 72,supuestos D5,x_D5,Optimal,104,104,17,100,100,17,88,104
+2025-06-19,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,116,116,17,104,104,17,139,116
+2025-06-19,Laboral,CRA 54,supuestos D5,x_D5,Optimal,218,218,17,212,212,17,285,218
+2025-06-19,Laboral,CL 72,supuestos D5,x_D5,Optimal,103,103,17,98,98,17,73,103
+2025-06-23,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,63,63,17,65,65,17,89,63
+2025-06-23,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,103,103,17,86,86,17,165,103
+2025-06-23,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,67,67,17,56,65
+2025-06-24,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,114,114,17,114,114,17,140,114
+2025-06-24,Laboral,CRA 54,supuestos D5,x_D5,Optimal,217,217,17,225,225,17,279,217
+2025-06-24,Laboral,CL 72,supuestos D5,x_D5,Optimal,103,103,17,98,98,17,92,103
+2025-07-09,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,115,115,17,106,106,17,154,115
+2025-07-09,Laboral,CRA 54,supuestos D5,x_D5,Optimal,219,219,17,182,182,17,281,219
+2025-07-09,Laboral,CL 72,supuestos D5,x_D5,Optimal,103,103,17,102,102,17,93,103
+2025-07-12,Sábado,SILENCIO,supuestos D5,x_D5,Optimal,106,106,17,100,100,17,142,106
+2025-07-12,Sábado,CRA 54,supuestos D5,x_D5,Optimal,183,183,17,180,180,17,259,183
+2025-07-12,Sábado,CL 72,supuestos D5,x_D5,Optimal,99,99,17,100,100,17,93,99
+2025-07-13,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,62,62,17,62,62,17,91,62
+2025-07-13,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,99,99,17,89,89,17,158,99
+2025-07-13,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,62,65
+2025-07-15,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,114,114,17,115,115,17,136,114
+2025-07-15,Laboral,CRA 54,supuestos D5,x_D5,Optimal,216,216,17,207,207,17,268,216
+2025-07-15,Laboral,CL 72,supuestos D5,x_D5,Optimal,103,103,17,101,101,17,93,103
+2025-07-23,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,117,117,17,115,115,17,142,117
+2025-07-23,Laboral,CRA 54,supuestos D5,x_D5,Optimal,226,226,17,211,211,17,285,226
+2025-07-23,Laboral,CL 72,supuestos D5,x_D5,Optimal,103,103,17,108,108,17,85,103
+2025-07-29,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,119,119,17,120,120,17,121,119
+2025-07-29,Laboral,CRA 54,supuestos D5,x_D5,Optimal,230,230,17,185,185,17,238,230
+2025-07-29,Laboral,CL 72,supuestos D5,x_D5,Optimal,104,104,17,101,101,17,71,104
+2025-08-07,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,112,65
+2025-08-07,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,114,114,17,101,101,17,180,114
+2025-08-07,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,66,66,17,65,65,17,73,66
+2025-08-10,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,62,62,17,62,62,17,95,62
+2025-08-10,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,100,100,17,99,99,17,178,100
+2025-08-10,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,56,65
+2025-08-16,Sábado,SILENCIO,supuestos D5,x_D5,Optimal,105,105,17,104,104,17,125,105
+2025-08-16,Sábado,CRA 54,supuestos D5,x_D5,Optimal,193,193,17,190,190,17,239,193
+2025-08-16,Sábado,CL 72,supuestos D5,x_D5,Optimal,100,100,17,100,100,17,74,100
+2025-08-17,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,62,62,17,62,62,17,101,62
+2025-08-17,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,106,106,17,89,89,17,151,106
+2025-08-17,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,60,65
+2025-08-18,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,64,64,17,64,64,17,104,64
+2025-08-18,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,111,111,17,94,94,17,146,111
+2025-08-18,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,66,66,17,65,65,17,53,66
+2025-08-23,Sábado,SILENCIO,supuestos D5,x_D5,Optimal,106,106,17,110,110,17,118,106
+2025-08-23,Sábado,CRA 54,supuestos D5,x_D5,Optimal,190,190,17,175,175,17,234,190
+2025-08-23,Sábado,CL 72,supuestos D5,x_D5,Optimal,101,101,17,100,100,17,73,101
+2025-09-01,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,135,135,17,131,131,17,133,135
+2025-09-01,Laboral,CRA 54,supuestos D5,x_D5,Optimal,253,253,17,220,220,17,258,253
+2025-09-01,Laboral,CL 72,supuestos D5,x_D5,Optimal,107,107,17,105,105,17,80,107
+2025-09-04,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,131,131,17,125,125,17,129,131
+2025-09-04,Laboral,CRA 54,supuestos D5,x_D5,Optimal,250,250,17,207,207,17,211,250
+2025-09-04,Laboral,CL 72,supuestos D5,x_D5,Optimal,107,107,17,108,108,17,82,107
+2025-09-05,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,135,135,17,120,120,17,140,135
+2025-09-05,Laboral,CRA 54,supuestos D5,x_D5,Optimal,251,251,17,227,227,17,246,251
+2025-09-05,Laboral,CL 72,supuestos D5,x_D5,Optimal,109,109,17,105,105,17,83,109
+2025-09-07,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,62,62,17,62,62,17,98,62
+2025-09-07,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,106,106,17,95,95,17,178,106
+2025-09-07,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,66,65
+2025-09-27,Sábado,SILENCIO,supuestos D5,x_D5,Optimal,106,106,17,105,105,17,115,106
+2025-09-27,Sábado,CRA 54,supuestos D5,x_D5,Optimal,194,194,17,192,192,17,231,194
+2025-09-27,Sábado,CL 72,supuestos D5,x_D5,Optimal,100,100,17,101,101,17,77,100
+2025-10-06,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,125,125,17,111,111,17,159,125
+2025-10-06,Laboral,CRA 54,supuestos D5,x_D5,Optimal,237,237,17,210,210,17,258,237
+2025-10-06,Laboral,CL 72,supuestos D5,x_D5,Optimal,104,104,17,105,105,17,85,104
+2025-10-07,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,125,125,17,110,110,17,148,125
+2025-10-07,Laboral,CRA 54,supuestos D5,x_D5,Optimal,236,236,17,212,212,17,260,236
+2025-10-07,Laboral,CL 72,supuestos D5,x_D5,Optimal,104,104,17,99,99,17,95,104
+2025-10-08,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,122,122,17,109,109,17,153,122
+2025-10-08,Laboral,CRA 54,supuestos D5,x_D5,Optimal,233,233,17,200,200,17,268,233
+2025-10-08,Laboral,CL 72,supuestos D5,x_D5,Optimal,105,105,17,99,99,17,96,105
+2025-10-10,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,119,119,17,112,112,17,131,119
+2025-10-10,Laboral,CRA 54,supuestos D5,x_D5,Optimal,229,229,17,205,205,17,244,229
+2025-10-10,Laboral,CL 72,supuestos D5,x_D5,Optimal,104,104,17,101,101,17,78,104
+2025-10-16,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,127,127,17,124,124,17,146,127
+2025-10-16,Laboral,CRA 54,supuestos D5,x_D5,Optimal,237,237,17,224,224,17,266,237
+2025-10-16,Laboral,CL 72,supuestos D5,x_D5,Optimal,106,106,17,108,108,17,87,106
+2025-10-21,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,124,124,17,129,129,17,152,124
+2025-10-21,Laboral,CRA 54,supuestos D5,x_D5,Optimal,239,239,17,241,241,17,285,239
+2025-10-21,Laboral,CL 72,supuestos D5,x_D5,Optimal,104,104,17,110,110,17,92,104
+2025-11-04,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,127,127,17,126,126,17,138,127
+2025-11-04,Laboral,CRA 54,supuestos D5,x_D5,Optimal,242,242,17,242,242,17,266,242
+2025-11-04,Laboral,CL 72,supuestos D5,x_D5,Optimal,106,106,17,103,103,17,79,106
+2025-11-10,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,120,120,17,120,120,17,145,120
+2025-11-10,Laboral,CRA 54,supuestos D5,x_D5,Optimal,219,219,17,225,225,17,264,219
+2025-11-10,Laboral,CL 72,supuestos D5,x_D5,Optimal,102,102,17,104,104,17,88,102
+2025-11-12,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,127,127,17,129,129,17,142,127
+2025-11-12,Laboral,CRA 54,supuestos D5,x_D5,Optimal,233,233,17,201,201,17,253,233
+2025-11-12,Laboral,CL 72,supuestos D5,x_D5,Optimal,104,104,17,102,102,17,88,104
+2025-11-16,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,62,62,17,62,62,17,97,62
+2025-11-16,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,109,109,17,105,105,17,178,109
+2025-11-16,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,50,65
+2025-11-21,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,125,125,17,116,116,17,155,125
+2025-11-21,Laboral,CRA 54,supuestos D5,x_D5,Optimal,242,242,17,218,218,17,268,242
+2025-11-21,Laboral,CL 72,supuestos D5,x_D5,Optimal,105,105,17,104,104,17,90,105
+2025-11-22,Sábado,SILENCIO,supuestos D5,x_D5,Optimal,107,107,17,105,105,17,133,107
+2025-11-22,Sábado,CRA 54,supuestos D5,x_D5,Optimal,199,199,17,181,181,17,243,199
+2025-11-22,Sábado,CL 72,supuestos D5,x_D5,Optimal,101,101,17,100,100,17,82,101
+2025-11-23,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,62,62,17,62,62,17,101,62
+2025-11-23,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,108,108,17,97,97,17,177,108
+2025-11-23,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,65,65
+2025-11-24,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,121,121,17,121,121,17,125,121
+2025-11-24,Laboral,CRA 54,supuestos D5,x_D5,Optimal,225,225,17,219,219,17,254,225
+2025-11-24,Laboral,CL 72,supuestos D5,x_D5,Optimal,102,102,17,103,103,17,82,102
+2025-11-28,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,117,117,17,124,124,17,155,117
+2025-11-28,Laboral,CRA 54,supuestos D5,x_D5,Optimal,234,234,17,220,220,17,276,234
+2025-11-28,Laboral,CL 72,supuestos D5,x_D5,Optimal,104,104,17,103,103,17,91,104
+2025-12-01,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,117,117,17,117,117,17,143,117
+2025-12-01,Laboral,CRA 54,supuestos D5,x_D5,Optimal,233,233,17,213,213,17,247,233
+2025-12-01,Laboral,CL 72,supuestos D5,x_D5,Optimal,102,102,17,102,102,17,92,102
+2025-12-03,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,119,119,17,113,113,17,158,119
+2025-12-03,Laboral,CRA 54,supuestos D5,x_D5,Optimal,233,233,17,215,215,17,238,233
+2025-12-03,Laboral,CL 72,supuestos D5,x_D5,Optimal,103,103,17,102,102,17,79,103
+2025-12-13,Sábado,SILENCIO,supuestos D5,x_D5,Optimal,105,105,17,103,103,17,148,105
+2025-12-13,Sábado,CRA 54,supuestos D5,x_D5,Optimal,192,192,17,172,172,17,205,192
+2025-12-13,Sábado,CL 72,supuestos D5,x_D5,Optimal,100,100,17,99,99,17,77,100
+2025-12-19,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,113,113,17,110,110,17,171,113
+2025-12-19,Laboral,CRA 54,supuestos D5,x_D5,Optimal,221,221,17,197,197,17,209,221
+2025-12-19,Laboral,CL 72,supuestos D5,x_D5,Optimal,101,101,17,103,103,17,87,101
+2025-12-21,Domingo/festivo,SILENCIO,supuestos D5,x_D5,Optimal,62,62,17,65,65,17,90,62
+2025-12-21,Domingo/festivo,CRA 54,supuestos D5,x_D5,Optimal,122,122,17,130,130,17,161,122
+2025-12-21,Domingo/festivo,CL 72,supuestos D5,x_D5,Optimal,65,65,17,65,65,17,52,65
+2025-12-23,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,112,112,17,118,118,17,143,112
+2025-12-23,Laboral,CRA 54,supuestos D5,x_D5,Optimal,218,218,17,201,201,17,215,218
+2025-12-23,Laboral,CL 72,supuestos D5,x_D5,Optimal,101,101,17,100,100,17,77,101
+2025-12-26,Laboral,SILENCIO,supuestos D5,x_D5,Optimal,109,109,17,105,105,17,134,109
+2025-12-26,Laboral,CRA 54,supuestos D5,x_D5,Optimal,197,197,17,185,185,17,246,197
+2025-12-26,Laboral,CL 72,supuestos D5,x_D5,Optimal,100,100,17,100,100,17,95,100

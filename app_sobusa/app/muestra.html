@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sobusa Despacho · Muestra</title>
+<meta name="description" content="Muestra de componentes del sistema de diseño de Sobusa Despacho con datos reales del proyecto, solo en claro y con la paleta de pantallas, sin internet.">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="componentes.css">
+<style>
+/* Propio de la muestra: índice, fichas de tokens y la paleta de pantallas. */
+.indice { display: flex; flex-wrap: wrap; gap: var(--e-2); }
+.muestra { display: grid; gap: var(--e-7); }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: var(--e-3); }
+.swatch { display: grid; gap: 6px; min-width: 0; }
+.swatch__color { height: 56px; border-radius: var(--radio-m); border: 1px solid var(--linea); background: var(--sw); }
+.swatch__nombre { font-size: var(--t-xs); font-weight: var(--peso-medio); overflow-wrap: anywhere; }
+.swatch__hex { font-family: var(--fuente-mono); font-size: 11px; color: var(--tinta-3); }
+.tipos { display: grid; gap: var(--e-3); }
+.tipos__fila { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: var(--e-3); align-items: baseline; padding-bottom: var(--e-3); border-bottom: 1px solid var(--linea); }
+.tipos__fila:last-child { border-bottom: 0; }
+.tipos__meta { font-family: var(--fuente-mono); font-size: 11px; color: var(--tinta-3); }
+@media (max-width: 600px) { .tipos__fila { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+.espacios { display: flex; flex-wrap: wrap; gap: var(--e-4); align-items: flex-end; }
+.espacio { display: grid; gap: 4px; justify-items: center; font-family: var(--fuente-mono); font-size: 11px; color: var(--tinta-3); }
+.espacio__caja { background: var(--acento-suave); border: 1px solid var(--acento); border-radius: 3px; }
+.sombras { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--e-4); }
+.sombra { height: 72px; border-radius: var(--radio-m); background: var(--superficie); display: grid; place-items: center; font-size: var(--t-xs); color: var(--tinta-2); }
+.paleta-fila { display: flex; flex-wrap: wrap; gap: var(--e-4) var(--e-5); margin: 0; padding: 0; list-style: none; }
+.paleta-fila li { display: flex; align-items: center; gap: var(--e-2); font-size: var(--t-s); }
+.ejemplo { display: grid; gap: var(--e-3); min-width: 0; }
+.ejemplo__nota { font-size: var(--t-xs); color: var(--tinta-3); }
+.cabecera-muestra { display: grid; gap: var(--e-4); }
+.pie-muestra { padding-top: var(--e-5); border-top: 1px solid var(--linea); color: var(--tinta-3); font-size: var(--t-xs); display: grid; gap: var(--e-1); }
+.modulo-demo { height: 420px; }
+.modulo-demo .modulo__marco { height: auto; }
+/* En el teléfono la barra del módulo de prueba (estado, «Cargar el planificador real», «Abrir aparte») baja de línea en vez de salirse. */
+.modulo-demo .modulo__barra, .modulo-demo .modulo__estado { flex-wrap: wrap; min-width: 0; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="lateral" aria-label="Pantallas">
+    <a class="lateral__marca" href="#inicio">
+      <span class="lateral__logo"><svg class="icono" aria-hidden="true"><use href="#i-bus"></use></svg></span>
+      <span><span class="lateral__nombre">Sobusa Despacho</span><span class="lateral__lema">Data Challenge 2026</span></span>
+    </a>
+    <nav>
+      <ul class="lateral__nav" id="nav-pantallas">
+        <li><a class="lateral__enlace" href="#inicio" aria-current="page"><span class="cuadro-color" style="--cuadro: var(--pantalla-inicio)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-inicio"></use></svg></span><span class="lateral__texto"><span class="lateral__titulo">Inicio</span><span class="lateral__pregunta">¿Qué proponemos?</span></span></a></li>
+        <li><a class="lateral__enlace" href="#demanda"><span class="cuadro-color" style="--cuadro: var(--pantalla-demanda)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-demanda"></use></svg></span><span class="lateral__texto"><span class="lateral__titulo">Demanda</span><span class="lateral__pregunta">¿Cuántos pasajeros habrá?</span></span></a></li>
+        <li><a class="lateral__enlace" href="#modelo"><span class="cuadro-color" style="--cuadro: var(--pantalla-modelo)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-modelo"></use></svg></span><span class="lateral__texto"><span class="lateral__titulo">Modelo</span><span class="lateral__pregunta">¿Qué modelo es y por qué?</span></span></a></li>
+        <li><a class="lateral__enlace" href="#horario"><span class="cuadro-color" style="--cuadro: var(--pantalla-horario)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-horario"></use></svg></span><span class="lateral__texto"><span class="lateral__titulo">Horario</span><span class="lateral__pregunta">¿Cuántos buses y cada cuánto?</span></span></a></li>
+        <li><a class="lateral__enlace" href="#despacho"><span class="cuadro-color" style="--cuadro: var(--pantalla-despacho)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-despacho"></use></svg></span><span class="lateral__texto"><span class="lateral__titulo">Despacho</span><span class="lateral__pregunta">¿Qué hago ahora?</span></span></a></li>
+        <li><a class="lateral__enlace" href="#ciudad"><span class="cuadro-color" style="--cuadro: var(--pantalla-ciudad)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-ciudad"></use></svg></span><span class="lateral__texto"><span class="lateral__titulo">Ciudad</span><span class="lateral__pregunta">¿Cómo se ve en la calle?</span></span></a></li>
+        <li><a class="lateral__enlace" href="#resultado"><span class="cuadro-color" style="--cuadro: var(--pantalla-resultado)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-resultado"></use></svg></span><span class="lateral__texto"><span class="lateral__titulo">Resultado</span><span class="lateral__pregunta">¿Qué gana Sobusa?</span></span></a></li>
+        <li><a class="lateral__enlace" href="#piloto"><span class="cuadro-color" style="--cuadro: var(--pantalla-piloto)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-piloto"></use></svg></span><span class="lateral__texto"><span class="lateral__titulo">Piloto</span><span class="lateral__pregunta">¿Cómo lo comprobamos?</span></span></a></li>
+        <li><a class="lateral__enlace" href="#metodo"><span class="cuadro-color" style="--cuadro: var(--pantalla-metodo)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-metodo"></use></svg></span><span class="lateral__texto"><span class="lateral__titulo">Método y datos</span><span class="lateral__pregunta">¿De dónde sale todo?</span></span></a></li>
+      </ul>
+    </nav>
+    <div class="lateral__pie">
+      <button class="boton boton--secundario boton--icono con-tooltip" type="button" data-plegar aria-label="Plegar la barra"><svg class="icono" aria-hidden="true"><use href="#i-panel"></use></svg><span class="tooltip tooltip--izq">Plegar la barra</span></button>
+    </div>
+  </aside>
+
+  <main class="contenido">
+    <div class="pantalla muestra">
+
+      <header class="cabecera">
+        <div class="cabecera__texto">
+          <span class="cabecera__pantalla">Sistema de diseño · muestra</span>
+          <h1 class="cabecera__pregunta">¿Cómo se ve Sobusa Despacho?</h1>
+          <p class="cabecera__subtitulo">Todos los componentes de la app con cifras reales del proyecto. El interruptor cambia las fichas de cifra entre lo que Sobusa hace hoy y lo que propone el modelo.</p>
+        </div>
+        <div class="cabecera__acciones">
+          <fieldset class="segmentado" id="escenario" aria-label="Escenario">
+            <legend>Escenario</legend>
+            <label class="segmentado__opcion"><input type="radio" name="escenario" value="hoy" id="esc-hoy" checked><span class="segmentado__etiqueta"><span class="segmentado__punto" style="--c: var(--serie-hoy)"></span>Hoy</span></label>
+            <label class="segmentado__opcion"><input type="radio" name="escenario" value="modelo" id="esc-modelo"><span class="segmentado__etiqueta"><span class="segmentado__punto" style="--c: var(--serie-modelo)"></span>Con el modelo</span></label>
+            <label class="segmentado__opcion con-tooltip"><input type="radio" name="escenario" value="oraculo" id="esc-oraculo" disabled><span class="segmentado__etiqueta"><span class="segmentado__punto segmentado__punto--trazos" style="--c: var(--serie-oraculo)"></span>Oráculo</span><span class="tooltip">No aplica a estas cifras</span></label>
+          </fieldset>
+        </div>
+      </header>
+
+      <nav class="indice" aria-label="Índice de la muestra">
+        <a class="chip" href="#s-tokens">Tokens</a><a class="chip" href="#s-cifras">Fichas de cifra</a><a class="chip" href="#s-graficos">Gráficos</a><a class="chip" href="#s-tablas">Tablas</a><a class="chip" href="#s-avisos">Avisos</a><a class="chip" href="#s-tiempo">Línea de tiempo</a><a class="chip" href="#s-controles">Controles</a><a class="chip" href="#s-modulo">Módulo embebido</a><a class="chip" href="#s-paleta">Paleta de pantallas</a>
+      </nav>
+
+      <!-- ===================================================== Tokens -->
+      <section class="seccion" id="s-tokens">
+        <div class="seccion__cab"><h2 class="seccion__titulo">Tokens</h2><span class="texto-3 pequeno">Leídos de tokens.css (la app es solo clara)</span></div>
+        <p class="seccion__intro">Un solo acento (verde azulado del Caribe), neutros con sesgo frío, las tres rutas con sus colores de siempre y tres colores de estado que nunca se confunden con el acento ni con una serie.</p>
+        <div class="pila">
+          <span class="rotulo">Neutros y acento</span>
+          <div class="swatches" data-swatches="--fondo --superficie --superficie-2 --linea --linea-fuerte --tinta --tinta-2 --tinta-3 --acento --acento-fuerte --acento-suave --foco"></div>
+          <span class="rotulo">Series de los gráficos y rutas</span>
+          <div class="swatches" data-swatches="--serie-hoy --serie-modelo --serie-real --serie-oraculo --ruta-silencio --ruta-cra54 --ruta-cl72 --rejilla --eje"></div>
+          <span class="rotulo">Paleta con nombre: cuadro del ícono y texto</span>
+          <div class="swatches" data-swatches="--color-turquesa --color-azul --color-indigo --color-naranja --color-coral --color-cian --color-verde --color-morado --color-gris"></div>
+          <div class="swatches" data-swatches="--color-turquesa-texto --color-azul-texto --color-indigo-texto --color-naranja-texto --color-coral-texto --color-cian-texto --color-verde-texto --color-morado-texto --color-gris-texto"></div>
+          <span class="rotulo">Estado (siempre con icono y texto)</span>
+          <div class="swatches" data-swatches="--bien --bien-suave --atencion --atencion-texto --atencion-suave --critico --critico-suave"></div>
+        </div>
+        <div class="rejilla-2">
+          <div class="tarjeta tipos">
+            <span class="rotulo">Tipografía (pila del sistema)</span>
+            <div class="tipos__fila"><span class="tipos__meta">--t-hero · 600</span><span style="font: 600 var(--t-hero)/var(--lh-cifra) var(--fuente-titulos); letter-spacing: var(--ls-titulo); font-variant-numeric: tabular-nums">13,94 %</span></div>
+            <div class="tipos__fila"><span class="tipos__meta">--t-3xl · h1</span><h1 style="font-size: var(--t-3xl)">¿Qué proponemos?</h1></div>
+            <div class="tipos__fila"><span class="tipos__meta">--t-xl · h2</span><h2>Lo que gana Sobusa</h2></div>
+            <div class="tipos__fila"><span class="tipos__meta">--t-l · entradilla</span><span style="font-size: var(--t-l); color: var(--tinta-2)">No quitar buses: cambiarlos de hora.</span></div>
+            <div class="tipos__fila"><span class="tipos__meta">--t-m · texto</span><span>El modelo se equivoca en 14 de cada 100 pasajeros a una semana; la regla manual, en 20.</span></div>
+            <div class="tipos__fila"><span class="tipos__meta">--t-s · secundario</span><span class="texto-2 pequeno">WAPE a 7 días, 12 pliegues mensuales de 2025.</span></div>
+            <div class="tipos__fila"><span class="tipos__meta">--t-xs · rótulo</span><span class="rotulo">Salidas por hora</span></div>
+            <div class="tipos__fila"><span class="tipos__meta">--fuente-mono</span><code>experimentos/E11_modelo_mejorado/resultados.json</code></div>
+          </div>
+          <div class="pila">
+            <div class="tarjeta pila">
+              <span class="rotulo">Espaciado (8 px) y radios</span>
+              <div class="espacios" id="espacios"></div>
+              <div class="fila">
+                <div class="espacio"><div class="espacio__caja" style="width:40px;height:40px;border-radius:var(--radio-s)"></div>--radio-s</div>
+                <div class="espacio"><div class="espacio__caja" style="width:40px;height:40px;border-radius:var(--radio-m)"></div>--radio-m</div>
+                <div class="espacio"><div class="espacio__caja" style="width:40px;height:40px;border-radius:var(--radio-l)"></div>--radio-l</div>
+                <div class="espacio"><div class="espacio__caja" style="width:60px;height:28px;border-radius:var(--radio-pill)"></div>--radio-pill</div>
+              </div>
+            </div>
+            <div class="tarjeta pila">
+              <span class="rotulo">Sombras y movimiento</span>
+              <div class="sombras">
+                <div class="sombra" style="box-shadow: var(--sombra-1)">--sombra-1</div>
+                <div class="sombra" style="box-shadow: var(--sombra-2)">--sombra-2</div>
+                <div class="sombra" style="box-shadow: var(--sombra-3)">--sombra-3</div>
+              </div>
+              <p class="pequeno texto-2">Duraciones 120 / 200 / 320 / 600 ms con la curva <code>cubic-bezier(0.2, 0, 0, 1)</code>; con <code>prefers-reduced-motion</code> todo es inmediato.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================== Fichas de cifra -->
+      <section class="seccion" id="s-cifras">
+        <div class="seccion__cab"><h2 class="seccion__titulo">Fichas de cifra</h2><span class="texto-3 pequeno">Valor, unidad, variación y botón «fuente»; cuentan al cambiar de escenario</span></div>
+        <div class="cifras" id="cifras"></div>
+        <div class="rejilla-lado">
+          <article class="cifra cifra--hero">
+            <header class="cifra__cab"><h3 class="cifra__etiqueta">Saldo anual del plan que reasigna, contabilidad conservadora</h3><button class="fuente" type="button" popovertarget="fuente-saldo" aria-expanded="false" aria-label="Fuente de la cifra"><svg class="icono" aria-hidden="true"><use href="#i-fuente"></use></svg></button></header>
+            <p class="cifra__valor"><span id="hero-saldo" data-decimales="0"></span><span class="cifra__unidad">M COP/año</span></p>
+            <p class="cifra__variacion" id="hero-saldo-var"></p>
+            <p class="cifra__nota">Ahorro de operación menos pasajes perdidos, pago por hora, β = 0,70. Con la contabilidad simétrica (suma también lo que se gana en las horas reforzadas) el saldo cambia de signo: ver el aviso de canje.</p>
+          </article>
+          <div class="pila">
+            <article class="cifra cifra--llana">
+              <h3 class="cifra__etiqueta">Plan semanal frente al oráculo (79 días)</h3>
+              <p class="cifra__valor"><span id="bt-plan" data-decimales="2"></span><span class="cifra__unidad">salidas/h de error</span></p>
+              <p class="cifra__variacion cifra__variacion--bien" id="bt-var"></p>
+              <p class="cifra__nota" id="bt-nota"></p>
+            </article>
+            <div class="estado-carga"><span class="giro" aria-hidden="true"></span>Estado de carga: calculando el día…</div>
+            <div class="pila" aria-hidden="true"><div class="cargando cargando--texto" style="width:70%"></div><div class="cargando cargando--texto" style="width:45%"></div><div class="cargando cargando--bloque"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================== Gráficos -->
+      <section class="seccion" id="s-graficos">
+        <div class="seccion__cab"><h2 class="seccion__titulo">Gráficos</h2><span class="texto-3 pequeno">ECharts local con el tema de tema_echarts.js; leyenda que aísla series y tabla gemela</span></div>
+        <figure class="grafico" id="grafico-0">
+          <figcaption class="grafico__cab">
+            <div class="grafico__titulos"><h3 class="grafico__titulo" id="g0-titulo"></h3><p class="grafico__sub">Pasajeros por día, pronóstico a una semana. Tinta: lo que pasó; gris: la regla manual de Sobusa; acento: nuestro modelo. Las bandas marcan domingos y festivos.</p></div>
+            <div class="grafico__acciones">
+              <fieldset class="segmentado" id="cual-modelo" aria-label="Modelo dibujado"><legend>Modelo dibujado</legend>
+                <label class="segmentado__opcion"><input type="radio" name="cual-modelo" value="modelo_final" checked><span class="segmentado__etiqueta">Modelo final (E11)</span></label>
+                <label class="segmentado__opcion"><input type="radio" name="cual-modelo" value="hibrido"><span class="segmentado__etiqueta">Híbrido (E12)</span></label>
+              </fieldset>
+              <button class="boton boton--secundario boton--pequeno" type="button" id="ver-tabla-0" data-ver-tabla data-texto-tabla="Ver tabla" data-texto-grafico="Ver gráfico"><svg class="icono" aria-hidden="true"><use href="#i-tabla"></use></svg><span data-texto>Ver tabla</span></button>
+            </div>
+          </figcaption>
+          <ul class="leyenda" id="leyenda-0"></ul>
+          <div class="grafico__lienzo" id="lienzo-0" role="img" aria-label="Líneas: pasajeros reales, regla manual y modelo por día"></div>
+          <div class="grafico__tabla tabla-marco" id="tabla-0" hidden></div>
+          <div class="grafico__pie"><span id="g0-pie"></span><button class="fuente fuente--texto" type="button" popovertarget="fuente-g0" aria-expanded="false"><svg class="icono" aria-hidden="true"><use href="#i-fuente"></use></svg>Fuente</button></div>
+        </figure>
+        <figure class="grafico" id="grafico-1">
+          <figcaption class="grafico__cab">
+            <div class="grafico__titulos"><h3 class="grafico__titulo" id="g1-titulo"></h3><p class="grafico__sub">Salidas por hora de salida: lo que Sobusa programa hoy (mediana de 2025) y lo que recomienda el plan con costos con fuente. El plan quita salidas en el valle y las pone en los picos.</p></div>
+            <div class="grafico__acciones"><button class="boton boton--secundario boton--pequeno" type="button" id="ver-tabla-1" data-ver-tabla data-texto-tabla="Ver tabla" data-texto-grafico="Ver gráfico"><svg class="icono" aria-hidden="true"><use href="#i-tabla"></use></svg><span data-texto>Ver tabla</span></button></div>
+          </figcaption>
+          <ul class="leyenda" id="leyenda-1"></ul>
+          <div class="grafico__lienzo" id="lienzo-1" role="img" aria-label="Barras: salidas por hora hoy y con el modelo"></div>
+          <div class="grafico__tabla tabla-marco" id="tabla-1" hidden></div>
+          <div class="grafico__pie"><span id="g1-pie"></span><button class="fuente fuente--texto" type="button" popovertarget="fuente-g1" aria-expanded="false"><svg class="icono" aria-hidden="true"><use href="#i-fuente"></use></svg>Fuente</button></div>
+        </figure>
+      </section>
+
+      <!-- ===================================================== Tablas -->
+      <section class="seccion" id="s-tablas">
+        <div class="seccion__cab"><h2 class="seccion__titulo">Tabla de datos y «Ver cómo se calculó»</h2></div>
+        <div class="tabla-marco">
+          <table class="tabla" id="tabla-wape">
+            <caption>Pasajeros mal estimados de cada 100 (WAPE, h = 7, 2025) por ruta</caption>
+            <thead><tr><th scope="col">Ruta</th><th scope="col" class="num">Regla manual</th><th scope="col" class="num">E1 (primer modelo)</th><th scope="col" class="num">Modelo final (E11)</th><th scope="col" class="num">Híbrido (E12)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <details class="desplegable">
+          <summary class="desplegable__resumen"><svg class="icono desplegable__chevron" aria-hidden="true"><use href="#i-chevron-derecha"></use></svg>Ver cómo se calculó</summary>
+          <div class="desplegable__cuerpo">
+            <p><strong>WAPE</strong> = Σ|pronóstico − real| / Σ real, sobre las 18.615 franjas de ruta × día × hora de salida (4 a 20 h) de 2025, en 12 pliegues mensuales con entrenamiento estrictamente anterior a cada mes.</p>
+            <p>La <strong>regla manual</strong> (B1) es el promedio de las 8 semanas anteriores para la misma ruta, día de la semana y hora; es lo que Sobusa usa hoy. El <strong>modelo final</strong> es LightGBM Poisson (variante V4 de E11) con calendario y demanda reciente. El <strong>híbrido</strong> añade cuatro columnas con los pronósticos de Chronos-2 y es el recomendado para producción.</p>
+            <ol><li>Se entrena hasta el mes anterior y se pronostica el mes con 7 días de antelación.</li><li>Se suman los errores absolutos de todas las franjas y se dividen por los pasajeros reales.</li><li>Un revisor independiente lo recalculó con código propio desde <code>predicciones_2025.parquet</code>.</li></ol>
+          </div>
+        </details>
+      </section>
+
+      <!-- ===================================================== Avisos -->
+      <section class="seccion" id="s-avisos">
+        <div class="seccion__cab"><h2 class="seccion__titulo">Avisos de canje y estado</h2><span class="texto-3 pequeno">Los canjes se muestran completos: nunca solo el lado bueno</span></div>
+        <div class="rejilla-2">
+          <div class="aviso aviso--canje"><svg class="icono" aria-hidden="true"><use href="#i-canje"></use></svg><div class="aviso__cuerpo"><h3 class="aviso__titulo">Canje: dos contabilidades</h3><p id="aviso-canje"></p></div></div>
+          <div class="aviso aviso--atencion"><svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg><div class="aviso__cuerpo"><h3 class="aviso__titulo">Atención: β se midió con fallas, no con recortes planificados</h3><p id="aviso-beta"></p></div></div>
+          <div class="aviso aviso--critico"><svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg><div class="aviso__cuerpo"><h3 class="aviso__titulo">Crítico: el modelo persona a persona castiga al plan</h3><p>Visto persona a persona en la vista 3D (sin límite de cupo), el plan pierde más pasajeros y llena más los buses de lo que D5 estima. Se presenta como hallazgo, no se esconde.</p></div></div>
+          <div class="aviso aviso--bien"><svg class="icono" aria-hidden="true"><use href="#i-bien"></use></svg><div class="aviso__cuerpo"><h3 class="aviso__titulo">Verificado por un revisor independiente</h3><p>Las cifras de E11 y E12 fueron recalculadas con código propio por un revisor adversarial; la diferencia fue menor que 1e-9.</p></div></div>
+        </div>
+        <div class="aviso"><svg class="icono" aria-hidden="true"><use href="#i-info"></use></svg><div class="aviso__cuerpo"><h3 class="aviso__titulo">Nota</h3><p>Un aviso sin variante es una nota neutra: fondo de la superficie secundaria, icono de información.</p></div></div>
+      </section>
+
+      <!-- ===================================================== Línea de tiempo -->
+      <section class="seccion" id="s-tiempo">
+        <div class="seccion__cab"><h2 class="seccion__titulo">Línea de tiempo</h2><span class="texto-3 pequeno" id="tiempo-sub"></span></div>
+        <ol class="linea-tiempo linea-tiempo--horizontal" id="linea-piloto"></ol>
+      </section>
+
+      <!-- ===================================================== Controles -->
+      <section class="seccion" id="s-controles">
+        <div class="seccion__cab"><h2 class="seccion__titulo">Pestañas, botones, chips y tooltip</h2></div>
+        <div class="pila">
+          <div class="pestanas" role="tablist" aria-label="Ejemplo de pestañas" id="pestanas-demo">
+            <button class="pestana" role="tab" id="pestana-1" aria-selected="true" aria-controls="panel-1" data-pestana="resumen">Resumen</button>
+            <button class="pestana" role="tab" id="pestana-2" aria-selected="false" aria-controls="panel-2" data-pestana="detalle">Detalle por ruta</button>
+            <button class="pestana" role="tab" id="pestana-3" aria-selected="false" aria-controls="panel-3" data-pestana="metodo">Cómo se calculó</button>
+          </div>
+          <div class="panel" id="panel-1" role="tabpanel" aria-labelledby="pestana-1"><p class="prosa texto-2">Panel «Resumen»: primero el resumen y después el detalle. Las flechas del teclado cambian de pestaña.</p></div>
+          <div class="panel" id="panel-2" role="tabpanel" aria-labelledby="pestana-2" hidden><p class="prosa texto-2">Panel «Detalle por ruta»: aquí irían las fichas por ruta con sus chips.</p></div>
+          <div class="panel" id="panel-3" role="tabpanel" aria-labelledby="pestana-3" hidden><p class="prosa texto-2">Panel «Cómo se calculó»: el desplegable con la fórmula y los pasos.</p></div>
+        </div>
+        <div class="rejilla-2">
+          <div class="tarjeta pila">
+            <span class="rotulo">Botones</span>
+            <div class="botonera">
+              <button class="boton boton--primario" type="button"><svg class="icono" aria-hidden="true"><use href="#i-play"></use></svg>Reproducir el día</button>
+              <button class="boton boton--secundario" type="button"><svg class="icono" aria-hidden="true"><use href="#i-descargar"></use></svg>Descargar el horario</button>
+              <button class="boton boton--fantasma" type="button">Ver cómo se calculó<svg class="icono" aria-hidden="true"><use href="#i-chevron-derecha"></use></svg></button>
+              <button class="boton boton--primario" type="button" disabled>Deshabilitado</button>
+            </div>
+            <div class="botonera">
+              <button class="boton boton--secundario boton--pequeno" type="button">Pequeño</button>
+              <button class="boton boton--primario boton--pequeno" type="button">Pequeño primario</button>
+              <button class="boton boton--secundario boton--icono con-tooltip" type="button" aria-label="Abrir aparte"><svg class="icono" aria-hidden="true"><use href="#i-externo"></use></svg><span class="tooltip">Abrir aparte</span></button>
+              <button class="boton boton--secundario boton--icono boton--pequeno con-tooltip" type="button" aria-label="Información"><svg class="icono" aria-hidden="true"><use href="#i-info"></use></svg><span class="tooltip">Tooltip al pasar o al enfocar</span></button>
+            </div>
+          </div>
+          <div class="tarjeta pila">
+            <span class="rotulo">Chips</span>
+            <div class="chips" id="chips-rutas">
+              <button class="chip" type="button" aria-pressed="true" style="--c: var(--ruta-silencio)"><span class="chip__punto"></span>SILENCIO</button>
+              <button class="chip" type="button" aria-pressed="true" style="--c: var(--ruta-cra54)"><span class="chip__punto"></span>CRA 54</button>
+              <button class="chip" type="button" aria-pressed="false" style="--c: var(--ruta-cl72)"><span class="chip__punto"></span>CL 72</button>
+            </div>
+            <div class="chips">
+              <span class="chip chip--bien"><svg class="icono" aria-hidden="true"><use href="#i-bien"></use></svg>Verificado: sí</span>
+              <span class="chip chip--atencion"><svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg>Verificado: parcial</span>
+              <span class="chip chip--critico"><svg class="icono" aria-hidden="true"><use href="#i-alerta"></use></svg>Sin revisor</span>
+              <span class="chip chip--acento">Recomendado para producción</span>
+              <span class="chip">Laboral</span><span class="chip">Sábado</span><span class="chip">Domingo y festivo</span>
+            </div>
+            <p class="ejemplo__nota">Los chips de ruta filtran (aria-pressed); los de estado llevan icono y texto, nunca solo color.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================== Módulo embebido -->
+      <section class="seccion" id="s-modulo">
+        <div class="seccion__cab"><h2 class="seccion__titulo">Marco de módulo embebido</h2><span class="texto-3 pequeno">Las páginas existentes entran en un iframe; nunca se ocultan con display:none</span></div>
+        <div class="modulo modulo-demo" id="modulo-demo">
+          <div class="modulo__barra">
+            <span class="modulo__nombre"><svg class="icono" aria-hidden="true"><use href="#i-horario"></use></svg>Planificador de despacho</span>
+            <span class="modulo__estado"><span id="modulo-estado">Vista de prueba con los tokens de la app</span><button class="boton boton--fantasma boton--pequeno" type="button" id="cargar-planificador">Cargar el planificador real<svg class="icono" aria-hidden="true"><use href="#i-chevron-derecha"></use></svg></button><a class="boton boton--secundario boton--pequeno boton--icono con-tooltip" href="../planificador.html#plan" target="_blank" rel="noopener" aria-label="Abrir aparte"><svg class="icono" aria-hidden="true"><use href="#i-externo"></use></svg><span class="tooltip tooltip--der">Abrir aparte</span></a></span>
+          </div>
+          <iframe class="modulo__marco" id="marco-demo" title="Módulo embebido de prueba" srcdoc="<!doctype html><html lang='es' data-embebido='1'><head><meta charset='utf-8'><link rel='stylesheet' href='tokens.css'><link rel='stylesheet' href='componentes.css'><style>body{padding:16px 20px;display:grid;gap:12px}</style></head><body><p class='rotulo'>Página embebida de prueba</p><h2>Lee app/tokens.css: mismo fondo, texto y acento que la app</h2><p class='texto-2 pequeno'>Con ?embebido=1 la página real oculta su marca y sus enlaces, y sus tokens (--bg, --fg, --accent…) pasan a leer los de la app. Nada de esto está activo todavía en las páginas reales: es la propuesta del inventario técnico.</p><div class='cifras'><article class='cifra'><h3 class='cifra__etiqueta'>Salidas hoy, CRA 54 laboral</h3><p class='cifra__valor'>277<span class='cifra__unidad'>salidas/día</span></p></article><article class='cifra'><h3 class='cifra__etiqueta'>Con el plan</h3><p class='cifra__valor'>261<span class='cifra__unidad'>salidas/día</span></p></article></div></body></html>"></iframe>
+        </div>
+      </section>
+
+      <!-- ===================================================== Paleta de pantallas -->
+      <section class="seccion" id="s-paleta">
+        <div class="seccion__cab"><h2 class="seccion__titulo">Paleta de pantallas</h2><span class="texto-3 pequeno">Cada pantalla con su color, como en Ajustes del iPhone: solo pinta el cuadro de su ícono</span></div>
+        <ul class="paleta-fila">
+          <li><span class="cuadro-color" style="--cuadro: var(--pantalla-inicio)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-inicio"></use></svg></span>Inicio</li>
+          <li><span class="cuadro-color" style="--cuadro: var(--pantalla-demanda)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-demanda"></use></svg></span>Demanda</li>
+          <li><span class="cuadro-color" style="--cuadro: var(--pantalla-modelo)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-modelo"></use></svg></span>Modelo</li>
+          <li><span class="cuadro-color" style="--cuadro: var(--pantalla-horario)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-horario"></use></svg></span>Horario</li>
+          <li><span class="cuadro-color" style="--cuadro: var(--pantalla-despacho)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-despacho"></use></svg></span>Despacho</li>
+          <li><span class="cuadro-color" style="--cuadro: var(--pantalla-ciudad)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-ciudad"></use></svg></span>Ciudad</li>
+          <li><span class="cuadro-color" style="--cuadro: var(--pantalla-resultado)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-resultado"></use></svg></span>Resultado</li>
+          <li><span class="cuadro-color" style="--cuadro: var(--pantalla-piloto)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-piloto"></use></svg></span>Piloto</li>
+          <li><span class="cuadro-color" style="--cuadro: var(--pantalla-metodo)" aria-hidden="true"><svg class="icono" aria-hidden="true"><use href="#i-metodo"></use></svg></span>Método y datos</li>
+        </ul>
+        <p class="pequeno">La hoja completa, con los contrastes medidos, los colores de los gráficos, los de estado y los neutros: <a href="paleta.html">Paleta de colores</a>.</p>
+      </section>
+
+      <footer class="pie-muestra">
+        <span>Sobusa Despacho · sistema de diseño (app/tokens.css, componentes.css, tema_echarts.js, componentes.js, iconos.js). Datos de ejemplo generados por app/generar_muestra_datos.py desde los resultados de los experimentos; <span id="pie-generado"></span>.</span>
+        <span>Equipo: Abrahan Basto Martínez, Rubén Esguerra Fernández, Paula Gómez · Universidad del Norte.</span>
+      </footer>
+    </div>
+  </main>
+</div>
+
+<!-- Popovers de fuente (fuera del flujo, en la capa superior) -->
+<div id="popovers"></div>
+
+<script src="../lib/echarts.min.js"></script>
+<script src="iconos.js"></script>
+<script src="tema_echarts.js"></script>
+<script src="componentes.js"></script>
+<script src="muestra_datos.js"></script>
+<script>
+(function () {
+  'use strict';
+  const D = window.MUESTRA_DATOS;
+  const F = COMPONENTES.formato;
+  const icono = ICONOS.svg;
+  const graficos = {};
+  let escenario = 'hoy';
+  let modeloDibujado = 'modelo_final';
+
+  // ---- Popovers de fuente ---------------------------------------------------------------------------------------
+  const popovers = document.getElementById('popovers');
+  function popoverFuente(id, f, titulo) {
+    const ver = (f.verificado || '').toLowerCase();
+    const clase = ver === 'sí' ? 'bien' : ver === 'parcial' ? 'atencion' : 'critico';
+    const iconoVer = clase === 'bien' ? 'bien' : 'alerta';
+    const div = document.createElement('div');
+    div.id = id; div.className = 'fuente-pop'; div.setAttribute('popover', '');
+    div.innerHTML = '<div class="fuente-pop__cab"><span class="fuente-pop__titulo">' + icono('fuente') + 'Fuente' + (titulo ? ' · ' + titulo : '') + '</span><button class="boton boton--fantasma boton--icono boton--pequeno" type="button" data-cerrar aria-label="Cerrar">' + icono('cerrar') + '</button></div>' +
+      '<dl class="fuente-pop__datos"><dt>Archivo</dt><dd><code>' + f.archivo + '</code></dd><dt>Clave</dt><dd>' + f.clave + '</dd><dt>Experimento</dt><dd>' + f.experimento + '</dd><dt>Revisor</dt><dd><span class="chip chip--' + clase + '">' + icono(iconoVer) + (f.verificado || 'no') + '</span>' + (f.revision ? '<span class="texto-2">' + f.revision + '</span>' : '') + '</dd>' + (f.nota ? '<dt>Nota</dt><dd>' + f.nota + '</dd>' : '') + '</dl>' +
+      '<div class="fuente-pop__pie">Ninguna cifra está escrita a mano: app/verificar_datos_app.py comparará este valor con el archivo.</div>';
+    popovers.appendChild(div);
+    return div;
+  }
+
+  // ---- Fichas de cifra (hoy / con el modelo) --------------------------------------------------------------------
+  const C = D.cifras;
+  const fichas = [
+    { etiqueta: 'Pasajeros mal estimados de cada 100 (a una semana)', hoy: C.error_regla_manual, modelo: C.error_modelo_final, mejorSiBaja: true, nota: 'WAPE, h = 7, 2025. El híbrido (E12) llega a ' + F.numero(C.error_hibrido.valor, 2) + ' %.' },
+    { etiqueta: 'Salidas válidas por día (tres rutas)', hoy: C.salidas_dia_hoy, modelo: C.salidas_dia_plan, mejorSiBaja: null, nota: 'Promedio de los 365 días de 2025. El plan reasigna: casi las mismas salidas, en otras horas.' },
+    { etiqueta: 'Espera media en el paradero', hoy: C.espera_hoy, modelo: C.espera_plan, mejorSiBaja: true, nota: 'Intervalo del punto medio con la irregularidad de D4.' },
+    { etiqueta: 'Pasajeros por día por encima de la capacidad', hoy: C.sobrecapacidad_hoy, modelo: C.sobrecapacidad_plan, mejorSiBaja: true, nota: 'Capacidad de 50 en el tramo crítico.' },
+  ];
+  const contCifras = document.getElementById('cifras');
+  fichas.forEach(function (f, i) {
+    const n = i + 1;
+    const art = document.createElement('article');
+    art.className = 'cifra';
+    art.innerHTML = '<header class="cifra__cab"><h3 class="cifra__etiqueta">' + f.etiqueta + '</h3><button class="fuente" type="button" id="fuente-btn-' + n + '" popovertarget="fuente-' + n + '" aria-expanded="false" aria-label="Fuente de la cifra">' + icono('fuente') + '</button></header>' +
+      '<p class="cifra__valor"><span id="cifra-' + n + '" data-decimales="' + f.hoy.decimales + '"></span><span class="cifra__unidad">' + f.hoy.unidad + '</span></p>' +
+      '<p class="cifra__variacion" id="var-' + n + '"></p><p class="cifra__nota">' + f.nota + '</p>';
+    contCifras.appendChild(art);
+    f.pop = popoverFuente('fuente-' + n, f.hoy, 'hoy');
+    f.popModelo = popoverFuente('fuente-' + n + '-m', f.modelo, 'con el modelo');
+  });
+  function pintarCifras(animar) {
+    fichas.forEach(function (f, i) {
+      const n = i + 1;
+      const el = document.getElementById('cifra-' + n);
+      const c = escenario === 'modelo' ? f.modelo : f.hoy;
+      if (animar) COMPONENTES.ponerCifra(el, c.valor); else { el.dataset.cifra = String(c.valor); el.textContent = F.numero(c.valor, c.decimales); }
+      const v = document.getElementById('var-' + n);
+      const dif = f.modelo.valor - f.hoy.valor;
+      const pct = dif / f.hoy.valor * 100;
+      const buena = f.mejorSiBaja === null ? null : (f.mejorSiBaja ? dif < 0 : dif > 0);
+      v.className = 'cifra__variacion' + (buena === null ? '' : buena ? ' cifra__variacion--bien' : ' cifra__variacion--mal');
+      if (escenario === 'modelo') {
+        v.innerHTML = icono(dif < 0 ? 'flecha-abajo' : 'flecha-arriba', 'icono') + F.signo(dif, f.modelo.decimales, f.modelo.unidad === '%' ? 'puntos' : f.modelo.unidad) + ' frente a hoy (' + F.signo(pct, 1, '%') + ')';
+      } else {
+        v.innerHTML = icono('igual', 'icono') + 'Lo que Sobusa hace hoy (regla manual y oferta real de 2025)';
+        v.className = 'cifra__variacion';
+      }
+      document.getElementById('fuente-btn-' + n).setAttribute('popovertarget', escenario === 'modelo' ? 'fuente-' + n + '-m' : 'fuente-' + n);
+    });
+  }
+  // Cifra protagonista: saldo conservador, con el simétrico al lado.
+  popoverFuente('fuente-saldo', C.saldo_conservador, 'saldo conservador');
+  const hero = document.getElementById('hero-saldo');
+  hero.dataset.cifra = String(C.saldo_conservador.valor); hero.textContent = F.signo(C.saldo_conservador.valor, 0);
+  document.getElementById('hero-saldo-var').innerHTML = icono('canje', 'icono') + 'Con la contabilidad simétrica: ' + F.signo(C.saldo_simetrico.valor, 0, 'M COP/año');
+  // Backtest.
+  const bt = C.backtest;
+  const btEl = document.getElementById('bt-plan'); btEl.dataset.cifra = String(bt.plan_error_salidas_h); btEl.textContent = F.numero(bt.plan_error_salidas_h, 2);
+  document.getElementById('bt-var').innerHTML = icono('flecha-abajo', 'icono') + 'La operación real queda a ' + F.numero(bt.real_error_salidas_h, 2) + ' salidas/h del oráculo';
+  document.getElementById('bt-nota').textContent = 'Horas exactas: ' + F.numero(bt.plan_pct_horas_exactas, 1) + ' % con el plan frente a ' + F.numero(bt.real_pct_horas_exactas, 1) + ' % hoy; reoptimizar en el día (motor) queda en ' + F.numero(bt.motor_error_salidas_h, 2) + '. Corrida del 13-10-2026, sin revisor independiente.';
+  // Avisos con cifras.
+  document.getElementById('aviso-canje').textContent = 'Conservadora: solo cuenta los pasajes perdidos donde se quitan salidas → ' + F.signo(C.saldo_conservador.valor, 0) + ' M COP/año. Simétrica: suma también los pasajeros ganados donde se añaden → ' + F.signo(C.saldo_simetrico.valor, 0) + ' M COP/año. Ahorro de operación: ' + F.numero(C.ahorro_operativo_plan.valor, 0) + ' M; pasajeros en riesgo: ' + F.numero(C.pax_riesgo_plan.valor, 0) + ' por día.';
+  document.getElementById('aviso-beta').textContent = 'β = ' + F.numero(C.beta.valor, 2) + ' (E7): con 10 % menos salidas en una franja se pierde el ' + F.numero(C.beta.valor * 10, 0) + ' % de sus pasajeros. Se midió con fallas sin aviso; un recorte planificado y anunciado puede perder menos (o más). El piloto de P2 lo mide en la calle antes de recortar.';
+  document.getElementById('pie-generado').textContent = 'generados el ' + D.generado;
+
+  // ---- Gráfico 0: líneas (real / regla manual / modelo) --------------------------------------------------------
+  const S = D.serie_diaria;
+  document.getElementById('g0-titulo').textContent = S.titulo;
+  document.getElementById('g0-pie').textContent = S.dias.length + ' días; ' + S.fuente.nota;
+  popoverFuente('fuente-g0', S.fuente, 'serie diaria');
+  const nombresSerie = { real: 'Pasajeros reales', regla_manual: 'Hoy: regla manual de Sobusa', modelo_final: 'Con el modelo: final (E11)', hibrido: 'Con el modelo: híbrido (E12)' };
+  function leyendaHTML(ul, items, obtener) {
+    ul.innerHTML = items.map(function (it) {
+      return '<li><button class="leyenda__item" type="button" data-serie="' + it.nombre + '" aria-pressed="true"><span class="leyenda__muestra ' + (it.clase || '') + '" style="--c: ' + it.color + '"></span>' + it.nombre + '</button></li>';
+    }).join('');
+    COMPONENTES.leyenda(ul, obtener);
+  }
+  function opcionLineas() {
+    const t = TEMA_ECHARTS.tokens();
+    const festivos = [];
+    S.tipo_dia.forEach(function (td, i) { if (td !== 'Laboral' && td !== 'Sábado') festivos.push([{ xAxis: i - 0.5 }, { xAxis: i + 0.5 }]); });
+    const modelo = S[modeloDibujado];
+    return {
+      legend: { show: false, data: [nombresSerie.regla_manual, nombresSerie[modeloDibujado], nombresSerie.real] },
+      tooltip: { trigger: 'axis', valueFormatter: function (v) { return F.numero(v, 0) + ' pasajeros'; } },
+      xAxis: { type: 'category', data: S.dias, axisLabel: { formatter: function (v) { return F.fechaCorta(v); }, hideOverlap: true, margin: 12 }, boundaryGap: false },
+      yAxis: { type: 'value', name: 'pasajeros/día', nameLocation: 'end', nameGap: 12, axisLabel: { formatter: function (v) { return v >= 1000 ? F.numero(v / 1000, 0) + ' mil' : v; } }, min: function (v) { return Math.floor(v.min / 5000) * 5000; } },
+      series: [
+        Object.assign({ name: nombresSerie.regla_manual, type: 'line', data: S.regla_manual, z: 1 }, TEMA_ECHARTS.serie('hoy')),
+        Object.assign({ name: nombresSerie[modeloDibujado], type: 'line', data: modelo, z: 2 }, TEMA_ECHARTS.serie('modelo')),
+        Object.assign({ name: nombresSerie.real, type: 'line', data: S.real, z: 3, markArea: { silent: true, itemStyle: { color: t.superficie2, opacity: 0.55 }, data: festivos } }, TEMA_ECHARTS.serie('real')),
+      ],
+    };
+  }
+  function tablaLineas() {
+    let h = '<table class="tabla tabla--compacta"><thead><tr><th scope="col">Día</th><th scope="col">Tipo</th><th scope="col" class="num">Reales</th><th scope="col" class="num">Regla manual</th><th scope="col" class="num">Modelo final</th><th scope="col" class="num">Híbrido</th></tr></thead><tbody>';
+    S.dias.forEach(function (d, i) { h += '<tr><td>' + F.fecha(d) + '</td><td>' + S.tipo_dia[i] + '</td><td class="num">' + F.numero(S.real[i]) + '</td><td class="num">' + F.numero(S.regla_manual[i]) + '</td><td class="num">' + F.numero(S.modelo_final[i]) + '</td><td class="num">' + F.numero(S.hibrido[i]) + '</td></tr>'; });
+    return h + '</tbody></table>';
+  }
+  document.getElementById('tabla-0').innerHTML = tablaLineas();
+
+  // ---- Gráfico 1: barras (salidas por hora hoy / recomendado) --------------------------------------------------
+  const B = D.salidas_hora;
+  document.getElementById('g1-titulo').textContent = B.titulo;
+  document.getElementById('g1-pie').textContent = 'Hoy: ' + B.total_hoy + ' salidas al día; con el modelo: ' + B.total_plan + '. Costos con fuente de 2026 (conductor por hora, e = 0,5).';
+  popoverFuente('fuente-g1', { archivo: B.fuente_hoy.archivo + ' y ' + B.fuente_plan.archivo, clave: 'Hoy: ' + B.fuente_hoy.clave + '. Plan: ' + B.fuente_plan.clave, experimento: B.fuente_plan.experimento, verificado: B.fuente_plan.verificado }, 'salidas por hora');
+  function opcionBarras() {
+    return {
+      legend: { show: false, data: ['Hoy', 'Con el modelo'] },
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, valueFormatter: function (v) { return v + ' salidas'; } },
+      xAxis: { type: 'category', data: B.horas.map(function (h) { return h + ' h'; }), axisLabel: { interval: 1 } },
+      yAxis: { type: 'value', name: 'salidas/h', nameLocation: 'end', nameGap: 12 },
+      series: [
+        Object.assign({ name: 'Hoy', type: 'bar', data: B.hoy }, TEMA_ECHARTS.serie('hoy')),
+        Object.assign({ name: 'Con el modelo', type: 'bar', data: B.plan }, TEMA_ECHARTS.serie('modelo')),
+      ],
+    };
+  }
+  function tablaBarras() {
+    let h = '<table class="tabla tabla--compacta"><thead><tr><th scope="col">Hora de salida</th><th scope="col" class="num">Hoy</th><th scope="col" class="num">Con el modelo</th><th scope="col" class="num">Diferencia</th></tr></thead><tbody>';
+    B.horas.forEach(function (hr, i) { h += '<tr><td>' + hr + ' h</td><td class="num">' + B.hoy[i] + '</td><td class="num">' + B.plan[i] + '</td><td class="num">' + F.signo(B.plan[i] - B.hoy[i], 0) + '</td></tr>'; });
+    h += '<tr class="tabla__fila-total"><td>Día</td><td class="num">' + B.total_hoy + '</td><td class="num">' + B.total_plan + '</td><td class="num">' + F.signo(B.total_plan - B.total_hoy, 0) + '</td></tr>';
+    return h + '</tbody></table>';
+  }
+  document.getElementById('tabla-1').innerHTML = tablaBarras();
+
+  // ---- Dibujar (solo tema claro) -------------------------------------------------------------------------------
+  function dibujar() {
+    ['0', '1'].forEach(function (k) { if (graficos[k]) graficos[k].dispose(); });
+    graficos['0'] = TEMA_ECHARTS.init(echarts, document.getElementById('lienzo-0'));
+    graficos['0'].setOption(opcionLineas());
+    graficos['1'] = TEMA_ECHARTS.init(echarts, document.getElementById('lienzo-1'));
+    graficos['1'].setOption(opcionBarras());
+    const t = TEMA_ECHARTS.tokens();
+    leyendaHTML(document.getElementById('leyenda-0'), [
+      { nombre: nombresSerie.regla_manual, color: t.serieHoy },
+      { nombre: nombresSerie[modeloDibujado], color: t.serieModelo },
+      { nombre: nombresSerie.real, color: t.serieReal, clase: 'leyenda__muestra--gruesa' },
+    ], function () { return graficos['0']; });
+    leyendaHTML(document.getElementById('leyenda-1'), [
+      { nombre: 'Hoy', color: t.serieHoy, clase: 'leyenda__muestra--barra' },
+      { nombre: 'Con el modelo', color: t.serieModelo, clase: 'leyenda__muestra--barra' },
+    ], function () { return graficos['1']; });
+    pintarSwatches();
+  }
+  TEMA_ECHARTS.registrar(echarts);
+  dibujar();
+  // Cada lienzo sigue el tamaño de su contenedor (barra plegada, ventana) sin depender del evento resize.
+  const vigilante = new ResizeObserver(function () { Object.keys(graficos).forEach(function (k) { graficos[k].resize(); }); });
+  ['lienzo-0', 'lienzo-1'].forEach(function (id) { vigilante.observe(document.getElementById(id)); });
+
+  // ---- Tokens: swatches y espacios ----------------------------------------------------------------------------
+  function pintarSwatches() {
+    const cs = getComputedStyle(document.documentElement);
+    document.querySelectorAll('[data-swatches]').forEach(function (cont) {
+      cont.innerHTML = cont.dataset.swatches.split(/\s+/).map(function (n) {
+        const v = cs.getPropertyValue(n).trim();
+        return '<div class="swatch"><div class="swatch__color" style="--sw: ' + v + '"></div><span class="swatch__nombre">' + n + '</span><span class="swatch__hex">' + v + '</span></div>';
+      }).join('');
+    });
+  }
+  document.getElementById('espacios').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8].map(function (k) {
+    const v = getComputedStyle(document.documentElement).getPropertyValue('--e-' + k).trim();
+    return '<div class="espacio"><div class="espacio__caja" style="width:' + v + ';height:' + v + '"></div>--e-' + k + ' · ' + v + '</div>';
+  }).join('');
+
+  // ---- Tabla WAPE por ruta --------------------------------------------------------------------------------------
+  const W = D.wape_por_ruta;
+  const cuerpo = document.querySelector('#tabla-wape tbody');
+  const filasW = W.rutas.map(function (r) { return { nombre: r, c: 'var(--ruta-' + (r === 'SILENCIO' ? 'silencio' : r === 'CRA 54' ? 'cra54' : 'cl72') + ')', v: [W.regla_manual[r], W.e1[r], W.modelo_final[r], W.hibrido[r]] }; });
+  filasW.push({ nombre: 'Tres rutas', c: null, v: [W.global.regla_manual, W.global.e1, W.global.modelo_final, W.global.hibrido], total: true });
+  cuerpo.innerHTML = filasW.map(function (f) {
+    const min = Math.min.apply(null, f.v);
+    return '<tr' + (f.total ? ' class="tabla__fila-total"' : '') + '><td>' + (f.c ? '<span class="tabla__clave"><span class="tabla__muestra" style="--c:' + f.c + '"></span>' + f.nombre + '</span>' : f.nombre) + '</td>' +
+      f.v.map(function (x, i) { return '<td class="num' + (x === min ? ' tabla__mejor' : i === 0 ? ' tabla__peor' : '') + '">' + F.numero(x, 2) + '</td>'; }).join('') + '</tr>';
+  }).join('');
+
+  // ---- Línea de tiempo del piloto -------------------------------------------------------------------------------
+  const P = D.piloto;
+  document.getElementById('tiempo-sub').textContent = 'Piloto de ' + P.semanas + ' semanas para medir β (P2): del ' + F.fecha(P.inicio) + ' al ' + F.fecha(P.fin) + ', ' + P.dias_laborales + ' días laborales, ' + P.festivos_dentro.length + ' festivos dentro';
+  const hitos = [{ fecha: P.inicio, titulo: 'Arranca el piloto', texto: 'Días alternos sorteados en bloques de dos semanas; la consola en modo sombra.', clase: 'hito--activo' }];
+  P.cierres_bloques.forEach(function (f, i) { hitos.push({ fecha: f, titulo: 'Cierre del bloque ' + (i + 1), texto: i === P.cierres_bloques.length - 1 ? 'Última estimación de β por franja y conjunta; decisión sobre los recortes.' : 'Reglas de parada: pérdida mayor que proporcional, hacinamiento o presupuesto.', clase: '' }); });
+  hitos[hitos.length - 1].titulo = 'Termina el piloto';
+  document.getElementById('linea-piloto').innerHTML = hitos.map(function (h) { return '<li class="hito ' + h.clase + '"><span class="hito__fecha">' + F.fecha(h.fecha) + '</span><h3 class="hito__titulo">' + h.titulo + '</h3><p class="hito__texto">' + h.texto + '</p></li>'; }).join('');
+
+  // ---- Comportamiento -------------------------------------------------------------------------------------------
+  COMPONENTES.iniciar(document);
+  pintarCifras(false);
+  COMPONENTES.segmentado(document.getElementById('escenario'), function (v) { escenario = v; pintarCifras(true); });
+  COMPONENTES.segmentado(document.getElementById('cual-modelo'), function (v) { modeloDibujado = v; dibujar(); });
+  COMPONENTES.pestanas(document.getElementById('pestanas-demo'));
+  document.querySelectorAll('#chips-rutas .chip').forEach(function (b) { b.addEventListener('click', function () { b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); }); });
+  document.querySelectorAll('#nav-pantallas .lateral__enlace').forEach(function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); document.querySelectorAll('#nav-pantallas .lateral__enlace').forEach(function (x) { x.removeAttribute('aria-current'); }); a.setAttribute('aria-current', 'page'); });
+  });
+  document.getElementById('cargar-planificador').addEventListener('click', function () {
+    const marco = document.getElementById('marco-demo');
+    marco.removeAttribute('srcdoc');
+    marco.src = '../planificador.html#plan';
+    document.getElementById('modulo-estado').textContent = 'planificador.html (sin modo embebido todavía: muestra su propia cabecera)';
+    this.disabled = true;
+  });
+  window.__muestraLista = true;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+% Subsección 3.9 (nueva en el informe). Fuentes: experimentos/E7_elasticidad/README.md (secciones 0-5),
+% experimentos/D5_optimizacion_milp/README.md (sección 1), costos/README.md (secciones 1-3),
+% experimentos/D6_simulador/README.md, sistema_tiempo_real/README.md (secciones 1, 3.1 y «El mismo día con
+% nuestro plan») y documentos/informe_resultados.md (secciones 2, 4.3, 4.4 y 6).
+\subsection{Del pronóstico a la decisión de despacho}
+\label{sec:decision}
+
+\paragraph{Elasticidad de los pasajeros a las salidas (E7).}
+$\beta$ es la elasticidad de los pasajeros de una franja a las salidas realizadas: con un 10~\% menos de salidas se
+pierde un $\beta \times 10$~\% de los pasajeros ($\beta = 0$, demanda cautiva; $\beta = 1$, cada bus que falta se lleva
+a sus pasajeros). Se identifica con un experimento natural: 27.754 viajes registrados (4,9~\%) recorrieron menos de
+20~km, salidas que el despachador quería hacer y que fallaron. La demanda esperada no predice esas fallas
+(coeficiente $+0{,}29$, $t = 0{,}75$) y no se reponen (un punto más de fallas reduce las salidas un 0,99~\%), así que su
+proporción instrumenta las salidas $S$ en
+\begin{equation}
+  \ln P_{r,d,h} = \beta \ln S_{r,d,h} + \mu_{r,h,\tau,m} + \lambda_d + \varepsilon_{r,d,h},
+  \label{eq:beta}
+\end{equation}
+con $P$ los pasajeros de la hora y efectos fijos de ruta $\times$ hora $\times$ tipo de día $\times$ mes ($\mu$) y de día
+($\lambda_d$), por mínimos cuadrados en dos etapas \citep{wooldridge2010panel} con errores agrupados por día sobre
+54.179 horas. Un diseño por ruta-día y otro de derrame la complementan; la literatura la sitúa cerca de 0,5
+\citep{evans2004tcrp95}. Si un plan pone $n_h < n^0_h$ salidas, se pierden $P_h [1 - (n_h/n^0_h)^{\beta}]$ pasajeros.
+
+\paragraph{Optimizador de salidas por hora (D5).}
+Para cada ruta y día, un programa lineal entero mixto elige las salidas válidas de cada hora $h \in \{4,\dots,20\}$:
+la binaria $z_{h,k}$ indica que la hora tiene $k$ salidas ($\sum_k z_{h,k} = 1$) y los términos no lineales se calculan
+antes para cada par $(h,k)$:
+\begin{multline}
+  \min_{z} \sum_{h}\sum_{k} z_{h,k} \Big[\, c_{\mathrm{bh}}\, k\, \tfrac{\theta_h}{60} + c_{\mathrm{km}}\, k\, \ell
+  + v_w\, P_h\, \tfrac{m_h\,(1 + \mathrm{CV}_h^2)}{120\, k} \\
+  + \pi\, \E\big[(L_h - Q k)^{+}\big] + T\, e\, P_h\, \tfrac{k^0_h - k}{k^0_h} \Big],
+  \label{eq:milp}
+\end{multline}
+que suma la operación (ciclo $\theta_h$ en minutos, longitud $\ell$), la espera con intervalos irregulares ($m_h$
+minutos operados, irregularidad $\mathrm{CV}_h$), la sobrecarga esperada (carga crítica $L_h$ lognormal, $Q = 50$) y los
+pasajes ganados o perdidos frente a la oferta de referencia $k^0_h$. Las restricciones son un intervalo de 2 a 10
+minutos (15 en domingo y festivo), un cambio de a lo sumo 6 salidas por hora entre horas y la flota disponible; se
+resuelve con PuLP y CBC \citep{mitchell2011pulp}. Primero se corrió con supuestos del equipo (60.000 COP por bus-hora,
+1.500 por km y tarifa de 3.000) y después con costos de fuente pública de 2026: $c_{\mathrm{bh}} = 26.400$ COP de
+conductor por bus-hora si se le paga por hora (1,3 salarios mínimos, prestaciones, recargos y 42~h semanales,
+\citealp{ley2101}; nada si se le paga por producido), $c_{\mathrm{km}} = 1.991$ COP por km (ACPM de la CREG 898,
+mantenimiento 736, llantas 231 y lubricantes 126) y $T = 3.182$ COP de ingreso neto por pasajero (tarifa de 3.700 por
+0,86). La espera ($v_w = 7.000$ COP por hora), la penalidad por pasajero sobre la capacidad ($\pi = 10.000$) y
+$e = 0{,}5$ siguen siendo supuestos. Cada plan se calcula para los 365 días de 2025 con el pronóstico a siete días y se
+evalúa con la demanda que llegó, con dos contabilidades: la \emph{conservadora} cuenta solo los pasajeros perdidos donde
+se quitan salidas ($\beta = 0{,}70$) y la \emph{simétrica} cuenta perdidos y ganados con una regla lineal en el cambio relativo de salidas. El \emph{$\beta$
+de equilibrio} es el valor por encima del cual un plan pierde dinero con la contabilidad conservadora.
+
+\paragraph{Simulador, motor en tiempo real y modelo persona a persona.}
+El simulador (D6) reproduce una ruta bus por bus y, en 18 días laborales no usados para construirlo, se equivoca un
+1,4--1,9~\% en el tiempo de vuelta. El motor corre cada 1 a 5 minutos sin mirar al futuro: corrige la demanda con lo
+visto, reoptimiza las horas que faltan con \eqref{eq:milp} y entrega la hora de las próximas salidas y alertas; se probó
+en 79 días de 2025 frente a un oráculo, el mismo optimizador con la demanda que llegó. El modelo persona a persona
+pone a cada pasajero real de los 353 días de 2025 con GPS en los buses del plan: se queda con probabilidad
+$(x_h/n^0_h)^{\beta}$ si el plan tiene menos salidas que las válidas de su hora y se pierde si ningún bus del plan pasa
+por su paradero en 20 minutos; los buses del plan no tienen tope de cupo.

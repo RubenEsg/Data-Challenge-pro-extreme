@@ -1,0 +1,21 @@
+nombre,WAPE,tipo
+B1 manual (8 semanas),20.044677368270303,base
+B2 ingenua (hace 7 días),24.450830890056952,base
+B3 perfil histórico,19.347954001160144,base
+Plantilla k=3 + nivel reciente del grupo × calendario (N5),15.844355297753843,plantilla
+Plantilla k=4 + nivel 8 semanas (N1),19.514463929320076,plantilla
+Plantilla k=4 + nivel reciente del grupo × calendario (N5),14.934451993426787,plantilla
+Plantilla k=5 + nivel reciente del grupo × calendario (N5),15.438397391394746,plantilla
+Plantilla k=6 + nivel reciente del grupo × calendario (N5),15.794593974155077,plantilla
+Plantilla k=7 + nivel reciente del grupo × calendario (N5),16.14196775581608,plantilla
+Plantilla k=8 + nivel reciente del grupo × calendario (N5),16.14410328268702,plantilla
+Plantilla k=4 + nivel mediano del grupo × deriva (N2),15.146847328580696,plantilla
+Plantilla k=4 + nivel mixto N1/N2 (N3),16.73741655114154,plantilla
+Plantilla k=4 + nivel reciente del grupo (N4),15.238963276881046,plantilla
+Cota: grupo real + nivel 8 semanas N1 (k=4),19.476864067814013,cota
+Cota: grupo real + nivel N5 (k=4),14.901013523898628,cota
+Cota: grupo real + total diario real (k=4),13.000543578475096,cota
+Plantilla k=4 (Ward) + nivel N5,15.001749440558815,plantilla
+Plantilla k=4 (normalización global) + nivel N5,15.579502317815955,plantilla
+LightGBM Poisson de referencia,14.495888944859944,lgbm
+LightGBM + variables de plantilla (k=4),14.317746531418972,lgbm

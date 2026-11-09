@@ -1,0 +1,52 @@
+ruta,tipo_dia,hora,salidas_habituales,intervalo_habitual_min,franja,planilla_tratada,intervalo_tratado_min,instruccion
+CRA 54,laboral,4,6.0,10.0,,6.0,10.0,no cambiar
+CRA 54,laboral,5,30.0,2.0,,30.0,2.0,no cambiar
+CRA 54,laboral,6,25.0,2.4,,25.0,2.4,no cambiar
+CRA 54,laboral,7,19.0,3.1578947368421053,C,19.0,3.1578947368421053,control: no cambiar
+CRA 54,laboral,8,15.0,4.0,vecina de R1,15.0,4.0,no cambiar (hora vecina: se observa el traslado de pasajeros)
+CRA 54,laboral,9,16.0,3.75,R1,13.0,4.615384615384615,"día recorte: -3 salidas, intervalos parejos (~4.6 min)"
+CRA 54,laboral,10,15.0,4.0,R1,12.0,5.0,"día recorte: -3 salidas, intervalos parejos (~5.0 min)"
+CRA 54,laboral,11,16.0,3.75,R1,13.0,4.615384615384615,"día recorte: -3 salidas, intervalos parejos (~4.6 min)"
+CRA 54,laboral,12,17.0,3.5294117647058822,vecina de R1,17.0,3.5294117647058822,no cambiar (hora vecina: se observa el traslado de pasajeros)
+CRA 54,laboral,13,19.0,3.1578947368421053,vecina de F1,19.0,3.1578947368421053,no cambiar (hora vecina: se observa el traslado de pasajeros)
+CRA 54,laboral,14,18.0,3.3333333333333335,F1,22.0,2.727272727272727,"día refuerzo: +4 salidas, intervalos parejos (~2.7 min)"
+CRA 54,laboral,15,17.0,3.5294117647058822,F1,21.0,2.857142857142857,"día refuerzo: +4 salidas, intervalos parejos (~2.9 min)"
+CRA 54,laboral,16,17.0,3.5294117647058822,vecina de R2,17.0,3.5294117647058822,no cambiar (hora vecina: se observa el traslado de pasajeros)
+CRA 54,laboral,17,16.0,3.75,R2,12.0,5.0,"día recorte: -4 salidas, intervalos parejos (~5.0 min)"
+CRA 54,laboral,18,14.0,4.285714285714286,R2,10.0,6.0,"día recorte: -4 salidas, intervalos parejos (~6.0 min)"
+CRA 54,laboral,19,13.0,4.615384615384615,R2,9.0,6.666666666666667,"día recorte: -4 salidas, intervalos parejos (~6.7 min)"
+CRA 54,laboral,20,8.0,7.5,vecina de R2,8.0,7.5,no cambiar (hora vecina: se observa el traslado de pasajeros)
+CL 72,laboral,4,3.0,20.0,,3.0,20.0,no cambiar
+CL 72,laboral,5,15.0,4.0,,15.0,4.0,no cambiar
+CL 72,laboral,6,6.0,10.0,,6.0,10.0,no cambiar
+CL 72,laboral,7,6.0,10.0,,6.0,10.0,no cambiar
+CL 72,laboral,8,5.0,12.0,,5.0,12.0,no cambiar
+CL 72,laboral,9,6.0,10.0,,6.0,10.0,no cambiar
+CL 72,laboral,10,5.0,12.0,,5.0,12.0,no cambiar
+CL 72,laboral,11,4.0,15.0,vecina de F2,4.0,15.0,no cambiar (hora vecina: se observa el traslado de pasajeros)
+CL 72,laboral,12,5.0,12.0,F2,7.0,8.571428571428571,"día refuerzo: +2 salidas, intervalos parejos (~8.6 min)"
+CL 72,laboral,13,6.0,10.0,F2,8.0,7.5,"día refuerzo: +2 salidas, intervalos parejos (~7.5 min)"
+CL 72,laboral,14,6.0,10.0,F2,8.0,7.5,"día refuerzo: +2 salidas, intervalos parejos (~7.5 min)"
+CL 72,laboral,15,5.0,12.0,F2,7.0,8.571428571428571,"día refuerzo: +2 salidas, intervalos parejos (~8.6 min)"
+CL 72,laboral,16,4.0,15.0,vecina de F2,4.0,15.0,no cambiar (hora vecina: se observa el traslado de pasajeros)
+CL 72,laboral,17,5.0,12.0,,5.0,12.0,no cambiar
+CL 72,laboral,18,5.0,12.0,,5.0,12.0,no cambiar
+CL 72,laboral,19,5.0,12.0,,5.0,12.0,no cambiar
+CL 72,laboral,20,4.0,15.0,,4.0,15.0,no cambiar
+CRA 54,domingo,4,0.0,,,0.0,,no cambiar
+CRA 54,domingo,5,14.0,4.285714285714286,,14.0,4.285714285714286,no cambiar
+CRA 54,domingo,6,13.0,4.615384615384615,,13.0,4.615384615384615,no cambiar
+CRA 54,domingo,7,14.0,4.285714285714286,,14.0,4.285714285714286,no cambiar
+CRA 54,domingo,8,14.0,4.285714285714286,vecina de R3,14.0,4.285714285714286,no cambiar (hora vecina: se observa el traslado de pasajeros)
+CRA 54,domingo,9,14.0,4.285714285714286,R3,10.0,6.0,"día recorte: -4 salidas, intervalos parejos (~6.0 min)"
+CRA 54,domingo,10,14.0,4.285714285714286,R3,10.0,6.0,"día recorte: -4 salidas, intervalos parejos (~6.0 min)"
+CRA 54,domingo,11,12.0,5.0,R3,8.0,7.5,"día recorte: -4 salidas, intervalos parejos (~7.5 min)"
+CRA 54,domingo,12,12.0,5.0,R3,8.0,7.5,"día recorte: -4 salidas, intervalos parejos (~7.5 min)"
+CRA 54,domingo,13,14.0,4.285714285714286,R3,10.0,6.0,"día recorte: -4 salidas, intervalos parejos (~6.0 min)"
+CRA 54,domingo,14,14.0,4.285714285714286,vecina de R3,14.0,4.285714285714286,no cambiar (hora vecina: se observa el traslado de pasajeros)
+CRA 54,domingo,15,12.0,5.0,,12.0,5.0,no cambiar
+CRA 54,domingo,16,12.0,5.0,,12.0,5.0,no cambiar
+CRA 54,domingo,17,10.0,6.0,,10.0,6.0,no cambiar
+CRA 54,domingo,18,9.0,6.666666666666667,,9.0,6.666666666666667,no cambiar
+CRA 54,domingo,19,6.0,10.0,,6.0,10.0,no cambiar
+CRA 54,domingo,20,1.0,60.0,,1.0,60.0,no cambiar

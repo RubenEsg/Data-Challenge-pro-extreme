@@ -1,0 +1,62 @@
+"""Pruebas de app/servicios/datos.py: contrato de la serie horaria y del catálogo de rutas."""
+
+from datetime import date, datetime, time
+
+import pandas as pd
+import pytest
+
+from app.servicios import datos
+
+pytestmark = pytest.mark.skipif(
+    not (datos.carpeta_datos() / "demanda_horaria.parquet").exists(),
+    reason="faltan los datos empaquetados (scripts/preparar_datos_api.py)",
+)
+
+
+def test_demanda_horaria_cumple_contrato():
+    d = datos.demanda_horaria()
+    assert list(d.columns[:6]) == datos.COLUMNAS_CONTRATO
+    assert set(d["ruta"].unique()) == {"SILENCIO", "CRA 54", "CL 72"}
+    assert d["hora"].between(4, 20).all()
+    assert isinstance(d["fecha"].iloc[0], date)
+    assert not d.duplicated(["ruta", "fecha", "hora"]).any()
+    assert (d["pasajeros"].dropna() >= 0).all()
+    assert str(d["ultima_actualizacion"].dt.tz) == "America/Bogota"
+
+
+def test_ultima_actualizacion_es_fin_del_dia():
+    d = datos.demanda_horaria(desde=date(2025, 3, 3), hasta=date(2025, 3, 3))
+    esperado = pd.Timestamp(datetime.combine(date(2025, 3, 3), time(23, 59, 59))).tz_localize("America/Bogota")
+    assert (d["ultima_actualizacion"] == esperado).all()
+
+
+def test_filtros_por_fecha_y_ruta():
+    d = datos.demanda_horaria(desde=date(2025, 1, 6), hasta=date(2025, 1, 12), rutas=["CL 72"])
+    assert set(d["ruta"]) == {"CL 72"}
+    assert d["fecha"].min() >= date(2025, 1, 6) and d["fecha"].max() <= date(2025, 1, 12)
+    assert len(d) == 7 * 17
+
+
+def test_demanda_devuelve_copia():
+    d = datos.demanda_horaria(desde=date(2025, 1, 6), hasta=date(2025, 1, 6))
+    d["pasajeros"] = -1
+    assert (datos.demanda_horaria(desde=date(2025, 1, 6), hasta=date(2025, 1, 6))["pasajeros"] >= 0).all()
+
+
+def test_catalogo_rutas():
+    cat = datos.catalogo_rutas()
+    assert {c["ruta"] for c in cat} == {"SILENCIO", "CRA 54", "CL 72"}
+    for c in cat:
+        for campo in ("ruta", "idruta", "capacidad", "tiempo_ciclo_min", "flota", "frecuencia_actual_min"):
+            assert campo in c
+        assert c["capacidad"] == 50
+        assert c["tiempo_ciclo_min"] > 0 and c["flota"] > 0 and c["frecuencia_actual_min"] > 0
+    assert datos.ruta_info("16")["ruta"] == "CRA 54"
+    with pytest.raises(KeyError):
+        datos.ruta_info("NO EXISTE")
+
+
+def test_parametros_operativos_por_hora():
+    p = datos.parametros_operativos("SILENCIO", "Laboral")
+    assert len(p) > 0
+    assert {"tiempo_ciclo_min", "flota", "intervalo_programado_min", "nmin", "nmax"} <= set(p.columns)

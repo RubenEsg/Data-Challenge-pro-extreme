@@ -1,0 +1,1490 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<script>/* Modo embebido: dentro de la app Sobusa Despacho (iframe o ?embebido=1). Abierta sola, nada cambia. */
+try { if (new URLSearchParams(location.search).get('embebido') === '1' || window.parent !== window) document.documentElement.setAttribute('data-embebido', '1'); } catch (e) {}
+/* Solo modo claro (19-oct-2026): el tema claro se fija antes del primer pintado, abierta sola o embebida, aunque el sistema esté en oscuro. */
+document.documentElement.setAttribute('data-theme', 'light');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador de ahorro</title>
+<meta name="description" content="Cuánto habría ahorrado Sobusa cada día de 2025 con el plan del modelo frente a la operación real: combustible, mantenimiento, conductores y pasajes en riesgo, por día, mes y año, con parámetros editables.">
+<link rel="stylesheet" href="lib/fuentes.css">  <!-- Barlow Condensed e IBM Plex Sans, copia local (antes: Google Fonts) -->
+<style>
+/* Tokens, cabecera, chips, pestañas, KPI y panel de parámetros copiados de planificador.html para que las páginas se vean como un solo producto. */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --surface-2: #eaeef3; --fg: #182230; --muted: #5a6776; --line: #d9e0e8;
+  --accent: #1c3f6e; --accent-soft: #dce7f5;
+  --r-silencio: #2f6fb3; --r-cra54: #d9731a; --r-cl72: #6a3d9a;
+  --ok: #2e8b57; --warn: #b88a00; --bad: #c0392b;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --shadow: 0 1px 2px rgba(24, 34, 48, 0.06), 0 4px 16px rgba(24, 34, 48, 0.05);
+  /* Series propias del simulador (validadas con el validador de paleta: CVD ≥ 9 y visión normal ≥ 16 en todos los pares). */
+  --real: #a9b3be; --plan-a: #a33460; --plan-b: #02a295;
+  /* Calendario: divergente azul (gana) ↔ rojo (pierde) con punto medio neutro. */
+  --div-pos: #2a78d6; --div-neg: #d03b3b; --div-mid: #eaeef3;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.1; margin: 0; text-wrap: balance; }
+h1 { font-size: 30px; letter-spacing: 0.2px; }
+h2 { font-size: 26px; margin-bottom: 4px; }
+h3 { font-size: 19px; color: var(--fg); }
+p { margin: 0; max-width: 72ch; }
+.muted { color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+b.bad, span.bad, td.bad, .bad-txt { color: var(--bad); }
+b.ok, span.ok, td.ok, .ok-txt { color: var(--ok); }
+
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 10px 20px; }
+.brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.brand .sub { color: var(--muted); font-size: 13px; letter-spacing: 0.4px; text-transform: uppercase; }
+@media (max-width: 1540px) { .brand .sub { display: none; } }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: 500 13px var(--font-body); cursor: pointer; text-decoration: none; }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chip[aria-pressed="false"] { opacity: 0.55; }
+.chip[aria-pressed="true"] { border-color: var(--c, var(--accent)); box-shadow: inset 0 0 0 1px var(--c, var(--accent)); opacity: 1; }
+.chip:disabled { opacity: 0.35; cursor: default; }
+.chip:focus-visible, .tab:focus-visible, .seg button:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+nav.tabs { display: flex; gap: 2px; overflow-x: auto; padding: 0 20px; background: var(--surface); border-bottom: 1px solid var(--line); scrollbar-width: thin; }
+.tab { flex: none; padding: 10px 14px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--muted); font: 600 15px var(--font-display); letter-spacing: 0.4px; text-transform: uppercase; cursor: pointer; }
+.tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.tab .t-corto { display: none; }
+
+main { padding-block: 22px 40px; padding-inline: 20px; max-width: 1480px; margin: 0 auto; }
+section.panel { display: none; }
+section.panel.activa { display: block; }
+.lead { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.lead p { max-width: 95ch; color: var(--muted); }
+
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 22px; }
+@media (max-width: 1180px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { header.top { position: static; } .kpis { gap: 8px; } .kpi { padding: 10px 12px; } .kpi .value { font-size: 26px; } .kpi .value small { font-size: 14px; } .kpi .delta { font-size: 12px; line-height: 1.35; } .kpi .label { font-size: 11.5px; } }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); min-width: 0; }
+.kpi .label { font-size: 12.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi .value { font: 700 32px/1.05 var(--font-display); margin-top: 4px; overflow-wrap: anywhere; }
+.kpi .value small { font: 600 17px var(--font-display); color: var(--muted); margin-left: 4px; }
+.kpi .value .nw { white-space: nowrap; }
+.kpi .delta { font-size: 13px; margin-top: 4px; color: var(--muted); }
+.kpi .delta.bad { color: var(--bad); } .kpi .delta.ok { color: var(--ok); }
+
+.grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+.bloque { grid-column: span 12; min-width: 0; }
+.bloque.mitad { grid-column: span 6; }
+.bloque.siete { grid-column: span 7; }
+.bloque.cinco { grid-column: span 5; }
+@media (max-width: 1100px) { .bloque.mitad, .bloque.siete, .bloque.cinco { grid-column: span 12; } }
+.bloque-cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 14px; margin-bottom: 6px; }
+.bloque-cab p { font-size: 13.5px; color: var(--muted); }
+.tarjeta { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); min-width: 0; }
+.chart { width: 100%; height: 340px; }
+.chart.bajo { height: 280px; }
+@media (max-width: 600px) { .chart { height: 300px; } .chart.bajo { height: 250px; } }
+
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; color: var(--muted); padding: 5px 12px; font: 500 13px var(--font-body); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--fg); }
+
+table.datos { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.datos th, table.datos td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.datos th { color: var(--muted); font-weight: 500; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.4px; }
+table.datos td.num, table.datos th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.datos tr.total td { font-weight: 600; border-top: 1px solid var(--muted); }
+table.datos tr.subtotal td { font-weight: 600; background: var(--surface-2); }
+table.datos td .sub, table.datos th .sub { display: block; color: var(--muted); font-size: 12px; font-weight: 400; text-transform: none; letter-spacing: 0; }
+table.datos tr.subtitulo td { background: var(--surface-2); color: var(--muted); font: 600 14px var(--font-display); letter-spacing: 0.5px; text-transform: uppercase; }
+table.datos.compacto { font-size: 13.5px; }
+table.datos.compacto th, table.datos.compacto td { padding: 6px 7px; }
+table.datos.compacto th { white-space: normal; }
+table.datos.compacto th.num { white-space: normal; }
+table.datos td.nombre { white-space: nowrap; }
+.tabla-wrap { overflow-x: auto; }
+ul.notas { padding-left: 20px; margin: 0; display: grid; gap: 8px; max-width: 95ch; }
+ul.notas li { line-height: 1.45; }
+footer { padding: 24px 20px; color: var(--muted); font-size: 12.5px; border-top: 1px solid var(--line); text-align: center; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+code { font-size: 12.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+details.tabla-det { margin-top: 8px; }
+details.tabla-det > summary { cursor: pointer; font-size: 13.5px; color: var(--accent); padding: 4px 0; }
+
+/* Panel de parámetros (como el planificador). */
+.layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 980px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+aside.parametros { position: sticky; top: calc(var(--alto-cab, 110px) + 12px); max-height: calc(100vh - var(--alto-cab, 110px) - 24px); overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+@media (max-width: 980px) { aside.parametros { position: static; max-height: none; } }
+@media (min-width: 981px) { aside.parametros::after { content: ""; position: sticky; bottom: 0; display: block; height: 28px; background: linear-gradient(to bottom, transparent, var(--surface) 85%); pointer-events: none; } }
+aside.parametros > details > summary { list-style: none; cursor: pointer; padding: 12px 16px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+aside.parametros > details > summary::-webkit-details-marker { display: none; }
+aside.parametros > details > summary h3 { font-size: 20px; }
+aside.parametros > details > summary .abrir { font-size: 12.5px; color: var(--muted); }
+aside.parametros > details[open] > summary .abrir::after { content: "ocultar"; }
+aside.parametros > details:not([open]) > summary .abrir::after { content: "mostrar"; }
+.cuerpo-param { padding: 0 16px 16px; }
+.grupo { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+.grupo:first-child { border-top: 0; margin-top: 0; padding-top: 0; }
+.grupo-tit { font: 600 14px var(--font-display); letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.campo { display: grid; gap: 4px; margin-bottom: 12px; }
+.campo .fila { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; }
+.campo .fila label, .campo .fila .lbl { color: var(--fg); font-weight: 500; }
+.campo .fila output { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 600; white-space: nowrap; }
+.campo .ayuda { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.campo input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; }
+.campo input[type=number] { width: 100%; font: 500 13.5px var(--font-body); padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); font-variant-numeric: tabular-nums; }
+.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.trio label { font-size: 11.5px; color: var(--muted); display: grid; gap: 2px; }
+.derivado { font-size: 12.5px; padding: 6px 10px; border-radius: 8px; background: var(--surface-2); color: var(--fg); }
+.derivado b { font-variant-numeric: tabular-nums; }
+.boton { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 8px; padding: 6px 12px; font: 500 13px var(--font-body); cursor: pointer; }
+.boton:hover { background: var(--surface-2); }
+.boton.primario { background: var(--accent-soft); }
+.boton.mini { padding: 2px 8px; font-size: 12px; }
+.selector { display: grid; gap: 8px; padding: 12px 16px 14px; border-bottom: 1px solid var(--line); }
+.selector .tit { font: 600 20px/1.1 var(--font-display); color: var(--fg); }
+.seg.vertical { display: flex; flex-direction: column; flex-wrap: nowrap; width: 100%; }
+.seg.vertical button { text-align: left; padding: 6px 10px; line-height: 1.35; border-top: 1px solid var(--line); }
+.seg.vertical button:first-child { border-top: 0; }
+.seg.vertical button[aria-pressed="true"] { box-shadow: inset 3px 0 0 var(--accent); }
+.seg.vertical button .clave { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.selector .ayuda { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.selector .ayuda b { color: var(--fg); font-weight: 600; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; }
+[hidden] { display: none !important; }
+.aviso { font-size: 13.5px; margin: 0 0 16px; padding: 10px 14px; border-left: 4px solid var(--line); background: var(--surface); border-radius: 0 10px 10px 0; box-shadow: var(--shadow); max-width: 120ch; }
+.aviso.warn { border-left-color: var(--warn); }
+.aviso.bad { border-left-color: var(--bad); }
+.nota-tabla { font-size: 12.5px; color: var(--muted); margin-top: 8px; max-width: none; }
+.nota-tabla b { color: var(--fg); }
+.check input { margin-top: 3px; accent-color: var(--accent); }
+
+/* Propio del simulador. */
+.fecha-barra { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 6px; }
+.fecha-barra input[type=date] { font: 500 14px var(--font-body); padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); }
+.fecha-titulo { font: 600 26px/1.15 var(--font-display); }
+.nota-dia { font-size: 13px; color: var(--muted); margin-bottom: 14px; max-width: 110ch; }
+.nota-dia b { color: var(--fg); font-weight: 600; }
+.veredicto { font-size: 15px; padding: 12px 16px; border-left: 4px solid var(--line); background: var(--surface); border-radius: 0 10px 10px 0; box-shadow: var(--shadow); margin-bottom: 16px; }
+.veredicto.bad { border-left-color: var(--bad); }
+.veredicto.bad .tit { color: var(--bad); }
+.veredicto.ok { border-left-color: var(--ok); }
+.veredicto.warn { border-left-color: var(--warn); }
+.veredicto .tit { font: 600 20px/1.2 var(--font-display); display: block; margin-bottom: 2px; }
+.veredicto .linea2 { display: block; margin-top: 6px; font-size: 13.5px; color: var(--muted); }
+.veredicto .linea2 b { color: var(--fg); }
+.veredicto .linea2 b.bad { color: var(--bad); }
+.veredicto .linea2 b.ok { color: var(--ok); }
+table.ahorro th.num { min-width: 92px; }
+table.ahorro td.num .sub { text-align: right; white-space: nowrap; }
+table.ahorro td.num .sub.envuelve { white-space: normal; }
+.cal-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.cal-cab h3 { font-size: 20px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.cal-grid .dow { font-size: 11.5px; color: var(--muted); text-align: center; text-transform: uppercase; letter-spacing: 0.4px; padding-bottom: 2px; }
+.cal-grid .dia { border: 0; border-radius: 6px; padding: 3px 1px; min-height: 46px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; cursor: pointer; color: var(--fg); font: 600 13px var(--font-body); background: var(--div-mid); min-width: 0; }
+.cal-grid .dia .v { font: 500 11px var(--font-body); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cal-grid .dia[aria-pressed="true"] { outline: 2.5px solid var(--fg); outline-offset: 1px; position: relative; z-index: 1; }
+.cal-grid .dia.festivo .n::after { content: "·F"; font-size: 9.5px; font-weight: 500; margin-left: 1px; vertical-align: 2px; }
+.cal-grid .dia.atipico .n { text-decoration: underline dotted; text-underline-offset: 2px; }
+.cal-ley { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12px; color: var(--muted); margin-top: 10px; }
+.cal-ley .barra { flex: 1 1 120px; height: 8px; border-radius: 4px; background: linear-gradient(to right, var(--div-neg), var(--div-mid), var(--div-pos)); min-width: 100px; }
+.leyenda-linea { display: inline-block; width: 18px; border-top: 2px dashed var(--muted); vertical-align: middle; margin-right: 4px; }
+.calculando { opacity: 0.6; transition: opacity 0.15s; }
+
+/* Teléfono: al final para que gane a las reglas generales. */
+@media (max-width: 600px) {
+  .top-inner { padding: 10px 16px; gap: 8px 10px; }
+  .chips { margin-left: 0; gap: 6px; }
+  .chip { padding: 4px 9px; font-size: 12.5px; }
+  .chip .largo { display: none; }
+  h1 { font-size: 26px; }
+  main { padding-inline: 16px; }
+  nav.tabs { padding: 0 8px; }
+  /* Las tres pestañas caben a 360–400 px con su nombre corto (la barra ya no se corta). */
+  .tab { padding: 10px 11px; }
+  .tab .t-largo { display: none; }
+  .tab .t-corto { display: inline; }
+  .tarjeta { padding: 12px 10px; }
+  table.ahorro { font-size: 13px; }
+  table.ahorro th, table.ahorro td { padding: 6px 4px; }
+  table.ahorro th { font-size: 11px; letter-spacing: 0; }
+  table.ahorro th.num { min-width: 0; white-space: normal; }
+  table.ahorro th:first-child { width: 28%; }
+  table.ahorro td .sub, table.ahorro th .sub { font-size: 11px; }
+  table.ahorro td:first-child .sub { display: none; }
+  table.ahorro tr.rubro td.num .sub { display: none; }
+  table.ahorro td.num .sub { white-space: normal; }
+  .fecha-titulo { font-size: 22px; flex-basis: 100%; }
+  .veredicto { padding: 10px 12px; font-size: 14px; }
+}
+/* Modo embebido: sin marca, sin enlaces a otras páginas y sin pie; se conservan rutas, pestañas, parámetros y contenido. */
+html[data-embebido] header.top .brand, html[data-embebido] header.top a.chip, html[data-embebido] footer { display: none; }
+html[data-embebido] .top-inner { padding: 8px 16px; }
+html[data-embebido] nav.tabs { padding: 0 16px; }
+html[data-embebido] main { padding-inline: 16px; padding-block: 16px 24px; }
+</style>
+<script>if (document.documentElement.hasAttribute('data-embebido')) document.write('<link rel="stylesheet" href="app/tokens.css">');</script>
+</head>
+<body>
+<header class="top" id="cabecera">
+  <div class="top-inner">
+    <div class="brand">
+      <h1>Simulador de ahorro</h1>
+      <span class="sub">Operación real de 2025 frente al plan del modelo</span>
+    </div>
+    <div class="chips" id="chips-rutas" role="group" aria-label="Ruta"></div>
+    <a class="chip" href="planificador.html"><span>Planificador<span class="largo"> de despacho</span> →</span></a>
+    <a class="chip" href="EDA_visual.html"><span>Tablero<span class="largo"> de datos</span> →</span></a>
+    <a class="chip" href="consola_despacho.html"><span>Consola<span class="largo"> de despacho</span> →</span></a>
+  </div>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+</header>
+
+<main>
+  <div class="layout">
+    <aside class="parametros" aria-label="Parámetros del simulador">
+      <div class="selector">
+        <div class="tit" id="tit-plan">Plan a comparar</div>
+        <div class="seg vertical" id="seg-plan" role="group" aria-labelledby="tit-plan">
+          <button type="button" data-v="a" aria-pressed="true"><span class="clave" style="background:var(--plan-a)"></span>(a) D5 con sus supuestos: recorta</button>
+          <button type="button" data-v="b" aria-pressed="false"><span class="clave" style="background:var(--plan-b)"></span>(b) D5 con costos con fuente: reasigna</button>
+        </div>
+        <div class="ayuda" id="ayuda-plan"></div>
+      </div>
+      <div class="selector">
+        <div class="tit" id="tit-esquema">Pago del conductor</div>
+        <div class="seg vertical" id="seg-esquema" role="group" aria-labelledby="tit-esquema">
+          <button type="button" data-v="hora" aria-pressed="true">Por hora o turno</button>
+          <button type="button" data-v="plantilla" aria-pressed="false">Salario fijo: plantilla mensual</button>
+          <button type="button" data-v="producido" aria-pressed="false">Por producido (parte del recaudo)</button>
+        </div>
+        <div class="ayuda" id="ayuda-esquema"></div>
+      </div>
+      <div class="selector">
+        <div class="tit" id="tit-metodo">Conductores necesarios</div>
+        <div class="seg vertical" id="seg-metodo" role="group" aria-labelledby="tit-metodo">
+          <button type="button" data-v="observadas" aria-pressed="true">(a) Con las horas que hicieron en 2025</button>
+          <button type="button" data-v="legal" aria-pressed="false">(b) Con la jornada legal (42 h semanales)</button>
+        </div>
+        <div class="ayuda" id="ayuda-metodo"></div>
+      </div>
+      <details id="det-param" open>
+        <summary><h3>Parámetros</h3><span class="abrir"></span></summary>
+        <div class="cuerpo-param">
+          <div class="grupo">
+            <div class="grupo-tit">Conductores</div>
+            <div class="campo">
+              <div class="fila"><label for="in-salario">Salario mensual por conductor</label><output id="out-salario"></output></div>
+              <input type="number" id="in-salario" min="0" step="10000" inputmode="numeric">
+              <div class="ayuda" id="ay-salario"></div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-fp">Factor prestacional</label><output id="out-fp"></output></div>
+              <input type="number" id="in-fp" min="1" max="2" step="0.01" inputmode="decimal">
+              <div class="ayuda">Costo del empleador ÷ salario: pensión, ARL IV, caja, cesantías, intereses, prima, vacaciones y dotación (1,42–1,56).</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-aux">Auxilio de transporte</label><output id="out-aux"></output></div>
+              <input type="number" id="in-aux" min="0" step="1000" inputmode="numeric">
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-recargos">Recargos nocturno y dominical</label><output id="out-recargos"></output></div>
+              <input type="range" id="in-recargos" min="0" max="0.4" step="0.01">
+              <div class="ayuda">18 % de los buses-hora de 2025 son de 19 a 6 h y 11 % en domingo o festivo (rango 12–25 %).</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-hmes">Horas trabajadas al mes</label><output id="out-hmes"></output></div>
+              <input type="number" id="in-hmes" min="100" max="300" step="1" inputmode="numeric">
+              <div class="ayuda">182 h: jornada de 42 h semanales desde el 15-jul-2026 (Ley 2101 de 2021). Solo pesa en el pago por hora.</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-hpag">Horas pagadas por hora en ruta</label><output id="out-hpag"></output></div>
+              <input type="range" id="in-hpag" min="1" max="1.5" step="0.01">
+              <div class="ayuda">Incluye el descanso entre vueltas (37 min por vuelta, D2). Solo pesa en el pago por hora.</div>
+            </div>
+            <div class="campo solo-observadas">
+              <div class="fila"><span class="lbl">Horas en ruta por conductor-día (a)</span></div>
+              <div class="trio" id="trio-horas"></div>
+              <div class="ayuda" id="ay-horas"></div>
+            </div>
+            <div class="campo solo-observadas">
+              <div class="fila"><label for="in-dias">Días trabajados al mes por conductor (a)</label><output id="out-dias"></output></div>
+              <input type="number" id="in-dias" min="5" max="31" step="0.1" inputmode="decimal">
+              <div class="ayuda" id="ay-dias"></div>
+            </div>
+            <div class="campo solo-observadas">
+              <div class="fila"><label for="in-dsueldo">Conductor-días por sueldo completo (a)</label><output id="out-dsueldo"></output></div>
+              <input type="number" id="in-dsueldo" min="5" max="31" step="0.1" inputmode="decimal">
+              <div class="ayuda" id="ay-dsueldo"></div>
+            </div>
+            <div class="campo solo-legal">
+              <div class="fila"><label for="in-hleg">Jornada legal: horas pagadas por día (b)</label><output id="out-hleg"></output></div>
+              <input type="number" id="in-hleg" min="4" max="12" step="0.5" inputmode="decimal">
+              <div class="ayuda">42 h semanales en 6 días (Ley 2101 de 2021, desde el 15-jul-2026) = 7 h. Cada hora del bus en ruta paga 1,16 h de conductor por los descansos, así que un conductor cubre 7 ÷ 1,16 ≈ 6 h de bus.</div>
+            </div>
+            <div class="campo solo-legal">
+              <div class="fila"><label for="in-dleg">Jornada legal: días trabajados al mes (b)</label><output id="out-dleg"></output></div>
+              <input type="number" id="in-dleg" min="15" max="31" step="1" inputmode="numeric">
+              <div class="ayuda">6 días por semana con un día de descanso: unos 26 al mes (26 × 7 h = 182 h).</div>
+            </div>
+            <div class="campo solo-legal">
+              <div class="fila"><label for="in-reserva">Reserva por ausencias (b)</label><output id="out-reserva"></output></div>
+              <input type="range" id="in-reserva" min="0" max="0.3" step="0.01">
+              <div class="ayuda">Conductores de más para cubrir incapacidades y vacaciones: el ausentismo de conductores pasa del 10 % (H65 en documentos/investigacion_internacional.md).</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-part">Parte del recaudo para el conductor</label><output id="out-part"></output></div>
+              <input type="range" id="in-part" min="0" max="0.4" step="0.01">
+              <div class="ayuda">Solo con pago por producido (supuesto de costos/: 20 %, rango 15–25 %).</div>
+            </div>
+            <div class="derivado" id="derivado-cond"></div>
+          </div>
+          <div class="grupo">
+            <div class="grupo-tit">Combustible y mantenimiento</div>
+            <div class="campo">
+              <div class="fila"><label for="in-acpm">Precio del ACPM</label><output id="out-acpm"></output></div>
+              <input type="number" id="in-acpm" min="0" step="10" inputmode="numeric">
+              <div class="ayuda">Barranquilla, vigente en octubre de 2026 (CREG, circulares 335 y 339 de 2026). Promedio 2025: 10.585.</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-rend">Rendimiento</label><output id="out-rend"></output></div>
+              <input type="number" id="in-rend" min="1" max="40" step="0.1" inputmode="decimal">
+              <div class="ayuda">Estimado por tipo de bus y edad (Sobusa no registra el consumo; rango 11–15,5 km/gal para la NQR).</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-mant">Mantenimiento por km</label><output id="out-mant"></output></div>
+              <input type="number" id="in-mant" min="0" step="10" inputmode="numeric">
+              <div class="ayuda">Preventivo y correctivo; estudio de costos de Soacha 2026 (ARM) y SICE-TAC, a precios de 2026.</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-llantas">Llantas por km</label><output id="out-llantas"></output></div>
+              <input type="number" id="in-llantas" min="0" step="5" inputmode="numeric">
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-lub">Lubricantes y filtros por km</label><output id="out-lub"></output></div>
+              <input type="number" id="in-lub" min="0" step="5" inputmode="numeric">
+            </div>
+            <div class="derivado" id="derivado-km"></div>
+          </div>
+          <div class="grupo">
+            <div class="grupo-tit">Pasajeros</div>
+            <div class="campo">
+              <div class="fila"><label for="in-tarifa">Tarifa neta por pasajero</label><output id="out-tarifa"></output></div>
+              <input type="number" id="in-tarifa" min="0" step="10" inputmode="numeric">
+              <div class="ayuda">3.700 COP de 2026 × 0,86 que retiene el operador tras FET, factor de calidad y descuentos del SIBUS (rango 3.071–3.420).</div>
+            </div>
+            <div class="campo">
+              <div class="fila"><label for="in-beta">Elasticidad β</label><output id="out-beta"></output></div>
+              <input type="range" id="in-beta" min="0" max="1" step="0.01">
+              <div class="ayuda">Con 10 % menos salidas en una hora se pierde β × 10 % de sus pasajeros. Medida en Sobusa: 0,70 (rango 0,55–0,90, E7); literatura 0,5.</div>
+            </div>
+            <label class="check"><input type="checkbox" id="in-sim"> <span>Contar también los pasajeros que se ganarían donde el plan añade salidas (contabilidad simétrica; nadie los ha medido).</span></label>
+          </div>
+          <div class="grupo" style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" class="boton primario" id="btn-reset">Restablecer valores por defecto</button>
+          </div>
+        </div>
+      </details>
+    </aside>
+
+    <div class="contenido" id="contenido">
+      <section class="panel" id="p-fecha" role="tabpanel">
+        <div class="fecha-barra">
+          <button type="button" class="chip" id="dia-prev" aria-label="Día anterior">◀</button>
+          <input type="date" id="in-fecha" min="2025-01-01" max="2025-12-31" aria-label="Fecha de 2025">
+          <button type="button" class="chip" id="dia-next" aria-label="Día siguiente">▶</button>
+          <h2 class="fecha-titulo" id="fecha-titulo"></h2>
+        </div>
+        <p class="nota-dia" id="nota-dia"></p>
+        <div class="veredicto" id="veredicto" role="status" aria-live="polite"></div>
+        <div class="grid" style="margin-bottom:22px">
+          <div class="bloque siete tarjeta">
+            <div class="bloque-cab"><h3>Cuánto se ahorra: día, mes y año</h3><p id="sub-ahorro"></p></div>
+            <div class="tabla-wrap"><table class="datos ahorro" id="t-ahorro"></table></div>
+            <p class="nota-tabla" id="nota-nomina"></p>
+          </div>
+          <div class="bloque cinco tarjeta">
+            <div class="cal-cab">
+              <button type="button" class="chip" id="mes-prev" aria-label="Mes anterior">◀</button>
+              <h3 id="cal-titulo"></h3>
+              <button type="button" class="chip" id="mes-next" aria-label="Mes siguiente">▶</button>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+            <div class="cal-ley" id="cal-ley"></div>
+          </div>
+        </div>
+        <div class="kpis" id="kpis"></div>
+        <div class="grid">
+          <div class="bloque">
+            <div class="bloque-cab"><h3 id="tit-salidas">Salidas por hora</h3><p id="sub-salidas"></p></div>
+            <div class="chart" id="c-salidas"></div>
+            <details class="tabla-det"><summary>Ver la tabla por hora</summary><div class="tabla-wrap"><table class="datos" id="t-horas"></table></div></details>
+          </div>
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Por ruta en este día</h3><p>Operación real → plan. Conductores: con la regla de la pestaña «Conductores»; entre paréntesis, cuántos trabajaron ese día (un rango: no se sabe cuántas personas hay detrás del código 799).</p></div>
+            <div class="tabla-wrap"><table class="datos compacto" id="t-rutas"></table></div>
+          </div>
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Mes a mes en 2025</h3><p id="sub-mensual">Clic en un mes para ir a su calendario.</p></div>
+            <div class="chart" id="c-mensual"></div>
+            <details class="tabla-det"><summary>Ver la tabla por mes</summary><div class="tabla-wrap"><table class="datos compacto" id="t-meses"></table></div></details>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="p-conductores" role="tabpanel">
+        <div class="lead">
+          <h2>Conductores: cuántos trabajan y cuántos necesita el plan</h2>
+          <p id="lead-cond"></p>
+        </div>
+        <div class="aviso warn" id="aviso-jornada" role="note"></div>
+        <div class="kpis" id="kpis-cond"></div>
+        <div class="grid">
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Cuántos conductores pide la operación real de 2025</h3><p>Promedio del año, tres rutas. (a) con las horas que hicieron los conductores en 2025; (b) con la jornada legal. Nómina con salario fijo al costo mensual por conductor del panel. Se recalcula con los parámetros.</p></div>
+            <div class="tabla-wrap"><table class="datos compacto" id="t-metodos"></table></div>
+            <p class="nota-tabla" id="nota-metodos"></p>
+          </div>
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Conductores por día en 2025</h3><p id="sub-cond-dia"></p></div>
+            <div class="chart" id="c-cond-dia"></div>
+          </div>
+          <div class="bloque mitad">
+            <div class="bloque-cab"><h3>Horas por conductor en un día</h3><p>Conductor-días de 2025 (identificados) por tramo de horas. Horas en ruta: suma de la duración de sus viajes. Jornada: del primer inicio al último fin.</p></div>
+            <div class="chart bajo" id="c-horas"></div>
+          </div>
+          <div class="bloque mitad">
+            <div class="bloque-cab"><h3>Días trabajados al mes</h3><p>Conductor-meses de 2025 según los días (1 a 31) que trabajó cada conductor en cada mes.</p></div>
+            <div class="chart bajo" id="c-dias"></div>
+          </div>
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Horas en ruta al mes por conductor</h3><p id="sub-jornada-mes"></p></div>
+            <div class="chart bajo" id="c-jornada-mes"></div>
+          </div>
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Plantilla del mes</h3><p id="sub-plantilla"></p></div>
+            <div class="chart bajo" id="c-plantilla"></div>
+          </div>
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Por tipo de día y por ruta</h3><p>Promedios de 2025. Rango con el 799 = identificados + entre una persona por cada bus con el código 799 sin conductor identificado ese día (cota baja) y una por cada bus con el 799 (cota alta).</p></div>
+            <div class="tabla-wrap"><table class="datos compacto" id="t-cond-tipo"></table></div>
+            <div class="tabla-wrap" style="margin-top:12px"><table class="datos compacto" id="t-cond-ruta"></table></div>
+          </div>
+          <div class="bloque mitad">
+            <h3 style="margin-bottom:8px">La regla para estimar conductores</h3>
+            <ul class="notas" id="notas-regla"></ul>
+          </div>
+          <div class="bloque mitad">
+            <h3 style="margin-bottom:8px">Qué dicen los datos y qué no</h3>
+            <ul class="notas" id="notas-datos"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="p-metodo" role="tabpanel">
+        <div class="lead">
+          <h2>Método, supuestos y verificación</h2>
+          <p>Cómo se calcula cada cifra, de dónde salen los valores por defecto y qué tan fiel es la página al informe.</p>
+        </div>
+        <div class="grid">
+          <div class="bloque mitad">
+            <h3 style="margin-bottom:8px">Cómo se calcula</h3>
+            <ul class="notas" id="notas-metodo"></ul>
+          </div>
+          <div class="bloque mitad">
+            <h3 style="margin-bottom:8px">Limitaciones</h3>
+            <ul class="notas" id="notas-limites"></ul>
+          </div>
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Verificación (calculada en este navegador con los valores por defecto)</h3><p>Totales de 2025, tres rutas, frente al cálculo en Python (simulacion_por_fecha.py), que a su vez reproduce costos/ y el informe.</p></div>
+            <div class="tabla-wrap"><table class="datos" id="t-verif"></table></div>
+          </div>
+          <div class="bloque">
+            <div class="bloque-cab"><h3>Parámetros por defecto y su fuente</h3><p>Valores centrales del módulo costos/ (precios de octubre de 2026) y del análisis de conductores de 2025.</p></div>
+            <div class="tabla-wrap"><table class="datos" id="t-fuentes"></table></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+<footer>Simulador de ahorro del Data Challenge Sobusa 2026 (Universidad del Norte). Planes: optimización D5 con el pronóstico a una semana; costos: módulo costos/; conductores: progvehiculos 2025. Precios de 2026 aplicados a la operación de 2025. Código y datos: simulacion_ahorro/.</footer>
+
+<script src="lib/echarts.min.js"></script>  <!-- ECharts 5.5.1, copia local (antes: cdn.jsdelivr.net) -->
+<script src="./simulacion_ahorro/simulacion_datos.js"></script>
+<script>
+/* MOTOR-INICIO: misma lógica que simulacion_ahorro/simulacion_por_fecha.py (se comprueba en la pestaña «Método»). */
+function crearMotor(S) {
+  'use strict';
+  const NR = S.rutas.length, NH = S.horas.length, ND = S.fechas.length;
+  const OF = { real: S.n0, a: S.xa, b: S.xb };
+  // Indicadores que no dependen de los parámetros: salidas, buses-hora, km, espera y sobrecarga por ruta y día.
+  const est = {};
+  Object.keys(OF).forEach((k) => {
+    const x = OF[k];
+    const o = { sal: [], bh: [], km: [], espN: [], espD: [], sobre: [], pico: S.pico[k] };
+    for (let r = 0; r < NR; r++) {
+      const sal = new Float64Array(ND), bh = new Float64Array(ND), km = new Float64Array(ND), eN = new Float64Array(ND), eD = new Float64Array(ND), so = new Float64Array(ND);
+      for (let d = 0; d < ND; d++) {
+        const t = S.tipo[d], cic = S.ciclo[r][t], mi = S.minutos[r][t], cv = S.cv[r][t];
+        let s = 0, b = 0, en = 0, ed = 0, sc = 0;
+        for (let h = 0; h < NH; h++) {
+          const i = d * NH + h, xi = x[r][i], pax = S.pax[r][i];
+          s += xi; b += xi * cic[h] / 60;
+          if (xi > 0 && pax > 0) { en += mi[h] / xi / 2 * (1 + cv[h] * cv[h]) * pax; ed += pax; }
+          const L = S.L[r][i];
+          if (L !== null) sc += Math.max(L - S.capacidad * xi, 0);
+        }
+        sal[d] = s; bh[d] = b; km[d] = s * S.km[r]; eN[d] = en; eD[d] = ed; so[d] = sc;
+      }
+      o.sal.push(sal); o.bh.push(bh); o.km.push(km); o.espN.push(eN); o.espD.push(eD); o.sobre.push(so);
+    }
+    est[k] = o;
+  });
+  const paxDia = [];
+  for (let r = 0; r < NR; r++) {
+    const a = new Float64Array(ND);
+    for (let d = 0; d < ND; d++) { let s = 0; for (let h = 0; h < NH; h++) s += S.pax[r][d * NH + h]; a[d] = s; }
+    paxDia.push(a);
+  }
+  // Pasajeros en riesgo (contabilidad conservadora: pax · (1 − (x/n0)^β) donde x < n0) y netos con la simétrica (pax · β · (x − n0)/n0).
+  const cache = new Map();
+  function pasajeros(plan, beta) {
+    const clave = plan + '|' + beta;
+    if (cache.has(clave)) return cache.get(clave);
+    const x = OF[plan], perd = [], sim = [];
+    for (let r = 0; r < NR; r++) {
+      const pe = new Float64Array(ND), si = new Float64Array(ND);
+      for (let d = 0; d < ND; d++) {
+        let a = 0, b = 0;
+        for (let h = 0; h < NH; h++) {
+          const i = d * NH + h, n0 = S.n0[r][i];
+          if (n0 > 0) {
+            const xi = x[r][i], pax = S.pax[r][i];
+            if (xi < n0) a += pax * (1 - Math.pow(Math.min(Math.max(xi / n0, 0), 1), beta));
+            b += pax * beta * (xi - n0) / n0;
+          }
+        }
+        pe[d] = a; si[d] = b;
+      }
+      perd.push(pe); sim.push(si);
+    }
+    const res = { perd, sim };
+    if (cache.size > 60) cache.clear();
+    cache.set(clave, res);
+    return res;
+  }
+  // Pasajeros en riesgo por hora de un día (para el gráfico y la tabla por hora).
+  function riesgoHora(plan, beta, r, d) {
+    const x = OF[plan], out = [];
+    for (let h = 0; h < NH; h++) {
+      const i = d * NH + h, n0 = S.n0[r][i], xi = x[r][i], pax = S.pax[r][i];
+      out.push(n0 > 0 && xi < n0 ? pax * (1 - Math.pow(Math.min(Math.max(xi / n0, 0), 1), beta)) : 0);
+    }
+    return out;
+  }
+  const costoMes = (p) => (p.salario * p.factor_prestacional + p.aux_transporte * (1 + p.prest_aux)) * (1 + p.recargos);
+  const costoBH = (p) => costoMes(p) / p.horas_mes * p.horas_pagadas;
+  const costoKm = (p) => p.precio_acpm / p.rendimiento + p.mant_km + p.llantas_km + p.lub_km;
+  // Buses-hora que cubre un conductor-día: (a) horas en ruta observadas por ruta; (b) jornada legal ÷ horas pagadas por hora en ruta.
+  const horasConductor = (p) => p.metodo_conductores === 'legal' ? [0, 1, 2].map(() => p.horas_legales_dia / p.horas_pagadas) : p.horas_turno;
+  // Plantilla (personas distintas al mes): días al mes por conductor y reserva por ausencias (la reserva solo con la jornada legal).
+  const diasReserva = (p) => p.metodo_conductores === 'legal' ? [p.dias_legales_mes, 1 + p.reserva] : [p.dias_trabajados, 1];
+  // Nómina con salario fijo: conductor-días que cubre un sueldo completo. (a) Los regulares cobran el mes completo y los
+  // ocasionales sus días ÷ 26 (días por sueldo completo de 2025); (b) jornada legal: todos de tiempo completo, con la reserva.
+  const diasNomina = (p) => p.metodo_conductores === 'legal' ? [p.dias_legales_mes, 1 + p.reserva] : [p.dias_por_sueldo, 1];
+  const plantillaDe = (condDias, p) => { const [dm, rv] = diasReserva(p); return condDias * rv / dm; };
+  const conductores = (o, r, d, h) => Math.ceil(Math.max(o.bh[r][d] / Math.max(h, 1e-6), o.pico[r][d]) - 1e-9);
+  const CAMPOS = ['comb', 'mant', 'llan', 'lub', 'cond', 'oper', 'pas', 'neto', 'galR', 'galQ', 'condR', 'condQ'];
+  function simular(p, plan, esquema, simetrica) {
+    const R = est.real, Q = est[plan], pp = pasajeros(plan, p.beta);
+    const cm = costoMes(p), cbh = costoBH(p), hs = horasConductor(p), [diasM, resv] = diasNomina(p);
+    const factor = esquema === 'producido' ? 1 - p.participacion_producido : 1;
+    const out = {}; CAMPOS.forEach((c) => { out[c] = []; });
+    for (let r = 0; r < NR; r++) {
+      const v = {}; CAMPOS.forEach((c) => { v[c] = new Float64Array(ND); });
+      for (let d = 0; d < ND; d++) {
+        const kmR = R.km[r][d], kmQ = Q.km[r][d];
+        const gR = kmR / p.rendimiento, gQ = kmQ / p.rendimiento;
+        const cR = conductores(R, r, d, hs[r]), cQ = conductores(Q, r, d, hs[r]);
+        const comb = gR * p.precio_acpm - gQ * p.precio_acpm;
+        const mant = kmR * p.mant_km - kmQ * p.mant_km;
+        const llan = kmR * p.llantas_km - kmQ * p.llantas_km;
+        const lub = kmR * p.lub_km - kmQ * p.lub_km;
+        const cond = esquema === 'hora' ? R.bh[r][d] * cbh - Q.bh[r][d] * cbh
+          : esquema === 'plantilla' ? cR * resv * cm / diasM - cQ * resv * cm / diasM : 0;
+        const oper = comb + mant + llan + lub + cond;
+        const pas = (simetrica ? -pp.sim[r][d] : pp.perd[r][d]) * p.tarifa_neta * factor;
+        v.comb[d] = comb; v.mant[d] = mant; v.llan[d] = llan; v.lub[d] = lub; v.cond[d] = cond; v.oper[d] = oper; v.pas[d] = pas; v.neto[d] = oper - pas;
+        v.galR[d] = gR; v.galQ[d] = gQ; v.condR[d] = cR; v.condQ[d] = cQ;
+      }
+      CAMPOS.forEach((c) => out[c].push(v[c]));
+    }
+    return { plan, esquema, simetrica, R, Q, pp, out, costoMes: cm, costoBH: cbh, costoKm: costoKm(p) };
+  }
+  function serieConductores(p, oferta) {
+    const o = est[oferta], out = [], hs = horasConductor(p);
+    for (let r = 0; r < NR; r++) { const a = new Float64Array(ND); for (let d = 0; d < ND; d++) a[d] = conductores(o, r, d, hs[r]); out.push(a); }
+    return out;
+  }
+  return { simular, serieConductores, riesgoHora, est, paxDia, pasajeros, costoMes, costoBH, costoKm, horasConductor, diasReserva, diasNomina, plantillaDe, NR, NH, ND, OF };
+}
+/* MOTOR-FIN */
+</script>
+<script>
+(function () {
+  'use strict';
+  // Modo embebido (dentro de la app Sobusa Despacho): la fecha llega por mensaje y no se usa localStorage (el tema es siempre claro).
+  const EMBEBIDO = document.documentElement.hasAttribute('data-embebido');
+  let callarEstado = false;
+  function avisarApp(m) { if (EMBEBIDO && window.parent !== window) { try { window.parent.postMessage(Object.assign({ pagina: 'simulador_ahorro.html' }, m), '*'); } catch (e) { /* sin padre */ } } }
+  function avisarEstado() { if (EMBEBIDO && !callarEstado) avisarApp({ tipo: 'estado', dia: S.fechas[estado.dia], pestana: estado.tab }); }
+  const S = window.SIM;
+  if (!S) { document.getElementById('contenido').innerHTML = '<p>No se encontró <code>simulacion_ahorro/simulacion_datos.js</code> junto a esta página: la carpeta <code>simulacion_ahorro</code> debe estar al lado de este archivo.</p>'; return; }
+  const M = crearMotor(S);
+  const NR = M.NR, NH = M.NH, ND = M.ND, PRM = S.param;
+
+  // ================= utilidades =================
+  const $ = (id) => document.getElementById(id);
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fmt = (n, d = 0) => (n == null || !isFinite(n)) ? '–' : Number(n).toLocaleString('es-CO', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const sg = (n, d = 0) => (n == null || !isFinite(n)) ? '–' : (Math.abs(n) < 0.5 * Math.pow(10, -d) ? fmt(0, d) : (n > 0 ? '+' : '−') + fmt(Math.abs(n), d));
+  const pct = (a, b) => b ? (a / b - 1) * 100 : null;
+  // 4,3 × 10⁻¹⁵ (notación científica en español)
+  const cientifico = (v) => {
+    if (!(v > 0)) return '0';
+    const e = Math.floor(Math.log10(v)), sup = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+    const exp = String(e).split('').map((c) => c === '-' ? '⁻' : sup[Number(c)]).join('');
+    return `${fmt(v / Math.pow(10, e), 1)} × 10${exp}`;
+  };
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  // Color con transparencia (acepta #rgb, #rrggbb y rgb()): para la banda de los conductores que trabajaron.
+  const conAlfa = (c, a) => {
+    const s = String(c).trim();
+    let m = s.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+    if (m) { let h = m[1]; if (h.length === 3) h = h.split('').map((x) => x + x).join(''); const n = parseInt(h, 16); return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`; }
+    m = s.match(/^rgba?\(([^)]+)\)$/i);
+    if (m) { const [r, g, b] = m[1].split(',').map((x) => parseFloat(x)); return `rgba(${r}, ${g}, ${b}, ${a})`; }
+    return s;
+  };
+  // Millones de COP con decimales según el tamaño
+  const decM = (v) => { const a = Math.abs(v) / 1e6; return a >= 100 ? 0 : a >= 10 ? 1 : 2; };
+  const mM = (v, d) => fmt(v / 1e6, d == null ? decM(v) : d);
+  const smM = (v, d) => sg(v / 1e6, d == null ? decM(v) : d);
+  const reducida = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const MES3 = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const DIAS_SEM = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  const VAR_RUTA = { 'SILENCIO': '--r-silencio', 'CRA 54': '--r-cra54', 'CL 72': '--r-cl72' };
+  const NOMBRE_PLAN = { a: 'Plan (a): D5 con sus supuestos', b: 'Plan (b): D5 con costos con fuente' };
+  const CORTO_PLAN = { a: 'plan (a)', b: 'plan (b)' };
+  const VAR_PLAN = { a: '--plan-a', b: '--plan-b' };
+  const ESQ_TXT = { hora: 'conductor pagado por hora o turno', plantilla: 'conductor con salario fijo (plantilla mensual)', producido: 'conductor pagado por producido' };
+  const fechaDe = (i) => { const [y, m, d] = S.fechas[i].split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+  const mesDe = (i) => Number(S.fechas[i].slice(5, 7)) - 1;
+  const MES_INI = [], MES_FIN = [];
+  S.fechas.forEach((f, i) => { const m = mesDe(i); if (MES_INI[m] == null) MES_INI[m] = i; MES_FIN[m] = i + 1; });
+  const fechaLarga = (i) => { const f = fechaDe(i); return `${DIAS_SEM[f.getUTCDay()]} ${f.getUTCDate()} de ${MESES[f.getUTCMonth()]} de 2025`; };
+  const fechaCorta = (i) => { const f = fechaDe(i); return `${f.getUTCDate()} de ${MESES[f.getUTCMonth()]}`; };
+
+  // ================= estado =================
+  const DEF = {
+    plan: 'a', esquema: 'hora', simetrica: false, ruta: 'Total',
+    precio_acpm: PRM.precio_acpm.v, rendimiento: PRM.rendimiento.v, mant_km: PRM.mant_km.v, llantas_km: PRM.llantas_km.v, lub_km: PRM.lub_km.v,
+    salario: PRM.salario.v, factor_prestacional: PRM.factor_prestacional.v, aux_transporte: PRM.aux_transporte.v, prest_aux: PRM.prest_aux.v,
+    recargos: PRM.recargos.v, horas_mes: PRM.horas_mes.v, horas_pagadas: PRM.horas_pagadas.v, participacion_producido: PRM.participacion_producido.v,
+    horas_turno: PRM.horas_turno.v.slice(), dias_trabajados: PRM.dias_trabajados.v, dias_por_sueldo: PRM.dias_por_sueldo.v, tarifa_neta: PRM.tarifa_neta.v, beta: PRM.beta.v,
+    metodo_conductores: PRM.metodo_conductores.v, horas_legales_dia: PRM.horas_legales_dia.v, dias_legales_mes: PRM.dias_legales_mes.v, reserva: PRM.reserva.v,
+  };
+  const iniFecha = Math.max(0, S.fechas.indexOf('2025-10-30'));   // jueves laboral cercano a la mediana de los dos planes
+  const estado = Object.assign({ tab: 'fecha', dia: iniFecha, mesCal: mesDe(iniFecha) }, JSON.parse(JSON.stringify(DEF)));
+  let ultimo = null;
+  const charts = {};
+  const rutasSel = () => estado.ruta === 'Total' ? [0, 1, 2] : [S.rutas.indexOf(estado.ruta)];
+  const suma = (arr, rs, d0, d1) => { let s = 0; for (const r of rs) { const a = arr[r]; for (let d = d0; d < d1; d++) s += a[d]; } return s; };
+
+  // ================= controles =================
+  const CAMPOS_NUM = {
+    salario: ['in-salario', 'out-salario', (v) => fmt(v) + ' COP'],
+    factor_prestacional: ['in-fp', 'out-fp', (v) => fmt(v, 2)],
+    aux_transporte: ['in-aux', 'out-aux', (v) => fmt(v) + ' COP'],
+    recargos: ['in-recargos', 'out-recargos', (v) => fmt(v * 100) + ' %'],
+    horas_mes: ['in-hmes', 'out-hmes', (v) => fmt(v) + ' h'],
+    horas_pagadas: ['in-hpag', 'out-hpag', (v) => fmt(v, 2)],
+    dias_trabajados: ['in-dias', 'out-dias', (v) => fmt(v, 1) + ' días'],
+    dias_por_sueldo: ['in-dsueldo', 'out-dsueldo', (v) => fmt(v, 1) + ' días'],
+    horas_legales_dia: ['in-hleg', 'out-hleg', (v) => fmt(v, 1) + ' h'],
+    dias_legales_mes: ['in-dleg', 'out-dleg', (v) => fmt(v) + ' días'],
+    reserva: ['in-reserva', 'out-reserva', (v) => fmt(v * 100) + ' %'],
+    participacion_producido: ['in-part', 'out-part', (v) => fmt(v * 100) + ' %'],
+    precio_acpm: ['in-acpm', 'out-acpm', (v) => fmt(v) + ' COP/gal'],
+    rendimiento: ['in-rend', 'out-rend', (v) => fmt(v, 2) + ' km/gal'],
+    mant_km: ['in-mant', 'out-mant', (v) => fmt(v, 1) + ' COP/km'],
+    llantas_km: ['in-llantas', 'out-llantas', (v) => fmt(v, 1) + ' COP/km'],
+    lub_km: ['in-lub', 'out-lub', (v) => fmt(v, 1) + ' COP/km'],
+    tarifa_neta: ['in-tarifa', 'out-tarifa', (v) => fmt(v) + ' COP'],
+    beta: ['in-beta', 'out-beta', (v) => fmt(v, 2)],
+  };
+  $('trio-horas').innerHTML = S.rutas.map((r, i) => `<label>${esc(r)}<input type="number" id="in-h${i}" min="1" max="20" step="0.1" inputmode="decimal" aria-label="Horas productivas por conductor-día en ${esc(r)}"></label>`).join('');
+  $('ay-horas').innerHTML = `Horas en ruta por conductor-día en 2025 (media por ruta). Media de las tres: ${fmt(PRM.horas_turno.media_tres_rutas, 2)} h; mediana ${fmt(PRM.horas_turno.mediana_tres_rutas, 2)} h. <button type="button" class="boton mini" id="btn-h-iguales">Usar ${fmt(PRM.horas_turno.media_tres_rutas, 1)} h en las tres</button>`;
+  $('ay-dias').textContent = `Conductor-días ÷ conductores distintos de cada mes en 2025: ${fmt(PRM.dias_trabajados.v, 2)} (mediana ${fmt(PRM.dias_trabajados.mediana, 0)}). Da la plantilla (personas distintas al mes); no cambia el costo.`;
+  const SF = S.analisis.salario_fijo;
+  $('ay-dsueldo').innerHTML = `Solo pesa con salario fijo. Los regulares (${fmt(SF.dias_regular)} días o más en el mes) cobran el mes completo y los ocasionales (${fmt(SF.pct_conductor_meses_ocasionales)} % de los conductor-meses), sus días ÷ ${fmt(SF.dias_sueldo_completo)}: con la mezcla de 2025, un sueldo completo cubre ${fmt(PRM.dias_por_sueldo.v, 2)} conductor-días. Con ${fmt(PRM.dias_trabajados.v, 2)} se paga el mes completo a todos, como el cálculo anterior, que sobreestimaba el ahorro.`;
+  $('ay-salario').textContent = `1,3 SMMLV de 2026 (${fmt(PRM.salario.v / 1.3)} COP), el supuesto central de costos/; rango 1,0–1,6 SMMLV.`;
+
+  // Decimales con que se muestra cada campo (el estado conserva el valor exacto mientras no se edite).
+  const DEC_INPUT = { salario: 0, aux_transporte: 0, precio_acpm: 0, tarifa_neta: 0, horas_mes: 0, factor_prestacional: 2, recargos: 2, horas_pagadas: 2,
+    dias_trabajados: 2, dias_por_sueldo: 2, participacion_producido: 2, rendimiento: 2, mant_km: 1, llantas_km: 1, lub_km: 1, beta: 2,
+    horas_legales_dia: 1, dias_legales_mes: 0, reserva: 2 };
+  const legal = () => estado.metodo_conductores === 'legal';
+  // Costo de un conductor-día con salario fijo: costo mensual × reserva ÷ conductor-días por sueldo completo (según el método).
+  const costoConductorDia = (p) => { const [dm, rv] = M.diasNomina(p); return M.costoMes(p) * rv / dm; };
+  // Conductores que pide la operación real de 2025 con cada método (promedio por día, plantilla mensual, sueldos completos y nómina al mes).
+  function resumenMetodos() {
+    const out = {};
+    [['a', 'observadas'], ['b', 'legal']].forEach(([k, m]) => {
+      const p = Object.assign({}, estado, { metodo_conductores: m });
+      const sr = M.serieConductores(p, 'real');
+      let s = 0; for (let r = 0; r < NR; r++) for (let d = 0; d < ND; d++) s += sr[r][d];
+      const plantilla = M.plantillaDe(s, p) / 12;
+      const [dn, rn] = M.diasNomina(p), sueldos = s / 12 * rn / dn;
+      out[k] = { dia: s / ND, plantilla, sueldos, nomina: sueldos * M.costoMes(p), sinReserva: s / 12 / M.diasReserva(p)[0] };
+    });
+    return out;
+  }
+  function sincronizar() {
+    Object.entries(CAMPOS_NUM).forEach(([k, [inp]]) => { $(inp).value = String(Number(estado[k].toFixed(DEC_INPUT[k] == null ? 4 : DEC_INPUT[k]))); });
+    estado.horas_turno.forEach((h, i) => { $('in-h' + i).value = String(Math.round(h * 100) / 100); });
+    $('in-sim').checked = !!estado.simetrica;
+    document.querySelectorAll('#seg-plan button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === estado.plan ? 'true' : 'false'));
+    document.querySelectorAll('#seg-esquema button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === estado.esquema ? 'true' : 'false'));
+    document.querySelectorAll('#seg-metodo button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === estado.metodo_conductores ? 'true' : 'false'));
+    document.querySelectorAll('.solo-legal').forEach((el) => { el.hidden = !legal(); });
+    document.querySelectorAll('.solo-observadas').forEach((el) => { el.hidden = legal(); });
+    $('in-fecha').value = S.fechas[estado.dia];
+    rotular();
+  }
+  function rotular() {
+    Object.entries(CAMPOS_NUM).forEach(([k, [, out, f]]) => { $(out).textContent = f(estado[k]); });
+    const cm = M.costoMes(estado), cbh = M.costoBH(estado), ckm = M.costoKm(estado), ccd = costoConductorDia(estado);
+    $('derivado-cond').innerHTML = `Costo mensual por conductor: <b>${fmt(cm)}</b> COP · por bus-hora (pago por hora): <b>${fmt(cbh)}</b> COP · por conductor-día con salario fijo: <b>${fmt(ccd)}</b> COP${legal() ? ` (incluye ${fmt(estado.reserva * 100)} % de reserva)` : ''}`;
+    const RM = resumenMetodos();
+    $('ayuda-metodo').innerHTML = (legal()
+      ? `Cada conductor trabaja <b>${fmt(estado.horas_legales_dia, 1)} h pagadas por día</b> (${fmt(estado.horas_legales_dia / estado.horas_pagadas, 1)} h de bus) y <b>${fmt(estado.dias_legales_mes)} días al mes</b>, más ${fmt(estado.reserva * 100)} % de reserva. La operación real de 2025 pide <b>${fmt(RM.b.dia)} conductores de turno por día</b> (${fmt(RM.a.dia)} con las horas de 2025) y una plantilla de <b>${fmt(RM.b.plantilla)}</b> (${fmt(RM.a.plantilla)}): la nómina de hoy pasa de ${fmt(RM.a.nomina / 1e6)} a <b>${fmt(RM.b.nomina / 1e6)} M COP al mes</b>.`
+      : `Cada conductor cubre las horas en ruta que hizo en 2025 (SILENCIO ${fmt(estado.horas_turno[0], 1)}, CRA 54 ${fmt(estado.horas_turno[1], 1)}, CL 72 ${fmt(estado.horas_turno[2], 1)} h por día) y trabaja ${fmt(estado.dias_trabajados, 1)} días al mes: la operación real pide ${fmt(RM.a.dia)} conductores por día y una plantilla de ${fmt(RM.a.plantilla)}. <b>Esas jornadas pasan de la legal</b> (pestaña «Conductores»); con la jornada legal serían ${fmt(RM.b.dia)} por día y ${fmt(RM.b.plantilla)} en plantilla.`) +
+      ' <b>Antes de prometer ahorros de nómina, confirmar con Sobusa la jornada real y la forma de pago.</b>';
+    $('derivado-km').innerHTML = `Costo por km: <b>${fmt(ckm, 0)}</b> COP (ACPM ${fmt(estado.precio_acpm / estado.rendimiento)} + mantenimiento, llantas y lubricantes ${fmt(estado.mant_km + estado.llantas_km + estado.lub_km)})`;
+    $('ayuda-plan').innerHTML = estado.plan === 'a'
+      ? 'Salidas que eligió D5 con <b>60.000 COP por bus-hora, 1.500 COP/km y tarifa de 3.000</b> (supuestos sin fuente): recorta 10,6 % de las salidas. Mover los costos no cambia el plan, solo lo revalora.'
+      : 'D5 reoptimizado con los <b>costos con fuente</b> (26.400 COP por bus-hora, 1.991 COP/km, tarifa 3.182, e = 0,5): casi los mismos buses-hora de hoy, quitados de los valles y puestos en CL 72 y de 13 a 15 h.';
+    const part = fmt(estado.participacion_producido * 100);
+    $('ayuda-esquema').innerHTML = {
+      hora: `Cada hora de bus que no sale ahorra <b>${fmt(cbh)} COP</b> de conductor (salario, prestaciones y recargos ÷ horas al mes × horas pagadas por hora en ruta).`,
+      plantilla: `Sobusa paga un salario mensual: solo ahorra si necesita menos conductores. Cada conductor-día vale <b>${fmt(ccd)} COP</b> (${legal() ? `costo mensual × reserva ÷ ${fmt(estado.dias_legales_mes)} días de la jornada legal` : `costo mensual ÷ ${fmt(estado.dias_por_sueldo, 1)} conductor-días por sueldo completo: los regulares cobran el mes completo y los ocasionales, sus días ÷ ${fmt(S.analisis.salario_fijo.dias_sueldo_completo)}`}). Supone que la plantilla se ajusta mes a mes.`,
+      producido: `El conductor se lleva el <b>${part} %</b> del recaudo: quitar buses no ahorra conductor y Sobusa pierde el ${fmt(100 - estado.participacion_producido * 100)} % de cada pasaje en riesgo.`,
+    }[estado.esquema];
+  }
+  // Plan, esquema y método quedan en la dirección (#) para que un enlace copiado o una recarga los conserve.
+  document.querySelectorAll('#seg-plan button').forEach((b) => b.addEventListener('click', () => { estado.plan = b.dataset.v; sincronizar(); guardarHash(); recalcular(); }));
+  document.querySelectorAll('#seg-esquema button').forEach((b) => b.addEventListener('click', () => { estado.esquema = b.dataset.v; sincronizar(); guardarHash(); recalcular(); }));
+  document.querySelectorAll('#seg-metodo button').forEach((b) => b.addEventListener('click', () => { estado.metodo_conductores = b.dataset.v; sincronizar(); guardarHash(); recalcular(); }));
+  Object.entries(CAMPOS_NUM).forEach(([k, [inp]]) => {
+    $(inp).addEventListener('input', (ev) => {
+      const v = parseFloat(ev.target.value);
+      if (!isFinite(v) || v < 0) return;
+      if (['rendimiento', 'horas_mes', 'dias_trabajados', 'dias_por_sueldo', 'horas_legales_dia', 'dias_legales_mes'].includes(k) && v <= 0) return;
+      estado[k] = v; rotular(); recalcular();
+    });
+  });
+  S.rutas.forEach((_, i) => $('in-h' + i).addEventListener('input', (ev) => {
+    const v = parseFloat(ev.target.value);
+    if (!isFinite(v) || v <= 0) return;
+    estado.horas_turno[i] = v; recalcular();
+  }));
+  $('btn-h-iguales').addEventListener('click', () => { estado.horas_turno = [0, 1, 2].map(() => PRM.horas_turno.media_tres_rutas); sincronizar(); recalcular(); });
+  $('in-sim').addEventListener('change', (ev) => { estado.simetrica = ev.target.checked; recalcular(); });
+  $('btn-reset').addEventListener('click', () => {
+    const keep = { tab: estado.tab, dia: estado.dia, mesCal: estado.mesCal, ruta: estado.ruta };
+    Object.assign(estado, JSON.parse(JSON.stringify(DEF)), keep);
+    sincronizar(); guardarHash(); recalcular();
+  });
+
+  // Fecha
+  function irA(i) {
+    estado.dia = Math.min(ND - 1, Math.max(0, i));
+    estado.mesCal = mesDe(estado.dia);
+    $('in-fecha').value = S.fechas[estado.dia];
+    guardarHash(); dibujar();
+    avisarEstado();
+  }
+  $('in-fecha').addEventListener('change', (ev) => { const i = S.fechas.indexOf(ev.target.value); if (i >= 0) irA(i); else $('in-fecha').value = S.fechas[estado.dia]; });
+  $('dia-prev').addEventListener('click', () => irA(estado.dia - 1));
+  $('dia-next').addEventListener('click', () => irA(estado.dia + 1));
+  $('mes-prev').addEventListener('click', () => { if (estado.mesCal > 0) { estado.mesCal--; dibujarCalendario(); } });
+  $('mes-next').addEventListener('click', () => { if (estado.mesCal < 11) { estado.mesCal++; dibujarCalendario(); } });
+
+  // Rutas (chips)
+  const chipsEl = $('chips-rutas');
+  ['Total'].concat(S.rutas).forEach((r) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.r = r;
+    b.innerHTML = r === 'Total' ? 'Tres rutas' : `<span class="dot"></span>${esc(r)}`;
+    b.addEventListener('click', () => { estado.ruta = r; pintarChips(); guardarHash(); dibujar(); });
+    chipsEl.appendChild(b);
+  });
+  function pintarChips() {
+    chipsEl.querySelectorAll('.chip').forEach((b) => {
+      const r = b.dataset.r;
+      b.style.setProperty('--c', r === 'Total' ? css('--accent') : css(VAR_RUTA[r]));
+      b.setAttribute('aria-pressed', r === estado.ruta ? 'true' : 'false');
+    });
+  }
+
+  // Pestañas
+  // Nombre largo y corto de cada pestaña (el corto se ve en el teléfono, para que las tres quepan sin cortarse).
+  const TABS = [['fecha', 'Simulación por fecha', 'Simulación'], ['conductores', 'Conductores', 'Conductores'], ['metodo', 'Método y supuestos', 'Método']];
+  const tabsEl = $('tabs');
+  TABS.forEach(([k, n, corto]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tab'; b.setAttribute('role', 'tab'); b.dataset.k = k;
+    b.innerHTML = `<span class="t-largo">${esc(n)}</span><span class="t-corto">${esc(corto)}</span>`;
+    b.addEventListener('click', () => activar(k)); tabsEl.appendChild(b);
+  });
+  function activar(k) {
+    estado.tab = k;
+    document.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-selected', b.dataset.k === k ? 'true' : 'false'));
+    document.querySelectorAll('section.panel').forEach((s) => s.classList.toggle('activa', s.id === 'p-' + k));
+    guardarHash();
+    dibujar();
+    requestAnimationFrame(() => Object.values(charts).forEach((c) => c.resize()));
+  }
+  function guardarHash() {
+    const h = `#${estado.tab}&fecha=${S.fechas[estado.dia]}&ruta=${encodeURIComponent(estado.ruta)}&plan=${estado.plan}&esquema=${estado.esquema}&metodo=${estado.metodo_conductores}`;
+    if (location.hash !== h) history.replaceState(null, '', h);
+  }
+  function leerHash() {
+    const h = location.hash.replace(/^#/, '');
+    if (!h) return;
+    const partes = h.split('&');
+    if (TABS.some((t) => t[0] === partes[0])) estado.tab = partes[0];
+    partes.slice(1).forEach((p) => {
+      const [k, v] = p.split('=');
+      if (k === 'fecha') { const i = S.fechas.indexOf(v); if (i >= 0) { estado.dia = i; estado.mesCal = mesDe(i); } }
+      if (k === 'ruta') { const r = decodeURIComponent(v || ''); if (r === 'Total' || S.rutas.includes(r)) estado.ruta = r; }
+      if (k === 'plan' && (v === 'a' || v === 'b')) estado.plan = v;
+      if (k === 'esquema' && ['hora', 'plantilla', 'producido'].includes(v)) estado.esquema = v;
+      if (k === 'metodo' && ['observadas', 'legal'].includes(v)) estado.metodo_conductores = v;
+    });
+  }
+
+  // Tema: solo claro (19-oct-2026). data-theme="light" se fija en <head>; no hay botón ni se lee el tema guardado.
+  function aplicarTema() {
+    document.documentElement.setAttribute('data-theme', 'light');
+    Object.values(charts).forEach((c) => c.dispose()); for (const k in charts) delete charts[k];
+    pintarChips(); dibujar();
+  }
+
+  // ================= gráficos =================
+  const angosto = () => window.innerWidth < 600;
+  function temaG() { return { texto: css('--fg'), muted: css('--muted'), linea: css('--line'), fondo: css('--surface'), accent: css('--accent') }; }
+  function base(extra) {
+    const t = temaG();
+    return Object.assign({
+      animation: !reducida, animationDuration: 300, backgroundColor: 'transparent', textStyle: { fontFamily: css('--font-body'), color: t.texto },
+      grid: { left: angosto() ? 44 : 60, right: angosto() ? 10 : 20, top: angosto() ? 70 : 52, bottom: 30, containLabel: false },
+      tooltip: { trigger: 'axis', confine: true, backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 }, axisPointer: { type: 'shadow' } },
+      legend: { top: 0, left: 0, inactiveColor: t.linea, textStyle: { color: t.muted, fontSize: 12.5 }, itemWidth: 14, itemHeight: 8, itemGap: angosto() ? 8 : 14 },
+    }, extra);
+  }
+  function ejeY(nombre, extra) {
+    const t = temaG();
+    return Object.assign({ type: 'value', name: nombre, nameTextStyle: { color: t.muted, align: 'left', padding: [0, 0, 0, angosto() ? -38 : -54] }, splitLine: { lineStyle: { color: t.linea } }, axisLabel: { color: t.muted, fontSize: 12, formatter: (v) => fmt(v) } }, extra || {});
+  }
+  function ejeX(datos, extra) {
+    const t = temaG();
+    return Object.assign({ type: 'category', data: datos, axisLine: { lineStyle: { color: t.linea } }, axisTick: { show: false }, axisLabel: { color: t.muted, fontSize: 12 } }, extra || {});
+  }
+  function chart(id, option) {
+    const el = $(id);
+    if (!window.echarts) return null;
+    if (!charts[id]) charts[id] = echarts.init(el, null, { renderer: 'canvas' });
+    charts[id].setOption(option, true);
+    return charts[id];
+  }
+  const linea = (color, txt) => `<span style="display:inline-block;width:12px;height:0;border-top:3px solid ${color};vertical-align:middle;margin-right:6px"></span>${txt}`;
+
+  // ================= cálculo =================
+  function agregados(sim, rs, d0, d1) {
+    const o = sim.out, R = sim.R, Q = sim.Q;
+    const A = {};
+    ['comb', 'mant', 'llan', 'lub', 'cond', 'oper', 'pas', 'neto', 'galR', 'galQ', 'condR', 'condQ'].forEach((k) => { A[k] = suma(o[k], rs, d0, d1); });
+    A.salR = suma(R.sal, rs, d0, d1); A.salQ = suma(Q.sal, rs, d0, d1);
+    A.bhR = suma(R.bh, rs, d0, d1); A.bhQ = suma(Q.bh, rs, d0, d1);
+    A.kmR = suma(R.km, rs, d0, d1); A.kmQ = suma(Q.km, rs, d0, d1);
+    A.espR = suma(R.espN, rs, d0, d1) / suma(R.espD, rs, d0, d1); A.espQ = suma(Q.espN, rs, d0, d1) / suma(Q.espD, rs, d0, d1);
+    A.sobreR = suma(R.sobre, rs, d0, d1); A.sobreQ = suma(Q.sobre, rs, d0, d1);
+    A.pax = suma(M.paxDia, rs, d0, d1);
+    A.perd = suma(sim.pp.perd, rs, d0, d1); A.simNet = suma(sim.pp.sim, rs, d0, d1);
+    A.dias = d1 - d0;
+    return A;
+  }
+  // Conductores que trabajaron (suma de los días d0..d1−1): identificados, rango con el código 799 (cota baja y alta) y
+  // la estimación por horas.
+  function observados(rs, d0, d1) {
+    let s = 0, si = 0, lo = 0, hi = 0;
+    const O = S.obs;
+    for (let d = d0; d < d1; d++) {
+      if (rs.length === 3) { s += O.estimados[d]; si += O.identificados[d]; lo += O.baja[d]; hi += O.alta[d]; }
+      else rs.forEach((r) => { s += O.estimados_ruta[r][d]; si += O.identificados_ruta[r][d]; lo += O.baja_ruta[r][d]; hi += O.alta_ruta[r][d]; });
+    }
+    return { estimados: s, identificados: si, baja: lo, alta: hi };
+  }
+  const rango = (lo, hi, d = 0) => Math.round(lo * Math.pow(10, d)) === Math.round(hi * Math.pow(10, d)) ? fmt(lo, d) : `${fmt(lo, d)}–${fmt(hi, d)}`;
+
+  function recalcular() {
+    $('contenido').classList.add('calculando');
+    clearTimeout(recalcular.t);
+    recalcular.t = setTimeout(() => {
+      try { ultimo = M.simular(estado, estado.plan, estado.esquema, estado.simetrica); dibujar(); }
+      finally { $('contenido').classList.remove('calculando'); }
+    }, 0);
+  }
+
+  // ================= pestaña: simulación por fecha =================
+  function dibujarFecha() {
+    const sim = ultimo, rs = rutasSel(), d = estado.dia, m = mesDe(d);
+    const D = agregados(sim, rs, d, d + 1), Mm = agregados(sim, rs, MES_INI[m], MES_FIN[m]), Y = agregados(sim, rs, 0, ND);
+    const ambito = estado.ruta === 'Total' ? 'las tres rutas' : estado.ruta;
+    // Título y notas del día
+    $('fecha-titulo').textContent = fechaLarga(d).replace(/^./, (c) => c.toUpperCase());
+    const tipo = S.tipos[S.tipo[d]];
+    const notas = [`<b>${esc(tipo === 'Domingo/festivo' ? 'Domingo o festivo' : tipo)}</b> · ${esc(ambito)} · ${fmt(D.pax)} pasajeros registrados`];
+    if (S.festivos[S.fechas[d]]) notas.push(`festivo: ${esc(S.festivos[S.fechas[d]])}`);
+    if (S.atipicos[S.fechas[d]]) notas.push(`<span class="bad">día atípico (E10)</span>: ${esc(S.atipicos[S.fechas[d]])}`);
+    $('nota-dia').innerHTML = notas.join(' · ');
+    dibujarVeredicto(D, Mm, Y, m);
+    dibujarTablaAhorro(D, Mm, Y, m);
+    dibujarCalendario();
+    dibujarKpis(D, Mm, m, rs);
+    dibujarSalidas(rs, d);
+    dibujarRutas(d);
+    dibujarMensual(rs);
+  }
+
+  function frasePas(n) { return `${fmt(n)} pasajero${Math.round(n) === 1 ? '' : 's'}`; }
+  // Un ahorro que se logra perdiendo pasajeros va en rojo, con cuántos: verde solo si gana dinero sin perder pasajeros.
+  const perdidosDe = (A) => estado.simetrica ? Math.max(0, -A.simNet) : A.perd;
+  const claseAhorro = (v, A) => (v < 0 || perdidosDe(A) >= 0.5) ? 'bad' : 'ok';
+  const aCosta = (v, A) => (v >= 0 && perdidosDe(A) >= 0.5) ? `a costa de ${frasePas(perdidosDe(A))}${estado.simetrica ? ' netos' : ''}` : '';
+  function dibujarVeredicto(D, Mm, Y, m) {
+    const el = $('veredicto');
+    const plan = CORTO_PLAN[estado.plan], dia = fechaCorta(estado.dia);
+    const factorTxt = estado.esquema === 'producido' ? ` (el ${fmt(100 - estado.participacion_producido * 100)} % que pierde Sobusa)` : '';
+    let cls, tit, cuerpo;
+    const dSal = D.salR - D.salQ, dKm = D.kmR - D.kmQ;
+    const nSal = (n) => `${fmt(Math.abs(n))} salida${Math.round(Math.abs(n)) === 1 ? '' : 's'} ${n > 0 ? 'menos' : 'más'}`;
+    const nKm = (n) => `${fmt(Math.abs(n))} km ${n > 0 ? 'menos' : 'más'}`;
+    const fisico = (Math.round(dSal) === 0 ? 'las mismas salidas' : nSal(dSal)) + (Math.round(dKm) === 0 ? '' : ' y ' + nKm(dKm));
+    const operTxt = D.oper >= 0 ? `ahorrado <b>${mM(D.oper)} M COP</b> en operación` : `costado <b>${mM(-D.oper)} M COP</b> más en operación`;
+    const perd = perdidosDe(D);
+    const netoTxt = `<b class="${claseAhorro(D.neto, D)}">${smM(D.neto)} M COP</b>`;
+    const pctDia = `${fmt(perd / Math.max(D.pax, 1) * 100, 1)} % de los del día`;
+    const notaB = estado.plan === 'b' ? ' El plan (b) pone salidas donde los buses van llenos; los pasajeros que ganaría allí no se cuentan con la contabilidad conservadora (prueba la casilla de contabilidad simétrica).' : '';
+    if (estado.simetrica) {
+      const net = D.simNet;
+      const pasTxt = net < 0 ? `<b class="bad">${frasePas(-net)} perdidos</b> netos` : `<b class="ok">${frasePas(net)} ganados</b> netos`;
+      cls = D.neto >= 0 && net >= 0 ? 'ok' : 'bad';
+      tit = D.neto >= 0 ? (net < 0 ? `Ahorra, pero a costa de ${frasePas(-net)}` : 'Ahorra y gana pasajeros (sin medir)') : (net < 0 ? 'No paga y pierde pasajeros' : 'No paga, aunque gane pasajeros');
+      cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}). Contando también los pasajeros que se ganarían donde añade salidas (contabilidad simétrica, sin medir), quedan ${pasTxt} (${smM(-D.pas)} M COP${factorTxt}): neto ${netoTxt}.`;
+    } else if (perd >= 0.5) {
+      cls = 'bad';
+      if (D.neto >= 0) {
+        tit = `Ahorra, pero a costa de ${frasePas(perd)}`;
+        cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}) y, descontando los pasajes, ${netoTxt} netos, <b class="bad">a costa de ${frasePas(perd)} en riesgo</b> (${pctDia}; ${mM(D.pas)} M COP en pasajes${factorTxt}).`;
+      } else if (D.oper > 0) {
+        tit = 'No paga: lo que ahorra se va en pasajes';
+        cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}), pero con <b class="bad">${frasePas(perd)} en riesgo</b> (${pctDia}; ${mM(D.pas)} M COP en pasajes${factorTxt}): neto ${netoTxt}.`;
+      } else {
+        tit = 'Cuesta más y además pone pasajeros en riesgo';
+        cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}) y además pone <b class="bad">${frasePas(perd)} en riesgo</b> en las horas que recorta (${mM(D.pas)} M COP${factorTxt}): neto ${netoTxt}.${notaB}`;
+      }
+    } else if (D.oper >= 0) {
+      cls = 'ok'; tit = D.oper > 0 ? 'Ahorra sin poner pasajeros en riesgo' : 'Igual que la operación real';
+      cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}) sin quitar salidas donde había pasajeros: neto ${netoTxt}.`;
+    } else {
+      cls = 'warn'; tit = 'Cuesta más que la operación real';
+      cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}), sin pasajeros en riesgo: neto ${netoTxt}.${notaB}`;
+    }
+    const lin = (A, nombre) => {
+      const pp = perdidosDe(A);
+      return `${nombre}: neto <b class="${claseAhorro(A.neto, A)}">${smM(A.neto)} M COP</b>` +
+        (pp >= 0.5 ? ` ${A.neto >= 0 ? 'a costa de' : 'con'} <b class="bad">${frasePas(pp)} ${estado.simetrica ? 'perdidos netos' : 'en riesgo'}</b>` : (estado.simetrica && A.simNet >= 0.5 ? ` con ${frasePas(A.simNet)} ganados netos` : ''));
+    };
+    el.className = 'veredicto ' + cls;
+    el.innerHTML = `<span class="tit">${tit}</span>${cuerpo}<span class="linea2">${lin(Mm, 'En ' + MESES[m])} · ${lin(Y, 'En 2025')} · ${esc(ESQ_TXT[estado.esquema])}, β = ${fmt(estado.beta, 2)}.</span>`;
+  }
+
+  function dibujarTablaAhorro(D, Mm, Y, m) {
+    const cols = [D, Mm, Y];
+    const decs = [2, 1, 0];
+    // Ahorro en rojo si se logra perdiendo pasajeros (con cuántos en el neto); verde solo si no se pierde ninguno.
+    const celda = (v, A, i, conSub) => { const s = conSub ? aCosta(v, A) : ''; return `<td class="num ${claseAhorro(v, A)}">${sg(v / 1e6, decs[i])}${s ? `<span class="sub bad-txt envuelve">${s}</span>` : ''}</td>`; };
+    const condLbl = { hora: `Conductores<span class="sub">pago por hora: ${fmt(ultimo.costoBH)} COP por bus-hora</span>`,
+      plantilla: `Conductores<span class="sub">salario fijo: ${fmt(costoConductorDia(estado))} COP por conductor-día (${legal() ? 'jornada legal' : 'horas de 2025'})</span>`,
+      producido: `Conductores<span class="sub">por producido: quitar buses no ahorra conductor</span>` }[estado.esquema];
+    const subCond = (A, i) => {
+      if (estado.esquema === 'plantilla') {
+        const dc = A.condR - A.condQ;
+        if (i === 0) return `${sg(dc)} conductores-día`;
+        if (i === 1) return `${sg(M.plantillaDe(dc, estado), 1)} en la plantilla`;
+        return `${sg(M.plantillaDe(dc, estado) / 12, 1)} en la plantilla media`;
+      }
+      return estado.esquema === 'hora' ? `${sg(A.bhR - A.bhQ, 0)} buses-hora` : '';
+    };
+    const filas = [
+      ['Combustible (ACPM)', (A) => A.comb, (A) => `${sg(A.galR - A.galQ, 0)} gal`],
+      ['Mantenimiento', (A) => A.mant, null],
+      ['Llantas', (A) => A.llan, null],
+      ['Lubricantes y filtros', (A) => A.lub, null],
+      [condLbl, (A) => A.cond, subCond],
+    ];
+    let html = `<thead><tr><th>Ahorro frente a la operación real<span class="sub">M COP, precios de 2026</span></th><th class="num">Este día<span class="sub">${esc(fechaCorta(estado.dia))}</span></th><th class="num">${esc(MESES[m].replace(/^./, (c) => c.toUpperCase()))}<span class="sub">${fmt(Mm.dias)} días</span></th><th class="num">Año 2025<span class="sub">365 días</span></th></tr></thead><tbody>`;
+    filas.forEach(([lbl, f, sub]) => {
+      html += `<tr class="rubro"><td>${lbl}</td>${cols.map((A, i) => `<td class="num">${sg(f(A) / 1e6, decs[i])}${sub && sub(A, i) ? `<span class="sub">${sub(A, i)}</span>` : ''}</td>`).join('')}</tr>`;
+    });
+    html += `<tr class="subtotal"><td>Ahorro en operación</td>${cols.map((A, i) => celda(A.oper, A, i, false)).join('')}</tr>`;
+    const factorTxt = estado.esquema === 'producido' ? ` × ${fmt(1 - estado.participacion_producido, 2)}` : '';
+    if (estado.simetrica) {
+      html += `<tr><td>Pasajeros perdidos o ganados<span class="sub">simétrica: ganados − perdidos, × ${fmt(estado.tarifa_neta)} COP${factorTxt}</span></td>${cols.map((A, i) => `<td class="num ${A.simNet < 0 ? 'bad' : 'ok'}">${sg(-A.pas / 1e6, decs[i])}<span class="sub envuelve">${A.simNet < 0 ? fmt(-A.simNet) + ' perdidos' : fmt(A.simNet) + ' ganados'}</span></td>`).join('')}</tr>`;
+    } else {
+      html += `<tr><td>Pasajes en riesgo<span class="sub">pasajeros perdidos con β = ${fmt(estado.beta, 2)} × ${fmt(estado.tarifa_neta)} COP${factorTxt}</span></td>${cols.map((A, i) => `<td class="num ${A.perd >= 0.5 ? 'bad' : ''}">${sg(-A.pas / 1e6, decs[i])}<span class="sub envuelve">${fmt(A.perd)} pasajeros</span></td>`).join('')}</tr>`;
+    }
+    html += `<tr class="total"><td>Ahorro neto<span class="sub">en rojo si se logra perdiendo pasajeros</span></td>${cols.map((A, i) => celda(A.neto, A, i, true)).join('')}</tr>`;
+    html += `<tr><td class="muted">Promedio por día</td>${cols.map((A) => `<td class="num muted">${sg(A.neto / A.dias / 1e6, 2)}</td>`).join('')}</tr></tbody>`;
+    $('t-ahorro').innerHTML = html;
+    $('sub-ahorro').textContent = `${NOMBRE_PLAN[estado.plan]} · ${ESQ_TXT[estado.esquema]}`;
+    const AN = S.analisis, JL = AN.jornada_frente_a_la_ley;
+    $('nota-nomina').innerHTML = estado.esquema === 'producido'
+      ? '<b>Conductores:</b> con pago por producido no hay ahorro de nómina; el conductor pierde su parte de cada pasaje en riesgo.'
+      : `<b>Ahorro de conductores por confirmar.</b> En 2025 cada conductor hizo en promedio ${fmt(AN.horas_ruta_por_conductor_dia.media, 1)} h en ruta por día, y los regulares unas ${fmt(JL.mes_regulares.ruta_mediana)} h en ruta al mes, más que las ${fmt(182)} h de la jornada legal (el ${fmt(JL.mes_regulares.pct_ruta_mayor_182)} % pasa de ese tope).` +
+        (estado.esquema === 'plantilla' && !legal() ? ` Con salario fijo, los regulares cobran el mes completo y los ocasionales (${fmt(AN.salario_fijo.pct_conductor_meses_ocasionales)} % de los conductor-meses), sus días ÷ ${fmt(AN.salario_fijo.dias_sueldo_completo)}.` : '') +
+        ' Antes de prometer ahorros de nómina hay que confirmar con Sobusa la jornada real y la forma de pago (por hora, turno o producido).';
+  }
+
+  // Calendario del mes con el neto de cada día (escala divergente: rojo pierde, azul gana)
+  function dibujarCalendario() {
+    if (!ultimo) return;
+    const rs = rutasSel(), m = estado.mesCal;
+    const netos = new Float64Array(ND);
+    for (let d = 0; d < ND; d++) { let s = 0; for (const r of rs) s += ultimo.out.neto[r][d]; netos[d] = s; }
+    const abs = Array.from(netos).map(Math.abs).sort((a, b) => a - b);
+    const vmax = Math.max(abs[Math.floor(abs.length * 0.95)], 1);
+    $('cal-titulo').textContent = `${MESES[m].replace(/^./, (c) => c.toUpperCase())} de 2025`;
+    $('mes-prev').disabled = m === 0; $('mes-next').disabled = m === 11;
+    const d0 = MES_INI[m], d1 = MES_FIN[m];
+    const primero = (fechaDe(d0).getUTCDay() + 6) % 7;   // lunes = 0
+    let html = ['lu', 'ma', 'mi', 'ju', 'vi', 'sá', 'do'].map((x) => `<div class="dow" aria-hidden="true">${x}</div>`).join('');
+    for (let k = 0; k < primero; k++) html += '<div aria-hidden="true"></div>';
+    for (let d = d0; d < d1; d++) {
+      const v = netos[d], t = Math.pow(Math.min(1, Math.abs(v) / vmax), 0.75), p = Math.round(62 * t);
+      const bg = `color-mix(in oklab, ${v >= 0 ? 'var(--div-pos)' : 'var(--div-neg)'} ${p}%, var(--div-mid))`;
+      const f = S.fechas[d], cls = ['dia', S.festivos[f] ? 'festivo' : '', S.atipicos[f] ? 'atipico' : ''].filter(Boolean).join(' ');
+      const etiqueta = `${fechaLarga(d)}: neto ${smM(v, 2)} millones de pesos${S.festivos[f] ? ', festivo' : ''}${S.atipicos[f] ? ', día atípico' : ''}`;
+      html += `<button type="button" class="${cls}" data-i="${d}" aria-pressed="${d === estado.dia}" aria-label="${esc(etiqueta)}" title="${esc(etiqueta)}" style="background:${bg}"><span class="n">${fechaDe(d).getUTCDate()}</span><span class="v">${sg(v / 1e6, 1)}</span></button>`;
+    }
+    $('cal-grid').innerHTML = html;
+    $('cal-grid').querySelectorAll('button.dia').forEach((b) => b.addEventListener('click', () => irA(Number(b.dataset.i))));
+    // Cuántos días "ganan" dinero perdiendo pasajeros (el canje que la página debe dejar claro)
+    const pp = ultimo.pp;
+    let azules = 0, azulesConPerdida = 0;
+    for (let d = 0; d < ND; d++) {
+      if (netos[d] < 0) continue;
+      azules++;
+      let per = 0;
+      for (const r of rs) per += estado.simetrica ? -pp.sim[r][d] : pp.perd[r][d];
+      if (per >= 0.5) azulesConPerdida++;
+    }
+    $('cal-ley').innerHTML = `<span>pierde</span><span class="barra" aria-hidden="true"></span><span>gana</span><span style="flex-basis:100%">Neto del día en M COP (${esc(estado.ruta === 'Total' ? 'tres rutas' : estado.ruta)}); escala hasta ±${fmt(vmax / 1e6, 1)}. ·F = festivo; subrayado = día atípico (E10).` +
+      ` En 2025 el neto es positivo ${fmt(azules)} días${azules ? `; <b class="bad">${azulesConPerdida === azules ? 'todos' : fmt(azulesConPerdida)} a costa de pasajeros${estado.simetrica ? ' (netos)' : ' en riesgo'}</b>` : ''}.</span>`;
+  }
+
+  function kpi(label, value, delta, cls) {
+    return `<div class="kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="delta ${cls || ''}">${delta}</div></div>`;
+  }
+  const clase = (d, menosEsMejor) => (d == null || Math.abs(d) < 1e-9) ? '' : ((d < 0) === menosEsMejor ? 'ok' : 'bad');
+  function dibujarKpis(D, Mm, m, rs) {
+    const obs = observados(rs, estado.dia, estado.dia + 1);
+    const obsM = observados(rs, MES_INI[m], MES_FIN[m]);
+    const plantR = M.plantillaDe(Mm.condR, estado), plantQ = M.plantillaDe(Mm.condQ, estado);
+    const plantObs = rs.length === 3 ? S.obs.plantilla_mes[m] : null;
+    const dEsp = D.espQ - D.espR;
+    const tiles = [
+      kpi('Salidas del día', fmt(D.salQ), `${sg(D.salQ - D.salR)} (${sg(pct(D.salQ, D.salR), 1)} %) frente a la operación real: ${fmt(D.salR)}`, clase(D.salQ - D.salR, true)),
+      kpi('Buses-hora', fmt(D.bhQ), `${sg(D.bhQ - D.bhR)} (${sg(pct(D.bhQ, D.bhR), 1)} %) frente a ${fmt(D.bhR)}`, clase(D.bhQ - D.bhR, true)),
+      kpi('Kilómetros', fmt(D.kmQ), `${sg(D.kmQ - D.kmR)} frente a ${fmt(D.kmR)} (catálogo de la ruta)`, clase(D.kmQ - D.kmR, true)),
+      kpi('Galones de ACPM', fmt(D.galQ), `${sg(D.galQ - D.galR)} frente a ${fmt(D.galR)} · ${sg((D.galQ - D.galR) * PRM.ef_co2.v / 1000, 1)} t de CO2`, clase(D.galQ - D.galR, true)),
+      kpi(legal() ? 'Conductores de turno (jornada legal)' : 'Conductores necesarios', fmt(D.condQ) + '<small>en el día</small>', `${sg(D.condQ - D.condR)} frente a ${fmt(D.condR)} con la operación real · trabajaron ${rango(obs.baja, obs.alta)} (${fmt(obs.identificados)} identificados más los del código 799)${legal() ? `, con jornadas más largas` : ''}`, clase(D.condQ - D.condR, true)),
+      kpi(legal() ? 'Plantilla del mes (jornada legal)' : 'Plantilla del mes', fmt(plantQ) + '<small>conductores</small>', `${sg(plantQ - plantR)} frente a ${fmt(plantR)} con la operación real${legal() ? `, con ${fmt(estado.reserva * 100)} % de reserva` : ''}${plantObs ? ` · en ${MESES[m]} trabajaron ${fmt(plantObs)} identificados` : ` · trabajaron ${rango(obsM.baja / Math.max(Mm.dias, 1), obsM.alta / Math.max(Mm.dias, 1))} por día`}`, clase(plantQ - plantR, true)),
+      estado.simetrica
+        ? kpi('Pasajeros netos', sg(D.simNet), `simétrica: ganados − perdidos frente a ${fmt(D.pax)} del día (β = ${fmt(estado.beta, 2)}) · conservadora: ${fmt(D.perd)} en riesgo`, D.simNet < 0 ? 'bad' : 'ok')
+        : kpi('Pasajeros en riesgo', fmt(D.perd), `${fmt(D.perd / Math.max(D.pax, 1) * 100, 1)} % de los ${fmt(D.pax)} del día (β = ${fmt(estado.beta, 2)}), en las horas en que el plan pone menos salidas`, D.perd >= 0.5 ? 'bad' : 'ok'),
+      kpi('Sobre la capacidad', fmt(D.sobreQ) + '<small>pasajeros</small>', `${sg(D.sobreQ - D.sobreR)} frente a ${fmt(D.sobreR)} (carga del tramo crítico sobre 50 por bus) · espera ${fmt(D.espQ, 2)} min (${sg(dEsp, 2)})`, clase(D.sobreQ - D.sobreR, true)),
+    ];
+    $('kpis').innerHTML = tiles.join('');
+  }
+
+  function dibujarSalidas(rs, d) {
+    const t = temaG(), plan = estado.plan, otro = plan === 'a' ? 'b' : 'a';
+    const sumaH = (arr) => S.horas.map((_, h) => rs.reduce((s, r) => s + arr[r][d * NH + h], 0));
+    const real = sumaH(S.n0), xp = sumaH(M.OF[plan]), xo = sumaH(M.OF[otro]), pax = sumaH(S.pax);
+    const riesgo = S.horas.map(() => 0);
+    rs.forEach((r) => M.riesgoHora(plan, estado.beta, r, d).forEach((v, h) => { riesgo[h] += v; }));
+    const cReal = css('--real'), cPlan = css(VAR_PLAN[plan]), cOtro = css(VAR_PLAN[otro]);
+    const ambito = estado.ruta === 'Total' ? 'tres rutas' : estado.ruta;
+    $('tit-salidas').textContent = `Salidas por hora · ${ambito}`;
+    $('sub-salidas').textContent = `Salidas válidas por hora de salida el ${fechaCorta(d)}. Barras: operación real y ${CORTO_PLAN[plan]}; línea punteada: ${CORTO_PLAN[otro]}.`;
+    chart('c-salidas', base({
+      tooltip: Object.assign(base().tooltip, {
+        formatter: (ps) => {
+          const i = ps[0].dataIndex;
+          return [`<b>${S.horas[i]} h</b> · ${fmt(pax[i])} pasajeros registrados`,
+            linea(cReal, `Operación real: <b>${fmt(real[i])}</b> salidas`),
+            linea(cPlan, `${esc(NOMBRE_PLAN[plan])}: <b>${fmt(xp[i])}</b>`),
+            linea(cOtro, `${esc(NOMBRE_PLAN[otro])}: ${fmt(xo[i])}`),
+            riesgo[i] >= 0.5 ? `<span style="color:${css('--bad')}">Pasajeros en riesgo con el ${CORTO_PLAN[plan]}: <b>${fmt(riesgo[i])}</b></span>` : `Sin pasajeros en riesgo en esta hora`].join('<br>');
+        },
+      }),
+      xAxis: ejeX(S.horas.map((h) => h + ' h'), { axisLabel: { color: t.muted, fontSize: 12, interval: angosto() ? 1 : 0 } }),
+      yAxis: ejeY('salidas por hora'),
+      series: [
+        { name: 'Operación real', type: 'bar', data: real, barMaxWidth: 24, barGap: '12%', barCategoryGap: '30%', itemStyle: { color: cReal, borderRadius: [4, 4, 0, 0] } },
+        { name: NOMBRE_PLAN[plan], type: 'bar', data: xp, barMaxWidth: 24, itemStyle: { color: cPlan, borderRadius: [4, 4, 0, 0] } },
+        { name: NOMBRE_PLAN[otro], type: 'line', data: xo, symbol: 'circle', symbolSize: 7, lineStyle: { type: 'dashed', width: 2, color: cOtro }, itemStyle: { color: cOtro, borderColor: t.fondo, borderWidth: 2 }, z: 5 },
+      ],
+    }));
+    let html = `<thead><tr><th>Hora</th><th class="num">Pasajeros</th><th class="num">Real</th><th class="num">Plan (a)</th><th class="num">Plan (b)</th><th class="num">En riesgo con el ${CORTO_PLAN[plan]}</th></tr></thead><tbody>`;
+    const xa = sumaH(S.xa), xb = sumaH(S.xb);
+    S.horas.forEach((h, i) => { html += `<tr><td>${h} h</td><td class="num">${fmt(pax[i])}</td><td class="num">${fmt(real[i])}</td><td class="num">${fmt(xa[i])}</td><td class="num">${fmt(xb[i])}</td><td class="num${riesgo[i] >= 0.5 ? ' bad' : ''}">${fmt(riesgo[i])}</td></tr>`; });
+    const tot = (a) => a.reduce((s, v) => s + v, 0);
+    html += `<tr class="total"><td>Día</td><td class="num">${fmt(tot(pax))}</td><td class="num">${fmt(tot(real))}</td><td class="num">${fmt(tot(xa))}</td><td class="num">${fmt(tot(xb))}</td><td class="num">${fmt(tot(riesgo))}</td></tr></tbody>`;
+    $('t-horas').innerHTML = html;
+  }
+
+  function dibujarRutas(d) {
+    const sim = ultimo;
+    let html = `<thead><tr><th>Ruta</th><th class="num">Salidas</th><th class="num">Buses-hora</th><th class="num">Km</th><th class="num">Conductores<span class="sub">(trabajaron)</span></th><th class="num">${estado.simetrica ? 'Pasajeros netos' : 'Pasajeros en riesgo'}</th><th class="num">Sobre la capacidad</th><th class="num">Ahorro en operación</th><th class="num">Neto</th></tr></thead><tbody>`;
+    const fila = (nombre, rs, total) => {
+      const A = agregados(sim, rs, d, d + 1), o = observados(rs, d, d + 1);
+      const pas = estado.simetrica ? `<td class="num ${A.simNet < 0 ? 'bad' : 'ok'}">${sg(A.simNet)}</td>` : `<td class="num${A.perd >= 0.5 ? ' bad' : ''}">${fmt(A.perd)}</td>`;
+      return `<tr${total ? ' class="total"' : ''}><td class="nombre">${total ? '' : `<span class="dot" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(${VAR_RUTA[nombre]});margin-right:6px"></span>`}${esc(nombre)}</td>` +
+        `<td class="num">${fmt(A.salR)} → ${fmt(A.salQ)}</td><td class="num">${fmt(A.bhR)} → ${fmt(A.bhQ)}</td><td class="num">${fmt(A.kmR)} → ${fmt(A.kmQ)}</td>` +
+        `<td class="num">${fmt(A.condR)} → ${fmt(A.condQ)}<span class="sub">(${rango(o.baja, o.alta)})</span></td>` +
+        `${pas}<td class="num">${fmt(A.sobreR)} → ${fmt(A.sobreQ)}</td>` +
+        `<td class="num ${claseAhorro(A.oper, A)}">${smM(A.oper, 2)} M</td><td class="num ${claseAhorro(A.neto, A)}">${smM(A.neto, 2)} M</td></tr>`;
+    };
+    S.rutas.forEach((r, i) => { html += fila(r, [i], false); });
+    html += fila('Tres rutas', [0, 1, 2], true) + '</tbody>';
+    $('t-rutas').innerHTML = html;
+  }
+
+  function dibujarMensual(rs) {
+    const sim = ultimo, t = temaG();
+    const meses = MESES.map((_, m) => agregados(sim, rs, MES_INI[m], MES_FIN[m]));
+    const cOp = css('--accent'), cPas = css('--bad'), cNeto = css('--fg');
+    const ambito = estado.ruta === 'Total' ? 'tres rutas' : estado.ruta;
+    $('sub-mensual').textContent = `${NOMBRE_PLAN[estado.plan]} · ${ESQ_TXT[estado.esquema]} · ${ambito}. Millones de COP por mes. Clic en un mes para ir a su calendario.`;
+    const c = chart('c-mensual', base({
+      tooltip: Object.assign(base().tooltip, {
+        formatter: (ps) => {
+          const i = ps[0].dataIndex, A = meses[i];
+          return [`<b>${MESES[i].replace(/^./, (x) => x.toUpperCase())}</b> · ${fmt(A.dias)} días`,
+            linea(cOp, `Ahorro en operación: <b>${smM(A.oper, 1)} M</b>`),
+            linea(cPas, estado.simetrica ? `Pasajeros netos: <b>${sg(A.simNet)}</b> (${smM(-A.pas, 1)} M)` : `Pasajes en riesgo: <b>${smM(-A.pas, 1)} M</b> (${fmt(A.perd)} pasajeros)`),
+            `Neto: <b>${smM(A.neto, 1)} M COP</b>`].join('<br>');
+        },
+      }),
+      xAxis: ejeX(MES3),
+      yAxis: ejeY('M COP por mes', { axisLabel: { color: t.muted, fontSize: 12, formatter: (v) => fmt(v) } }),
+      series: [
+        { name: 'Ahorro en operación', type: 'bar', stack: 'm', data: meses.map((A) => A.oper / 1e6), barMaxWidth: 24, itemStyle: { color: cOp, borderRadius: [4, 4, 0, 0] } },
+        { name: estado.simetrica ? 'Pasajeros (simétrica)' : 'Pasajes en riesgo', type: 'bar', stack: 'm', data: meses.map((A) => -A.pas / 1e6), barMaxWidth: 24, itemStyle: { color: cPas, borderRadius: [0, 0, 4, 4] } },
+        { name: 'Neto', type: 'line', data: meses.map((A) => A.neto / 1e6), symbol: 'circle', symbolSize: 9, lineStyle: { width: 0 }, itemStyle: { color: cNeto, borderColor: t.fondo, borderWidth: 2 }, z: 6 },
+      ],
+    }));
+    if (c) { c.off('click'); c.on('click', (e) => { const m = e.dataIndex; const dia = Math.min(MES_INI[m] + fechaDe(estado.dia).getUTCDate() - 1, MES_FIN[m] - 1); irA(dia); }); }
+    let html = `<thead><tr><th>Mes</th><th class="num">Salidas por día<span class="sub">real → plan</span></th><th class="num">Buses-hora por día</th><th class="num">Galones ahorrados</th><th class="num">Plantilla<span class="sub">real → plan</span></th><th class="num">Ahorro en operación</th><th class="num">${estado.simetrica ? 'Pasajeros netos' : 'Pasajeros en riesgo'}</th><th class="num">Pasajes</th><th class="num">Neto</th></tr></thead><tbody>`;
+    meses.forEach((A, i) => {
+      html += `<tr><td>${MESES[i].replace(/^./, (x) => x.toUpperCase())}</td><td class="num">${fmt(A.salR / A.dias)} → ${fmt(A.salQ / A.dias)}</td><td class="num">${fmt(A.bhR / A.dias)} → ${fmt(A.bhQ / A.dias)}</td><td class="num">${fmt(A.galR - A.galQ)}</td>` +
+        `<td class="num">${fmt(M.plantillaDe(A.condR, estado))} → ${fmt(M.plantillaDe(A.condQ, estado))}</td><td class="num">${smM(A.oper, 1)} M</td><td class="num${!estado.simetrica && A.perd >= 0.5 ? ' bad' : ''}">${estado.simetrica ? sg(A.simNet) : fmt(A.perd)}</td><td class="num">${smM(-A.pas, 1)} M</td><td class="num ${claseAhorro(A.neto, A)}">${smM(A.neto, 1)} M</td></tr>`;
+    });
+    const Y = agregados(sim, rs, 0, ND);
+    html += `<tr class="total"><td>2025</td><td class="num">${fmt(Y.salR / ND)} → ${fmt(Y.salQ / ND)}</td><td class="num">${fmt(Y.bhR / ND)} → ${fmt(Y.bhQ / ND)}</td><td class="num">${fmt(Y.galR - Y.galQ)}</td><td class="num">${fmt(M.plantillaDe(Y.condR, estado) / 12)} → ${fmt(M.plantillaDe(Y.condQ, estado) / 12)}</td><td class="num">${smM(Y.oper, 0)} M</td><td class="num">${estado.simetrica ? sg(Y.simNet) : fmt(Y.perd)}</td><td class="num">${smM(-Y.pas, 0)} M</td><td class="num ${claseAhorro(Y.neto, Y)}">${smM(Y.neto, 0)} M</td></tr></tbody>`;
+    $('t-meses').innerHTML = html;
+  }
+
+  // ================= pestaña: conductores =================
+  function dibujarConductores() {
+    const A = S.analisis, rs = rutasSel(), t = temaG();
+    const ambito = estado.ruta === 'Total' ? 'las tres rutas' : estado.ruta;
+    const gen = A.codigos_genericos[0], G = A.codigo_generico, pp = G.personas_por_dia, cod = String(G.codigo);
+    const cd = A.conductores_por_dia, hr = A.horas_ruta_por_conductor_dia, jo = A.jornada_por_conductor_dia, dt = A.dias_trabajados_por_conductor_mes;
+    const vpc = A.distribucion_viajes_por_conductor_dia, totVpc = Object.values(vpc).reduce((s, v) => s + v, 0);
+    const JL = A.jornada_frente_a_la_ley, reg = JL.mes_regulares, cpb = JL.conductores_por_bus, rel = A.relevos, SF = A.salario_fijo;
+    const variante = (k) => reg.variantes.find((v) => v.clave === k);
+    const C0 = A.viajes.composicion_s0;   // qué cuenta la operación real de D5 frente a los viajes que corrieron
+    // El código 799: qué es y cuántas personas puede haber detrás (rango, no una sola cifra)
+    $('lead-cond').innerHTML = `Con los viajes de 2025 que corrieron (${fmt(A.viajes.viajes_que_corrieron)}), cada viaje con el código del conductor que lo hizo. Un código, el <b>${cod}</b>, no es una persona: aparece en ${fmt(gen.viajes)} viajes (${fmt(gen.pct_viajes, 1)} %), hasta en ${fmt(gen.vehiculos_por_dia_max)} buses el mismo día (ningún otro código pasa de ${fmt(G.max_vehiculos_por_dia_otros_codigos)}). Es casi siempre el <b>primer viaje del día del bus</b>: un solo viaje por bus y día (${fmt(G.pct_un_solo_viaje_por_vehiculo_dia, 1)} %), el primero del bus (${fmt(G.pct_primer_viaje_del_vehiculo, 1)} %), con salida entre las 4 y las 6 h (${fmt(G.pct_salida_de_4_a_6_h)} %), registrado ${fmt(G.minutos_de_registro_antes_de_la_salida_mediana.generico)} min antes de la salida (${fmt(G.minutos_de_registro_antes_de_la_salida_mediana.identificados)} min los demás), y en el ${fmt(G.pct_seguido_de_identificado)} % de los casos lo sigue un conductor identificado en el mismo bus. ` +
+      `Cuántas personas hay detrás no se puede saber: entre <b>${fmt(pp.cota_baja, 1)} por día</b> (si el conductor identificado del bus hizo también el primer viaje) y <b>${fmt(pp.cota_alta)}</b> (una persona distinta por bus). Por eso los conductores que trabajaron son un rango, <b>entre ${fmt(cd.cota_baja.media)} y ${fmt(cd.cota_alta.media)} por día</b> (${fmt(cd.identificados.media)} identificados); la estimación por horas del ${cod} (${fmt(pp.por_horas, 1)} personas) da ${fmt(cd.estimados.media, 1)}. El rango no cambia el ahorro: la regla de conductores se aplica igual a la operación real y al plan.`;
+    // Horas al mes frente a la ley: cifra principal, las horas en ruta; la jornada cuenta también las pausas
+    $('aviso-jornada').innerHTML = `<b>Las horas de 2025 pasan de la jornada legal.</b> Los conductores regulares (20 días o más en el mes: ${fmt(reg.pct_conductor_meses)} % de los conductor-meses, que hacen el ${fmt(reg.pct_horas_ruta)} % de las horas en ruta) suman una mediana de <b>${fmt(reg.ruta_mediana)} h en ruta al mes</b> (la suma de la duración de sus viajes), frente al máximo ordinario de <b>182 h</b> (42 h semanales desde el 15-jul-2026, Ley 2101 de 2021): el <b>${fmt(reg.pct_ruta_mayor_182)} %</b> de esos meses lo supera. Frente al tope de 2025 (195 h al mes, con 46 y luego 44 h semanales) lo pasa el ${fmt(reg.pct_ruta_mayor_195)} % con las horas en ruta y el ${fmt(reg.pct_jornada_mayor_195)} % con la jornada. ` +
+      `La jornada del primer inicio al último fin suma ${fmt(reg.jornada_mediana)} h al mes, pero cuenta como trabajo las pausas entre vueltas (${fmt(variante('jornada_sin_pausas').mediana)} h sin las pausas de más de 2 h); aun contando en 0 los viajes con duración imputada, el ${fmt(variante('ruta_registrada').pct_mayor_182)} % de los regulares pasa de 182 h. Por día, ${fmt(hr.media, 1)} h en ruta de media: el ${fmt(JL.pct_conductor_dias_ruta_mayor['7'])} % de los conductor-días pasa de 7 h en ruta. ` +
+      `Lo que los datos no pueden descartar: relevos que no se registraron (las horas de un código serían de más de una persona) y la forma de pago (turnos largos, horas extra o producido). Por eso la página ofrece dos maneras de estimar los conductores (panel izquierdo). <b>Antes de prometer ahorros de nómina hay que confirmar con Sobusa la jornada real y la forma de pago (por hora, turno o producido).</b>`;
+    $('kpis-cond').innerHTML = [
+      kpi('Conductores por día', `<span class="nw">${rango(cd.cota_baja.media, cd.cota_alta.media)}</span> <small>trabajaron</small>`, `${fmt(cd.identificados.media)} identificados + entre ${fmt(pp.cota_baja, 1)} y ${fmt(pp.cota_alta)} detrás del código ${cod} · ${rango(cpb.cota_baja, cpb.cota_alta, 1)} por bus en uso (Bogotá 2,3; Santiago 2,4)`),
+      kpi('Horas en ruta por conductor-día', fmt(hr.media, 1) + '<small>h</small>', `media; mediana ${fmt(hr.mediana, 1)} h · ${fmt(JL.pct_conductor_dias_ruta_mayor['7'])} % pasa de 7 h · ${fmt(A.viajes_por_conductor_dia.media, 1)} vueltas por día`),
+      kpi('Jornada por día', fmt(jo.media, 1) + '<small>h</small>', `del primer inicio al último fin, con las pausas; mediana ${fmt(jo.mediana, 1)} h, p90 ${fmt(jo.p90, 1)} h; jornada legal: 7 h en 6 días`, 'bad'),
+      kpi('Horas en ruta al mes, regulares', fmt(reg.ruta_mediana) + '<small>h</small>', `mediana con 20 días o más (${fmt(reg.dias_mediana)} días): el ${fmt(reg.pct_ruta_mayor_182)} % pasa de 182 h (2026) y el ${fmt(reg.pct_ruta_mayor_195)} % de 195 h (2025); con las pausas, ${fmt(reg.jornada_mediana)} h de jornada`, 'bad'),
+      kpi('Días trabajados al mes', fmt(dt.media, 1) + '<small>días</small>', `media por conductor y mes; mediana ${fmt(dt.mediana)} días · ${fmt((vpc['1'] || 0) / totVpc * 100)} % de los conductor-días es de 1 vuelta`),
+      kpi('Plantilla mensual', fmt(A.plantilla_mensual_identificada.media) + '<small>identificados</small>', `distintos en el mes (${fmt(A.plantilla_mensual_identificada.min)}–${fmt(A.plantilla_mensual_identificada.max)}); ${fmt(A.plantilla_sobre_conductores_dia, 2)} por cada conductor-día; ${fmt(SF.sueldos_completos_por_mes)} sueldos completos si los ocasionales cobran por días`),
+      kpi('Relevos registrados', fmt(rel.vehiculo_dias_con_relevo_entre_identificados) + '<small>vehículo-días</small>', `con dos o más conductores identificados en el año (${fmt(rel.pct_con_relevo_entre_identificados, 1)} %); el ${fmt(rel.pct_con_dos_o_mas_codigos, 1)} % con dos códigos no son relevos: en el ${fmt(rel.pct_de_esos_con_codigo_generico)} % uno es el ${cod} del primer viaje`),
+      kpi('En 2025', fmt(A.conductores_identificados_2025) + '<small>conductores</small>', `identificados; ${fmt(A.conductores_con_menos_de_10_viajes)} hicieron menos de 10 viajes en el año`),
+    ].join('');
+
+    // Tabla: cuántos conductores pide la operación real con cada método (y cuántos trabajaron: un rango por el código 799)
+    const RM = resumenMetodos(), costoM = M.costoMes(estado);
+    const plantObsId = A.plantilla_mensual_identificada.media;
+    const plantObs = [plantObsId * cd.cota_baja.media / cd.identificados.media, plantObsId * cd.cota_alta.media / cd.identificados.media];
+    const busesDia = cpb.vehiculos_por_dia;
+    const celdaN = (v, d = 0) => Array.isArray(v) ? rango(v[0], v[1], d) : fmt(v, d);
+    const porBus = (v) => Array.isArray(v) ? v.map((x) => x / busesDia) : v / busesDia;
+    const filaM = (nombre, sub, dia, plant, nomina, actual) => `<tr${actual ? ' class="subtotal"' : ''}><td>${nombre}<span class="sub">${sub}</span></td><td class="num">${celdaN(dia)}</td><td class="num">${celdaN(plant)}</td><td class="num">${nomina == null ? '—' : fmt(nomina / 1e6)}</td><td class="num">${celdaN(porBus(plant), 2)}</td></tr>`;
+    $('t-metodos').innerHTML = '<thead><tr><th>Cómo se cuenta</th><th class="num">Conductores por día</th><th class="num">Plantilla mensual</th><th class="num">Nómina con salario fijo, M COP al mes</th><th class="num">Conductores por bus en uso</th></tr></thead><tbody>' +
+      filaM('Trabajaron en 2025', `identificados ${fmt(cd.identificados.media)} por día y ${fmt(plantObsId)} al mes, más los que haya detrás del código ${cod} (rango)`, [cd.cota_baja.media, cd.cota_alta.media], plantObs, null, false) +
+      filaM('(a) Horas observadas', `${fmt(hr.media, 1)} h en ruta por conductor-día (por ruta) y ${fmt(estado.dias_trabajados, 1)} días al mes; nómina: ${fmt(RM.a.sueldos)} sueldos completos (${fmt(estado.dias_por_sueldo, 1)} conductor-días por sueldo)`, RM.a.dia, RM.a.plantilla, RM.a.nomina, !legal()) +
+      filaM('(b) Jornada legal, sin reserva', `${fmt(estado.horas_legales_dia, 1)} h pagadas por día (${fmt(estado.horas_legales_dia / estado.horas_pagadas, 1)} h de bus) y ${fmt(estado.dias_legales_mes)} días al mes`, RM.b.dia, RM.b.sinReserva, RM.b.sinReserva * costoM, false) +
+      filaM(`(b) Jornada legal con ${fmt(estado.reserva * 100)} % de reserva`, 'reserva para cubrir ausencias (H65)', RM.b.dia, RM.b.plantilla, RM.b.nomina, legal()) + '</tbody>';
+    // La nota va fuera de la tabla para que en el teléfono se lea entera (la tabla se desplaza dentro de su caja).
+    $('nota-metodos').innerHTML = `Referencias (documentos/investigacion_internacional.md): el SITP de Bogotá opera con 2,3 conductores por bus (H61) y Santiago con ~2,4 por bus de punta (H63), con 19 h de servicio. Sobusa tiene entre ${fmt(cpb.cota_baja, 1)} y ${fmt(cpb.cota_alta, 1)} por bus en uso, con jornadas más largas. Con la jornada legal, la operación de hoy pide ${fmt(RM.b.dia)} conductores de turno por día (${sg(pct(RM.b.dia, RM.a.dia), 0)} %) y la nómina con salario fijo ${pct(RM.b.nomina, RM.a.nomina) >= 0 ? 'sube' : 'baja'} un ${fmt(Math.abs(pct(RM.b.nomina, RM.a.nomina)), 0)} %: la plantilla casi no cambia sin reserva, porque las horas al mes son las mismas, repartidas en ${fmt(estado.dias_legales_mes)} jornadas de ${fmt(estado.horas_legales_dia, 1)} h en vez de ${fmt(estado.dias_trabajados, 1)} jornadas largas, pero todos cobrarían el mes completo; hoy la mitad de los conductor-meses son ocasionales que, con la regla de la página, cobran por días. La nómina de (a) supone sueldo fijo sin horas extra.`;
+
+    // Conductores por día: los que trabajaron (banda entre la cota baja y la alta del código 799), regla con la operación real y con cada plan
+    const cR = M.serieConductores(estado, 'real'), cA = M.serieConductores(estado, 'a'), cB = M.serieConductores(estado, 'b');
+    const porDia = (arr) => S.fechas.map((_, d) => rs.reduce((s, r) => s + arr[r][d], 0));
+    const obsLo = S.fechas.map((_, d) => rs.length === 3 ? S.obs.baja[d] : rs.reduce((s, r) => s + S.obs.baja_ruta[r][d], 0));
+    const obsHi = S.fechas.map((_, d) => rs.length === 3 ? S.obs.alta[d] : rs.reduce((s, r) => s + S.obs.alta_ruta[r][d], 0));
+    const sR = porDia(cR), sA = porDia(cA), sB = porDia(cB);
+    const media = (a) => a.reduce((s, v) => s + v, 0) / a.length;
+    const loM = media(obsLo), hiM = media(obsHi);
+    const frenteAlRango = (v) => v < loM - 0.05 ? `por debajo de los que trabajaron (entre ${fmt(loM)} y ${fmt(hiM)})` : v > hiM + 0.05 ? `por encima de los que trabajaron (entre ${fmt(loM)} y ${fmt(hiM)})` : `dentro del rango de los que trabajaron (entre ${fmt(loM)} y ${fmt(hiM)})`;
+    const hMed = PRM.horas_turno.mediana_tres_rutas;
+    const sMed = porDia(M.serieConductores(Object.assign({}, estado, { metodo_conductores: 'observadas', horas_turno: [hMed, hMed, hMed] }), 'real'));
+    $('sub-cond-dia').textContent = `${ambito.replace(/^./, (c) => c.toUpperCase())}, media móvil de 7 días. Banda: los que trabajaron, entre la cota baja y la alta según cuántas personas haya detrás del código ${cod}. Regla ${legal() ? `(b) jornada legal: ⌈buses-hora × ${fmt(estado.horas_pagadas, 2)} ÷ ${fmt(estado.horas_legales_dia, 1)} h⌉` : '(a) horas observadas: ⌈buses-hora ÷ horas en ruta por conductor-día⌉'} por ruta, con piso en los buses en ruta del pico. Promedio del año: trabajaron entre ${fmt(loM)} y ${fmt(hiM)}; la regla da ${fmt(media(sR))} con la operación real, ${fmt(media(sA))} con el plan (a) y ${fmt(media(sB))} con el plan (b).`;
+    const cObs = css('--fg'), cReal = css('--muted'), cA_ = css('--plan-a'), cB_ = css('--plan-b');
+    // Media móvil centrada de 7 días: quita el ciclo semanal para que se vean las diferencias entre las curvas.
+    const movil = (a) => a.map((_, d) => { let s = 0, n = 0; for (let k = Math.max(0, d - 3); k <= Math.min(a.length - 1, d + 3); k++) { s += a[k]; n++; } return s / n; });
+    const mLo = movil(obsLo), mHi = movil(obsHi), mR = movil(sR), mA = movil(sA), mB = movil(sB);
+    const NOM_OBS = `Trabajaron (rango con el ${cod})`, colBanda = conAlfa(cObs, 0.18);
+    chart('c-cond-dia', base({
+      tooltip: Object.assign(base().tooltip, { axisPointer: { type: 'line', lineStyle: { color: t.muted } },
+        formatter: (ps) => { const i = ps[0].dataIndex; return [`<b>Semana alrededor del ${esc(fechaCorta(i))}</b> (media de 7 días)`, linea(cObs, `Trabajaron: entre <b>${fmt(mLo[i])}</b> y <b>${fmt(mHi[i])}</b> · ese día ${rango(obsLo[i], obsHi[i])}`), linea(cReal, `Regla, operación real: ${fmt(mR[i])} · ese día ${fmt(sR[i])}`), linea(cA_, `Regla, plan (a): ${fmt(mA[i])} · ese día ${fmt(sA[i])}`), linea(cB_, `Regla, plan (b): ${fmt(mB[i])} · ese día ${fmt(sB[i])}`)].join('<br>'); } }),
+      legend: Object.assign(base().legend, { data: [{ name: NOM_OBS, icon: 'rect', itemStyle: { color: colBanda } }, 'Regla con la operación real', 'Regla con el plan (a)', 'Regla con el plan (b)'] }),
+      grid: Object.assign(base().grid, { top: angosto() ? 96 : 52 }),   // en el teléfono la leyenda ocupa tres líneas
+      xAxis: ejeX(S.fechas, { boundaryGap: false, axisLabel: { color: t.muted, fontSize: 12, interval: (i, v) => v.endsWith('-01') && (!angosto() || Number(v.slice(5, 7)) % 2 === 1), formatter: (v) => MES3[Number(v.slice(5, 7)) - 1] } }),
+      yAxis: ejeY('conductores por día', { min: (v) => Math.max(0, Math.floor(v.min * 0.85 / 20) * 20) }),
+      series: [
+        // Banda: la cota baja (sin área) y, apilada encima, la diferencia hasta la cota alta (con área)
+        { name: NOM_OBS, type: 'line', stack: 'obs', data: mLo, symbol: 'none', lineStyle: { width: 0 }, itemStyle: { color: colBanda }, emphasis: { disabled: true } },
+        { name: NOM_OBS, type: 'line', stack: 'obs', data: mHi.map((v, i) => v - mLo[i]), symbol: 'none', lineStyle: { width: 0 }, itemStyle: { color: colBanda }, areaStyle: { color: colBanda, opacity: 1 }, emphasis: { disabled: true } },
+        { name: 'Regla con la operación real', type: 'line', data: mR, symbol: 'none', lineStyle: { width: 2, type: 'dashed', color: cReal }, itemStyle: { color: cReal } },
+        { name: 'Regla con el plan (a)', type: 'line', data: mA, symbol: 'none', lineStyle: { width: 2, color: cA_ }, itemStyle: { color: cA_ } },
+        { name: 'Regla con el plan (b)', type: 'line', data: mB, symbol: 'none', lineStyle: { width: 2, color: cB_ }, itemStyle: { color: cB_ } },
+      ],
+    }));
+
+    // Histogramas de horas en ruta y jornada (estáticos)
+    const hR = A.hist_horas_ruta, hJ = A.hist_jornada;
+    const cats = hJ.bordes.slice(0, -1).map((b) => `${b}–${b + 1}`);
+    const datR = cats.map((_, i) => i < hR.conteos.length ? hR.conteos[i] : 0);
+    chart('c-horas', base({
+      tooltip: Object.assign(base().tooltip, { valueFormatter: (v) => fmt(v) + ' conductor-días' }),
+      xAxis: ejeX(cats, { axisLabel: { color: t.muted, fontSize: 11, interval: angosto() ? 3 : 1 } }),
+      yAxis: ejeY('conductor-días'),
+      series: [
+        { name: 'Horas en ruta', type: 'bar', data: datR, barMaxWidth: 14, barGap: '15%', itemStyle: { color: css('--accent'), borderRadius: [4, 4, 0, 0] } },
+        { name: 'Jornada', type: 'bar', data: hJ.conteos, barMaxWidth: 14, itemStyle: { color: css('--real'), borderRadius: [4, 4, 0, 0] } },
+      ],
+    }));
+    const hd = A.hist_dias_trabajados;
+    chart('c-dias', base({
+      tooltip: Object.assign(base().tooltip, { valueFormatter: (v) => fmt(v) + ' conductor-meses' }),
+      legend: { show: false },
+      grid: { left: angosto() ? 44 : 60, right: angosto() ? 10 : 20, top: 36, bottom: 30 },
+      xAxis: ejeX(hd.map((_, i) => String(i + 1)), { axisLabel: { color: t.muted, fontSize: 11, interval: angosto() ? 4 : 1 } }),
+      yAxis: ejeY('conductor-meses'),
+      series: [{ name: 'Conductor-meses', type: 'bar', data: hd, barMaxWidth: 14, itemStyle: { color: css('--accent'), borderRadius: [4, 4, 0, 0] },
+        markLine: { silent: true, symbol: 'none', lineStyle: { color: css('--plan-a'), width: 2 }, label: { color: t.texto, formatter: `media ${fmt(dt.media, 1)}` }, data: [{ xAxis: String(Math.round(dt.media)) }] } }],
+    }));
+
+    // Horas en ruta al mes por conductor (cifra principal): regulares y ocasionales frente al máximo legal
+    const hj = JL.hist_ruta_mes, catsJ = hj.bordes.slice(0, -1).map((b) => `${b}–${b + 20}`);
+    const iLegal = Math.max(0, hj.bordes.findIndex((b) => b >= 180));
+    $('sub-jornada-mes').textContent = `Conductor-meses de 2025 por horas en ruta sumadas en el mes (la duración de sus viajes; eje: horas). Regulares: 20 días o más en el mes (mediana ${fmt(reg.ruta_mediana)} h; el ${fmt(reg.pct_ruta_mayor_182)} % pasa de 182 h); ocasionales: menos de 20. Sombreado: 180 h o más; el máximo ordinario es 182 h al mes (42 h semanales desde el 15-jul-2026; 195 h en 2025). Con la jornada del primer inicio al último fin, que cuenta las pausas, la mediana de los regulares es ${fmt(reg.jornada_mediana)} h.`;
+    chart('c-jornada-mes', base({
+      tooltip: Object.assign(base().tooltip, { valueFormatter: (v) => fmt(v) + ' conductor-meses' }),
+      xAxis: ejeX(catsJ, { axisLabel: { color: t.muted, fontSize: 11, interval: angosto() ? 3 : 1 } }),
+      yAxis: ejeY('conductor-meses'),
+      series: [
+        { name: 'Regulares (20 días o más)', type: 'bar', stack: 'j', data: hj.regulares, barMaxWidth: 24, itemStyle: { color: css('--accent') },
+          markArea: { silent: true, itemStyle: { color: css('--bad'), opacity: 0.08 }, label: { show: true, position: 'insideTop', color: t.muted, fontSize: 11, formatter: 'por encima de la jornada legal' },
+            data: [[{ xAxis: catsJ[iLegal] }, { xAxis: catsJ[catsJ.length - 1] }]] } },
+        { name: 'Ocasionales (menos de 20 días)', type: 'bar', stack: 'j', data: hj.ocasionales, barMaxWidth: 24, itemStyle: { color: css('--real'), borderRadius: [4, 4, 0, 0] } },
+      ],
+    }));
+
+    // Plantilla del mes: observada (identificados) frente a la regla
+    const plantilla = (arr) => MESES.map((_, m) => { let s = 0; for (const r of rs) for (let d = MES_INI[m]; d < MES_FIN[m]; d++) s += arr[r][d]; return M.plantillaDe(s, estado); });
+    const pR = plantilla(cR), pA = plantilla(cA), pB = plantilla(cB);
+    const obsP = rs.length === 3 ? S.obs.plantilla_mes : null;
+    $('sub-plantilla').textContent = `Plantilla = conductores-día del mes ÷ ${legal() ? `${fmt(estado.dias_legales_mes)} días de la jornada legal × (1 + ${fmt(estado.reserva * 100)} % de reserva)` : `${fmt(estado.dias_trabajados, 1)} días trabajados por conductor (2025)`}. ${obsP ? `Barras: conductores identificados distintos en cada mes (sin los del código genérico).` : 'Por ruta no hay plantilla observada comparable (un conductor puede pasar de ruta).'} Promedio: regla ${fmt(media(pR))} con la operación real, ${fmt(media(pA))} con el plan (a), ${fmt(media(pB))} con el plan (b).`;
+    const series = [];
+    if (obsP) series.push({ name: 'Trabajaron (identificados)', type: 'bar', data: obsP, barMaxWidth: 24, itemStyle: { color: css('--real'), borderRadius: [4, 4, 0, 0] } });
+    series.push({ name: 'Regla con la operación real', type: 'line', data: pR, symbol: 'circle', symbolSize: 7, lineStyle: { width: 1.5, type: 'dashed', color: cReal }, itemStyle: { color: cReal } });
+    series.push({ name: 'Regla con el plan (a)', type: 'line', data: pA, symbol: 'circle', symbolSize: 8, lineStyle: { width: 2, color: cA_ }, itemStyle: { color: cA_, borderColor: t.fondo, borderWidth: 2 } });
+    series.push({ name: 'Regla con el plan (b)', type: 'line', data: pB, symbol: 'circle', symbolSize: 8, lineStyle: { width: 2, color: cB_ }, itemStyle: { color: cB_, borderColor: t.fondo, borderWidth: 2 } });
+    chart('c-plantilla', base({ tooltip: Object.assign(base().tooltip, { valueFormatter: (v) => fmt(v) }), xAxis: ejeX(MES3), yAxis: ejeY('conductores', { min: (v) => Math.max(0, Math.floor(v.min * 0.8 / 50) * 50) }), series }));
+
+    // Tablas por tipo de día y por ruta
+    $('t-cond-tipo').innerHTML = `<thead><tr><th>Tipo de día</th><th class="num">Días</th><th class="num">Conductores por día<span class="sub">identificados · rango con el ${cod}</span></th><th class="num">Viajes por conductor-día</th><th class="num">Horas en ruta<span class="sub">media · mediana</span></th><th class="num">Jornada<span class="sub">media · mediana</span></th><th class="num">Vehículo-días con el ${cod}</th><th class="num">Relevos entre identificados<span class="sub">% de los vehículo-días</span></th></tr></thead><tbody>` +
+      A.por_tipo_dia.map((f) => `<tr><td>${esc(f.tipo_dia)}</td><td class="num">${fmt(f.dias)}</td><td class="num">${fmt(f.conductores_identificados_por_dia)} · ${rango(f.conductores_cota_baja_por_dia, f.conductores_cota_alta_por_dia)}</td><td class="num">${fmt(f.viajes_por_conductor_dia, 2)}</td><td class="num">${fmt(f.horas_ruta_media, 1)} · ${fmt(f.horas_ruta_mediana, 1)} h</td><td class="num">${fmt(f.jornada_media, 1)} · ${fmt(f.jornada_mediana, 1)} h</td><td class="num">${fmt(f.pct_vehiculos_con_codigo_generico, 1)} %</td><td class="num">${fmt(f.pct_vehiculos_con_relevo_identificados, 2)} %</td></tr>`).join('') + '</tbody>';
+    $('t-cond-ruta').innerHTML = `<thead><tr><th>Ruta<span class="sub">principal del día</span></th><th class="num">Distintos en 2025</th><th class="num">Conductores por día<span class="sub">identificados · rango con el ${cod}</span></th><th class="num">Viajes por conductor-día</th><th class="num">Horas en ruta<span class="sub">media · mediana</span></th><th class="num">Jornada<span class="sub">media · mediana</span></th><th class="num">Viajes del código ${cod}</th></tr></thead><tbody>` +
+      A.por_ruta.map((f) => `<tr><td>${esc(f.ruta)}</td><td class="num">${fmt(f.conductores_distintos_2025)}</td><td class="num">${fmt(f.conductores_identificados_por_dia)} · ${rango(f.conductores_cota_baja_por_dia, f.conductores_cota_alta_por_dia)}</td><td class="num">${fmt(f.viajes_por_conductor_dia, 2)}</td><td class="num">${fmt(f.horas_ruta_media, 1)} · ${fmt(f.horas_ruta_mediana, 1)} h</td><td class="num">${fmt(f.jornada_media, 1)} · ${fmt(f.jornada_mediana, 1)} h</td><td class="num">${fmt(f.viajes_codigo_generico)}</td></tr>`).join('') + '</tbody>';
+
+    $('notas-regla').innerHTML = [
+      `<b>Conductores-día</b> de una ruta = ⌈buses-hora del plan ÷ horas de bus que cubre un conductor en un día⌉, y nunca menos que los buses en ruta en el pico (cada bus en la calle necesita un conductor). Hay dos maneras de fijar esas horas (selector «Conductores necesarios»): <b>(a)</b> las que hicieron los conductores en 2025 y <b>(b)</b> la jornada legal.`,
+      `<b>(a) Horas observadas</b> (por defecto): la <b>media</b> de horas en ruta por conductor-día de cada ruta en 2025 (SILENCIO ${fmt(A.por_ruta[0].horas_ruta_media, 2)}, CRA 54 ${fmt(A.por_ruta[1].horas_ruta_media, 2)}, CL 72 ${fmt(A.por_ruta[2].horas_ruta_media, 2)} h) y ${fmt(dt.media, 2)} días al mes. Se usa la media y no la mediana porque convierte horas totales en personas (horas ÷ media = conductor-días); con la mediana de las tres rutas (${fmt(hMed, 1)} h) la regla daría ${fmt(media(sMed))} conductores por día con la operación real (${esc(ambito)}), ${frenteAlRango(media(sMed))}. Describe cómo se trabaja hoy, con jornadas por encima de la legal.`,
+      `<b>(b) Jornada legal</b>: cada conductor trabaja ${fmt(estado.horas_legales_dia, 1)} h pagadas por día (42 h semanales en 6 días, Ley 2101 de 2021) y ${fmt(estado.dias_legales_mes)} días al mes; como cada hora del bus en ruta paga ${fmt(estado.horas_pagadas, 2)} h de conductor por los descansos, cubre ${fmt(estado.horas_legales_dia / estado.horas_pagadas, 1)} h de bus. A la plantilla se le suma ${fmt(estado.reserva * 100)} % de reserva por ausencias (H65). Sube los conductores de turno por día y la nómina de hoy (tabla de arriba).`,
+      `<b>Plantilla del mes</b> = conductores-día del mes ÷ días trabajados por conductor al mes (× reserva en (b)). Con (a) y los datos de 2025 eso reproduce los conductores distintos de cada mes: ${fmt(A.plantilla_sobre_conductores_dia, 2)} personas por cada conductor-día promedio.`,
+      `<b>Nómina con salario fijo</b> = conductores-día ÷ conductor-días por sueldo completo × costo mensual. Con (a), los regulares (${fmt(SF.dias_regular)} días o más en el mes) cobran el mes completo y los ocasionales (${fmt(SF.pct_conductor_meses_ocasionales)} % de los conductor-meses), sus días ÷ ${fmt(SF.dias_sueldo_completo)}: con la mezcla de 2025 un sueldo cubre ${fmt(PRM.dias_por_sueldo.v, 2)} conductor-días, y no ${fmt(dt.media, 2)} como si todos cobraran el mes completo (eso sobreestimaba el ahorro de este esquema). Con (b), todos son de tiempo completo: ${fmt(estado.dias_legales_mes)} días y la reserva.`,
+      `<b>Calibración</b>: con (a), aplicada a la operación real, la regla da ${fmt(RM.a.dia, 1)} conductores por día; trabajaron entre ${fmt(cd.cota_baja.media)} y ${fmt(cd.cota_alta.media)} (${fmt(cd.identificados.media)} identificados más los que haya detrás del ${cod}), así que la regla queda entre ${sg(pct(RM.a.dia, cd.cota_baja.media), 0)} % y ${sg(pct(RM.a.dia, cd.cota_alta.media), 0)} % de lo observado. Además, los buses-hora de D5 cuentan las salidas no marcadas como canceladas (${fmt(C0.salidas_s0_por_dia, 1)} por día): no incluyen los ${fmt(C0.canceladas_que_corrieron)} viajes marcados como cancelados que sí corrieron, pero sí ${fmt(C0.no_canceladas_de_menos_de_20_km)} no cancelados de menos de 20 km; en neto son ${fmt(C0.viajes_que_corrieron_por_dia - C0.salidas_s0_por_dia, 1)} viajes por día menos que los que corrieron (${sg(pct(C0.salidas_s0_por_dia, C0.viajes_que_corrieron_por_dia), 1)} %). Como la regla se aplica igual al real y al plan, la diferencia entre ambos es la que importa.`,
+      `CL 72 rinde menos por conductor con (a) (${fmt(A.por_ruta[2].viajes_por_conductor_dia, 1)} vueltas por conductor-día frente a ${fmt(A.por_ruta[1].viajes_por_conductor_dia, 1)} en CRA 54): cada bus-hora que el plan pasa a CL 72 pide más conductores, y por eso el plan (b) necesita algunos más aunque casi no cambie los buses-hora. Con la jornada legal (b) las tres rutas rinden igual y ese efecto desaparece.`,
+    ].map((x) => `<li>${x}</li>`).join('');
+    $('notas-datos').innerHTML = [
+      `<b>Turnos</b>: ${fmt(A.turnos_hora_de_inicio_pct['antes de las 7 h'])} % de los conductor-días empieza antes de las 7 h y ${fmt(A.turnos_hora_de_inicio_pct['7 a 11 h'])} % entre las 7 y las 11 h. Casi nadie cambia de ruta en el día (${fmt(rel.pct_conductor_dias_con_mas_de_una_ruta, 2)} % de los conductor-días).`,
+      `<b>Relevos</b>: solo ${fmt(rel.vehiculo_dias_con_relevo_entre_identificados)} vehículo-días del año (${fmt(rel.pct_con_relevo_entre_identificados, 1)} %) tienen dos o más conductores identificados. El ${fmt(rel.pct_con_dos_o_mas_codigos, 1)} % de los vehículo-días tiene dos códigos, pero en el ${fmt(rel.pct_de_esos_con_codigo_generico)} % de ellos uno es el ${cod} del primer viaje del día: no son relevos. Si hubo relevos sin registrar, las horas de un código serían de más de una persona.`,
+      `<b>Dos grupos de conductores</b>: los regulares (20 días o más en el mes) hacen el ${fmt(reg.pct_horas_ruta)} % de las horas, con unas ${fmt(reg.ruta_mediana)} h en ruta al mes, por encima del máximo legal; los ocasionales (${fmt(JL.mes_ocasionales.pct_conductor_meses)} % de los conductor-meses, con una mediana de ${fmt(JL.mes_ocasionales.dias_mediana)} días en el mes; ${fmt(A.conductores_con_menos_de_10_viajes)} de los ${fmt(A.conductores_identificados_2025)} códigos hicieron menos de 10 viajes en el año) cubren relevos y suplencias. En promedio salen ${fmt(A.horas_ruta_mes_por_conductor_media)} h en ruta al mes por conductor, pero ese promedio esconde las horas largas de los regulares.`,
+      `<b>Referencias</b> (documentos/investigacion_internacional.md): el SITP de Bogotá opera con 2,3 conductores por bus (H61) y Santiago con ~2,4 (H63); Sobusa, con entre ${fmt(cpb.cota_baja, 1)} y ${fmt(cpb.cota_alta, 1)} por bus en uso. En un patio del SITP, un programa de turnos bajó los turnos de día hábil de 476 a 459 (−3,6 %, 17 conductores, 27,9 M COP al mes en pesos de 2018) con la misma oferta (H49): ordenar los turnos es la palanca de nómina con menos riesgo de perder pasajeros.`,
+      `<b>Despachadores</b>: ${fmt(A.despachadores.codigos_2025)} códigos en 2025 (${fmt(A.despachadores.codigos_con_mas_de_100_viajes)} con actividad regular), unos ${fmt(A.despachadores.codigos_por_dia_mediana)} por día y ${fmt(A.despachadores.codigos_a_la_misma_hora_mediana)} a la vez. Según Sobusa despachan 2 personas, así que un código no es una persona. El número de salidas no cambia los puestos de despacho: el plan no ahorra despachadores.`,
+      `<b>Lo que no está en los datos</b>: cómo se paga a cada conductor, sus horas pagadas y si maneja en otras rutas de Sobusa que no están en esta base (eso explicaría las jornadas cortas de CL 72). Procesos indica <code>manejaturnos = N</code>: el sistema no registra turnos.`,
+    ].map((x) => `<li>${x}</li>`).join('');
+  }
+
+  // ================= pestaña: método =================
+  let verifHecha = false;
+  function dibujarMetodo() {
+    $('notas-metodo').innerHTML = [
+      `<b>Qué se compara.</b> Para cada fecha de 2025, ruta y hora de salida (4 a 20 h), las salidas válidas que hubo (operación real, S0 de D5) con las que habría programado el modelo con el pronóstico de una semana antes: <b>(a)</b> D5 con sus supuestos (60.000 COP por bus-hora, 1.500 COP/km, tarifa 3.000 y e = 0,5), que recorta, y <b>(b)</b> D5 reoptimizado con los costos con fuente (e = 0,5), que reasigna. Los planes están fijos: al mover un costo se revaloran, no se reoptimizan (para eso está el planificador).`,
+      `<b>Operación.</b> Buses-hora = salidas × ciclo de la ruta en esa hora ÷ 60 (D1/D5). Km = salidas × longitud de la ruta en el catálogo (SILENCIO 62,9; CRA 54 56,4; CL 72 57,0 km). Galones = km ÷ rendimiento. Combustible = galones × precio del ACPM; mantenimiento, llantas y lubricantes = km × su costo por km.`,
+      `<b>Conductores.</b> Por hora o turno: buses-hora × costo por bus-hora = (salario × factor prestacional + auxilio × 1,1766) × (1 + recargos) ÷ horas al mes × horas pagadas por hora en ruta (${fmt(M.costoBH(DEF))} COP por defecto, como costos/). Salario fijo (plantilla): conductores-día × costo mensual × reserva ÷ conductor-días por sueldo completo: con (a), ${fmt(PRM.dias_por_sueldo.v, 2)} (los regulares, con ${fmt(S.analisis.salario_fijo.dias_regular)} días o más en el mes, cobran el mes completo y los ocasionales, sus días ÷ ${fmt(S.analisis.salario_fijo.dias_sueldo_completo)}), o sea ${fmt(costoConductorDia(DEF))} COP por conductor-día; con (b), ${fmt(PRM.dias_legales_mes.v)} días y la reserva (${fmt(costoConductorDia(Object.assign({}, DEF, { metodo_conductores: 'legal' })))} COP). Por producido: no se ahorra conductor y cada pasaje perdido cuesta a Sobusa (1 − parte del conductor) de la tarifa neta.`,
+      `<b>Conductores necesarios</b> = ⌈máx(buses-hora ÷ horas de bus por conductor-día, buses en ruta en el pico)⌉ por ruta y día. (a) Horas observadas: horas en ruta por conductor-día de 2025 en cada ruta (${PRM.horas_turno.v.map((h) => fmt(h, 1)).join(' / ')} h), sin reserva (ya está en los datos); la plantilla (personas distintas) divide entre ${fmt(PRM.dias_trabajados.v, 2)} días trabajados por conductor al mes. (b) Jornada legal: ${fmt(PRM.horas_legales_dia.v, 0)} h pagadas ÷ ${fmt(PRM.horas_pagadas.v, 2)} = ${fmt(PRM.horas_legales_dia.v / PRM.horas_pagadas.v, 2)} h de bus por conductor-día, ${fmt(PRM.dias_legales_mes.v)} días al mes y ${fmt(PRM.reserva.v * 100)} % de reserva por ausencias.`,
+      `<b>Pasajeros en riesgo</b> (contabilidad conservadora de D1, D5 y E7): en cada hora en que el plan pone x salidas y hubo n0 &gt; x, se pierden pasajeros × (1 − (x ÷ n0)^β). Donde el plan añade salidas no se cuenta ninguno ganado. Con la casilla de contabilidad simétrica se cuentan pasajeros × β × (x − n0) ÷ n0 en todas las horas, ganados y perdidos (la fórmula lineal del objetivo de D5).`,
+      `<b>Ahorro neto</b> = (costo de la operación real − costo del plan) − valor de los pasajes en riesgo. Mes y año suman los días. Precios de 2026 aplicados a la operación de 2025, como el informe.`,
+      `<b>Servicio.</b> Sobre la capacidad: Σ máx(carga del tramo crítico − 50 × salidas, 0) por hora, con la carga medida en 2025 (como D5). Espera: minutos operados ÷ salidas ÷ 2 × (1 + CV²), ponderada por pasajeros.`,
+    ].map((x) => `<li>${x}</li>`).join('');
+    $('notas-limites').innerHTML = [
+      `<b>No se sabe cómo paga Sobusa a sus conductores ni cuánto trabajan de verdad.</b> Los datos muestran horas por encima de la jornada legal (${fmt(S.analisis.horas_ruta_por_conductor_dia.media, 1)} h en ruta por día de media; los regulares, unas ${fmt(S.analisis.jornada_frente_a_la_ley.mes_regulares.ruta_mediana)} h en ruta al mes frente a 182, y ${fmt(S.analisis.jornada_frente_a_la_ley.mes_regulares.jornada_mediana)} h contando las pausas entre vueltas), es decir, horas extra, turnos largos o pago por producido; tampoco se pueden descartar relevos sin registrar. Con producido el ahorro en conductor es cero y el de recortar se reduce casi a la mitad; con salario fijo depende de reducir la plantilla; si hay horas extra, las primeras horas que se ahorran son las más caras. <b>Antes de prometer ahorros de nómina hay que confirmar con Sobusa la jornada real y la forma de pago (por hora, turno o producido).</b>`,
+      `<b>La plantilla no se ajusta de un día para otro.</b> El esquema de plantilla supone que se reduce (o crece) mes a mes; en la práctica se ajusta con la rotación (no reemplazar a quien se va), con preaviso y, si hay despidos, con indemnizaciones que aquí no se cuentan. El ahorro de un día con salario fijo solo existe si se acumula en menos personas al mes.`,
+      `<b>Salario fijo con horas observadas.</b> La mitad de los conductor-meses de 2025 son ocasionales (menos de ${fmt(S.analisis.salario_fijo.dias_regular)} días). La página les paga sus días ÷ ${fmt(S.analisis.salario_fijo.dias_sueldo_completo)} de un sueldo y el mes completo a los regulares; si todos cobraran el mes completo (${fmt(PRM.dias_trabajados.v, 2)} conductor-días por sueldo), cada conductor-día costaría un ${fmt(pct(PRM.dias_por_sueldo.v, PRM.dias_trabajados.v), 0)} % más y el ahorro de esta columna saldría mayor en la misma proporción. El campo «Conductor-días por sueldo completo» permite probarlo.`,
+      `<b>β viene de salidas que fallaron sin aviso</b> (E7). Un recorte planificado y anunciado podría perder menos pasajeros (β de 0,4–0,5): pruébalo con el deslizador. Los pasajeros ganados donde se añaden salidas no se han medido; por eso la contabilidad conservadora es un piso.`,
+      `<b>Los pasajeros de la operación real</b> son los que subieron con la oferta real; con otra oferta la demanda se habría repartido distinto entre horas. Los días atípicos de E10 (fallas de registro, recesos) están marcados en el calendario.`,
+      `<b>Km del catálogo.</b> Los viajes reales miden un poco más según el GPS (63,1 / 57,5 / 62,6 km); el ahorro en km podría ser hasta 10 % mayor en CL 72. Los buses-hora cuentan las salidas no marcadas como canceladas: no incluyen los ${fmt(S.analisis.viajes.composicion_s0.canceladas_que_corrieron)} viajes marcados como cancelados que corrieron, pero sí ${fmt(S.analisis.viajes.composicion_s0.no_canceladas_de_menos_de_20_km)} no cancelados de menos de 20 km.`,
+      `<b>Conductores.</b> La regla supone que las horas productivas por conductor no cambian con el plan; un plan con más horas valle o más CL 72 podría cambiar los turnos. El código ${String(S.analisis.codigo_generico.codigo)} (${fmt(S.analisis.codigos_genericos[0].pct_viajes, 0)} % de los viajes, casi siempre el primer viaje del día del bus) impide saber cuántas personas trabajaron: entre ${fmt(S.analisis.conductores_por_dia.cota_baja.media)} y ${fmt(S.analisis.conductores_por_dia.cota_alta.media)} por día.`,
+      `<b>Costos con fuente, pero no de Sobusa</b> (costos/README.md): rendimiento, mantenimiento y salario son estimaciones con rango. Los costos fijos (seguros, capital, administración) no cambian porque ningún plan baja los buses del pico.`,
+    ].map((x) => `<li>${x}</li>`).join('');
+    // Parámetros
+    const filas = Object.entries(PRM).filter(([k]) => k !== 'prest_aux').map(([k, p]) => {
+      const v = Array.isArray(p.v) ? p.v.map((x, i) => `${S.rutas[i]} ${fmt(x, 2)}`).join(' · ') : (p.unidad === 'fracción' ? fmt(p.v * 100, 1) + ' %' : fmt(p.v, p.v < 100 ? 2 : 0) + ' ' + p.unidad);
+      const rango = (p.bajo != null && p.alto != null && p.bajo !== p.alto) ? (p.unidad === 'fracción' ? `${fmt(p.bajo * 100)}–${fmt(p.alto * 100)} %` : `${fmt(p.bajo, p.bajo < 100 ? 2 : 0)}–${fmt(p.alto, p.alto < 100 ? 2 : 0)}`) : '';
+      return `<tr><td>${esc(p.nombre)}</td><td class="num" style="text-align:left">${esc(v)}${rango ? `<span class="sub">rango ${esc(rango)}</span>` : ''}</td><td>${esc(p.fuente || '')}</td></tr>`;
+    });
+    $('t-fuentes').innerHTML = '<thead><tr><th>Parámetro</th><th>Por defecto</th><th>Fuente</th></tr></thead><tbody>' + filas.join('') + '</tbody>';
+    if (verifHecha) return;
+    // Verificación: con los valores por defecto, los totales del año deben coincidir con Python
+    const p0 = JSON.parse(JSON.stringify(DEF));
+    const filasV = [];
+    let peor = 0;
+    ['a', 'b'].forEach((plan) => {
+      const V = S.verif[plan];
+      const res = {};
+      ['hora', 'plantilla', 'producido'].forEach((e) => { res[e] = agregados(M.simular(p0, plan, e, false), [0, 1, 2], 0, ND); });
+      const sim = agregados(M.simular(p0, plan, 'hora', true), [0, 1, 2], 0, ND);
+      const leg = agregados(M.simular(Object.assign({}, p0, { metodo_conductores: 'legal' }), plan, 'plantilla', false), [0, 1, 2], 0, ND);
+      const comps = [
+        ['Ahorro en combustible', res.hora.comb, V.ahorro_combustible, 'M'], ['Ahorro en mantenimiento', res.hora.mant, V.ahorro_mantenimiento, 'M'],
+        ['Ahorro en llantas', res.hora.llan, V.ahorro_llantas, 'M'], ['Ahorro en lubricantes', res.hora.lub, V.ahorro_lubricantes, 'M'],
+        ['Conductores, por hora', res.hora.cond, V.ahorro_conductores_hora, 'M'], ['Conductores, plantilla', res.plantilla.cond, V.ahorro_conductores_plantilla, 'M'],
+        ['Pasajes en riesgo', res.hora.pas, V.valor_pasajes_hora, 'M'], ['Pasajeros en riesgo por día', res.hora.perd / ND, V.pasajeros_en_riesgo_dia, 'n'],
+        ['Neto, por hora', res.hora.neto, V.neto_hora, 'M'], ['Neto, plantilla', res.plantilla.neto, V.neto_plantilla, 'M'],
+        ['Neto, por producido', res.producido.neto, V.neto_producido, 'M'], ['Neto simétrico, por hora', sim.neto, V.neto_hora_simetrica, 'M'],
+        ['Conductores por día, real', res.hora.condR / ND, V.conductores_dia_real, 'n'], ['Conductores por día, plan', res.hora.condQ / ND, V.conductores_dia_plan, 'n'],
+        ['Sobre la capacidad por día, plan', res.hora.sobreQ / ND, V.sobre_capacidad_dia_plan, 'n'], ['Espera media del plan (min)', res.hora.espQ, V.espera_plan_min, 'e'],
+        ['Jornada legal: conductores de turno por día, real', leg.condR / ND, V.conductores_dia_real_legal, 'n'], ['Jornada legal: conductores de turno por día, plan', leg.condQ / ND, V.conductores_dia_plan_legal, 'n'],
+        ['Jornada legal: conductores, salario fijo', leg.cond, V.ahorro_conductores_plantilla_legal, 'M'], ['Jornada legal: neto, salario fijo', leg.neto, V.neto_plantilla_legal, 'M'],
+      ];
+      comps.forEach(([n, js, py, u]) => {
+        const dif = Math.abs(js - py) / Math.max(Math.abs(py), 1e-9);
+        peor = Math.max(peor, dif);
+        const f = (v) => u === 'M' ? smM(v, 1) + ' M COP' : u === 'e' ? fmt(v, 3) : fmt(v, 1);
+        filasV.push(`<tr><td>Plan (${plan}) · ${esc(n)}</td><td class="num">${f(js)}</td><td class="num">${f(py)}</td><td class="num">${dif < 1e-9 ? 'igual' : cientifico(dif)}</td></tr>`);
+      });
+    });
+    $('t-verif').innerHTML = `<thead><tr><th>Cifra de 2025</th><th class="num">Esta página</th><th class="num">Python</th><th class="num">Diferencia relativa</th></tr></thead><tbody>${filasV.join('')}<tr class="total"><td colspan="4">${peor < 1e-9 ? `Coinciden las ${filasV.length} cifras (diferencia relativa máxima ${cientifico(peor)}). En Python, el plan (a) reproduce la Tabla 7 del informe (−1.029 M COP con pago por hora, −1.688 M por producido, +1.939 M simétrico) y el (b) la sección 6 de costos/README.md (−2.825 M; +1.600 M simétrico).` : `<span class="bad">Diferencia máxima ${cientifico(peor)}: revisar.</span>`}</td></tr></tbody>`;
+    window.simuladorVerificacion = { peor, n: filasV.length };
+    verifHecha = true;
+  }
+
+  // ================= dibujo general =================
+  function dibujar() {
+    if (!ultimo) return;
+    pintarChips();
+    if (estado.tab === 'fecha') dibujarFecha();
+    else if (estado.tab === 'conductores') dibujarConductores();
+    else dibujarMetodo();
+  }
+  function medirCabecera() { document.documentElement.style.setProperty('--alto-cab', $('cabecera').offsetHeight + 'px'); }
+  let tRes = null;
+  window.addEventListener('resize', () => { medirCabecera(); clearTimeout(tRes); tRes = setTimeout(() => { Object.values(charts).forEach((c) => c.resize()); dibujar(); }, 150); });
+
+  // ---------- inicio ----------
+  if (window.innerWidth < 980) $('det-param').open = false;
+  if (!window.echarts) document.querySelectorAll('.chart').forEach((el) => { el.innerHTML = '<p class="muted">No se pudo cargar la biblioteca de gráficos (se necesita conexión a internet). Las tablas debajo tienen las mismas cifras.</p>'; el.style.height = 'auto'; });
+  leerHash();
+  medirCabecera();
+  sincronizar();
+  ultimo = M.simular(estado, estado.plan, estado.esquema, estado.simetrica);
+  window.simulador = { M, estado, DEF, agregados: (plan, esquema, simetrica, p) => agregados(M.simular(p || estado, plan, esquema, !!simetrica), [0, 1, 2], 0, ND), recalcular, irA };
+  // Un enlace con otra fecha, ruta o pestaña en el # (o atrás/adelante) actualiza la página sin recargarla.
+  window.addEventListener('hashchange', () => {
+    leerHash(); sincronizar();
+    ultimo = M.simular(estado, estado.plan, estado.esquema, estado.simetrica);
+    activar(estado.tab);
+  });
+  activar(estado.tab);
+
+  // ---------- modo embebido (dentro de la app Sobusa Despacho) ----------
+  // La app manda {tipo:'tema'}, {tipo:'dia'} (la fecha) y {tipo:'pestana'}; al cambiar la fecha se avisa {tipo:'estado'}.
+  if (EMBEBIDO) {
+    window.addEventListener('message', (ev) => {
+      if (ev.source !== window.parent || !ev.data || typeof ev.data !== 'object') return;
+      const m = ev.data;
+      if (m.tipo === 'tema') { if (m.tema === 'light' && document.documentElement.getAttribute('data-theme') !== 'light') aplicarTema(); }   // solo claro: otro tema se ignora
+      else if (m.tipo === 'dia') { const i = S.fechas.indexOf(m.dia || m.fecha); if (i >= 0 && i !== estado.dia) { callarEstado = true; irA(i); callarEstado = false; } }
+      else if (m.tipo === 'pestana') { const k = m.pestana || m.k; if (TABS.some((t) => t[0] === k) && k !== estado.tab) activar(k); }
+    });
+    avisarApp({ tipo: 'listo', pestana: estado.tab, dia: S.fechas[estado.dia] });
+  }
+})();
+</script>
+</body>
+</html>

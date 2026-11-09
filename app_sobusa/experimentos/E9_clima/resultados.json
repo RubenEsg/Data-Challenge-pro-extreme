@@ -1,0 +1,2450 @@
+{
+ "experimento": "E9_clima",
+ "fuente_clima": {
+  "proveedor": "Open-Meteo Historical Weather API (archive-api.open-meteo.com), modelo best_match (ECMWF IFS 9 km / ERA5)",
+  "punto_solicitado": [
+   10.96,
+   -74.8
+  ],
+  "punto_devuelto": [
+   10.931458,
+   -74.77414
+  ],
+  "elevacion_m": 50.0,
+  "zona_horaria": "America/Bogota",
+  "licencia": "CC BY 4.0"
+ },
+ "sensibilidad_era5": {
+  "punto_era5": [
+   10.75,
+   -74.75
+  ],
+  "lluvia_anual_era5_mm": {
+   "2022": 0.0,
+   "2023": 1601.9,
+   "2024": 2409.9,
+   "2025": 1924.3
+  },
+  "correlacion_diaria": 0.6310339164183117,
+  "acuerdo_dia_lluvioso_5mm_pct": 81.76845943482223,
+  "dias_5mm_best_match": 259,
+  "dias_5mm_era5": 373,
+  "dias_5mm_ambos": 216
+ },
+ "lluvia_anual_mm": {
+  "2023": 1128.5,
+  "2024": 1516.4,
+  "2025": 1154.1
+ },
+ "lluvia_climatologia_2013_2022_mm_anual": 1344.7,
+ "horas_por_clase_operacion": {
+  "Sin lluvia": 14204,
+  "Ligera": 4006,
+  "Moderada": 413,
+  "Fuerte": 9
+ },
+ "frac_horas_lluvia_por_hora": {
+  "0": 0.064,
+  "1": 0.074,
+  "2": 0.077,
+  "3": 0.072,
+  "4": 0.081,
+  "5": 0.087,
+  "6": 0.079,
+  "7": 0.151,
+  "8": 0.224,
+  "9": 0.349,
+  "10": 0.406,
+  "11": 0.427,
+  "12": 0.485,
+  "13": 0.496,
+  "14": 0.409,
+  "15": 0.284,
+  "16": 0.204,
+  "17": 0.131,
+  "18": 0.089,
+  "19": 0.069,
+  "20": 0.068,
+  "21": 0.058,
+  "22": 0.058,
+  "23": 0.058
+ },
+ "regresiones_desvio": {
+  "pasajeros_total": {
+   "n": 47440,
+   "r2": 0.0011762791153292484,
+   "coeficientes": {
+    "h_Ligera": {
+     "efecto_pct": 1.8904284891056777,
+     "ic_inf": 0.02334777861590087,
+     "ic_sup": 3.792360966276953,
+     "p": 0.04717333162774894,
+     "n_horas": 10628
+    },
+    "h_Moderada": {
+     "efecto_pct": -2.528636947844898,
+     "ic_inf": -7.387539636176421,
+     "ic_sup": 2.5851875430381144,
+     "p": 0.3262524390050957,
+     "n_horas": 1160
+    },
+    "h_Fuerte": {
+     "efecto_pct": -0.4712452909009346,
+     "ic_inf": -10.464950044883237,
+     "ic_sup": 10.637934740750099,
+     "p": 0.930279327771368,
+     "n_horas": 21
+    },
+    "prev_Ligera": {
+     "efecto_pct": -1.0627007543768108,
+     "ic_inf": -3.3003780770003543,
+     "ic_sup": 1.2267575338866132,
+     "p": 0.36000547746607436,
+     "n_horas": 14791
+    },
+    "prev_Moderada": {
+     "efecto_pct": -4.891940125581518,
+     "ic_inf": -8.41270044585044,
+     "ic_sup": -1.235836222816733,
+     "p": 0.009156765501304757,
+     "n_horas": 3060
+    },
+    "prev_Fuerte": {
+     "efecto_pct": -1.8000876987340653,
+     "ic_inf": -8.470113260781698,
+     "ic_sup": 5.356000313331943,
+     "p": 0.612744795088128,
+     "n_horas": 66
+    }
+   }
+  },
+  "pasajeros_por_viaje": {
+   "n": 46979,
+   "r2": 0.00033362995152286246,
+   "coeficientes": {
+    "h_Ligera": {
+     "efecto_pct": 0.6013647179770709,
+     "ic_inf": -0.12133198676260726,
+     "ic_sup": 1.3292906727401022,
+     "p": 0.10311181091691873,
+     "n_horas": 10565
+    },
+    "h_Moderada": {
+     "efecto_pct": 0.7769659129748474,
+     "ic_inf": -1.505642240129046,
+     "ic_sup": 3.1124735427504824,
+     "p": 0.5078903551917632,
+     "n_horas": 1150
+    },
+    "h_Fuerte": {
+     "efecto_pct": -5.275166913947061,
+     "ic_inf": -9.874156645936516,
+     "ic_sup": -0.44149747447510546,
+     "p": 0.032821962240704966,
+     "n_horas": 21
+    },
+    "prev_Ligera": {
+     "efecto_pct": 0.2594743294903834,
+     "ic_inf": -0.5932565669759082,
+     "ic_sup": 1.1195201218749506,
+     "p": 0.55209011120476,
+     "n_horas": 14666
+    },
+    "prev_Moderada": {
+     "efecto_pct": -0.7974434976408484,
+     "ic_inf": -2.3190654678340694,
+     "ic_sup": 0.7478814953711499,
+     "p": 0.3100041730380253,
+     "n_horas": 3026
+    },
+    "prev_Fuerte": {
+     "efecto_pct": -2.580760364202217,
+     "ic_inf": -9.424060666246525,
+     "ic_sup": 4.77957304142822,
+     "p": 0.4816795225966952,
+     "n_horas": 66
+    }
+   }
+  },
+  "viajes_validos": {
+   "n": 47436,
+   "r2": 0.001379309226910097,
+   "coeficientes": {
+    "h_Ligera": {
+     "efecto_pct": -0.3927378815609117,
+     "ic_inf": -1.1695411641191367,
+     "ic_sup": 0.39017104238461275,
+     "p": 0.32455965924512586,
+     "n_horas": 10630
+    },
+    "h_Moderada": {
+     "efecto_pct": -3.37713114113527,
+     "ic_inf": -5.411695443590336,
+     "ic_sup": -1.2988040085899932,
+     "p": 0.0015561032608472835,
+     "n_horas": 1160
+    },
+    "h_Fuerte": {
+     "efecto_pct": 4.046279894568894,
+     "ic_inf": -3.6134717112122683,
+     "ic_sup": 12.314745142224147,
+     "p": 0.30930731595063665,
+     "n_horas": 21
+    },
+    "prev_Ligera": {
+     "efecto_pct": -0.7684679691125629,
+     "ic_inf": -1.6592079436473228,
+     "ic_sup": 0.1303400480486827,
+     "p": 0.09356885060886187,
+     "n_horas": 14791
+    },
+    "prev_Moderada": {
+     "efecto_pct": -2.0633471691895,
+     "ic_inf": -3.7321248570652443,
+     "ic_sup": -0.3656416695445919,
+     "p": 0.01741814610046903,
+     "n_horas": 3061
+    },
+    "prev_Fuerte": {
+     "efecto_pct": -1.5613294572735748,
+     "ic_inf": -8.02728612876985,
+     "ic_sup": 5.359203293560788,
+     "p": 0.6498510002640514,
+     "n_horas": 66
+    }
+   }
+  },
+  "ciclo_min": {
+   "n": 46979,
+   "r2": 0.010209928677693325,
+   "coeficientes": {
+    "viaje_Ligera": {
+     "efecto_pct": 0.6575658246023242,
+     "ic_inf": 0.4083344153502866,
+     "ic_sup": 0.9074158707007784,
+     "p": 2.198096157300561e-07,
+     "n_horas": 16173
+    },
+    "viaje_Moderada": {
+     "efecto_pct": 2.0338535870749075,
+     "ic_inf": 1.4644716378368061,
+     "ic_sup": 2.6064307020580824,
+     "p": 1.761586900619381e-12,
+     "n_horas": 3701
+    },
+    "viaje_Fuerte": {
+     "efecto_pct": 2.668310825603415,
+     "ic_inf": -0.17874280041989543,
+     "ic_sup": 5.596566738362552,
+     "p": 0.0664593373480451,
+     "n_horas": 84
+    }
+   }
+  },
+  "tasa_cancel_pp": {
+   "n": 47404,
+   "r2": 7.998298103384371e-05,
+   "coeficientes": {
+    "h_Ligera": {
+     "efecto": 0.0038764404480475852,
+     "ic_inf": -0.3420997195334491,
+     "ic_sup": 0.34985260042954425,
+     "p": 0.9824794325098298,
+     "n_horas": 10619
+    },
+    "h_Moderada": {
+     "efecto": 0.38865698158616635,
+     "ic_inf": -0.41379960124294957,
+     "ic_sup": 1.1911135644152822,
+     "p": 0.3424708099387327,
+     "n_horas": 1156
+    },
+    "h_Fuerte": {
+     "efecto": -1.1740228191655746,
+     "ic_inf": -5.206661376292621,
+     "ic_sup": 2.858615737961472,
+     "p": 0.5682605347794094,
+     "n_horas": 21
+    },
+    "prev_Ligera": {
+     "efecto": 0.03999223013337038,
+     "ic_inf": -0.270549443627502,
+     "ic_sup": 0.35053390389424277,
+     "p": 0.800721814118522,
+     "n_horas": 14783
+    },
+    "prev_Moderada": {
+     "efecto": 0.23907831176817307,
+     "ic_inf": -0.3112907869703776,
+     "ic_sup": 0.7894474105067237,
+     "p": 0.39453786850266703,
+     "n_horas": 3049
+    },
+    "prev_Fuerte": {
+     "efecto": 1.5084945554773137,
+     "ic_inf": -0.7400272254689604,
+     "ic_sup": 3.757016336423588,
+     "p": 0.18853334201598848,
+     "n_horas": 66
+    }
+   }
+  },
+  "retraso_salida_min": {
+   "n": 47276,
+   "r2": 0.0008951056746958619,
+   "coeficientes": {
+    "h_Ligera": {
+     "efecto": 0.003607741233961248,
+     "ic_inf": -0.08171518495690422,
+     "ic_sup": 0.08893066742482672,
+     "p": 0.9339506036836132,
+     "n_horas": 10606
+    },
+    "h_Moderada": {
+     "efecto": 0.21038107930382874,
+     "ic_inf": -0.035542072792633855,
+     "ic_sup": 0.4563042314002913,
+     "p": 0.09359514137022702,
+     "n_horas": 1153
+    },
+    "h_Fuerte": {
+     "efecto": 0.03091144655287948,
+     "ic_inf": -1.1826431291939645,
+     "ic_sup": 1.2444660222997235,
+     "p": 0.9601823368842624,
+     "n_horas": 21
+    },
+    "prev_Ligera": {
+     "efecto": -0.035668871714261086,
+     "ic_inf": -0.12319151896088977,
+     "ic_sup": 0.0518537755323676,
+     "p": 0.4244203192841326,
+     "n_horas": 14760
+    },
+    "prev_Moderada": {
+     "efecto": 0.08039322348148469,
+     "ic_inf": -0.07370124093413045,
+     "ic_sup": 0.23448768789709984,
+     "p": 0.3065162909644378,
+     "n_horas": 3047
+    },
+    "prev_Fuerte": {
+     "efecto": 0.07620389950747207,
+     "ic_inf": -0.9646025732238417,
+     "ic_sup": 1.1170103722387859,
+     "p": 0.8858923413538039,
+     "n_horas": 66
+    }
+   }
+  }
+ },
+ "regla_umbral": [
+  {
+   "umbral_mm_h": 0.5,
+   "pasajeros_efecto": -1.781361087477762,
+   "pasajeros_ic_inf": -4.30132977369907,
+   "pasajeros_ic_sup": 0.8049642384389433,
+   "pasajeros_n_horas": 10105,
+   "pasajeros_por_viaje_efecto": 0.4084735244777926,
+   "pasajeros_por_viaje_ic_inf": -0.5050363625347942,
+   "pasajeros_por_viaje_ic_sup": 1.3303707738568704,
+   "pasajeros_por_viaje_n_horas": 10012,
+   "ciclo_efecto": 1.2413078884038642,
+   "ciclo_ic_inf": 0.9069516396346344,
+   "ciclo_ic_sup": 1.5767720301306465,
+   "ciclo_n_horas": 9867,
+   "cancel_pp_efecto": 0.026346160425786143,
+   "cancel_pp_ic_inf": -0.30592727844068773,
+   "cancel_pp_ic_sup": 0.35861959929226,
+   "cancel_pp_n_horas": 10087,
+   "retraso_min_efecto": -0.014257970077091491,
+   "retraso_min_ic_inf": -0.10814858013755223,
+   "retraso_min_ic_sup": 0.07963263998336924,
+   "retraso_min_n_horas": 10072,
+   "horas_ruta_sobre_umbral_pct": 21.051976346093994,
+   "dias_con_alguna_hora_sobre_umbral_por_anio": 173.33333333333334
+  },
+  {
+   "umbral_mm_h": 1.0,
+   "pasajeros_efecto": -1.9100983519902082,
+   "pasajeros_ic_inf": -4.754956946953392,
+   "pasajeros_ic_sup": 1.0197328585119125,
+   "pasajeros_n_horas": 6666,
+   "pasajeros_por_viaje_efecto": 0.2776298104008701,
+   "pasajeros_por_viaje_ic_inf": -0.8174814407213571,
+   "pasajeros_por_viaje_ic_sup": 1.3848325940810202,
+   "pasajeros_por_viaje_n_horas": 6604,
+   "ciclo_efecto": 1.6348269709475893,
+   "ciclo_ic_inf": 1.226016835933974,
+   "ciclo_ic_sup": 2.045288121497646,
+   "ciclo_n_horas": 6448,
+   "cancel_pp_efecto": 0.04456651481875142,
+   "cancel_pp_ic_inf": -0.3426579735459187,
+   "cancel_pp_ic_sup": 0.4317910031834215,
+   "cancel_pp_n_horas": 6652,
+   "retraso_min_efecto": 0.03773436776321462,
+   "retraso_min_ic_inf": -0.06743742278475524,
+   "retraso_min_ic_sup": 0.14290615831118447,
+   "retraso_min_n_horas": 6643,
+   "horas_ruta_sobre_umbral_pct": 13.899782135076252,
+   "dias_con_alguna_hora_sobre_umbral_por_anio": 125.66666666666667
+  },
+  {
+   "umbral_mm_h": 2.0,
+   "pasajeros_efecto": -3.3386476189340097,
+   "pasajeros_ic_inf": -6.648886289381206,
+   "pasajeros_ic_sup": 0.08897240476937185,
+   "pasajeros_n_horas": 3984,
+   "pasajeros_por_viaje_efecto": -0.3256376229119451,
+   "pasajeros_por_viaje_ic_inf": -1.8051736869661328,
+   "pasajeros_por_viaje_ic_sup": 1.1761911325907537,
+   "pasajeros_por_viaje_n_horas": 3948,
+   "ciclo_efecto": 2.047836166057282,
+   "ciclo_ic_inf": 1.4872236356007873,
+   "ciclo_ic_sup": 2.61154550415168,
+   "ciclo_n_horas": 3785,
+   "cancel_pp_efecto": 0.2970829159882073,
+   "cancel_pp_ic_inf": -0.18198706732552555,
+   "cancel_pp_ic_sup": 0.7761528993019402,
+   "cancel_pp_n_horas": 3973,
+   "retraso_min_efecto": 0.12479871590467607,
+   "retraso_min_ic_inf": -0.008214806054949217,
+   "retraso_min_ic_sup": 0.25781223786430135,
+   "retraso_min_n_horas": 3969,
+   "horas_ruta_sobre_umbral_pct": 8.309990662931838,
+   "dias_con_alguna_hora_sobre_umbral_por_anio": 84.66666666666667
+  },
+  {
+   "umbral_mm_h": 3.0,
+   "pasajeros_efecto": -3.3135578980143854,
+   "pasajeros_ic_inf": -7.1000214073374535,
+   "pasajeros_ic_sup": 0.627236173324186,
+   "pasajeros_n_horas": 2822,
+   "pasajeros_por_viaje_efecto": 0.07461553964676071,
+   "pasajeros_por_viaje_ic_inf": -1.4597792362119444,
+   "pasajeros_por_viaje_ic_sup": 1.6329027658159356,
+   "pasajeros_por_viaje_n_horas": 2795,
+   "ciclo_efecto": 2.4440323677760833,
+   "ciclo_ic_inf": 1.786868742320924,
+   "ciclo_ic_sup": 3.1054388197957916,
+   "ciclo_n_horas": 2720,
+   "cancel_pp_efecto": 0.229597394498742,
+   "cancel_pp_ic_inf": -0.35174640038664856,
+   "cancel_pp_ic_sup": 0.8109411893841325,
+   "cancel_pp_n_horas": 2815,
+   "retraso_min_efecto": 0.13279992263066706,
+   "retraso_min_ic_inf": -0.02617268587227828,
+   "retraso_min_ic_sup": 0.2917725311336124,
+   "retraso_min_n_horas": 2813,
+   "horas_ruta_sobre_umbral_pct": 5.894802365390601,
+   "dias_con_alguna_hora_sobre_umbral_por_anio": 65.33333333333333
+  },
+  {
+   "umbral_mm_h": 5.0,
+   "pasajeros_efecto": -4.285263129239825,
+   "pasajeros_ic_inf": -9.647301988354362,
+   "pasajeros_ic_sup": 1.3949893677557723,
+   "pasajeros_n_horas": 1268,
+   "pasajeros_por_viaje_efecto": -0.41816094330101583,
+   "pasajeros_por_viaje_ic_inf": -2.5387750691686306,
+   "pasajeros_por_viaje_ic_sup": 1.7485946534338215,
+   "pasajeros_por_viaje_n_horas": 1253,
+   "ciclo_efecto": 2.689092290357209,
+   "ciclo_ic_inf": 1.7499828017022434,
+   "ciclo_ic_sup": 3.6368693640809413,
+   "ciclo_n_horas": 1232,
+   "cancel_pp_efecto": -0.000513941704020581,
+   "cancel_pp_ic_inf": -0.7637859489698173,
+   "cancel_pp_ic_sup": 0.7627580655617763,
+   "cancel_pp_n_horas": 1264,
+   "retraso_min_efecto": 0.11493827381622063,
+   "retraso_min_ic_inf": -0.09495424037728786,
+   "retraso_min_ic_sup": 0.3248307880097291,
+   "retraso_min_n_horas": 1263,
+   "horas_ruta_sobre_umbral_pct": 2.6330532212885154,
+   "dias_con_alguna_hora_sobre_umbral_por_anio": 31.333333333333332
+  },
+  {
+   "umbral_mm_h": 8.0,
+   "pasajeros_efecto": -3.2851736387119135,
+   "pasajeros_ic_inf": -9.46099420199883,
+   "pasajeros_ic_sup": 3.311910216498193,
+   "pasajeros_n_horas": 315,
+   "pasajeros_por_viaje_efecto": -2.440427738522377,
+   "pasajeros_por_viaje_ic_inf": -5.588738763816636,
+   "pasajeros_por_viaje_ic_sup": 0.8128693041410839,
+   "pasajeros_por_viaje_n_horas": 312,
+   "ciclo_efecto": 2.618222984511709,
+   "ciclo_ic_inf": 1.1493345231377683,
+   "ciclo_ic_sup": 4.10844261254264,
+   "ciclo_n_horas": 305,
+   "cancel_pp_efecto": 0.8625641211421666,
+   "cancel_pp_ic_inf": -0.36721119207505004,
+   "cancel_pp_ic_sup": 2.092339434359383,
+   "cancel_pp_n_horas": 315,
+   "retraso_min_efecto": -0.05082992928395187,
+   "retraso_min_ic_inf": -0.4565487993591837,
+   "retraso_min_ic_sup": 0.35488894079127997,
+   "retraso_min_n_horas": 314,
+   "horas_ruta_sobre_umbral_pct": 0.6535947712418301,
+   "dias_con_alguna_hora_sobre_umbral_por_anio": 8.666666666666666
+  }
+ ],
+ "variacion_explicada": {
+  "diaria_vs_linea_base": {
+   "n": 2823,
+   "r2": 0.01858280091268094,
+   "sd_log_desvio": 0.08083499503808042,
+   "coeficientes": {
+    "precipitacion_mm": {
+     "b": -0.005597715775319008,
+     "p": 0.02793659320334391
+    },
+    "precipitacion_4_21h_mm": {
+     "b": 0.0007149122978217057,
+     "p": 0.7240764746350269
+    },
+    "horas_lluvia": {
+     "b": 0.0024293451510740485,
+     "p": 0.004832568651738714
+    },
+    "intensidad_max_mm_h": {
+     "b": 0.0030836900983565404,
+     "p": 0.14873508517974404
+    },
+    "horas_lluvia_2mm": {
+     "b": 0.007190410525195412,
+     "p": 0.2515440815397174
+    },
+    "p_dia_ant": {
+     "b": -0.0009800693458774704,
+     "p": 0.13294003253798728
+    }
+   }
+  },
+  "diaria_residuo_e1_2025": {
+   "n": 1095,
+   "r2": 0.005908221890493892,
+   "sd_log_residuo": 0.10190818579652176
+  },
+  "horaria_vs_linea_base": {
+   "n": 47440,
+   "r2": 0.0031697472568740226
+  }
+ },
+ "eventos_aguacero": {
+  "criterio": "días con intensidad máxima >= 8 mm/h o precipitación diaria >= 20 mm (Open-Meteo)",
+  "n": 51,
+  "n_dias_normales": 48,
+  "mediana_pax_dia_desvio_pct": -1.3790101190894244,
+  "mediana_pax_tormenta_desvio_pct": -2.0839858699526035,
+  "mediana_ciclo_tormenta_desvio_pct": 2.056518617579628,
+  "media_cancel_dia_pct": 7.591838692062502,
+  "media_cancel_dia_esperada_pct": 7.302839509321625,
+  "tabla": [
+   {
+    "fecha": "2023-11-20",
+    "dia_semana": "lun",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 22.9,
+    "intensidad_max_mm_h": 19.4,
+    "hora_pico_operacion": 13,
+    "mm_h_pico_operacion": 19.4,
+    "horas_lluvia_2mm": 2,
+    "pax_dia_desvio_pct": 7.13,
+    "pax_tormenta_desvio_pct": 1.78,
+    "ciclo_tormenta_desvio_pct": 1.95,
+    "ciclo_tormenta_min": 255.14,
+    "cancel_dia_pct": 5.41,
+    "cancel_dia_esperada_pct": 5.49,
+    "cancel_tormenta_pct": 5.08,
+    "viajes_tormenta_desvio_pct": 7.01,
+    "retraso_tormenta_min": -4.03,
+    "retraso_tormenta_esperado_min": -4.53,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2025-05-01",
+    "dia_semana": "jue",
+    "tipo_dia": "Domingo/festivo",
+    "especial": 1,
+    "precipitacion_mm": 35.0,
+    "intensidad_max_mm_h": 15.3,
+    "hora_pico_operacion": 11,
+    "mm_h_pico_operacion": 15.3,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": -56.01,
+    "pax_tormenta_desvio_pct": -51.23,
+    "ciclo_tormenta_desvio_pct": -22.92,
+    "ciclo_tormenta_min": 189.89,
+    "cancel_dia_pct": 14.94,
+    "cancel_dia_esperada_pct": 8.57,
+    "cancel_tormenta_pct": 12.88,
+    "viajes_tormenta_desvio_pct": -22.82,
+    "retraso_tormenta_min": -3.69,
+    "retraso_tormenta_esperado_min": -4.39,
+    "residuo_e1_dia_pct": 6.08
+   },
+   {
+    "fecha": "2025-05-31",
+    "dia_semana": "sáb",
+    "tipo_dia": "Sábado",
+    "especial": 0,
+    "precipitacion_mm": 15.4,
+    "intensidad_max_mm_h": 13.5,
+    "hora_pico_operacion": 11,
+    "mm_h_pico_operacion": 13.5,
+    "horas_lluvia_2mm": 1,
+    "pax_dia_desvio_pct": 1.27,
+    "pax_tormenta_desvio_pct": 5.63,
+    "ciclo_tormenta_desvio_pct": 2.07,
+    "ciclo_tormenta_min": 260.25,
+    "cancel_dia_pct": 9.16,
+    "cancel_dia_esperada_pct": 9.6,
+    "cancel_tormenta_pct": 3.4,
+    "viajes_tormenta_desvio_pct": -1.05,
+    "retraso_tormenta_min": -4.45,
+    "retraso_tormenta_esperado_min": -3.7,
+    "residuo_e1_dia_pct": 2.74
+   },
+   {
+    "fecha": "2024-09-12",
+    "dia_semana": "jue",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 26.7,
+    "intensidad_max_mm_h": 13.4,
+    "hora_pico_operacion": 13,
+    "mm_h_pico_operacion": 4.6,
+    "horas_lluvia_2mm": 4,
+    "pax_dia_desvio_pct": -0.79,
+    "pax_tormenta_desvio_pct": 3.59,
+    "ciclo_tormenta_desvio_pct": 5.56,
+    "ciclo_tormenta_min": 282.53,
+    "cancel_dia_pct": 9.32,
+    "cancel_dia_esperada_pct": 6.65,
+    "cancel_tormenta_pct": 11.11,
+    "viajes_tormenta_desvio_pct": 5.11,
+    "retraso_tormenta_min": -2.79,
+    "retraso_tormenta_esperado_min": -2.89,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-09-03",
+    "dia_semana": "mar",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 19.2,
+    "intensidad_max_mm_h": 13.0,
+    "hora_pico_operacion": 12,
+    "mm_h_pico_operacion": 13.0,
+    "horas_lluvia_2mm": 1,
+    "pax_dia_desvio_pct": -1.3,
+    "pax_tormenta_desvio_pct": -4.66,
+    "ciclo_tormenta_desvio_pct": 6.74,
+    "ciclo_tormenta_min": 278.13,
+    "cancel_dia_pct": 12.02,
+    "cancel_dia_esperada_pct": 8.33,
+    "cancel_tormenta_pct": 17.33,
+    "viajes_tormenta_desvio_pct": -6.06,
+    "retraso_tormenta_min": -4.17,
+    "retraso_tormenta_esperado_min": -3.21,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-11-13",
+    "dia_semana": "mié",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 13.8,
+    "intensidad_max_mm_h": 12.3,
+    "hora_pico_operacion": 13,
+    "mm_h_pico_operacion": 12.3,
+    "horas_lluvia_2mm": 1,
+    "pax_dia_desvio_pct": -9.37,
+    "pax_tormenta_desvio_pct": -9.21,
+    "ciclo_tormenta_desvio_pct": 10.19,
+    "ciclo_tormenta_min": 290.12,
+    "cancel_dia_pct": 9.35,
+    "cancel_dia_esperada_pct": 6.94,
+    "cancel_tormenta_pct": 12.41,
+    "viajes_tormenta_desvio_pct": -14.89,
+    "retraso_tormenta_min": -2.4,
+    "retraso_tormenta_esperado_min": -3.71,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-11-26",
+    "dia_semana": "mar",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 23.2,
+    "intensidad_max_mm_h": 11.9,
+    "hora_pico_operacion": 15,
+    "mm_h_pico_operacion": 3.6,
+    "horas_lluvia_2mm": 4,
+    "pax_dia_desvio_pct": -3.83,
+    "pax_tormenta_desvio_pct": -10.14,
+    "ciclo_tormenta_desvio_pct": 1.58,
+    "ciclo_tormenta_min": 274.81,
+    "cancel_dia_pct": 6.41,
+    "cancel_dia_esperada_pct": 5.68,
+    "cancel_tormenta_pct": 12.05,
+    "viajes_tormenta_desvio_pct": -1.35,
+    "retraso_tormenta_min": -2.68,
+    "retraso_tormenta_esperado_min": -3.31,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-06-10",
+    "dia_semana": "lun",
+    "tipo_dia": "Domingo/festivo",
+    "especial": 1,
+    "precipitacion_mm": 18.9,
+    "intensidad_max_mm_h": 11.9,
+    "hora_pico_operacion": 12,
+    "mm_h_pico_operacion": 11.9,
+    "horas_lluvia_2mm": 2,
+    "pax_dia_desvio_pct": -70.43,
+    "pax_tormenta_desvio_pct": -69.52,
+    "ciclo_tormenta_desvio_pct": -23.09,
+    "ciclo_tormenta_min": 191.59,
+    "cancel_dia_pct": 22.8,
+    "cancel_dia_esperada_pct": 6.76,
+    "cancel_tormenta_pct": 31.71,
+    "viajes_tormenta_desvio_pct": -41.46,
+    "retraso_tormenta_min": -3.46,
+    "retraso_tormenta_esperado_min": -4.36,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-05-30",
+    "dia_semana": "jue",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 20.5,
+    "intensidad_max_mm_h": 11.0,
+    "hora_pico_operacion": 13,
+    "mm_h_pico_operacion": 5.0,
+    "horas_lluvia_2mm": 3,
+    "pax_dia_desvio_pct": -12.14,
+    "pax_tormenta_desvio_pct": -4.98,
+    "ciclo_tormenta_desvio_pct": 14.61,
+    "ciclo_tormenta_min": 299.26,
+    "cancel_dia_pct": 9.36,
+    "cancel_dia_esperada_pct": 7.22,
+    "cancel_tormenta_pct": 14.47,
+    "viajes_tormenta_desvio_pct": -5.8,
+    "retraso_tormenta_min": -3.89,
+    "retraso_tormenta_esperado_min": -2.7,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-11-10",
+    "dia_semana": "dom",
+    "tipo_dia": "Domingo/festivo",
+    "especial": 0,
+    "precipitacion_mm": 16.2,
+    "intensidad_max_mm_h": 10.6,
+    "hora_pico_operacion": 14,
+    "mm_h_pico_operacion": 10.6,
+    "horas_lluvia_2mm": 1,
+    "pax_dia_desvio_pct": -2.79,
+    "pax_tormenta_desvio_pct": -1.08,
+    "ciclo_tormenta_desvio_pct": -0.98,
+    "ciclo_tormenta_min": 199.66,
+    "cancel_dia_pct": 13.21,
+    "cancel_dia_esperada_pct": 15.07,
+    "cancel_tormenta_pct": 16.08,
+    "viajes_tormenta_desvio_pct": 12.68,
+    "retraso_tormenta_min": -3.61,
+    "retraso_tormenta_esperado_min": -2.36,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2023-06-08",
+    "dia_semana": "jue",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 22.5,
+    "intensidad_max_mm_h": 10.3,
+    "hora_pico_operacion": 4,
+    "mm_h_pico_operacion": 10.3,
+    "horas_lluvia_2mm": 3,
+    "pax_dia_desvio_pct": -12.74,
+    "pax_tormenta_desvio_pct": -3.14,
+    "ciclo_tormenta_desvio_pct": 0.1,
+    "ciclo_tormenta_min": 199.27,
+    "cancel_dia_pct": 3.19,
+    "cancel_dia_esperada_pct": 5.93,
+    "cancel_tormenta_pct": 3.49,
+    "viajes_tormenta_desvio_pct": -0.6,
+    "retraso_tormenta_min": -1.56,
+    "retraso_tormenta_esperado_min": -1.88,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-09-20",
+    "dia_semana": "vie",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 21.7,
+    "intensidad_max_mm_h": 10.3,
+    "hora_pico_operacion": 13,
+    "mm_h_pico_operacion": 10.3,
+    "horas_lluvia_2mm": 2,
+    "pax_dia_desvio_pct": -2.88,
+    "pax_tormenta_desvio_pct": -1.32,
+    "ciclo_tormenta_desvio_pct": -1.32,
+    "ciclo_tormenta_min": 277.73,
+    "cancel_dia_pct": 8.96,
+    "cancel_dia_esperada_pct": 6.53,
+    "cancel_tormenta_pct": 10.88,
+    "viajes_tormenta_desvio_pct": -5.76,
+    "retraso_tormenta_min": -4.52,
+    "retraso_tormenta_esperado_min": -2.29,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-08-05",
+    "dia_semana": "lun",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 18.1,
+    "intensidad_max_mm_h": 10.1,
+    "hora_pico_operacion": 18,
+    "mm_h_pico_operacion": 4.4,
+    "horas_lluvia_2mm": 2,
+    "pax_dia_desvio_pct": 13.11,
+    "pax_tormenta_desvio_pct": 8.73,
+    "ciclo_tormenta_desvio_pct": 0.26,
+    "ciclo_tormenta_min": 249.85,
+    "cancel_dia_pct": 6.47,
+    "cancel_dia_esperada_pct": 8.92,
+    "cancel_tormenta_pct": 6.12,
+    "viajes_tormenta_desvio_pct": 1.47,
+    "retraso_tormenta_min": -2.06,
+    "retraso_tormenta_esperado_min": -1.15,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2025-12-01",
+    "dia_semana": "lun",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 11.6,
+    "intensidad_max_mm_h": 9.8,
+    "hora_pico_operacion": 13,
+    "mm_h_pico_operacion": 9.8,
+    "horas_lluvia_2mm": 1,
+    "pax_dia_desvio_pct": 0.13,
+    "pax_tormenta_desvio_pct": 4.34,
+    "ciclo_tormenta_desvio_pct": 6.54,
+    "ciclo_tormenta_min": 264.45,
+    "cancel_dia_pct": 6.23,
+    "cancel_dia_esperada_pct": 7.28,
+    "cancel_tormenta_pct": 5.44,
+    "viajes_tormenta_desvio_pct": 3.73,
+    "retraso_tormenta_min": -4.15,
+    "retraso_tormenta_esperado_min": -4.01,
+    "residuo_e1_dia_pct": -1.45
+   },
+   {
+    "fecha": "2024-07-04",
+    "dia_semana": "jue",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 34.5,
+    "intensidad_max_mm_h": 9.7,
+    "hora_pico_operacion": 21,
+    "mm_h_pico_operacion": 9.7,
+    "horas_lluvia_2mm": 6,
+    "pax_dia_desvio_pct": -2.71,
+    "pax_tormenta_desvio_pct": -26.29,
+    "ciclo_tormenta_desvio_pct": 15.35,
+    "ciclo_tormenta_min": 218.35,
+    "cancel_dia_pct": 6.67,
+    "cancel_dia_esperada_pct": 7.53,
+    "cancel_tormenta_pct": 6.9,
+    "viajes_tormenta_desvio_pct": -16.92,
+    "retraso_tormenta_min": -4.46,
+    "retraso_tormenta_esperado_min": -0.71,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2023-06-06",
+    "dia_semana": "mar",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 20.9,
+    "intensidad_max_mm_h": 9.5,
+    "hora_pico_operacion": 13,
+    "mm_h_pico_operacion": 9.5,
+    "horas_lluvia_2mm": 3,
+    "pax_dia_desvio_pct": -2.3,
+    "pax_tormenta_desvio_pct": 3.12,
+    "ciclo_tormenta_desvio_pct": 1.92,
+    "ciclo_tormenta_min": 246.61,
+    "cancel_dia_pct": 5.22,
+    "cancel_dia_esperada_pct": 5.38,
+    "cancel_tormenta_pct": 5.49,
+    "viajes_tormenta_desvio_pct": -2.82,
+    "retraso_tormenta_min": -3.4,
+    "retraso_tormenta_esperado_min": -3.27,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2025-05-07",
+    "dia_semana": "mié",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 24.8,
+    "intensidad_max_mm_h": 9.5,
+    "hora_pico_operacion": 12,
+    "mm_h_pico_operacion": 9.5,
+    "horas_lluvia_2mm": 4,
+    "pax_dia_desvio_pct": 1.78,
+    "pax_tormenta_desvio_pct": -3.06,
+    "ciclo_tormenta_desvio_pct": 8.72,
+    "ciclo_tormenta_min": 267.64,
+    "cancel_dia_pct": 9.39,
+    "cancel_dia_esperada_pct": 10.43,
+    "cancel_tormenta_pct": 9.66,
+    "viajes_tormenta_desvio_pct": -9.03,
+    "retraso_tormenta_min": -3.51,
+    "retraso_tormenta_esperado_min": -4.37,
+    "residuo_e1_dia_pct": -2.18
+   },
+   {
+    "fecha": "2023-05-16",
+    "dia_semana": "mar",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 16.9,
+    "intensidad_max_mm_h": 9.3,
+    "hora_pico_operacion": 13,
+    "mm_h_pico_operacion": 9.3,
+    "horas_lluvia_2mm": 2,
+    "pax_dia_desvio_pct": -4.22,
+    "pax_tormenta_desvio_pct": -6.43,
+    "ciclo_tormenta_desvio_pct": 2.06,
+    "ciclo_tormenta_min": 245.48,
+    "cancel_dia_pct": 6.88,
+    "cancel_dia_esperada_pct": 4.82,
+    "cancel_tormenta_pct": 12.73,
+    "viajes_tormenta_desvio_pct": -12.2,
+    "retraso_tormenta_min": -3.0,
+    "retraso_tormenta_esperado_min": -3.21,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2023-10-24",
+    "dia_semana": "mar",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 11.8,
+    "intensidad_max_mm_h": 9.1,
+    "hora_pico_operacion": 13,
+    "mm_h_pico_operacion": 9.1,
+    "horas_lluvia_2mm": 1,
+    "pax_dia_desvio_pct": -8.26,
+    "pax_tormenta_desvio_pct": -10.52,
+    "ciclo_tormenta_desvio_pct": 2.27,
+    "ciclo_tormenta_min": 254.65,
+    "cancel_dia_pct": 3.9,
+    "cancel_dia_esperada_pct": 4.94,
+    "cancel_tormenta_pct": 4.82,
+    "viajes_tormenta_desvio_pct": 1.28,
+    "retraso_tormenta_min": -2.29,
+    "retraso_tormenta_esperado_min": -3.7,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-08-06",
+    "dia_semana": "mar",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 24.0,
+    "intensidad_max_mm_h": 9.1,
+    "hora_pico_operacion": 7,
+    "mm_h_pico_operacion": 9.1,
+    "horas_lluvia_2mm": 3,
+    "pax_dia_desvio_pct": 1.36,
+    "pax_tormenta_desvio_pct": 0.12,
+    "ciclo_tormenta_desvio_pct": 4.94,
+    "ciclo_tormenta_min": 254.99,
+    "cancel_dia_pct": 10.97,
+    "cancel_dia_esperada_pct": 7.91,
+    "cancel_tormenta_pct": 5.88,
+    "viajes_tormenta_desvio_pct": 1.05,
+    "retraso_tormenta_min": -3.23,
+    "retraso_tormenta_esperado_min": -2.85,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2025-05-03",
+    "dia_semana": "sáb",
+    "tipo_dia": "Sábado",
+    "especial": 0,
+    "precipitacion_mm": 10.6,
+    "intensidad_max_mm_h": 9.1,
+    "hora_pico_operacion": 12,
+    "mm_h_pico_operacion": 9.1,
+    "horas_lluvia_2mm": 1,
+    "pax_dia_desvio_pct": 2.0,
+    "pax_tormenta_desvio_pct": 2.88,
+    "ciclo_tormenta_desvio_pct": 8.95,
+    "ciclo_tormenta_min": 271.24,
+    "cancel_dia_pct": 8.52,
+    "cancel_dia_esperada_pct": 8.81,
+    "cancel_tormenta_pct": 5.88,
+    "viajes_tormenta_desvio_pct": -6.57,
+    "retraso_tormenta_min": -2.99,
+    "retraso_tormenta_esperado_min": -3.82,
+    "residuo_e1_dia_pct": -0.72
+   },
+   {
+    "fecha": "2024-05-08",
+    "dia_semana": "mié",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 25.4,
+    "intensidad_max_mm_h": 9.0,
+    "hora_pico_operacion": 21,
+    "mm_h_pico_operacion": 4.6,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": 2.09,
+    "pax_tormenta_desvio_pct": 2.29,
+    "ciclo_tormenta_desvio_pct": 1.35,
+    "ciclo_tormenta_min": 190.37,
+    "cancel_dia_pct": 6.69,
+    "cancel_dia_esperada_pct": 6.68,
+    "cancel_tormenta_pct": 14.08,
+    "viajes_tormenta_desvio_pct": -16.44,
+    "retraso_tormenta_min": -3.52,
+    "retraso_tormenta_esperado_min": -2.76,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2025-10-01",
+    "dia_semana": "mié",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 10.6,
+    "intensidad_max_mm_h": 9.0,
+    "hora_pico_operacion": 12,
+    "mm_h_pico_operacion": 9.0,
+    "horas_lluvia_2mm": 1,
+    "pax_dia_desvio_pct": 5.72,
+    "pax_tormenta_desvio_pct": 9.51,
+    "ciclo_tormenta_desvio_pct": 3.92,
+    "ciclo_tormenta_min": 259.43,
+    "cancel_dia_pct": 5.1,
+    "cancel_dia_esperada_pct": 7.07,
+    "cancel_tormenta_pct": 1.39,
+    "viajes_tormenta_desvio_pct": 3.27,
+    "retraso_tormenta_min": -3.41,
+    "retraso_tormenta_esperado_min": -4.31,
+    "residuo_e1_dia_pct": 1.39
+   },
+   {
+    "fecha": "2023-10-21",
+    "dia_semana": "sáb",
+    "tipo_dia": "Sábado",
+    "especial": 0,
+    "precipitacion_mm": 24.1,
+    "intensidad_max_mm_h": 8.9,
+    "hora_pico_operacion": 16,
+    "mm_h_pico_operacion": 8.9,
+    "horas_lluvia_2mm": 3,
+    "pax_dia_desvio_pct": -0.18,
+    "pax_tormenta_desvio_pct": -7.05,
+    "ciclo_tormenta_desvio_pct": -2.74,
+    "ciclo_tormenta_min": 234.26,
+    "cancel_dia_pct": 4.73,
+    "cancel_dia_esperada_pct": 5.51,
+    "cancel_tormenta_pct": 7.14,
+    "viajes_tormenta_desvio_pct": -0.64,
+    "retraso_tormenta_min": -2.6,
+    "retraso_tormenta_esperado_min": -3.58,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2023-10-20",
+    "dia_semana": "vie",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 9.0,
+    "intensidad_max_mm_h": 8.7,
+    "hora_pico_operacion": 18,
+    "mm_h_pico_operacion": 8.7,
+    "horas_lluvia_2mm": 1,
+    "pax_dia_desvio_pct": 6.73,
+    "pax_tormenta_desvio_pct": 9.11,
+    "ciclo_tormenta_desvio_pct": -1.93,
+    "ciclo_tormenta_min": 243.8,
+    "cancel_dia_pct": 4.33,
+    "cancel_dia_esperada_pct": 5.0,
+    "cancel_tormenta_pct": 8.09,
+    "viajes_tormenta_desvio_pct": 7.07,
+    "retraso_tormenta_min": -1.45,
+    "retraso_tormenta_esperado_min": -2.62,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2025-08-16",
+    "dia_semana": "sáb",
+    "tipo_dia": "Sábado",
+    "especial": 0,
+    "precipitacion_mm": 21.6,
+    "intensidad_max_mm_h": 8.7,
+    "hora_pico_operacion": 13,
+    "mm_h_pico_operacion": 4.4,
+    "horas_lluvia_2mm": 4,
+    "pax_dia_desvio_pct": 1.13,
+    "pax_tormenta_desvio_pct": 5.05,
+    "ciclo_tormenta_desvio_pct": 6.99,
+    "ciclo_tormenta_min": 271.03,
+    "cancel_dia_pct": 7.4,
+    "cancel_dia_esperada_pct": 8.47,
+    "cancel_tormenta_pct": 8.5,
+    "viajes_tormenta_desvio_pct": 6.87,
+    "retraso_tormenta_min": -3.76,
+    "retraso_tormenta_esperado_min": -3.65,
+    "residuo_e1_dia_pct": 5.11
+   },
+   {
+    "fecha": "2025-10-23",
+    "dia_semana": "jue",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 10.5,
+    "intensidad_max_mm_h": 8.7,
+    "hora_pico_operacion": 11,
+    "mm_h_pico_operacion": 8.7,
+    "horas_lluvia_2mm": 1,
+    "pax_dia_desvio_pct": 0.88,
+    "pax_tormenta_desvio_pct": -2.14,
+    "ciclo_tormenta_desvio_pct": 1.23,
+    "ciclo_tormenta_min": 255.16,
+    "cancel_dia_pct": 7.66,
+    "cancel_dia_esperada_pct": 7.09,
+    "cancel_tormenta_pct": 6.77,
+    "viajes_tormenta_desvio_pct": -11.43,
+    "retraso_tormenta_min": -3.02,
+    "retraso_tormenta_esperado_min": -4.25,
+    "residuo_e1_dia_pct": 2.65
+   },
+   {
+    "fecha": "2024-09-19",
+    "dia_semana": "jue",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 14.3,
+    "intensidad_max_mm_h": 8.4,
+    "hora_pico_operacion": 14,
+    "mm_h_pico_operacion": 8.4,
+    "horas_lluvia_2mm": 2,
+    "pax_dia_desvio_pct": -5.54,
+    "pax_tormenta_desvio_pct": -5.35,
+    "ciclo_tormenta_desvio_pct": -3.52,
+    "ciclo_tormenta_min": 274.5,
+    "cancel_dia_pct": 6.29,
+    "cancel_dia_esperada_pct": 7.12,
+    "cancel_tormenta_pct": 6.67,
+    "viajes_tormenta_desvio_pct": -0.36,
+    "retraso_tormenta_min": -3.1,
+    "retraso_tormenta_esperado_min": -2.94,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2023-03-15",
+    "dia_semana": "mié",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 18.4,
+    "intensidad_max_mm_h": 8.4,
+    "hora_pico_operacion": 13,
+    "mm_h_pico_operacion": 8.4,
+    "horas_lluvia_2mm": 3,
+    "pax_dia_desvio_pct": -18.26,
+    "pax_tormenta_desvio_pct": -6.08,
+    "ciclo_tormenta_desvio_pct": 0.26,
+    "ciclo_tormenta_min": 230.83,
+    "cancel_dia_pct": 5.37,
+    "cancel_dia_esperada_pct": 3.86,
+    "cancel_tormenta_pct": 5.81,
+    "viajes_tormenta_desvio_pct": -7.43,
+    "retraso_tormenta_min": -4.31,
+    "retraso_tormenta_esperado_min": -4.04,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-11-21",
+    "dia_semana": "jue",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 12.7,
+    "intensidad_max_mm_h": 8.2,
+    "hora_pico_operacion": 5,
+    "mm_h_pico_operacion": 1.3,
+    "horas_lluvia_2mm": 1,
+    "pax_dia_desvio_pct": 5.15,
+    "pax_tormenta_desvio_pct": 3.71,
+    "ciclo_tormenta_desvio_pct": -3.16,
+    "ciclo_tormenta_min": 198.08,
+    "cancel_dia_pct": 5.48,
+    "cancel_dia_esperada_pct": 5.52,
+    "cancel_tormenta_pct": 4.51,
+    "viajes_tormenta_desvio_pct": 0.79,
+    "retraso_tormenta_min": -0.9,
+    "retraso_tormenta_esperado_min": -1.67,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2025-06-13",
+    "dia_semana": "vie",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 32.5,
+    "intensidad_max_mm_h": 8.2,
+    "hora_pico_operacion": 5,
+    "mm_h_pico_operacion": 8.2,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": -4.7,
+    "pax_tormenta_desvio_pct": -5.77,
+    "ciclo_tormenta_desvio_pct": 0.58,
+    "ciclo_tormenta_min": 193.59,
+    "cancel_dia_pct": 7.09,
+    "cancel_dia_esperada_pct": 7.0,
+    "cancel_tormenta_pct": 4.96,
+    "viajes_tormenta_desvio_pct": 0.75,
+    "retraso_tormenta_min": -0.04,
+    "retraso_tormenta_esperado_min": -2.8,
+    "residuo_e1_dia_pct": 0.9
+   },
+   {
+    "fecha": "2025-09-19",
+    "dia_semana": "vie",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 10.8,
+    "intensidad_max_mm_h": 8.1,
+    "hora_pico_operacion": 11,
+    "mm_h_pico_operacion": 8.1,
+    "horas_lluvia_2mm": 2,
+    "pax_dia_desvio_pct": 1.55,
+    "pax_tormenta_desvio_pct": 0.07,
+    "ciclo_tormenta_desvio_pct": 6.63,
+    "ciclo_tormenta_min": 279.95,
+    "cancel_dia_pct": 6.67,
+    "cancel_dia_esperada_pct": 7.05,
+    "cancel_tormenta_pct": 5.0,
+    "viajes_tormenta_desvio_pct": 2.7,
+    "retraso_tormenta_min": -3.86,
+    "retraso_tormenta_esperado_min": -4.38,
+    "residuo_e1_dia_pct": -1.02
+   },
+   {
+    "fecha": "2024-11-14",
+    "dia_semana": "jue",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 16.4,
+    "intensidad_max_mm_h": 8.1,
+    "hora_pico_operacion": 14,
+    "mm_h_pico_operacion": 8.1,
+    "horas_lluvia_2mm": 2,
+    "pax_dia_desvio_pct": -3.24,
+    "pax_tormenta_desvio_pct": -3.0,
+    "ciclo_tormenta_desvio_pct": 1.37,
+    "ciclo_tormenta_min": 280.55,
+    "cancel_dia_pct": 7.78,
+    "cancel_dia_esperada_pct": 5.47,
+    "cancel_tormenta_pct": 7.59,
+    "viajes_tormenta_desvio_pct": -3.94,
+    "retraso_tormenta_min": -3.3,
+    "retraso_tormenta_esperado_min": -2.73,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2023-11-19",
+    "dia_semana": "dom",
+    "tipo_dia": "Domingo/festivo",
+    "especial": 0,
+    "precipitacion_mm": 24.6,
+    "intensidad_max_mm_h": 8.1,
+    "hora_pico_operacion": 5,
+    "mm_h_pico_operacion": 8.1,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": -19.22,
+    "pax_tormenta_desvio_pct": -28.39,
+    "ciclo_tormenta_desvio_pct": 4.95,
+    "ciclo_tormenta_min": 190.19,
+    "cancel_dia_pct": 15.0,
+    "cancel_dia_esperada_pct": 14.51,
+    "cancel_tormenta_pct": 17.54,
+    "viajes_tormenta_desvio_pct": -8.74,
+    "retraso_tormenta_min": -3.2,
+    "retraso_tormenta_esperado_min": -4.45,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2023-04-28",
+    "dia_semana": "vie",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 9.0,
+    "intensidad_max_mm_h": 8.0,
+    "hora_pico_operacion": 11,
+    "mm_h_pico_operacion": 8.0,
+    "horas_lluvia_2mm": 1,
+    "pax_dia_desvio_pct": 0.71,
+    "pax_tormenta_desvio_pct": -3.08,
+    "ciclo_tormenta_desvio_pct": 2.53,
+    "ciclo_tormenta_min": 243.32,
+    "cancel_dia_pct": 4.94,
+    "cancel_dia_esperada_pct": 5.15,
+    "cancel_tormenta_pct": 5.33,
+    "viajes_tormenta_desvio_pct": 4.58,
+    "retraso_tormenta_min": -5.27,
+    "retraso_tormenta_esperado_min": -3.93,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2025-06-12",
+    "dia_semana": "jue",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 27.7,
+    "intensidad_max_mm_h": 8.0,
+    "hora_pico_operacion": 18,
+    "mm_h_pico_operacion": 8.0,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": -6.06,
+    "pax_tormenta_desvio_pct": -18.79,
+    "ciclo_tormenta_desvio_pct": -2.73,
+    "ciclo_tormenta_min": 227.78,
+    "cancel_dia_pct": 10.57,
+    "cancel_dia_esperada_pct": 8.84,
+    "cancel_tormenta_pct": 19.48,
+    "viajes_tormenta_desvio_pct": -11.74,
+    "retraso_tormenta_min": -2.38,
+    "retraso_tormenta_esperado_min": -2.54,
+    "residuo_e1_dia_pct": -2.84
+   },
+   {
+    "fecha": "2025-09-05",
+    "dia_semana": "vie",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 24.9,
+    "intensidad_max_mm_h": 7.5,
+    "hora_pico_operacion": 11,
+    "mm_h_pico_operacion": 4.8,
+    "horas_lluvia_2mm": 4,
+    "pax_dia_desvio_pct": -2.56,
+    "pax_tormenta_desvio_pct": 0.5,
+    "ciclo_tormenta_desvio_pct": -2.17,
+    "ciclo_tormenta_min": 260.48,
+    "cancel_dia_pct": 7.68,
+    "cancel_dia_esperada_pct": 6.98,
+    "cancel_tormenta_pct": 4.55,
+    "viajes_tormenta_desvio_pct": -6.32,
+    "retraso_tormenta_min": -4.37,
+    "retraso_tormenta_esperado_min": -4.4,
+    "residuo_e1_dia_pct": -7.23
+   },
+   {
+    "fecha": "2024-10-10",
+    "dia_semana": "jue",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 29.1,
+    "intensidad_max_mm_h": 7.4,
+    "hora_pico_operacion": 6,
+    "mm_h_pico_operacion": 7.4,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": -20.52,
+    "pax_tormenta_desvio_pct": -17.7,
+    "ciclo_tormenta_desvio_pct": -1.76,
+    "ciclo_tormenta_min": 228.55,
+    "cancel_dia_pct": 8.08,
+    "cancel_dia_esperada_pct": 6.45,
+    "cancel_tormenta_pct": 7.78,
+    "viajes_tormenta_desvio_pct": -0.32,
+    "retraso_tormenta_min": -4.05,
+    "retraso_tormenta_esperado_min": -3.55,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2025-08-17",
+    "dia_semana": "dom",
+    "tipo_dia": "Domingo/festivo",
+    "especial": 0,
+    "precipitacion_mm": 20.0,
+    "intensidad_max_mm_h": 7.3,
+    "hora_pico_operacion": 20,
+    "mm_h_pico_operacion": 7.3,
+    "horas_lluvia_2mm": 3,
+    "pax_dia_desvio_pct": 0.33,
+    "pax_tormenta_desvio_pct": 6.56,
+    "ciclo_tormenta_desvio_pct": 0.79,
+    "ciclo_tormenta_min": 198.13,
+    "cancel_dia_pct": 14.52,
+    "cancel_dia_esperada_pct": 12.89,
+    "cancel_tormenta_pct": 12.07,
+    "viajes_tormenta_desvio_pct": 0.99,
+    "retraso_tormenta_min": -1.38,
+    "retraso_tormenta_esperado_min": -1.43,
+    "residuo_e1_dia_pct": 2.21
+   },
+   {
+    "fecha": "2023-10-27",
+    "dia_semana": "vie",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 27.1,
+    "intensidad_max_mm_h": 6.2,
+    "hora_pico_operacion": 16,
+    "mm_h_pico_operacion": 6.2,
+    "horas_lluvia_2mm": 4,
+    "pax_dia_desvio_pct": -7.91,
+    "pax_tormenta_desvio_pct": 2.31,
+    "ciclo_tormenta_desvio_pct": 2.08,
+    "ciclo_tormenta_min": 276.36,
+    "cancel_dia_pct": 5.07,
+    "cancel_dia_esperada_pct": 5.26,
+    "cancel_tormenta_pct": 5.17,
+    "viajes_tormenta_desvio_pct": 2.17,
+    "retraso_tormenta_min": -4.05,
+    "retraso_tormenta_esperado_min": -2.83,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-07-02",
+    "dia_semana": "mar",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 25.7,
+    "intensidad_max_mm_h": 6.2,
+    "hora_pico_operacion": 5,
+    "mm_h_pico_operacion": 6.2,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": 0.74,
+    "pax_tormenta_desvio_pct": -3.93,
+    "ciclo_tormenta_desvio_pct": -0.8,
+    "ciclo_tormenta_min": 209.38,
+    "cancel_dia_pct": 9.04,
+    "cancel_dia_esperada_pct": 7.65,
+    "cancel_tormenta_pct": 6.42,
+    "viajes_tormenta_desvio_pct": -4.67,
+    "retraso_tormenta_min": -0.39,
+    "retraso_tormenta_esperado_min": -1.92,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-11-09",
+    "dia_semana": "sáb",
+    "tipo_dia": "Sábado",
+    "especial": 0,
+    "precipitacion_mm": 22.4,
+    "intensidad_max_mm_h": 6.0,
+    "hora_pico_operacion": 12,
+    "mm_h_pico_operacion": 6.0,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": -1.1,
+    "pax_tormenta_desvio_pct": 3.46,
+    "ciclo_tormenta_desvio_pct": 2.05,
+    "ciclo_tormenta_min": 263.35,
+    "cancel_dia_pct": 6.43,
+    "cancel_dia_esperada_pct": 5.95,
+    "cancel_tormenta_pct": 5.13,
+    "viajes_tormenta_desvio_pct": 8.82,
+    "retraso_tormenta_min": -3.97,
+    "retraso_tormenta_esperado_min": -3.38,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-09-22",
+    "dia_semana": "dom",
+    "tipo_dia": "Domingo/festivo",
+    "especial": 1,
+    "precipitacion_mm": 20.2,
+    "intensidad_max_mm_h": 5.8,
+    "hora_pico_operacion": 13,
+    "mm_h_pico_operacion": 1.6,
+    "horas_lluvia_2mm": 2,
+    "pax_dia_desvio_pct": -39.48,
+    "pax_tormenta_desvio_pct": -48.39,
+    "ciclo_tormenta_desvio_pct": -3.4,
+    "ciclo_tormenta_min": 197.18,
+    "cancel_dia_pct": 17.54,
+    "cancel_dia_esperada_pct": 17.43,
+    "cancel_tormenta_pct": 20.0,
+    "viajes_tormenta_desvio_pct": 9.71,
+    "retraso_tormenta_min": 1.34,
+    "retraso_tormenta_esperado_min": -1.95,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2023-10-25",
+    "dia_semana": "mié",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 23.6,
+    "intensidad_max_mm_h": 5.5,
+    "hora_pico_operacion": 11,
+    "mm_h_pico_operacion": 5.5,
+    "horas_lluvia_2mm": 4,
+    "pax_dia_desvio_pct": -7.96,
+    "pax_tormenta_desvio_pct": 1.01,
+    "ciclo_tormenta_desvio_pct": 3.8,
+    "ciclo_tormenta_min": 257.95,
+    "cancel_dia_pct": 6.6,
+    "cancel_dia_esperada_pct": 4.99,
+    "cancel_tormenta_pct": 6.04,
+    "viajes_tormenta_desvio_pct": -1.75,
+    "retraso_tormenta_min": -4.68,
+    "retraso_tormenta_esperado_min": -4.15,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-09-21",
+    "dia_semana": "sáb",
+    "tipo_dia": "Sábado",
+    "especial": 0,
+    "precipitacion_mm": 22.3,
+    "intensidad_max_mm_h": 5.5,
+    "hora_pico_operacion": 17,
+    "mm_h_pico_operacion": 5.5,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": -0.65,
+    "pax_tormenta_desvio_pct": -3.63,
+    "ciclo_tormenta_desvio_pct": 2.52,
+    "ciclo_tormenta_min": 254.87,
+    "cancel_dia_pct": 5.96,
+    "cancel_dia_esperada_pct": 8.23,
+    "cancel_tormenta_pct": 3.92,
+    "viajes_tormenta_desvio_pct": -20.65,
+    "retraso_tormenta_min": -1.48,
+    "retraso_tormenta_esperado_min": -2.69,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2023-05-25",
+    "dia_semana": "jue",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 22.8,
+    "intensidad_max_mm_h": 5.3,
+    "hora_pico_operacion": 6,
+    "mm_h_pico_operacion": 5.3,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": -1.46,
+    "pax_tormenta_desvio_pct": -2.03,
+    "ciclo_tormenta_desvio_pct": 0.89,
+    "ciclo_tormenta_min": 226.53,
+    "cancel_dia_pct": 6.37,
+    "cancel_dia_esperada_pct": 5.86,
+    "cancel_tormenta_pct": 3.89,
+    "viajes_tormenta_desvio_pct": -2.54,
+    "retraso_tormenta_min": -3.14,
+    "retraso_tormenta_esperado_min": -3.36,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-11-03",
+    "dia_semana": "dom",
+    "tipo_dia": "Domingo/festivo",
+    "especial": 0,
+    "precipitacion_mm": 34.1,
+    "intensidad_max_mm_h": 5.0,
+    "hora_pico_operacion": 12,
+    "mm_h_pico_operacion": 5.0,
+    "horas_lluvia_2mm": 9,
+    "pax_dia_desvio_pct": -10.5,
+    "pax_tormenta_desvio_pct": -16.8,
+    "ciclo_tormenta_desvio_pct": 5.23,
+    "ciclo_tormenta_min": 207.49,
+    "cancel_dia_pct": 15.19,
+    "cancel_dia_esperada_pct": 14.55,
+    "cancel_tormenta_pct": 20.54,
+    "viajes_tormenta_desvio_pct": -17.21,
+    "retraso_tormenta_min": -2.25,
+    "retraso_tormenta_esperado_min": -3.27,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-10-21",
+    "dia_semana": "lun",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 20.1,
+    "intensidad_max_mm_h": 4.1,
+    "hora_pico_operacion": 4,
+    "mm_h_pico_operacion": 2.5,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": 2.58,
+    "pax_tormenta_desvio_pct": 8.45,
+    "ciclo_tormenta_desvio_pct": -0.75,
+    "ciclo_tormenta_min": 210.34,
+    "cancel_dia_pct": 7.68,
+    "cancel_dia_esperada_pct": 6.72,
+    "cancel_tormenta_pct": 4.6,
+    "viajes_tormenta_desvio_pct": -1.19,
+    "retraso_tormenta_min": -0.87,
+    "retraso_tormenta_esperado_min": -0.96,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2023-10-28",
+    "dia_semana": "sáb",
+    "tipo_dia": "Sábado",
+    "especial": 0,
+    "precipitacion_mm": 22.1,
+    "intensidad_max_mm_h": 3.5,
+    "hora_pico_operacion": 5,
+    "mm_h_pico_operacion": 3.1,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": -3.76,
+    "pax_tormenta_desvio_pct": -3.5,
+    "ciclo_tormenta_desvio_pct": 3.12,
+    "ciclo_tormenta_min": 197.7,
+    "cancel_dia_pct": 5.13,
+    "cancel_dia_esperada_pct": 5.43,
+    "cancel_tormenta_pct": 4.63,
+    "viajes_tormenta_desvio_pct": -3.29,
+    "retraso_tormenta_min": 6.32,
+    "retraso_tormenta_esperado_min": -2.52,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-11-01",
+    "dia_semana": "vie",
+    "tipo_dia": "Laboral",
+    "especial": 0,
+    "precipitacion_mm": 25.9,
+    "intensidad_max_mm_h": 3.4,
+    "hora_pico_operacion": 10,
+    "mm_h_pico_operacion": 3.4,
+    "horas_lluvia_2mm": 6,
+    "pax_dia_desvio_pct": -1.94,
+    "pax_tormenta_desvio_pct": -5.3,
+    "ciclo_tormenta_desvio_pct": 4.97,
+    "ciclo_tormenta_min": 275.33,
+    "cancel_dia_pct": 5.79,
+    "cancel_dia_esperada_pct": 5.96,
+    "cancel_tormenta_pct": 2.96,
+    "viajes_tormenta_desvio_pct": -8.39,
+    "retraso_tormenta_min": -2.82,
+    "retraso_tormenta_esperado_min": -3.43,
+    "residuo_e1_dia_pct": NaN
+   },
+   {
+    "fecha": "2024-11-02",
+    "dia_semana": "sáb",
+    "tipo_dia": "Sábado",
+    "especial": 0,
+    "precipitacion_mm": 20.4,
+    "intensidad_max_mm_h": 3.0,
+    "hora_pico_operacion": 4,
+    "mm_h_pico_operacion": 3.0,
+    "horas_lluvia_2mm": 5,
+    "pax_dia_desvio_pct": 3.95,
+    "pax_tormenta_desvio_pct": 3.63,
+    "ciclo_tormenta_desvio_pct": 4.04,
+    "ciclo_tormenta_min": 193.03,
+    "cancel_dia_pct": 5.14,
+    "cancel_dia_esperada_pct": 5.8,
+    "cancel_tormenta_pct": 4.23,
+    "viajes_tormenta_desvio_pct": -0.73,
+    "retraso_tormenta_min": -2.5,
+    "retraso_tormenta_esperado_min": -0.02,
+    "residuo_e1_dia_pct": NaN
+   }
+  ]
+ },
+ "variantes": [
+  {
+   "nombre": "E1 base (a), h = 7",
+   "horizonte": "h=7",
+   "n_variables": 67,
+   "notas": "Réplica de la variante (a) de E1: sin clima.",
+   "metricas_global": {
+    "n": 18615,
+    "MAE": 99.56909767870894,
+    "RMSE": 147.90656669832714,
+    "WAPE": 14.398858094066266,
+    "sesgo": -2.2539211621857724,
+    "devianza_poisson": 31.16948458834636
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "n": 6205,
+     "MAE": 71.18662924085666,
+     "RMSE": 95.5770229275585,
+     "WAPE": 19.328643067755706,
+     "sesgo": 2.0195307429763667
+    },
+    "CRA 54": {
+     "n": 6205,
+     "MAE": 138.75369760427213,
+     "RMSE": 201.63027792395076,
+     "WAPE": 12.037089842449351,
+     "sesgo": -5.412153929078158
+    },
+    "SILENCIO": {
+     "n": 6205,
+     "MAE": 88.76696619099805,
+     "RMSE": 125.85436476370379,
+     "WAPE": 16.037198482087042,
+     "sesgo": -3.3691403004555283
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Laboral": {
+     "n": 12495,
+     "MAE": 111.13952422547756,
+     "RMSE": 165.21785832771963,
+     "WAPE": 13.870844694253456,
+     "sesgo": -4.107930707448606
+    },
+    "Sábado": {
+     "n": 2652,
+     "MAE": 87.84291145524232,
+     "RMSE": 119.88447859524646,
+     "WAPE": 13.597918349199517,
+     "sesgo": -0.9158940581407344
+    },
+    "Domingo/festivo": {
+     "n": 3468,
+     "MAE": 66.84861502667893,
+     "RMSE": 89.91492642486226,
+     "WAPE": 20.200690017725307,
+     "sesgo": 3.4027689728002883
+    }
+   },
+   "wape_dias_lluviosos_5mm": 14.313628941669787,
+   "wape_dias_lluviosos_5mm_por_ruta": {
+    "CL 72": 19.511673649966692,
+    "CRA 54": 11.936036671110493,
+    "SILENCIO": 15.834543330792009
+   },
+   "wape_dias_aguacero_5mm_h": 13.66084300951137,
+   "wape_dias_secos": 14.427785077060012,
+   "wape_horas_lluvia_ventana_2mm": 14.465928476281285,
+   "n_dias_lluviosos_5mm": 82,
+   "n_dias_aguacero_5mm_h": 39,
+   "importancia_clima_pct": 0.0,
+   "importancia_top_clima": {},
+   "tiempo_s": 56.1
+  },
+  {
+   "nombre": "(a) nowcast: clima observado, h = 7",
+   "horizonte": "h=7",
+   "n_variables": 80,
+   "notas": "Cota superior: usa la lluvia, temperatura y humedad observadas del mismo día y hora (como si el pronóstico fuera perfecto).",
+   "metricas_global": {
+    "n": 18615,
+    "MAE": 101.13819508657338,
+    "RMSE": 150.74650029537662,
+    "WAPE": 14.625767963075134,
+    "sesgo": -5.42749099338747,
+    "devianza_poisson": 31.996276459196753
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "n": 6205,
+     "MAE": 71.73395778093949,
+     "RMSE": 96.59567113057534,
+     "WAPE": 19.477254093518184,
+     "sesgo": 0.3182667249496377
+    },
+    "CRA 54": {
+     "n": 6205,
+     "MAE": 141.4650259916307,
+     "RMSE": 205.98891529146948,
+     "WAPE": 12.272301616654447,
+     "sesgo": -10.859948403690181
+    },
+    "SILENCIO": {
+     "n": 6205,
+     "MAE": 90.21560148714987,
+     "RMSE": 128.10685051857885,
+     "WAPE": 16.29891804702695,
+     "sesgo": -5.740791301421863
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Laboral": {
+     "n": 12495,
+     "MAE": 112.98410433031361,
+     "RMSE": 168.5180254768086,
+     "WAPE": 14.101058781803285,
+     "sesgo": -7.551267304163607
+    },
+    "Sábado": {
+     "n": 2652,
+     "MAE": 89.50138431900615,
+     "RMSE": 122.43806653211224,
+     "WAPE": 13.85464684569652,
+     "sesgo": -5.599379249547377
+    },
+    "Domingo/festivo": {
+     "n": 3468,
+     "MAE": 67.35681854535478,
+     "RMSE": 90.53106495189509,
+     "WAPE": 20.354261811884257,
+     "sesgo": 2.3557940869135523
+    }
+   },
+   "wape_dias_lluviosos_5mm": 15.000379448130523,
+   "wape_dias_lluviosos_5mm_por_ruta": {
+    "CL 72": 19.87720866089696,
+    "CRA 54": 12.746072252739223,
+    "SILENCIO": 16.476289198171187
+   },
+   "wape_dias_aguacero_5mm_h": 14.440654958028553,
+   "wape_dias_secos": 14.517696540455225,
+   "wape_horas_lluvia_ventana_2mm": 14.897719693766817,
+   "n_dias_lluviosos_5mm": 82,
+   "n_dias_aguacero_5mm_h": 39,
+   "importancia_clima_pct": 0.2793911888683121,
+   "importancia_top_clima": {
+    "p_dia_ant": 0.065,
+    "p_dia": 0.054,
+    "p_dia_4_21": 0.031,
+    "temp_h": 0.03,
+    "max_dia": 0.028,
+    "horas_lluvia_dia": 0.023,
+    "hr_h": 0.021,
+    "p_viaje4": 0.011
+   },
+   "tiempo_s": 63.8,
+   "dif_wape_vs_base_pp": {
+    "estimacion": 0.22690986900886792,
+    "ic_inf": 0.12053121163109104,
+    "ic_sup": 0.3630681769117866
+   },
+   "dif_wape_vs_base_dias_lluviosos_pp": {
+    "estimacion": 0.6867505064607373,
+    "ic_inf": 0.3022718310014349,
+    "ic_sup": 1.164660793336774
+   },
+   "dif_wape_vs_base_dias_aguacero_pp": {
+    "estimacion": 0.7798119485171796,
+    "ic_inf": 0.07606493484336604,
+    "ic_sup": 1.7182142048489968
+   },
+   "dif_wape_vs_base_horas_lluvia_pp": {
+    "estimacion": 0.43179121748553007,
+    "ic_inf": 0.13874403734631927,
+    "ic_sup": 0.7065831358772141
+   },
+   "reduccion_ecm_pct": -3.877039739069848
+  },
+  {
+   "nombre": "(b) operativo: climatología, h = 7",
+   "horizonte": "h=7",
+   "n_variables": 73,
+   "notas": "Solo climatología 2013-2022 por mes y hora y temporada de lluvias: lo único que se sabe con 7 días de anticipación.",
+   "metricas_global": {
+    "n": 18615,
+    "MAE": 99.55383211731791,
+    "RMSE": 147.57013602473802,
+    "WAPE": 14.39665051503502,
+    "sesgo": -2.9018877512015067,
+    "devianza_poisson": 31.130492698182703
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "n": 6205,
+     "MAE": 71.20814449514926,
+     "RMSE": 95.58570476745938,
+     "WAPE": 19.334484904560856,
+     "sesgo": 1.3357346719437586
+    },
+    "CRA 54": {
+     "n": 6205,
+     "MAE": 138.6761374216252,
+     "RMSE": 200.99817673833158,
+     "WAPE": 12.030361381133815,
+     "sesgo": -5.552343175209074
+    },
+    "SILENCIO": {
+     "n": 6205,
+     "MAE": 88.77721443517926,
+     "RMSE": 125.67394770219309,
+     "WAPE": 16.039049994345255,
+     "sesgo": -4.489054750339208
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Laboral": {
+     "n": 12495,
+     "MAE": 110.97057605069838,
+     "RMSE": 164.70655364521215,
+     "WAPE": 13.849759001201676,
+     "sesgo": -4.776940855003542
+    },
+    "Sábado": {
+     "n": 2652,
+     "MAE": 88.30977710650178,
+     "RMSE": 120.28504935339348,
+     "WAPE": 13.670188278562076,
+     "sesgo": -2.0483977360255907
+    },
+    "Domingo/festivo": {
+     "n": 3468,
+     "MAE": 67.0183703067918,
+     "RMSE": 89.91845500847852,
+     "WAPE": 20.25198762188754,
+     "sesgo": 3.201149449421296
+    }
+   },
+   "wape_dias_lluviosos_5mm": 14.31120439334182,
+   "wape_dias_lluviosos_5mm_por_ruta": {
+    "CL 72": 19.44185610331596,
+    "CRA 54": 11.970238318321929,
+    "SILENCIO": 15.800381204478068
+   },
+   "wape_dias_aguacero_5mm_h": 13.652527792206866,
+   "wape_dias_secos": 14.46256062294456,
+   "wape_horas_lluvia_ventana_2mm": 14.457689426269852,
+   "n_dias_lluviosos_5mm": 82,
+   "n_dias_aguacero_5mm_h": 39,
+   "importancia_clima_pct": 0.24416623429576284,
+   "importancia_top_clima": {
+    "clim_p_dia_mes": 0.101,
+    "clim_p_viaje4": 0.051,
+    "clim_p_mes_hora": 0.037,
+    "temporada": 0.023,
+    "clim_prob_dia_lluvioso": 0.017,
+    "clim_prob_mes_hora": 0.016
+   },
+   "tiempo_s": 55.2,
+   "dif_wape_vs_base_pp": {
+    "estimacion": -0.0022075790312493975,
+    "ic_inf": -0.047421965336844674,
+    "ic_sup": 0.04417137650123517
+   },
+   "dif_wape_vs_base_dias_lluviosos_pp": {
+    "estimacion": -0.0024245483279699705,
+    "ic_inf": -0.08599190587493187,
+    "ic_sup": 0.07241881913436649
+   },
+   "dif_wape_vs_base_dias_aguacero_pp": {
+    "estimacion": -0.008315217304509232,
+    "ic_inf": -0.12201418015970535,
+    "ic_sup": 0.09686807479777672
+   },
+   "dif_wape_vs_base_horas_lluvia_pp": {
+    "estimacion": -0.00823905001143183,
+    "ic_inf": -0.10611841293614732,
+    "ic_sup": 0.09063918036908782
+   },
+   "reduccion_ecm_pct": 0.45440585331595573
+  },
+  {
+   "nombre": "(b') climatología + lluvia rezagada >= 7 días, h = 7",
+   "horizonte": "h=7",
+   "n_variables": 76,
+   "notas": "Añade la lluvia observada de los días d-13..d-7 y d-36..d-7 (permitido con h = 7).",
+   "metricas_global": {
+    "n": 18615,
+    "MAE": 100.06531956353919,
+    "RMSE": 148.40684917645467,
+    "WAPE": 14.47061759243891,
+    "sesgo": -2.145828285577271,
+    "devianza_poisson": 31.505060067566202
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "n": 6205,
+     "MAE": 71.34796487944685,
+     "RMSE": 95.59000593516016,
+     "WAPE": 19.372449032522873,
+     "sesgo": 1.8986071426579008
+    },
+    "CRA 54": {
+     "n": 6205,
+     "MAE": 139.4750071216717,
+     "RMSE": 202.1204722191619,
+     "WAPE": 12.099664516962996,
+     "sesgo": -4.5345979353531325
+    },
+    "SILENCIO": {
+     "n": 6205,
+     "MAE": 89.37298668949902,
+     "RMSE": 126.82130784165541,
+     "WAPE": 16.14668595739133,
+     "sesgo": -3.801494064036582
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Laboral": {
+     "n": 12495,
+     "MAE": 111.61361178247144,
+     "RMSE": 165.7113994783371,
+     "WAPE": 13.930013517589417,
+     "sesgo": -3.6694296651313265
+    },
+    "Sábado": {
+     "n": 2652,
+     "MAE": 88.4967024814088,
+     "RMSE": 120.52259931882735,
+     "WAPE": 13.699123976881623,
+     "sesgo": -2.201486453920873
+    },
+    "Domingo/festivo": {
+     "n": 3468,
+     "MAE": 67.30409154342699,
+     "RMSE": 90.41363454594355,
+     "WAPE": 20.338328470242367,
+     "sesgo": 3.3861799900787704
+    }
+   },
+   "wape_dias_lluviosos_5mm": 14.387000716242838,
+   "wape_dias_lluviosos_5mm_por_ruta": {
+    "CL 72": 19.394906928811213,
+    "CRA 54": 11.998905075675404,
+    "SILENCIO": 16.054247067515533
+   },
+   "wape_dias_aguacero_5mm_h": 13.717245040398405,
+   "wape_dias_secos": 14.503057997874711,
+   "wape_horas_lluvia_ventana_2mm": 14.61019579781076,
+   "n_dias_lluviosos_5mm": 82,
+   "n_dias_aguacero_5mm_h": 39,
+   "importancia_clima_pct": 0.43585072877231595,
+   "importancia_top_clima": {
+    "p_rez_7_36": 0.117,
+    "clim_p_dia_mes": 0.091,
+    "horas_lluvia_rez_7_13": 0.054,
+    "p_rez_7_13": 0.048,
+    "clim_p_viaje4": 0.042,
+    "clim_p_mes_hora": 0.03,
+    "temporada": 0.021,
+    "clim_prob_dia_lluvioso": 0.02
+   },
+   "tiempo_s": 57.5,
+   "dif_wape_vs_base_pp": {
+    "estimacion": 0.07175949837263763,
+    "ic_inf": -0.0013687067410903765,
+    "ic_sup": 0.14092266189994376
+   },
+   "dif_wape_vs_base_dias_lluviosos_pp": {
+    "estimacion": 0.07337177457304864,
+    "ic_inf": -0.042112628248665185,
+    "ic_sup": 0.19072830387808934
+   },
+   "dif_wape_vs_base_dias_aguacero_pp": {
+    "estimacion": 0.056402030887031676,
+    "ic_inf": -0.11506505093795542,
+    "ic_sup": 0.25031530838434674
+   },
+   "dif_wape_vs_base_horas_lluvia_pp": {
+    "estimacion": 0.1442673215294733,
+    "ic_inf": 0.013835269501065952,
+    "ic_sup": 0.28353574024223527
+   },
+   "reduccion_ecm_pct": -0.6776285497443357
+  },
+  {
+   "nombre": "(a2) nowcast parsimonioso, h = 7",
+   "horizonte": "h=7",
+   "n_variables": 70,
+   "notas": "Cota superior con solo 3 variables de lluvia agregadas (máximo hora o 3 previas, suma durante el viaje, lluvia del día 4-22 h).",
+   "metricas_global": {
+    "n": 18615,
+    "MAE": 99.76583206419033,
+    "RMSE": 148.29307468630503,
+    "WAPE": 14.42730819118285,
+    "sesgo": -4.204957110420543,
+    "devianza_poisson": 31.32149423900929
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "n": 6205,
+     "MAE": 71.28967824820852,
+     "RMSE": 95.78678558020368,
+     "WAPE": 19.35662300588217,
+     "sesgo": 1.0992607097734417
+    },
+    "CRA 54": {
+     "n": 6205,
+     "MAE": 138.97867677300482,
+     "RMSE": 202.09701640719084,
+     "WAPE": 12.056607120283907,
+     "sesgo": -8.948399253889885
+    },
+    "SILENCIO": {
+     "n": 6205,
+     "MAE": 89.0291411713577,
+     "RMSE": 126.3099191167418,
+     "WAPE": 16.084564663195657,
+     "sesgo": -4.765732787145188
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Laboral": {
+     "n": 12495,
+     "MAE": 111.31698409864758,
+     "RMSE": 165.64027434882462,
+     "WAPE": 13.89299269567201,
+     "sesgo": -6.312120763503745
+    },
+    "Sábado": {
+     "n": 2652,
+     "MAE": 88.44017265111283,
+     "RMSE": 120.52617249261293,
+     "WAPE": 13.690373264912669,
+     "sesgo": -3.8881635299303814
+    },
+    "Domingo/festivo": {
+     "n": 3468,
+     "MAE": 66.8085091382787,
+     "RMSE": 89.87593503694175,
+     "WAPE": 20.188570595069578,
+     "sesgo": 3.144775666342632
+    }
+   },
+   "wape_dias_lluviosos_5mm": 14.419321374713395,
+   "wape_dias_lluviosos_5mm_por_ruta": {
+    "CL 72": 19.60646724907088,
+    "CRA 54": 12.044079979009856,
+    "SILENCIO": 15.942505068513126
+   },
+   "wape_dias_aguacero_5mm_h": 13.764358034224996,
+   "wape_dias_secos": 14.480931152133389,
+   "wape_horas_lluvia_ventana_2mm": 14.525682073594396,
+   "n_dias_lluviosos_5mm": 82,
+   "n_dias_aguacero_5mm_h": 39,
+   "importancia_clima_pct": 0.12416753603269141,
+   "importancia_top_clima": {
+    "p_dia_4_21": 0.112,
+    "p_viaje4": 0.012
+   },
+   "tiempo_s": 56.8,
+   "dif_wape_vs_base_pp": {
+    "estimacion": 0.028450097116580957,
+    "ic_inf": -0.03390329805682454,
+    "ic_sup": 0.09773293299497492
+   },
+   "dif_wape_vs_base_dias_lluviosos_pp": {
+    "estimacion": 0.10569243304360511,
+    "ic_inf": -0.07532703997474556,
+    "ic_sup": 0.27332536205813973
+   },
+   "dif_wape_vs_base_dias_aguacero_pp": {
+    "estimacion": 0.10351502471362259,
+    "ic_inf": -0.2273902417953589,
+    "ic_sup": 0.4526522935665926
+   },
+   "dif_wape_vs_base_horas_lluvia_pp": {
+    "estimacion": 0.05975359731311221,
+    "ic_inf": -0.11124084828626891,
+    "ic_sup": 0.24295382893781534
+   },
+   "reduccion_ecm_pct": -0.5233209127313997
+  },
+  {
+   "nombre": "(a3) nowcast parsimonioso monótono, h = 7",
+   "horizonte": "h=7",
+   "n_variables": 70,
+   "notas": "Como (a2) con restricción monótona decreciente: más lluvia nunca aumenta los pasajeros previstos.",
+   "metricas_global": {
+    "n": 18615,
+    "MAE": 99.40237369302805,
+    "RMSE": 147.935369681635,
+    "WAPE": 14.374747852368158,
+    "sesgo": -2.381097719034165,
+    "devianza_poisson": 31.15174861639634
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "n": 6205,
+     "MAE": 71.09644171902322,
+     "RMSE": 95.43692626917814,
+     "WAPE": 19.304155289119834,
+     "sesgo": 2.034370946226659
+    },
+    "CRA 54": {
+     "n": 6205,
+     "MAE": 138.4668809719313,
+     "RMSE": 201.63295461192848,
+     "WAPE": 12.012208072583714,
+     "sesgo": -5.856788203138897
+    },
+    "SILENCIO": {
+     "n": 6205,
+     "MAE": 88.64379838812961,
+     "RMSE": 126.0577864603432,
+     "WAPE": 16.01494621205955,
+     "sesgo": -3.3208759001902597
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Laboral": {
+     "n": 12495,
+     "MAE": 110.80774816823575,
+     "RMSE": 165.1989692564602,
+     "WAPE": 13.829437155438223,
+     "sesgo": -4.058588836113647
+    },
+    "Sábado": {
+     "n": 2652,
+     "MAE": 88.39551553617946,
+     "RMSE": 120.56983244629212,
+     "WAPE": 13.683460427069354,
+     "sesgo": -2.5794235145105424
+    },
+    "Domingo/festivo": {
+     "n": 3468,
+     "MAE": 66.72648954200211,
+     "RMSE": 89.59296089131107,
+     "WAPE": 20.16378545271321,
+     "sesgo": 3.8144650022782485
+    }
+   },
+   "wape_dias_lluviosos_5mm": 14.540997666358404,
+   "wape_dias_lluviosos_5mm_por_ruta": {
+    "CL 72": 19.606576584363385,
+    "CRA 54": 12.198564772267257,
+    "SILENCIO": 16.075846050556038
+   },
+   "wape_dias_aguacero_5mm_h": 13.905536616369673,
+   "wape_dias_secos": 14.342713403229974,
+   "wape_horas_lluvia_ventana_2mm": 14.697463380801471,
+   "n_dias_lluviosos_5mm": 82,
+   "n_dias_aguacero_5mm_h": 39,
+   "importancia_clima_pct": 0.07340867779470102,
+   "importancia_top_clima": {
+    "p_dia_4_21": 0.07,
+    "p_viaje4": 0.004
+   },
+   "tiempo_s": 72.7,
+   "dif_wape_vs_base_pp": {
+    "estimacion": -0.024110241698110924,
+    "ic_inf": -0.08980911955203834,
+    "ic_sup": 0.04344081747489891
+   },
+   "dif_wape_vs_base_dias_lluviosos_pp": {
+    "estimacion": 0.22736872468861385,
+    "ic_inf": 0.024064217458937245,
+    "ic_sup": 0.43390121981283625
+   },
+   "dif_wape_vs_base_dias_aguacero_pp": {
+    "estimacion": 0.24469360685830166,
+    "ic_inf": -0.1565511425937048,
+    "ic_sup": 0.6581222808308935
+   },
+   "dif_wape_vs_base_horas_lluvia_pp": {
+    "estimacion": 0.23153490452018696,
+    "ic_inf": -0.02953015874827408,
+    "ic_sup": 0.4894610960322087
+   },
+   "reduccion_ecm_pct": -0.038951330511051395
+  },
+  {
+   "nombre": "E1 base (a), h = 1",
+   "horizonte": "h=1",
+   "n_variables": 82,
+   "notas": "Réplica de la variante (a) de E1 con h = 1.",
+   "metricas_global": {
+    "n": 18615,
+    "MAE": 97.48946862631945,
+    "RMSE": 145.63765806510278,
+    "WAPE": 14.098119367777127,
+    "sesgo": -1.8341742655337014,
+    "devianza_poisson": 30.342676356059954
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "n": 6205,
+     "MAE": 70.38064289644088,
+     "RMSE": 94.47452871266088,
+     "WAPE": 19.10980109511519,
+     "sesgo": 0.8862493243439801
+    },
+    "CRA 54": {
+     "n": 6205,
+     "MAE": 135.27518391730425,
+     "RMSE": 198.4381068543714,
+     "WAPE": 11.73532360132445,
+     "sesgo": -4.211711536654965
+    },
+    "SILENCIO": {
+     "n": 6205,
+     "MAE": 86.81257906521321,
+     "RMSE": 123.80574910979333,
+     "WAPE": 15.684106610279605,
+     "sesgo": -2.177060584290119
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Laboral": {
+     "n": 12495,
+     "MAE": 108.64872835289978,
+     "RMSE": 162.6716554260067,
+     "WAPE": 13.559979203741543,
+     "sesgo": -3.423335783339013
+    },
+    "Sábado": {
+     "n": 2652,
+     "MAE": 86.68580160002807,
+     "RMSE": 118.40874252610921,
+     "WAPE": 13.418799908432966,
+     "sesgo": 0.6996318436390804
+    },
+    "Domingo/festivo": {
+     "n": 3468,
+     "MAE": 65.54493998448078,
+     "RMSE": 88.2418309610949,
+     "WAPE": 19.80673816994537,
+     "sesgo": 1.953864766603304
+    }
+   },
+   "wape_dias_lluviosos_5mm": 13.999109898322873,
+   "wape_dias_lluviosos_5mm_por_ruta": {
+    "CL 72": 19.274027691356117,
+    "CRA 54": 11.587475735088823,
+    "SILENCIO": 15.54019629682709
+   },
+   "wape_dias_aguacero_5mm_h": 13.291143592615715,
+   "wape_dias_secos": 14.041292242733332,
+   "wape_horas_lluvia_ventana_2mm": 14.197829126429179,
+   "n_dias_lluviosos_5mm": 82,
+   "n_dias_aguacero_5mm_h": 39,
+   "importancia_clima_pct": 0.0,
+   "importancia_top_clima": {},
+   "tiempo_s": 65.7
+  },
+  {
+   "nombre": "(a) nowcast: clima observado, h = 1",
+   "horizonte": "h=1",
+   "n_variables": 95,
+   "notas": "Cota superior con h = 1.",
+   "metricas_global": {
+    "n": 18615,
+    "MAE": 98.44281880501968,
+    "RMSE": 147.41996393108096,
+    "WAPE": 14.23598497324191,
+    "sesgo": -3.647217133281064,
+    "devianza_poisson": 30.825551821752207
+   },
+   "metricas_por_ruta": {
+    "CL 72": {
+     "n": 6205,
+     "MAE": 70.79232599645532,
+     "RMSE": 95.10557554729633,
+     "WAPE": 19.221581576675618,
+     "sesgo": 0.17193669343459628
+    },
+    "CRA 54": {
+     "n": 6205,
+     "MAE": 136.79118849153252,
+     "RMSE": 201.17754928629023,
+     "WAPE": 11.866839255152966,
+     "sesgo": -6.808139943344754
+    },
+    "SILENCIO": {
+     "n": 6205,
+     "MAE": 87.7449419270712,
+     "RMSE": 125.22164533060324,
+     "WAPE": 15.8525531497363,
+     "sesgo": -4.305448149933034
+    }
+   },
+   "metricas_por_tipo_dia": {
+    "Laboral": {
+     "n": 12495,
+     "MAE": 109.82261581525736,
+     "RMSE": 164.90278235965226,
+     "WAPE": 13.706487035157656,
+     "sesgo": -5.035974193180883
+    },
+    "Sábado": {
+     "n": 2652,
+     "MAE": 87.11700164545589,
+     "RMSE": 118.72635011503948,
+     "WAPE": 13.485548868739066,
+     "sesgo": -3.1891847297395772
+    },
+    "Domingo/festivo": {
+     "n": 3468,
+     "MAE": 66.10299858132971,
+     "RMSE": 88.87857149619424,
+     "WAPE": 19.97537545169269,
+     "sesgo": 1.0061327886497915
+    }
+   },
+   "wape_dias_lluviosos_5mm": 14.319133408236965,
+   "wape_dias_lluviosos_5mm_por_ruta": {
+    "CL 72": 19.409485306782216,
+    "CRA 54": 11.951206554391614,
+    "SILENCIO": 15.890575647007518
+   },
+   "wape_dias_aguacero_5mm_h": 13.849019530684698,
+   "wape_dias_secos": 14.175014652422268,
+   "wape_horas_lluvia_ventana_2mm": 14.411304661548765,
+   "n_dias_lluviosos_5mm": 82,
+   "n_dias_aguacero_5mm_h": 39,
+   "importancia_clima_pct": 0.23866525548875167,
+   "importancia_top_clima": {
+    "p_dia": 0.057,
+    "p_dia_ant": 0.053,
+    "p_dia_4_21": 0.029,
+    "max_dia": 0.025,
+    "temp_h": 0.021,
+    "horas_lluvia_dia": 0.018,
+    "hr_h": 0.012,
+    "p_viaje4": 0.01
+   },
+   "tiempo_s": 73.6,
+   "dif_wape_vs_base_pp": {
+    "estimacion": 0.13786560546478366,
+    "ic_inf": 0.026899760952995046,
+    "ic_sup": 0.2839461726285722
+   },
+   "dif_wape_vs_base_dias_lluviosos_pp": {
+    "estimacion": 0.32002350991409406,
+    "ic_inf": -0.003687159354181616,
+    "ic_sup": 0.7391798907289564
+   },
+   "dif_wape_vs_base_dias_aguacero_pp": {
+    "estimacion": 0.5578759380689846,
+    "ic_inf": -0.06076419593950888,
+    "ic_sup": 1.421196070895308
+   },
+   "dif_wape_vs_base_horas_lluvia_pp": {
+    "estimacion": 0.21347553511958692,
+    "ic_inf": -0.03245993675764104,
+    "ic_sup": 0.5181418325756685
+   },
+   "reduccion_ecm_pct": -2.4625660309406183
+  }
+ ],
+ "mejor_variante": "E1 base (a), h = 7 (ninguna variante con clima mejora el WAPE con IC 95 % por debajo de 0)",
+ "descripcion": "Efecto de la lluvia (Open-Meteo, horario) sobre la demanda, el tiempo de ciclo, el retraso de salida y las cancelaciones de SILENCIO, CRA 54 y CL 72 (2023-2025), y valor de añadir variables de clima al LightGBM de E1 (12 pliegues de 2025).",
+ "tiempo_s": 521.6,
+ "modelos_reutilizados_de_cache": false,
+ "verificacion": {
+  "fecha": "2026-10-05",
+  "veredicto": "confiable_con_reservas",
+  "confirmado": "Lluvia anual, máximo horario, horas por clase, 51 eventos, ERA5 0,63, desvíos de pasajeros por clase/ruta/tipo de día, viajes válidos −2,9 %, ciclo +1,2/+2,0/+2,7/+3,0 % frente a seco, R² diario 0,019, WAPE de las 8 variantes y diferencias con IC recalculados de forma independiente. Protocolo sin fuga.",
+  "correcciones": [
+   "La hora del aguacero no ordena los efectos: mediana del desvío en la ventana de tormenta −2,0 % (pico laboral, 11 eventos), −3,0 % (valle, 25) y +0,9 % (fin de semana, 12).",
+   "2024-10-10 (−20,5 %) coincide con el receso escolar de octubre (semana entera −8 a −18 %) y 2024-05-30 (−12 %) con la transición al Sibus y el fin de semestre (E10): no son efectos limpios de la lluvia.",
+   "Se retira de la regla operativa 'aceptar menos salidas en los aguaceros de la madrugada y del final de la tarde'.",
+   "Días al año con alguna hora ≥ 2 / ≥ 5 mm/h: 91 / 34 contando todos los días (85 / 31 solo días normales).",
+   "Tasa media de cancelación 8,7 % (CRA 54 6,0 %), no 8–10 %; el −12 % de domingo/festivo con lluvia fuerte es un solo día.",
+   "La réplica de E1 tiene WAPE 14,40 % frente a 14,39 % del archivo de E1 (correlación 0,9997); las comparaciones son contra la réplica."
+  ],
+  "observaciones": [
+   "run.py escribe dos tablas en datos/ (clima_barranquilla_2023_2025.parquet, clima_diario.parquet), usadas también por E7.",
+   "El docstring de run.py dice ~25 min; la ejecución real tarda 8,7 min."
+  ]
+ }
+}

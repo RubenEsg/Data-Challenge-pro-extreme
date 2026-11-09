@@ -1,0 +1,16 @@
+% Sección 7. Resume cifras ya citadas en las secciones 4 y 5.
+\section{Conclusiones}
+\label{sec:conclusiones}
+
+\begin{enumerate}
+  \item La demanda se pronostica con una semana de antelación con un WAPE de 13,6--13,9~\%, frente al 20,0~\% de la regla
+        manual; la mejora sale de no aprender de datos corruptos y de combinar el LightGBM con un modelo fundacional.
+  \item Lo que decide cuántos buses despachar es la elasticidad: con $\beta \approx 0{,}70$, recortar no paga con la
+        contabilidad conservadora (el plan que recorta pierde 1.029 M COP al año; con la simétrica deja $+1.939$ M, a costa
+        de pasajeros y sobrecarga). Con costos de fuente pública, el optimizador reasigna, y si eso paga depende
+        de si los buses añadidos atraen pasajeros, algo que solo un piloto puede medir.
+  \item El plan semanal queda mucho más cerca del óptimo que la operación real (1,05 frente a 2,80 salidas por hora de
+        error); reoptimizar en el día no mejora.
+  \item Visto persona a persona, el plan llena demasiado algunos buses: falta añadir el cupo por bus al optimizador antes
+        de llevar el plan a la calle.
+\end{enumerate}

@@ -1,0 +1,1957 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<script>/* Modo embebido: dentro de la app Sobusa Despacho (iframe o ?embebido=1). Abierta sola, nada cambia. */
+try { if (new URLSearchParams(location.search).get('embebido') === '1' || window.parent !== window) document.documentElement.setAttribute('data-embebido', '1'); } catch (e) {}
+/* Solo modo claro (19-oct-2026): el tema claro se fija antes del primer pintado, abierta sola o embebida, aunque el sistema esté en oscuro. */
+document.documentElement.setAttribute('data-theme', 'light');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Consola de despacho</title>
+<meta name="description" content="Consola de despacho en tiempo real (demostración): reproduce días de 2025 de las rutas SILENCIO, CRA 54 y CL 72 de Sobusa como si el sistema estuviera en vivo, con los despachos de las tres rutas en orden.">
+<link rel="stylesheet" href="lib/fuentes.css">  <!-- Barlow Condensed e IBM Plex Sans, copia local (antes: Google Fonts) -->
+<link rel="stylesheet" href="lib/leaflet.min.css">  <!-- Leaflet 1.9.4, copia local (antes: cdnjs) -->
+<style>
+/* Tokens, cabecera, chips, pestañas, botones y controles segmentados copiados de EDA_visual.html y planificador.html para que las páginas se vean como un solo producto. */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --surface-2: #eaeef3; --fg: #182230; --muted: #5a6776; --line: #d9e0e8;
+  --accent: #1c3f6e; --accent-soft: #dce7f5;
+  --r-silencio: #2f6fb3; --r-cra54: #d9731a; --r-cl72: #6a3d9a;
+  --ok: #2e8b57; --warn: #b88a00; --bad: #c0392b;
+  --manana: #c2185b; --tarde: #00897b;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --shadow: 0 1px 2px rgba(24, 34, 48, 0.06), 0 4px 16px rgba(24, 34, 48, 0.05);
+  --shadow-pop: 0 2px 6px rgba(24, 34, 48, 0.10), 0 14px 40px rgba(24, 34, 48, 0.18);
+  /* Propios de la consola: barra neutra del plan semanal y rampa secuencial (un solo tono) de ocupación de los buses. */
+  --plan: #a7b2be;
+  --occ-0: #d4efe9; --occ-1: #92d4c6; --occ-2: #44b09e; --occ-3: #13857a; --occ-4: #0a554d;
+  --sin-dato: #b3bbc5;
+  --mapa-vacio: #f0f1f3;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; line-height: 1.1; margin: 0; text-wrap: balance; }
+h1 { font-size: 30px; letter-spacing: 0.2px; }
+h2 { font-size: 26px; margin-bottom: 4px; }
+h3 { font-size: 19px; color: var(--fg); }
+p { margin: 0; max-width: 72ch; }
+.muted { color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 1001; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 10px 20px; }
+.brand { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.brand .sub { color: var(--muted); font-size: 13px; letter-spacing: 0.4px; text-transform: uppercase; }
+.brand .sub-corta { display: none; }
+@media (max-width: 1560px) { .brand .sub-larga { display: none; } .brand .sub-corta { display: inline; } }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips.rutas { margin-left: auto; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: 500 13px var(--font-body); cursor: pointer; text-decoration: none; white-space: nowrap; }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chips.rutas .chip[aria-pressed="false"] { opacity: 0.45; }
+.chips.rutas .chip[aria-pressed="true"] { border-color: var(--c, var(--accent)); }
+.chip:focus-visible, .tab:focus-visible, .seg button:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; color: var(--muted); padding: 5px 12px; font: 500 13px var(--font-body); cursor: pointer; white-space: nowrap; }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--fg); }
+.seg button .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); margin-right: 6px; }
+.boton { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 8px; padding: 6px 12px; font: 500 13px var(--font-body); cursor: pointer; white-space: nowrap; }
+.boton:hover { background: var(--surface-2); }
+.boton.primario { background: var(--accent-soft); font-weight: 600; min-width: 122px; justify-content: center; }
+.boton:disabled { opacity: 0.45; cursor: default; }
+.boton svg { flex: none; }
+.boton.icono { padding: 6px 9px; min-width: 34px; justify-content: center; font-size: 15px; line-height: 1; }
+
+table.datos { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.datos th, table.datos td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.datos th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; }
+table.datos td.num, table.datos th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.datos tr.ahora td { background: var(--accent-soft); }
+.tabla-wrap { overflow-x: auto; }
+footer { padding: 24px 20px; color: var(--muted); font-size: 12.5px; border-top: 1px solid var(--line); text-align: center; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ---------- Propio de la consola ---------- */
+/* Barra del día: selector de fecha (calendario), día anterior y siguiente, y días de ejemplo. */
+.dia-bar { position: relative; display: flex; flex-wrap: nowrap; align-items: center; gap: 8px 10px; padding: 7px 20px 8px; border-top: 1px solid var(--line); }
+.dia-nav { display: flex; align-items: center; gap: 6px; min-width: 0; flex: none; }
+.selector-dia { display: inline-flex; align-items: center; gap: 9px; min-width: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); padding: 4px 12px; cursor: pointer; min-height: 34px; text-align: left; }
+.selector-dia:hover { background: var(--surface-2); }
+.selector-dia[aria-expanded="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.selector-dia .fecha { font: 600 18px/1.15 var(--font-display); letter-spacing: 0.3px; white-space: nowrap; }
+.selector-dia .f-corta { display: none; }
+.selector-dia .etq { font: 500 13px/1.2 var(--font-body); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px; }
+.selector-dia svg { flex: none; color: var(--muted); }
+.ejemplos { display: flex; flex: 0 1 auto; align-items: center; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: thin; padding: 2px; }
+.ejemplos .rot { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; margin-right: 2px; }
+.ejemplos .chip { padding: 3px 10px; font-size: 12.5px; }
+.ejemplos .chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.dias-disp { flex: none; margin-left: auto; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+
+/* Calendario emergente */
+.panel-dias { position: absolute; left: 14px; top: calc(100% + 4px); z-index: 1200; width: min(680px, calc(100vw - 28px)); background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-pop); padding: 14px 16px 12px; display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 8px 22px; max-height: calc(100vh - 150px); overflow: auto; overscroll-behavior: contain; }
+.panel-dias[hidden] { display: none; }
+.cal-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.cal-cab h3 { font-size: 21px; }
+.cal-sem, .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.cal-sem span { text-align: center; font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; padding-bottom: 2px; }
+.cal-dia { position: relative; height: 40px; border: 1px solid transparent; border-radius: 7px; background: var(--surface-2); color: var(--fg); font: 500 14px/1 var(--font-body); font-variant-numeric: tabular-nums; cursor: pointer; padding: 0 0 7px; }
+.cal-dia:hover:not(:disabled) { border-color: var(--accent); }
+.cal-dia.finde { background: var(--surface); border-color: var(--line); }
+.cal-dia.ej::after { content: ""; position: absolute; inset: 2px; border: 1.5px solid var(--accent); border-radius: 5px; pointer-events: none; }
+.cal-dia[aria-current="date"] { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 700; }
+.cal-dia:disabled { background: transparent; border-color: transparent; color: var(--muted); opacity: 0.55; cursor: default; }
+.cal-dia.pend:disabled { border: 1px dashed var(--line); opacity: 0.8; }
+.cal-dia .mk { position: absolute; left: 50%; bottom: 5px; width: 7px; height: 7px; margin-left: -3.5px; }
+.mk.festivo { background: var(--warn); transform: rotate(45deg); }
+.mk.carnaval { background: var(--manana); border-radius: 50%; }
+.mk.especial { background: var(--bad); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.cal-dia[aria-current="date"] .mk { box-shadow: 0 0 0 1.5px var(--surface); }
+.cal-vacio { height: 40px; }
+.cal-ley { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 9px; font-size: 12px; color: var(--muted); line-height: 1.35; }
+.cal-ley span { display: inline-flex; align-items: center; gap: 5px; }
+.cal-ley span[hidden] { display: none; }
+.cal-ley .mk { position: static; display: inline-block; width: 8px; height: 8px; margin: 0; }
+.cal-ley .cj { width: 12px; height: 12px; border: 1.5px solid var(--accent); border-radius: 3px; }
+.cal-ley .cp { width: 12px; height: 12px; border: 1px dashed var(--muted); border-radius: 3px; }
+.cal-nota { grid-column: 1 / -1; font-size: 12px; color: var(--muted); max-width: none; border-top: 1px solid var(--line); padding-top: 8px; }
+.cal-lista { min-width: 0; }
+.cal-lista h4 { font-size: 14.5px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin: 10px 0 3px; }
+.cal-lista h4:first-child { margin-top: 2px; }
+.cal-lista ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.cal-lista button { width: 100%; display: flex; align-items: baseline; gap: 8px; border: 0; background: none; color: var(--fg); padding: 3px 6px; border-radius: 6px; font: 13px/1.35 var(--font-body); cursor: pointer; text-align: left; }
+.cal-lista button:hover { background: var(--surface-2); }
+.cal-lista button[aria-current="date"] { background: var(--accent-soft); font-weight: 600; }
+.cal-lista .f { flex: none; min-width: 84px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cal-lista .mk { position: relative; top: -1px; flex: none; display: inline-block; width: 7px; height: 7px; }
+
+/* Barra del reloj: fija bajo la cabecera en pantallas anchas. */
+.reloj-bar { position: sticky; top: var(--alto-cab, 112px); z-index: 1000; background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: var(--shadow); }
+.reloj-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 8px 20px 6px; }
+.reloj-bloque { display: flex; align-items: center; gap: 12px; }
+.reloj { font: 700 46px/1 var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: 0.5px; white-space: nowrap; }
+.reloj .seg-txt { font-size: 26px; color: var(--muted); margin-left: 1px; }
+.reloj-meta { display: flex; flex-direction: column; font-size: 12.5px; color: var(--muted); line-height: 1.35; min-width: 170px; }
+.reloj-meta #reloj-estado { color: var(--fg); font-weight: 500; }
+.controles-reloj { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.deslizador { flex: 1 1 280px; min-width: 220px; position: relative; padding-bottom: 15px; }
+.deslizador input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); cursor: pointer; }
+.marcas { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; font-size: 11px; color: var(--muted); pointer-events: none; }
+.marcas span { position: absolute; transform: translateX(-50%); font-variant-numeric: tabular-nums; }
+
+main { padding-block: 12px 36px; padding-inline: 20px; max-width: 1480px; margin: 0 auto; position: relative; }
+main.cargando .fila-1, main.cargando .fila-2, main.cargando .fila-3 { opacity: 0.55; transition: opacity 0.15s; }
+.estado-dia { margin-bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.estado-dia > p { flex: 1 1 480px; max-width: none; font-size: 14px; }
+.estado-dia .resultado { display: inline; padding: 1px 6px; border-radius: 6px; background: var(--accent-soft); }
+details.como { flex: 0 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+details.como[open] { flex-basis: 100%; }
+details.como > summary { cursor: pointer; padding: 5px 14px; font: 600 16px var(--font-display); letter-spacing: 0.4px; text-transform: uppercase; color: var(--accent); }
+details.como > summary span { font: 400 13px var(--font-body); text-transform: none; letter-spacing: 0; color: var(--muted); margin-left: 6px; }
+details.como:not([open]) > summary span { display: none; }
+.como-cuerpo { padding: 0 16px 14px; display: grid; gap: 8px; font-size: 13.5px; }
+.como-cuerpo ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; max-width: 120ch; }
+.como-cuerpo b { font-weight: 600; }
+.como-cuerpo p { max-width: 120ch; font-size: 12.5px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 12px 16px 14px; min-width: 0; }
+.card-cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-bottom: 8px; }
+.card-cab h3 { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.card-cab h3 .ruta-nombre { color: var(--muted); font-weight: 500; }
+.card-cab .sub { font-size: 12.5px; color: var(--muted); }
+
+.fila-1 { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(400px, 1fr); gap: 16px; height: clamp(540px, calc(100vh - var(--alto-fijo, 180px) - 70px), 800px); margin-bottom: 16px; }
+.fila-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 16px; margin-bottom: 16px; align-items: start; }
+.fila-3 { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; }
+.mapa-card { position: relative; z-index: 0; isolation: isolate; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.mapa-card .card-cab { padding: 10px 16px 8px; margin: 0; }
+.mapa-wrap { position: relative; flex: 1 1 auto; min-height: 0; }
+#mapa { position: absolute; inset: 0; background: var(--surface-2); }
+.leaflet-container { background: var(--surface-2); font-family: var(--font-body); }
+.leaflet-tooltip { font-family: var(--font-body); font-size: 12.5px; line-height: 1.45; background: var(--surface); color: var(--fg); border-color: var(--line); box-shadow: var(--shadow); }
+.leaflet-tooltip-top::before { border-top-color: var(--surface); }
+.leaflet-tooltip-bottom::before { border-bottom-color: var(--surface); }
+.leaflet-tooltip-left::before { border-left-color: var(--surface); }
+.leaflet-tooltip-right::before { border-right-color: var(--surface); }
+.leaflet-tooltip b { font-variant-numeric: tabular-nums; }
+.leaflet-bar a, .leaflet-bar a:hover { background: var(--surface); color: var(--fg); border-bottom-color: var(--line); }
+.leaflet-control-attribution { color: var(--muted); }
+.leaflet-container .leaflet-control-attribution { background: var(--surface); }
+/* Enlaces subrayados: así no se distinguen del texto solo por el color (el tono del enlace casi no cambia). */
+.leaflet-container .leaflet-control-attribution a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+/* Teselas sin la mezcla plus-lighter de Leaflet (con escalas de pantalla de 125-300 % dejaba líneas claras entre ellas) y de 257 px en vez de 256: se solapan 1 px y el fondo del mapa no asoma por sus bordes suavizados (en tema oscuro dejaba líneas oscuras). */
+.leaflet-container img.leaflet-tile { mix-blend-mode: normal; width: 257px !important; height: 257px !important; }
+/* La atribución del mapa base es larga: se acomoda a la derecha de la leyenda (10 px + 236 px) en vez de taparla. */
+.mapa-card .leaflet-bottom.leaflet-right { left: 256px; }
+/* Su esquina inferior derecha es la de la tarjeta: mismo radio que el recorte de .mapa-card (10 px menos 1 px de borde). */
+.mapa-card .leaflet-control-attribution { border-bottom-right-radius: 9px; }
+/* Sin mapa base (no hay internet o Esri no responde): fondo gris liso y una nota dentro del mapa; las capas propias (rutas, puntos, buses) no dependen de él. */
+#mapa.sin-fondo { background: var(--mapa-vacio); }
+/* Una tesela que no cargó nunca recibe leaflet-tile-loaded y Leaflet la deja oculta; se repite aquí para que jamás se vea el icono de imagen rota. */
+.leaflet-container img.leaflet-tile:not(.leaflet-tile-loaded) { visibility: hidden; }
+.aviso-mapa { position: absolute; z-index: 900; top: 10px; right: 10px; max-width: min(320px, calc(100% - 64px)); margin: 0; padding: 6px 10px; border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 0 8px 8px 0; background: var(--surface); color: var(--fg); font-size: 12.5px; line-height: 1.4; box-shadow: var(--shadow); pointer-events: none; }
+.leyenda-mapa { position: absolute; z-index: 500; left: 10px; bottom: 10px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 11px; font-size: 12px; box-shadow: var(--shadow); width: 236px; line-height: 1.35; }
+.leyenda-mapa b { font-weight: 600; }
+.leyenda-mapa .grad { height: 10px; border-radius: 5px; margin-top: 5px; background: linear-gradient(90deg, var(--occ-0), var(--occ-1), var(--occ-2), var(--occ-3), var(--occ-4)); border: 1px solid var(--line); }
+.leyenda-mapa .ticks { display: flex; justify-content: space-between; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.leyenda-mapa .fila { display: flex; align-items: center; gap: 7px; margin-top: 4px; }
+.leyenda-mapa .sw { flex: none; width: 12px; height: 12px; border-radius: 50%; }
+.leyenda-mapa .sw.sin { background: var(--sin-dato); border: 2px solid var(--muted); }
+.leyenda-mapa .sw.ring { background: var(--surface); border: 2.5px solid var(--muted); }
+.leyenda-mapa .ln { flex: none; width: 16px; height: 0; border-top: 3px solid var(--c); border-radius: 2px; }
+.leyenda-mapa .cnt { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* Despachos en orden: las tres rutas mezcladas, como los entregan los despachadores */
+.desp-card { display: flex; flex-direction: column; min-height: 0; padding-bottom: 8px; }
+.desp-card .card-cab { margin-bottom: 6px; }
+.desp-ctrl { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; margin-bottom: 6px; }
+.desp-resumen { font-size: 13px; color: var(--muted); max-width: none; line-height: 1.4; }
+.desp-resumen b { color: var(--fg); font-weight: 600; }
+ol.desp-lista { list-style: none; margin: 6px 0 0; padding: 0 2px 0 0; overflow-y: auto; flex: 1 1 auto; min-height: 0; overscroll-behavior: contain; border-top: 1px solid var(--line); scrollbar-width: thin; }
+li.desp { position: relative; display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; grid-template-areas: "hora info est" "hora det est" "nota nota nota"; column-gap: 12px; align-items: center; padding: 6px 8px 6px 15px; border-bottom: 1px solid var(--line); }
+li.desp::before { content: ""; position: absolute; left: 4px; top: 7px; bottom: 7px; width: 5px; border-radius: 3px; background: var(--c); }
+li.desp .hora { grid-area: hora; display: flex; flex-direction: column; line-height: 1.05; }
+li.desp .hora b { font: 700 23px/1 var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: 0.2px; }
+li.desp .hora small { font-size: 12px; color: var(--muted); margin-top: 3px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+li.desp .info { grid-area: info; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; min-width: 0; }
+li.desp .ruta-tag { font-weight: 600; font-size: 14px; white-space: nowrap; }
+li.desp .veh { font-size: 13.5px; white-space: nowrap; }
+li.desp .veh.no { color: var(--muted); }
+li.desp .det { grid-area: det; font-size: 12px; color: var(--muted); min-width: 0; overflow-wrap: anywhere; line-height: 1.35; }
+li.desp .det b { color: var(--fg); font-weight: 600; }
+li.desp .est { grid-area: est; justify-self: end; }
+li.desp .nota { grid-area: nota; margin: 5px 0 1px; padding: 3px 9px; font-size: 12.5px; line-height: 1.4; border-left: 3px solid var(--nc, var(--accent)); background: var(--surface-2); border-radius: 0 6px 6px 0; max-width: none; overflow-wrap: anywhere; }
+li.desp.hecho { padding-top: 4px; padding-bottom: 4px; grid-template-areas: "hora info est" "hora info est" "nota nota nota"; }
+li.desp.hecho .hora small { margin-top: 1px; font-size: 11.5px; }
+li.desp.hecho .hora b { font-size: 18px; color: var(--muted); }
+li.desp.hecho .ruta-tag, li.desp.hecho .veh { color: var(--muted); font-weight: 500; }
+li.desp.hecho::before { opacity: 0.45; }
+li.desp.pronto { background: color-mix(in srgb, var(--accent-soft) 40%, var(--surface)); }
+li.desp.pronto .hora small, li.desp.siguiente .hora small, li.desp.atrasado .hora small { color: var(--fg); font-weight: 600; }
+li.desp.siguiente { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); border-radius: 6px; border-bottom-color: transparent; }
+li.desp.lejos .hora b { font-size: 20px; }
+li.sep-ahora { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 11.5px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
+li.sep-ahora::before, li.sep-ahora::after { content: ""; flex: 1 1 auto; height: 0; border-top: 2px solid var(--accent); }
+li.sep-ahora::before { flex: 0 0 10px; }
+li.vacia { padding: 10px 4px; color: var(--muted); font-size: 13.5px; }
+.pill { --pc: var(--accent); display: inline-flex; align-items: center; gap: 5px; padding: 1px 9px 1px 7px; border-radius: 999px; border: 1px solid var(--pc); background: color-mix(in srgb, var(--pc) 13%, var(--surface)); color: var(--fg); font: 600 11px/18px var(--font-body); letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; }
+.pill svg { width: 11px; height: 11px; flex: none; color: var(--pc); }
+.pill.hecho { --pc: var(--muted); background: transparent; color: var(--muted); border-color: var(--line); }
+.pill.ajustado { --pc: var(--warn); }
+.pill.atrasado { --pc: var(--bad); }
+/* Falla de datos: la lista pasa a modo plan semanal (estado «plan», gris como las barras del plan semanal) con un aviso arriba. */
+.pill.plan { --pc: var(--plan); }
+.desp-falla { margin: 2px 0 4px; padding: 6px 10px; border: 1px solid var(--line); border-left: 3px solid var(--bad); border-radius: 0 6px 6px 0; background: var(--surface-2); font-size: 13px; font-weight: 500; line-height: 1.4; max-width: none; }
+.desp-nota { font-size: 12px; color: var(--muted); margin-top: 7px; padding-top: 6px; border-top: 1px solid var(--line); max-width: none; line-height: 1.4; }
+
+.estado-motor { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }
+.estado-motor i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+.estado-motor.bad { border-color: var(--bad); }
+.estado-motor.bad i { background: var(--bad); border-radius: 1px; transform: rotate(45deg); }
+ol.proximas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+ol.proximas li { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px 5px; background: var(--surface); min-width: 0; }
+ol.proximas li.primera { border-color: var(--accent); background: var(--accent-soft); }
+ol.proximas li.tarde { border-color: var(--bad); }
+ol.proximas .hora { display: block; font: 700 30px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+ol.proximas .cuenta { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ol.proximas li.primera .cuenta { color: var(--fg); font-weight: 600; }
+ol.proximas li.vacia { grid-column: 1 / -1; color: var(--muted); font-size: 13.5px; }
+.ajuste { font-size: 13px; margin-top: 8px; padding: 5px 10px; border-left: 3px solid var(--line); background: var(--surface-2); border-radius: 0 6px 6px 0; max-width: none; }
+.ajuste.activo { border-left-color: var(--accent); }
+.ajuste.malo { border-left-color: var(--bad); }
+dl.datos-prox { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; margin: 8px 0 0; }
+dl.datos-prox dt { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+dl.datos-prox dd { margin: 0; font: 700 22px/1.1 var(--font-display); }
+dl.datos-prox dd small { display: block; font: 400 12.5px/1.35 var(--font-body); color: var(--muted); margin-top: 2px; }
+dl.datos-prox dd .alerta-txt { color: var(--fg); font-weight: 600; }
+
+.alertas-card { display: flex; flex-direction: column; }
+.alertas-card .card-cab { margin-bottom: 4px; }
+.alertas-resumen { font-size: 12.5px; color: var(--muted); margin-bottom: 6px; max-width: none; }
+.nota-alertas { font-size: 12px; color: var(--muted); margin-top: 8px; padding-top: 7px; border-top: 1px solid var(--line); max-width: none; line-height: 1.4; }
+ul.lista-alertas { list-style: none; margin: 0; padding: 0 4px 0 0; display: grid; gap: 7px; align-content: start; overflow-y: auto; max-height: 340px; overscroll-behavior: contain; }
+li.alerta { border: 1px solid var(--line); border-left: 4px solid var(--sev-c); border-radius: 8px; padding: 6px 10px 7px; background: var(--surface); }
+li.alerta .cab { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 8px; font-size: 12.5px; color: var(--muted); }
+li.alerta .cab .tipo { color: var(--fg); font-weight: 600; font-size: 13px; }
+li.alerta .cab .cuando { margin-left: auto; font-variant-numeric: tabular-nums; }
+li.alerta .cab .vivo { color: var(--fg); font-weight: 600; }
+li.alerta .msg { font-size: 13px; line-height: 1.4; margin-top: 2px; overflow-wrap: anywhere; max-width: none; }
+li.alerta.cerrada .msg { color: var(--muted); }
+ul.lista-alertas li.vacia { color: var(--muted); font-size: 13.5px; padding: 6px 0; }
+.sev { display: inline-flex; align-items: center; gap: 5px; padding: 0 8px 0 6px; border-radius: 999px; border: 1px solid var(--sev-c); background: color-mix(in srgb, var(--sev-c) 15%, var(--surface)); color: var(--fg); font: 600 11px/18px var(--font-body); letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap; }
+.sev i { width: 9px; height: 9px; background: var(--sev-c); display: inline-block; }
+.sev-alta { --sev-c: var(--bad); }
+.sev-media { --sev-c: var(--warn); }
+.sev-info { --sev-c: var(--accent); }
+.sev-alta .sev i { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.sev-media .sev i { border-radius: 50%; }
+.sev-info .sev i { border-radius: 2px; transform: scale(0.85); }
+.ruta-tag { display: inline-flex; align-items: center; gap: 5px; color: var(--fg); }
+.ruta-tag .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); flex: none; }
+
+.chart { width: 100%; height: 300px; }
+.desvio { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.desvio .valor { font: 700 30px/1 var(--font-display); }
+.desvio .det { font-size: 12.5px; color: var(--muted); }
+.pie-panel { font-size: 12.5px; color: var(--muted); margin-top: 6px; max-width: none; line-height: 1.4; }
+details.tabla-det { margin-top: 6px; font-size: 13px; }
+details.tabla-det > summary { cursor: pointer; color: var(--accent); font-size: 12.5px; }
+details.tabla-det .tabla-wrap { max-height: 300px; overflow: auto; margin-top: 6px; }
+.aviso-carga { padding: 14px 16px; border: 1px solid var(--line); border-left: 3px solid var(--bad); border-radius: 0 8px 8px 0; background: var(--surface); }
+.aviso-dia { margin: 0 0 12px; padding: 8px 12px; border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 0 8px 8px 0; background: var(--surface); font-size: 13.5px; max-width: none; }
+code { font-size: 12.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+
+@media (max-width: 1240px) {
+  .dias-disp { display: none; }
+}
+@media (max-width: 1080px) {
+  .fila-1 { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .desp-card { order: -1; }
+  ol.desp-lista { max-height: 560px; }
+  .mapa-wrap { flex: none; height: 460px; }
+  .fila-2, .fila-3 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) {
+  header.top { position: static; }
+  .reloj-bar { position: static; }
+  .top-inner { padding: 10px 14px; gap: 8px 12px; }
+  .chips.rutas { margin-left: 0; }
+  .dia-bar { padding: 6px 14px 8px; flex-wrap: wrap; }
+  .dia-nav { width: 100%; }
+  .selector-dia { flex: 1 1 auto; }
+  .selector-dia .etq { max-width: none; flex: 1 1 auto; }
+  .ejemplos { width: 100%; }
+  .panel-dias { left: 8px; right: 8px; width: auto; grid-template-columns: minmax(0, 1fr); max-height: none; }
+  .reloj-inner { padding: 8px 14px 6px; gap: 8px 12px; }
+  .reloj { font-size: 40px; }
+  .reloj .seg-txt { font-size: 22px; }
+  .reloj-meta { min-width: 0; }
+  main { padding-inline: 12px; }
+  .card { padding: 10px 12px 12px; }
+  .mapa-wrap { height: 340px; }
+  ol.desp-lista { max-height: 480px; }
+  li.desp { grid-template-columns: 62px minmax(0, 1fr) auto; grid-template-areas: "hora info est" "hora det det" "nota nota nota"; column-gap: 10px; padding-right: 4px; }
+  .leyenda-mapa { position: static; width: auto; margin: 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; }
+  .mapa-card .leaflet-bottom.leaflet-right { left: auto; }
+  .mapa-card .leaflet-control-attribution { border-bottom-right-radius: 0; }
+  ol.proximas .hora { font-size: 26px; }
+  .chart { height: 280px; }
+  h1 { font-size: 27px; }
+}
+@media (max-width: 520px) {
+  .selector-dia .f-larga { display: none; }
+  .selector-dia .f-corta { display: inline; }
+  .controles-reloj .boton { padding: 6px 10px; }
+  .boton.primario { min-width: 112px; }
+}
+@media (max-width: 390px) {
+  li.desp { grid-template-columns: 54px minmax(0, 1fr) auto; column-gap: 8px; padding-left: 13px; }
+  li.desp .hora b { font-size: 20px; }
+  li.desp .ruta-tag { font-size: 13.5px; }
+  .pill { padding: 1px 7px 1px 6px; font-size: 10.5px; letter-spacing: 0.2px; }
+}
+/* Modo embebido: sin marca, sin enlaces a otras páginas (salvo «Vista 3D →», que pide a la app
+   abrir Ciudad con el mismo día y hora) y sin pie; se conservan rutas, barra del día, reloj y contenido. */
+html[data-embebido] header.top .brand, html[data-embebido] header.top a.chip:not(#a-vista3d), html[data-embebido] footer { display: none; }
+html[data-embebido] .top-inner { padding: 8px 16px; }
+html[data-embebido] main { padding-inline: 16px; }
+</style>
+<script>if (document.documentElement.hasAttribute('data-embebido')) document.write('<link rel="stylesheet" href="app/tokens.css">');</script>
+</head>
+<body>
+<header class="top" id="cabecera">
+  <div class="top-inner">
+    <div class="brand">
+      <h1>Consola de despacho</h1>
+      <span class="sub"><span class="sub-larga">Replay de 2025 como si fuera en vivo</span><span class="sub-corta">Replay de 2025</span></span>
+    </div>
+    <div class="chips rutas" id="chips-rutas" role="group" aria-label="Ruta de los paneles de detalle"></div>
+    <div class="chips">
+      <a class="chip" href="EDA_visual.html">Tablero de datos →</a>
+      <a class="chip" href="planificador.html">Planificador →</a>
+      <a class="chip" href="simulador_ahorro.html">Simulador de ahorro →</a>
+      <a class="chip" id="a-vista3d" href="vista_3d.html">Vista 3D →</a>
+    </div>
+  </div>
+  <div class="dia-bar" id="dia-bar">
+    <div class="dia-nav">
+      <button type="button" class="boton icono" id="btn-dia-ant" aria-label="Día anterior con datos" title="Día anterior con datos">‹</button>
+      <button type="button" class="selector-dia" id="btn-dia" aria-haspopup="dialog" aria-expanded="false" aria-controls="panel-dias" title="Elegir el día que se reproduce">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 6.2h13M5 1v3M11 1v3" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+        <span class="fecha"><span class="f-larga" id="dia-fecha-larga">Cargando…</span><span class="f-corta" id="dia-fecha-corta">Cargando…</span></span>
+        <span class="etq" id="dia-etq"></span>
+        <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
+      <button type="button" class="boton icono" id="btn-dia-sig" aria-label="Día siguiente con datos" title="Día siguiente con datos">›</button>
+    </div>
+    <div class="ejemplos" id="ejemplos" role="group" aria-label="Días de ejemplo"></div>
+    <span class="dias-disp" id="dias-disp"></span>
+    <div class="panel-dias" id="panel-dias" role="dialog" aria-label="Elegir el día" hidden>
+      <div class="cal">
+        <div class="cal-cab">
+          <button type="button" class="boton icono" id="cal-ant" aria-label="Mes anterior">‹</button>
+          <h3 id="cal-mes" aria-live="polite"></h3>
+          <button type="button" class="boton icono" id="cal-sig" aria-label="Mes siguiente">›</button>
+        </div>
+        <div class="cal-sem" aria-hidden="true"><span>lu</span><span>ma</span><span>mi</span><span>ju</span><span>vi</span><span>sá</span><span>do</span></div>
+        <div class="cal-grid" id="cal-grid" aria-label="Días del mes"></div>
+        <div class="cal-ley" aria-hidden="true">
+          <span><i class="mk festivo"></i>festivo</span><span><i class="mk carnaval"></i>Carnaval</span><span><i class="mk especial"></i>día especial (E9, E10)</span>
+          <span><i class="cj"></i>día de ejemplo</span><span id="ley-pend"><i class="cp"></i>se está generando</span><span>gris: sin GPS (último día del mes)</span>
+        </div>
+      </div>
+      <div class="cal-lista" id="cal-lista"></div>
+      <p class="cal-nota" id="cal-nota"></p>
+    </div>
+  </div>
+</header>
+
+<div class="reloj-bar" id="reloj-bar">
+  <div class="reloj-inner">
+    <div class="reloj-bloque">
+      <div class="reloj" id="reloj" role="timer" aria-label="Hora del replay"><span id="reloj-hm">06:00</span><span class="seg-txt" id="reloj-s">:00</span></div>
+      <div class="reloj-meta"><span id="reloj-fecha"></span><span id="reloj-estado">En pausa</span></div>
+    </div>
+    <div class="controles-reloj">
+      <button type="button" class="boton" id="btn-atras" aria-label="Retroceder a la corrida anterior del motor (5 minutos)">‹ 5 min</button>
+      <button type="button" class="boton primario" id="btn-play" aria-pressed="false">Reproducir</button>
+      <button type="button" class="boton" id="btn-adelante" aria-label="Avanzar a la siguiente corrida del motor (5 minutos)">5 min ›</button>
+      <div class="seg" id="seg-vel" role="group" aria-label="Velocidad de reproducción">
+        <button type="button" data-v="1" aria-pressed="true" title="Tiempo real: 1 segundo del reloj = 1 segundo">x1</button>
+        <button type="button" data-v="10" aria-pressed="false" title="10 segundos del reloj por segundo">x10</button>
+        <button type="button" data-v="60" aria-pressed="false" title="1 minuto del reloj por segundo">x60</button>
+        <button type="button" data-v="300" aria-pressed="false" title="5 minutos del reloj por segundo">x300</button>
+        <button type="button" data-v="900" aria-pressed="false" title="15 minutos del reloj por segundo">x900</button>
+      </div>
+    </div>
+    <div class="deslizador">
+      <input type="range" id="slider" min="240" max="1260" step="1" value="360" aria-label="Hora del replay, de 04:00 a 21:00">
+      <div class="marcas" id="marcas" aria-hidden="true"></div>
+    </div>
+  </div>
+</div>
+
+<main id="main">
+  <div class="estado-dia">
+    <p id="dia-texto">Cargando los datos del replay…</p>
+    <details class="como" id="como">
+      <summary>Cómo funciona <span>plan semanal + ejecución en tiempo real · qué encontró el backtest</span></summary>
+      <div class="como-cuerpo">
+        <ul>
+          <li><b>Dos tiempos.</b> Cada semana, el pronóstico (E1/E11) y el optimizador D5 fijan cuántas salidas por hora necesita cada ruta y a qué hora sale cada bus: el <b>plan semanal</b>. Cada 5 minutos, el <b>motor en tiempo real</b> lee lo que ya pasó (despachos, GPS y contadores de puertas), descuenta las salidas hechas y los buses en la calle, y entrega las salidas de la próxima hora, contadas desde la última salida real, más las alertas.</li>
+          <li><b>Qué plan es.</b> En los días generados con la versión actual de los datos, el plan semanal es el de D5 con los <b>costos con fuente</b> de <code>costos/</code>: 26.400 COP por bus-hora de conductor, 1.991 COP por km y una tarifa neta de 3.182 COP (precios 2026, elasticidad 0,5), los mismos del planificador y del simulador de ahorro. Con esos costos D5 no recorta buses: <b>reasigna</b> salidas de las horas flojas a las cargadas (en 2025, 451 salidas por día frente a 460 reales, −0,5 % de buses-hora, espera media de 4,30 min frente a 4,43 y 267 pasajeros por día sobre la capacidad frente a 317). Con los supuestos iniciales de D5 (60.000 COP por bus-hora, 1.500 por km, tarifa 3.000) el plan recortaba el 10 % de los buses-hora; los días generados antes del cambio traen ese plan hasta que se vuelvan a generar, y el pie de esta ayuda dice cuántos quedan. El motor reoptimiza con los mismos costos del plan del día. <span id="plan-param"></span></li>
+          <li><b>Despachos en orden.</b> En Sobusa dos personas entregan los despachos a todos los conductores, sin importar la ruta. Por eso la lista principal mezcla las tres rutas en orden de hora: arriba los recién hechos y debajo los recomendados de la próxima hora, a la hora exacta. El vehículo de un despacho futuro es el bus que Sobusa ya tenía programado para esa ruta (registro hecho antes de la hora del reloj, en orden de hora programada), solo si su hora programada está a ±15 min de la recomendada y todavía no tiene salida; si no hay ninguno así, queda «vehículo por asignar». Estados: <b>hecho</b> (el sistema ya detectó la salida), <b>próximo</b>, <b>ajustado</b> (el motor la retrasa porque los dos últimos buses van pegados o la adelanta porque el último salió lleno; la hora ya incluye el ajuste) y <b>atrasado</b> (pasó más de un minuto de la hora recomendada y no ha salido; si hay un hueco largo, «despachar ya»).</li>
+          <li><b>Falla de datos.</b> Si el motor marca los datos como malos (falla del registro de despachos o de los contadores, o corte de GPS), no recomienda horas propias: la lista pasa a modo <b>plan semanal</b> y muestra las salidas del horario del plan de la próxima hora, con estado <b>plan</b> (sin «atrasado» ni «despachar ya»), un aviso con la hora desde la que faltan los datos y «Salidas hoy: sin datos». Mientras dura, se ocultan las alertas que dependen del registro (huecos, cambios de plan, buses pegados y flota al límite).</li>
+          <li><b>Tiempo real.</b> Con x1, un segundo del reloj es un segundo real; x10, x60, x300 y x900 aceleran. El motor corrió cada 5 minutos (una foto por corrida); entre fotos el reloj avanza segundo a segundo, los buses se deslizan entre posiciones y la lista cambia justo cuando el reloj pasa la hora de cada salida.</li>
+          <li><b>Qué encontró el backtest (79 días de 2025, corrida del 13 de octubre con el plan de los costos con fuente).</b> El plan semanal queda a 1,05 salidas por hora de lo que habría elegido D5 conociendo la demanda real (oráculo) y acierta el 54 % de las horas, frente a 2,80 salidas por hora y el 14 % de la operación real de 2025; tiene los mismos buses-hora que la operación real (−0,2 %) con menos espera (4,99 frente a 5,16 min) y menos pasajeros sobre la capacidad (68 frente a 107 al día). Reoptimizar durante el día no mejora: 1,08 salidas/h, y el error del pronóstico por hora a las 12 h pasa de 14,2 % a 14,3 %, porque lo que se ve en la mañana dice poco del resto del día. El número de buses por hora lo fija el plan semanal; en vivo, el valor está en <b>la hora exacta de cada salida</b> y en las <b>alertas</b>: huecos sin salidas, buses llenos, buses pegados, flota sin buses en patio y fallas de datos. Con el D5 de los supuestos iniciales (60.000 COP por bus-hora, 1.500 por km y tarifa 3.000), el plan que recorta, las cifras eran 0,56, 2,61 y 0,61 salidas por hora (70 % y 15 % de horas exactas).</li>
+          <li><b>Es un replay.</b> No hay transmisión en vivo: la base del reto es histórica y de solo lectura, así que se reproducen días de 2025 (<span id="como-dias">todos los que tienen GPS</span>; el último día de cada mes no tiene GPS). En cada foto el motor solo usa información anterior a la hora del reloj. Lo que solo se sabe después (el resultado real, la lluvia que cayó, una falla de registro, etiquetas como «Caída inesperada») se muestra al llegar a las 21:00; antes, la descripción del día solo trae lo que se sabe de antemano (calendario, festivos, periodos escolares). La salida se detecta unos minutos tarde (al llegar cerca del primer punto de control), así que los «hechos» aparecen con ese retraso.</li>
+          <li><b>Posiciones aproximadas.</b> Cada bus avanza por el trazado de su ruta (las calles), a velocidad constante entre sus pasos por los puntos de control; en producción la posición vendría del GPS en vivo. Un bus que acaba de salir parte del patio y, si su GPS empezó tarde, aparece en el punto de la ruta desde el que llegaría a tiempo a su primer punto de control. La ocupación es la del contador de puertas al terminar la última visita a un punto de control; a veces falta.</li>
+          <li><b>Alertas demasiado frecuentes.</b> Con los umbrales actuales, en el backtest el sobrecupo salta en 21,7, el apelotonamiento en 16,7 y la flota al límite en 6,2 de las 69 corridas por ruta y día. Por eso aquí se agrupan los avisos repetidos; en un piloto habría que subir esos umbrales o mostrarlos como indicadores.</li>
+        </ul>
+        <p class="muted" id="notas-meta"></p>
+      </div>
+    </details>
+  </div>
+  <p class="aviso-dia" id="aviso-dia" role="status" hidden></p>
+
+  <div class="fila-1">
+    <section class="card mapa-card" aria-labelledby="t-mapa">
+      <div class="card-cab"><h3 id="t-mapa">Mapa de la operación</h3><span class="sub" id="mapa-sub"></span></div>
+      <div class="mapa-wrap"><div id="mapa" aria-label="Mapa de buses en la calle"></div><p class="aviso-mapa" id="aviso-mapa" role="status" hidden>Sin mapa base: no hay internet (las rutas y los buses se siguen viendo).</p></div>
+      <div class="leyenda-mapa" id="leyenda-mapa"></div>
+    </section>
+    <section class="card desp-card" id="card-despachos" aria-labelledby="t-desp">
+      <div class="card-cab"><h3 id="t-desp">Despachos en orden <span class="ruta-nombre" id="desp-sub">· las tres rutas</span></h3><span class="estado-motor" id="estado-motor"><i></i><span></span></span></div>
+      <div class="desp-ctrl">
+        <div class="seg" id="seg-desp" role="group" aria-label="Filtrar los despachos por ruta"></div>
+      </div>
+      <p class="desp-resumen" id="desp-resumen"></p>
+      <p class="desp-falla" id="desp-falla" role="status" hidden></p>
+      <ol class="desp-lista" id="desp-lista" aria-label="Despachos de las tres rutas en orden de hora"></ol>
+      <p class="sr-only" id="desp-vivo" aria-live="polite"></p>
+      <p class="desp-nota" id="desp-nota">El motor recalcula las horas cada 5 min desde la última salida real. Vehículo: el que Sobusa ya tenía programado a ±15 min de la hora y que todavía no ha salido. Más en «Cómo funciona».</p>
+    </section>
+  </div>
+
+  <div class="fila-2">
+    <section class="card" id="card-prox" aria-labelledby="t-prox">
+      <div class="card-cab"><h3 id="t-prox">Próximas salidas <span class="ruta-nombre" id="prox-ruta"></span></h3><span class="sub" id="prox-sub"></span></div>
+      <ol class="proximas" id="proximas"></ol>
+      <p class="ajuste" id="ajuste"></p>
+      <dl class="datos-prox" id="datos-prox"></dl>
+    </section>
+    <section class="card alertas-card" aria-labelledby="t-alertas">
+      <div class="card-cab">
+        <h3 id="t-alertas">Alertas</h3>
+        <div class="seg" id="seg-filtro" role="group" aria-label="Rutas de las alertas">
+          <button type="button" data-v="todas" aria-pressed="true">Las tres rutas</button>
+          <button type="button" data-v="ruta" aria-pressed="false" id="btn-filtro-ruta">Solo CRA 54</button>
+        </div>
+      </div>
+      <p class="alertas-resumen" id="alertas-resumen"></p>
+      <ul class="lista-alertas" id="lista-alertas" aria-label="Alertas hasta la hora del reloj"></ul>
+      <p class="nota-alertas">Nota: tal como está calibrado, el motor alerta demasiado (backtest: sobrecupo en 21,7 y apelotonamiento en 16,7 de 69 corridas por ruta y día). Aquí se agrupan los avisos del mismo tipo y ruta separados por 15 min o menos.</p>
+    </section>
+  </div>
+
+  <div class="fila-3">
+    <section class="card" aria-labelledby="t-salidas">
+      <div class="card-cab"><h3 id="t-salidas">Salidas por hora <span class="ruta-nombre" id="salidas-ruta"></span></h3><span class="sub" id="salidas-sub"></span></div>
+      <div class="chart" id="c-salidas" role="img" aria-label="Salidas por hora: plan semanal, realizadas y recomendadas"></div>
+      <details class="tabla-det" id="det-tabla"><summary>Ver como tabla</summary><div class="tabla-wrap"><table class="datos" id="t-salidas-tabla"></table></div></details>
+    </section>
+    <section class="card" aria-labelledby="t-pax">
+      <div class="card-cab"><h3 id="t-pax">Pasajeros hasta ahora <span class="ruta-nombre" id="pax-ruta"></span></h3>
+        <div class="desvio"><span class="valor" id="pax-desvio">–</span><span class="det" id="pax-det"></span></div></div>
+      <div class="chart" id="c-pax" role="img" aria-label="Pasajeros acumulados del día: vistos frente a esperados"></div>
+      <p class="pie-panel" id="pax-pie"></p>
+    </section>
+  </div>
+</main>
+<footer>Consola de demostración del prototipo de despacho en tiempo real del Data Challenge Pro Extreme – Sobusa 2026 (Universidad del Norte). Replay de días de 2025; no está conectada a Sobusa. El fondo del mapa es de Esri, con datos de OpenStreetMap y otras fuentes, y es lo único de la página que necesita internet.</footer>
+
+<script src="lib/echarts.min.js"></script>  <!-- ECharts 5.5.1, copia local (antes: cdn.jsdelivr.net) -->
+<script src="lib/leaflet.min.js"></script>  <!-- Leaflet 1.9.4, copia local (antes: cdnjs) -->
+<script src="sistema_tiempo_real/replay/dias/indice.js"></script>
+<script src="sistema_tiempo_real/replay/dias/calles/rutas.js"></script>
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const BASE = 'sistema_tiempo_real/replay/';
+
+  // ================= utilidades =================
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fmt = (n, d = 0) => (n == null || !isFinite(n)) ? '–' : Number(n).toLocaleString('es-CO', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const fmtSig = (n, d = 1) => (n == null || !isFinite(n)) ? '–' : (n > 0.0001 ? '+' : n < -0.0001 ? '−' : '') + fmt(Math.abs(n), d);
+  const pad = (n) => String(n).padStart(2, '0');
+  const hhmm = (m) => pad(Math.floor(m / 60)) + ':' + pad(Math.floor(m % 60));             // minutos del día -> HH:MM
+  const hhmmS = (s) => hhmm(Math.floor(s / 60));                                               // segundos del día -> HH:MM
+  const hhmmss = (s) => { s = Math.floor(s); return pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60); };
+  const aMin = (s) => { const p = String(s).split(':'); return (+p[0]) * 60 + (+p[1]); };
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+  const durTxt = (m) => m < 60 ? fmt(Math.floor(m)) + ' min' : Math.floor(m / 60) + ' h ' + pad(Math.floor(m % 60)) + ' min';
+  const mss = (seg) => { seg = Math.max(0, Math.floor(seg)); return Math.floor(seg / 60) + ':' + pad(seg % 60); };
+  const suma = (a) => a.reduce((x, y) => x + (y || 0), 0);
+  const limpiarVeh = (v) => String(v).replace(/^SOBUSA/, '');
+  const reducida = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const angosto = () => window.innerWidth < 600;
+  function techo(v) {
+    if (!(v > 0)) return 10;
+    const p = Math.pow(10, Math.floor(Math.log10(v))), n = v / p;
+    const f = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find((x) => n <= x + 1e-9);
+    return f * p;
+  }
+  function hexRgb(h) {
+    h = String(h).replace('#', '').trim();
+    if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+    const n = parseInt(h, 16);
+    return isFinite(n) ? [(n >> 16) & 255, (n >> 8) & 255, n & 255] : [128, 128, 128];
+  }
+  const rgba = (hex, a) => { const c = hexRgb(hex); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; };
+  // Cuenta regresiva de una salida: dif = hora de la salida - hora del reloj (segundos).
+  function txtCuenta(dif) {
+    if (dif >= 600) return 'en ' + Math.floor(dif / 60) + ' min';
+    if (dif >= 0) return 'en ' + mss(dif);
+    if (dif > -60) return 'ahora';
+    return 'hace ' + durTxt(-dif / 60);
+  }
+  const txtHace = (dif) => dif < 60 ? 'hace ' + Math.max(0, Math.floor(dif)) + ' s' : 'hace ' + durTxt(dif / 60);
+  const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const MESES_C = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const DIAS_C = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+  const DIAS_L = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  const partesFecha = (f) => { const [y, m, d] = f.split('-').map(Number); return { y, m, d, dow: new Date(Date.UTC(y, m - 1, d)).getUTCDay() }; };
+  const fechaLarga = (f) => { const p = partesFecha(f); return `${cap(DIAS_L[p.dow])} ${p.d} de ${MESES[p.m - 1]} de ${p.y}`; };
+  const fechaCorta = (f) => { const p = partesFecha(f); return `${DIAS_C[p.dow]} ${p.d} ${MESES_C[p.m - 1]} ${p.y}`; };
+
+  // ================= calles: trazado de cada ruta y trayectoria de cada bus (sistema_tiempo_real/calles.py) =================
+  // Con estos archivos cada bus avanza por el trazado real de su ruta: su posición son los metros recorridos desde el patio,
+  // interpolados entre sus visitas a los puntos de control. Sin ellos, la consola dibuja como antes (línea recta entre puntos).
+  const CALLES = (window.REPLAY_CALLES_RUTAS && window.REPLAY_CALLES_RUTAS.rutas) || null;
+  // Punto [lat, lon] del trazado de la ruta r a s metros del inicio (búsqueda binaria e interpolación lineal entre vértices).
+  function puntoEnRuta(r, s) {
+    const g = CALLES && CALLES[r];
+    if (!g || !g.s || !g.s.length) return null;
+    const S = g.s, n = S.length;
+    if (!(s > S[0])) return [g.lat[0], g.lon[0]];
+    if (s >= S[n - 1]) return [g.lat[n - 1], g.lon[n - 1]];
+    let lo = 0, hi = n - 1;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (S[mid] <= s) lo = mid; else hi = mid; }
+    const f = (s - S[lo]) / ((S[hi] - S[lo]) || 1);
+    return [g.lat[lo] + (g.lat[hi] - g.lat[lo]) * f, g.lon[lo] + (g.lon[hi] - g.lon[lo]) * f];
+  }
+  // Metros desde el patio en el segundo t de una trayectoria [t0, s0, t1, s1, ...] (antes del primer nudo y después del último,
+  // el bus queda quieto en ese nudo).
+  function metrosEn(kn, t) {
+    const n = kn.length >> 1;
+    if (t <= kn[0]) return kn[1];
+    if (t >= kn[2 * n - 2]) return kn[2 * n - 1];
+    let lo = 0, hi = n - 1;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (kn[2 * mid] <= t) lo = mid; else hi = mid; }
+    const t0 = kn[2 * lo], t1 = kn[2 * hi];
+    return kn[2 * lo + 1] + (kn[2 * hi + 1] - kn[2 * lo + 1]) * ((t - t0) / ((t1 - t0) || 1));
+  }
+  // Trayectorias de un día (calles/AAAA-MM-DD.js): {ruta: Map("vehículo|minuto de salida" -> [trayectoria, ...])} o null.
+  async function obtenerCalles(fecha) {
+    if (!CALLES || LEGADO) return null;
+    try {
+      const reg = (window.REPLAY_CALLES_GZ = window.REPLAY_CALLES_GZ || {});
+      if (!reg[fecha]) await cargarScript(BASE + 'dias/calles/' + fecha + '.js');
+      const b64 = reg[fecha];
+      delete reg[fecha];
+      if (!b64) return null;
+      const C = await descomprimir(b64);
+      const out = {};
+      Object.keys(C.rutas || {}).forEach((r) => { out[r] = new Map(Object.entries(C.rutas[r])); });
+      return out;
+    } catch (e) { return null; }       // sin trayectorias del día: se dibuja como antes
+  }
+
+  // ================= datos: índice y días (un archivo por día, cargado al elegirlo) =================
+  let IDX = null, LEGADO = false;
+  function cargarScript(src) {
+    return new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = src; s.async = true;
+      s.onload = () => { s.remove(); res(); };
+      s.onerror = () => { s.remove(); rej(new Error('No se pudo cargar ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+  async function iniciarDatos() {
+    const I = window.REPLAY_INDICE;
+    if (I && I.dias && I.dias.length) { IDX = I; return; }
+    // Respaldo: el archivo único con los 6 días de la versión anterior (sin los campos nuevos).
+    try { await cargarScript(BASE + 'replay_datos.js'); } catch (e) { /* sin respaldo */ }
+    const R = window.REPLAY;
+    if (!R || !R.dias || !R.dias.length) throw new Error('sin datos');
+    LEGADO = true;
+    const GR = { 'Laboral normal': 'laboral', 'Sábado': 'sabado', 'Domingo': 'domingo', 'Festivo': 'festivo', 'Carnaval': 'carnaval' };
+    IDX = { meta: R.meta, mapa: R.mapa, pendientes: [], sin_gps: [],
+      dias: R.dias.map((d) => ({ fecha: d.fecha, etiqueta: d.etiqueta, grupo: GR[d.etiqueta] || 'especial', contexto: null, ejemplo: true, dia_semana: d.dia_semana, tipo_dia: d.tipo_dia })) };
+  }
+  async function descomprimir(b64) {
+    const bin = atob(b64), n = bin.length, u8 = new Uint8Array(n);
+    for (let i = 0; i < n; i++) u8[i] = bin.charCodeAt(i);
+    if (typeof DecompressionStream === 'undefined') throw new Error('este navegador no puede descomprimir los datos (use Edge, Chrome, Firefox o Safari recientes)');
+    const flujo = new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'));
+    return JSON.parse(await new Response(flujo).text());
+  }
+  // ================= arranque =================
+  iniciarDatos().then(arrancar, () => {
+    $('main').innerHTML = '<p class="aviso-carga">No se encontraron los datos del replay junto a esta página (<code>sistema_tiempo_real/replay/dias/indice.js</code> ni <code>sistema_tiempo_real/replay/replay_datos.js</code>). Se generan con <code>python sistema_tiempo_real/generar_replay.py --por-dia</code>.</p>';
+    $('dia-fecha-larga').textContent = $('dia-fecha-corta').textContent = 'Sin datos';
+  });
+
+  function arrancar() {
+  const META = IDX.meta, MAPA = IDX.mapa;
+  const RUTAS = META.rutas.map((r) => r.nombre);
+  const INFO_RUTA = Object.fromEntries(META.rutas.map((r) => [r.nombre, r]));
+  const VAR_COLOR = { 'SILENCIO': '--r-silencio', 'CRA 54': '--r-cra54', 'CL 72': '--r-cl72' };
+  const colorRuta = (r) => (VAR_COLOR[r] && css(VAR_COLOR[r])) || (INFO_RUTA[r] && INFO_RUTA[r].color) || '#888888';
+  const CAP = META.capacidad || 50;
+  const HORAS = META.horas;
+  const H0 = HORAS[0];
+  const TIPO = { demanda: 'Demanda', hueco: 'Hueco sin salidas', sobrecupo: 'Sobrecupo', flota: 'Flota', regularidad: 'Regularidad', plan: 'Cambio de plan', datos: 'Falla de datos' };
+  const NIVEL_TXT = { alta: 'Crítica', media: 'Atención', info: 'Información' };
+  const NIVEL_N = { info: 1, media: 2, alta: 3 };
+  const NIVEL_DE = ['info', 'info', 'media', 'alta'];
+  const AGRUPAR_MIN = 15;
+  const DEPOT = {};
+  RUTAS.forEach((r) => {
+    const pts = (MAPA.puntos && MAPA.puntos[r]) || [];
+    const p = pts.find((x) => x.id === 2) || pts[0];
+    if (p) DEPOT[r] = [p.lat, p.lon];
+  });
+
+  // ---------- catálogo de días ----------
+  let CAT = null;
+  const ORDEN_GRUPO = ['laboral', 'sabado', 'domingo', 'festivo', 'carnaval', 'especial'];
+  function armarCatalogo() {
+    const lista = IDX.dias.slice().sort((a, b) => (a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : 0));
+    CAT = { lista, porFecha: new Map(lista.map((d) => [d.fecha, d])), pend: new Set(IDX.pendientes || []), sinGps: new Set(IDX.sin_gps || []) };
+  }
+  armarCatalogo();
+
+  // ================= estado =================
+  const estado = { fecha: null, t: 6 * 3600, k: 0, ruta: RUTAS.includes('CRA 54') ? 'CRA 54' : RUTAS[0], jugando: false, vel: 1, filtro: 'todas', filtroDesp: 'todas', cargando: false };
+  let D = null, P = null, TRAY = null;      // TRAY: trayectorias por las calles del día (o null)
+  const ultimoK = () => D.snapshots.length - 1;
+  const T_INI = () => P.tiempos[0] * 60;
+  const T_FIN = () => P.tiempos[P.tiempos.length - 1] * 60;
+  function idxFoto(t) {
+    const ts = P.tiempos, m = t / 60 + 1e-9;
+    if (m < ts[0]) return 0;
+    let lo = 0, hi = ts.length - 1;
+    while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (ts[mid] <= m) lo = mid; else hi = mid - 1; }
+    return lo;
+  }
+  const snap = () => D.snapshots[estado.k];
+  const tFoto = () => P.tiempos[estado.k];                 // minutos del día de la foto vigente
+  const idxHora = () => Math.floor(tFoto() / 60) - H0;
+  const finDia = () => estado.t >= T_FIN() - 0.5;
+
+  // Preparación de un día: tiempos de las fotos, alertas agrupadas, salidas reales con su segundo exacto y horario del plan.
+  // Cada salida cuenta como hecha desde que el motor la conoce (`c`: su segundo de salida o, si el viaje se registró después, el
+  // de su registro; datos de la versión 3) hasta que sabe que falló (`hasta`, solo las que al final resultan fallidas), salvo
+  // entre `g0` y `g1` si a los 30 min no había pasado por ningún punto y pasó después (falla por GPS que se revierte).
+  function prepDia(Dd) {
+    const tiempos = Dd.snapshots.map((s) => aMin(s.t));
+    const salidas = {}, porVeh = {}, horario = {}, fallaDe = {};
+    RUTAS.forEach((r) => {
+      const re = (Dd.real && Dd.real[r]) || {}, sl = re.salidas || [], ss = re.salidas_seg, sc = re.salidas_conoce;
+      const temp = new Map((re.fallas_temporales || []).map((x) => [x[0] + '|' + x[1], x]));
+      salidas[r] = sl.map((x, i) => { const s = ss && ss[i] != null ? ss[i] : aMin(x[0]) * 60; return { s, c: sc && sc[i] != null ? Math.max(s, sc[i]) : s, veh: x[1], hasta: Infinity }; })
+        .concat((re.fallidas || []).map((x) => ({ s: x[2], c: x[4] != null ? Math.max(x[2], x[4]) : x[2], veh: x[1], hasta: x[3] })))
+        .sort((a, b) => a.c - b.c || a.s - b.s);
+      salidas[r].forEach((x) => { const g = temp.get(x.s + '|' + x.veh); if (g) { x.g0 = g[2]; x.g1 = g[3]; } });
+      // momento de la falla de cada salida (para las `hechas` de las fotos de la versión 2, que no lo traen)
+      fallaDe[r] = new Map(salidas[r].filter((x) => x.hasta !== Infinity).map((x) => [x.s + '|' + x.veh, x.hasta]));
+      const pv = new Map();
+      salidas[r].forEach((x) => { if (!pv.has(x.veh)) pv.set(x.veh, []); pv.get(x.veh).push(x.s); });
+      porVeh[r] = pv;
+      horario[r] = ((Dd.plan && Dd.plan[r] && Dd.plan[r].horario) || []).map((h) => ({ s: aMin(h) * 60 }));
+    });
+    // Falla de datos: para cada foto con datos_ok falso, la hora (minutos) de la primera foto de esa racha (cuándo el motor marcó
+    // los datos como malos). Solo mira fotos anteriores o iguales.
+    const fallaDesde = [];
+    let ini = null;
+    Dd.snapshots.forEach((s, k) => { if (s.datos_ok === false) { if (ini == null) ini = tiempos[k]; fallaDesde.push(ini); } else { ini = null; fallaDesde.push(null); } });
+    return { tiempos, grupos: agrupar(Dd, tiempos), salidas, porVeh, horario, fallaDesde, fallaDe };
+  }
+  // ¿El motor cuenta la salida x como hecha en el segundo t?
+  const cuenta = (x, t) => x.c <= t && t < x.hasta && !(x.g0 != null && x.g0 <= t && t < x.g1);
+  // Con los datos marcados como malos el motor vuelve al plan semanal: las alertas que dependen del registro de despachos o que
+  // contradicen el plan (hueco y «despachar ya», cambio de plan, buses pegados con su ajuste, flota al límite del reoptimizado) no
+  // se muestran. El motor corregido ya no las emite; con los archivos generados antes se filtran aquí.
+  const ocultaEnFalla = (a) => a[0] === 'hueco' || a[0] === 'plan' || a[0] === 'regularidad' || (a[0] === 'flota' && /^Flota al l[ií]mite/.test(a[2]));
+  // Agrupa avisos del mismo tipo y ruta separados por 15 min o menos (decisión causal: solo mira el aviso anterior).
+  function agrupar(Dd, tiempos) {
+    const abiertos = new Map(), grupos = [];
+    Dd.snapshots.forEach((s, k) => {
+      RUTAS.forEach((r) => {
+        const e = s.rutas[r];
+        if (!e || !e.alertas) return;
+        e.alertas.forEach((a) => {
+          if (s.datos_ok === false && ocultaEnFalla(a)) return;
+          const tipo = a[0], nivel = a[1], msg = a[2];
+          const clave = r + '|' + tipo;
+          let g = abiertos.get(clave);
+          if (!g || tiempos[k] - g.occ[g.occ.length - 1].t > AGRUPAR_MIN) {
+            g = { ruta: r, tipo, kIni: k, occ: [] };
+            grupos.push(g); abiertos.set(clave, g);
+          }
+          g.occ.push({ k, t: tiempos[k], nivel: NIVEL_N[nivel] || 1, msg });
+        });
+      });
+    });
+    return grupos;
+  }
+  function grupoEn(g, k, tiempos) {
+    let fotos = 0, lastK = -1, nivel = 0;
+    for (const o of g.occ) {
+      if (o.k > k) break;
+      if (o.k !== lastK) { fotos++; lastK = o.k; }
+      nivel = Math.max(nivel, o.nivel);
+    }
+    if (lastK < 0) return null;
+    const msgs = [...new Set(g.occ.filter((o) => o.k === lastK).map((o) => o.msg))];
+    return { ruta: g.ruta, tipo: g.tipo, ini: tiempos[g.kIni], fin: tiempos[lastK], lastK, fotos, nivel, msgs, activa: lastK === k };
+  }
+  const DIAS_MEM = new Map();          // fecha -> {D, P}; guarda los 4 últimos días abiertos
+  async function obtenerDia(fecha) {
+    if (DIAS_MEM.has(fecha)) { const v = DIAS_MEM.get(fecha); DIAS_MEM.delete(fecha); DIAS_MEM.set(fecha, v); return v; }
+    let Dd;
+    if (LEGADO) Dd = window.REPLAY.dias.find((d) => d.fecha === fecha);
+    else {
+      const reg = (window.REPLAY_DIA_GZ = window.REPLAY_DIA_GZ || {});
+      if (!reg[fecha]) await cargarScript(BASE + 'dias/' + fecha + '.js');
+      const b64 = reg[fecha];
+      delete reg[fecha];
+      if (!b64) throw new Error('el archivo del día no trae datos');
+      Dd = await descomprimir(b64);
+    }
+    if (!Dd || !Dd.snapshots || !Dd.snapshots.length) throw new Error('día sin fotos');
+    const v = { D: Dd, P: prepDia(Dd), T: await obtenerCalles(fecha) };
+    DIAS_MEM.set(fecha, v);
+    while (DIAS_MEM.size > 4) DIAS_MEM.delete(DIAS_MEM.keys().next().value);
+    return v;
+  }
+  // Primer índice de una lista ordenada {s} con s > x.
+  function sobre(arr, x) { let lo = 0, hi = arr.length; while (lo < hi) { const mid = (lo + hi) >> 1; if (arr[mid].s <= x) lo = mid + 1; else hi = mid; } return lo; }
+  // Lo mismo sobre el segundo en que el motor conoce cada salida (`c`; las salidas reales están ordenadas por él).
+  function sobreC(arr, x) { let lo = 0, hi = arr.length; while (lo < hi) { const mid = (lo + hi) >> 1; if (arr[mid].c <= x) lo = mid + 1; else hi = mid; } return lo; }
+
+  // ================= tema: solo claro (19-oct-2026) =================
+  // data-theme="light" se fija en <head> antes del primer pintado; no hay botón de tema ni se lee el que quedó guardado.
+  const EMBEBIDO = document.documentElement.hasAttribute('data-embebido');  // dentro de la app: sin localStorage
+  let avisosApp = false, callarEstado = false;                              // avisos {tipo:'estado'} a la app (ver «modo embebido»)
+  let RAMPA = [], SIN_DATO = '#b3bbc5', COLOR_RUTA = {}, version = 0;
+  function leerTema() {
+    RAMPA = [0, 1, 2, 3, 4].map((i) => hexRgb(css('--occ-' + i)));
+    SIN_DATO = css('--sin-dato') || SIN_DATO;
+    RUTAS.forEach((r) => { COLOR_RUTA[r] = colorRuta(r); });
+    version++;
+  }
+  function colorOcup(o) {
+    if (o == null) return SIN_DATO;
+    const v = Math.max(0, Math.min(1, o / CAP)) * (RAMPA.length - 1);
+    const i = Math.min(RAMPA.length - 2, Math.floor(v)), f = v - i, a = RAMPA[i], b = RAMPA[i + 1];
+    return 'rgb(' + a.map((x, j) => Math.round(x + (b[j] - x) * f)).join(',') + ')';
+  }
+  const radio = (o) => (o != null && o >= CAP) ? 8.5 : 6;
+  function aplicarTema() {
+    document.documentElement.setAttribute('data-theme', 'light');
+    leerTema();
+  }
+  function cambiarTema() {
+    aplicarTema();
+    pintarChips(); pintarFiltroDesp();
+    Object.values(charts).forEach((c) => c.dispose()); for (const k in charts) delete charts[k];
+    temaMapa();
+    firmaLista = ''; firmaAlertas = ''; firmaLeyenda = '';
+    if (D) { pintarFoto(); pintarVivo(true); }
+  }
+
+  // ================= cabecera: rutas =================
+  const chipsEl = $('chips-rutas');
+  RUTAS.forEach((r) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.dataset.r = r;
+    b.innerHTML = `<span class="dot"></span>${esc(r)}`;
+    b.title = 'Ver los paneles de detalle de ' + r;
+    b.addEventListener('click', () => { if (estado.ruta === r) return; estado.ruta = r; pintarChips(); cambiarRuta(); });
+    chipsEl.appendChild(b);
+  });
+  function pintarChips() {
+    chipsEl.querySelectorAll('.chip').forEach((b) => { b.style.setProperty('--c', colorRuta(b.dataset.r)); b.setAttribute('aria-pressed', b.dataset.r === estado.ruta ? 'true' : 'false'); });
+    $('btn-filtro-ruta').textContent = 'Solo ' + estado.ruta;
+    ['prox-ruta', 'salidas-ruta', 'pax-ruta'].forEach((id) => { $(id).textContent = '· ' + estado.ruta; });
+  }
+
+  // ================= lo que se sabe antes del día y lo que solo se sabe después =================
+  // Etiquetas que cuentan el resultado del día (caída de la demanda, falla de registro, lluvia que cayó, mañana floja): mientras se
+  // reproduce el día se muestra la del calendario y estas solo al llegar a las 21:00, como el resultado real. El calendario de días
+  // las usa para elegir (es el catálogo de días especiales), salvo en los días de ejemplo, que se ven en la barra todo el tiempo.
+  const ETQ_DESPUES = new Set(['Caída inesperada', 'Caída sin explicar', 'Falla de registro', 'Lluvia fuerte', 'Mañana floja']);
+  function etiquetaPrevia(d) {
+    if (!d) return '';
+    if (d.etiqueta_previa) return d.etiqueta_previa;                  // archivos generados con la versión 3 de los datos
+    if (!ETQ_DESPUES.has(d.etiqueta)) return d.etiqueta;
+    // el día de ejemplo del 10-oct cae en el receso escolar de octubre (el archivo de 6 días no trae `contexto`)
+    if ((d.contexto && /receso escolar de octubre/i.test(d.contexto)) || d.etiqueta === 'Caída inesperada') return 'Receso escolar';
+    return d.tipo_dia === 'Sábado' ? 'Sábado' : d.tipo_dia === 'Domingo/festivo' ? (d.dia_semana === 'domingo' ? 'Domingo' : 'Festivo') : 'Laboral';
+  }
+  const etiquetaMenu = (d) => (d && d.ejemplo ? etiquetaPrevia(d) : d ? d.etiqueta : '');
+  const etiquetaVisible = (d) => (D && finDia() ? (d ? d.etiqueta : D.etiqueta) : etiquetaPrevia(d || D));
+  const fraseCalendario = (f, ctx) => { const p = partesFecha(f), Ds = cap(DIAS_L[p.dow]), mes = MESES[p.m - 1]; return ctx ? `${Ds} de ${mes}, en ${ctx}.` : `${Ds} corriente de ${mes}.`; };
+  // Descripción del día sin lo que solo se sabe después (archivos de la versión 2: se quita de la frase completa).
+  function descripcionPrevia(Dd) {
+    if (Dd.descripcion_previa != null) return Dd.descripcion_previa;
+    const s = String(Dd.descripcion || '').split(/\s*Pasajeros reales frente al pronóstico semanal/)[0].trim();
+    if (ETQ_DESPUES.has(Dd.etiqueta) && Dd.etiqueta !== 'Caída inesperada') return fraseCalendario(Dd.fecha, Dd.contexto);
+    return s.replace(/\s*Llovió [\d.,]+ mm \(E9\)\./g, '')
+      .replace(/: día atípico de E10/g, '')
+      .replace(/; además jugó la Selección Colombia a las ([\d:]+)/, '; a las $1 juega la Selección Colombia')
+      .replace(/: operación y registro atípicos \(muchos viajes marcados como cancelados\)/, '')
+      .replace(/: la demanda cae y el pronóstico semanal no lo anticipa \(E10\)/, '');
+  }
+
+  // ================= barra del día y calendario =================
+  const ejemplosEl = $('ejemplos');
+  function pintarEjemplos() {
+    const ej = CAT.lista.filter((d) => d.ejemplo).sort((a, b) => ORDEN_GRUPO.indexOf(a.grupo) - ORDEN_GRUPO.indexOf(b.grupo));
+    ejemplosEl.innerHTML = ej.length ? '<span class="rot">Ejemplos:</span>' + ej.map((d) => `<button type="button" class="chip" data-f="${esc(d.fecha)}" title="${esc(fechaLarga(d.fecha))}">${esc(etiquetaPrevia(d))}</button>`).join('') : '';
+    marcarEjemplos();
+  }
+  function marcarEjemplos() { ejemplosEl.querySelectorAll('.chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.f === estado.fecha ? 'true' : 'false')); }
+  ejemplosEl.addEventListener('click', (ev) => { const b = ev.target.closest('.chip'); if (b) cambiarDia(b.dataset.f); });
+  function textoEtiqueta(d, etq) { if (!d) return ''; etq = etq == null ? d.etiqueta : etq; return etq + (d.contexto && !/vacaciones|receso|semana santa/i.test(etq) ? ' · ' + d.contexto : ''); }
+  // Etiqueta del día abierto en la barra del día y junto al reloj: la del calendario hasta las 21:00, la completa después.
+  function pintarEtiquetaDia() {
+    if (!estado.fecha) return;
+    const d = CAT.porFecha.get(estado.fecha), etq = etiquetaVisible(d);
+    if ($('dia-etq').textContent !== etq) $('dia-etq').textContent = etq;
+    btnDia.title = `${fechaLarga(estado.fecha)} · ${textoEtiqueta(d || D, etq)}. Elegir otro día`;
+    $('reloj-fecha').textContent = `${fechaCorta(estado.fecha)} · ${etq}`;
+  }
+  function pintarSeleccionDia() {
+    const d = CAT.porFecha.get(estado.fecha);
+    $('dia-fecha-larga').textContent = fechaLarga(estado.fecha);
+    $('dia-fecha-corta').textContent = fechaCorta(estado.fecha);
+    pintarEtiquetaDia();
+    const i = CAT.lista.findIndex((x) => x.fecha === estado.fecha);
+    $('btn-dia-ant').disabled = i <= 0;
+    $('btn-dia-sig').disabled = i < 0 || i >= CAT.lista.length - 1;
+    marcarEjemplos();
+    pintarDisponibles();
+  }
+  function pintarDisponibles() {
+    const pd = META.por_dia;
+    const n = CAT.lista.length;
+    const generando = pd && pd.generando && pd.pendientes > 0;
+    $('dias-disp').textContent = generando ? `${fmt(n)} de ${fmt(pd.previstos)} días listos` : `${fmt(n)} días de 2025`;
+    $('dias-disp').title = generando ? 'Los demás días de 2025 con GPS se están generando; aparecen al volver a abrir el calendario.' : 'Días de 2025 que se pueden reproducir (todos menos el último de cada mes, que no tiene GPS).';
+    $('como-dias').textContent = LEGADO ? 'seis días de ejemplo' : (pd && pd.pendientes > 0 ? `${fmt(n)} días listos de ${fmt(pd.previstos)} con GPS` : `${fmt(n)} días con GPS`);
+  }
+  $('btn-dia-ant').addEventListener('click', () => moverDia(-1));
+  $('btn-dia-sig').addEventListener('click', () => moverDia(1));
+  function moverDia(dir) {
+    const i = CAT.lista.findIndex((x) => x.fecha === estado.fecha), j = i + dir;
+    if (i >= 0 && j >= 0 && j < CAT.lista.length) cambiarDia(CAT.lista[j].fecha);
+  }
+
+  // Calendario
+  const panel = $('panel-dias'), btnDia = $('btn-dia');
+  const cal = { mes: 5, abierto: false, ultRecarga: 0 };
+  function abrirCalendario() {
+    if (cal.abierto) return;
+    cal.abierto = true;
+    cal.mes = estado.fecha ? partesFecha(estado.fecha).m - 1 : 5;
+    panel.hidden = false; btnDia.setAttribute('aria-expanded', 'true');
+    pintarCalendario(); pintarListaEspeciales();
+    const sel = panel.querySelector('.cal-dia[aria-current="date"]') || panel.querySelector('.cal-dia:not(:disabled)');
+    if (sel) sel.focus();
+    recargarIndice();
+  }
+  function cerrarCalendario(enfocar) {
+    if (!cal.abierto) return;
+    cal.abierto = false; panel.hidden = true; btnDia.setAttribute('aria-expanded', 'false');
+    if (enfocar) btnDia.focus();
+  }
+  btnDia.addEventListener('click', () => { if (cal.abierto) cerrarCalendario(false); else abrirCalendario(); });
+  document.addEventListener('mousedown', (ev) => { if (cal.abierto && !panel.contains(ev.target) && !btnDia.contains(ev.target)) cerrarCalendario(false); });
+  panel.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { ev.preventDefault(); cerrarCalendario(true); } });
+  $('cal-ant').addEventListener('click', () => { if (cal.mes > 0) { cal.mes--; pintarCalendario(); } });
+  $('cal-sig').addEventListener('click', () => { if (cal.mes < 11) { cal.mes++; pintarCalendario(); } });
+  const fechaDe = (m, d) => `2025-${pad(m + 1)}-${pad(d)}`;
+  function pintarCalendario() {
+    const m = cal.mes;
+    const act = document.activeElement, fFoco = act && act.closest && act.closest('#cal-grid') ? act.dataset.f : null;
+    $('cal-mes').textContent = cap(MESES[m]) + ' de 2025';
+    $('cal-ant').disabled = m <= 0; $('cal-sig').disabled = m >= 11;
+    $('ley-pend').hidden = CAT.pend.size === 0;
+    const dow = (new Date(Date.UTC(2025, m, 1)).getUTCDay() + 6) % 7, n = new Date(Date.UTC(2025, m + 1, 0)).getUTCDate();
+    let html = '';
+    for (let i = 0; i < dow; i++) html += '<span class="cal-vacio" aria-hidden="true"></span>';
+    for (let d = 1; d <= n; d++) {
+      const f = fechaDe(m, d), info = CAT.porFecha.get(f), p = partesFecha(f);
+      const finde = p.dow === 0 || p.dow === 6;
+      let cls = 'cal-dia' + (finde ? ' finde' : ''), extra = '', titulo;
+      if (info) {
+        titulo = `${fechaLarga(f)} · ${textoEtiqueta(info, etiquetaMenu(info))}`;
+        if (info.ejemplo) cls += ' ej';
+        if (['festivo', 'carnaval', 'especial'].includes(info.grupo)) extra = `<i class="mk ${info.grupo}" aria-hidden="true"></i>`;
+      } else if (CAT.sinGps.has(f)) { titulo = `${fechaLarga(f)} · sin GPS (último día del mes): no se puede reproducir`; cls += ' sin'; }
+      else { titulo = `${fechaLarga(f)} · todavía se está generando`; cls += ' pend'; }
+      html += `<button type="button" class="${cls}" data-f="${f}" title="${esc(titulo)}" aria-label="${esc(titulo)}"${info ? '' : ' disabled'}${f === estado.fecha ? ' aria-current="date"' : ''} tabindex="-1">${d}${extra}</button>`;
+    }
+    $('cal-grid').innerHTML = html;
+    const previo = fFoco && $('cal-grid').querySelector(`.cal-dia[data-f="${fFoco}"]:not(:disabled)`);
+    const foco = previo || $('cal-grid').querySelector('[aria-current="date"]') || $('cal-grid').querySelector('.cal-dia:not(:disabled)');
+    if (foco) { foco.tabIndex = 0; if (previo) previo.focus(); }
+  }
+  $('cal-grid').addEventListener('click', (ev) => { const b = ev.target.closest('.cal-dia'); if (b && !b.disabled) { cerrarCalendario(true); cambiarDia(b.dataset.f); } });
+  $('cal-grid').addEventListener('keydown', (ev) => {
+    const b = ev.target.closest('.cal-dia'); if (!b) return;
+    const pasos = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+    let delta = pasos[ev.key];
+    if (ev.key === 'PageUp') delta = -28; else if (ev.key === 'PageDown') delta = 28;
+    if (delta == null) return;
+    ev.preventDefault();
+    let t = Date.UTC(2025, cal.mes, partesFecha(b.dataset.f).d);
+    for (let i = 0; i < 60; i++) {
+      t += delta * 86400000;
+      const dt = new Date(t);
+      if (dt.getUTCFullYear() !== 2025) return;
+      const f = fechaDe(dt.getUTCMonth(), dt.getUTCDate());
+      if (CAT.porFecha.has(f)) {
+        if (dt.getUTCMonth() !== cal.mes) { cal.mes = dt.getUTCMonth(); pintarCalendario(); }
+        $('cal-grid').querySelectorAll('.cal-dia').forEach((x) => { x.tabIndex = x.dataset.f === f ? 0 : -1; });
+        const destino = $('cal-grid').querySelector(`[data-f="${f}"]`); if (destino) destino.focus();
+        return;
+      }
+      if (Math.abs(delta) !== 1) delta = Math.sign(delta);     // si cae en un día sin datos, sigue día a día
+    }
+  });
+  function pintarListaEspeciales() {
+    const grupos = [['Días de ejemplo', (d) => d.ejemplo], ['Festivos', (d) => d.grupo === 'festivo' && !d.ejemplo], ['Carnaval', (d) => d.grupo === 'carnaval' && !d.ejemplo],
+      ['Días especiales (E9, E10)', (d) => d.grupo === 'especial' && !d.ejemplo]];
+    let html = '';
+    grupos.forEach(([titulo, fn]) => {
+      const xs = CAT.lista.filter(fn);
+      if (!xs.length) return;
+      html += `<h4>${esc(titulo)}</h4><ul>` + xs.map((d) => {
+        const mk = ['festivo', 'carnaval', 'especial'].includes(d.grupo) ? `<i class="mk ${d.grupo}" aria-hidden="true"></i>` : '';
+        const e0 = etiquetaMenu(d);
+        const etq = d.grupo === 'festivo' ? e0.replace(/^Festivo · /, '') : d.grupo === 'carnaval' ? e0.replace(/^Carnaval · /, 'Carnaval, ') : e0;
+        return `<li><button type="button" data-f="${esc(d.fecha)}"${d.fecha === estado.fecha ? ' aria-current="date"' : ''}><span class="f">${esc(fechaCorta(d.fecha).replace(/ 2025$/, ''))}</span>${mk}<span>${esc(etq)}</span></button></li>`;
+      }).join('') + '</ul>';
+    });
+    $('cal-lista').innerHTML = html;
+    const pd = META.por_dia;
+    $('cal-nota').textContent = LEGADO
+      ? 'Solo están los seis días de ejemplo (archivo único de la versión anterior). Los demás días se generan con generar_replay.py --por-dia.'
+      : `${fmt(CAT.lista.length)} días listos de los ${fmt((pd && pd.previstos) || CAT.lista.length)} de 2025 con GPS (todos menos el último de cada mes).` + (pd && pd.pendientes > 0 ? ' Los punteados se están generando: vuelve a abrir el calendario en unos minutos.' : '') + ' Cada día se carga solo cuando se elige.';
+  }
+  $('cal-lista').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-f]'); if (b) { cerrarCalendario(true); cambiarDia(b.dataset.f); } });
+  // Mientras el generador sigue corriendo, el índice se vuelve a leer al abrir el calendario (como mucho cada 30 s).
+  function recargarIndice() {
+    const pd = META.por_dia;
+    if (LEGADO || !pd || !pd.generando || Date.now() - cal.ultRecarga < 30000) return;
+    cal.ultRecarga = Date.now();
+    cargarScript(BASE + 'dias/indice.js?v=' + Date.now()).then(() => {
+      const I = window.REPLAY_INDICE;
+      if (!I || !I.dias || I.dias.length < CAT.lista.length) return;
+      IDX = Object.assign({}, IDX, { dias: I.dias, pendientes: I.pendientes, sin_gps: I.sin_gps });
+      META.por_dia = I.meta && I.meta.por_dia;
+      armarCatalogo();
+      pintarSeleccionDia();
+      if (cal.abierto) { pintarCalendario(); pintarListaEspeciales(); }
+    }).catch(() => { /* se reintenta la próxima vez */ });
+  }
+
+  // ================= mapa =================
+  // Mapa base de Esri (Canvas World Light Gray): una capa base y encima una de rótulos (solo modo claro).
+  // Funciona al abrir la página con doble clic (file://): las teselas de OpenStreetMap y de CARTO rechazan esas peticiones.
+  // Esri tiene datos de Barranquilla hasta el zoom 16; en 17 y 18 Leaflet amplía las teselas del 16.
+  // Las teselas son lo único de la página que necesita internet (bibliotecas y fuentes vienen de lib/) y no se pueden guardar en
+  // local: antes de pedirlas se sondea una (6 s de tiempo límite) y, si no hay conexión, el mapa queda en gris liso con una nota;
+  // las rutas, los puntos de control y los buses son capas propias y se dibujan igual.
+  const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
+  const ATRIB_FONDO = 'Powered by <a href="https://www.esri.com/">Esri</a> | Fuentes: Esri, HERE, Garmin, &copy;&nbsp;colaboradores de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> y comunidad de usuarios de&nbsp;SIG';
+  const AVISO_SIN_INTERNET = 'Sin mapa base: no hay internet (las rutas y los buses se siguen viendo).';
+  const AVISO_SIN_SERVICIO = 'Sin mapa base: el servidor de mapas no responde (las rutas y los buses se siguen viendo).';
+  let mapa = null, rend = null, fondos = null, fondoActual = '';
+  const tilesFondo = { internet: null, sondeando: false, ultimoSondeo: 0, cargas: 0, errores: 0, plazo: false };
+  const lineas = {}, puntos = {};
+  const marcadores = new Map();
+  const capaEsri = (servicio, opciones) => L.tileLayer(ESRI + servicio + '/MapServer/tile/{z}/{y}/{x}', Object.assign({ maxNativeZoom: 16, maxZoom: 18 }, opciones));
+  // Sondeo de internet. Si el navegador ya sabe que no hay red (navigator.onLine en falso) no se pide nada; si no, se pide la tesela
+  // del zoom 0 en modo no-cors (basta con que el servidor responda) con un tiempo límite de 6 s. Sin conexión, el navegador anota
+  // en su consola esa única petición fallida (es un aviso de red, no un error de la página); las teselas no se piden nunca.
+  function sondearInternet() {
+    if (navigator.onLine === false) return Promise.resolve(false);
+    const ctl = new AbortController();
+    const limite = setTimeout(() => ctl.abort(), 6000);
+    return fetch(ESRI + 'World_Light_Gray_Base/MapServer/tile/0/0/0', { mode: 'no-cors', cache: 'no-store', signal: ctl.signal })
+      .then(() => true, () => false)
+      .finally(() => clearTimeout(limite));
+  }
+  // Nota dentro del mapa y fondo gris liso cuando no hay mapa base: sin internet según el sondeo, o con internet pero con 8 o más
+  // errores de tesela y ninguna cargada a los 10 s de poner la capa base; se oculta en cuanto carga alguna.
+  function revisarFondo() {
+    const texto = tilesFondo.internet === false ? AVISO_SIN_INTERNET
+      : (tilesFondo.plazo && tilesFondo.errores >= 8 && tilesFondo.cargas === 0) ? AVISO_SIN_SERVICIO : '';
+    const el = $('aviso-mapa');
+    el.hidden = !texto;
+    if (texto) el.textContent = texto;
+    $('mapa').classList.toggle('sin-fondo', !!texto);
+  }
+  // Sondea y, si hay internet, pone el par de teselas del tema; si no, deja el mapa sin fondo y vuelve a sondear cuando el navegador
+  // avisa que volvió la red («online») o cuando la pestaña vuelve a estar visible, como mucho una vez cada 30 s.
+  function buscarFondo() {
+    if (tilesFondo.internet || tilesFondo.sondeando || Date.now() - tilesFondo.ultimoSondeo < 30000) return;
+    tilesFondo.sondeando = true;
+    tilesFondo.ultimoSondeo = Date.now();
+    sondearInternet().then((hay) => {
+      tilesFondo.sondeando = false;
+      tilesFondo.internet = hay;
+      if (hay) {
+        ponerFondo();
+        setTimeout(() => { tilesFondo.plazo = true; revisarFondo(); }, 10000);
+      }
+      revisarFondo();
+    });
+  }
+  function iniciarMapa() {
+    if (!window.L) { $('mapa').innerHTML = '<p class="muted" style="padding:16px">No se pudo cargar la biblioteca del mapa (lib/leaflet.min.js).</p>'; return; }
+    rend = L.canvas({ padding: 0.3, tolerance: 4 });
+    mapa = L.map('mapa', { preferCanvas: true, renderer: rend, zoomControl: true, attributionControl: true, zoomSnap: 0.25 });
+    fondos = {
+      claro: [capaEsri('World_Light_Gray_Base', { zIndex: 1, attribution: ATRIB_FONDO }), capaEsri('World_Light_Gray_Reference', { zIndex: 2 })],
+    };
+    [fondos.claro[0]].forEach((c) => c
+      .on('tileload', () => { tilesFondo.cargas++; revisarFondo(); })
+      .on('tileerror', () => { tilesFondo.errores++; revisarFondo(); }));
+    RUTAS.forEach((r) => {
+      const traz = CALLES && CALLES[r] ? CALLES[r].lat.map((la, i) => [la, CALLES[r].lon[i]]) : (MAPA.rutas[r] || []);
+      lineas[r] = L.polyline(traz, { renderer: rend, color: COLOR_RUTA[r], weight: 3, opacity: 0.6, interactive: false, lineJoin: 'round' }).addTo(mapa);
+    });
+    RUTAS.forEach((r) => {
+      puntos[r] = (MAPA.puntos[r] || []).map((p) => L.circleMarker([p.lat, p.lon], { renderer: rend, radius: 3.5, color: COLOR_RUTA[r], weight: 1.5, fillColor: css('--surface'), fillOpacity: 1 })
+        .bindTooltip(`<b>Punto de control ${esc(p.id)}</b> · ${esc(r)}<br>minuto ${fmt(p.minuto)} del recorrido${p.id === 2 ? ' (patio)' : ''}`, { direction: 'top', offset: [0, -4] })
+        .addTo(mapa));
+    });
+    const todos = RUTAS.flatMap((r) => MAPA.rutas[r] || []);
+    if (todos.length) mapa.fitBounds(L.latLngBounds(todos), { padding: [14, 14] }); else mapa.setView(MAPA.centro, 12);
+    temaMapa();
+    buscarFondo();
+    window.addEventListener('online', buscarFondo);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') buscarFondo(); });
+  }
+  // Pone el par base + rótulos claros.
+  // Solo cambia las capas de teselas: el mapa, el zoom y las capas de rutas, puntos y buses se conservan. Sin internet no pone nada.
+  function ponerFondo() {
+    if (!tilesFondo.internet) return;
+    const clave = 'claro';
+    if (clave === fondoActual) return;
+    const viejo = fondos[fondoActual];
+    fondos[clave].forEach((c) => c.addTo(mapa));
+    if (viejo) viejo.forEach((c) => c.remove());
+    fondoActual = clave;
+  }
+  function temaMapa() {
+    if (!mapa) return;
+    ponerFondo();
+    const sup = css('--surface');
+    RUTAS.forEach((r) => {
+      const act = r === estado.ruta;
+      lineas[r].setStyle({ color: COLOR_RUTA[r], weight: act ? 4.5 : 3, opacity: act ? 0.9 : 0.5 });
+      puntos[r].forEach((m) => m.setStyle({ color: COLOR_RUTA[r], fillColor: sup }));
+    });
+    lineas[estado.ruta].bringToFront();
+    marcadores.forEach((m) => m.setStyle({ color: COLOR_RUTA[m._ruta], fillColor: colorOcup(m._occ) }));
+    marcadores.forEach((m) => { if (m._ruta === estado.ruta) m.bringToFront(); });
+  }
+  function contenidoBus(m) {
+    const b = m._bus, r = m._ruta, t = estado.t;
+    const sale = m._sale != null ? m._sale : b[5] * 60;
+    const occ = b[3] == null ? (m._nuevo ? 'sin dato todavía (acaba de salir)' : 'sin dato del contador')
+      : `<b>${fmt(b[3])}</b> pasajeros a bordo (${fmt(b[3] / CAP * 100)} % de ${CAP})${b[3] >= CAP ? ' · <b>sobrecupo</b>' : ''}`;
+    const punto = b[4] == null ? 'todavía ninguno (acaba de salir del patio)' : 'punto ' + esc(b[4]);
+    return `<b>Bus ${esc(b[0])}</b> · ${esc(r)}<br>Salió a las <b>${hhmmS(sale)}</b> (${txtHace(Math.max(0, t - sale))})<br>Ocupación: ${occ}<br>Último punto de control: ${punto}`;
+  }
+  // Buses entre dos fotos: cada bus de la foto k se desliza hacia su posición en la foto k+1; los que salen entre las dos
+  // aparecen en el patio a su hora exacta de salida y van hacia su posición de la foto k+1; los que terminan se quedan en su
+  // última posición hasta la foto siguiente. Solo se dibuja: los datos (ocupación, punto) son los de la foto vigente.
+  let par = null;
+  function clavesBuses(lista, r) {
+    const dup = new Map(), out = [];
+    (lista || []).forEach((b) => {
+      let key = r + '|' + b[0] + '|' + b[5];
+      const n = dup.get(key) || 0; dup.set(key, n + 1);
+      if (n) key += '#' + n;
+      if (b[1] == null || b[2] == null) return;
+      out.push([key, b]);
+    });
+    return out;
+  }
+  function salidaExacta(r, b) {
+    const xs = P.porVeh[r] && P.porVeh[r].get(b[0]);
+    if (xs) for (const s of xs) if (Math.abs(s / 60 - b[5]) <= 1) return s;
+    return b[5] * 60;
+  }
+  // Trayectoria por las calles del bus b de la ruta r: la de su clave (vehículo y minuto de salida); si hay varias (despacho
+  // duplicado), la que en el segundo t pasa más cerca de la posición [lat, lon] que trae la foto.
+  function trayectoria(r, b, t) {
+    const lista = TRAY && TRAY[r] && TRAY[r].get(b[0] + '|' + b[5]);
+    if (!lista || !lista.length) return null;
+    if (lista.length === 1 || b[1] == null) return lista[0];
+    let mejor = lista[0], dmin = Infinity;
+    lista.forEach((kn) => {
+      const p = puntoEnRuta(r, metrosEn(kn, t));
+      if (!p) return;
+      const d = (p[0] - b[1]) * (p[0] - b[1]) + (p[1] - b[2]) * (p[1] - b[2]);
+      if (d < dmin) { dmin = d; mejor = kn; }
+    });
+    return mejor;
+  }
+  function prepararPar(k) {
+    const S0 = D.snapshots[k], S1 = D.snapshots[k + 1] || null;
+    const t0 = P.tiempos[k] * 60, t1 = S1 ? P.tiempos[k + 1] * 60 : t0;
+    const items = [];
+    RUTAS.forEach((r) => {
+      const m1 = new Map(S1 ? clavesBuses(S1.rutas[r] && S1.rutas[r].buses, r) : []);
+      clavesBuses(S0.rutas[r] && S0.rutas[r].buses, r).forEach(([key, b]) => {
+        const b1 = m1.get(key);
+        items.push({ key, r, b, desde: [b[1], b[2]], hasta: b1 ? [b1[1], b1[2]] : null, ini: t0, sale: salidaExacta(r, b), kn: trayectoria(r, b, t0) });
+        m1.delete(key);
+      });
+      m1.forEach((b, key) => {
+        const s = Math.max(t0, Math.min(t1, salidaExacta(r, b)));
+        items.push({ key, r, b: [b[0], b[1], b[2], null, null, b[5]], desde: DEPOT[r] || [b[1], b[2]], hasta: [b[1], b[2]], ini: s, sale: salidaExacta(r, b), nuevo: true, kn: trayectoria(r, b, t1) });
+      });
+    });
+    return { dia: estado.fecha, k, t0, t1, items };
+  }
+  function posicion(it, t) {
+    if (it.nuevo && t < it.ini) return null;
+    if (it.kn) { const p = puntoEnRuta(it.r, metrosEn(it.kn, t)); if (p) return p; }     // por las calles
+    if (!it.hasta) return it.desde;
+    const span = par.t1 - it.ini, f = span > 0 ? Math.max(0, Math.min(1, (t - it.ini) / span)) : 1;
+    return [it.desde[0] + (it.hasta[0] - it.desde[0]) * f, it.desde[1] + (it.hasta[1] - it.desde[1]) * f];
+  }
+  const enCalle = {};
+  function actualizarBuses(t) {
+    if (!mapa || !D) return;
+    const k = idxFoto(t);
+    if (!par || par.k !== k || par.dia !== estado.fecha) par = prepararPar(k);
+    const vistos = new Set();
+    RUTAS.forEach((r) => { enCalle[r] = 0; });
+    for (const it of par.items) {
+      const pos = posicion(it, t);
+      if (!pos) continue;
+      vistos.add(it.key); enCalle[it.r]++;
+      let m = marcadores.get(it.key);
+      if (!m) {
+        m = L.circleMarker(pos, { renderer: rend, radius: radio(it.b[3]), color: COLOR_RUTA[it.r], weight: 2, fillColor: colorOcup(it.b[3]), fillOpacity: 1 });
+        m._ruta = it.r; m._bus = it.b; m._occ = it.b[3]; m._sale = it.sale; m._nuevo = !!it.nuevo;
+        m.bindTooltip(contenidoBus, { direction: 'top', offset: [0, -7], opacity: 1 });
+        m.addTo(mapa);
+        marcadores.set(it.key, m);
+      } else {
+        if (m._bus !== it.b) {
+          m._bus = it.b; m._sale = it.sale; m._nuevo = !!it.nuevo;
+          if (m._occ !== it.b[3]) { m._occ = it.b[3]; m.setStyle({ fillColor: colorOcup(it.b[3]) }); m.setRadius(radio(it.b[3])); }
+          if (m.isTooltipOpen()) m.getTooltip().update();
+        }
+        const ll = m.getLatLng();
+        if (ll.lat !== pos[0] || ll.lng !== pos[1]) m.setLatLng(pos);
+      }
+    }
+    marcadores.forEach((m, key) => { if (!vistos.has(key)) { m.remove(); marcadores.delete(key); } });
+    pintarLeyenda();
+  }
+  function limpiarBuses() { marcadores.forEach((m) => m.remove()); marcadores.clear(); par = null; }
+  let firmaLeyenda = '';
+  function pintarLeyenda() {
+    const total = RUTAS.reduce((a, r) => a + (enCalle[r] || 0), 0);
+    const firma = RUTAS.map((r) => enCalle[r] || 0).join('|') + '|' + version + '|' + hhmmS(estado.t);
+    if (firma === firmaLeyenda) return;
+    firmaLeyenda = firma;
+    const filas = RUTAS.map((r) => `<div class="fila"><span class="ln" style="--c:${COLOR_RUTA[r]}"></span>${esc(r)}<span class="cnt">${fmt(enCalle[r] || 0)} en la calle</span></div>`).join('');
+    $('leyenda-mapa').innerHTML = `<b>Ocupación del bus</b> <span class="muted">(pasajeros a bordo)</span><div class="grad" aria-hidden="true"></div><div class="ticks"><span>0</span><span>25</span><span>${CAP} o más</span></div>`
+      + `<div class="fila"><span class="sw sin"></span>sin dato del contador</div><div class="fila"><span class="sw ring"></span>borde = ruta · círculo grande = ${CAP} o más</div>` + filas;
+    $('mapa-sub').textContent = `${fmt(total)} buses en la calle a las ${hhmmS(estado.t)} · pasa el cursor o toca un bus`;
+  }
+
+  // ================= despachos en orden (las tres rutas) =================
+  const VENTANA_HECHOS = 15 * 60, MAX_HECHOS = 3, PRONTO = 5 * 60, VENTANA_PROG = 15 * 60, HORIZONTE = 60 * 60;
+  // Falla de datos en la foto vigente: desde cuándo (minutos) y si es corte de GPS (cobertura < 50 %) o falla del registro de
+  // despachos / de los contadores (guarda de datos del motor).
+  function fallaEn(k) {
+    const S = D.snapshots[k];
+    if (!S || S.datos_ok !== false) return null;
+    // ¿el registro de despachos también falla? (el motor avisa «Solo N salidas registradas frente a M del plan» en alguna ruta)
+    const registro = RUTAS.some((r) => ((S.rutas[r] && S.rutas[r].alertas) || []).some((a) => a[0] === 'datos' && /^Solo \d+ salidas registradas/.test(a[2])));
+    return { desde: P.fallaDesde[k] != null ? P.fallaDesde[k] : P.tiempos[k], gps: S.cobertura != null && S.cobertura < 0.5, registro };
+  }
+  // Aviso de la lista en modo plan semanal. Si los despachos sí se registran y lo que no cuadra son los pasajeros (p. ej., la mañana
+  // floja del 20-nov), no se dice que falte el registro.
+  const textoFalla = (f) => (f.gps ? `No llegan los datos de GPS desde las ${hhmm(f.desde)}`
+    : f.registro ? `No llegan los registros de despacho desde las ${hhmm(f.desde)}`
+    : `Los pasajeros contados no cuadran con lo esperado desde las ${hhmm(f.desde)} (posible falla de los contadores; los despachos sí se registran)`)
+    + ': despache según el horario del plan semanal.';
+  // Vehículo de cada despacho pendiente (en orden de hora): el primer bus programado por Sobusa, en orden de hora programada, cuya
+  // hora programada esté a ±15 min de la del despacho y que todavía no haya salido; si no hay ninguno, «vehículo por asignar».
+  function asignarVehiculos(pend, prog) {
+    const usado = prog.map(() => false);
+    pend.forEach((f) => {
+      for (let j = 0; j < prog.length; j++) {
+        if (!usado[j] && Math.abs(prog[j].s - f.s) <= VENTANA_PROG) { usado[j] = true; f.veh = prog[j].veh; f.prog = prog[j].hhmm; return; }
+      }
+    });
+  }
+  // Modelo de la lista en el instante t (segundos): salidas hechas = las que el motor contaba en la foto vigente (`hechas`, menos
+  // las que se saben fallidas entre la foto y t) más las que el motor conoce después de la foto (salida y registro <= t, todavía no
+  // sabidas fallidas); próximas = recomendaciones de la foto (próxima hora) menos las que ya cubrió una salida posterior a la foto;
+  // vehículo = programación de Sobusa registrada hasta la foto (a ±15 min y sin salida). Con falla de datos (modo plan semanal) las
+  // próximas son las del horario del plan entre t y t + 60 min.
+  function modelo(t) {
+    const k = idxFoto(t), S = D.snapshots[k], tk = P.tiempos[k] * 60;
+    const falla = fallaEn(k);
+    const filas = [], porRuta = {};
+    RUTAS.forEach((r) => {
+      const e = S.rutas[r], sal = P.salidas[r] || [];
+      const iT = sobreC(sal, t), iK = Math.min(sobreC(sal, tk), iT);
+      const tras = [];
+      for (let i = iK; i < iT; i++) if (cuenta(sal[i], t)) tras.push(sal[i]);
+      let recientes, hechosHoy, ultima;
+      if (e && e.hechas) {
+        // Problema 3: una salida de la foto deja de ser «hecha» en cuanto se sabe que falló (tercer campo de `hechas` en los datos
+        // de la versión 3; con los anteriores, el momento se toma de las fallidas del día).
+        const fd = P.fallaDe[r];
+        const vivas = e.hechas.map((h) => ({ s: h[0], veh: h[1], hasta: h[2] != null ? h[2] : (fd.get(h[0] + '|' + h[1]) || Infinity) })).filter((x) => x.hasta > t);
+        recientes = vivas.filter((x) => t - x.s <= VENTANA_HECHOS);
+        // «hechos hoy»: lo que contaba el motor en la foto más el cambio de cada salida entre la foto y t (las que conoce después,
+        // las que se saben fallidas, las fallas por GPS que se revierten)
+        let delta = 0;
+        for (let i = 0; i < iT; i++) delta += (cuenta(sal[i], t) ? 1 : 0) - (cuenta(sal[i], tk) ? 1 : 0);
+        hechosHoy = e.salidas_real + delta;
+        const cands = vivas.concat(tras);
+        ultima = cands.length ? cands.reduce((a, b) => (b.s > a.s ? b : a)) : (e.ultima_salida ? { s: aMin(e.ultima_salida) * 60, veh: null } : null);
+      } else {                       // datos sin `hechas` (archivo de 6 días): salidas reales del día hasta t
+        recientes = [];
+        for (let i = iK - 1; i >= 0 && t - sal[i].s <= VENTANA_HECHOS; i--) if (cuenta(sal[i], t)) recientes.unshift(sal[i]);
+        hechosHoy = 0; ultima = null;
+        for (let i = 0; i < iT; i++) if (cuenta(sal[i], t)) { hechosHoy++; ultima = sal[i]; }
+      }
+      // salidas nuevas después de la foto (una salida vieja registrada tarde cuenta en «hechos hoy» pero no cubre una recomendación)
+      const nuevas = tras.filter((x) => x.s > tk);
+      const info = { e, hechosHoy, ultima, tras: nuevas.length, pend: [] };
+      porRuta[r] = info;
+      recientes.concat(tras.filter((x) => t - x.s <= VENTANA_HECHOS)).forEach((x) => filas.push({ tipo: 'hecho', est: 'hecho', r, s: x.s, veh: x.veh }));
+      if (!e) return;
+      // Programación de Sobusa sin los buses que ya salieron (salida detectada en la foto o después de ella) ni los viajes que ya
+      // arrancaron antes del reloj (tercer campo de `programados`, datos de la versión 3: fechainicio o primera visita GPS).
+      const salieron = new Set((e.hechas || []).map((h) => h[1]).concat(tras.filter((x) => x.s > tk - VENTANA_HECHOS).map((x) => x.veh)));
+      const prog = (e.programados || []).filter((p) => !salieron.has(p[1]) && !(p[2] != null && p[2] <= t)).map((p) => ({ s: aMin(p[0]) * 60, hhmm: p[0], veh: p[1] }));
+      if (falla) {
+        // Modo plan semanal: el horario del plan (se conoce desde el inicio del día) de la próxima hora, sin «atrasado» ni
+        // «despachar ya»: con el registro roto no se sabe si una salida ya se hizo.
+        const hor = P.horario[r] || [];
+        for (let i = sobre(hor, t - 60); i < hor.length && hor[i].s <= t + HORIZONTE; i++) info.pend.push({ tipo: 'pend', est: 'plan', r, s: hor[i].s, veh: null, prog: null });
+      } else {
+        const recs = ((e.proximas_60 && e.proximas_60.length) ? e.proximas_60 : (e.proximas || [])).map((h) => aMin(h) * 60);
+        const nCons = Math.min(nuevas.length, recs.length);
+        const ret = (e.ajuste && e.ajuste[0]) || 0, ade = (e.ajuste && e.ajuste[1]) || 0;
+        const motivos = e.ajuste_motivos || (e.alertas || []).filter((a) => a[0] === 'regularidad').map((a) => a[2]);
+        const hueco = (e.alertas || []).find((a) => a[0] === 'hueco');
+        recs.slice(nCons).forEach((s, i) => {
+          const f = { tipo: 'pend', est: 'proximo', r, s, veh: null, prog: null };
+          if (i === 0 && nCons === 0) {
+            if (ret > 0 || ade > 0) { f.est = 'ajustado'; f.ajuste = { ret, ade, motivos }; }
+            if (hueco) f.hueco = hueco[2];
+          }
+          if (t - s >= 60) f.est = 'atrasado';
+          info.pend.push(f);
+        });
+      }
+      asignarVehiculos(info.pend, prog);
+      info.pend.forEach((f) => filas.push(f));
+    });
+    filas.sort((a, b) => (a.tipo !== b.tipo ? (a.tipo === 'hecho' ? -1 : 1) : (a.s - b.s || RUTAS.indexOf(a.r) - RUTAS.indexOf(b.r))));
+    return { k, tk, t, filas, porRuta, falla };
+  }
+  function motivoAjuste(aj) {
+    const partes = [], ms = aj.motivos || [];
+    if (aj.ret > 0) {
+      let x = null; for (const m of ms) { x = String(m).match(/Buses\s+(\S+)\s+y\s+(\S+)\s+pasaron el punto\s+(\d+)\s+con\s+([\d.,]+)\s+min de diferencia \(objetivo\s+([\d.,]+)\)/); if (x) break; }
+      partes.push(`retrasar ${fmt(aj.ret, 1)} min: ` + (x ? `los buses ${limpiarVeh(x[1])} y ${limpiarVeh(x[2])} pasaron pegados por el punto ${x[3]}, a ${x[4]} min entre ellos (objetivo ${x[5]} min)` : 'los dos últimos buses pasaron pegados por el primer punto de control'));
+    }
+    if (aj.ade > 0) {
+      let x = null; for (const m of ms) { x = String(m).match(/El último bus \((\S+)\) ya llevó (\d+) pasajeros/); if (x) break; }
+      partes.push(`adelantar ${fmt(aj.ade, 1)} min: ` + (x ? `el último bus (${limpiarVeh(x[1])}) ya llevó ${x[2]} pasajeros` : 'el último bus salió casi lleno'));
+    }
+    return cap(partes.join('; ')) + '. La hora ya incluye el ajuste.';
+  }
+  const ICONOS = {
+    hecho: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.3 4.8 9 10 3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+    proximo: '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 3.4V6l1.8 1.3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+    ajustado: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 4h8M7.5 1.8 9.7 4 7.5 6.2M10.5 8h-8M4.5 5.8 2.3 8l2.2 2.2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+    atrasado: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 11.3 10.5H.7z" fill="currentColor"/><path d="M6 4.3v3.1M6 8.6v.2" style="stroke:var(--surface)" stroke-width="1.4"/></svg>',
+    plan: '<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="1.4" y="2.3" width="9.2" height="8.3" rx="1.3" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M1.4 5h9.2M4 1v2.6M8 1v2.6" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>',
+  };
+  const EST_TXT = { hecho: 'Hecho', proximo: 'Próximo', ajustado: 'Ajustado', atrasado: 'Atrasado', plan: 'Plan' };
+  function filaHtml(f, t, sig) {
+    const c = COLOR_RUTA[f.r];
+    const ruta = `<span class="ruta-tag"><span class="dot" style="--c:${c}" aria-hidden="true"></span>${esc(f.r)}</span>`;
+    const pill = `<span class="pill ${f.est}">${ICONOS[f.est]}${EST_TXT[f.est]}</span>`;
+    if (f.tipo === 'hecho') {
+      return `<li class="desp hecho" style="--c:${c}"><div class="hora"><b>${hhmmS(f.s)}</b><small>${txtHace(t - f.s)}</small></div>`
+        + `<div class="info">${ruta}<span class="veh">Bus ${esc(f.veh)}</span></div><div class="est">${pill}</div></li>`;
+    }
+    const dif = f.s - t;
+    const cls = ['desp', f.est];
+    if (sig) cls.push('siguiente'); else if (dif <= PRONTO) cls.push('pronto'); else if (dif > 30 * 60) cls.push('lejos');
+    const veh = f.veh ? `<span class="veh">Bus ${esc(f.veh)}</span>` : '<span class="veh no">vehículo por asignar</span>';
+    const det = (sig ? '<b>Siguiente despacho</b> · ' : '') + (f.est === 'plan' ? 'horario del plan semanal · ' : '')
+      + (f.prog ? `programado por Sobusa a las ${esc(f.prog)}` : 'ningún bus programado a ±15 min');
+    let nota = '', nc = 'var(--accent)';
+    if (f.est === 'atrasado') {
+      nc = 'var(--bad)';
+      nota = `Debía salir a las ${hhmmS(f.s)} y no ha salido (${durTxt(-dif / 60)} de atraso)` + (f.hueco ? '. Hueco: ' + esc(f.hueco) : '') + '.';
+      if (f.ajuste) nota += ' ' + esc(motivoAjuste(f.ajuste));
+    } else if (f.ajuste) { nc = 'var(--warn)'; nota = esc(motivoAjuste(f.ajuste)); }
+    else if (f.hueco) { nc = 'var(--bad)'; nota = 'Hueco: ' + esc(f.hueco) + '.'; }
+    return `<li class="${cls.join(' ')}" style="--c:${c}"><div class="hora"><b>${hhmmS(f.s)}</b><small>${txtCuenta(dif)}</small></div>`
+      + `<div class="info">${ruta}${veh}</div><div class="det">${det}</div><div class="est">${pill}</div>`
+      + (nota ? `<p class="nota" style="--nc:${nc}">${nota}</p>` : '') + '</li>';
+  }
+  let firmaLista = '', ultSig = '';
+  const NOTA_DESP = 'El motor recalcula las horas cada 5 min desde la última salida real. Vehículo: el que Sobusa ya tenía programado a ±15 min de la hora y que todavía no ha salido. Más en «Cómo funciona».';
+  const NOTA_DESP_FALLA = 'Falla de datos: el motor no recomienda horas propias hasta que vuelvan los datos; la lista sigue el horario del plan semanal. Vehículo: el que Sobusa ya tenía programado a ±15 min y que todavía no ha salido.';
+  function pintarDespachos(M, t) {
+    const fil = estado.filtroDesp, plan = !!M.falla;
+    const vis = M.filas.filter((f) => fil === 'todas' || f.r === fil);
+    const hechos = vis.filter((f) => f.tipo === 'hecho').slice(-MAX_HECHOS), pend = vis.filter((f) => f.tipo === 'pend');
+    let html = hechos.map((f) => filaHtml(f, t, false)).join('');
+    html += `<li class="sep-ahora" aria-hidden="true">ahora ${hhmmss(t)}</li>`;
+    html += pend.length ? pend.map((f, i) => filaHtml(f, t, i === 0)).join('')
+      : `<li class="vacia">${plan ? 'No quedan salidas del plan semanal en la próxima hora' : 'No quedan despachos recomendados hoy' + (finDia() ? ' (el servicio terminó)' : ' en la próxima hora')}.</li>`;
+    if (html !== firmaLista) { $('desp-lista').innerHTML = html; firmaLista = html; }
+    // aviso de falla de datos (modo plan semanal)
+    const fb = $('desp-falla'), txtF = plan ? textoFalla(M.falla) : '';
+    if (fb.textContent !== txtF) fb.textContent = txtF;
+    if (fb.hidden === plan) fb.hidden = !plan;
+    const nota = plan ? NOTA_DESP_FALLA : NOTA_DESP;
+    if ($('desp-nota').textContent !== nota) $('desp-nota').textContent = nota;
+    // resumen
+    const rutasVis = fil === 'todas' ? RUTAS : [fil];
+    const hechosHoy = rutasVis.reduce((a, r) => a + M.porRuta[r].hechosHoy, 0);
+    const pronto = pend.filter((f) => f.s - t <= 600 && f.s - t >= -59).length, atras = pend.filter((f) => f.est === 'atrasado').length;
+    const sig = pend[0];
+    let res = `<b>${fmt(pronto)}</b> en los próximos 10 min` + (atras ? ` · <b>${fmt(atras)} atrasado${atras > 1 ? 's' : ''}</b>` : '') + ` · <b>${fmt(pend.length)}</b> en la próxima hora`
+      + (plan ? ' según el plan semanal · hechos hoy: <b>sin datos</b>' : ` · <b>${fmt(hechosHoy)}</b> hechos hoy`);
+    if ($('desp-resumen').innerHTML !== res) $('desp-resumen').innerHTML = res;
+    // anuncio para lectores de pantalla solo cuando cambia el siguiente (y no a velocidades altas)
+    const claveSig = sig ? sig.r + '|' + sig.s : '';
+    if (claveSig !== ultSig) {
+      ultSig = claveSig;
+      if (estado.vel <= 10 || !estado.jugando) $('desp-vivo').textContent = sig ? `${plan ? 'Falla de datos. Siguiente salida del plan semanal' : 'Siguiente despacho'}: ${sig.r} a las ${hhmmS(sig.s)}${sig.veh ? ', bus ' + sig.veh : ''}.` : 'No quedan despachos pendientes.';
+    }
+  }
+  const segDesp = $('seg-desp');
+  function pintarFiltroDesp() {
+    segDesp.innerHTML = `<button type="button" data-v="todas" aria-pressed="${estado.filtroDesp === 'todas'}">Todas</button>`
+      + RUTAS.map((r) => `<button type="button" data-v="${esc(r)}" aria-pressed="${estado.filtroDesp === r}"><span class="dot" style="--c:${COLOR_RUTA[r]}" aria-hidden="true"></span>${esc(r)}</button>`).join('');
+    $('desp-sub').textContent = estado.filtroDesp === 'todas' ? '· las tres rutas' : '· ' + estado.filtroDesp;
+  }
+  segDesp.addEventListener('click', (ev) => {
+    const b = ev.target.closest('button[data-v]'); if (!b) return;
+    estado.filtroDesp = b.dataset.v;
+    pintarFiltroDesp(); firmaLista = '';
+    if (D) pintarVivo(true);
+  });
+
+  // ================= gráficos =================
+  const charts = {};
+  function grafico(id) { if (!window.echarts) return null; if (!charts[id]) charts[id] = echarts.init($(id), null, { renderer: 'canvas' }); return charts[id]; }
+  function temaG() { return { texto: css('--fg'), muted: css('--muted'), linea: css('--line'), fondo: css('--surface'), plan: css('--plan') }; }
+  const animar = () => !reducida && !(estado.jugando && estado.vel > 60);
+  function base(t) {
+    return {
+      animation: animar(), animationDuration: 250, animationDurationUpdate: 250, backgroundColor: 'transparent',
+      textStyle: { fontFamily: css('--font-body'), color: t.texto },
+      tooltip: { trigger: 'axis', confine: true, backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 } },
+      legend: { top: 0, left: 0, inactiveColor: t.linea, textStyle: { color: t.muted, fontSize: 12.5 }, icon: 'roundRect', itemWidth: 14, itemHeight: 8, itemGap: angosto() ? 8 : 14 },
+    };
+  }
+  // Salidas del horario del plan semanal de la ruta con hora >= s (segundos) y antes de `hasta` (segundos; sin tope si se omite).
+  function planDesde(r, s, hasta) {
+    const hor = P.horario[r] || [];
+    let n = 0;
+    for (let i = sobre(hor, s - 0.001); i < hor.length && (hasta == null || hor[i].s < hasta); i++) n++;
+    return n;
+  }
+  function pintarSalidas() {
+    const r = estado.ruta, e = snap().rutas[r], Pl = D.plan[r], iA = idxHora(), c = COLOR_RUTA[r];
+    const falla = fallaEn(estado.k);
+    const real = e.salidas_real_hora.map((v, i) => (i <= iA ? v : 0));
+    // Con falla de datos se sigue el plan semanal: en la hora en curso faltan las salidas del horario del plan desde la foto.
+    const rec = falla ? Pl.salidas_hora.map((v, i) => (i < iA ? 0 : i === iA ? planDesde(r, tFoto() * 60, (HORAS[iA] + 1) * 3600) : v))
+      : e.salidas_reopt_hora.map((v, i) => (i < iA ? 0 : i === iA ? Math.max(0, v - e.salidas_real_hora[i]) : v));
+    const quedan = suma(rec);
+    $('salidas-sub').textContent = falla
+      ? `por hora de salida, a las ${hhmm(tFoto())} · falla de datos: se sigue el plan semanal · ${fmt(e.salidas_real)} hechas registradas · faltan ${fmt(quedan)} del plan`
+      : `por hora de salida, a las ${hhmm(tFoto())} · ${fmt(e.salidas_real)} hechas · faltan ${fmt(quedan)} recomendadas (plan semanal: ${fmt(e.restantes_plan)})`;
+    pintarTabla(Pl, real, rec, iA);
+    const ch = grafico('c-salidas'); if (!ch) return;
+    const t = temaG();
+    const ymax = techo(Math.max(1, ...Pl.salidas_hora, ...e.salidas_reopt_hora, ...e.salidas_real_hora) * 1.06);
+    const cats = HORAS.map(String);
+    const enRango = iA >= 0 && iA < HORAS.length;
+    ch.setOption(Object.assign(base(t), {
+      grid: { left: 40, right: 8, top: angosto() ? 58 : 36, bottom: 28 },
+      tooltip: Object.assign(base(t).tooltip, { axisPointer: { type: 'shadow' }, formatter: (ps) => {
+        const i = ps[0].dataIndex, h = HORAS[i];
+        const v = (id) => { const p = ps.find((q) => q.seriesId === id); return p ? p.value : 0; };
+        const fase = i < iA ? 'hora pasada' : i === iA ? 'hora en curso' : 'por venir';
+        return `<b>${h} a ${h + 1} h</b> · ${fase}<br>Plan semanal: <b>${fmt(v('plan'))}</b><br>Realizadas: <b>${fmt(v('real'))}</b><br>Recomendadas (faltan): <b>${fmt(v('rec'))}</b>`;
+      } }),
+      legend: Object.assign(base(t).legend, { data: ['Plan semanal', 'Realizadas', 'Recomendadas (resto del día)'] }),
+      xAxis: { type: 'category', data: cats, axisTick: { show: false }, axisLine: { lineStyle: { color: t.linea } }, axisLabel: { color: t.muted, fontSize: 11.5 } },
+      yAxis: { type: 'value', max: ymax, minInterval: 1, splitLine: { lineStyle: { color: t.linea } }, axisLabel: { color: t.muted, fontSize: 11.5 } },
+      series: [
+        { id: 'plan', name: 'Plan semanal', type: 'bar', data: Pl.salidas_hora, barGap: '15%', barMaxWidth: 16, itemStyle: { color: t.plan, borderRadius: [3, 3, 0, 0] },
+          markArea: { silent: true, itemStyle: { color: rgba(css('--accent'), 0.08) }, label: { show: true, position: 'insideTop', formatter: 'ahora', color: t.muted, fontSize: 11 }, data: enRango ? [[{ xAxis: cats[iA] }, { xAxis: cats[iA] }]] : [] } },
+        { id: 'real', name: 'Realizadas', type: 'bar', stack: 'ejec', data: real, barMaxWidth: 16, itemStyle: { color: c } },
+        { id: 'rec', name: 'Recomendadas (resto del día)', type: 'bar', stack: 'ejec', data: rec, barMaxWidth: 16, itemStyle: { color: rgba(c, 0.42), borderRadius: [3, 3, 0, 0] } },
+      ],
+    }));
+  }
+  function pintarTabla(Pl, real, rec, iA) {
+    const det = $('det-tabla'); if (!det.open) return;
+    $('t-salidas-tabla').innerHTML = '<thead><tr><th>Hora</th><th class="num">Plan semanal</th><th class="num">Realizadas</th><th class="num">Recomendadas</th></tr></thead><tbody>'
+      + HORAS.map((h, i) => `<tr class="${i === iA ? 'ahora' : ''}"><td>${h} a ${h + 1} h${i === iA ? ' (en curso)' : ''}</td><td class="num">${fmt(Pl.salidas_hora[i])}</td><td class="num">${i <= iA ? fmt(real[i]) : '–'}</td><td class="num">${i >= iA ? fmt(rec[i]) : '–'}</td></tr>`).join('')
+      + `<tr><td><b>Total</b></td><td class="num"><b>${fmt(suma(Pl.salidas_hora))}</b></td><td class="num"><b>${fmt(suma(real))}</b></td><td class="num"><b>${fmt(suma(rec))}</b></td></tr></tbody>`;
+  }
+  $('det-tabla').addEventListener('toggle', () => { if (D) pintarSalidas(); });
+
+  let firmaEsp = '', espCache = [];
+  function pintarPax() {
+    const r = estado.ruta, k = estado.k, e = snap().rutas[r], c = COLOR_RUTA[r], tA = tFoto();
+    const dev = e.pax_esp > 0 ? (e.pax_obs / e.pax_esp - 1) * 100 : null;
+    $('pax-desvio').textContent = dev == null ? '–' : (dev > 0.05 ? '▲ ' : dev < -0.05 ? '▼ ' : '') + fmtSig(dev, 1) + ' %';
+    $('pax-det').textContent = e.pax_esp > 0 ? `${fmt(e.pax_obs)} vistos frente a ${fmt(e.pax_esp)} esperados a las ${hhmm(tA)}` : 'todavía no hay pasajeros esperados a esta hora';
+    $('pax-pie').textContent = fallaEn(k)
+      ? 'Falla de datos: el motor no corrige la demanda (factor 1, plan semanal) hasta que vuelvan los datos. Pasajeros contados al terminar cada tramo (llegan con 10-30 min de retraso).'
+      : `Factor de demanda del motor: ${fmt(e.factor, 2)} (80 %: ${fmt(e.f10, 2)}–${fmt(e.f90, 2)}). Corrige poco a propósito: lo visto en la mañana predice poco el resto del día, así que el plan apenas cambia. Pasajeros contados al terminar cada tramo (llegan con 10-30 min de retraso).`;
+    const ch = grafico('c-pax'); if (!ch) return;
+    const t = temaG();
+    // La curva esperada sale del plan (pronóstico × curva de acumulación de días previos): se conoce desde el inicio del día.
+    const firma = [estado.fecha, r, version, ch.id].join('|');
+    const nuevaEsp = firma !== firmaEsp;
+    if (nuevaEsp) { firmaEsp = firma; espCache = D.snapshots.map((s, i) => [P.tiempos[i], s.rutas[r].pax_esp]); }
+    const esp = espCache;
+    const obs = D.snapshots.slice(0, k + 1).map((s, i) => [P.tiempos[i], s.rutas[r].pax_obs]);
+    let maxObs = 0; for (const p of obs) if (p[1] > maxObs) maxObs = p[1];
+    let maxEsp = 0; for (const p of esp) if (p[1] > maxEsp) maxEsp = p[1];
+    const ymax = techo(Math.max(suma(D.plan[r].pax_plan_hora), maxEsp, maxObs) * 1.02);
+    const x0 = P.tiempos[0], x1 = P.tiempos[P.tiempos.length - 1];
+    const ladoEtiqueta = (tA - x0) / (x1 - x0) > 0.62 ? 'left' : 'right';
+    ch.setOption(Object.assign(base(t), {
+      grid: { left: 52, right: 14, top: angosto() ? 58 : 36, bottom: 28 },
+      tooltip: Object.assign(base(t).tooltip, { axisPointer: { type: 'line', lineStyle: { color: t.muted } }, formatter: (ps) => {
+        const pe = ps.find((p) => p.seriesId === 'esp'), po = ps.find((p) => p.seriesId === 'obs');
+        const x = pe ? pe.value[0] : po ? po.value[0] : null; if (x == null) return '';
+        let h = `<b>${hhmm(x)}</b>`;
+        const okO = po && Math.abs(po.value[0] - x) < 0.5;
+        if (okO) h += `<br>${po.marker}Vistos: <b>${fmt(po.value[1])}</b>`;
+        if (pe) h += `<br>${pe.marker}Esperados según el plan: <b>${fmt(pe.value[1])}</b>`;
+        if (okO && pe && pe.value[1] > 0) h += `<br>Desvío: <b>${fmtSig((po.value[1] / pe.value[1] - 1) * 100, 1)} %</b>`;
+        return h;
+      } }),
+      legend: Object.assign(base(t).legend, { data: ['Vistos hoy', 'Esperados según el plan'] }),
+      xAxis: { type: 'value', min: x0, max: x1, interval: angosto() ? 240 : 120, axisLine: { lineStyle: { color: t.linea } }, splitLine: { show: false }, axisLabel: { color: t.muted, fontSize: 11.5, showMaxLabel: false, formatter: (v) => hhmm(v) } },
+      yAxis: { type: 'value', max: ymax, splitLine: { lineStyle: { color: t.linea } }, axisLabel: { color: t.muted, fontSize: 11.5, formatter: (v) => fmt(v) } },
+      series: [
+        Object.assign({ id: 'esp', name: 'Esperados según el plan', type: 'line', showSymbol: false, symbol: 'circle', symbolSize: 6, lineStyle: { width: 2, type: [6, 4], color: t.muted }, itemStyle: { color: t.muted }, z: 2 }, nuevaEsp ? { data: esp } : {}),
+        { id: 'obs', name: 'Vistos hoy', type: 'line', data: obs, showSymbol: false, symbol: 'circle', symbolSize: 7, lineStyle: { width: 2.5, color: c }, itemStyle: { color: c }, z: 3,
+          markLine: { silent: true, symbol: 'none', animation: false, lineStyle: { color: t.muted, width: 1, type: 'solid' }, label: { show: false }, data: [{ xAxis: tA }] } },
+        { id: 'pt', name: 'ahora', type: 'scatter', data: [[tA, e.pax_obs]], symbolSize: 10, itemStyle: { color: c, borderColor: t.fondo, borderWidth: 2 }, z: 4, silent: true, tooltip: { show: false },
+          label: { show: true, position: ladoEtiqueta, distance: 8, color: t.texto, fontSize: 12, formatter: () => `${hhmm(tA)} · ${fmt(e.pax_obs)} vistos` } },
+      ],
+    }));
+  }
+
+  // ================= paneles =================
+  let firmaDia = '';
+  function pintarDiaTexto() {
+    const d = D, fin = finDia();
+    const firma = [estado.fecha, fin, fin ? estado.ruta : ''].join('|');
+    if (firma === firmaDia) return;
+    firmaDia = firma;
+    const partes = String(d.descripcion || '').split(/Pasajeros reales frente al pronóstico semanal/);
+    const tipo = d.tipo_dia === 'Domingo/festivo' ? 'domingo o festivo' : String(d.tipo_dia).toLowerCase();
+    // Hasta las 21:00, solo lo que se sabe de antemano; al final, la descripción completa y el resultado real.
+    let html = `<b>${esc(fechaLarga(d.fecha))}</b> · tipo de día: ${esc(tipo)} · ${esc(fin ? partes[0].trim() : descripcionPrevia(d))}`;
+    if (fin) {
+      const r = estado.ruta, Rr = d.real[r], Pp = d.plan[r];
+      const extra = (Rr && Pp) ? ` En ${esc(r)}: ${fmt(suma(Rr.salidas_hora))} salidas reales frente a ${fmt(suma(Pp.salidas_hora))} del plan semanal (${fmt(suma(Pp.oraculo_hora))} habría elegido D5 conociendo la demanda real, con los mismos costos del plan).` : '';
+      if (partes.length > 1) html += ` <span class="resultado"><b>Resultado del día:</b> pasajeros reales frente al pronóstico semanal${esc(partes[1])}${extra}</span>`;
+      else if (extra) html += ` <span class="resultado"><b>Resultado del día:</b>${extra}</span>`;
+    } else {
+      html += ` <span class="muted">Lo que pasó realmente ese día (resultado, lluvia, fallas) se muestra al llegar a las ${esc(META.fin)}.</span>`;
+    }
+    $('dia-texto').innerHTML = html;
+    pintarEtiquetaDia();
+  }
+  function pintarMotor() {
+    const s = snap(), mot = $('estado-motor'), falla = fallaEn(estado.k);
+    mot.classList.toggle('bad', !!falla);
+    // Falla de registro (guarda de datos del motor: contadores o registro de despachos) o corte de GPS (cobertura < 50 %); sin el
+    // porcentaje de GPS, que no explica una falla del registro.
+    mot.querySelector('span').textContent = !falla ? `Datos al día · GPS ${fmt((s.cobertura || 0) * 100)} %` : falla.gps ? 'Corte de GPS: plan semanal' : 'Falla de registro: plan semanal';
+    mot.title = `Corrida del motor de las ${hhmm(tFoto())}` + (falla ? `: datos marcados como malos desde las ${hhmm(falla.desde)}; se sigue el horario del plan semanal` : '');
+  }
+  function pintarProximas(M, t) {
+    const r = estado.ruta, info = M.porRuta[r], e = info.e, iA = idxHora(), Pp = D.plan[r], falla = M.falla;
+    $('prox-sub').textContent = falla ? `corrida de las ${hhmm(tFoto())} · plan semanal` : `corrida de las ${hhmm(tFoto())}`;
+    const pend = info.pend.slice(0, 3);
+    const lis = pend.map((f, i) => {
+      const dif = f.s - t, tarde = f.est === 'atrasado';
+      const cuenta = tarde ? 'atrasada ' + durTxt(-dif / 60) : txtCuenta(dif);
+      return `<li class="${i === 0 ? 'primera' : ''}${tarde ? ' tarde' : ''}"><span class="hora">${hhmmS(f.s)}</span><span class="cuenta">${i === 0 ? 'Próxima: ' : ''}${cuenta}</span></li>`;
+    });
+    const htmlL = lis.length ? lis.join('') : `<li class="vacia">No quedan salidas ${falla ? 'del plan semanal' : 'recomendadas'} en la próxima hora${finDia() ? ' (el servicio terminó)' : ''}.</li>`;
+    if ($('proximas').innerHTML !== htmlL) $('proximas').innerHTML = htmlL;
+    const aj = $('ajuste'), f0 = pend[0];
+    let txt, cls = '';
+    if (falla) { cls = 'malo'; txt = textoFalla(falla) + ' Son las horas del horario del plan, sin ajustes del motor.'; }
+    else if (!f0) txt = finDia() ? 'Fin de la operación del día.' : 'Sin salidas recomendadas en la próxima hora.';
+    else if (f0.est === 'atrasado') { cls = 'malo'; txt = `Atrasada: debía salir a las ${hhmmS(f0.s)}` + (f0.hueco ? `. Hueco: ${f0.hueco}` : '') + '.'; }
+    else if (f0.ajuste) { cls = 'activo'; txt = motivoAjuste(f0.ajuste); }
+    else if (f0.hueco) { cls = 'malo'; txt = 'Hueco: ' + f0.hueco + '.'; }
+    else txt = 'Sin ajuste: salidas repartidas a intervalos iguales desde la última salida real.';
+    aj.className = 'ajuste' + (cls ? ' ' + cls : '');
+    if (aj.textContent !== txt) aj.textContent = txt;
+    const items = [];
+    if (iA >= 0 && iA < HORAS.length) {
+      const n = falla ? Pp.salidas_hora[iA] : e.salidas_reopt_hora[iA], np = Pp.salidas_hora[iA];
+      items.push(falla ? ['Intervalo del plan', n > 0 ? fmt(60 / n, 1) + ' min' : 'sin salidas', `${fmt(n)} salidas de ${HORAS[iA]} a ${HORAS[iA] + 1} h en el plan semanal`]
+        : ['Intervalo recomendado', n > 0 ? fmt(60 / n, 1) + ' min' : 'sin salidas', `${fmt(n)} salidas de ${HORAS[iA]} a ${HORAS[iA] + 1} h · plan semanal ${fmt(np)}`]);
+    } else {
+      items.push([falla ? 'Intervalo del plan' : 'Intervalo recomendado', '–', 'fuera del horario de servicio']);
+    }
+    const etqUlt = falla ? 'Última salida registrada' : 'Última salida real';
+    if (info.ultima) items.push([etqUlt, hhmmS(info.ultima.s), `${info.ultima.veh ? 'bus ' + esc(info.ultima.veh) + ' · ' : ''}${txtHace(Math.max(0, t - info.ultima.s))}`]);
+    else items.push([etqUlt, '–', falla ? 'ninguna registrada todavía' : 'todavía no ha salido ningún bus']);
+    const planHasta = sobre(P.horario[r] || [], t);
+    if (falla) {
+      // Con el registro roto no se sabe cuántos buses salieron: ni las salidas del día ni los buses en patio son confiables.
+      items.push(['Buses en patio', 'sin datos', `${falla.gps ? 'sin GPS no se sabe cuántos están en la calle' : 'faltan registros de despacho'} · flota ${fmt(e.flota)}`]);
+      items.push(['Salidas hoy', 'sin datos', `el plan llevaba ${fmt(planHasta)} · faltan ${fmt(planDesde(r, t))} del plan`]);
+    } else {
+      items.push(['Buses en patio', fmt(e.en_patio), e.en_patio > 0 ? `de ${fmt(e.flota)} disponibles · ${fmt(e.en_ruta)} en la calle` : `<span class="alerta-txt">sin buses en patio</span> · ${fmt(e.en_ruta)} en la calle de ${fmt(e.flota)}`]);
+      items.push(['Salidas hoy', fmt(info.hechosHoy), `el plan llevaba ${fmt(planHasta)} · faltan ${fmt(Math.max(0, e.restantes_reopt - info.tras))}`]);
+    }
+    const htmlD = items.map(([dt, dd, sm]) => `<div><dt>${dt}</dt><dd>${dd}<small>${sm}</small></dd></div>`).join('');
+    if ($('datos-prox').innerHTML !== htmlD) $('datos-prox').innerHTML = htmlD;
+  }
+
+  let firmaAlertas = '';
+  function pintarAlertas() {
+    const firma = [estado.fecha, estado.k, estado.filtro, estado.filtro === 'ruta' ? estado.ruta : '', version].join('|');
+    if (firma === firmaAlertas) return;
+    firmaAlertas = firma;
+    const k = estado.k, t = tFoto();
+    const gs = P.grupos.filter((g) => g.kIni <= k && (estado.filtro === 'todas' || g.ruta === estado.ruta)).map((g) => grupoEn(g, k, P.tiempos)).filter(Boolean);
+    gs.sort((a, b) => b.lastK - a.lastK || b.nivel - a.nivel || RUTAS.indexOf(a.ruta) - RUTAS.indexOf(b.ruta));
+    const avisos = gs.reduce((a, g) => a + g.fotos, 0), activas = gs.filter((g) => g.activa).length;
+    const criticas = gs.filter((g) => g.activa && g.nivel === 3).length;
+    $('alertas-resumen').textContent = gs.length
+      ? `${fmt(gs.length)} alertas hasta las ${hhmm(t)} (${fmt(avisos)} avisos agrupados) · ${fmt(activas)} activas ahora${criticas ? ', ' + fmt(criticas) + ' críticas' : ''}`
+      : `Sin alertas hasta las ${hhmm(t)}.`;
+    const MAX = 80;
+    const html = gs.slice(0, MAX).map((g) => {
+      const nv = NIVEL_DE[g.nivel];
+      const cuando = g.ini === g.fin ? hhmm(g.ini) : `${hhmm(g.ini)}–${hhmm(g.fin)}`;
+      const vivo = g.activa ? '<span class="vivo">activa</span>' : 'terminó';
+      const rep = g.fotos > 1 ? ` · <span title="${fmt(g.fotos)} avisos seguidos agrupados en esta alerta">${fmt(g.fotos)} avisos</span>` : '';
+      return `<li class="alerta sev-${nv}${g.activa ? '' : ' cerrada'}"><div class="cab"><span class="sev"><i aria-hidden="true"></i>${NIVEL_TXT[nv]}</span><span class="tipo">${esc(TIPO[g.tipo] || g.tipo)}</span>`
+        + `<span class="ruta-tag"><span class="dot" style="--c:${COLOR_RUTA[g.ruta]}" aria-hidden="true"></span>${esc(g.ruta)}</span><span class="cuando">${cuando} · ${vivo}${rep}</span></div>`
+        + g.msgs.map((m) => `<p class="msg">${esc(m)}</p>`).join('') + '</li>';
+    }).join('');
+    $('lista-alertas').innerHTML = html ? html + (gs.length > MAX ? `<li class="vacia">y ${fmt(gs.length - MAX)} alertas más antiguas</li>` : '') : '<li class="vacia">El motor no ha emitido alertas todavía.</li>';
+  }
+  document.querySelectorAll('#seg-filtro button').forEach((b) => b.addEventListener('click', () => {
+    estado.filtro = b.dataset.v;
+    document.querySelectorAll('#seg-filtro button').forEach((x) => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    if (D) pintarAlertas();
+  }));
+
+  // ================= reloj y reproducción =================
+  const ICONO_PLAY = '<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2.5 1.5v9l7.5-4.5z" fill="currentColor"/></svg>';
+  const ICONO_PAUSA = '<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2.5 1.5h2.6v9H2.5zM6.9 1.5h2.6v9H6.9z" fill="currentColor"/></svg>';
+  const VEL_TXT = { 1: 'tiempo real', 10: '10 s por segundo', 60: '1 min por segundo', 300: '5 min por segundo', 900: '15 min por segundo' };
+  function pintarMarcas() {
+    const sl = $('slider'), a = +sl.min, b = +sl.max;
+    $('marcas').innerHTML = [4, 8, 12, 16, 20].map((h) => {
+      const p = (h * 60 - a) / (b - a);
+      return `<span style="left:calc(8px + (100% - 16px) * ${p.toFixed(4)})">${pad(h)}:00</span>`;
+    }).join('');
+  }
+  let ultSeg = -1, ultEstadoReloj = '';
+  function pintarReloj(forzar) {
+    const t = estado.t, s = Math.floor(t);
+    if (s !== ultSeg || forzar) {
+      ultSeg = s;
+      $('reloj-hm').textContent = hhmmS(t);
+      $('reloj-s').textContent = ':' + pad(s % 60);
+      const sl = $('slider');
+      sl.min = String(Math.round(T_INI() / 60)); sl.max = String(Math.round(T_FIN() / 60));
+      const v = String(Math.floor(t / 60));
+      if (sl.value !== v) sl.value = v;
+      sl.setAttribute('aria-valuetext', hhmmss(t));
+    }
+    const fin = finDia();
+    const txtEstado = estado.cargando ? 'Cargando el día…' : estado.jugando ? `Reproduciendo · x${estado.vel} (${VEL_TXT[estado.vel] || ''})` : (fin ? 'Fin del día' : 'En pausa');
+    const clave = txtEstado + '|' + fin + '|' + estado.jugando;
+    if (clave !== ultEstadoReloj || forzar) {
+      ultEstadoReloj = clave;
+      $('reloj-estado').textContent = txtEstado;
+      const bp = $('btn-play');
+      bp.innerHTML = estado.jugando ? ICONO_PAUSA + 'Pausa' : ICONO_PLAY + (fin ? 'Repetir día' : 'Reproducir');
+      bp.setAttribute('aria-pressed', estado.jugando ? 'true' : 'false');
+    }
+    $('btn-atras').disabled = t <= T_INI() + 0.5;
+    $('btn-adelante').disabled = fin;
+  }
+  // Paneles de la foto vigente (cambian cada 5 min del reloj): alertas, gráficos, estado del motor, texto del día.
+  function pintarFoto() {
+    pintarDiaTexto(); pintarMotor(); pintarSalidas(); pintarPax(); pintarAlertas();
+  }
+  // Partes que avanzan con el reloj (cada segundo a x1; en cada cuadro a velocidades altas).
+  // La lista se vuelve a dibujar en cuanto cambia el estado de algún despacho (el reloj pasa una hora de salida, sale un bus o
+  // llega otra corrida del motor); las cuentas regresivas, como mucho cada 0,1 s a velocidades altas.
+  let ultVivo = 0, ultMapa = 0, ultFirmaEst = '';
+  function pintarVivo(forzar) {
+    const ahora = performance.now(), t = estado.t;
+    pintarReloj(forzar);
+    const intMapa = forzar || !estado.jugando ? 0 : estado.vel <= 1 ? 200 : estado.vel <= 10 ? 50 : 0;
+    if (forzar || ahora - ultMapa >= intMapa) { ultMapa = ahora; actualizarBuses(t); }
+    const M = modelo(t);
+    const firmaEst = M.filas.map((f) => f.r + f.s + f.est).join(',');
+    const intLista = !estado.jugando || estado.vel <= 1 ? 0 : 100;
+    if (forzar || firmaEst !== ultFirmaEst || ahora - ultVivo >= intLista) {
+      ultVivo = ahora; ultFirmaEst = firmaEst;
+      pintarDespachos(M, t); pintarProximas(M, t);
+    }
+    if (finDia() !== (firmaDia.split('|')[1] === 'true')) pintarDiaTexto();
+  }
+  function fijarT(t, salto) {
+    if (!D) return;
+    t = Math.max(T_INI(), Math.min(T_FIN(), t));
+    estado.t = t;
+    const k = idxFoto(t);
+    const cambio = k !== estado.k;
+    estado.k = k;
+    if (cambio || salto) pintarFoto();
+    pintarVivo(!!salto);
+  }
+  let raf = 0, tsPrev = 0;
+  function pedirFrame() { if (!raf) raf = requestAnimationFrame(bucle); }
+  function bucle(ts) {
+    raf = 0;
+    if (!estado.jugando || !D) return;
+    const dt = tsPrev ? Math.min(ts - tsPrev, 250) : 0;
+    tsPrev = ts;
+    const t = estado.t + dt / 1000 * estado.vel;
+    if (t >= T_FIN()) { fijarT(T_FIN(), false); pausar(); return; }
+    fijarT(t, false);
+    pedirFrame();
+  }
+  function reproducir() {
+    if (!D || estado.cargando) return;
+    if (finDia()) fijarT(T_INI(), true);
+    estado.jugando = true; tsPrev = 0;
+    pintarReloj(true); pedirFrame();
+  }
+  function pausar() {
+    if (!estado.jugando) return;
+    estado.jugando = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    pintarVivo(true);
+    avisarEstado();
+  }
+  // Saltos de 5 min: a la corrida (foto) anterior o siguiente del motor.
+  function paso(dir) {
+    if (!D) return;
+    const k = idxFoto(estado.t), tk = P.tiempos[k] * 60;
+    let destino;
+    if (dir > 0) destino = k < ultimoK() ? P.tiempos[k + 1] * 60 : T_FIN();
+    else destino = estado.t > tk + 0.5 ? tk : (k > 0 ? P.tiempos[k - 1] * 60 : T_INI());
+    fijarT(destino, true);
+  }
+  $('btn-play').addEventListener('click', () => { if (estado.jugando) pausar(); else reproducir(); });
+  $('btn-atras').addEventListener('click', () => paso(-1));
+  $('btn-adelante').addEventListener('click', () => paso(1));
+  $('slider').addEventListener('input', (ev) => fijarT(+ev.target.value * 60, true));
+  function ponerVelocidad(v) {
+    estado.vel = v;
+    document.querySelectorAll('#seg-vel button').forEach((x) => x.setAttribute('aria-pressed', +x.dataset.v === v ? 'true' : 'false'));
+    tsPrev = 0; pintarReloj(true);
+  }
+  document.querySelectorAll('#seg-vel button').forEach((b) => b.addEventListener('click', () => ponerVelocidad(+b.dataset.v)));
+  document.addEventListener('keydown', (ev) => {
+    if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
+    const el = ev.target;
+    if (el && el.closest && (el.closest('input, select, textarea, button, a, summary, [role="tab"], .panel-dias') || el.closest('.leaflet-container'))) return;
+    if (ev.key === ' ') { ev.preventDefault(); if (estado.jugando) pausar(); else reproducir(); }
+    else if (ev.key === 'ArrowRight') { ev.preventDefault(); paso(1); }
+    else if (ev.key === 'ArrowLeft') { ev.preventDefault(); paso(-1); }
+  });
+
+  // ================= cambio de día y de ruta =================
+  // Día pedido que no está en el catálogo (enlace #dia=…, o la API): aviso en la página; no se abre otro día ni se aplica la hora.
+  function fechaValida(f) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(f)) return false;
+    const [y, m, d] = f.split('-').map(Number), dt = new Date(Date.UTC(y, m - 1, d));
+    return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+  }
+  function textoSinDatos(f) {
+    if (!fechaValida(f)) return `El enlace pide un día que no existe («${f}»).`;
+    const nombre = 'El ' + fechaLarga(f).charAt(0).toLowerCase() + fechaLarga(f).slice(1);
+    if (CAT.sinGps.has(f)) return `${nombre} no se puede reproducir: es el último día del mes y no tiene GPS.`;
+    if (CAT.pend.has(f)) return `${nombre} todavía se está generando: vuelve a intentarlo en unos minutos.`;
+    if (!f.startsWith('2025-')) return `${nombre} no está en el replay: solo hay días de 2025.`;
+    return `${nombre} no está en el replay.`;
+  }
+  function mostrarAviso(txt) { const a = $('aviso-dia'); a.textContent = txt; a.hidden = false; }
+  let pedido = 0;
+  async function cambiarDia(fecha, opts) {
+    opts = opts || {};
+    if (!CAT.porFecha.has(fecha)) {
+      mostrarAviso(textoSinDatos(String(fecha)) + (D ? ` Sigue abierto el ${fechaLarga(estado.fecha).toLowerCase()}.` : ''));
+      return false;
+    }
+    if (fecha === estado.fecha && D) { if (opts.t != null) fijarT(opts.t, true); return true; }
+    const n = ++pedido;
+    const jugaba = estado.jugando;
+    if (jugaba) { estado.jugando = false; if (raf) { cancelAnimationFrame(raf); raf = 0; } }
+    estado.cargando = true; $('main').classList.add('cargando'); pintarRelojSeguro();
+    $('aviso-dia').hidden = true;
+    try {
+      const v = await obtenerDia(fecha);
+      if (n !== pedido) return false;
+      D = v.D; P = v.P; TRAY = v.T; estado.fecha = fecha;
+      pintarPlanParam();
+      const t = opts.t != null ? opts.t : estado.t;
+      estado.t = Math.max(T_INI(), Math.min(T_FIN(), t));
+      estado.k = idxFoto(estado.t);
+      firmaAlertas = ''; firmaDia = ''; firmaLista = ''; firmaLeyenda = ''; firmaEsp = '';
+      limpiarBuses();
+      estado.cargando = false; $('main').classList.remove('cargando');
+      pintarSeleccionDia(); pintarFoto(); pintarVivo(true);
+      ponerHash();
+      if (opts.aviso) mostrarAviso(opts.aviso);
+      if (jugaba) reproducir();
+      return true;
+    } catch (err) {
+      if (n !== pedido) return false;
+      estado.cargando = false; $('main').classList.remove('cargando');
+      const aviso = $('aviso-dia');
+      aviso.textContent = `No se pudo abrir el ${fechaLarga(fecha).toLowerCase()} (${err && err.message ? err.message : 'error'}). El archivo es sistema_tiempo_real/replay/dias/${fecha}.js; si la generación sigue en curso, vuelve a intentarlo en unos minutos.`;
+      aviso.hidden = false;
+      if (D) { pintarRelojSeguro(); if (jugaba) reproducir(); }
+      return false;
+    }
+  }
+  // Parámetros del plan del día abierto (`plan_param`, datos de la versión 4) en la ayuda «Cómo funciona»; los archivos anteriores
+  // se generaron con los supuestos iniciales de D5 y así se dice (en el punto «Qué plan es» y en las notas del pie).
+  const NOTA_PLAN_ANTERIOR = 'Plan semanal de este día (versión anterior de los datos) = D5 con el pronóstico de E1 a 7 días (fuera de muestra) y los supuestos iniciales de D5 (60.000 COP por bus-hora, 1.500 COP por km, tarifa 3.000), el plan que recorta; reoptimizado = motor con el nowcast y esos mismos supuestos.';
+  function pintarPlanParam() {
+    const el = $('plan-param');
+    if (!el) return;
+    const pp = D && D.plan_param;
+    el.textContent = pp
+      ? `Plan de este día (${pp.fuente || 'costos con fuente'}): ${fmt(pp.bus_hora)} COP por bus-hora, ${fmt(pp.km)} COP por km, tarifa ${fmt(pp.tarifa)} COP, elasticidad ${fmt(pp.elasticidad, 2)}, penalidad por sobrecarga ${fmt(pp.penalidad)} COP por pasajero, hora de espera ${fmt(pp.espera)} COP.`
+      : 'Este día se generó con la versión anterior de los datos: su plan semanal y las recomendaciones del motor usan los supuestos iniciales de D5 (60.000 COP por bus-hora, 1.500 por km, tarifa 3.000), el plan que recorta; vuelva a generarlo (generar_replay.py --por-dia) para ver el plan con los costos con fuente.';
+    pintarNotasMeta();
+  }
+  // Notas del meta al pie de la ayuda. La nota del plan describe los costos de `meta.plan_param` (versión 4 de los datos); con un
+  // día de una versión anterior se reemplaza por la de ese día (plan y motor con los supuestos iniciales de D5).
+  function pintarNotasMeta() {
+    const notas = (META.notas || []).slice();
+    if (D && !D.plan_param) {
+      const i = notas.findIndex((n) => /^Plan semanal/.test(n));
+      if (i >= 0) notas[i] = NOTA_PLAN_ANTERIOR; else notas.push(NOTA_PLAN_ANTERIOR);
+    }
+    $('notas-meta').textContent = notas.join(' ');
+  }
+  function pintarRelojSeguro() { if (D) pintarReloj(true); else $('reloj-estado').textContent = estado.cargando ? 'Cargando el día…' : ''; }
+  function cambiarRuta() {
+    firmaAlertas = ''; firmaLista = '';
+    temaMapa();
+    if (D) { pintarFoto(); pintarVivo(true); }
+  }
+  function ponerHash() {
+    try { history.replaceState(null, '', '#dia=' + estado.fecha); } catch (e) { /* file:// sin historial */ }
+    const a3 = $('a-vista3d'); if (a3) a3.href = 'vista_3d.html#dia=' + estado.fecha + '&hora=' + hhmmS(estado.t);
+    avisarEstado();
+  }
+  // La vista 3D abre el mismo día y la misma hora del reloj (se calcula al hacer clic, porque el reloj avanza).
+  if ($('a-vista3d')) $('a-vista3d').addEventListener('click', (e) => { e.currentTarget.href = 'vista_3d.html#dia=' + estado.fecha + '&hora=' + hhmmS(estado.t); });
+  // Un enlace o una dirección con #dia=AAAA-MM-DD&hora=HH:MM abre ese día y esa hora (replaceState no dispara este evento). Si el
+  // día no tiene datos, aviso: el día abierto y su hora no cambian, y la dirección vuelve a la del día abierto.
+  window.addEventListener('hashchange', () => {
+    const h = leerHash();
+    if (h.dia) cambiarDia(h.dia, h.t != null ? { t: h.t } : {}).then((ok) => { if (!ok && D) ponerHash(); });
+    else if (h.t != null) fijarT(h.t, true);
+  });
+  function leerHash() {
+    const h = decodeURIComponent(location.hash || '').replace(/^#/, '');
+    const out = {};
+    h.split('&').forEach((p) => { const [a, b] = p.split('='); if (a && b != null) out[a] = b; else if (/^\d{4}-\d{2}-\d{2}$/.test(a)) out.dia = a; });
+    if (out.hora && /^\d{1,2}:\d{2}(:\d{2})?$/.test(out.hora)) { const q = out.hora.split(':').map(Number); out.t = q[0] * 3600 + q[1] * 60 + (q[2] || 0); }
+    return out;
+  }
+
+  // ================= tamaño =================
+  function medirCabecera() {
+    const hc = $('cabecera').offsetHeight, hr = $('reloj-bar').offsetHeight;
+    document.documentElement.style.setProperty('--alto-cab', hc + 'px');
+    document.documentElement.style.setProperty('--alto-fijo', (hc + hr) + 'px');
+  }
+  if (window.ResizeObserver) { const ro = new ResizeObserver(medirCabecera); ro.observe($('cabecera')); ro.observe($('reloj-bar')); }
+  let tRes = 0, ultimoAncho = window.innerWidth;
+  window.addEventListener('resize', () => {
+    medirCabecera();
+    clearTimeout(tRes);
+    tRes = setTimeout(() => {
+      Object.values(charts).forEach((c) => c.resize());
+      if (mapa) mapa.invalidateSize();
+      if (D && (ultimoAncho < 600) !== (window.innerWidth < 600)) { pintarSalidas(); pintarPax(); }
+      ultimoAncho = window.innerWidth;
+    }, 120);
+  });
+
+  // ================= inicio =================
+  aplicarTema();
+  pintarNotasMeta();
+  if (!window.echarts) document.querySelectorAll('.chart').forEach((el) => { el.innerHTML = '<p class="muted" style="padding:12px 0">No se pudo cargar la biblioteca de gráficos (lib/echarts.min.js).</p>'; el.style.height = 'auto'; });
+  medirCabecera();
+  pintarChips(); pintarFiltroDesp(); pintarEjemplos(); pintarMarcas(); pintarDisponibles();
+  iniciarMapa();
+  const h = leerHash();
+  const ejLab = CAT.lista.find((d) => d.ejemplo && d.grupo === 'laboral');
+  const defecto = CAT.porFecha.has('2025-06-03') ? '2025-06-03' : (ejLab || CAT.lista[0]).fecha;
+  // Un enlace a un día sin datos no abre ese día ni aplica su hora: la página necesita un día, así que abre el de siempre a las
+  // 06:00 y lo dice en el aviso.
+  const pedidoOk = !!(h.dia && CAT.porFecha.has(h.dia));
+  const inicial = pedidoOk ? h.dia : defecto;
+  const avisoIni = h.dia && !pedidoOk ? `${textoSinDatos(h.dia)} Se abrió el ${fechaLarga(defecto).toLowerCase()}.` : null;
+  const tIni = h.t != null && (pedidoOk || !h.dia) ? h.t : 6 * 3600;
+  const listo = (async () => {
+    const ok = await cambiarDia(inicial, { t: tIni, aviso: avisoIni });
+    if (ok || D || inicial === defecto) return ok;
+    // no se pudo leer el archivo del día pedido: se abre el de siempre y se conserva el aviso
+    return cambiarDia(defecto, { t: 6 * 3600, aviso: `${$('aviso-dia').textContent} Se abrió el ${fechaLarga(defecto).toLowerCase()}.` });
+  })();
+  // Ganchos para pruebas automáticas (QA con Playwright).
+  window.consola = {
+    listo, estado, cambiarDia, reproducir, pausar, ponerVelocidad,
+    irA: (min) => fijarT(min * 60, true), irSeg: (s) => fijarT(s, true),
+    filtrarDespachos: (r) => { const b = segDesp.querySelector(`button[data-v="${r}"]`); if (b) b.click(); },
+    modelo: () => (D ? modelo(estado.t) : null), dias: () => CAT.lista.length, marcadores: () => marcadores.size,
+    catalogo: () => CAT.lista.map((d) => ({ fecha: d.fecha, grupo: d.grupo, etiqueta: d.etiqueta, ejemplo: d.ejemplo })),
+    salidasReales: () => (P ? P.salidas : null), tiempos: () => (P ? P.tiempos : null),
+    puntoBus: (ruta, bus) => {
+      if (!mapa) return null;
+      const caja = $('mapa').getBoundingClientRect(), tam = mapa.getSize();
+      for (const m of marcadores.values()) {
+        if ((ruta && m._ruta !== ruta) || (bus && m._bus[0] !== bus)) continue;
+        const p = mapa.latLngToContainerPoint(m.getLatLng());
+        if (p.x > 270 && p.x < tam.x - 40 && p.y > 60 && p.y < tam.y - 40) return { x: caja.left + p.x, y: caja.top + p.y, bus: m._bus[0] };
+      }
+      return null;
+    },
+  };
+
+  // ================= modo embebido (dentro de la app Sobusa Despacho) =================
+  // La app manda {tipo:'tema'} y {tipo:'dia', dia, hora}; la consola avisa {tipo:'listo'} al tener el primer día y
+  // {tipo:'estado', dia, hora} al cambiar de día o pausar. «Vista 3D →» pide a la app abrir Ciudad en vez de navegar.
+  function avisarApp(m) { if (EMBEBIDO && window.parent !== window) { try { window.parent.postMessage(Object.assign({ pagina: 'consola_despacho.html' }, m), '*'); } catch (e) { /* sin padre */ } } }
+  function avisarEstado() { if (avisosApp && !callarEstado && D) avisarApp({ tipo: 'estado', dia: estado.fecha, hora: hhmmS(estado.t), jugando: !!estado.jugando }); }
+  if (EMBEBIDO) {
+    window.addEventListener('message', (ev) => {
+      if (ev.source !== window.parent || !ev.data || typeof ev.data !== 'object') return;
+      const m = ev.data;
+      if (m.tipo === 'tema') { if (m.tema === 'light' && document.documentElement.getAttribute('data-theme') !== 'light') cambiarTema(); }   // solo claro: otro tema se ignora
+      else if (m.tipo === 'dia') {
+        const q = /^\d{1,2}:\d{2}(:\d{2})?$/.test(m.hora || '') ? String(m.hora).split(':').map(Number) : null;
+        const t = q ? q[0] * 3600 + q[1] * 60 + (q[2] || 0) : null;
+        const dia = m.dia || estado.fecha;
+        if (dia === estado.fecha && (t == null || hhmmS(t) === hhmmS(estado.t))) return;
+        callarEstado = true;
+        cambiarDia(dia, t != null ? { t } : {}).then(() => { callarEstado = false; }, () => { callarEstado = false; });
+      }
+    });
+    const a3 = $('a-vista3d');
+    if (a3) a3.addEventListener('click', (e) => { e.preventDefault(); avisarApp({ tipo: 'navegar', pantalla: 'ciudad', parametros: { dia: estado.fecha, hora: hhmmS(estado.t) } }); });
+    listo.then(() => { avisosApp = true; avisarApp({ tipo: 'listo', dia: estado.fecha, hora: hhmmS(estado.t) }); });
+  }
+  }
+})();
+</script>
+</body>
+</html>

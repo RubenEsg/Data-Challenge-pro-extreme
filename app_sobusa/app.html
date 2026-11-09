@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sobusa Despacho</title>
+<meta name="description" content="Sobusa Despacho: pronóstico de demanda y horario recomendado para las rutas SILENCIO, CRA 54 y CL 72. Se abre con doble clic, sin servidor ni internet.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f5f5f7">
+<link rel="stylesheet" href="app/tokens.css">
+<link rel="stylesheet" href="app/componentes.css">
+<style>
+/* Propio de la carcasa: lo poco que componentes.css no cubre. Todo con tokens. */
+.saltar:focus-visible {
+  position: fixed !important;
+  left: var(--e-4);
+  top: var(--e-4);
+  z-index: var(--z-tooltip);
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 10px 14px;
+  clip: auto;
+  white-space: normal;
+  border-radius: var(--radio-m);
+  background: var(--superficie);
+  color: var(--acento);
+  font-weight: var(--peso-medio);
+  box-shadow: var(--sombra-3);
+}
+#zona-cabecera { margin-bottom: var(--e-6); }
+.rejilla-lado > .cifra--hero { align-self: start; }
+.pantalla[hidden] { display: none; }
+/* Pantalla sin contenido (si su archivo no cargó): solo cabecera y, si lo tiene, módulo, sin hueco vacío. */
+.pantalla:empty { display: none; }
+/* Con el módulo a pantalla completa, la cabecera se alinea con el módulo y la zona de pantallas no suma un hueco
+   (display: contents, no display: none: dentro puede dormir una pantalla con iframe). */
+.contenido--modulo > #zona-cabecera { width: 100%; max-width: none; margin-bottom: 0; }
+.contenido--modulo > #pantallas { display: contents; }
+.contenido > .modulo { width: 100%; max-width: var(--ancho-contenido); margin-inline: auto; }
+.contenido--ancho .pantalla, .contenido--ancho > .modulo, .contenido--modulo > .modulo { max-width: none; }
+/* Módulo al final de una pantalla con resumen (Demanda, Horario, Despacho, Ciudad, Método): alto propio, la página sigue desplazándose. */
+.contenido--con-modulo > .modulo:not(.modulo--dormido) { height: clamp(560px, 82vh, 920px); margin-top: var(--e-6); }
+/* Pantalla con un iframe dentro que no se ve: fuera de pantalla e inerte, nunca display:none. */
+.pantalla--dormida { position: fixed !important; left: -300vw !important; top: 0 !important; width: min(1100px, 100vw) !important; visibility: hidden; pointer-events: none; }
+/* Lista rótulo / valor de las pantallas (Horario, Despacho, Ciudad, Método). */
+.resumen-datos { display: grid; grid-template-columns: auto auto; gap: 4px var(--e-4); margin: 0; font-size: var(--t-s); }
+.resumen-datos dt { color: var(--tinta-2); }
+.resumen-datos dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+/* Valores de texto largos: apilados y alineados a la izquierda (la pantalla pone la clase según la longitud). */
+.resumen-datos--apilado { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+.resumen-datos--apilado dd { text-align: left; margin-bottom: var(--e-2); }
+.aviso-app { display: grid; gap: var(--e-3); }
+.aviso-app[hidden] { display: none; }
+
+/* Piezas que usan las pantallas y no están en componentes.css. */
+.entradilla { font-size: var(--t-l); line-height: 1.45; color: var(--tinta-2); max-width: var(--ancho-texto); text-wrap: pretty; }
+.entradilla strong { color: var(--tinta); font-weight: var(--peso-fuerte); }
+/* Una sola frase de apoyo, grande (Inicio). */
+.lema { font: var(--peso-fuerte) var(--t-xl) / 1.15 var(--fuente-titulos); letter-spacing: var(--ls-titulo); color: var(--tinta); max-width: var(--ancho-texto); text-wrap: balance; }
+.cifra__valor--texto { font-size: var(--t-m); line-height: 1.4; letter-spacing: 0; }
+/* Valor de texto en una ficha (Piloto: «β = 0,70 frente a 0,53»): alineado a la izquierda y sin partirse mal. */
+.cifra__valor--frase { font-size: var(--t-l); line-height: 1.25; justify-content: flex-start; text-wrap: balance; }
+/* Héroe de Inicio: la pareja Hoy → Con el modelo a todo el ancho. */
+.heroe { display: grid; gap: var(--e-4); }
+.heroe__tarjeta { padding: var(--e-6); gap: var(--e-4); }
+.heroe__par { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--e-3) var(--e-6); }
+.heroe__lado { display: grid; gap: var(--e-1); min-width: 0; }
+.heroe__quien { display: inline-flex; align-items: center; gap: var(--e-1); color: var(--tinta-2); font-size: var(--t-s); font-weight: var(--peso-medio); }
+.heroe__valor { display: flex; align-items: baseline; gap: 0 var(--e-1); margin: 0; font: var(--peso-fuerte) var(--t-hero) / 1 var(--fuente-titulos); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: var(--tinta); }
+.heroe__lado--hoy .heroe__valor { color: var(--tinta-2); }
+.heroe__flecha { align-self: center; color: var(--tinta-3); }
+.heroe__flecha .icono { width: 32px; height: 32px; }
+.heroe .cifras { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); align-items: start; }
+/* En pantalla ancha la pareja reparte el ancho: Hoy a la izquierda, la flecha al centro, el modelo a la derecha. */
+@media (min-width: 601px) {
+  .heroe__par { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; }
+  .heroe__flecha { align-self: center; justify-self: center; }
+}
+#cab-aparte[hidden] { display: none; }
+.cifra--media .cifra__valor { font-size: var(--t-xl); }
+.cifra__destacado { color: var(--acento); font-size: var(--t-s); font-weight: var(--peso-fuerte); }
+.heroe > .lema { margin-bottom: var(--e-3); }
+@media (max-width: 600px) {
+  .heroe__tarjeta { padding: var(--e-5); }
+  .heroe__par { flex-direction: column; align-items: flex-start; gap: var(--e-2); }
+  .heroe__flecha { align-self: flex-start; margin-left: var(--e-2); transform: rotate(90deg); }
+  .heroe__flecha .icono { width: 24px; height: 24px; }
+}
+.cifra--pendiente .cifra__valor { min-height: 1.1em; }
+.cifra--pendiente .cargando { display: inline-block; width: 4.5ch; height: 0.85em; vertical-align: middle; }
+.enlace-flecha { display: inline-flex; align-items: center; justify-self: start; gap: 4px; font-size: var(--t-m); font-weight: var(--peso-medio); text-decoration: none; }
+.enlace-flecha:hover { text-decoration: underline; }
+.enlace-flecha .icono { width: 16px; height: 16px; }
+.datos-pie { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--e-4) var(--e-5); }
+.dato { display: grid; align-content: start; gap: 4px; min-width: 0; font-size: var(--t-s); }
+.dato__cab { display: flex; align-items: center; justify-content: space-between; gap: var(--e-2); }
+.dato__valor { color: var(--tinta); font-weight: var(--peso-medio); font-variant-numeric: tabular-nums; text-wrap: pretty; }
+.dato__nota { color: var(--tinta-3); font-size: var(--t-s); }
+.pendiente { color: var(--tinta-3); font-size: var(--t-xs); }
+.mini-cifras { display: flex; flex-wrap: wrap; gap: var(--e-3) var(--e-5); }
+.mini-cifra { display: grid; gap: 2px; }
+.mini-cifra__rotulo { font-size: var(--t-s); color: var(--tinta-3); }
+.mini-cifra__valor { font: var(--peso-fuerte) var(--t-xl) / 1.1 var(--fuente-titulos); font-variant-numeric: tabular-nums; letter-spacing: var(--ls-titulo); }
+.mini-cifra__unidad { font-size: var(--t-s); color: var(--tinta-2); font-weight: var(--peso-medio); }
+/* El cuadro de color de la pantalla, encima del título grande, con un poco menos de aire que el resto de la cabecera. */
+.cabecera__texto > .cuadro-color--cabecera { margin-bottom: 2px; }
+/* Mientras la cabecera compacta está a la vista, el foco con Tab no queda debajo de ella. */
+html:has(.cabecera-compacta--visible) { scroll-padding-top: 64px; }
+</style>
+<script>
+// Antes de que carguen las pantallas: registrarPantalla guarda las definiciones hasta que app.js (el último script) las recoge.
+window.registrarPantalla = function (definicion) { (window.__pantallasRegistradas = window.__pantallasRegistradas || []).push(definicion); };
+// Solo modo claro (19-oct-2026): html lleva data-theme="light" fijo; no hay botón de tema ni se lee un tema guardado.
+</script>
+</head>
+<body>
+<a class="oculto saltar" href="#contenido" id="saltar">Saltar al contenido</a>
+<div class="app" id="app">
+  <aside class="lateral" aria-label="Pantallas">
+    <a class="lateral__marca" href="#inicio">
+      <span class="lateral__logo"><svg class="icono" aria-hidden="true"><use href="#i-bus"></use></svg></span>
+      <span><span class="lateral__nombre">Sobusa Despacho</span><span class="lateral__lema">Data Challenge 2026</span></span>
+    </a>
+    <nav aria-label="Pantallas de la app"><ul class="lateral__nav" id="nav-pantallas"></ul></nav>
+    <div class="lateral__pie">
+      <button class="boton boton--secundario boton--icono con-tooltip" type="button" data-plegar aria-label="Plegar la barra"><svg class="icono" aria-hidden="true"><use href="#i-panel"></use></svg><span class="tooltip tooltip--izq">Plegar la barra</span></button>
+    </div>
+  </aside>
+
+  <main class="contenido" id="contenido" tabindex="-1">
+    <div class="pantalla" id="zona-cabecera">
+      <header class="cabecera" id="cabecera">
+        <div class="cabecera__texto">
+          <span class="cabecera__pantalla oculto" id="cab-rotulo"></span>
+          <span class="cuadro-color cuadro-color--cabecera" id="cab-cuadro" aria-hidden="true"></span>
+          <h1 class="cabecera__pregunta" id="cab-pregunta" tabindex="-1"></h1>
+          <p class="cabecera__subtitulo" id="cab-subtitulo"></p>
+        </div>
+        <div class="cabecera__acciones">
+          <fieldset class="segmentado" id="escenario" aria-label="Escenario">
+            <legend>Escenario</legend>
+            <label class="segmentado__opcion" id="op-hoy"><input type="radio" name="escenario" value="hoy" id="esc-hoy" checked><span class="segmentado__etiqueta"><span data-etiqueta>Hoy</span></span><span class="tooltip" data-tooltip hidden>No aplica a esta pantalla</span></label>
+            <label class="segmentado__opcion" id="op-modelo"><input type="radio" name="escenario" value="modelo" id="esc-modelo"><span class="segmentado__etiqueta"><span data-etiqueta>Con el modelo</span></span><span class="tooltip" data-tooltip hidden>No aplica a esta pantalla</span></label>
+            <label class="segmentado__opcion" id="op-oraculo"><input type="radio" name="escenario" value="oraculo" id="esc-oraculo"><span class="segmentado__etiqueta"><span data-etiqueta>Oráculo</span></span><span class="tooltip" data-tooltip hidden>No aplica a esta pantalla</span></label>
+          </fieldset>
+          <a class="boton boton--secundario boton--pequeno boton--icono con-tooltip" id="cab-aparte" href="#" target="_blank" rel="noopener" aria-label="Abrir aparte" hidden><svg class="icono" aria-hidden="true"><use href="#i-externo"></use></svg><span class="tooltip tooltip--der">Abrir aparte</span></a>
+        </div>
+      </header>
+      <div class="aviso-app" id="avisos-app" hidden></div>
+    </div>
+    <div id="pantallas"></div>
+    <!-- Los módulos embebidos (iframes) se añaden aquí, como hijos directos de main; nunca se ocultan con display:none. -->
+  </main>
+
+  <!-- Cabecera compacta: aparece al bajar, cuando el título sale de la vista (app.js la sincroniza con el interruptor). -->
+  <div class="cabecera-compacta" id="cab-compacta">
+    <p class="cabecera-compacta__titulo" id="cab-compacta-titulo"></p>
+    <fieldset class="segmentado" id="escenario-compacto" aria-label="Escenario">
+      <legend>Escenario</legend>
+      <label class="segmentado__opcion" id="opc-hoy"><input type="radio" name="escenario-compacto" value="hoy" id="escc-hoy"><span class="segmentado__etiqueta"><span data-etiqueta>Hoy</span></span></label>
+      <label class="segmentado__opcion" id="opc-modelo"><input type="radio" name="escenario-compacto" value="modelo" id="escc-modelo"><span class="segmentado__etiqueta"><span data-etiqueta>Con el modelo</span></span></label>
+      <label class="segmentado__opcion" id="opc-oraculo"><input type="radio" name="escenario-compacto" value="oraculo" id="escc-oraculo"><span class="segmentado__etiqueta"><span data-etiqueta>Oráculo</span></span></label>
+    </fieldset>
+  </div>
+</div>
+
+<!-- Hoja «Más» del teléfono: las nueve pantallas, con su pregunta. -->
+<dialog class="hoja" id="hoja-mas" aria-labelledby="hoja-mas-t">
+  <span class="hoja__asa" aria-hidden="true"></span>
+  <div class="hoja__cab"><h2 class="hoja__titulo" id="hoja-mas-t">Pantallas</h2><button class="boton boton--secundario boton--icono" type="button" data-cerrar-hoja aria-label="Cerrar"><svg class="icono" aria-hidden="true"><use href="#i-cerrar"></use></svg></button></div>
+  <ul class="hoja__lista" id="hoja-lista"></ul>
+</dialog>
+
+<!-- Avisos para lectores de pantalla (cambio de escenario). -->
+<p class="oculto" aria-live="polite" id="anuncio"></p>
+
+<!-- Popovers de fuente: fuera del flujo, en la capa superior -->
+<div id="popovers"></div>
+
+<!-- Orden de carga (DISEÑO.md §5): tokens y componentes arriba; aquí ECharts local, iconos, tema, comportamiento, datos, pantallas y, el último, la app. -->
+<script src="lib/echarts.min.js"></script>
+<script src="app/iconos.js"></script>
+<script src="app/tema_echarts.js"></script>
+<script src="app/componentes.js"></script>
+<!-- Único punto de carga de las cifras: app/datos_app.js (lo genera app/generar_datos_app.py). Si no existe, app.js avisa en consola y usa app/muestra_datos.js. -->
+<script src="app/datos_app.js"></script>
+<!-- Pantallas: las nueve, una por archivo, en el orden de la barra lateral (3-nov-2026). Todas se registran con registrarPantalla en un único registro: el orden de carga no importa. Horario, Despacho y Ciudad declaran su módulo con completo: false (resumen propio y el iframe debajo). -->
+<script src="app/pantallas/inicio.js"></script>
+<script src="app/pantallas/demanda.js"></script>
+<script src="app/pantallas/modelo.js"></script>
+<script src="app/pantallas/horario.js"></script>
+<script src="app/pantallas/despacho.js"></script>
+<script src="app/pantallas/ciudad.js"></script>
+<script src="app/pantallas/resultado.js"></script>
+<script src="app/pantallas/piloto.js"></script>
+<script src="app/pantallas/metodo.js"></script>
+<script src="app/app.js"></script>
+</body>
+</html>

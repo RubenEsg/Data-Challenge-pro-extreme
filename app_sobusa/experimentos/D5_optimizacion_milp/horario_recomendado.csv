@@ -1,0 +1,1093 @@
+ruta,tipo_dia,n,hora_salida
+SILENCIO,Laboral,1,04:34
+SILENCIO,Laboral,2,04:41
+SILENCIO,Laboral,3,04:49
+SILENCIO,Laboral,4,04:56
+SILENCIO,Laboral,5,05:01
+SILENCIO,Laboral,6,05:04
+SILENCIO,Laboral,7,05:07
+SILENCIO,Laboral,8,05:10
+SILENCIO,Laboral,9,05:12
+SILENCIO,Laboral,10,05:15
+SILENCIO,Laboral,11,05:18
+SILENCIO,Laboral,12,05:20
+SILENCIO,Laboral,13,05:23
+SILENCIO,Laboral,14,05:26
+SILENCIO,Laboral,15,05:29
+SILENCIO,Laboral,16,05:31
+SILENCIO,Laboral,17,05:34
+SILENCIO,Laboral,18,05:37
+SILENCIO,Laboral,19,05:40
+SILENCIO,Laboral,20,05:42
+SILENCIO,Laboral,21,05:45
+SILENCIO,Laboral,22,05:48
+SILENCIO,Laboral,23,05:50
+SILENCIO,Laboral,24,05:53
+SILENCIO,Laboral,25,05:56
+SILENCIO,Laboral,26,05:59
+SILENCIO,Laboral,27,06:03
+SILENCIO,Laboral,28,06:09
+SILENCIO,Laboral,29,06:15
+SILENCIO,Laboral,30,06:21
+SILENCIO,Laboral,31,06:27
+SILENCIO,Laboral,32,06:33
+SILENCIO,Laboral,33,06:39
+SILENCIO,Laboral,34,06:45
+SILENCIO,Laboral,35,06:51
+SILENCIO,Laboral,36,06:57
+SILENCIO,Laboral,37,07:05
+SILENCIO,Laboral,38,07:15
+SILENCIO,Laboral,39,07:25
+SILENCIO,Laboral,40,07:35
+SILENCIO,Laboral,41,07:45
+SILENCIO,Laboral,42,07:55
+SILENCIO,Laboral,43,08:05
+SILENCIO,Laboral,44,08:15
+SILENCIO,Laboral,45,08:25
+SILENCIO,Laboral,46,08:35
+SILENCIO,Laboral,47,08:45
+SILENCIO,Laboral,48,08:55
+SILENCIO,Laboral,49,09:05
+SILENCIO,Laboral,50,09:15
+SILENCIO,Laboral,51,09:25
+SILENCIO,Laboral,52,09:35
+SILENCIO,Laboral,53,09:45
+SILENCIO,Laboral,54,09:55
+SILENCIO,Laboral,55,10:05
+SILENCIO,Laboral,56,10:15
+SILENCIO,Laboral,57,10:25
+SILENCIO,Laboral,58,10:35
+SILENCIO,Laboral,59,10:45
+SILENCIO,Laboral,60,10:55
+SILENCIO,Laboral,61,11:05
+SILENCIO,Laboral,62,11:15
+SILENCIO,Laboral,63,11:25
+SILENCIO,Laboral,64,11:35
+SILENCIO,Laboral,65,11:45
+SILENCIO,Laboral,66,11:55
+SILENCIO,Laboral,67,12:05
+SILENCIO,Laboral,68,12:15
+SILENCIO,Laboral,69,12:25
+SILENCIO,Laboral,70,12:35
+SILENCIO,Laboral,71,12:45
+SILENCIO,Laboral,72,12:55
+SILENCIO,Laboral,73,13:04
+SILENCIO,Laboral,74,13:13
+SILENCIO,Laboral,75,13:21
+SILENCIO,Laboral,76,13:30
+SILENCIO,Laboral,77,13:39
+SILENCIO,Laboral,78,13:47
+SILENCIO,Laboral,79,13:56
+SILENCIO,Laboral,80,14:04
+SILENCIO,Laboral,81,14:11
+SILENCIO,Laboral,82,14:19
+SILENCIO,Laboral,83,14:26
+SILENCIO,Laboral,84,14:34
+SILENCIO,Laboral,85,14:41
+SILENCIO,Laboral,86,14:49
+SILENCIO,Laboral,87,14:56
+SILENCIO,Laboral,88,15:04
+SILENCIO,Laboral,89,15:13
+SILENCIO,Laboral,90,15:21
+SILENCIO,Laboral,91,15:30
+SILENCIO,Laboral,92,15:39
+SILENCIO,Laboral,93,15:47
+SILENCIO,Laboral,94,15:56
+SILENCIO,Laboral,95,16:05
+SILENCIO,Laboral,96,16:15
+SILENCIO,Laboral,97,16:25
+SILENCIO,Laboral,98,16:35
+SILENCIO,Laboral,99,16:45
+SILENCIO,Laboral,100,16:55
+SILENCIO,Laboral,101,17:05
+SILENCIO,Laboral,102,17:15
+SILENCIO,Laboral,103,17:25
+SILENCIO,Laboral,104,17:35
+SILENCIO,Laboral,105,17:45
+SILENCIO,Laboral,106,17:55
+SILENCIO,Laboral,107,18:05
+SILENCIO,Laboral,108,18:15
+SILENCIO,Laboral,109,18:25
+SILENCIO,Laboral,110,18:35
+SILENCIO,Laboral,111,18:45
+SILENCIO,Laboral,112,18:55
+SILENCIO,Laboral,113,19:05
+SILENCIO,Laboral,114,19:15
+SILENCIO,Laboral,115,19:25
+SILENCIO,Laboral,116,19:35
+SILENCIO,Laboral,117,19:45
+SILENCIO,Laboral,118,19:55
+SILENCIO,Laboral,119,20:05
+SILENCIO,Laboral,120,20:15
+SILENCIO,Laboral,121,20:24
+SILENCIO,Laboral,122,20:34
+SILENCIO,Laboral,123,20:44
+SILENCIO,Sábado,1,04:35
+SILENCIO,Sábado,2,04:45
+SILENCIO,Sábado,3,04:55
+SILENCIO,Sábado,4,05:03
+SILENCIO,Sábado,5,05:09
+SILENCIO,Sábado,6,05:15
+SILENCIO,Sábado,7,05:21
+SILENCIO,Sábado,8,05:27
+SILENCIO,Sábado,9,05:33
+SILENCIO,Sábado,10,05:39
+SILENCIO,Sábado,11,05:45
+SILENCIO,Sábado,12,05:51
+SILENCIO,Sábado,13,05:57
+SILENCIO,Sábado,14,06:03
+SILENCIO,Sábado,15,06:09
+SILENCIO,Sábado,16,06:15
+SILENCIO,Sábado,17,06:21
+SILENCIO,Sábado,18,06:27
+SILENCIO,Sábado,19,06:33
+SILENCIO,Sábado,20,06:39
+SILENCIO,Sábado,21,06:45
+SILENCIO,Sábado,22,06:51
+SILENCIO,Sábado,23,06:57
+SILENCIO,Sábado,24,07:05
+SILENCIO,Sábado,25,07:15
+SILENCIO,Sábado,26,07:25
+SILENCIO,Sábado,27,07:35
+SILENCIO,Sábado,28,07:45
+SILENCIO,Sábado,29,07:55
+SILENCIO,Sábado,30,08:05
+SILENCIO,Sábado,31,08:15
+SILENCIO,Sábado,32,08:25
+SILENCIO,Sábado,33,08:35
+SILENCIO,Sábado,34,08:45
+SILENCIO,Sábado,35,08:55
+SILENCIO,Sábado,36,09:05
+SILENCIO,Sábado,37,09:15
+SILENCIO,Sábado,38,09:25
+SILENCIO,Sábado,39,09:35
+SILENCIO,Sábado,40,09:45
+SILENCIO,Sábado,41,09:55
+SILENCIO,Sábado,42,10:05
+SILENCIO,Sábado,43,10:15
+SILENCIO,Sábado,44,10:25
+SILENCIO,Sábado,45,10:35
+SILENCIO,Sábado,46,10:45
+SILENCIO,Sábado,47,10:55
+SILENCIO,Sábado,48,11:05
+SILENCIO,Sábado,49,11:15
+SILENCIO,Sábado,50,11:25
+SILENCIO,Sábado,51,11:35
+SILENCIO,Sábado,52,11:45
+SILENCIO,Sábado,53,11:55
+SILENCIO,Sábado,54,12:05
+SILENCIO,Sábado,55,12:15
+SILENCIO,Sábado,56,12:25
+SILENCIO,Sábado,57,12:35
+SILENCIO,Sábado,58,12:45
+SILENCIO,Sábado,59,12:55
+SILENCIO,Sábado,60,13:05
+SILENCIO,Sábado,61,13:15
+SILENCIO,Sábado,62,13:25
+SILENCIO,Sábado,63,13:35
+SILENCIO,Sábado,64,13:45
+SILENCIO,Sábado,65,13:55
+SILENCIO,Sábado,66,14:05
+SILENCIO,Sábado,67,14:15
+SILENCIO,Sábado,68,14:25
+SILENCIO,Sábado,69,14:35
+SILENCIO,Sábado,70,14:45
+SILENCIO,Sábado,71,14:55
+SILENCIO,Sábado,72,15:05
+SILENCIO,Sábado,73,15:15
+SILENCIO,Sábado,74,15:25
+SILENCIO,Sábado,75,15:35
+SILENCIO,Sábado,76,15:45
+SILENCIO,Sábado,77,15:55
+SILENCIO,Sábado,78,16:05
+SILENCIO,Sábado,79,16:15
+SILENCIO,Sábado,80,16:25
+SILENCIO,Sábado,81,16:35
+SILENCIO,Sábado,82,16:45
+SILENCIO,Sábado,83,16:55
+SILENCIO,Sábado,84,17:05
+SILENCIO,Sábado,85,17:15
+SILENCIO,Sábado,86,17:25
+SILENCIO,Sábado,87,17:35
+SILENCIO,Sábado,88,17:45
+SILENCIO,Sábado,89,17:55
+SILENCIO,Sábado,90,18:05
+SILENCIO,Sábado,91,18:15
+SILENCIO,Sábado,92,18:25
+SILENCIO,Sábado,93,18:35
+SILENCIO,Sábado,94,18:45
+SILENCIO,Sábado,95,18:55
+SILENCIO,Sábado,96,19:05
+SILENCIO,Sábado,97,19:15
+SILENCIO,Sábado,98,19:25
+SILENCIO,Sábado,99,19:35
+SILENCIO,Sábado,100,19:45
+SILENCIO,Sábado,101,19:55
+SILENCIO,Sábado,102,20:04
+SILENCIO,Sábado,103,20:13
+SILENCIO,Sábado,104,20:22
+SILENCIO,Sábado,105,20:31
+SILENCIO,Sábado,106,20:40
+SILENCIO,Domingo/festivo,1,05:00
+SILENCIO,Domingo/festivo,2,05:08
+SILENCIO,Domingo/festivo,3,05:23
+SILENCIO,Domingo/festivo,4,05:38
+SILENCIO,Domingo/festivo,5,05:53
+SILENCIO,Domingo/festivo,6,06:08
+SILENCIO,Domingo/festivo,7,06:23
+SILENCIO,Domingo/festivo,8,06:38
+SILENCIO,Domingo/festivo,9,06:53
+SILENCIO,Domingo/festivo,10,07:08
+SILENCIO,Domingo/festivo,11,07:23
+SILENCIO,Domingo/festivo,12,07:38
+SILENCIO,Domingo/festivo,13,07:53
+SILENCIO,Domingo/festivo,14,08:08
+SILENCIO,Domingo/festivo,15,08:23
+SILENCIO,Domingo/festivo,16,08:38
+SILENCIO,Domingo/festivo,17,08:53
+SILENCIO,Domingo/festivo,18,09:08
+SILENCIO,Domingo/festivo,19,09:23
+SILENCIO,Domingo/festivo,20,09:38
+SILENCIO,Domingo/festivo,21,09:53
+SILENCIO,Domingo/festivo,22,10:08
+SILENCIO,Domingo/festivo,23,10:23
+SILENCIO,Domingo/festivo,24,10:38
+SILENCIO,Domingo/festivo,25,10:53
+SILENCIO,Domingo/festivo,26,11:08
+SILENCIO,Domingo/festivo,27,11:23
+SILENCIO,Domingo/festivo,28,11:38
+SILENCIO,Domingo/festivo,29,11:53
+SILENCIO,Domingo/festivo,30,12:08
+SILENCIO,Domingo/festivo,31,12:23
+SILENCIO,Domingo/festivo,32,12:38
+SILENCIO,Domingo/festivo,33,12:53
+SILENCIO,Domingo/festivo,34,13:08
+SILENCIO,Domingo/festivo,35,13:23
+SILENCIO,Domingo/festivo,36,13:38
+SILENCIO,Domingo/festivo,37,13:53
+SILENCIO,Domingo/festivo,38,14:08
+SILENCIO,Domingo/festivo,39,14:23
+SILENCIO,Domingo/festivo,40,14:38
+SILENCIO,Domingo/festivo,41,14:53
+SILENCIO,Domingo/festivo,42,15:08
+SILENCIO,Domingo/festivo,43,15:23
+SILENCIO,Domingo/festivo,44,15:38
+SILENCIO,Domingo/festivo,45,15:53
+SILENCIO,Domingo/festivo,46,16:08
+SILENCIO,Domingo/festivo,47,16:23
+SILENCIO,Domingo/festivo,48,16:38
+SILENCIO,Domingo/festivo,49,16:53
+SILENCIO,Domingo/festivo,50,17:08
+SILENCIO,Domingo/festivo,51,17:23
+SILENCIO,Domingo/festivo,52,17:38
+SILENCIO,Domingo/festivo,53,17:53
+SILENCIO,Domingo/festivo,54,18:08
+SILENCIO,Domingo/festivo,55,18:23
+SILENCIO,Domingo/festivo,56,18:38
+SILENCIO,Domingo/festivo,57,18:53
+SILENCIO,Domingo/festivo,58,19:07
+SILENCIO,Domingo/festivo,59,19:22
+SILENCIO,Domingo/festivo,60,19:36
+SILENCIO,Domingo/festivo,61,19:51
+SILENCIO,Domingo/festivo,62,20:04
+CRA 54,Laboral,1,04:32
+CRA 54,Laboral,2,04:36
+CRA 54,Laboral,3,04:41
+CRA 54,Laboral,4,04:45
+CRA 54,Laboral,5,04:49
+CRA 54,Laboral,6,04:54
+CRA 54,Laboral,7,04:58
+CRA 54,Laboral,8,05:01
+CRA 54,Laboral,9,05:03
+CRA 54,Laboral,10,05:05
+CRA 54,Laboral,11,05:07
+CRA 54,Laboral,12,05:08
+CRA 54,Laboral,13,05:10
+CRA 54,Laboral,14,05:12
+CRA 54,Laboral,15,05:14
+CRA 54,Laboral,16,05:16
+CRA 54,Laboral,17,05:18
+CRA 54,Laboral,18,05:20
+CRA 54,Laboral,19,05:22
+CRA 54,Laboral,20,05:23
+CRA 54,Laboral,21,05:25
+CRA 54,Laboral,22,05:27
+CRA 54,Laboral,23,05:29
+CRA 54,Laboral,24,05:31
+CRA 54,Laboral,25,05:33
+CRA 54,Laboral,26,05:35
+CRA 54,Laboral,27,05:37
+CRA 54,Laboral,28,05:38
+CRA 54,Laboral,29,05:40
+CRA 54,Laboral,30,05:42
+CRA 54,Laboral,31,05:44
+CRA 54,Laboral,32,05:46
+CRA 54,Laboral,33,05:48
+CRA 54,Laboral,34,05:50
+CRA 54,Laboral,35,05:52
+CRA 54,Laboral,36,05:53
+CRA 54,Laboral,37,05:55
+CRA 54,Laboral,38,05:57
+CRA 54,Laboral,39,05:59
+CRA 54,Laboral,40,06:01
+CRA 54,Laboral,41,06:04
+CRA 54,Laboral,42,06:06
+CRA 54,Laboral,43,06:08
+CRA 54,Laboral,44,06:11
+CRA 54,Laboral,45,06:13
+CRA 54,Laboral,46,06:16
+CRA 54,Laboral,47,06:18
+CRA 54,Laboral,48,06:20
+CRA 54,Laboral,49,06:23
+CRA 54,Laboral,50,06:25
+CRA 54,Laboral,51,06:28
+CRA 54,Laboral,52,06:30
+CRA 54,Laboral,53,06:32
+CRA 54,Laboral,54,06:35
+CRA 54,Laboral,55,06:37
+CRA 54,Laboral,56,06:40
+CRA 54,Laboral,57,06:42
+CRA 54,Laboral,58,06:44
+CRA 54,Laboral,59,06:47
+CRA 54,Laboral,60,06:49
+CRA 54,Laboral,61,06:52
+CRA 54,Laboral,62,06:54
+CRA 54,Laboral,63,06:56
+CRA 54,Laboral,64,06:59
+CRA 54,Laboral,65,07:02
+CRA 54,Laboral,66,07:05
+CRA 54,Laboral,67,07:08
+CRA 54,Laboral,68,07:11
+CRA 54,Laboral,69,07:14
+CRA 54,Laboral,70,07:17
+CRA 54,Laboral,71,07:21
+CRA 54,Laboral,72,07:24
+CRA 54,Laboral,73,07:27
+CRA 54,Laboral,74,07:30
+CRA 54,Laboral,75,07:33
+CRA 54,Laboral,76,07:36
+CRA 54,Laboral,77,07:39
+CRA 54,Laboral,78,07:43
+CRA 54,Laboral,79,07:46
+CRA 54,Laboral,80,07:49
+CRA 54,Laboral,81,07:52
+CRA 54,Laboral,82,07:55
+CRA 54,Laboral,83,07:58
+CRA 54,Laboral,84,08:02
+CRA 54,Laboral,85,08:06
+CRA 54,Laboral,86,08:11
+CRA 54,Laboral,87,08:15
+CRA 54,Laboral,88,08:19
+CRA 54,Laboral,89,08:24
+CRA 54,Laboral,90,08:28
+CRA 54,Laboral,91,08:32
+CRA 54,Laboral,92,08:36
+CRA 54,Laboral,93,08:41
+CRA 54,Laboral,94,08:45
+CRA 54,Laboral,95,08:49
+CRA 54,Laboral,96,08:54
+CRA 54,Laboral,97,08:58
+CRA 54,Laboral,98,09:03
+CRA 54,Laboral,99,09:08
+CRA 54,Laboral,100,09:14
+CRA 54,Laboral,101,09:19
+CRA 54,Laboral,102,09:25
+CRA 54,Laboral,103,09:30
+CRA 54,Laboral,104,09:35
+CRA 54,Laboral,105,09:41
+CRA 54,Laboral,106,09:46
+CRA 54,Laboral,107,09:52
+CRA 54,Laboral,108,09:57
+CRA 54,Laboral,109,10:03
+CRA 54,Laboral,110,10:09
+CRA 54,Laboral,111,10:15
+CRA 54,Laboral,112,10:21
+CRA 54,Laboral,113,10:27
+CRA 54,Laboral,114,10:33
+CRA 54,Laboral,115,10:39
+CRA 54,Laboral,116,10:45
+CRA 54,Laboral,117,10:51
+CRA 54,Laboral,118,10:57
+CRA 54,Laboral,119,11:03
+CRA 54,Laboral,120,11:09
+CRA 54,Laboral,121,11:15
+CRA 54,Laboral,122,11:21
+CRA 54,Laboral,123,11:27
+CRA 54,Laboral,124,11:33
+CRA 54,Laboral,125,11:39
+CRA 54,Laboral,126,11:45
+CRA 54,Laboral,127,11:51
+CRA 54,Laboral,128,11:57
+CRA 54,Laboral,129,12:02
+CRA 54,Laboral,130,12:06
+CRA 54,Laboral,131,12:11
+CRA 54,Laboral,132,12:15
+CRA 54,Laboral,133,12:19
+CRA 54,Laboral,134,12:24
+CRA 54,Laboral,135,12:28
+CRA 54,Laboral,136,12:32
+CRA 54,Laboral,137,12:36
+CRA 54,Laboral,138,12:41
+CRA 54,Laboral,139,12:45
+CRA 54,Laboral,140,12:49
+CRA 54,Laboral,141,12:54
+CRA 54,Laboral,142,12:58
+CRA 54,Laboral,143,13:02
+CRA 54,Laboral,144,13:05
+CRA 54,Laboral,145,13:09
+CRA 54,Laboral,146,13:12
+CRA 54,Laboral,147,13:16
+CRA 54,Laboral,148,13:19
+CRA 54,Laboral,149,13:23
+CRA 54,Laboral,150,13:26
+CRA 54,Laboral,151,13:30
+CRA 54,Laboral,152,13:34
+CRA 54,Laboral,153,13:37
+CRA 54,Laboral,154,13:41
+CRA 54,Laboral,155,13:44
+CRA 54,Laboral,156,13:48
+CRA 54,Laboral,157,13:51
+CRA 54,Laboral,158,13:55
+CRA 54,Laboral,159,13:58
+CRA 54,Laboral,160,14:02
+CRA 54,Laboral,161,14:05
+CRA 54,Laboral,162,14:08
+CRA 54,Laboral,163,14:11
+CRA 54,Laboral,164,14:14
+CRA 54,Laboral,165,14:17
+CRA 54,Laboral,166,14:21
+CRA 54,Laboral,167,14:24
+CRA 54,Laboral,168,14:27
+CRA 54,Laboral,169,14:30
+CRA 54,Laboral,170,14:33
+CRA 54,Laboral,171,14:36
+CRA 54,Laboral,172,14:39
+CRA 54,Laboral,173,14:43
+CRA 54,Laboral,174,14:46
+CRA 54,Laboral,175,14:49
+CRA 54,Laboral,176,14:52
+CRA 54,Laboral,177,14:55
+CRA 54,Laboral,178,14:58
+CRA 54,Laboral,179,15:02
+CRA 54,Laboral,180,15:06
+CRA 54,Laboral,181,15:09
+CRA 54,Laboral,182,15:13
+CRA 54,Laboral,183,15:17
+CRA 54,Laboral,184,15:21
+CRA 54,Laboral,185,15:24
+CRA 54,Laboral,186,15:28
+CRA 54,Laboral,187,15:32
+CRA 54,Laboral,188,15:36
+CRA 54,Laboral,189,15:39
+CRA 54,Laboral,190,15:43
+CRA 54,Laboral,191,15:47
+CRA 54,Laboral,192,15:51
+CRA 54,Laboral,193,15:54
+CRA 54,Laboral,194,15:58
+CRA 54,Laboral,195,16:02
+CRA 54,Laboral,196,16:07
+CRA 54,Laboral,197,16:12
+CRA 54,Laboral,198,16:16
+CRA 54,Laboral,199,16:21
+CRA 54,Laboral,200,16:25
+CRA 54,Laboral,201,16:30
+CRA 54,Laboral,202,16:35
+CRA 54,Laboral,203,16:39
+CRA 54,Laboral,204,16:44
+CRA 54,Laboral,205,16:48
+CRA 54,Laboral,206,16:53
+CRA 54,Laboral,207,16:58
+CRA 54,Laboral,208,17:03
+CRA 54,Laboral,209,17:10
+CRA 54,Laboral,210,17:17
+CRA 54,Laboral,211,17:23
+CRA 54,Laboral,212,17:30
+CRA 54,Laboral,213,17:37
+CRA 54,Laboral,214,17:43
+CRA 54,Laboral,215,17:50
+CRA 54,Laboral,216,17:56
+CRA 54,Laboral,217,18:04
+CRA 54,Laboral,218,18:11
+CRA 54,Laboral,219,18:19
+CRA 54,Laboral,220,18:26
+CRA 54,Laboral,221,18:34
+CRA 54,Laboral,222,18:41
+CRA 54,Laboral,223,18:49
+CRA 54,Laboral,224,18:56
+CRA 54,Laboral,225,19:04
+CRA 54,Laboral,226,19:13
+CRA 54,Laboral,227,19:21
+CRA 54,Laboral,228,19:30
+CRA 54,Laboral,229,19:38
+CRA 54,Laboral,230,19:47
+CRA 54,Laboral,231,19:55
+CRA 54,Laboral,232,20:04
+CRA 54,Laboral,233,20:13
+CRA 54,Laboral,234,20:21
+CRA 54,Laboral,235,20:30
+CRA 54,Laboral,236,20:38
+CRA 54,Laboral,237,20:47
+CRA 54,Sábado,1,04:33
+CRA 54,Sábado,2,04:39
+CRA 54,Sábado,3,04:45
+CRA 54,Sábado,4,04:51
+CRA 54,Sábado,5,04:57
+CRA 54,Sábado,6,05:02
+CRA 54,Sábado,7,05:05
+CRA 54,Sábado,8,05:08
+CRA 54,Sábado,9,05:11
+CRA 54,Sábado,10,05:14
+CRA 54,Sábado,11,05:17
+CRA 54,Sábado,12,05:20
+CRA 54,Sábado,13,05:23
+CRA 54,Sábado,14,05:26
+CRA 54,Sábado,15,05:29
+CRA 54,Sábado,16,05:32
+CRA 54,Sábado,17,05:35
+CRA 54,Sábado,18,05:38
+CRA 54,Sábado,19,05:41
+CRA 54,Sábado,20,05:44
+CRA 54,Sábado,21,05:47
+CRA 54,Sábado,22,05:50
+CRA 54,Sábado,23,05:53
+CRA 54,Sábado,24,05:56
+CRA 54,Sábado,25,05:59
+CRA 54,Sábado,26,06:01
+CRA 54,Sábado,27,06:04
+CRA 54,Sábado,28,06:07
+CRA 54,Sábado,29,06:09
+CRA 54,Sábado,30,06:12
+CRA 54,Sábado,31,06:14
+CRA 54,Sábado,32,06:17
+CRA 54,Sábado,33,06:20
+CRA 54,Sábado,34,06:22
+CRA 54,Sábado,35,06:25
+CRA 54,Sábado,36,06:27
+CRA 54,Sábado,37,06:30
+CRA 54,Sábado,38,06:33
+CRA 54,Sábado,39,06:35
+CRA 54,Sábado,40,06:38
+CRA 54,Sábado,41,06:40
+CRA 54,Sábado,42,06:43
+CRA 54,Sábado,43,06:46
+CRA 54,Sábado,44,06:48
+CRA 54,Sábado,45,06:51
+CRA 54,Sábado,46,06:53
+CRA 54,Sábado,47,06:56
+CRA 54,Sábado,48,06:59
+CRA 54,Sábado,49,07:02
+CRA 54,Sábado,50,07:05
+CRA 54,Sábado,51,07:09
+CRA 54,Sábado,52,07:12
+CRA 54,Sábado,53,07:16
+CRA 54,Sábado,54,07:19
+CRA 54,Sábado,55,07:23
+CRA 54,Sábado,56,07:26
+CRA 54,Sábado,57,07:30
+CRA 54,Sábado,58,07:34
+CRA 54,Sábado,59,07:37
+CRA 54,Sábado,60,07:41
+CRA 54,Sábado,61,07:44
+CRA 54,Sábado,62,07:48
+CRA 54,Sábado,63,07:51
+CRA 54,Sábado,64,07:55
+CRA 54,Sábado,65,07:58
+CRA 54,Sábado,66,08:02
+CRA 54,Sábado,67,08:07
+CRA 54,Sábado,68,08:12
+CRA 54,Sábado,69,08:16
+CRA 54,Sábado,70,08:21
+CRA 54,Sábado,71,08:25
+CRA 54,Sábado,72,08:30
+CRA 54,Sábado,73,08:35
+CRA 54,Sábado,74,08:39
+CRA 54,Sábado,75,08:44
+CRA 54,Sábado,76,08:48
+CRA 54,Sábado,77,08:53
+CRA 54,Sábado,78,08:58
+CRA 54,Sábado,79,09:02
+CRA 54,Sábado,80,09:07
+CRA 54,Sábado,81,09:12
+CRA 54,Sábado,82,09:16
+CRA 54,Sábado,83,09:21
+CRA 54,Sábado,84,09:25
+CRA 54,Sábado,85,09:30
+CRA 54,Sábado,86,09:35
+CRA 54,Sábado,87,09:39
+CRA 54,Sábado,88,09:44
+CRA 54,Sábado,89,09:48
+CRA 54,Sábado,90,09:53
+CRA 54,Sábado,91,09:58
+CRA 54,Sábado,92,10:03
+CRA 54,Sábado,93,10:08
+CRA 54,Sábado,94,10:13
+CRA 54,Sábado,95,10:18
+CRA 54,Sábado,96,10:23
+CRA 54,Sábado,97,10:28
+CRA 54,Sábado,98,10:33
+CRA 54,Sábado,99,10:38
+CRA 54,Sábado,100,10:43
+CRA 54,Sábado,101,10:48
+CRA 54,Sábado,102,10:53
+CRA 54,Sábado,103,10:58
+CRA 54,Sábado,104,11:03
+CRA 54,Sábado,105,11:08
+CRA 54,Sábado,106,11:14
+CRA 54,Sábado,107,11:19
+CRA 54,Sábado,108,11:25
+CRA 54,Sábado,109,11:30
+CRA 54,Sábado,110,11:35
+CRA 54,Sábado,111,11:41
+CRA 54,Sábado,112,11:46
+CRA 54,Sábado,113,11:52
+CRA 54,Sábado,114,11:57
+CRA 54,Sábado,115,12:03
+CRA 54,Sábado,116,12:08
+CRA 54,Sábado,117,12:14
+CRA 54,Sábado,118,12:19
+CRA 54,Sábado,119,12:25
+CRA 54,Sábado,120,12:30
+CRA 54,Sábado,121,12:35
+CRA 54,Sábado,122,12:41
+CRA 54,Sábado,123,12:46
+CRA 54,Sábado,124,12:52
+CRA 54,Sábado,125,12:57
+CRA 54,Sábado,126,13:03
+CRA 54,Sábado,127,13:08
+CRA 54,Sábado,128,13:14
+CRA 54,Sábado,129,13:19
+CRA 54,Sábado,130,13:25
+CRA 54,Sábado,131,13:30
+CRA 54,Sábado,132,13:35
+CRA 54,Sábado,133,13:41
+CRA 54,Sábado,134,13:46
+CRA 54,Sábado,135,13:52
+CRA 54,Sábado,136,13:57
+CRA 54,Sábado,137,14:03
+CRA 54,Sábado,138,14:09
+CRA 54,Sábado,139,14:15
+CRA 54,Sábado,140,14:21
+CRA 54,Sábado,141,14:27
+CRA 54,Sábado,142,14:33
+CRA 54,Sábado,143,14:39
+CRA 54,Sábado,144,14:45
+CRA 54,Sábado,145,14:51
+CRA 54,Sábado,146,14:57
+CRA 54,Sábado,147,15:03
+CRA 54,Sábado,148,15:09
+CRA 54,Sábado,149,15:15
+CRA 54,Sábado,150,15:21
+CRA 54,Sábado,151,15:27
+CRA 54,Sábado,152,15:33
+CRA 54,Sábado,153,15:39
+CRA 54,Sábado,154,15:45
+CRA 54,Sábado,155,15:51
+CRA 54,Sábado,156,15:57
+CRA 54,Sábado,157,16:03
+CRA 54,Sábado,158,16:10
+CRA 54,Sábado,159,16:17
+CRA 54,Sábado,160,16:23
+CRA 54,Sábado,161,16:30
+CRA 54,Sábado,162,16:37
+CRA 54,Sábado,163,16:43
+CRA 54,Sábado,164,16:50
+CRA 54,Sábado,165,16:57
+CRA 54,Sábado,166,17:04
+CRA 54,Sábado,167,17:11
+CRA 54,Sábado,168,17:19
+CRA 54,Sábado,169,17:26
+CRA 54,Sábado,170,17:34
+CRA 54,Sábado,171,17:41
+CRA 54,Sábado,172,17:49
+CRA 54,Sábado,173,17:56
+CRA 54,Sábado,174,18:04
+CRA 54,Sábado,175,18:13
+CRA 54,Sábado,176,18:21
+CRA 54,Sábado,177,18:30
+CRA 54,Sábado,178,18:39
+CRA 54,Sábado,179,18:47
+CRA 54,Sábado,180,18:56
+CRA 54,Sábado,181,19:04
+CRA 54,Sábado,182,19:13
+CRA 54,Sábado,183,19:21
+CRA 54,Sábado,184,19:30
+CRA 54,Sábado,185,19:39
+CRA 54,Sábado,186,19:47
+CRA 54,Sábado,187,19:56
+CRA 54,Sábado,188,20:05
+CRA 54,Sábado,189,20:14
+CRA 54,Sábado,190,20:24
+CRA 54,Sábado,191,20:34
+CRA 54,Sábado,192,20:43
+CRA 54,Domingo/festivo,1,04:58
+CRA 54,Domingo/festivo,2,05:04
+CRA 54,Domingo/festivo,3,05:11
+CRA 54,Domingo/festivo,4,05:19
+CRA 54,Domingo/festivo,5,05:26
+CRA 54,Domingo/festivo,6,05:34
+CRA 54,Domingo/festivo,7,05:41
+CRA 54,Domingo/festivo,8,05:49
+CRA 54,Domingo/festivo,9,05:56
+CRA 54,Domingo/festivo,10,06:04
+CRA 54,Domingo/festivo,11,06:13
+CRA 54,Domingo/festivo,12,06:21
+CRA 54,Domingo/festivo,13,06:30
+CRA 54,Domingo/festivo,14,06:39
+CRA 54,Domingo/festivo,15,06:47
+CRA 54,Domingo/festivo,16,06:56
+CRA 54,Domingo/festivo,17,07:04
+CRA 54,Domingo/festivo,18,07:13
+CRA 54,Domingo/festivo,19,07:21
+CRA 54,Domingo/festivo,20,07:30
+CRA 54,Domingo/festivo,21,07:39
+CRA 54,Domingo/festivo,22,07:47
+CRA 54,Domingo/festivo,23,07:56
+CRA 54,Domingo/festivo,24,08:04
+CRA 54,Domingo/festivo,25,08:11
+CRA 54,Domingo/festivo,26,08:19
+CRA 54,Domingo/festivo,27,08:26
+CRA 54,Domingo/festivo,28,08:34
+CRA 54,Domingo/festivo,29,08:41
+CRA 54,Domingo/festivo,30,08:49
+CRA 54,Domingo/festivo,31,08:56
+CRA 54,Domingo/festivo,32,09:05
+CRA 54,Domingo/festivo,33,09:15
+CRA 54,Domingo/festivo,34,09:25
+CRA 54,Domingo/festivo,35,09:35
+CRA 54,Domingo/festivo,36,09:45
+CRA 54,Domingo/festivo,37,09:55
+CRA 54,Domingo/festivo,38,10:05
+CRA 54,Domingo/festivo,39,10:15
+CRA 54,Domingo/festivo,40,10:25
+CRA 54,Domingo/festivo,41,10:35
+CRA 54,Domingo/festivo,42,10:45
+CRA 54,Domingo/festivo,43,10:55
+CRA 54,Domingo/festivo,44,11:05
+CRA 54,Domingo/festivo,45,11:15
+CRA 54,Domingo/festivo,46,11:25
+CRA 54,Domingo/festivo,47,11:35
+CRA 54,Domingo/festivo,48,11:45
+CRA 54,Domingo/festivo,49,11:55
+CRA 54,Domingo/festivo,50,12:05
+CRA 54,Domingo/festivo,51,12:15
+CRA 54,Domingo/festivo,52,12:25
+CRA 54,Domingo/festivo,53,12:35
+CRA 54,Domingo/festivo,54,12:45
+CRA 54,Domingo/festivo,55,12:55
+CRA 54,Domingo/festivo,56,13:05
+CRA 54,Domingo/festivo,57,13:15
+CRA 54,Domingo/festivo,58,13:25
+CRA 54,Domingo/festivo,59,13:35
+CRA 54,Domingo/festivo,60,13:45
+CRA 54,Domingo/festivo,61,13:55
+CRA 54,Domingo/festivo,62,14:05
+CRA 54,Domingo/festivo,63,14:15
+CRA 54,Domingo/festivo,64,14:25
+CRA 54,Domingo/festivo,65,14:35
+CRA 54,Domingo/festivo,66,14:45
+CRA 54,Domingo/festivo,67,14:55
+CRA 54,Domingo/festivo,68,15:04
+CRA 54,Domingo/festivo,69,15:13
+CRA 54,Domingo/festivo,70,15:21
+CRA 54,Domingo/festivo,71,15:30
+CRA 54,Domingo/festivo,72,15:39
+CRA 54,Domingo/festivo,73,15:47
+CRA 54,Domingo/festivo,74,15:56
+CRA 54,Domingo/festivo,75,16:04
+CRA 54,Domingo/festivo,76,16:13
+CRA 54,Domingo/festivo,77,16:21
+CRA 54,Domingo/festivo,78,16:30
+CRA 54,Domingo/festivo,79,16:39
+CRA 54,Domingo/festivo,80,16:47
+CRA 54,Domingo/festivo,81,16:56
+CRA 54,Domingo/festivo,82,17:04
+CRA 54,Domingo/festivo,83,17:13
+CRA 54,Domingo/festivo,84,17:21
+CRA 54,Domingo/festivo,85,17:30
+CRA 54,Domingo/festivo,86,17:39
+CRA 54,Domingo/festivo,87,17:47
+CRA 54,Domingo/festivo,88,17:56
+CRA 54,Domingo/festivo,89,18:04
+CRA 54,Domingo/festivo,90,18:13
+CRA 54,Domingo/festivo,91,18:21
+CRA 54,Domingo/festivo,92,18:30
+CRA 54,Domingo/festivo,93,18:39
+CRA 54,Domingo/festivo,94,18:47
+CRA 54,Domingo/festivo,95,18:56
+CRA 54,Domingo/festivo,96,19:05
+CRA 54,Domingo/festivo,97,19:15
+CRA 54,Domingo/festivo,98,19:25
+CRA 54,Domingo/festivo,99,19:34
+CRA 54,Domingo/festivo,100,19:44
+CRA 54,Domingo/festivo,101,19:54
+CRA 54,Domingo/festivo,102,20:05
+CL 72,Laboral,1,04:35
+CL 72,Laboral,2,04:45
+CL 72,Laboral,3,04:55
+CL 72,Laboral,4,05:02
+CL 72,Laboral,5,05:07
+CL 72,Laboral,6,05:12
+CL 72,Laboral,7,05:16
+CL 72,Laboral,8,05:21
+CL 72,Laboral,9,05:25
+CL 72,Laboral,10,05:30
+CL 72,Laboral,11,05:35
+CL 72,Laboral,12,05:39
+CL 72,Laboral,13,05:44
+CL 72,Laboral,14,05:48
+CL 72,Laboral,15,05:53
+CL 72,Laboral,16,05:58
+CL 72,Laboral,17,06:05
+CL 72,Laboral,18,06:15
+CL 72,Laboral,19,06:25
+CL 72,Laboral,20,06:35
+CL 72,Laboral,21,06:45
+CL 72,Laboral,22,06:55
+CL 72,Laboral,23,07:05
+CL 72,Laboral,24,07:15
+CL 72,Laboral,25,07:25
+CL 72,Laboral,26,07:35
+CL 72,Laboral,27,07:45
+CL 72,Laboral,28,07:55
+CL 72,Laboral,29,08:05
+CL 72,Laboral,30,08:15
+CL 72,Laboral,31,08:25
+CL 72,Laboral,32,08:35
+CL 72,Laboral,33,08:45
+CL 72,Laboral,34,08:55
+CL 72,Laboral,35,09:05
+CL 72,Laboral,36,09:15
+CL 72,Laboral,37,09:25
+CL 72,Laboral,38,09:35
+CL 72,Laboral,39,09:45
+CL 72,Laboral,40,09:55
+CL 72,Laboral,41,10:05
+CL 72,Laboral,42,10:15
+CL 72,Laboral,43,10:25
+CL 72,Laboral,44,10:35
+CL 72,Laboral,45,10:45
+CL 72,Laboral,46,10:55
+CL 72,Laboral,47,11:05
+CL 72,Laboral,48,11:15
+CL 72,Laboral,49,11:25
+CL 72,Laboral,50,11:35
+CL 72,Laboral,51,11:45
+CL 72,Laboral,52,11:55
+CL 72,Laboral,53,12:05
+CL 72,Laboral,54,12:15
+CL 72,Laboral,55,12:25
+CL 72,Laboral,56,12:35
+CL 72,Laboral,57,12:45
+CL 72,Laboral,58,12:55
+CL 72,Laboral,59,13:05
+CL 72,Laboral,60,13:15
+CL 72,Laboral,61,13:25
+CL 72,Laboral,62,13:35
+CL 72,Laboral,63,13:45
+CL 72,Laboral,64,13:55
+CL 72,Laboral,65,14:05
+CL 72,Laboral,66,14:15
+CL 72,Laboral,67,14:25
+CL 72,Laboral,68,14:35
+CL 72,Laboral,69,14:45
+CL 72,Laboral,70,14:55
+CL 72,Laboral,71,15:05
+CL 72,Laboral,72,15:15
+CL 72,Laboral,73,15:25
+CL 72,Laboral,74,15:35
+CL 72,Laboral,75,15:45
+CL 72,Laboral,76,15:55
+CL 72,Laboral,77,16:05
+CL 72,Laboral,78,16:15
+CL 72,Laboral,79,16:25
+CL 72,Laboral,80,16:35
+CL 72,Laboral,81,16:45
+CL 72,Laboral,82,16:55
+CL 72,Laboral,83,17:05
+CL 72,Laboral,84,17:15
+CL 72,Laboral,85,17:25
+CL 72,Laboral,86,17:35
+CL 72,Laboral,87,17:45
+CL 72,Laboral,88,17:55
+CL 72,Laboral,89,18:05
+CL 72,Laboral,90,18:15
+CL 72,Laboral,91,18:25
+CL 72,Laboral,92,18:35
+CL 72,Laboral,93,18:45
+CL 72,Laboral,94,18:55
+CL 72,Laboral,95,19:05
+CL 72,Laboral,96,19:15
+CL 72,Laboral,97,19:25
+CL 72,Laboral,98,19:35
+CL 72,Laboral,99,19:45
+CL 72,Laboral,100,19:55
+CL 72,Laboral,101,20:05
+CL 72,Laboral,102,20:14
+CL 72,Laboral,103,20:23
+CL 72,Laboral,104,20:32
+CL 72,Laboral,105,20:41
+CL 72,Sábado,1,04:33
+CL 72,Sábado,2,04:41
+CL 72,Sábado,3,04:49
+CL 72,Sábado,4,04:56
+CL 72,Sábado,5,05:04
+CL 72,Sábado,6,05:13
+CL 72,Sábado,7,05:21
+CL 72,Sábado,8,05:30
+CL 72,Sábado,9,05:39
+CL 72,Sábado,10,05:47
+CL 72,Sábado,11,05:56
+CL 72,Sábado,12,06:05
+CL 72,Sábado,13,06:15
+CL 72,Sábado,14,06:25
+CL 72,Sábado,15,06:35
+CL 72,Sábado,16,06:45
+CL 72,Sábado,17,06:55
+CL 72,Sábado,18,07:05
+CL 72,Sábado,19,07:15
+CL 72,Sábado,20,07:25
+CL 72,Sábado,21,07:35
+CL 72,Sábado,22,07:45
+CL 72,Sábado,23,07:55
+CL 72,Sábado,24,08:05
+CL 72,Sábado,25,08:15
+CL 72,Sábado,26,08:25
+CL 72,Sábado,27,08:35
+CL 72,Sábado,28,08:45
+CL 72,Sábado,29,08:55
+CL 72,Sábado,30,09:05
+CL 72,Sábado,31,09:15
+CL 72,Sábado,32,09:25
+CL 72,Sábado,33,09:35
+CL 72,Sábado,34,09:45
+CL 72,Sábado,35,09:55
+CL 72,Sábado,36,10:05
+CL 72,Sábado,37,10:15
+CL 72,Sábado,38,10:25
+CL 72,Sábado,39,10:35
+CL 72,Sábado,40,10:45
+CL 72,Sábado,41,10:55
+CL 72,Sábado,42,11:05
+CL 72,Sábado,43,11:15
+CL 72,Sábado,44,11:25
+CL 72,Sábado,45,11:35
+CL 72,Sábado,46,11:45
+CL 72,Sábado,47,11:55
+CL 72,Sábado,48,12:05
+CL 72,Sábado,49,12:15
+CL 72,Sábado,50,12:25
+CL 72,Sábado,51,12:35
+CL 72,Sábado,52,12:45
+CL 72,Sábado,53,12:55
+CL 72,Sábado,54,13:05
+CL 72,Sábado,55,13:15
+CL 72,Sábado,56,13:25
+CL 72,Sábado,57,13:35
+CL 72,Sábado,58,13:45
+CL 72,Sábado,59,13:55
+CL 72,Sábado,60,14:05
+CL 72,Sábado,61,14:15
+CL 72,Sábado,62,14:25
+CL 72,Sábado,63,14:35
+CL 72,Sábado,64,14:45
+CL 72,Sábado,65,14:55
+CL 72,Sábado,66,15:05
+CL 72,Sábado,67,15:15
+CL 72,Sábado,68,15:25
+CL 72,Sábado,69,15:35
+CL 72,Sábado,70,15:45
+CL 72,Sábado,71,15:55
+CL 72,Sábado,72,16:05
+CL 72,Sábado,73,16:15
+CL 72,Sábado,74,16:25
+CL 72,Sábado,75,16:35
+CL 72,Sábado,76,16:45
+CL 72,Sábado,77,16:55
+CL 72,Sábado,78,17:05
+CL 72,Sábado,79,17:15
+CL 72,Sábado,80,17:25
+CL 72,Sábado,81,17:35
+CL 72,Sábado,82,17:45
+CL 72,Sábado,83,17:55
+CL 72,Sábado,84,18:05
+CL 72,Sábado,85,18:15
+CL 72,Sábado,86,18:25
+CL 72,Sábado,87,18:35
+CL 72,Sábado,88,18:45
+CL 72,Sábado,89,18:55
+CL 72,Sábado,90,19:05
+CL 72,Sábado,91,19:15
+CL 72,Sábado,92,19:25
+CL 72,Sábado,93,19:35
+CL 72,Sábado,94,19:45
+CL 72,Sábado,95,19:55
+CL 72,Sábado,96,20:04
+CL 72,Sábado,97,20:13
+CL 72,Sábado,98,20:21
+CL 72,Sábado,99,20:30
+CL 72,Sábado,100,20:38
+CL 72,Domingo/festivo,1,05:08
+CL 72,Domingo/festivo,2,05:23
+CL 72,Domingo/festivo,3,05:38
+CL 72,Domingo/festivo,4,05:53
+CL 72,Domingo/festivo,5,06:08
+CL 72,Domingo/festivo,6,06:23
+CL 72,Domingo/festivo,7,06:38
+CL 72,Domingo/festivo,8,06:53
+CL 72,Domingo/festivo,9,07:08
+CL 72,Domingo/festivo,10,07:23
+CL 72,Domingo/festivo,11,07:38
+CL 72,Domingo/festivo,12,07:53
+CL 72,Domingo/festivo,13,08:08
+CL 72,Domingo/festivo,14,08:23
+CL 72,Domingo/festivo,15,08:38
+CL 72,Domingo/festivo,16,08:53
+CL 72,Domingo/festivo,17,09:08
+CL 72,Domingo/festivo,18,09:23
+CL 72,Domingo/festivo,19,09:38
+CL 72,Domingo/festivo,20,09:53
+CL 72,Domingo/festivo,21,10:08
+CL 72,Domingo/festivo,22,10:23
+CL 72,Domingo/festivo,23,10:38
+CL 72,Domingo/festivo,24,10:53
+CL 72,Domingo/festivo,25,11:08
+CL 72,Domingo/festivo,26,11:23
+CL 72,Domingo/festivo,27,11:38
+CL 72,Domingo/festivo,28,11:53
+CL 72,Domingo/festivo,29,12:08
+CL 72,Domingo/festivo,30,12:23
+CL 72,Domingo/festivo,31,12:38
+CL 72,Domingo/festivo,32,12:53
+CL 72,Domingo/festivo,33,13:08
+CL 72,Domingo/festivo,34,13:23
+CL 72,Domingo/festivo,35,13:38
+CL 72,Domingo/festivo,36,13:53
+CL 72,Domingo/festivo,37,14:08
+CL 72,Domingo/festivo,38,14:23
+CL 72,Domingo/festivo,39,14:38
+CL 72,Domingo/festivo,40,14:53
+CL 72,Domingo/festivo,41,15:08
+CL 72,Domingo/festivo,42,15:23
+CL 72,Domingo/festivo,43,15:38
+CL 72,Domingo/festivo,44,15:53
+CL 72,Domingo/festivo,45,16:08
+CL 72,Domingo/festivo,46,16:23
+CL 72,Domingo/festivo,47,16:38
+CL 72,Domingo/festivo,48,16:53
+CL 72,Domingo/festivo,49,17:08
+CL 72,Domingo/festivo,50,17:23
+CL 72,Domingo/festivo,51,17:38
+CL 72,Domingo/festivo,52,17:53
+CL 72,Domingo/festivo,53,18:08
+CL 72,Domingo/festivo,54,18:23
+CL 72,Domingo/festivo,55,18:38
+CL 72,Domingo/festivo,56,18:53
+CL 72,Domingo/festivo,57,19:03
+CL 72,Domingo/festivo,58,19:10
+CL 72,Domingo/festivo,59,19:17
+CL 72,Domingo/festivo,60,19:24
+CL 72,Domingo/festivo,61,19:31
+CL 72,Domingo/festivo,62,19:38
+CL 72,Domingo/festivo,63,19:45
+CL 72,Domingo/festivo,64,19:52
+CL 72,Domingo/festivo,65,20:02

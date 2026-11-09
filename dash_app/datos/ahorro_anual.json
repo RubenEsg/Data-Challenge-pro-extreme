@@ -1,0 +1,1887 @@
+{
+ "descripcion": "Ahorro anual frente a hoy (2025, tres rutas): el plan que reasigna (recomendado) y el que recorta, con los pasajes en juego en las dos contabilidades. Las palancas van aparte y no se suman.",
+ "convenciones": {
+  "dias_anio": 365,
+  "tarifa_neta_cop": 3182,
+  "costo_km_cop": 1991.2387756433009,
+  "costo_bus_hora_cop": 26400.22349377582,
+  "beta": {
+   "central": 0.7,
+   "bajo": 0.55,
+   "alto": 0.9
+  },
+  "precios": "2026",
+  "pago_conductor": "por hora",
+  "supuestos_iniciales": {
+   "costo_bus_hora_cop": 60000,
+   "costo_km_cop": 1500,
+   "tarifa_cop": 3000
+  }
+ },
+ "planes": {
+  "hoy": {
+   "salidas_dia": 459.8794520547945,
+   "salidas_anio": 167856,
+   "quitadas_dia": 0,
+   "puestas_dia": 0,
+   "quitadas_anio": 0,
+   "puestas_anio": 0,
+   "menos_salidas_dia": 0,
+   "menos_salidas_anio": 0,
+   "var_salidas_pct": 0,
+   "buses_hora_dia": 1731.6923603500763,
+   "km_dia": 26844.249589041094,
+   "var_buses_hora_pct": 0,
+   "var_km_pct": 0,
+   "delta_buses_hora_anio": 0,
+   "delta_km_anio": 0,
+   "ahorro_km_Mcop": 0,
+   "ahorro_conductor_Mcop": 0,
+   "ahorro_operacion_Mcop": 0,
+   "espera_min": 4.429917308177173,
+   "pax_sobre_capacidad_dia": 317.1041095890411,
+   "pct_horas_fc_mayor_1": 11.670918367346939,
+   "pax_en_riesgo_dia": {
+    "central": 0,
+    "bajo": 0,
+    "alto": 0
+   },
+   "pax_netos_dia_simetrico": 0,
+   "pasajes_perdidos_Mcop": 0,
+   "pasajes_ganados_Mcop": 0,
+   "saldo_conservador_Mcop": 0,
+   "saldo_simetrico_Mcop": 0,
+   "saldo_conservador_por_beta_Mcop": {
+    "bajo": 0,
+    "central": 0,
+    "alto": 0
+   },
+   "simetrica": {
+    "pax_ganados_dia": 0,
+    "pax_perdidos_dia": 0,
+    "ganados_Mcop": 0,
+    "perdidos_Mcop": 0
+   },
+   "beta_equilibrio": null,
+   "buses_hora_anio": 632067.7115277778,
+   "km_anio": 9798151.1,
+   "costo_km_conductor_Mcop": 36197.18724746481,
+   "ahorro_pct_costo": 0,
+   "dif_regla_perdidos_Mcop": 0
+  },
+  "reasigna": {
+   "salidas_dia": 450.90410958904107,
+   "salidas_anio": 164580,
+   "quitadas_dia": 64.4904109589041,
+   "puestas_dia": 55.515068493150686,
+   "quitadas_anio": 23539,
+   "puestas_anio": 20263,
+   "menos_salidas_dia": 8.975342465753425,
+   "menos_salidas_anio": 3276,
+   "var_salidas_pct": -1.951672862453535,
+   "buses_hora_dia": 1722.5191168188737,
+   "var_buses_hora_pct": -0.5297270890164407,
+   "var_km_pct": -2.115451148737642,
+   "delta_buses_hora_anio": 3348.2338888889544,
+   "delta_km_anio": 207275.09999999986,
+   "ahorro_km_Mcop": 412.7342163453425,
+   "ahorro_conductor_Mcop": 88.39412297610255,
+   "ahorro_operacion_Mcop": 501.12833932144497,
+   "buses_hora_anio": 628719.4776388889,
+   "km_anio": 9590876.0,
+   "costo_km_conductor_Mcop": 35696.05890814337,
+   "ahorro_pct_costo": 1.3844400005322046,
+   "espera_min": 4.30160584333654,
+   "pax_sobre_capacidad_dia": 266.61506849315066,
+   "pct_horas_fc_mayor_1": 6.794990723562153,
+   "pax_en_riesgo_dia": {
+    "central": 2863.9320289675475,
+    "bajo": 2313.0131259922896,
+    "alto": 3552.4175860769587
+   },
+   "pax_netos_dia_simetrico": 946.31686948259,
+   "pasajes_perdidos_Mcop": 3326.2565764037786,
+   "saldo_conservador_Mcop": -2825.1282370823337,
+   "saldo_simetrico_Mcop": 1600.2091410446096,
+   "pasajes_ganados_Mcop": 4425.337378126943,
+   "simetrica": {
+    "pax_ganados_dia": 3661.0945300326534,
+    "pax_perdidos_dia": 2714.7776605500635,
+    "ganados_Mcop": 4252.105020015825,
+    "perdidos_Mcop": 3153.0242182926604
+   },
+   "dif_regla_perdidos_Mcop": 173.23235811111817,
+   "saldo_conservador_por_beta_Mcop": {
+    "bajo": -2185.2744955997814,
+    "central": -2825.128237082335,
+    "alto": -3624.7560176759184
+   },
+   "beta_equilibrio": null
+  },
+  "recorta": {
+   "salidas_dia": 411.25479452054793,
+   "salidas_anio": 150108,
+   "quitadas_dia": 85.66301369863014,
+   "puestas_dia": 37.038356164383565,
+   "quitadas_anio": 31267,
+   "puestas_anio": 13519,
+   "menos_salidas_dia": 48.62465753424657,
+   "menos_salidas_anio": 17748,
+   "var_salidas_pct": -10.573348584500996,
+   "buses_hora_dia": 1565.2420429984777,
+   "var_buses_hora_pct": -9.61200275307268,
+   "var_km_pct": -10.718381348497482,
+   "delta_buses_hora_anio": 60754.365833333504,
+   "delta_km_anio": 1050203.200000001,
+   "ahorro_km_Mcop": 2091.2053341446785,
+   "ahorro_conductor_Mcop": 1603.928836222622,
+   "ahorro_operacion_Mcop": 3695.1341703673006,
+   "buses_hora_anio": 571313.3456944444,
+   "km_anio": 8747947.899999999,
+   "costo_km_conductor_Mcop": 32502.05307709752,
+   "ahorro_pct_costo": 10.208346148846417,
+   "espera_min": 4.742377428824227,
+   "pax_sobre_capacidad_dia": 530.4383561643835,
+   "pct_horas_fc_mayor_1": 15.636595547309835,
+   "pax_en_riesgo_dia": {
+    "central": 4067.614783075687,
+    "bajo": 3296.2015684515422,
+    "alto": 5023.731483837277
+   },
+   "pax_netos_dia_simetrico": -1512.3859618174154,
+   "pasajes_perdidos_Mcop": 4724.249837507595,
+   "saldo_conservador_Mcop": -1029.1156671402946,
+   "saldo_simetrico_Mcop": 1938.6037427336996,
+   "pasajes_ganados_Mcop": 2967.7194098739947,
+   "simetrica": {
+    "pax_ganados_dia": 2318.757531037543,
+    "pax_perdidos_dia": 3831.143492854958,
+    "ganados_Mcop": 2693.0745592729336,
+    "perdidos_Mcop": 4449.604986906535
+   },
+   "dif_regla_perdidos_Mcop": 274.64485060106017,
+   "saldo_conservador_por_beta_Mcop": {
+    "bajo": -133.17321727938128,
+    "central": -1029.1156671403,
+    "alto": -2139.5782869058353
+   },
+   "beta_equilibrio": 0.528463472273316
+  }
+ },
+ "por_ruta": {
+  "rutas": [
+   "SILENCIO",
+   "CRA 54",
+   "CL 72"
+  ],
+  "SILENCIO": {
+   "hoy": {
+    "salidas_anio": 48211,
+    "salidas_dia": 132.0849315068493
+   },
+   "reasigna": {
+    "salidas_anio": 43978,
+    "salidas_dia": 120.4876712328767
+   },
+   "recorta": {
+    "salidas_anio": 40097,
+    "salidas_dia": 109.85479452054794
+   }
+  },
+  "CRA 54": {
+   "hoy": {
+    "salidas_anio": 90143,
+    "salidas_dia": 246.96712328767123
+   },
+   "reasigna": {
+    "salidas_anio": 82757,
+    "salidas_dia": 226.73150684931508
+   },
+   "recorta": {
+    "salidas_anio": 74634,
+    "salidas_dia": 204.47671232876712
+   }
+  },
+  "CL 72": {
+   "hoy": {
+    "salidas_anio": 29502,
+    "salidas_dia": 80.82739726027397
+   },
+   "reasigna": {
+    "salidas_anio": 37845,
+    "salidas_dia": 103.68493150684931
+   },
+   "recorta": {
+    "salidas_anio": 35377,
+    "salidas_dia": 96.92328767123287
+   }
+  }
+ },
+ "por_hora": {
+  "horas": [
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20
+  ],
+  "tipos_dia": {
+   "Laboral": {
+    "dias": 245,
+    "hoy": [
+     12.853061224489796,
+     70.81632653061224,
+     39.83673469387755,
+     33.265306122448976,
+     28.538775510204083,
+     29.379591836734694,
+     27.791836734693877,
+     26.216326530612246,
+     28.444897959183674,
+     31.50204081632653,
+     30.00408163265306,
+     27.16734693877551,
+     26.86122448979592,
+     26.46938775510204,
+     24.653061224489797,
+     23.56734693877551,
+     16.257142857142856
+    ],
+    "salidas_dia": {
+     "hoy": 503.62448979591835,
+     "reasigna": 510.9551020408163,
+     "recorta": 464.0204081632653
+    },
+    "reasigna": [
+     15.481632653061224,
+     67.17551020408163,
+     43.155102040816324,
+     32.453061224489794,
+     28.514285714285716,
+     25.779591836734692,
+     24.26938775510204,
+     24.024489795918367,
+     30.506122448979593,
+     35.76734693877551,
+     39.95510204081633,
+     34.48979591836735,
+     28.983673469387757,
+     22.726530612244897,
+     21.179591836734694,
+     20.39183673469388,
+     16.102040816326532
+    ],
+    "recorta": [
+     13.391836734693877,
+     64.41224489795918,
+     40.23673469387755,
+     30.918367346938776,
+     26.13877551020408,
+     23.416326530612245,
+     22.073469387755104,
+     22.163265306122447,
+     26.081632653061224,
+     30.077551020408162,
+     33.155102040816324,
+     29.60408163265306,
+     25.73061224489796,
+     21.195918367346938,
+     19.955102040816328,
+     19.457142857142856,
+     16.012244897959185
+    ],
+    "quitadas": {
+     "reasigna": [
+      0.27346938775510204,
+      6.710204081632653,
+      1.7918367346938775,
+      2.9959183673469387,
+      2.710204081632653,
+      4.869387755102041,
+      5.46530612244898,
+      4.959183673469388,
+      2.3469387755102042,
+      1.8204081632653062,
+      0.37551020408163266,
+      0.49387755102040815,
+      2.204081632653061,
+      6.142857142857143,
+      6.085714285714285,
+      5.7306122448979595,
+      2.8612244897959185
+     ],
+     "recorta": [
+      0.7346938775510204,
+      8.824489795918367,
+      2.404081632653061,
+      3.8816326530612244,
+      4.040816326530612,
+      6.946938775510204,
+      7.33469387755102,
+      6.522448979591837,
+      4.624489795918367,
+      3.869387755102041,
+      1.546938775510204,
+      1.7836734693877552,
+      3.926530612244898,
+      7.448979591836735,
+      7.151020408163265,
+      6.53469387755102,
+      2.9020408163265308
+     ]
+    },
+    "puestas": {
+     "reasigna": [
+      2.9020408163265308,
+      3.0693877551020408,
+      5.110204081632653,
+      2.183673469387755,
+      2.6857142857142855,
+      1.2693877551020407,
+      1.9428571428571428,
+      2.76734693877551,
+      4.408163265306122,
+      6.085714285714285,
+      10.326530612244898,
+      7.816326530612245,
+      4.326530612244898,
+      2.4,
+      2.6122448979591835,
+      2.5551020408163265,
+      2.706122448979592
+     ],
+     "recorta": [
+      1.273469387755102,
+      2.4204081632653063,
+      2.804081632653061,
+      1.5346938775510204,
+      1.6408163265306122,
+      0.9836734693877551,
+      1.616326530612245,
+      2.4693877551020407,
+      2.2612244897959184,
+      2.4448979591836735,
+      4.697959183673469,
+      4.220408163265306,
+      2.795918367346939,
+      2.1755102040816325,
+      2.453061224489796,
+      2.4244897959183676,
+      2.657142857142857
+     ]
+    },
+    "quitadas_dia": {
+     "reasigna": 57.836734693877546,
+     "recorta": 80.47755102040816
+    },
+    "puestas_dia": {
+     "reasigna": 65.16734693877552,
+     "recorta": 40.8734693877551
+    }
+   },
+   "Sábado": {
+    "dias": 52,
+    "hoy": [
+     12.961538461538462,
+     49.86538461538461,
+     38.05769230769231,
+     39.34615384615385,
+     33.05769230769231,
+     27.28846153846154,
+     26.846153846153847,
+     25.826923076923077,
+     28.173076923076923,
+     28.26923076923077,
+     24.807692307692307,
+     25.48076923076923,
+     25.346153846153847,
+     23.26923076923077,
+     20.365384615384617,
+     16.673076923076923,
+     10.038461538461538
+    ],
+    "salidas_dia": {
+     "hoy": 455.6730769230769,
+     "reasigna": 433.78846153846155,
+     "recorta": 399.78846153846155
+    },
+    "reasigna": [
+     12.75,
+     41.5,
+     42.98076923076923,
+     31.692307692307693,
+     26.692307692307693,
+     28.096153846153847,
+     26.942307692307693,
+     24.98076923076923,
+     25.115384615384617,
+     25.03846153846154,
+     24.75,
+     24.307692307692307,
+     22.673076923076923,
+     20.865384615384617,
+     19.673076923076923,
+     20.153846153846153,
+     15.576923076923077
+    ],
+    "recorta": [
+     12.0,
+     37.63461538461539,
+     38.42307692307692,
+     29.096153846153847,
+     24.653846153846153,
+     25.153846153846153,
+     24.442307692307693,
+     23.192307692307693,
+     23.23076923076923,
+     23.192307692307693,
+     22.673076923076923,
+     22.48076923076923,
+     21.076923076923077,
+     19.692307692307693,
+     18.73076923076923,
+     19.057692307692307,
+     15.057692307692308
+    ],
+    "quitadas": {
+     "reasigna": [
+      1.5,
+      10.096153846153847,
+      1.1730769230769231,
+      8.26923076923077,
+      6.884615384615385,
+      2.6923076923076925,
+      2.7115384615384617,
+      3.5576923076923075,
+      5.211538461538462,
+      4.884615384615385,
+      3.173076923076923,
+      4.0576923076923075,
+      4.923076923076923,
+      4.846153846153846,
+      3.7115384615384617,
+      1.4423076923076923,
+      0.4423076923076923
+     ],
+     "recorta": [
+      2.1153846153846154,
+      12.923076923076923,
+      2.5576923076923075,
+      10.692307692307692,
+      8.75,
+      4.115384615384615,
+      4.288461538461538,
+      5.038461538461538,
+      6.923076923076923,
+      6.403846153846154,
+      4.538461538461538,
+      5.519230769230769,
+      6.403846153846154,
+      5.923076923076923,
+      4.5,
+      2.019230769230769,
+      0.6153846153846154
+     ]
+    },
+    "puestas": {
+     "reasigna": [
+      1.2884615384615385,
+      1.7307692307692308,
+      6.096153846153846,
+      0.6153846153846154,
+      0.5192307692307693,
+      3.5,
+      2.8076923076923075,
+      2.7115384615384617,
+      2.1538461538461537,
+      1.6538461538461537,
+      3.1153846153846154,
+      2.8846153846153846,
+      2.25,
+      2.4423076923076925,
+      3.019230769230769,
+      4.923076923076923,
+      5.980769230769231
+     ],
+     "recorta": [
+      1.1538461538461537,
+      0.6923076923076923,
+      2.923076923076923,
+      0.4423076923076923,
+      0.34615384615384615,
+      1.9807692307692308,
+      1.8846153846153846,
+      2.4038461538461537,
+      1.9807692307692308,
+      1.3269230769230769,
+      2.4038461538461537,
+      2.519230769230769,
+      2.1346153846153846,
+      2.3461538461538463,
+      2.8653846153846154,
+      4.403846153846154,
+      5.634615384615385
+     ]
+    },
+    "quitadas_dia": {
+     "reasigna": 69.57692307692308,
+     "recorta": 93.32692307692307
+    },
+    "puestas_dia": {
+     "reasigna": 47.6923076923077,
+     "recorta": 37.44230769230769
+    }
+   },
+   "Domingo/festivo": {
+    "dias": 68,
+    "hoy": [
+     0.39705882352941174,
+     27.029411764705884,
+     24.426470588235293,
+     22.926470588235293,
+     21.029411764705884,
+     22.264705882352942,
+     21.41176470588235,
+     19.75,
+     19.08823529411765,
+     19.88235294117647,
+     20.11764705882353,
+     19.308823529411764,
+     19.294117647058822,
+     17.83823529411765,
+     16.205882352941178,
+     12.705882352941176,
+     1.8088235294117647
+    ],
+    "salidas_dia": {
+     "hoy": 305.4852941176471,
+     "reasigna": 247.63235294117646,
+     "recorta": 229.91176470588235
+    },
+    "reasigna": [
+     2.1323529411764706,
+     18.176470588235293,
+     16.13235294117647,
+     15.5,
+     16.308823529411764,
+     15.352941176470589,
+     14.955882352941176,
+     14.5,
+     15.117647058823529,
+     15.176470588235293,
+     15.529411764705882,
+     16.352941176470587,
+     17.014705882352942,
+     16.308823529411764,
+     16.220588235294116,
+     19.5,
+     3.3529411764705883
+    ],
+    "recorta": [
+     2.0588235294117645,
+     16.720588235294116,
+     15.382352941176471,
+     14.882352941176471,
+     15.352941176470589,
+     14.558823529411764,
+     14.176470588235293,
+     13.661764705882353,
+     14.117647058823529,
+     14.235294117647058,
+     14.426470588235293,
+     14.794117647058824,
+     15.088235294117647,
+     14.470588235294118,
+     14.676470588235293,
+     18.13235294117647,
+     3.176470588235294
+    ],
+    "quitadas": {
+     "reasigna": [
+      0.0,
+      9.132352941176471,
+      8.573529411764707,
+      8.044117647058824,
+      5.779411764705882,
+      7.632352941176471,
+      7.220588235294118,
+      6.205882352941177,
+      5.205882352941177,
+      5.926470588235294,
+      5.8088235294117645,
+      4.220588235294118,
+      3.8970588235294117,
+      3.2205882352941178,
+      2.323529411764706,
+      1.3088235294117647,
+      0.07352941176470588
+     ],
+     "recorta": [
+      0.014705882352941176,
+      10.382352941176471,
+      9.294117647058824,
+      8.617647058823529,
+      6.676470588235294,
+      8.411764705882353,
+      8.0,
+      6.985294117647059,
+      6.132352941176471,
+      6.8088235294117645,
+      6.779411764705882,
+      5.470588235294118,
+      5.382352941176471,
+      4.544117647058823,
+      3.25,
+      1.6470588235294117,
+      0.08823529411764706
+     ]
+    },
+    "puestas": {
+     "reasigna": [
+      1.7352941176470589,
+      0.27941176470588236,
+      0.27941176470588236,
+      0.6176470588235294,
+      1.0588235294117647,
+      0.7205882352941176,
+      0.7647058823529411,
+      0.9558823529411765,
+      1.2352941176470589,
+      1.2205882352941178,
+      1.2205882352941178,
+      1.2647058823529411,
+      1.6176470588235294,
+      1.6911764705882353,
+      2.338235294117647,
+      8.102941176470589,
+      1.6176470588235294
+     ],
+     "recorta": [
+      1.6764705882352942,
+      0.07352941176470588,
+      0.25,
+      0.5735294117647058,
+      1.0,
+      0.7058823529411765,
+      0.7647058823529411,
+      0.8970588235294118,
+      1.161764705882353,
+      1.161764705882353,
+      1.088235294117647,
+      0.9558823529411765,
+      1.1764705882352942,
+      1.1764705882352942,
+      1.7205882352941178,
+      7.073529411764706,
+      1.4558823529411764
+     ]
+    },
+    "quitadas_dia": {
+     "reasigna": 84.57352941176471,
+     "recorta": 98.48529411764707
+    },
+    "puestas_dia": {
+     "reasigna": 26.720588235294116,
+     "recorta": 22.911764705882355
+    }
+   }
+  }
+ },
+ "contexto": {
+  "costo_operacion_anual_Mcop": 45817.2948400082,
+  "costos_fijos_anual_Mcop": 12991.096711241014,
+  "km_anio": 10436388.399999999,
+  "buses_hora_anio": 658822.8557207297,
+  "precios": "2025",
+  "pax_dia_2025": 35266.85205479452,
+  "pax_anio_2025": 12872401
+ },
+ "palancas": {
+  "domingos_festivos": {
+   "plan": "recorta",
+   "tipo_dia": "Domingo/festivo",
+   "saldo_conservador_Mcop": 181.2361951205922,
+   "saldo_por_dia_Mcop": 2.665238163538121,
+   "dias": 68,
+   "pax_en_riesgo_dia": 3809.77759714481,
+   "plan_recorta_por_tipo_dia": {
+    "Laboral": {
+     "dias": 245,
+     "saldo_conservador_Mcop": -1096.3140609729062,
+     "pax_en_riesgo_dia": 4045.5855472283192
+    },
+    "Sábado": {
+     "dias": 52,
+     "saldo_conservador_Mcop": -114.03780128798631,
+     "pax_en_riesgo_dia": 4508.5780797276975
+    },
+    "Domingo/festivo": {
+     "dias": 68,
+     "saldo_conservador_Mcop": 181.2361951205922,
+     "pax_en_riesgo_dia": 3809.77759714481
+    }
+   }
+  },
+  "giro_corto_35": {
+   "escenario": "Giro corto en el punto 35, CRA 54 (1 de cada 2 buses, 7-15 h, laborales)",
+   "delta_km_anio": 137646.02834032953,
+   "delta_buses_hora_anio": 8720.32248502658,
+   "ahorro_operacion_Mcop": 505.2376189961076,
+   "pasajes_perdidos_Mcop": 257.4928637521996,
+   "saldo_conservador_Mcop": 247.74475524390803,
+   "saldo_rango_Mcop": {
+    "pesimista": 52.49968735316879,
+    "optimista": 475.38768871667133
+   },
+   "pax_en_riesgo_dia": {
+    "central": 221.7033000285851,
+    "bajo": 182.80541834168608,
+    "alto": 267.6586996331871
+   },
+   "espera_hoy_min": 4.784368118623593,
+   "espera_despues_min": 4.992043153837306,
+   "valor_social_espera_Mcop": -143.55334902863663,
+   "beta_equilibrio": 2.0250420004578498,
+   "bajadas_forzadas_dia": 561.8333
+  },
+  "regularizar_cl72": {
+   "escenario": "Regularizar el despacho de CL 72 (mismas salidas, equiespaciadas)",
+   "espera_hoy_min": 9.519846835482516,
+   "espera_despues_min": 7.959769229804901,
+   "delta_espera_min": -1.5600776056776153,
+   "delta_km_anio": 0.0,
+   "delta_buses_hora_anio": 104.8729805960852,
+   "ahorro_operacion_Mcop": 2.768670126195064,
+   "pasajes_perdidos_Mcop": 0.0,
+   "saldo_conservador_Mcop": 2.768670126195064,
+   "pax_en_riesgo_dia": 0.0,
+   "valor_social_espera_Mcop": 340.15092705771895
+  }
+ },
+ "campos": {
+  "salidas_dia": "Salidas válidas por día: promedio de los días de 2025, tres rutas (salidas/día)",
+  "salidas_anio": "Salidas válidas en todo 2025, tres rutas (salidas/año)",
+  "quitadas_dia": "Salidas por día que el plan quita donde hoy hay más: suma de max(hoy − plan, 0) por ruta × día × hora ÷ días",
+  "puestas_dia": "Salidas por día que el plan añade donde hoy hay menos: suma de max(plan − hoy, 0) por ruta × día × hora ÷ días",
+  "quitadas_anio": "Salidas al año que el plan quita: suma de max(hoy − plan, 0) por ruta × día × hora",
+  "puestas_anio": "Salidas al año que el plan añade: suma de max(plan − hoy, 0) por ruta × día × hora",
+  "menos_salidas_dia": "Salidas netas por día que el plan deja de hacer frente a hoy (quitadas − puestas)",
+  "menos_salidas_anio": "Salidas netas al año que el plan deja de hacer frente a hoy (quitadas − puestas)",
+  "var_salidas_pct": "Cambio de las salidas frente a hoy, en % (negativo = menos que hoy)",
+  "buses_hora_dia": "Horas de bus en ruta por día (buses-hora/día)",
+  "var_buses_hora_pct": "Cambio de los buses-hora frente a hoy, en % (negativo = menos que hoy)",
+  "km_dia": "Km por día de la oferta de hoy en la base de los escenarios de D5 (solo en planes.hoy)",
+  "var_km_pct": "Cambio de los km frente a hoy, en % (negativo = menos que hoy), sobre planes.hoy.km_dia",
+  "delta_buses_hora_anio": "Buses-hora al año que el plan deja de recorrer frente a hoy (positivo = menos que hoy)",
+  "delta_km_anio": "Km al año que el plan deja de recorrer frente a hoy (positivo = menos que hoy)",
+  "buses_hora_anio": "Horas de bus en ruta al año: buses_hora_dia × días del año (buses-hora/año)",
+  "km_anio": "Km al año en la base de los escenarios de D5: hoy = km_dia × días del año; cada plan = hoy − delta_km_anio (km/año)",
+  "costo_km_conductor_Mcop": "Lo que cuestan al año los km (costo evitable por km) y las horas de conductor (pagado por hora) del plan, a precios 2026 y en la misma base que el ahorro: km_anio × costo por km + buses_hora_anio × costo por bus-hora (M COP/año). No incluye costos fijos: no es el costo total de operación",
+  "ahorro_pct_costo": "ahorro_operacion_Mcop como % de planes.hoy.costo_km_conductor_Mcop (lo que hoy cuestan los km y las horas de conductor)",
+  "dif_regla_perdidos_Mcop": "Pasajes perdidos de la contabilidad conservadora (forma de potencia) menos los de la simétrica (forma lineal): pasajes_perdidos_Mcop − simetrica.perdidos_Mcop (M COP/año). saldo_conservador + simetrica.ganados_Mcop + dif_regla_perdidos_Mcop = saldo_simetrico",
+  "por_hora.quitadas": "Salidas medias por día de ese tipo que el plan quita, por hora de salida: suma de max(hoy − plan, 0) por ruta y hora ÷ días del tipo (tres rutas)",
+  "por_hora.puestas": "Salidas medias por día de ese tipo que el plan añade, por hora de salida: suma de max(plan − hoy, 0) por ruta y hora ÷ días del tipo (tres rutas)",
+  "por_hora.salidas_dia": "Salidas medias por día de ese tipo de cada plan, tres rutas (suma de su serie por hora)",
+  "por_hora.quitadas_dia": "Salidas medias por día de ese tipo que el plan quita (suma de su serie «quitadas»)",
+  "por_hora.puestas_dia": "Salidas medias por día de ese tipo que el plan añade (suma de su serie «puestas»)",
+  "convenciones.supuestos_iniciales": "Costos supuestos con los que D5 eligió el plan que recorta: COP por bus-hora, COP por km y tarifa en COP",
+  "ahorro_km_Mcop": "Parte del ahorro en operación que viene de los km: delta_km_anio × costo evitable por km (M COP/año)",
+  "ahorro_conductor_Mcop": "Parte del ahorro en operación que viene del conductor pagado por hora: delta_buses_hora_anio × costo por bus-hora (M COP/año)",
+  "ahorro_operacion_Mcop": "Lo que Sobusa deja de pagar al año en km y en horas de conductor pagado por hora (M COP/año, precios 2026). No es ganancia: no descuenta los pasajes en juego",
+  "espera_min": "Espera media estimada por pasajero (min)",
+  "pax_sobre_capacidad_dia": "Pasajeros por día por encima de la capacidad del bus en el tramo crítico",
+  "pct_horas_fc_mayor_1": "Horas con factor de carga mayor que 1 (% de las horas)",
+  "pax_en_riesgo_dia": "Pasajeros por día que se pueden perder donde se quitan salidas (contabilidad conservadora): central con la β central; bajo y alto con los extremos del rango de β (convenciones.beta)",
+  "pax_netos_dia_simetrico": "Pasajeros netos por día si los ganados donde se añaden salidas cuentan igual que los perdidos (contabilidad simétrica, β central)",
+  "pasajes_perdidos_Mcop": "Valor al año de pax_en_riesgo_dia.central: pasajeros/día × días del año × tarifa neta (M COP/año)",
+  "pasajes_ganados_Mcop": "Lo que la contabilidad simétrica suma a la conservadora: saldo_simetrico − saldo_conservador (M COP/año). Son los ganados donde se añaden salidas más la diferencia entre la pérdida conservadora (forma de potencia) y la lineal de la simétrica; el desglose de la fuente está en «simetrica»",
+  "saldo_conservador_Mcop": "ahorro_operacion_Mcop − pasajes_perdidos_Mcop (M COP/año)",
+  "saldo_simetrico_Mcop": "saldo_conservador_Mcop + pasajes_ganados_Mcop = ahorro_operacion_Mcop + simetrica.ganados_Mcop − simetrica.perdidos_Mcop (M COP/año)",
+  "saldo_conservador_por_beta_Mcop": "Saldo conservador del plan con cada β del rango (convenciones.beta), conductor por hora (M COP/año). La fuente no tiene el saldo simétrico con otras β",
+  "simetrica": "La contabilidad simétrica de la fuente separada en pasajeros ganados (donde se añaden salidas) y perdidos (donde se quitan), con la forma lineal de costos/reoptimizar_d5.py (pasajeros/día y M COP/año)",
+  "beta_equilibrio": "β por encima de la cual el saldo conservador del plan es negativo (pago por hora); null si la fuente no la calcula",
+  "por_ruta": "Salidas por día y por año de cada plan en cada ruta",
+  "por_hora": "Salidas medias por día de cada tipo de día, por hora de salida, tres rutas sumadas; «dias» = días de ese tipo en 2025",
+  "contexto": "Línea base de 2025 (precios 2025, conductor por hora; incluye los viajes marcados cancelados que corrieron) y pasajeros de 2025. No es la base de las comparaciones de los planes",
+  "palancas": "Medidas que se miden aparte de los planes. No se suman entre sí ni a un plan",
+  "palancas.domingos_festivos": "El plan que recorta aplicado solo a domingos y festivos (simulación por fecha, plan a). Es una parte del saldo anual del plan que recorta (plan_recorta_por_tipo_dia suma ese saldo), no algo que se le añade",
+  "palancas.giro_corto_35": "Giro corto en el punto 35 de CRA 54 sobre la oferta de hoy; bajadas_forzadas_dia (simulador D6, día laboral típico de CRA 54) no se valoran en el saldo; valor_social_espera_Mcop es tiempo de los pasajeros valorado, no caja",
+  "palancas.regularizar_cl72": "Las mismas salidas de cada día de CL 72, equiespaciadas; valor_social_espera_Mcop es tiempo de espera de los pasajeros valorado, no caja de Sobusa"
+ },
+ "origen": {
+  "convenciones.dias_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "dia → n distintos"
+  },
+  "convenciones.tarifa_neta_cop": {
+   "archivo": "costos/resultados/costos_para_planificador.json",
+   "clave": "tarifa_neta_2026.central"
+  },
+  "convenciones.costo_km_cop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].costo_km_usado"
+  },
+  "convenciones.costo_bus_hora_cop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].costo_bus_hora_usado"
+  },
+  "convenciones.beta.central": {
+   "archivo": "costos/resultados/costos_para_planificador.json",
+   "clave": "elasticidad_beta.central"
+  },
+  "convenciones.beta.bajo": {
+   "archivo": "costos/resultados/costos_para_planificador.json",
+   "clave": "elasticidad_beta.bajo"
+  },
+  "convenciones.beta.alto": {
+   "archivo": "costos/resultados/costos_para_planificador.json",
+   "clave": "elasticidad_beta.alto"
+  },
+  "planes.hoy.salidas_dia": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].salidas_dia"
+  },
+  "planes.hoy.salidas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "n_S0 → suma"
+  },
+  "planes.hoy.quitadas_dia": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.puestas_dia": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.quitadas_anio": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.puestas_anio": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.menos_salidas_dia": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.menos_salidas_anio": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.var_salidas_pct": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.buses_hora_dia": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].buses_hora_dia"
+  },
+  "planes.hoy.km_dia": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].km_dia"
+  },
+  "planes.hoy.var_buses_hora_pct": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.var_km_pct": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.delta_buses_hora_anio": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.delta_km_anio": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.ahorro_km_Mcop": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.ahorro_conductor_Mcop": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.ahorro_operacion_Mcop": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.espera_min": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].espera_media_min"
+  },
+  "planes.hoy.pax_sobre_capacidad_dia": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].pax_sobre_capacidad_dia"
+  },
+  "planes.hoy.pct_horas_fc_mayor_1": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].pct_horas_fc_mayor_1"
+  },
+  "planes.hoy.pax_en_riesgo_dia.central": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.pax_en_riesgo_dia.bajo": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.pax_en_riesgo_dia.alto": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.pax_netos_dia_simetrico": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.pasajes_perdidos_Mcop": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.pasajes_ganados_Mcop": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.saldo_conservador_Mcop": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.saldo_simetrico_Mcop": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.saldo_conservador_por_beta_Mcop.bajo": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.saldo_conservador_por_beta_Mcop.central": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.saldo_conservador_por_beta_Mcop.alto": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.simetrica.pax_ganados_dia": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.simetrica.pax_perdidos_dia": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.simetrica.ganados_Mcop": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.simetrica.perdidos_Mcop": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.beta_equilibrio": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.buses_hora_anio": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].buses_hora_dia",
+   "calculo": "buses_hora_dia × convenciones.dias_anio"
+  },
+  "planes.hoy.km_anio": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].km_dia",
+   "calculo": "km_dia × convenciones.dias_anio"
+  },
+  "planes.hoy.costo_km_conductor_Mcop": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv; costos/resultados/d5_reoptimizado.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].km_dia, buses_hora_dia; [corrida=D5 costos nuevos, pago por hora, e=0,5].costo_km_usado, costo_bus_hora_usado",
+   "calculo": "(km_anio × convenciones.costo_km_cop + buses_hora_anio × convenciones.costo_bus_hora_cop) × 1e-06"
+  },
+  "planes.hoy.ahorro_pct_costo": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.dif_regla_perdidos_Mcop": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.reasigna.salidas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].salidas_dia"
+  },
+  "planes.reasigna.salidas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "x_corrida_1 → suma"
+  },
+  "planes.reasigna.quitadas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "max(n_S0 − x_corrida_1, 0) → suma",
+   "calculo": "quitadas_anio ÷ convenciones.dias_anio"
+  },
+  "planes.reasigna.puestas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "max(x_corrida_1 − n_S0, 0) → suma",
+   "calculo": "puestas_anio ÷ convenciones.dias_anio"
+  },
+  "planes.reasigna.quitadas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "max(n_S0 − x_corrida_1, 0) → suma"
+  },
+  "planes.reasigna.puestas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "max(x_corrida_1 − n_S0, 0) → suma"
+  },
+  "planes.reasigna.menos_salidas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "quitadas − puestas",
+   "calculo": "(quitadas_anio − puestas_anio) ÷ convenciones.dias_anio"
+  },
+  "planes.reasigna.menos_salidas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "quitadas − puestas",
+   "calculo": "quitadas_anio − puestas_anio"
+  },
+  "planes.reasigna.var_salidas_pct": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].salidas_dia; [ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].salidas_dia",
+   "calculo": "(salidas_dia ÷ planes.hoy.salidas_dia − 1) × 100"
+  },
+  "planes.reasigna.buses_hora_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].buses_hora_dia"
+  },
+  "planes.reasigna.var_buses_hora_pct": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].buses_hora_dia; [ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].buses_hora_dia",
+   "calculo": "(buses_hora_dia ÷ planes.hoy.buses_hora_dia − 1) × 100"
+  },
+  "planes.reasigna.var_km_pct": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].delta_km_anual; [ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].km_dia",
+   "calculo": "−delta_km_anio ÷ (planes.hoy.km_dia × convenciones.dias_anio) × 100"
+  },
+  "planes.reasigna.delta_buses_hora_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].delta_buses_hora_anual"
+  },
+  "planes.reasigna.delta_km_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].delta_km_anual"
+  },
+  "planes.reasigna.ahorro_km_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].delta_km_anual × costo_km_usado × 1e-06"
+  },
+  "planes.reasigna.ahorro_conductor_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].delta_buses_hora_anual × costo_bus_hora_usado × 1e-06"
+  },
+  "planes.reasigna.ahorro_operacion_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].ahorro_operativo_pago_hora_Mcop"
+  },
+  "planes.reasigna.buses_hora_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].buses_hora_dia",
+   "calculo": "buses_hora_dia × convenciones.dias_anio"
+  },
+  "planes.reasigna.km_anio": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv; costos/resultados/d5_reoptimizado.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].km_dia; [corrida=D5 costos nuevos, pago por hora, e=0,5].delta_km_anual",
+   "calculo": "planes.hoy.km_anio − delta_km_anio"
+  },
+  "planes.reasigna.costo_km_conductor_Mcop": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv; costos/resultados/d5_reoptimizado.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].km_dia; [corrida=D5 costos nuevos, pago por hora, e=0,5].delta_km_anual, buses_hora_dia, costo_km_usado, costo_bus_hora_usado",
+   "calculo": "(km_anio × convenciones.costo_km_cop + buses_hora_anio × convenciones.costo_bus_hora_cop) × 1e-06"
+  },
+  "planes.reasigna.ahorro_pct_costo": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].ahorro_operativo_pago_hora_Mcop; [ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].km_dia, buses_hora_dia",
+   "calculo": "ahorro_operacion_Mcop ÷ planes.hoy.costo_km_conductor_Mcop × 100"
+  },
+  "planes.reasigna.espera_min": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].espera_media_min"
+  },
+  "planes.reasigna.pax_sobre_capacidad_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].pax_sobre_capacidad_dia"
+  },
+  "planes.reasigna.pct_horas_fc_mayor_1": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].pct_horas_fc_mayor_1"
+  },
+  "planes.reasigna.pax_en_riesgo_dia.central": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].pax_perdidos_dia_central"
+  },
+  "planes.reasigna.pax_en_riesgo_dia.bajo": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].pax_perdidos_dia_bajo"
+  },
+  "planes.reasigna.pax_en_riesgo_dia.alto": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].pax_perdidos_dia_alto"
+  },
+  "planes.reasigna.pax_netos_dia_simetrico": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].pax_netos_dia_simetrico_beta070"
+  },
+  "planes.reasigna.pasajes_perdidos_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/costos_para_planificador.json",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].pax_perdidos_dia_central; tarifa_neta_2026.central",
+   "calculo": "pax_en_riesgo_dia.central × convenciones.dias_anio × convenciones.tarifa_neta_cop × 1e-06"
+  },
+  "planes.reasigna.saldo_conservador_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].neto_pago_hora_beta070_Mcop"
+  },
+  "planes.reasigna.saldo_simetrico_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].neto_simetrico_pago_hora_beta070_Mcop"
+  },
+  "planes.reasigna.pasajes_ganados_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/costos_para_planificador.json",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].pax_netos_dia_simetrico_beta070; [corrida=D5 costos nuevos, pago por hora, e=0,5].pax_perdidos_dia_central; tarifa_neta_2026.central",
+   "calculo": "(pax_netos_dia_simetrico + pax_en_riesgo_dia.central) × convenciones.dias_anio × convenciones.tarifa_neta_cop × 1e-06 = saldo_simetrico − saldo_conservador"
+  },
+  "planes.reasigna.simetrica.pax_ganados_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1)",
+   "clave": "real × β central × (x_corrida_1 − n_S0) ÷ n_S0 donde n_S0 > 0, parte positiva → suma ÷ días"
+  },
+  "planes.reasigna.simetrica.pax_perdidos_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1)",
+   "clave": "real × β central × (x_corrida_1 − n_S0) ÷ n_S0 donde n_S0 > 0, parte negativa → −suma ÷ días"
+  },
+  "planes.reasigna.simetrica.ganados_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "real × β central × (x_corrida_1 − n_S0) ÷ n_S0 donde n_S0 > 0, parte positiva → suma",
+   "calculo": "× convenciones.tarifa_neta_cop × 1e-06"
+  },
+  "planes.reasigna.simetrica.perdidos_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "real × β central × (x_corrida_1 − n_S0) ÷ n_S0 donde n_S0 > 0, parte negativa → −suma",
+   "calculo": "× convenciones.tarifa_neta_cop × 1e-06"
+  },
+  "planes.reasigna.dif_regla_perdidos_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].pax_perdidos_dia_central; real × β central × (x_corrida_1 − n_S0) ÷ n_S0 donde n_S0 > 0, parte negativa",
+   "calculo": "pasajes_perdidos_Mcop − simetrica.perdidos_Mcop"
+  },
+  "planes.reasigna.saldo_conservador_por_beta_Mcop.bajo": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv",
+   "clave": "[beta=bajo (convenciones.beta.bajo)&plan=b].neto_hora_Mcop"
+  },
+  "planes.reasigna.saldo_conservador_por_beta_Mcop.central": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv",
+   "clave": "[beta=central (convenciones.beta.central)&plan=b].neto_hora_Mcop"
+  },
+  "planes.reasigna.saldo_conservador_por_beta_Mcop.alto": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv",
+   "clave": "[beta=alto (convenciones.beta.alto)&plan=b].neto_hora_Mcop"
+  },
+  "planes.reasigna.beta_equilibrio": {
+   "archivo": "sin fuente",
+   "clave": "costos/ no calcula la β de equilibrio del plan que reasigna (la Tabla 3 del informe deja «—»)"
+  },
+  "planes.recorta.salidas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].salidas_dia"
+  },
+  "planes.recorta.salidas_anio": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "x_D5 → suma"
+  },
+  "planes.recorta.quitadas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "max(n_S0 − x_D5, 0) → suma",
+   "calculo": "quitadas_anio ÷ convenciones.dias_anio"
+  },
+  "planes.recorta.puestas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "max(x_D5 − n_S0, 0) → suma",
+   "calculo": "puestas_anio ÷ convenciones.dias_anio"
+  },
+  "planes.recorta.quitadas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "max(n_S0 − x_D5, 0) → suma"
+  },
+  "planes.recorta.puestas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "max(x_D5 − n_S0, 0) → suma"
+  },
+  "planes.recorta.menos_salidas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "quitadas − puestas",
+   "calculo": "(quitadas_anio − puestas_anio) ÷ convenciones.dias_anio"
+  },
+  "planes.recorta.menos_salidas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "quitadas − puestas",
+   "calculo": "quitadas_anio − puestas_anio"
+  },
+  "planes.recorta.var_salidas_pct": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].salidas_dia; [ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].salidas_dia",
+   "calculo": "(salidas_dia ÷ planes.hoy.salidas_dia − 1) × 100"
+  },
+  "planes.recorta.buses_hora_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].buses_hora_dia"
+  },
+  "planes.recorta.var_buses_hora_pct": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].buses_hora_dia; [ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].buses_hora_dia",
+   "calculo": "(buses_hora_dia ÷ planes.hoy.buses_hora_dia − 1) × 100"
+  },
+  "planes.recorta.var_km_pct": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].delta_km_anual; [ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].km_dia",
+   "calculo": "−delta_km_anio ÷ (planes.hoy.km_dia × convenciones.dias_anio) × 100"
+  },
+  "planes.recorta.delta_buses_hora_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].delta_buses_hora_anual"
+  },
+  "planes.recorta.delta_km_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].delta_km_anual"
+  },
+  "planes.recorta.ahorro_km_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].delta_km_anual × costo_km_usado × 1e-06"
+  },
+  "planes.recorta.ahorro_conductor_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].delta_buses_hora_anual × costo_bus_hora_usado × 1e-06"
+  },
+  "planes.recorta.ahorro_operacion_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].ahorro_operativo_pago_hora_Mcop"
+  },
+  "planes.recorta.buses_hora_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].buses_hora_dia",
+   "calculo": "buses_hora_dia × convenciones.dias_anio"
+  },
+  "planes.recorta.km_anio": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv; costos/resultados/d5_reoptimizado.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].km_dia; [corrida=D5 original (60.000/1.500/3.000, e=0,5)].delta_km_anual",
+   "calculo": "planes.hoy.km_anio − delta_km_anio"
+  },
+  "planes.recorta.costo_km_conductor_Mcop": {
+   "archivo": "experimentos/D5_optimizacion_milp/escenarios.csv; costos/resultados/d5_reoptimizado.csv",
+   "clave": "[ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].km_dia; [corrida=D5 original (60.000/1.500/3.000, e=0,5)].delta_km_anual, buses_hora_dia, costo_km_usado, costo_bus_hora_usado",
+   "calculo": "(km_anio × convenciones.costo_km_cop + buses_hora_anio × convenciones.costo_bus_hora_cop) × 1e-06"
+  },
+  "planes.recorta.ahorro_pct_costo": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; experimentos/D5_optimizacion_milp/escenarios.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].ahorro_operativo_pago_hora_Mcop; [ruta=Todas&tipo_dia=Todos&escenario=S0 oferta real].km_dia, buses_hora_dia",
+   "calculo": "ahorro_operacion_Mcop ÷ planes.hoy.costo_km_conductor_Mcop × 100"
+  },
+  "planes.recorta.espera_min": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].espera_media_min"
+  },
+  "planes.recorta.pax_sobre_capacidad_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].pax_sobre_capacidad_dia"
+  },
+  "planes.recorta.pct_horas_fc_mayor_1": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].pct_horas_fc_mayor_1"
+  },
+  "planes.recorta.pax_en_riesgo_dia.central": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].pax_perdidos_dia_central"
+  },
+  "planes.recorta.pax_en_riesgo_dia.bajo": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].pax_perdidos_dia_bajo"
+  },
+  "planes.recorta.pax_en_riesgo_dia.alto": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].pax_perdidos_dia_alto"
+  },
+  "planes.recorta.pax_netos_dia_simetrico": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].pax_netos_dia_simetrico_beta070"
+  },
+  "planes.recorta.pasajes_perdidos_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/costos_para_planificador.json",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].pax_perdidos_dia_central; tarifa_neta_2026.central",
+   "calculo": "pax_en_riesgo_dia.central × convenciones.dias_anio × convenciones.tarifa_neta_cop × 1e-06"
+  },
+  "planes.recorta.saldo_conservador_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].neto_pago_hora_beta070_Mcop"
+  },
+  "planes.recorta.saldo_simetrico_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].neto_simetrico_pago_hora_beta070_Mcop"
+  },
+  "planes.recorta.pasajes_ganados_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/costos_para_planificador.json",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].pax_netos_dia_simetrico_beta070; [corrida=D5 original (60.000/1.500/3.000, e=0,5)].pax_perdidos_dia_central; tarifa_neta_2026.central",
+   "calculo": "(pax_netos_dia_simetrico + pax_en_riesgo_dia.central) × convenciones.dias_anio × convenciones.tarifa_neta_cop × 1e-06 = saldo_simetrico − saldo_conservador"
+  },
+  "planes.recorta.simetrica.pax_ganados_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "real × β central × (x_D5 − n_S0) ÷ n_S0 donde n_S0 > 0, parte positiva → suma ÷ días"
+  },
+  "planes.recorta.simetrica.pax_perdidos_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "real × β central × (x_D5 − n_S0) ÷ n_S0 donde n_S0 > 0, parte negativa → −suma ÷ días"
+  },
+  "planes.recorta.simetrica.ganados_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "real × β central × (x_D5 − n_S0) ÷ n_S0 donde n_S0 > 0, parte positiva → suma",
+   "calculo": "× convenciones.tarifa_neta_cop × 1e-06"
+  },
+  "planes.recorta.simetrica.perdidos_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "real × β central × (x_D5 − n_S0) ÷ n_S0 donde n_S0 > 0, parte negativa → −suma",
+   "calculo": "× convenciones.tarifa_neta_cop × 1e-06"
+  },
+  "planes.recorta.dif_regla_perdidos_Mcop": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].pax_perdidos_dia_central; real × β central × (x_D5 − n_S0) ÷ n_S0 donde n_S0 > 0, parte negativa",
+   "calculo": "pasajes_perdidos_Mcop − simetrica.perdidos_Mcop"
+  },
+  "planes.recorta.saldo_conservador_por_beta_Mcop.bajo": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv",
+   "clave": "[beta=bajo (convenciones.beta.bajo)&plan=a].neto_hora_Mcop"
+  },
+  "planes.recorta.saldo_conservador_por_beta_Mcop.central": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv",
+   "clave": "[beta=central (convenciones.beta.central)&plan=a].neto_hora_Mcop"
+  },
+  "planes.recorta.saldo_conservador_por_beta_Mcop.alto": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv",
+   "clave": "[beta=alto (convenciones.beta.alto)&plan=a].neto_hora_Mcop"
+  },
+  "planes.recorta.beta_equilibrio": {
+   "archivo": "costos/resultados/beta_equilibrio.csv",
+   "clave": "[clave=D5][\"pago por hora\"]"
+  },
+  "por_ruta.SILENCIO.hoy.salidas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[ruta=SILENCIO]*.n_S0 → suma"
+  },
+  "por_ruta.SILENCIO.hoy.salidas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[ruta=SILENCIO]*.n_S0 → suma",
+   "calculo": "salidas_anio ÷ convenciones.dias_anio"
+  },
+  "por_ruta.SILENCIO.reasigna.salidas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[ruta=SILENCIO]*.x_corrida_1 → suma"
+  },
+  "por_ruta.SILENCIO.reasigna.salidas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[ruta=SILENCIO]*.x_corrida_1 → suma",
+   "calculo": "salidas_anio ÷ convenciones.dias_anio"
+  },
+  "por_ruta.SILENCIO.recorta.salidas_anio": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "[ruta=SILENCIO]*.x_D5 → suma"
+  },
+  "por_ruta.SILENCIO.recorta.salidas_dia": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "[ruta=SILENCIO]*.x_D5 → suma",
+   "calculo": "salidas_anio ÷ convenciones.dias_anio"
+  },
+  "por_ruta.CRA 54.hoy.salidas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[ruta=CRA 54]*.n_S0 → suma"
+  },
+  "por_ruta.CRA 54.hoy.salidas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[ruta=CRA 54]*.n_S0 → suma",
+   "calculo": "salidas_anio ÷ convenciones.dias_anio"
+  },
+  "por_ruta.CRA 54.reasigna.salidas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[ruta=CRA 54]*.x_corrida_1 → suma"
+  },
+  "por_ruta.CRA 54.reasigna.salidas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[ruta=CRA 54]*.x_corrida_1 → suma",
+   "calculo": "salidas_anio ÷ convenciones.dias_anio"
+  },
+  "por_ruta.CRA 54.recorta.salidas_anio": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "[ruta=CRA 54]*.x_D5 → suma"
+  },
+  "por_ruta.CRA 54.recorta.salidas_dia": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "[ruta=CRA 54]*.x_D5 → suma",
+   "calculo": "salidas_anio ÷ convenciones.dias_anio"
+  },
+  "por_ruta.CL 72.hoy.salidas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[ruta=CL 72]*.n_S0 → suma"
+  },
+  "por_ruta.CL 72.hoy.salidas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[ruta=CL 72]*.n_S0 → suma",
+   "calculo": "salidas_anio ÷ convenciones.dias_anio"
+  },
+  "por_ruta.CL 72.reasigna.salidas_anio": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[ruta=CL 72]*.x_corrida_1 → suma"
+  },
+  "por_ruta.CL 72.reasigna.salidas_dia": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[ruta=CL 72]*.x_corrida_1 → suma",
+   "calculo": "salidas_anio ÷ convenciones.dias_anio"
+  },
+  "por_ruta.CL 72.recorta.salidas_anio": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "[ruta=CL 72]*.x_D5 → suma"
+  },
+  "por_ruta.CL 72.recorta.salidas_dia": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "[ruta=CL 72]*.x_D5 → suma",
+   "calculo": "salidas_anio ÷ convenciones.dias_anio"
+  },
+  "por_hora.horas": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "hora → valores distintos"
+  },
+  "por_hora.tipos_dia.Laboral.dias": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Laboral]*.dia → n distintos"
+  },
+  "por_hora.tipos_dia.Laboral.hoy": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Laboral]*.n_S0 → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.salidas_dia.hoy": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Laboral]*.n_S0 → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Laboral]*.x_corrida_1 → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.salidas_dia.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Laboral]*.x_corrida_1 → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.recorta": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "[tipo_dia=Laboral]*.x_D5 → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.salidas_dia.recorta": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "[tipo_dia=Laboral]*.x_D5 → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.quitadas.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "[tipo_dia=Laboral]*: max(n_S0 − x_corrida_1, 0) → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.puestas.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "[tipo_dia=Laboral]*: max(x_corrida_1 − n_S0, 0) → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.quitadas_dia.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "[tipo_dia=Laboral]*: max(n_S0 − x_corrida_1, 0) → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.puestas_dia.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "[tipo_dia=Laboral]*: max(x_corrida_1 − n_S0, 0) → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.quitadas.recorta": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "[tipo_dia=Laboral]*: max(n_S0 − x_D5, 0) → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.puestas.recorta": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "[tipo_dia=Laboral]*: max(x_D5 − n_S0, 0) → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.quitadas_dia.recorta": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "[tipo_dia=Laboral]*: max(n_S0 − x_D5, 0) → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Laboral.puestas_dia.recorta": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "[tipo_dia=Laboral]*: max(x_D5 − n_S0, 0) → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.dias": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Sábado]*.dia → n distintos"
+  },
+  "por_hora.tipos_dia.Sábado.hoy": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Sábado]*.n_S0 → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.salidas_dia.hoy": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Sábado]*.n_S0 → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Sábado]*.x_corrida_1 → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.salidas_dia.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Sábado]*.x_corrida_1 → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.recorta": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "[tipo_dia=Sábado]*.x_D5 → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.salidas_dia.recorta": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "[tipo_dia=Sábado]*.x_D5 → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.quitadas.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "[tipo_dia=Sábado]*: max(n_S0 − x_corrida_1, 0) → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.puestas.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "[tipo_dia=Sábado]*: max(x_corrida_1 − n_S0, 0) → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.quitadas_dia.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "[tipo_dia=Sábado]*: max(n_S0 − x_corrida_1, 0) → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.puestas_dia.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "[tipo_dia=Sábado]*: max(x_corrida_1 − n_S0, 0) → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.quitadas.recorta": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "[tipo_dia=Sábado]*: max(n_S0 − x_D5, 0) → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.puestas.recorta": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "[tipo_dia=Sábado]*: max(x_D5 − n_S0, 0) → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.quitadas_dia.recorta": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "[tipo_dia=Sábado]*: max(n_S0 − x_D5, 0) → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Sábado.puestas_dia.recorta": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "[tipo_dia=Sábado]*: max(x_D5 − n_S0, 0) → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.dias": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Domingo/festivo]*.dia → n distintos"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.hoy": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Domingo/festivo]*.n_S0 → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.salidas_dia.hoy": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Domingo/festivo]*.n_S0 → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Domingo/festivo]*.x_corrida_1 → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.salidas_dia.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "[tipo_dia=Domingo/festivo]*.x_corrida_1 → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.recorta": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "[tipo_dia=Domingo/festivo]*.x_D5 → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.salidas_dia.recorta": {
+   "archivo": "experimentos/D5_optimizacion_milp/decisiones_2025.parquet",
+   "clave": "[tipo_dia=Domingo/festivo]*.x_D5 → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.quitadas.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "[tipo_dia=Domingo/festivo]*: max(n_S0 − x_corrida_1, 0) → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.puestas.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "[tipo_dia=Domingo/festivo]*: max(x_corrida_1 − n_S0, 0) → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.quitadas_dia.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "[tipo_dia=Domingo/festivo]*: max(n_S0 − x_corrida_1, 0) → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.puestas_dia.reasigna": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0)",
+   "clave": "[tipo_dia=Domingo/festivo]*: max(x_corrida_1 − n_S0, 0) → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.quitadas.recorta": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "[tipo_dia=Domingo/festivo]*: max(n_S0 − x_D5, 0) → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.puestas.recorta": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "[tipo_dia=Domingo/festivo]*: max(x_D5 − n_S0, 0) → suma por hora",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.quitadas_dia.recorta": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "[tipo_dia=Domingo/festivo]*: max(n_S0 − x_D5, 0) → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "por_hora.tipos_dia.Domingo/festivo.puestas_dia.recorta": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet (n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5)",
+   "clave": "[tipo_dia=Domingo/festivo]*: max(x_D5 − n_S0, 0) → suma",
+   "calculo": "÷ por_hora.tipos_dia.<tipo>.dias"
+  },
+  "contexto.costo_operacion_anual_Mcop": {
+   "archivo": "costos/resultados/linea_base_2025.csv",
+   "clave": "[ruta=SILENCIO|CRA 54|CL 72]*.costo_total → suma × 1e-06"
+  },
+  "contexto.costos_fijos_anual_Mcop": {
+   "archivo": "costos/resultados/linea_base_2025.csv",
+   "clave": "[ruta=SILENCIO|CRA 54|CL 72]*.fijos → suma × 1e-06"
+  },
+  "contexto.km_anio": {
+   "archivo": "costos/resultados/linea_base_2025.csv",
+   "clave": "[ruta=SILENCIO|CRA 54|CL 72]*.km_anual → suma"
+  },
+  "contexto.buses_hora_anio": {
+   "archivo": "costos/resultados/linea_base_2025.csv",
+   "clave": "[ruta=SILENCIO|CRA 54|CL 72]*.buses_hora_anual → suma"
+  },
+  "contexto.pax_dia_2025": {
+   "archivo": "experimentos/D5_optimizacion_milp/resultados.json",
+   "clave": "complemento.pasajeros_dia_2025"
+  },
+  "contexto.pax_anio_2025": {
+   "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
+   "clave": "real → suma"
+  },
+  "convenciones.supuestos_iniciales.costo_bus_hora_cop": {
+   "archivo": "experimentos/D5_optimizacion_milp/resultados.json",
+   "clave": "parametros.COSTO_BUS_HORA"
+  },
+  "convenciones.supuestos_iniciales.costo_km_cop": {
+   "archivo": "experimentos/D5_optimizacion_milp/resultados.json",
+   "clave": "parametros.COSTO_KM"
+  },
+  "convenciones.supuestos_iniciales.tarifa_cop": {
+   "archivo": "experimentos/D5_optimizacion_milp/resultados.json",
+   "clave": "parametros.TARIFA"
+  },
+  "palancas.domingos_festivos.saldo_conservador_Mcop": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Domingo/festivo]*.neto_hora → suma × 1e-06"
+  },
+  "palancas.domingos_festivos.saldo_por_dia_Mcop": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Domingo/festivo]*.neto_hora → media × 1e-06"
+  },
+  "palancas.domingos_festivos.dias": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Domingo/festivo]*.fecha → n"
+  },
+  "palancas.domingos_festivos.pax_en_riesgo_dia": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Domingo/festivo]*.pasajeros_en_riesgo → media"
+  },
+  "palancas.domingos_festivos.plan_recorta_por_tipo_dia.Laboral.dias": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Laboral]*.fecha → n"
+  },
+  "palancas.domingos_festivos.plan_recorta_por_tipo_dia.Laboral.saldo_conservador_Mcop": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Laboral]*.neto_hora → suma × 1e-06"
+  },
+  "palancas.domingos_festivos.plan_recorta_por_tipo_dia.Laboral.pax_en_riesgo_dia": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Laboral]*.pasajeros_en_riesgo → media"
+  },
+  "palancas.domingos_festivos.plan_recorta_por_tipo_dia.Sábado.dias": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Sábado]*.fecha → n"
+  },
+  "palancas.domingos_festivos.plan_recorta_por_tipo_dia.Sábado.saldo_conservador_Mcop": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Sábado]*.neto_hora → suma × 1e-06"
+  },
+  "palancas.domingos_festivos.plan_recorta_por_tipo_dia.Sábado.pax_en_riesgo_dia": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Sábado]*.pasajeros_en_riesgo → media"
+  },
+  "palancas.domingos_festivos.plan_recorta_por_tipo_dia.Domingo/festivo.dias": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Domingo/festivo]*.fecha → n"
+  },
+  "palancas.domingos_festivos.plan_recorta_por_tipo_dia.Domingo/festivo.saldo_conservador_Mcop": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Domingo/festivo]*.neto_hora → suma × 1e-06"
+  },
+  "palancas.domingos_festivos.plan_recorta_por_tipo_dia.Domingo/festivo.pax_en_riesgo_dia": {
+   "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
+   "clave": "[ruta=Total&plan=a&tipo_dia=Domingo/festivo]*.pasajeros_en_riesgo → media"
+  },
+  "palancas.giro_corto_35.escenario": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].escenario"
+  },
+  "palancas.giro_corto_35.delta_km_anio": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].delta_km_anual"
+  },
+  "palancas.giro_corto_35.delta_buses_hora_anio": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].delta_buses_hora_anual"
+  },
+  "palancas.giro_corto_35.ahorro_operacion_Mcop": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].ahorro_por_km + ahorro_conductor_hora → × 1e-06"
+  },
+  "palancas.giro_corto_35.pasajes_perdidos_Mcop": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].ingreso_perdido × 1e-06"
+  },
+  "palancas.giro_corto_35.saldo_conservador_Mcop": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].neto_pago_por_hora × 1e-06"
+  },
+  "palancas.giro_corto_35.saldo_rango_Mcop.pesimista": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].neto_pago_por_hora_bajo × 1e-06"
+  },
+  "palancas.giro_corto_35.saldo_rango_Mcop.optimista": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].neto_pago_por_hora_alto × 1e-06"
+  },
+  "palancas.giro_corto_35.pax_en_riesgo_dia.central": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].pax_perdidos_dia"
+  },
+  "palancas.giro_corto_35.pax_en_riesgo_dia.bajo": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].pax_perdidos_dia_alto (β baja: caso optimista)"
+  },
+  "palancas.giro_corto_35.pax_en_riesgo_dia.alto": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].pax_perdidos_dia_bajo (β alta: caso pesimista)"
+  },
+  "palancas.giro_corto_35.espera_hoy_min": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].espera_min_S0"
+  },
+  "palancas.giro_corto_35.espera_despues_min": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].espera_min_esc"
+  },
+  "palancas.giro_corto_35.valor_social_espera_Mcop": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=GIRO35].valor_social_espera × 1e-06"
+  },
+  "palancas.giro_corto_35.beta_equilibrio": {
+   "archivo": "costos/resultados/beta_equilibrio.csv",
+   "clave": "[clave=GIRO35][\"pago por hora\"] (mayor que el rango de β: paga con cualquiera)"
+  },
+  "palancas.giro_corto_35.bajadas_forzadas_dia": {
+   "archivo": "experimentos/D6_simulador/resultados_escenarios.json",
+   "clave": "resumen[ruta=CRA 54&grupo=principal&politica=S0+G].bajadas_forzadas"
+  },
+  "palancas.regularizar_cl72.escenario": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=REG_CL72].escenario"
+  },
+  "palancas.regularizar_cl72.espera_hoy_min": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=REG_CL72].espera_min_S0"
+  },
+  "palancas.regularizar_cl72.espera_despues_min": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=REG_CL72].espera_min_esc"
+  },
+  "palancas.regularizar_cl72.delta_espera_min": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=REG_CL72].delta_espera_min"
+  },
+  "palancas.regularizar_cl72.delta_km_anio": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=REG_CL72].delta_km_anual"
+  },
+  "palancas.regularizar_cl72.delta_buses_hora_anio": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=REG_CL72].delta_buses_hora_anual"
+  },
+  "palancas.regularizar_cl72.ahorro_operacion_Mcop": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=REG_CL72].ahorro_por_km + ahorro_conductor_hora → × 1e-06"
+  },
+  "palancas.regularizar_cl72.pasajes_perdidos_Mcop": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=REG_CL72].ingreso_perdido × 1e-06"
+  },
+  "palancas.regularizar_cl72.saldo_conservador_Mcop": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=REG_CL72].neto_pago_por_hora × 1e-06"
+  },
+  "palancas.regularizar_cl72.pax_en_riesgo_dia": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=REG_CL72].pax_perdidos_dia"
+  },
+  "palancas.regularizar_cl72.valor_social_espera_Mcop": {
+   "archivo": "costos/resultados/ahorros_por_escenario.csv",
+   "clave": "[clave=REG_CL72].valor_social_espera × 1e-06"
+  }
+ }
+}

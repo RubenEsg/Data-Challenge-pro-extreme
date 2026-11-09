@@ -1,0 +1,283 @@
+{
+ "modelo": "hibrido_V4_chronos2cov",
+ "descripcion": "LightGBM V4 + Chronos-2 zero-shot con calendario como 4 variables",
+ "origen": "2025-12-31",
+ "antelacion": "auto",
+ "repo_chronos": "amazon/chronos-2",
+ "dispositivo": "cpu",
+ "params": {
+  "n_estimators": 600,
+  "learning_rate": 0.03,
+  "num_leaves": 31,
+  "min_child_samples": 40,
+  "subsample": 0.8,
+  "subsample_freq": 1,
+  "colsample_bytree": 0.8,
+  "reg_lambda": 1.0,
+  "random_state": 42,
+  "n_jobs": 2,
+  "verbose": -1
+ },
+ "variables_extra": [
+  "fm_c2",
+  "fm_c2_q10",
+  "fm_c2_q90",
+  "fm_c2_ratio"
+ ],
+ "modelos": {
+  "H7": {
+   "archivo": "modelos_hibrido/modelo_hibrido_H7.txt",
+   "filas": 55436,
+   "desde": "2023-01-08",
+   "hasta": "2025-12-31",
+   "fuente_chronos_entrenamiento": {
+    "E12": 54468
+   },
+   "ganancia_chronos_pct": 92.0
+  },
+  "H14": {
+   "archivo": "modelos_hibrido/modelo_hibrido_H14.txt",
+   "filas": 55079,
+   "desde": "2023-01-15",
+   "hasta": "2025-12-31",
+   "fuente_chronos_entrenamiento": {
+    "cache_hibrido": 54111
+   },
+   "ganancia_chronos_pct": 91.8
+  },
+  "H21": {
+   "archivo": "modelos_hibrido/modelo_hibrido_H21.txt",
+   "filas": 54722,
+   "desde": "2023-01-22",
+   "hasta": "2025-12-31",
+   "fuente_chronos_entrenamiento": {
+    "cache_hibrido": 53754
+   },
+   "ganancia_chronos_pct": 91.4
+  },
+  "H28": {
+   "archivo": "modelos_hibrido/modelo_hibrido_H28.txt",
+   "filas": 54365,
+   "desde": "2023-01-29",
+   "hasta": "2025-12-31",
+   "fuente_chronos_entrenamiento": {
+    "cache_hibrido": 53397
+   },
+   "ganancia_chronos_pct": 91.0
+  }
+ },
+ "resumen_semanal": [
+  {
+   "ruta": "CL 72",
+   "semana": 1,
+   "desde": "2026-01-01",
+   "hasta": "2026-01-07",
+   "horizonte": 7,
+   "pronostico": 28714.26,
+   "pronostico_V4_sombra": 29784.39,
+   "chronos2_mediana": 34185.6,
+   "real_2025_alineado": 32606.0,
+   "pronostico_E11": 30066.28,
+   "E8_ensamble_diario": 30711.87,
+   "variacion_vs_2025_pct": -11.94,
+   "dif_vs_E11_pct": -4.5,
+   "dif_vs_V4_sombra_pct": -3.59
+  },
+  {
+   "ruta": "CL 72",
+   "semana": 2,
+   "desde": "2026-01-08",
+   "hasta": "2026-01-14",
+   "horizonte": 14,
+   "pronostico": 33883.85,
+   "pronostico_V4_sombra": 34913.76,
+   "chronos2_mediana": 35899.17,
+   "real_2025_alineado": 39600.0,
+   "pronostico_E11": 34804.71,
+   "E8_ensamble_diario": 32854.13,
+   "variacion_vs_2025_pct": -14.43,
+   "dif_vs_E11_pct": -2.65,
+   "dif_vs_V4_sombra_pct": -2.95
+  },
+  {
+   "ruta": "CL 72",
+   "semana": 3,
+   "desde": "2026-01-15",
+   "hasta": "2026-01-21",
+   "horizonte": 21,
+   "pronostico": 38279.45,
+   "pronostico_V4_sombra": 39338.92,
+   "chronos2_mediana": 41367.44,
+   "real_2025_alineado": 43741.0,
+   "pronostico_E11": 39332.93,
+   "E8_ensamble_diario": 41069.75,
+   "variacion_vs_2025_pct": -12.49,
+   "dif_vs_E11_pct": -2.68,
+   "dif_vs_V4_sombra_pct": -2.69
+  },
+  {
+   "ruta": "CL 72",
+   "semana": 4,
+   "desde": "2026-01-22",
+   "hasta": "2026-01-28",
+   "horizonte": 28,
+   "pronostico": 41047.4,
+   "pronostico_V4_sombra": 41823.82,
+   "chronos2_mediana": 43895.67,
+   "real_2025_alineado": 44776.0,
+   "pronostico_E11": 41742.12,
+   "E8_ensamble_diario": 42016.02,
+   "variacion_vs_2025_pct": -8.33,
+   "dif_vs_E11_pct": -1.66,
+   "dif_vs_V4_sombra_pct": -1.86
+  },
+  {
+   "ruta": "CRA 54",
+   "semana": 1,
+   "desde": "2026-01-01",
+   "hasta": "2026-01-07",
+   "horizonte": 7,
+   "pronostico": 83781.49,
+   "pronostico_V4_sombra": 87270.85,
+   "chronos2_mediana": 99536.49,
+   "real_2025_alineado": 100240.0,
+   "pronostico_E11": 87434.89,
+   "E8_ensamble_diario": 93975.19,
+   "variacion_vs_2025_pct": -16.42,
+   "dif_vs_E11_pct": -4.18,
+   "dif_vs_V4_sombra_pct": -4.0
+  },
+  {
+   "ruta": "CRA 54",
+   "semana": 2,
+   "desde": "2026-01-08",
+   "hasta": "2026-01-14",
+   "horizonte": 14,
+   "pronostico": 97894.27,
+   "pronostico_V4_sombra": 103750.79,
+   "chronos2_mediana": 105472.69,
+   "real_2025_alineado": 124960.0,
+   "pronostico_E11": 103422.66,
+   "E8_ensamble_diario": 98741.49,
+   "variacion_vs_2025_pct": -21.66,
+   "dif_vs_E11_pct": -5.35,
+   "dif_vs_V4_sombra_pct": -5.64
+  },
+  {
+   "ruta": "CRA 54",
+   "semana": 3,
+   "desde": "2026-01-15",
+   "hasta": "2026-01-21",
+   "horizonte": 21,
+   "pronostico": 114958.41,
+   "pronostico_V4_sombra": 117194.42,
+   "chronos2_mediana": 122969.32,
+   "real_2025_alineado": 132321.0,
+   "pronostico_E11": 117322.07,
+   "E8_ensamble_diario": 125361.72,
+   "variacion_vs_2025_pct": -13.12,
+   "dif_vs_E11_pct": -2.01,
+   "dif_vs_V4_sombra_pct": -1.91
+  },
+  {
+   "ruta": "CRA 54",
+   "semana": 4,
+   "desde": "2026-01-22",
+   "hasta": "2026-01-28",
+   "horizonte": 28,
+   "pronostico": 124468.67,
+   "pronostico_V4_sombra": 128129.41,
+   "chronos2_mediana": 131601.94,
+   "real_2025_alineado": 141984.0,
+   "pronostico_E11": 127992.84,
+   "E8_ensamble_diario": 128440.45,
+   "variacion_vs_2025_pct": -12.34,
+   "dif_vs_E11_pct": -2.75,
+   "dif_vs_V4_sombra_pct": -2.86
+  },
+  {
+   "ruta": "SILENCIO",
+   "semana": 1,
+   "desde": "2026-01-01",
+   "hasta": "2026-01-07",
+   "horizonte": 7,
+   "pronostico": 43369.7,
+   "pronostico_V4_sombra": 44437.58,
+   "chronos2_mediana": 50844.18,
+   "real_2025_alineado": 48426.0,
+   "pronostico_E11": 44554.0,
+   "E8_ensamble_diario": 47397.05,
+   "variacion_vs_2025_pct": -10.44,
+   "dif_vs_E11_pct": -2.66,
+   "dif_vs_V4_sombra_pct": -2.4
+  },
+  {
+   "ruta": "SILENCIO",
+   "semana": 2,
+   "desde": "2026-01-08",
+   "hasta": "2026-01-14",
+   "horizonte": 14,
+   "pronostico": 50201.2,
+   "pronostico_V4_sombra": 52430.87,
+   "chronos2_mediana": 53456.58,
+   "real_2025_alineado": 62140.0,
+   "pronostico_E11": 52317.04,
+   "E8_ensamble_diario": 49859.75,
+   "variacion_vs_2025_pct": -19.21,
+   "dif_vs_E11_pct": -4.04,
+   "dif_vs_V4_sombra_pct": -4.25
+  },
+  {
+   "ruta": "SILENCIO",
+   "semana": 3,
+   "desde": "2026-01-15",
+   "hasta": "2026-01-21",
+   "horizonte": 21,
+   "pronostico": 57301.27,
+   "pronostico_V4_sombra": 57136.33,
+   "chronos2_mediana": 61431.99,
+   "real_2025_alineado": 62261.0,
+   "pronostico_E11": 57185.08,
+   "E8_ensamble_diario": 61598.04,
+   "variacion_vs_2025_pct": -7.97,
+   "dif_vs_E11_pct": 0.2,
+   "dif_vs_V4_sombra_pct": 0.29
+  },
+  {
+   "ruta": "SILENCIO",
+   "semana": 4,
+   "desde": "2026-01-22",
+   "hasta": "2026-01-28",
+   "horizonte": 28,
+   "pronostico": 62189.79,
+   "pronostico_V4_sombra": 61741.76,
+   "chronos2_mediana": 65971.39,
+   "real_2025_alineado": 67289.0,
+   "pronostico_E11": 61614.21,
+   "E8_ensamble_diario": 62830.46,
+   "variacion_vs_2025_pct": -7.58,
+   "dif_vs_E11_pct": 0.93,
+   "dif_vs_V4_sombra_pct": 0.73
+  }
+ ],
+ "total_por_ruta": {
+  "pasajeros_pred": {
+   "CL 72": 141925.0,
+   "CRA 54": 421103.0,
+   "SILENCIO": 213062.0
+  },
+  "pasajeros_pred_V4": {
+   "CL 72": 145861.0,
+   "CRA 54": 436345.0,
+   "SILENCIO": 215747.0
+  }
+ },
+ "filas": 1428,
+ "tiempos_s": {
+  "panel_s": 2.4,
+  "carga_chronos2_s": 0.4,
+  "chronos2_origen_s": 46.3,
+  "lightgbm_s": 45.2,
+  "total": 107.4
+ }
+}

@@ -1,0 +1,250 @@
+﻿prueba;hoja;celda;concepto;excel;python;dif_relativa
+central;Parámetros;D52;hora_conductor_2025;17251.948307692306;17251.948307692306;0,0
+central;Parámetros;D54;hora_conductor_2026;22758.813356703293;22758.813356703293;0,0
+central;Parámetros;D53;bus_hora_conductor_2025;20012.260036923075;20012.260036923075;0,0
+central;Parámetros;D55;bus_hora_conductor_2026;26400.22349377582;26400.22349377582;0,0
+central;Parámetros;D57;fijo_bus_2025;65222448.86745982;65222448.86745982;0,0
+central;Línea base;B33;Combustible · SILENCIO;2683629148.4634557;2683629148.463456;1,7768370062463504e-16
+central;Línea base;C33;Combustible · CRA 54;4501844332.11347;4501844332.11347;0,0
+central;Línea base;D33;Combustible · CL 72;1602346405.238765;1602346405.238765;0,0
+central;Línea base;E33;Combustible · Total;8787819885.815691;8787819885.815691;0,0
+central;Línea base;B34;Mantenimiento preventivo y correctivo · SILENCIO;2238685190.0;2238685190.0;0,0
+central;Línea base;C34;Mantenimiento preventivo y correctivo · CRA 54;3714431350.0;3714431350.0;0,0
+central;Línea base;D34;Mantenimiento preventivo y correctivo · CL 72;1352355340.0;1352355340.0;0,0
+central;Línea base;E34;Mantenimiento preventivo y correctivo · Total;7305471880.0;7305471880.0;0,0
+central;Línea base;B35;Llantas · SILENCIO;703586774.0;703586774.0;0,0
+central;Línea base;C35;Llantas · CRA 54;1167392710.0;1167392710.0;0,0
+central;Línea base;D35;Llantas · CL 72;425025964.0;425025964.0;0,0
+central;Línea base;E35;Llantas · Total;2296005448.0;2296005448.0;0,0
+central;Línea base;B36;Lubricantes y filtros · SILENCIO;383774604.0;383774604.0;0,0
+central;Línea base;C36;Lubricantes y filtros · CRA 54;636759660.0;636759660.0;0,0
+central;Línea base;D36;Lubricantes y filtros · CL 72;231832344.0;231832344.0;0,0
+central;Línea base;E36;Lubricantes y filtros · Total;1252366608.0;1252366608.0;0,0
+central;Línea base;B37;Conductor (valorado por hora) · SILENCIO;3987897193.500542;3987897193.500541;2,3914215189913735e-16
+central;Línea base;C37;Conductor (valorado por hora) · CRA 54;6822893612.971011;6822893612.971012;1,3977563926736574e-16
+central;Línea base;D37;Conductor (valorado por hora) · CL 72;2373743500.479943;2373743500.4799433;2,008798162508772e-16
+central;Línea base;E37;Conductor (valorado por hora) · Total;13184534306.951496;13184534306.951496;0,0
+central;Línea base;B39;Costo total · SILENCIO;13461367412.256092;13461367412.256092;0,0
+central;Línea base;C39;Costo total · CRA 54;22796362199.440308;22796362199.44031;1,6733798279967043e-16
+central;Línea base;D39;Costo total · CL 72;9559565228.3118;9559565228.3118;0,0
+central;Línea base;E39;Costo total · Total;45817294840.0082;45817294840.0082;0,0
+central;Línea base;B29;Galones de ACPM al año · SILENCIO;253531.33192852675;253531.3319285268;2,2958764295797875e-16
+central;Línea base;C29;Galones de ACPM al año · CRA 54;425304.1409649003;425304.1409649004;1,3686126070018958e-16
+central;Línea base;D29;Galones de ACPM al año · CL 72;151378.97073583043;151378.97073583043;0,0
+central;Línea base;E29;Galones de ACPM al año · Total;830214.4436292575;830214.4436292576;1,4022319500733898e-16
+central;Línea base;B30;CO2 emitido al año · SILENCIO;2322.347000465305;2322.3470004653054;1,9581369657305774e-16
+central;Línea base;C30;CO2 emitido al año · CRA 54;3895.7859312384867;3895.785931238487;1,1672801301530908e-16
+central;Línea base;D30;CO2 emitido al año · CL 72;1386.6313719402067;1386.6313719402067;0,0
+central;Línea base;E30;CO2 emitido al año · Total;7604.764303643999;7604.7643036439995;1,1959538329637944e-16
+central;Línea base;B28;Rendimiento de la ruta · SILENCIO;12.614305599520874;12.61430559952087;2,816416370105576e-16
+central;Línea base;C28;Rendimiento de la ruta · CRA 54;12.47655498477247;12.476554984772468;1,4237558697639526e-16
+central;Línea base;D28;Rendimiento de la ruta · CL 72;12.762249542384575;12.762249542384575;0,0
+central;Línea base;E28;Rendimiento de la ruta · Total;12.570714084878652;12.570714084878647;4,239274302333475e-16
+central;Línea base;B42;Costo por pasajero · SILENCIO;3561.200773187806;3561.200773187806;0,0
+central;Línea base;C42;Costo por pasajero · CRA 54;2999.8825120972206;2999.882512097221;1,5158838689604206e-16
+central;Línea base;D42;Costo por pasajero · CL 72;3852.6702630501236;3852.6702630501236;0,0
+central;Línea base;E42;Costo por pasajero · Total;3305.6314518457652;3305.6314518457652;0,0
+central;Línea base;B45;Ingreso por pasajes · SILENCIO;10727662704.0;10727662704.0;0,0
+central;Línea base;C45;Ingreso por pasajes · CRA 54;21566203230.0;21566203230.0;0,0
+central;Línea base;D45;Ingreso por pasajes · CL 72;7041881154.0;7041881154.0;0,0
+central;Línea base;E45;Ingreso por pasajes · Total;39335747088.0;39335747088.0;0,0
+central;Línea base;B49;Costo total con pago por producido · SILENCIO;11619002759.55555;11619002759.55555;0,0
+central;Línea base;C49;Costo total con pago por producido · CRA 54;20286709232.469296;20286709232.4693;1,8803923405770995e-16
+central;Línea base;D49;Costo total con pago por producido · CL 72;8594197958.631859;8594197958.631857;2,219344541507557e-16
+central;Línea base;E49;Costo total con pago por producido · Total;40499909950.65671;40499909950.65671;0,0
+central;Escenarios;H5;S1 · pax_perdidos_dia;3274.4126116547245;3274.412611654723;4,1663718488122152e-16
+central;Escenarios;L5;S1 · galones_ahorrados;50108.18762934911;50108.18762934913;4,35614893997191e-16
+central;Escenarios;M5;S1 · co2_t_evitado;458.99099868483785;458.990998684838;3,7153289949269155e-16
+central;Escenarios;R5;S1 · ahorro_por_km;1254.272742450982;1254.2727424509822;1,8127929257150224e-16
+central;Escenarios;S5;S1 · ahorro_conductor_hora;835.2415661557237;835.2415661557237;0,0
+central;Escenarios;T5;S1 · ingreso_perdido;3803.0010395541462;3803.001039554145;3,587277622252065e-16
+central;Escenarios;U5;S1 · neto_pago_por_hora;-1713.4867309474407;-1713.4867309474391;9,288754323895881e-16
+central;Escenarios;V5;S1 · neto_pago_por_producido;-1788.1280891923354;-1788.128089192334;7,629442548914918e-16
+central;Escenarios;W5;S1 · neto_simetrico_pago_por_hora;1722.0666834741583;1722.0666834741585;1,3203534893580331e-16
+central;Escenarios;AA5;S1 · valor_social_espera;-122.29271240596353;-122.29271240596353;0,0
+central;Escenarios;AB5;S1 · beta_equilibrio_pago_por_hora;0.36053119726870486;0.36053119726870486;0,0
+central;Escenarios;AC5;S1 · beta_equilibrio_pago_por_producido;0.26560296729729155;0.26560296729729155;0,0
+central;Sensibilidad;E5;S1 · neto_pago_por_hora_bajo;-3302.7753126692173;-3302.7753126692155;5,507457308913326e-16
+central;Sensibilidad;I5;S1 · neto_pago_por_hora_alto;-228.78564330367226;-228.7856433036709;5,962970547276044e-15
+central;Sensibilidad;J5;S1 · neto_pago_por_producido_bajo;-2959.5502949314273;-2959.5502949314255;6,146168242726226e-16
+central;Sensibilidad;L5;S1 · neto_pago_por_producido_alto;-748.2956017041026;-748.2956017041008;2,4308433717951225e-15
+central;Escenarios;H6;S5 · pax_perdidos_dia;3773.0676058918634;3773.0676058918634;0,0
+central;Escenarios;L6;S5 · galones_ahorrados;90621.51857946698;90621.51857946704;6,423161057759637e-16
+central;Escenarios;M6;S5 · co2_t_evitado;830.0931101879175;830.0931101879181;6,847836485227506e-16
+central;Escenarios;R6;S5 · ahorro_por_km;2268.3738129687595;2268.3738129687604;4,0094568918630593e-16
+central;Escenarios;S6;S5 · ahorro_conductor_hora;1704.919547169751;1704.919547169751;0,0
+central;Escenarios;T6;S5 · ingreso_perdido;4382.153909510987;4382.153909510987;0,0
+central;Escenarios;U6;S5 · neto_pago_por_hora;-408.8605493724772;-408.86054937247565;3,753779403753687e-15
+central;Escenarios;V6;S5 · neto_pago_por_producido;-1237.3493146400306;-1237.3493146400294;9,18793394690568e-16
+central;Escenarios;W6;S5 · neto_simetrico_pago_por_hora;2238.8689628489274;2238.8689628489287;6,0934430522607e-16
+central;Escenarios;AA6;S5 · valor_social_espera;-666.3310370863006;-666.3310370863006;0,0
+central;Escenarios;AB6;S5 · beta_equilibrio_pago_por_hora;0.6252626220899477;0.625262622089948;5,326832208109078e-16
+central;Escenarios;AC6;S5 · beta_equilibrio_pago_por_producido;0.42883179398427973;0.42883179398427973;0,0
+central;Sensibilidad;E6;S5 · neto_pago_por_hora_bajo;-2640.8331914318787;-2640.8331914318783;1,7219843811486514e-16
+central;Sensibilidad;I6;S5 · neto_pago_por_hora_alto;1861.361720625418;1861.3617206254191;6,107724063618175e-16
+central;Sensibilidad;J6;S5 · neto_pago_por_producido_bajo;-2802.7822939208136;-2802.7822939208127;3,2449709124594045e-16
+central;Sensibilidad;L6;S5 · neto_pago_por_producido_alto;255.61675817007972;255.61675817008066;3,669228957904502e-15
+central;Escenarios;H7;D5 · pax_perdidos_dia;4067.6147830756872;4067.614783075687;1,1179705432740398e-16
+central;Escenarios;L7;D5 · galones_ahorrados;83543.63904142035;83543.63904142039;5,225502047314018e-16
+central;Escenarios;M7;D5 · co2_t_evitado;765.2597336194104;765.2597336194108;4,456794186096153e-16
+central;Escenarios;R7;D5 · ahorro_por_km;2091.205334144678;2091.2053341446785;2,1745705381554978e-16
+central;Escenarios;S7;D5 · ahorro_conductor_hora;1603.9288362226218;1603.928836222622;1,4176045115487472e-16
+central;Escenarios;T7;D5 · ingreso_perdido;4724.249837507595;4724.249837507595;0,0
+central;Escenarios;U7;D5 · neto_pago_por_hora;-1029.115667140295;-1029.1156671402941;8,837633424629823e-16
+central;Escenarios;V7;D5 · neto_pago_por_producido;-1688.194535861398;-1688.1945358613978;1,3468452279240148e-16
+central;Escenarios;W7;D5 · neto_simetrico_pago_por_hora;1938.6037427336992;1938.6037427337005;7,03724037350522e-16
+central;Escenarios;AA7;D5 · valor_social_espera;-469.2463964390134;-469.2463964390134;0,0
+central;Escenarios;AB7;D5 · beta_equilibrio_pago_por_hora;0.5284634722733155;0.528463472273316;1,0504255098741812e-15
+central;Escenarios;AC7;D5 · beta_equilibrio_pago_por_producido;0.36098005641763875;0.3609800564176391;9,226739856292843e-16
+central;Sensibilidad;E7;D5 · neto_pago_por_hora_bajo;-3272.637836540117;-3272.6378365401165;1,3895437674436658e-16
+central;Sensibilidad;I7;D5 · neto_pago_por_hora_alto;1202.3515212085385;1202.3515212085395;7,56429950584462e-16
+central;Sensibilidad;J7;D5 · neto_pago_por_producido_bajo;-3273.5605215137766;-3273.560521513776;1,3891521109748037e-16
+central;Sensibilidad;L7;D5 · neto_pago_por_producido_alto;-210.20407472056286;-210.20407472056198;4,191512431496831e-15
+central;Escenarios;H8;D5_30k · pax_perdidos_dia;2877.399048290105;2877.399048290105;0,0
+central;Escenarios;L8;D5_30k · galones_ahorrados;23542.019809040456;23542.019809040466;4,635938848834047e-16
+central;Escenarios;M8;D5_30k · co2_t_evitado;215.64490145081058;215.64490145081066;3,95395985333144e-16
+central;Escenarios;R8;D5_30k · ahorro_por_km;589.2872032638726;589.2872032638726;0,0
+central;Escenarios;S8;D5_30k · ahorro_conductor_hora;290.91212207947945;290.9121220794794;1,9539721636377175e-16
+central;Escenarios;T8;D5_30k · ingreso_perdido;3341.897576655577;3341.897576655577;0,0
+central;Escenarios;U8;D5_30k · neto_pago_por_hora;-2461.698251312225;-2461.6982513122243;1,84729119681528e-16
+central;Escenarios;V8;D5_30k · neto_pago_por_producido;-2084.230858060589;-2084.2308580605886;2,1818473185336775e-16
+central;Escenarios;W8;D5_30k · neto_simetrico_pago_por_hora;1527.7902166469366;1527.7902166469369;1,488251940389122e-16
+central;Escenarios;AA8;D5_30k · valor_social_espera;105.27718332567086;105.27718332567086;0,0
+central;Escenarios;AB8;D5_30k · beta_equilibrio_pago_por_hora;0.16735871038749528;0.16735871038749528;0,0
+central;Escenarios;AC8;D5_30k · beta_equilibrio_pago_por_producido;0.13933261013253506;0.13933261013253506;0,0
+central;Sensibilidad;E8;D5_30k · neto_pago_por_hora_bajo;-3613.805193789334;-3613.805193789334;0,0
+central;Sensibilidad;I8;D5_30k · neto_pago_por_hora_alto;-1498.4991761932044;-1498.4991761932044;0,0
+central;Sensibilidad;J8;D5_30k · neto_pago_por_producido_bajo;-2979.441576341095;-2979.4415763410943;1,5262838328413104e-16
+central;Sensibilidad;L8;D5_30k · neto_pago_por_producido_alto;-1354.0943098524644;-1354.0943098524642;1,6791568636604466e-16
+central;Escenarios;H9;D5_15 · pax_perdidos_dia;4727.5737825536535;4727.573782553653;1,9238085825953084e-16
+central;Escenarios;L9;D5_15 · galones_ahorrados;130385.01145862471;130385.01145862478;5,580363519385289e-16
+central;Escenarios;M9;D5_15 · co2_t_evitado;1194.3267049610024;1194.326704961003;5,71134366749313e-16
+central;Escenarios;R9;D5_15 · ahorro_por_km;3263.7054667873294;3263.7054667873304;2,786693563583729e-16
+central;Escenarios;S9;D5_15 · ahorro_conductor_hora;2616.7672871761547;2616.7672871761547;0,0
+central;Escenarios;T9;D5_15 · ingreso_perdido;5490.74601827129;5490.746018271288;3,312827432725706e-16
+central;Escenarios;U9;D5_15 · neto_pago_por_hora;389.72673569219387;389.7267356921959;5,250763911165938e-15
+central;Escenarios;V9;D5_15 · neto_pago_por_producido;-1128.8913478297031;-1128.8913478297009;2,014132501594233e-15
+central;Escenarios;W9;D5_15 · neto_simetrico_pago_por_hora;2530.2099574800545;2530.2099574800554;3,5945424176526958e-16
+central;Escenarios;AA9;D5_15 · valor_social_espera;-1137.8970774717102;-1137.8970774717102;0,0
+central;Escenarios;AB9;D5_15 · beta_equilibrio_pago_por_hora;0.7594171487066165;0.7594171487066173;1,0233586620491833e-15
+central;Escenarios;AC9;D5_15 · beta_equilibrio_pago_por_producido;0.4975027668573606;0.4975027668573612;1,2273754122033002e-15
+central;Sensibilidad;E9;D5_15 · neto_pago_por_hora_bajo;-2619.2858749272345;-2619.2858749272336;3,472300257405828e-16
+central;Sensibilidad;I9;D5_15 · neto_pago_por_hora_alto;3547.6918434428444;3547.691843442847;7,690871207886352e-16
+central;Sensibilidad;J9;D5_15 · neto_pago_por_producido_bajo;-3186.2691547210125;-3186.269154721011;4,2816284074370515e-16
+central;Sensibilidad;L9;D5_15 · neto_pago_por_producido_alto;885.5385616315807;885.5385616315832;2,824394711018928e-15
+central;Escenarios;H10;GIRO35 · pax_perdidos_dia;221.7033000285851;221.7033000285851;0,0
+central;Escenarios;L10;GIRO35 · galones_ahorrados;11032.37460247042;11032.374602470423;3,297548295973452e-16
+central;Escenarios;M10;GIRO35 · co2_t_evitado;101.05655135862905;101.05655135862908;2,8124559019970077e-16
+central;Escenarios;R10;GIRO35 · ahorro_por_km;275.01915645360725;275.0191564536073;2,066889433951008e-16
+central;Escenarios;S10;GIRO35 · ahorro_conductor_hora;230.21846254250022;230.21846254250022;0,0
+central;Escenarios;T10;GIRO35 · ingreso_perdido;257.4928637521996;257.4928637521996;0,0
+central;Escenarios;U10;GIRO35 · neto_pago_por_hora;247.7447552439079;247.74475524390803;5,736087006649738e-16
+central;Escenarios;V10;GIRO35 · neto_pago_por_producido;69.02486545184757;69.02486545184767;1,441161563376162e-15
+central;Escenarios;W10;GIRO35 · neto_simetrico_pago_por_hora;247.74475524390783;247.74475524390795;4,588869605319792e-16
+central;Escenarios;AA10;GIRO35 · valor_social_espera;-143.55334902863663;-143.55334902863663;0,0
+central;Escenarios;AB10;GIRO35 · beta_equilibrio_pago_por_hora;2.0250420004578493;2.0250420004578498;2,192987650377902e-16
+central;Escenarios;AC10;GIRO35 · beta_equilibrio_pago_por_producido;1.0387246353700121;1.0387246353700128;6,412997170687156e-16
+central;Sensibilidad;E10;GIRO35 · neto_pago_por_hora_bajo;52.499687353168724;52.49968735316879;1,2180805151889953e-15
+central;Sensibilidad;I10;GIRO35 · neto_pago_por_hora_alto;475.38768871667105;475.38768871667133;5,978638089499033e-16
+central;Sensibilidad;J10;GIRO35 · neto_pago_por_producido_bajo;-55.71289876667436;-55.71289876667431;8,927554050186796e-16
+central;Sensibilidad;L10;GIRO35 · neto_pago_por_producido_alto;205.1950302111369;205.19503021113704;6,925535526167293e-16
+central;Escenarios;H11;REG_CL72 · pax_perdidos_dia;0.0;0.0;0,0
+central;Escenarios;L11;REG_CL72 · galones_ahorrados;0.0;-0.0;0,0
+central;Escenarios;M11;REG_CL72 · co2_t_evitado;0.0;-0.0;0,0
+central;Escenarios;R11;REG_CL72 · ahorro_por_km;0.0;-0.0;0,0
+central;Escenarios;S11;REG_CL72 · ahorro_conductor_hora;2.768670126195064;2.768670126195064;0,0
+central;Escenarios;T11;REG_CL72 · ingreso_perdido;0.0;0.0;0,0
+central;Escenarios;U11;REG_CL72 · neto_pago_por_hora;2.768670126195064;2.768670126195064;0,0
+central;Escenarios;V11;REG_CL72 · neto_pago_por_producido;0.0;-0.0;0,0
+central;Escenarios;W11;REG_CL72 · neto_simetrico_pago_por_hora;2.768670126195064;2.768670126195064;0,0
+central;Escenarios;AA11;REG_CL72 · valor_social_espera;340.15092705771895;340.15092705771895;0,0
+central;Escenarios;AB11;REG_CL72 · beta_equilibrio_pago_por_hora;sin pérdida;sin pérdida;0,0
+central;Escenarios;AC11;REG_CL72 · beta_equilibrio_pago_por_producido;sin pérdida;sin pérdida;0,0
+central;Sensibilidad;E11;REG_CL72 · neto_pago_por_hora_bajo;2.06931652638811;2.06931652638811;0,0
+central;Sensibilidad;I11;REG_CL72 · neto_pago_por_hora_alto;3.760084043201108;3.760084043201108;0,0
+central;Sensibilidad;J11;REG_CL72 · neto_pago_por_producido_bajo;0.0;-0.0;0,0
+central;Sensibilidad;L11;REG_CL72 · neto_pago_por_producido_alto;0.0;-0.0;0,0
+beta=0.55;Escenarios;H5;S1 · pax_perdidos_dia;2646.812453212992;2646.812453212991;3,4361886905469403e-16
+beta=0.55;Escenarios;L5;S1 · galones_ahorrados;50108.18762934911;50108.18762934913;4,35614893997191e-16
+beta=0.55;Escenarios;M5;S1 · co2_t_evitado;458.99099868483785;458.990998684838;3,7153289949269155e-16
+beta=0.55;Escenarios;R5;S1 · ahorro_por_km;1254.272742450982;1254.2727424509822;1,8127929257150224e-16
+beta=0.55;Escenarios;S5;S1 · ahorro_conductor_hora;835.2415661557237;835.2415661557237;0,0
+beta=0.55;Escenarios;T5;S1 · ingreso_perdido;3074.0873875351654;3074.087387535164;4,4378766140192784e-16
+beta=0.55;Escenarios;U5;S1 · neto_pago_por_hora;-984.5730789284598;-984.5730789284582;1,6165541818742695e-15
+beta=0.55;Escenarios;V5;S1 · neto_pago_por_producido;-1204.9971675771505;-1204.997167577149;1,3208460326117095e-15
+beta=0.55;Escenarios;W5;S1 · neto_simetrico_pago_por_hora;1800.8054602882755;1800.8054602882758;1,2626220902663952e-16
+beta=0.55;Escenarios;AA5;S1 · valor_social_espera;-122.29271240596353;-122.29271240596353;0,0
+beta=0.55;Escenarios;AB5;S1 · beta_equilibrio_pago_por_hora;0.36053119726870486;0.36053119726870486;0,0
+beta=0.55;Escenarios;AC5;S1 · beta_equilibrio_pago_por_producido;0.26560296729729155;0.26560296729729155;0,0
+beta=0.55;Escenarios;H6;S5 · pax_perdidos_dia;3055.188093983341;3055.188093983341;0,0
+beta=0.55;Escenarios;L6;S5 · galones_ahorrados;90621.51857946698;90621.51857946704;6,423161057759637e-16
+beta=0.55;Escenarios;M6;S5 · co2_t_evitado;830.0931101879175;830.0931101879181;6,847836485227506e-16
+beta=0.55;Escenarios;R6;S5 · ahorro_por_km;2268.3738129687595;2268.3738129687604;4,0094568918630593e-16
+beta=0.55;Escenarios;S6;S5 · ahorro_conductor_hora;1704.919547169751;1704.919547169751;0,0
+beta=0.55;Escenarios;T6;S5 · ingreso_perdido;3548.387107995072;3548.387107995072;0,0
+beta=0.55;Escenarios;U6;S5 · neto_pago_por_hora;424.90625214343845;424.90625214343976;3,0769107943303056e-15
+beta=0.55;Escenarios;V6;S5 · neto_pago_por_producido;-570.3358734272983;-570.3358734272971;2,192664486319024e-15
+beta=0.55;Escenarios;W6;S5 · neto_simetrico_pago_por_hora;2610.531333696695;2610.5313336966965;5,225917172683499e-16
+beta=0.55;Escenarios;AA6;S5 · valor_social_espera;-666.3310370863006;-666.3310370863006;0,0
+beta=0.55;Escenarios;AB6;S5 · beta_equilibrio_pago_por_hora;0.6252626220899477;0.625262622089948;5,326832208109078e-16
+beta=0.55;Escenarios;AC6;S5 · beta_equilibrio_pago_por_producido;0.42883179398427973;0.42883179398427973;0,0
+beta=0.55;Escenarios;H7;D5 · pax_perdidos_dia;3296.4234292617657;3296.4234292617652;1,3795174092313283e-16
+beta=0.55;Escenarios;L7;D5 · galones_ahorrados;83543.63904142035;83543.63904142039;5,225502047314018e-16
+beta=0.55;Escenarios;M7;D5 · co2_t_evitado;765.2597336194104;765.2597336194108;4,456794186096153e-16
+beta=0.55;Escenarios;R7;D5 · ahorro_por_km;2091.205334144678;2091.2053341446785;2,1745705381554978e-16
+beta=0.55;Escenarios;S7;D5 · ahorro_conductor_hora;1603.9288362226218;1603.928836222622;1,4176045115487472e-16
+beta=0.55;Escenarios;T7;D5 · ingreso_perdido;3828.5650634474923;3828.5650634474923;0,0
+beta=0.55;Escenarios;U7;D5 · neto_pago_por_hora;-133.43089308019262;-133.43089308019114;1,1076362124720115e-14
+beta=0.55;Escenarios;V7;D5 · neto_pago_por_producido;-971.6467166133161;-971.6467166133151;1,0530386425437162e-15
+beta=0.55;Escenarios;W7;D5 · neto_simetrico_pago_por_hora;2315.0031200837566;2315.0031200837575;3,9286975204595943e-16
+beta=0.55;Escenarios;AA7;D5 · valor_social_espera;-469.2463964390134;-469.2463964390134;0,0
+beta=0.55;Escenarios;AB7;D5 · beta_equilibrio_pago_por_hora;0.5284634722733155;0.528463472273316;1,0504255098741812e-15
+beta=0.55;Escenarios;AC7;D5 · beta_equilibrio_pago_por_producido;0.36098005641763875;0.3609800564176391;9,226739856292843e-16
+beta=0.55;Escenarios;H8;D5_30k · pax_perdidos_dia;2322.5149002870694;2322.5149002870694;0,0
+beta=0.55;Escenarios;L8;D5_30k · galones_ahorrados;23542.019809040456;23542.019809040466;4,635938848834047e-16
+beta=0.55;Escenarios;M8;D5_30k · co2_t_evitado;215.64490145081058;215.64490145081066;3,95395985333144e-16
+beta=0.55;Escenarios;R8;D5_30k · ahorro_por_km;589.2872032638726;589.2872032638726;0,0
+beta=0.55;Escenarios;S8;D5_30k · ahorro_conductor_hora;290.91212207947945;290.9121220794794;1,9539721636377175e-16
+beta=0.55;Escenarios;T8;D5_30k · ingreso_perdido;2697.438480640411;2697.438480640411;0,0
+beta=0.55;Escenarios;U8;D5_30k · neto_pago_por_hora;-1817.239155297059;-1817.239155297059;0,0
+beta=0.55;Escenarios;V8;D5_30k · neto_pago_por_producido;-1568.6635812484565;-1568.663581248456;2,8989475903083265e-16
+beta=0.55;Escenarios;W8;D5_30k · neto_simetrico_pago_por_hora;1389.0207399390258;1389.0207399390258;0,0
+beta=0.55;Escenarios;AA8;D5_30k · valor_social_espera;105.27718332567086;105.27718332567086;0,0
+beta=0.55;Escenarios;AB8;D5_30k · beta_equilibrio_pago_por_hora;0.16735871038749528;0.16735871038749528;0,0
+beta=0.55;Escenarios;AC8;D5_30k · beta_equilibrio_pago_por_producido;0.13933261013253506;0.13933261013253506;0,0
+beta=0.55;Escenarios;H9;D5_15 · pax_perdidos_dia;3838.5184058607433;3838.5184058607424;2,369389971881572e-16
+beta=0.55;Escenarios;L9;D5_15 · galones_ahorrados;130385.01145862471;130385.01145862478;5,580363519385289e-16
+beta=0.55;Escenarios;M9;D5_15 · co2_t_evitado;1194.3267049610024;1194.326704961003;5,71134366749313e-16
+beta=0.55;Escenarios;R9;D5_15 · ahorro_por_km;3263.7054667873294;3263.7054667873304;2,786693563583729e-16
+beta=0.55;Escenarios;S9;D5_15 · ahorro_conductor_hora;2616.7672871761547;2616.7672871761547;0,0
+beta=0.55;Escenarios;T9;D5_15 · ingreso_perdido;4458.170432118843;4458.170432118842;2,040062657139537e-16
+beta=0.55;Escenarios;U9;D5_15 · neto_pago_por_hora;1422.3023218446415;1422.3023218446426;7,993155602401807e-16
+beta=0.55;Escenarios;V9;D5_15 · neto_pago_por_producido;-302.83087890774505;-302.8308789077439;3,754136240388161e-15
+beta=0.55;Escenarios;W9;D5_15 · neto_simetrico_pago_por_hora;3248.1234138693603;3248.123413869361;1,4000310115825976e-16
+beta=0.55;Escenarios;AA9;D5_15 · valor_social_espera;-1137.8970774717102;-1137.8970774717102;0,0
+beta=0.55;Escenarios;AB9;D5_15 · beta_equilibrio_pago_por_hora;0.7594171487066165;0.7594171487066173;1,0233586620491833e-15
+beta=0.55;Escenarios;AC9;D5_15 · beta_equilibrio_pago_por_producido;0.4975027668573606;0.4975027668573612;1,2273754122033002e-15
+beta=0.55;Escenarios;H10;GIRO35 · pax_perdidos_dia;182.80541834168608;182.80541834168608;0,0
+beta=0.55;Escenarios;L10;GIRO35 · galones_ahorrados;11032.37460247042;11032.374602470423;3,297548295973452e-16
+beta=0.55;Escenarios;M10;GIRO35 · co2_t_evitado;101.05655135862905;101.05655135862908;2,8124559019970077e-16
+beta=0.55;Escenarios;R10;GIRO35 · ahorro_por_km;275.01915645360725;275.0191564536073;2,066889433951008e-16
+beta=0.55;Escenarios;S10;GIRO35 · ahorro_conductor_hora;230.21846254250022;230.21846254250022;0,0
+beta=0.55;Escenarios;T10;GIRO35 · ingreso_perdido;212.31569702458444;212.31569702458444;0,0
+beta=0.55;Escenarios;U10;GIRO35 · neto_pago_por_hora;292.92192197152303;292.92192197152315;3,8811310862786253e-16
+beta=0.55;Escenarios;V10;GIRO35 · neto_pago_por_producido;105.1665988339397;105.16659883393976;5,405082934227525e-16
+beta=0.55;Escenarios;W10;GIRO35 · neto_simetrico_pago_por_hora;302.92179747652204;302.92179747652216;3,753009478640351e-16
+beta=0.55;Escenarios;AA10;GIRO35 · valor_social_espera;-143.55334902863663;-143.55334902863663;0,0
+beta=0.55;Escenarios;AB10;GIRO35 · beta_equilibrio_pago_por_hora;2.0250420004578493;2.0250420004578498;2,192987650377902e-16
+beta=0.55;Escenarios;AC10;GIRO35 · beta_equilibrio_pago_por_producido;1.0387246353700121;1.0387246353700128;6,412997170687156e-16
+beta=0.55;Escenarios;H11;REG_CL72 · pax_perdidos_dia;0.0;0.0;0,0
+beta=0.55;Escenarios;L11;REG_CL72 · galones_ahorrados;0.0;-0.0;0,0
+beta=0.55;Escenarios;M11;REG_CL72 · co2_t_evitado;0.0;-0.0;0,0
+beta=0.55;Escenarios;R11;REG_CL72 · ahorro_por_km;0.0;-0.0;0,0
+beta=0.55;Escenarios;S11;REG_CL72 · ahorro_conductor_hora;2.768670126195064;2.768670126195064;0,0
+beta=0.55;Escenarios;T11;REG_CL72 · ingreso_perdido;0.0;0.0;0,0
+beta=0.55;Escenarios;U11;REG_CL72 · neto_pago_por_hora;2.768670126195064;2.768670126195064;0,0
+beta=0.55;Escenarios;V11;REG_CL72 · neto_pago_por_producido;0.0;-0.0;0,0
+beta=0.55;Escenarios;W11;REG_CL72 · neto_simetrico_pago_por_hora;2.768670126195064;2.768670126195064;0,0
+beta=0.55;Escenarios;AA11;REG_CL72 · valor_social_espera;340.15092705771895;340.15092705771895;0,0
+beta=0.55;Escenarios;AB11;REG_CL72 · beta_equilibrio_pago_por_hora;sin pérdida;sin pérdida;0,0
+beta=0.55;Escenarios;AC11;REG_CL72 · beta_equilibrio_pago_por_producido;sin pérdida;sin pérdida;0,0

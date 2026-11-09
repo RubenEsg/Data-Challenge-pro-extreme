@@ -1,0 +1,41 @@
+[project]
+name = "api-frecuencias-sobusa"
+version = "1.0.0"
+description = "API de frecuencias Sobusa: backend del reto (FastAPI + PostgreSQL, esquema ai_frecuencias)"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Abrahan Basto Martínez" },
+    { name = "Rubén Esguerra Fernández" },
+    { name = "Paula Gómez" },
+]
+license = { text = "Uso académico - Universidad del Norte" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q -p no:cacheprovider"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/servicios/motor_d5/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = [".venv", "app/servicios/motor_d5"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S"]
+ignore = ["B008", "S101", "S608"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "B"]
+"alembic/versions/*" = ["E501"]
+
+[tool.bandit]
+exclude_dirs = [".venv", "tests"]

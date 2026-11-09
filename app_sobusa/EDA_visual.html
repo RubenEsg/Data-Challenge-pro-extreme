@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<script>/* Modo embebido: dentro de la app Sobusa Despacho (iframe o ?embebido=1). Abierta sola, nada cambia. */
+try { if (new URLSearchParams(location.search).get('embebido') === '1' || window.parent !== window) document.documentElement.setAttribute('data-embebido', '1'); } catch (e) {}
+/* Solo modo claro (19-oct-2026): el tema claro se fija antes del primer pintado, abierta sola o embebida, aunque el sistema esté en oscuro. */
+document.documentElement.setAttribute('data-theme', 'light');</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tablero Sobusa 2023–2025</title>
+<link rel="stylesheet" href="lib/fuentes.css">  <!-- Barlow Condensed e IBM Plex Sans, copia local (antes: Google Fonts) -->
+<link rel="stylesheet" href="lib/leaflet.min.css">
+<style>
+/* Layout: sticky header with route chips, horizontal section tabs, one section visible at a time; cards only for KPI tiles and the map. */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --surface-2: #eaeef3; --fg: #182230; --muted: #5a6776; --line: #d9e0e8;
+  --accent: #1c3f6e; --accent-soft: #dce7f5;
+  --r-silencio: #2f6fb3; --r-cra54: #d9731a; --r-cl72: #6a3d9a;
+  --ok: #2e8b57; --warn: #b88a00; --bad: #c0392b;
+  --manana: #c2185b; --tarde: #00897b;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --shadow: 0 1px 2px rgba(24, 34, 48, 0.06), 0 4px 16px rgba(24, 34, 48, 0.05);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.1; margin: 0; text-wrap: balance; }
+h1 { font-size: 30px; letter-spacing: 0.2px; }
+h2 { font-size: 26px; margin-bottom: 4px; }
+h3 { font-size: 19px; color: var(--fg); }
+p { margin: 0; max-width: 72ch; }
+.muted { color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 10px 20px; }
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand .sub { color: var(--muted); font-size: 13px; letter-spacing: 0.4px; text-transform: uppercase; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: 500 13px var(--font-body); cursor: pointer; }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chip[aria-pressed="false"] { opacity: 0.45; }
+.chip:focus-visible, .tab:focus-visible, .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+nav.tabs { display: flex; gap: 2px; overflow-x: auto; padding: 0 20px; background: var(--surface); border-bottom: 1px solid var(--line); scrollbar-width: thin; }
+.tab { flex: none; padding: 10px 14px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--muted); font: 600 15px var(--font-display); letter-spacing: 0.4px; text-transform: uppercase; cursor: pointer; }
+.tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+main { padding-block: 22px 40px; padding-inline: 20px; max-width: 1380px; margin: 0 auto; }
+section.panel { display: none; }
+section.panel.activa { display: block; }
+.lead { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.lead p { max-width: 90ch; color: var(--muted); }
+
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 22px; }
+@media (max-width: 1000px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .kpis { grid-template-columns: 1fr; } }
+.leaflet-container { background: var(--surface-2); }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); min-width: 0; }
+.kpi .label { font-size: 12.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi .value { font: 700 34px/1.05 var(--font-display); margin-top: 4px; }
+.kpi .delta { font-size: 13px; margin-top: 4px; color: var(--muted); }
+.kpi .delta.bad { color: var(--bad); } .kpi .delta.ok { color: var(--ok); }
+
+.grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+.bloque { grid-column: span 12; min-width: 0; }
+.bloque.mitad { grid-column: span 6; }
+.bloque.tercio { grid-column: span 4; }
+@media (max-width: 900px) { .bloque.mitad, .bloque.tercio { grid-column: span 12; } }
+.bloque-cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 14px; margin-bottom: 4px; }
+.bloque-cab p { font-size: 13.5px; color: var(--muted); }
+.chart { width: 100%; height: 340px; }
+.chart.alto { height: 420px; }
+.chart.bajo { height: 260px; }
+.chart.calendario { height: 560px; }
+
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; color: var(--muted); padding: 5px 12px; font: 500 13px var(--font-body); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--fg); }
+.controles { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 14px; }
+.controles label { font-size: 13px; color: var(--muted); }
+
+#mapa { width: 100%; height: min(66vh, 720px); border-radius: 12px; border: 1px solid var(--line); box-shadow: var(--shadow); overflow: hidden; background: var(--surface-2); }
+.leyenda-mapa { position: absolute; z-index: 500; left: 12px; bottom: 12px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 12.5px; box-shadow: var(--shadow); max-width: 260px; }
+.leyenda-mapa .fila { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.leyenda-mapa .sw { width: 12px; height: 12px; border-radius: 50%; }
+.leyenda-mapa .grad { width: 110px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, var(--tarde), #b9b9b9, var(--manana)); }
+/* isolation: los paneles y controles de Leaflet (z-index 400 a 1000) quedan dentro del mapa y no tapan la cabecera fija al desplazar. */
+.mapa-wrap { position: relative; isolation: isolate; }
+.leaflet-container { font-family: var(--font-body); }
+/* Leaflet 1.9.4 suma las teselas con plus-lighter: donde dos teselas se solapan medio píxel (escalado de Windows, teléfonos)
+   queda una línea clara de 1 px entre filas de teselas. Con la mezcla normal ese solape no se nota, pero al 125 % y al 150 %
+   el borde suavizado entre dos teselas deja ver el fondo del mapa. Por eso las teselas de la capa base (clase fondo-base)
+   miden 1 px más y se solapan; las de rótulos no, para no estirar el texto. !important: Leaflet escribe 256 px en cada tesela.
+   En los zooms 17 y 18 Leaflet amplía las teselas del 16 y el solape con ellas (2 y 4 px): una vía que cruza el borde salta un poco. */
+.leaflet-container img.leaflet-tile { mix-blend-mode: normal; }
+.leaflet-container .fondo-base img.leaflet-tile { width: 257px !important; height: 257px !important; }
+/* Controles de Leaflet con los colores del tema (en oscuro conservaban el fondo blanco por defecto), también al pasar el ratón,
+   con foco y desactivados (zoom máximo o mínimo). Misma especificidad que leaflet.css, que se carga antes. El anillo de foco
+   del navegador (#101010) casi no se ve sobre el mapa oscuro: se usa el del resto del tablero, por dentro del botón. */
+.leaflet-bar a { background: var(--surface); color: var(--fg); border-bottom-color: var(--line); }
+.leaflet-bar a:hover, .leaflet-bar a:focus { background: var(--surface-2); color: var(--fg); }
+.leaflet-bar a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.leaflet-bar a.leaflet-disabled { background: var(--surface); color: var(--muted); }
+.leaflet-container .leaflet-control-attribution { background: var(--surface); color: var(--muted); }
+.leaflet-container .leaflet-control-attribution a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.leaflet-tooltip { font-family: var(--font-body); font-size: 12.5px; }
+.leaflet-tooltip b { font-variant-numeric: tabular-nums; }
+.aviso-fondo:not(:empty) { max-width: min(250px, calc(100vw - 120px)); background: var(--surface); color: var(--muted); border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; line-height: 1.4; box-shadow: var(--shadow); }
+
+table.datos { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.datos th, table.datos td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.datos th { color: var(--muted); font-weight: 500; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.4px; }
+table.datos td.num, table.datos th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.tabla-wrap { overflow-x: auto; }
+ul.notas { padding-left: 20px; margin: 0; display: grid; gap: 8px; max-width: 90ch; }
+ul.notas li { line-height: 1.45; }
+.hallazgos { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.hallazgo { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; }
+.hallazgo b { display: block; font: 600 17px var(--font-display); }
+.hallazgo span { color: var(--muted); font-size: 13.5px; }
+footer { padding: 24px 20px; color: var(--muted); font-size: 12.5px; border-top: 1px solid var(--line); text-align: center; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+/* Modo embebido: sin marca, sin enlaces a otras páginas y sin pie; se conservan rutas, pestañas y contenido. */
+html[data-embebido] header.top .brand, html[data-embebido] header.top a.chip, html[data-embebido] footer { display: none; }
+html[data-embebido] .top-inner { padding: 8px 16px; }
+html[data-embebido] nav.tabs { padding: 0 16px; }
+html[data-embebido] main { padding-inline: 16px; padding-block: 16px 24px; }
+</style>
+<script>if (document.documentElement.hasAttribute('data-embebido')) document.write('<link rel="stylesheet" href="app/tokens.css">');</script>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <h1>Sobusa 2023–2025</h1>
+      <span class="sub">Demanda, operación y flota de tres rutas</span>
+    </div>
+    <div class="chips" id="chips-rutas" role="group" aria-label="Rutas visibles"></div>
+    <a class="chip" href="planificador.html" style="text-decoration:none">Planificador de despacho →</a>
+    <a class="chip" href="consola_despacho.html" style="text-decoration:none">Consola de despacho →</a>
+    <a class="chip" href="simulador_ahorro.html" style="text-decoration:none">Simulador de ahorro →</a>
+  </div>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+</header>
+
+<main>
+  <section class="panel" id="p-resumen" role="tabpanel">
+    <div class="lead"><h2>Resumen</h2><p>Tres años completos de operación: cada viaje programado, cada pasajero contado por el sensor de puertas y 176 millones de posiciones GPS resumidas. Las cifras usan viajes válidos (finalizados y no cancelados).</p></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="hallazgos" id="hallazgos"></div>
+    <div class="grid">
+      <div class="bloque">
+        <div class="bloque-cab"><h3>Pasajeros por día, promedio móvil de 28 días</h3><p>Un año completo de caída sostenida; los valles son vacaciones, Carnaval y Semana Santa.</p></div>
+        <div class="chart" id="c-resumen-serie"></div>
+      </div>
+      <div class="bloque mitad">
+        <div class="bloque-cab"><h3>Año a año</h3></div>
+        <div class="tabla-wrap"><table class="datos" id="t-anual"></table></div>
+      </div>
+      <div class="bloque mitad">
+        <div class="bloque-cab"><h3>Pasajeros por viaje según la hora de salida (día laboral)</h3><p>Promedio 2023–2025 de los viajes limpios.</p></div>
+        <div class="chart bajo" id="c-resumen-ppv"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-mapa" role="tabpanel">
+    <div class="lead"><h2>Mapa</h2><p>Dónde sube la gente. Cada punto es una celda de 110 metros con las subidas acumuladas de 2023 a 2025; el trazado sigue los segmentos de 500 metros de cada ruta. Pasa el cursor sobre los puntos para ver las cifras.</p></div>
+    <div class="controles">
+      <label>Capa</label>
+      <div class="seg" id="seg-capa">
+        <button type="button" data-v="subidas" aria-pressed="true">Subidas por celda</button>
+        <button type="button" data-v="manana" aria-pressed="false">Mañana frente a tarde</button>
+        <button type="button" data-v="puntos" aria-pressed="false">Puntos de control</button>
+      </div>
+    </div>
+    <div class="mapa-wrap">
+      <div id="mapa"></div>
+      <div class="leyenda-mapa" id="leyenda-mapa"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-demanda" role="tabpanel">
+    <div class="lead"><h2>Demanda en el tiempo</h2><p>Pasajeros contados cada día, por ruta. Usa el deslizador para acercarte a una semana; los días de Carnaval y los festivos aparecen marcados.</p></div>
+    <div class="controles">
+      <label>Medida</label>
+      <div class="seg" id="seg-medida">
+        <button type="button" data-v="pasajeros" aria-pressed="true">Pasajeros por día</button>
+        <button type="button" data-v="viajes" aria-pressed="false">Viajes por día</button>
+        <button type="button" data-v="pax_por_viaje" aria-pressed="false">Pasajeros por viaje</button>
+      </div>
+      <label><input type="checkbox" id="chk-media" checked> Suavizar (28 días)</label>
+    </div>
+    <div class="grid">
+      <div class="bloque"><div class="chart alto" id="c-diaria"></div></div>
+      <div class="bloque">
+        <div class="bloque-cab"><h3>Calendario de pasajeros (tres rutas)</h3><p>Cada casilla es un día; las claras son domingos, festivos y vacaciones.</p></div>
+        <div class="chart calendario" id="c-calendario"></div>
+      </div>
+      <div class="bloque mitad">
+        <div class="bloque-cab"><h3>¿Se mueven juntas las rutas?</h3><p>Correlación entre rutas de los pasajeros diarios, quitando el efecto del día de la semana.</p></div>
+        <div class="chart bajo" id="c-correl"></div>
+      </div>
+      <div class="bloque mitad">
+        <div class="bloque-cab"><h3>Lectura</h3></div>
+        <ul class="notas" id="notas-correl"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-horas" role="tabpanel">
+    <div class="lead"><h2>Perfil por hora</h2><p>Cuántos pasajeros recogen los buses que salen a cada hora y cuántos viajes se despachan. La hora es la de salida del viaje; un bus que sale a las 5 recoge pasajeros durante casi cuatro horas.</p></div>
+    <div class="controles">
+      <label>Tipo de día</label>
+      <div class="seg seg-tipo" data-for="horas">
+        <button type="button" data-v="Laboral" aria-pressed="true">Laboral</button>
+        <button type="button" data-v="Sábado" aria-pressed="false">Sábado</button>
+        <button type="button" data-v="Domingo/festivo" aria-pressed="false">Domingo y festivo</button>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="bloque mitad"><div class="bloque-cab"><h3>Pasajeros por hora de salida</h3><p>Promedio por día.</p></div><div class="chart" id="c-horas-pax"></div></div>
+      <div class="bloque mitad"><div class="bloque-cab"><h3>Viajes despachados por hora</h3><p>Promedio por día.</p></div><div class="chart" id="c-horas-viajes"></div></div>
+      <div class="bloque">
+        <div class="bloque-cab"><h3>Pasajeros por viaje según hora y día de la semana</h3>
+          <div class="seg seg-ruta" data-for="heat"></div></div>
+        <div class="chart" id="c-heat"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-salidas" role="tabpanel">
+    <div class="lead"><h2>Salidas</h2><p>Un día de operación, viaje por viaje. Cada barra es un viaje válido de 2025: empieza en la hora de salida programada y dura lo que tardó el bus en dar la vuelta completa. Debajo, los minutos que separan cada salida de la anterior y la duración de cada viaje según su hora. Elige la ruta y el día.</p></div>
+    <div class="controles">
+      <label>Ruta</label><div class="seg seg-ruta" data-for="salidas"></div>
+      <label for="dia-salidas">Día</label>
+      <button type="button" class="chip" id="dia-prev" aria-label="Día anterior">◀</button>
+      <input type="date" id="dia-salidas" min="2025-01-01" max="2025-12-31" value="2025-06-03" style="font: 500 13px var(--font-body); padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg)">
+      <button type="button" class="chip" id="dia-next" aria-label="Día siguiente">▶</button>
+      <span class="muted" id="dia-etiqueta"></span>
+    </div>
+    <div class="kpis" id="kpis-salidas"></div>
+    <div class="grid">
+      <div class="bloque"><div class="bloque-cab"><h3>Línea de tiempo de los viajes del día</h3><p>Cada fila es un viaje, de arriba abajo en orden de salida; el color indica los pasajeros que recogió. Donde las barras se superponen hay varios buses en la ruta a la vez.</p></div><div class="chart alto" id="c-salidas-linea"></div></div>
+      <div class="bloque mitad"><div class="bloque-cab"><h3>Minutos desde la salida anterior</h3><p>Rojo: a menos de 2 minutos del bus anterior. Ámbar: más de 10 minutos.</p></div><div class="chart" id="c-salidas-intervalo"></div></div>
+      <div class="bloque mitad"><div class="bloque-cab"><h3>Duración de cada viaje según su hora de salida</h3><p>Puntos: los viajes del día. Línea: mediana de 2025 para esta ruta. Se omiten los viajes con cierre tardío (más de 400 minutos registrados).</p></div><div class="chart" id="c-salidas-duracion"></div></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-operacion" role="tabpanel">
+    <div class="lead"><h2>Operación</h2><p>Intervalo entre salidas y buses en circulación. La frecuencia nominal es de 5 minutos; la real cambia por ruta y por hora.</p></div>
+    <div class="controles">
+      <label>Tipo de día</label>
+      <div class="seg seg-tipo" data-for="operacion">
+        <button type="button" data-v="Laboral" aria-pressed="true">Laboral</button>
+        <button type="button" data-v="Sábado" aria-pressed="false">Sábado</button>
+        <button type="button" data-v="Domingo/festivo" aria-pressed="false">Domingo y festivo</button>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="bloque mitad"><div class="bloque-cab"><h3>Intervalo mediano entre salidas (minutos)</h3><p>La línea punteada es la frecuencia nominal de 5 minutos.</p></div><div class="chart" id="c-intervalo"></div></div>
+      <div class="bloque mitad"><div class="bloque-cab"><h3>Buses en ruta por hora</h3><p>Línea continua: buses circulando. Punteada: buses que pediría la demanda con un factor de carga de 0,85.</p></div><div class="chart" id="c-flota-hora"></div></div>
+      <div class="bloque"><div class="kpis" id="kpis-operacion"></div></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-ocupacion" role="tabpanel">
+    <div class="lead"><h2>Ocupación</h2><p>Cuántos pasajeros van a bordo en el momento de mayor carga de cada viaje, reconstruido con los contadores de puertas, y en qué tramo del recorrido se llena el bus.</p></div>
+    <div class="controles">
+      <label>Tipo de día</label>
+      <div class="seg seg-tipo" data-for="ocupacion">
+        <button type="button" data-v="Laboral" aria-pressed="true">Laboral</button>
+        <button type="button" data-v="Sábado" aria-pressed="false">Sábado</button>
+        <button type="button" data-v="Domingo/festivo" aria-pressed="false">Domingo y festivo</button>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="bloque mitad"><div class="bloque-cab"><h3>Viajes que superan la capacidad del bus (%)</h3><p>Por hora de salida.</p></div><div class="chart" id="c-supera"></div></div>
+      <div class="bloque mitad"><div class="bloque-cab"><h3>Ocupación máxima por viaje (mediana)</h3><p>Pasajeros a bordo en el punto de mayor carga.</p></div><div class="chart" id="c-ocupmax"></div></div>
+      <div class="bloque">
+        <div class="bloque-cab"><h3>Carga a lo largo del recorrido (día laboral)</h3><div class="seg seg-ruta" data-for="tramos"></div></div>
+        <p class="muted" style="font-size:13.5px;margin-bottom:8px">Tramos entre puntos de control consecutivos, en el orden del recorrido. Arriba, cuántos suben y bajan en cada tramo (mediana por viaje); abajo, cuántos van a bordo.</p>
+        <div class="chart bajo" id="c-tramos-sb"></div>
+        <div class="chart bajo" id="c-tramos-ab"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-flota" role="tabpanel">
+    <div class="lead"><h2>Flota</h2><p>Los buses que hicieron viajes válidos: antigüedad, capacidad y marcas, según el catálogo de vehículos de Sobusa.</p></div>
+    <div class="kpis" id="kpis-flota"></div>
+    <div class="grid">
+      <div class="bloque mitad"><div class="bloque-cab"><h3>Buses por año de modelo</h3></div><div class="chart" id="c-flota-anios"></div></div>
+      <div class="bloque mitad"><div class="bloque-cab"><h3>Configuraciones de capacidad más comunes</h3><p>Asientos más pasajeros de pie.</p></div><div class="chart" id="c-flota-cap"></div></div>
+      <div class="bloque mitad"><div class="bloque-cab"><h3>Marcas</h3></div><div class="chart bajo" id="c-flota-marcas"></div></div>
+      <div class="bloque mitad"><div class="bloque-cab"><h3>Uso diario por ruta</h3></div><div class="tabla-wrap"><table class="datos" id="t-flota"></table></div></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-datos" role="tabpanel">
+    <div class="lead"><h2>Datos y método</h2><p>De dónde sale cada cifra y qué hay que tener en cuenta al leerla.</p></div>
+    <div class="grid">
+      <div class="bloque mitad">
+        <h3>Fuentes</h3>
+        <div class="tabla-wrap"><table class="datos" id="t-fuentes"></table></div>
+      </div>
+      <div class="bloque mitad">
+        <h3>Advertencias al leer los datos</h3>
+        <ul class="notas" id="notas"></ul>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>Tablero generado a partir del análisis exploratorio del Data Challenge Pro Extreme – Sobusa 2026 (Universidad del Norte). El fondo del mapa es de Esri, con datos de OpenStreetMap y otras fuentes.</footer>
+
+<script src="lib/echarts.min.js"></script>  <!-- ECharts 5.5.1, copia local (antes: cdn.jsdelivr.net) -->
+<script src="lib/leaflet.min.js"></script>  <!-- Leaflet 1.9.4, copia local (antes: cdnjs) -->
+<script src="./dashboard_datos.js"></script>
+<script src="./dashboard_salidas.js"></script>
+<script src="./dashboard_correlaciones.js"></script>
+<script>
+(function () {
+  const EMBEBIDO = document.documentElement.hasAttribute('data-embebido');  // dentro de la app: sin localStorage
+  const D = window.DATOS;
+  if (!D) { document.querySelector('main').innerHTML = '<p>No se encontró el archivo dashboard_datos.js junto a esta página.</p>'; return; }
+
+  // ---------- utilidades ----------
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const RUTAS = D.meta.rutas;                       // [{id, nombre, km}]
+  const idsRutas = RUTAS.map(r => String(r.id));
+  const colorRuta = (id) => ({ '2': css('--r-silencio'), '16': css('--r-cra54'), '21': css('--r-cl72') })[String(id)];
+  const nombreRuta = (id) => RUTAS.find(r => String(r.id) === String(id)).nombre;
+  const HORAS = D.meta.horas;
+  const TIPOS = D.meta.tipos_dia;
+  const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const reducida = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const fmt = (n, d = 0) => (n == null || isNaN(n)) ? '–' : Number(n).toLocaleString('es-CO', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const fmtPct = (n, d = 1) => (n == null || isNaN(n)) ? '–' : (n > 0 ? '+' : '') + fmt(n, d) + ' %';
+  const fecha = (s) => { const [y, m, d] = s.split('-'); return `${d} ${MESES[+m - 1]} ${y}`; };
+  const media28 = (arr) => { const out = []; let suma = 0; const cola = []; for (let i = 0; i < arr.length; i++) { const v = arr[i] == null ? 0 : arr[i]; cola.push(v); suma += v; if (cola.length > 28) suma -= cola.shift(); out.push(i >= 27 ? suma / 28 : null); } return out; };
+
+  // ---------- estado ----------
+  const estado = { rutas: new Set(idsRutas), tipo: { horas: 'Laboral', operacion: 'Laboral', ocupacion: 'Laboral' }, heatRuta: '16', tramosRuta: '16', salidasRuta: '16', dia: '2025-06-03', medida: 'pasajeros', suavizar: true, capa: 'subidas', tabActiva: 'resumen' };
+  const charts = {};
+  const dibujado = {};
+
+  function tema() {
+    return { texto: css('--fg'), muted: css('--muted'), linea: css('--line'), fondo: css('--surface'), accent: css('--accent') };
+  }
+  function base(extra) {
+    const t = tema();
+    return Object.assign({
+      animation: !reducida, backgroundColor: 'transparent', textStyle: { fontFamily: css('--font-body'), color: t.texto },
+      grid: { left: 54, right: 20, top: 36, bottom: 40, containLabel: false },
+      tooltip: { trigger: 'axis', backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 }, axisPointer: { type: 'line', lineStyle: { color: t.muted } } },
+      legend: { top: 0, textStyle: { color: t.muted, fontSize: 12.5 }, icon: 'roundRect', itemWidth: 14, itemHeight: 6 },
+    }, extra);
+  }
+  function ejes(xData, yName, opts = {}) {
+    const t = tema();
+    return {
+      xAxis: Object.assign({ type: 'category', data: xData, axisLine: { lineStyle: { color: t.linea } }, axisTick: { show: false }, axisLabel: { color: t.muted, fontSize: 12 } }, opts.x || {}),
+      yAxis: Object.assign({ type: 'value', name: yName, nameTextStyle: { color: t.muted, align: 'left', padding: [0, 0, 0, -44] }, splitLine: { lineStyle: { color: t.linea } }, axisLabel: { color: t.muted, fontSize: 12, formatter: (v) => fmt(v) } }, opts.y || {}),
+    };
+  }
+  function chart(id, option) {
+    const el = document.getElementById(id);
+    if (!charts[id]) charts[id] = echarts.init(el, null, { renderer: 'canvas' });
+    charts[id].setOption(option, true);
+    return charts[id];
+  }
+  const lineaRuta = (id, data, extra) => Object.assign({ name: nombreRuta(id), type: 'line', data, symbol: 'circle', symbolSize: 6, showSymbol: false, lineStyle: { width: 2, color: colorRuta(id) }, itemStyle: { color: colorRuta(id) }, emphasis: { focus: 'series' } }, extra || {});
+  const rutasVisibles = () => idsRutas.filter(id => estado.rutas.has(id));
+
+  // ---------- cabecera: chips y pestañas ----------
+  const chipsEl = document.getElementById('chips-rutas');
+  RUTAS.forEach(r => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', 'true'); b.dataset.id = String(r.id);
+    b.style.setProperty('--c', colorRuta(r.id)); b.innerHTML = `<span class="dot"></span>${r.nombre} <span class="muted num">${fmt(r.km, 1)} km</span>`;
+    b.addEventListener('click', () => {
+      const id = String(r.id);
+      if (estado.rutas.has(id)) { if (estado.rutas.size === 1) return; estado.rutas.delete(id); } else estado.rutas.add(id);
+      b.setAttribute('aria-pressed', estado.rutas.has(id) ? 'true' : 'false');
+      redibujar();
+    });
+    chipsEl.appendChild(b);
+  });
+  const TABS = [['resumen', 'Resumen'], ['mapa', 'Mapa'], ['demanda', 'Demanda'], ['horas', 'Horas'], ['salidas', 'Salidas'], ['operacion', 'Operación'], ['ocupacion', 'Ocupación'], ['flota', 'Flota'], ['datos', 'Datos']];
+  const tabsEl = document.getElementById('tabs');
+  TABS.forEach(([k, n]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tab'; b.setAttribute('role', 'tab'); b.dataset.k = k; b.textContent = n;
+    b.addEventListener('click', () => activar(k)); tabsEl.appendChild(b);
+  });
+  function activar(k) {
+    estado.tabActiva = k;
+    document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.k === k ? 'true' : 'false'));
+    document.querySelectorAll('section.panel').forEach(s => s.classList.toggle('activa', s.id === 'p-' + k));
+    if (!EMBEBIDO) { try { localStorage.setItem('sobusa-tab', k); } catch (e) {} }
+    if (location.hash !== '#' + k) history.replaceState(null, '', '#' + k);
+    dibujarPanel(k);
+    requestAnimationFrame(() => { Object.values(charts).forEach(c => c.resize()); if (mapa) mapa.invalidateSize(); });
+  }
+  function segmentos(sel, clave, onChange) {
+    document.querySelectorAll(sel).forEach(seg => {
+      seg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+        seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+        onChange(seg.dataset.for, b.dataset.v);
+      }));
+    });
+  }
+  segmentos('.seg-tipo', 'tipo', (panel, v) => { estado.tipo[panel] = v; dibujarPanel(panel); });
+  document.querySelectorAll('.seg-ruta').forEach(seg => {
+    RUTAS.forEach(r => { const b = document.createElement('button'); b.type = 'button'; b.dataset.v = String(r.id); b.textContent = r.nombre; b.setAttribute('aria-pressed', String(r.id) === '16' ? 'true' : 'false'); seg.appendChild(b); });
+    seg.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      if (seg.dataset.for === 'heat') { estado.heatRuta = b.dataset.v; dibujarHeat(); }
+      else if (seg.dataset.for === 'salidas') { estado.salidasRuta = b.dataset.v; dibujarSalidas(); }
+      else { estado.tramosRuta = b.dataset.v; dibujarTramos(); }
+    }));
+  });
+  document.getElementById('seg-medida').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    document.getElementById('seg-medida').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    estado.medida = b.dataset.v; dibujarDiaria();
+  }));
+  document.getElementById('chk-media').addEventListener('change', (e) => { estado.suavizar = e.target.checked; dibujarDiaria(); });
+  document.getElementById('seg-capa').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    document.getElementById('seg-capa').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    estado.capa = b.dataset.v; dibujarMapa();
+  }));
+
+  // ---------- resumen ----------
+  function dibujarResumen() {
+    const k = D.kpis, a = D.anual;
+    const p25 = k.pasajeros_por_anio['2025'], p23 = k.pasajeros_por_anio['2023'];
+    const ult = a[a.length - 1], prim = a[0];
+    const tiles = [
+      ['Pasajeros en 2025', fmt(p25), `${fmtPct((p25 / p23 - 1) * 100)} frente a 2023`, 'bad'],
+      ['Viajes válidos por día', fmt(k.viajes_validos / k.dias), `${fmt(k.viajes_validos)} viajes en ${fmt(k.dias)} días`, ''],
+      ['Pasajeros por viaje', fmt(k.pasajeros_por_viaje_mediana), 'mediana de los viajes limpios', ''],
+      ['Duración de la vuelta', fmt(k.duracion_mediana_min) + ' min', 'mediana; ida y regreso', ''],
+      ['Intervalo real entre salidas', idsRutas.map(id => fmt(k.intervalo_mediano_min[id])).join(' · ') + ' min', 'laboral; SILENCIO · CRA 54 · CL 72 (nominal 5 min)', ''],
+      ['Vehículos distintos', fmt(k.vehiculos_distintos), `${fmt(k.conductores)} conductores`, ''],
+      ['Posiciones GPS resumidas', fmt(k.eventos_gps), 'eventos del contador de pasajeros', ''],
+      ['Viajes cancelados', fmtPct(ult.cancelados / (ult.viajes + ult.cancelados) * 100, 1).replace('+', ''), `en 2025; ${fmt(prim.cancelados / (prim.viajes + prim.cancelados) * 100, 1)} % en 2023`, 'warn'],
+    ];
+    document.getElementById('kpis').innerHTML = tiles.map(([l, v, d, c]) => `<div class="kpi"><div class="label">${l}</div><div class="value num">${v}</div><div class="delta ${c}">${d}</div></div>`).join('');
+    const e = D.eventos || {};
+    const h = [
+      ['La demanda cae cada año', `${fmtPct((k.pasajeros_por_anio['2024'] / p23 - 1) * 100)} en 2024 y ${fmtPct((p25 / k.pasajeros_por_anio['2024'] - 1) * 100)} en 2025, con una flota casi constante.`],
+      ['El Carnaval vacía los buses', `Pasajeros diarios ${fmtPct(e.carnaval_efecto ? Math.max(...Object.values(e.carnaval_efecto)) : null)} a ${fmtPct(e.carnaval_efecto ? Math.min(...Object.values(e.carnaval_efecto)) : null)} frente a los mismos días de semanas vecinas.`],
+      ['Los domingos y festivos pesan poco', `Un domingo mueve ${fmt(e.domingo_vs_laboral ? 100 + Math.max(...Object.values(e.domingo_vs_laboral)) : null)} % de un día laboral; un sábado, ${fmt(e.sabado_vs_laboral ? 100 + Math.max(...Object.values(e.sabado_vs_laboral)) : null)} %.`],
+      ['La frecuencia real no es la nominal', `En día laboral las salidas se separan ${fmt(k.intervalo_mediano_min['16'])} min en CRA 54, ${fmt(k.intervalo_mediano_min['2'])} en SILENCIO y ${fmt(k.intervalo_mediano_min['21'])} en CL 72.`],
+    ];
+    document.getElementById('hallazgos').innerHTML = h.map(([t, s]) => `<div class="hallazgo"><b>${t}</b><span>${s}</span></div>`).join('');
+    document.getElementById('t-anual').innerHTML = `<thead><tr><th>Año</th><th class="num">Pasajeros</th><th class="num">Viajes válidos</th><th class="num">Pasajeros por viaje</th><th class="num">Vehículos</th><th class="num">Cancelados</th></tr></thead><tbody>` +
+      a.map(r => `<tr><td>${r.anio}</td><td class="num">${fmt(r.pasajeros)}</td><td class="num">${fmt(r.viajes)}</td><td class="num">${fmt(r.pax_por_viaje, 1)}</td><td class="num">${fmt(r.vehiculos)}</td><td class="num">${fmt(r.cancelados)}</td></tr>`).join('') + '</tbody>';
+    const fechas = D.diaria.fechas;
+    const series = rutasVisibles().map(id => lineaRuta(id, media28(D.diaria.pasajeros[id]).map((v, i) => [fechas[i], v == null ? null : Math.round(v)])));
+    const t = tema();
+    chart('c-resumen-serie', base({
+      tooltip: { trigger: 'axis', backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 }, valueFormatter: (v) => fmt(v) },
+      xAxis: { type: 'time', axisLine: { lineStyle: { color: t.linea } }, axisLabel: { color: t.muted, formatter: (v) => { const d = new Date(v); return `${MESES[d.getMonth()]} ${d.getFullYear()}`; } } },
+      yAxis: ejes([], 'pasajeros por día').yAxis, series,
+    }));
+    const ppv = rutasVisibles().map(id => lineaRuta(id, D.perfil_hora[id]['Laboral'].pax_viaje, { showSymbol: true }));
+    chart('c-resumen-ppv', base(Object.assign(ejes(HORAS.map(h => h + ' h'), 'pasajeros por viaje'), { series: ppv, tooltip: Object.assign(base().tooltip, { valueFormatter: (v) => fmt(v, 1) }) })));
+  }
+
+  // ---------- mapa ----------
+  // Fondo: mapa base gris de Esri y, encima, sus rótulos en una capa aparte. OpenStreetMap bloquea las teselas
+  // que pide una página abierta como archivo local (no envía cabecera Referer).
+  const ESRI_CANVAS = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
+  const ATRIBUCION_FONDO = 'Powered by <a href="https://www.esri.com/">Esri</a> | Fuentes: Esri, HERE, Garmin, &copy;&nbsp;colaboradores de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> y comunidad de usuarios de&nbsp;SIG';
+  const AVISO_SIN_FONDO = 'No se pudo cargar el mapa base (sin conexión o servicio caído). Las rutas y los puntos siguen visibles.';
+  let mapa = null, capas = {}, fondo = null, avisoFondo = null;
+  const cargaFondo = { cargas: 0, errores: 0, plazo: false, reloj: null };
+  const temaOscuro = () => false;   // solo modo claro (19-oct-2026): el mapa base es siempre el gris claro
+  // Esri tiene datos de Barranquilla hasta el zoom 16; en 17 y 18 Leaflet amplía las teselas del 16.
+  const capaEsri = (servicio, opciones) => L.tileLayer(ESRI_CANVAS + servicio + '/MapServer/tile/{z}/{y}/{x}', Object.assign({ maxNativeZoom: 16, maxZoom: 18 }, opciones));
+  function avisarFondo(mostrar) { const texto = mostrar ? AVISO_SIN_FONDO : ''; if (avisoFondo && avisoFondo.textContent !== texto) avisoFondo.textContent = texto; }
+  function revisarFondo() { if (cargaFondo.plazo && cargaFondo.errores >= 8 && cargaFondo.cargas === 0) avisarFondo(true); }
+  // Pone el par base + rótulos del tema efectivo sin recrear el mapa: se conservan el zoom y las capas de datos. Devuelve true si cambió el par.
+  function ponerFondo() {
+    const oscuro = temaOscuro();
+    if (!mapa || (fondo && fondo.oscuro === oscuro)) return false;
+    if (fondo) { mapa.removeLayer(fondo.base); mapa.removeLayer(fondo.rotulos); }
+    const tono = oscuro ? 'Dark' : 'Light';
+    fondo = { oscuro, base: capaEsri(`World_${tono}_Gray_Base`, { attribution: ATRIBUCION_FONDO, zIndex: 1, className: 'fondo-base' }), rotulos: capaEsri(`World_${tono}_Gray_Reference`, { zIndex: 2 }) };
+    // Respaldo: si a los 10 s la capa base lleva 8 o más errores y ninguna tesela cargada, se avisa dentro del mapa.
+    Object.assign(cargaFondo, { cargas: 0, errores: 0, plazo: false });
+    clearTimeout(cargaFondo.reloj);
+    cargaFondo.reloj = setTimeout(() => { cargaFondo.plazo = true; revisarFondo(); }, 10000);
+    fondo.base.on('tileload', () => { cargaFondo.cargas++; avisarFondo(false); });
+    fondo.base.on('tileerror', () => { cargaFondo.errores++; revisarFondo(); });
+    fondo.base.addTo(mapa); fondo.rotulos.addTo(mapa);
+    return true;
+  }
+  // En pantallas estrechas la atribución del mapa base ocupa 2 o 3 líneas a todo el ancho: si pasa por debajo de la leyenda, la leyenda sube.
+  function ajustarLeyenda() {
+    const leyenda = document.getElementById('leyenda-mapa');
+    const a = mapa.attributionControl.getContainer().getBoundingClientRect(), l = leyenda.getBoundingClientRect();
+    if (!a.height || !l.width) return; // pestaña oculta
+    leyenda.style.bottom = a.left < l.right + 8 ? Math.ceil(leyenda.parentElement.getBoundingClientRect().bottom - a.top + 8) + 'px' : '';
+  }
+  function iniciarMapa() {
+    if (mapa) return;
+    mapa = L.map('mapa', { preferCanvas: true, zoomControl: true, attributionControl: true }).setView(D.mapa.centro, 12);
+    const aviso = L.control({ position: 'topright' });
+    aviso.onAdd = () => { avisoFondo = L.DomUtil.create('div', 'aviso-fondo'); avisoFondo.setAttribute('role', 'status'); return avisoFondo; };
+    aviso.addTo(mapa);
+    ponerFondo();
+    capas.render = L.canvas({ padding: 0.5 });
+    // Se recalcula cuando cambia el ancho del mapa, el texto de la atribución (fuentes, tema) o la leyenda (capa, rutas).
+    if ('ResizeObserver' in window) { const ro = new ResizeObserver(ajustarLeyenda); [mapa.getContainer(), mapa.attributionControl.getContainer(), document.getElementById('leyenda-mapa')].forEach(el => ro.observe(el)); }
+  }
+  function colorManana(p) { // 0 = tarde (teal), 0.5 = neutro, 1 = mañana (magenta)
+    const t = Math.max(0, Math.min(1, (p - 0.2) / 0.6));
+    const a = [0, 137, 123], b = [185, 185, 185], c = [194, 24, 91];
+    const mix = (u, v, k) => u.map((x, i) => Math.round(x + (v[i] - x) * k));
+    const rgb = t < 0.5 ? mix(a, b, t * 2) : mix(b, c, (t - 0.5) * 2);
+    return `rgb(${rgb.join(',')})`;
+  }
+  function dibujarMapa() {
+    iniciarMapa();
+    Object.keys(capas).forEach(k => { if (k !== 'render') { mapa.removeLayer(capas[k]); delete capas[k]; } });
+    const vis = rutasVisibles();
+    const grupo = L.layerGroup().addTo(mapa); capas.grupo = grupo;
+    vis.forEach(id => L.polyline(D.mapa.rutas[id], { color: colorRuta(id), weight: estado.capa === 'subidas' ? 2.5 : 3.5, opacity: estado.capa === 'subidas' ? 0.55 : 0.85, renderer: capas.render }).addTo(grupo));
+    const leyenda = document.getElementById('leyenda-mapa');
+    if (estado.capa === 'subidas') {
+      const maxS = Math.max(...vis.flatMap(id => D.mapa.celdas[id].map(c => c[2])));
+      vis.forEach(id => D.mapa.celdas[id].forEach(c => {
+        L.circleMarker([c[0], c[1]], { radius: 1.5 + 9 * Math.sqrt(c[2] / maxS), color: colorRuta(id), weight: 0, fillColor: colorRuta(id), fillOpacity: 0.55, renderer: capas.render })
+          .bindTooltip(`<b>${fmt(c[2])}</b> subidas · ${nombreRuta(id)}`, { sticky: true }).addTo(grupo);
+      }));
+      leyenda.innerHTML = `<b>Subidas acumuladas por celda de 110 m</b>` + vis.map(id => `<div class="fila"><span class="sw" style="background:${colorRuta(id)}"></span>${nombreRuta(id)}</div>`).join('') + `<div class="fila muted">El tamaño del punto crece con las subidas; máximo ${fmt(maxS)}.</div>`;
+    } else if (estado.capa === 'manana') {
+      const maxT = Math.max(...vis.flatMap(id => D.mapa.manana_tarde[id].map(c => c[2])));
+      vis.forEach(id => D.mapa.manana_tarde[id].forEach(c => {
+        L.circleMarker([c[0], c[1]], { radius: 4 + 16 * Math.sqrt(c[2] / maxT), color: css('--surface'), weight: 1, fillColor: colorManana(c[3]), fillOpacity: 0.85, renderer: capas.render })
+          .bindTooltip(`${nombreRuta(id)} · <b>${fmt(c[3] * 100)} %</b> de las subidas en la mañana (5 a 8 h) · ${fmt(c[2])} subidas en los dos picos`, { sticky: true }).addTo(grupo);
+      }));
+      leyenda.innerHTML = `<b>Origen de las subidas: mañana frente a tarde</b><div class="fila"><span class="grad"></span></div><div class="fila muted">Teal: suben sobre todo por la tarde (16 a 19 h). Magenta: por la mañana (5 a 8 h). Celdas de 1,1 km.</div>`;
+    } else {
+      vis.forEach(id => D.mapa.puntos[id].forEach(p => {
+        L.circleMarker([p.lat, p.lon], { radius: 7, color: colorRuta(id), weight: 2.5, fillColor: css('--surface'), fillOpacity: 1, renderer: capas.render })
+          .bindTooltip(`<b>Punto ${p.id}</b> · ${nombreRuta(id)}<br>minuto ${fmt(p.minuto)} del viaje · ${fmt(p.viajes)} viajes`, { sticky: true }).addTo(grupo);
+      }));
+      leyenda.innerHTML = `<b>Puntos de control</b>` + vis.map(id => `<div class="fila"><span class="sw" style="border:2.5px solid ${colorRuta(id)};background:var(--surface)"></span>${nombreRuta(id)}</div>`).join('') + `<div class="fila muted">El minuto es la mediana desde el inicio del viaje.</div>`;
+    }
+  }
+
+  // ---------- demanda ----------
+  function dibujarDiaria() {
+    const t = tema(), fechas = D.diaria.fechas, med = estado.medida;
+    const nombres = { pasajeros: 'pasajeros por día', viajes: 'viajes por día', pax_por_viaje: 'pasajeros por viaje' };
+    const series = rutasVisibles().map(id => {
+      let arr = D.diaria[med][id];
+      if (estado.suavizar) arr = media28(arr);
+      return lineaRuta(id, arr.map((v, i) => [fechas[i], v == null ? null : +Number(v).toFixed(1)]), { lineStyle: { width: estado.suavizar ? 2.2 : 1.2, color: colorRuta(id) } });
+    });
+    const carn = D.calendario.carnaval.map(d => ({ xAxis: d }));
+    series.push({ name: 'Carnaval', type: 'line', data: [], markLine: { silent: true, symbol: 'none', lineStyle: { color: css('--manana'), type: 'dashed', width: 1 }, label: { show: false }, data: carn }, itemStyle: { color: css('--manana') } });
+    chart('c-diaria', base({
+      tooltip: { trigger: 'axis', backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 }, formatter: (ps) => { const d = ps[0].axisValue; const f = typeof d === 'number' ? new Date(d).toISOString().slice(0, 10) : d; const fest = D.calendario.nombres_festivos[f]; return `<b>${fecha(f)}</b>${fest ? ' · ' + fest : ''}${D.calendario.carnaval.includes(f) ? ' · Carnaval' : ''}<br>` + ps.filter(p => p.seriesName !== 'Carnaval').map(p => `${p.marker} ${p.seriesName}: <b>${fmt(p.value[1], med === 'pax_por_viaje' ? 1 : 0)}</b>`).join('<br>'); } },
+      xAxis: { type: 'time', axisLine: { lineStyle: { color: t.linea } }, axisLabel: { color: t.muted, formatter: (v) => { const d = new Date(v); return `${MESES[d.getMonth()]} ${d.getFullYear()}`; } } },
+      yAxis: ejes([], nombres[med]).yAxis,
+      dataZoom: [{ type: 'inside' }, { type: 'slider', bottom: 6, height: 20, borderColor: t.linea, textStyle: { color: t.muted }, fillerColor: css('--accent-soft') }],
+      grid: { left: 54, right: 20, top: 36, bottom: 60 }, series,
+    }));
+  }
+  function dibujarCalendario() {
+    const t = tema(), vis = rutasVisibles();
+    const datos = D.diaria.fechas.map((f, i) => [f, vis.reduce((s, id) => s + (D.diaria.pasajeros[id][i] || 0), 0)]);
+    const max = Math.max(...datos.map(d => d[1]));
+    const cal = (y, top) => ({ top, left: 70, right: 20, cellSize: ['auto', 16], range: String(y), orient: 'horizontal', splitLine: { lineStyle: { color: t.linea } }, itemStyle: { borderColor: t.fondo, borderWidth: 1.5, color: 'transparent' }, yearLabel: { show: true, margin: 36, color: t.muted, fontSize: 14, fontFamily: css('--font-display') }, dayLabel: { nameMap: ['D', 'L', 'M', 'X', 'J', 'V', 'S'], color: t.muted, firstDay: 1 }, monthLabel: { nameMap: MESES.map(m => m[0].toUpperCase() + m.slice(1)), color: t.muted } });
+    chart('c-calendario', base({
+      tooltip: { position: 'top', backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 }, formatter: (p) => { const f = p.value[0]; const fest = D.calendario.nombres_festivos[f]; return `<b>${fecha(f)}</b>${fest ? ' · ' + fest : ''}${D.calendario.carnaval.includes(f) ? ' · Carnaval' : ''}<br>${fmt(p.value[1])} pasajeros`; } },
+      visualMap: { min: 0, max, orient: 'horizontal', left: 'center', bottom: 0, itemWidth: 12, itemHeight: 160, textStyle: { color: t.muted }, text: [fmt(max), '0'], inRange: { color: [css('--surface-2'), css('--accent')] }, calculable: false },
+      calendar: [cal(2023, 30), cal(2024, 200), cal(2025, 370)],
+      series: [0, 1, 2].map(i => ({ type: 'heatmap', coordinateSystem: 'calendar', calendarIndex: i, data: datos.filter(d => d[0].startsWith(String(2023 + i))) })),
+    }));
+  }
+
+  // ---------- horas ----------
+  function dibujarHoras() {
+    const tipo = estado.tipo.horas, x = HORAS.map(h => h + ' h');
+    chart('c-horas-pax', base(Object.assign(ejes(x, 'pasajeros por hora (promedio por día)'), { series: rutasVisibles().map(id => lineaRuta(id, D.perfil_hora[id][tipo].pasajeros, { showSymbol: true, areaStyle: { color: colorRuta(id), opacity: 0.08 } })) })));
+    chart('c-horas-viajes', base(Object.assign(ejes(x, 'viajes por hora (promedio por día)'), { tooltip: Object.assign(base().tooltip, { valueFormatter: (v) => fmt(v, 1) }), series: rutasVisibles().map(id => ({ name: nombreRuta(id), type: 'bar', data: D.perfil_hora[id][tipo].viajes, itemStyle: { color: colorRuta(id), borderRadius: [3, 3, 0, 0] }, barGap: '10%', barCategoryGap: '30%' })) })));
+    dibujarHeat();
+  }
+  function dibujarHeat() {
+    const t = tema(), id = estado.heatRuta, m = D.heat_hora_dia[id];
+    const datos = []; let max = 0;
+    m.forEach((fila, d) => fila.forEach((v, h) => { if (v != null) { datos.push([h, d, +Number(v).toFixed(1)]); max = Math.max(max, v); } }));
+    chart('c-heat', base({
+      tooltip: { position: 'top', backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 }, formatter: (p) => `${DIAS[p.value[1]]}, salidas de las ${HORAS[p.value[0]]} h<br><b>${fmt(p.value[2], 1)}</b> pasajeros por viaje · ${nombreRuta(id)}` },
+      grid: { left: 90, right: 90, top: 20, bottom: 40 },
+      xAxis: { type: 'category', data: HORAS.map(h => h + ' h'), splitArea: { show: false }, axisLabel: { color: t.muted }, axisLine: { lineStyle: { color: t.linea } } },
+      yAxis: { type: 'category', data: DIAS, inverse: true, axisLabel: { color: t.muted }, axisLine: { lineStyle: { color: t.linea } } },
+      visualMap: { min: 0, max: Math.ceil(max / 10) * 10, right: 0, top: 'middle', orient: 'vertical', text: [fmt(Math.ceil(max / 10) * 10) + ' por viaje', '0'], textStyle: { color: t.muted, fontSize: 11 }, itemHeight: 140, inRange: { color: [css('--surface-2'), colorRuta(id)] } },
+      series: [{ type: 'heatmap', data: datos, itemStyle: { borderColor: t.fondo, borderWidth: 2 }, label: { show: false }, emphasis: { itemStyle: { borderColor: t.texto } } }],
+    }));
+  }
+
+  // ---------- operación ----------
+  function dibujarOperacion() {
+    const tipo = estado.tipo.operacion, x = HORAS.map(h => h + ' h'), t = tema();
+    const sInt = rutasVisibles().map(id => lineaRuta(id, D.intervalo[id][tipo], { showSymbol: true }));
+    sInt.push({ name: 'Nominal 5 min', type: 'line', data: HORAS.map(() => 5), symbol: 'none', lineStyle: { type: 'dashed', width: 1.5, color: t.muted }, itemStyle: { color: t.muted } });
+    chart('c-intervalo', base(Object.assign(ejes(x, 'minutos entre salidas'), { tooltip: Object.assign(base().tooltip, { valueFormatter: (v) => fmt(v, 1) + ' min' }), series: sInt })));
+    const sF = [];
+    rutasVisibles().forEach(id => {
+      const f = D.flota_hora[id][tipo];
+      sF.push(lineaRuta(id, f.en_ruta, { showSymbol: true }));
+      if (f.necesarios && f.necesarios.some(v => v != null)) sF.push(lineaRuta(id, f.necesarios, { name: nombreRuta(id) + ' · necesarios', lineStyle: { width: 1.5, type: 'dashed', color: colorRuta(id) } }));
+    });
+    chart('c-flota-hora', base(Object.assign(ejes(x, 'buses en ruta'), { grid: { left: 54, right: 20, top: 64, bottom: 40 }, legend: { top: 0, textStyle: { color: t.muted, fontSize: 12.5 }, icon: 'roundRect', itemWidth: 14, itemHeight: 6, padding: [0, 0, 0, 60] }, series: sF })));
+    const k = D.kpis, fl = D.flota;
+    document.getElementById('kpis-operacion').innerHTML = idsRutas.map(id => `<div class="kpi"><div class="label" style="color:${colorRuta(id)}">${nombreRuta(id)}</div><div class="value num">${fmt(fl.vehiculos_por_dia[id])}</div><div class="delta">vehículos por día laboral · ${fmt(fl.vueltas_por_bus_dia[id], 1)} vueltas por bus · intervalo ${fmt(k.intervalo_mediano_min[id])} min</div></div>`).join('');
+  }
+
+  // ---------- ocupación ----------
+  function dibujarOcupacion() {
+    const tipo = estado.tipo.ocupacion, x = HORAS.map(h => h + ' h');
+    chart('c-supera', base(Object.assign(ejes(x, '% de viajes'), { tooltip: Object.assign(base().tooltip, { valueFormatter: (v) => fmt(v, 1) + ' %' }), series: rutasVisibles().map(id => lineaRuta(id, D.ocupacion[id][tipo].pct_supera_capacidad, { showSymbol: true })) })));
+    chart('c-ocupmax', base(Object.assign(ejes(x, 'pasajeros a bordo'), { series: rutasVisibles().map(id => lineaRuta(id, D.ocupacion[id][tipo].ocupacion_max_mediana, { showSymbol: true })) })));
+    dibujarTramos();
+  }
+  function dibujarTramos() {
+    const id = estado.tramosRuta, c = D.carga_tramos[id], t = tema();
+    const x = { x: { axisLabel: { color: t.muted, fontSize: 11, rotate: 60, interval: 0 } } };
+    chart('c-tramos-sb', base(Object.assign(ejes(c.tramos, 'pasajeros por viaje', x), { grid: { left: 54, right: 20, top: 36, bottom: 70 }, legend: { top: 0, textStyle: { color: t.muted } }, series: [
+      { name: 'Suben', type: 'bar', data: c.subidas, itemStyle: { color: css('--ok'), borderRadius: [3, 3, 0, 0] } },
+      { name: 'Bajan', type: 'bar', data: c.bajadas, itemStyle: { color: css('--bad'), borderRadius: [3, 3, 0, 0] } }] })));
+    chart('c-tramos-ab', base(Object.assign(ejes(c.tramos, 'pasajeros a bordo (máximo del tramo)', x), { grid: { left: 54, right: 20, top: 36, bottom: 70 }, series: [lineaRuta(id, c.a_bordo, { name: 'A bordo · ' + nombreRuta(id), showSymbol: true, areaStyle: { color: colorRuta(id), opacity: 0.12 } })] })));
+  }
+
+  // ---------- flota ----------
+  function dibujarFlota() {
+    const f = D.flota, t = tema();
+    document.getElementById('kpis-flota').innerHTML = [
+      ['Buses con viajes válidos', fmt(f.resumen.usados), `de ${fmt(f.resumen.total_catalogo)} en el catálogo`],
+      ['Año de modelo (mediana)', String(f.resumen.anio_mediano), 'ponderado por buses usados'],
+      ['Capacidad típica', fmt(f.resumen.capacidad_mediana) + ' pasajeros', 'asientos más de pie'],
+      ['Buses usados sin dato de capacidad', fmt(f.resumen.usados - f.resumen.con_capacidad), `de los ${fmt(f.resumen.usados)} con viajes; se les asigna la capacidad típica`],
+    ].map(([l, v, d]) => `<div class="kpi"><div class="label">${l}</div><div class="value num">${v}</div><div class="delta">${d}</div></div>`).join('');
+    chart('c-flota-anios', base(Object.assign(ejes(f.anios.map(a => String(a.anio)), 'buses'), { tooltip: Object.assign(base().tooltip, { valueFormatter: (v) => fmt(v) + ' buses' }), legend: { show: false }, series: [{ name: 'Buses', type: 'bar', data: f.anios.map(a => a.n), itemStyle: { color: css('--accent'), borderRadius: [3, 3, 0, 0] } }] })));
+    const cap = f.capacidad.slice(0, 12);
+    chart('c-flota-cap', base({
+      tooltip: { trigger: 'axis', backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 }, axisPointer: { type: 'shadow' } },
+      legend: { top: 0, textStyle: { color: t.muted } }, grid: { left: 110, right: 30, top: 36, bottom: 30 },
+      xAxis: { type: 'value', name: 'pasajeros por bus', nameLocation: 'middle', nameGap: 26, nameTextStyle: { color: t.muted }, splitLine: { lineStyle: { color: t.linea } }, axisLabel: { color: t.muted } },
+      yAxis: { type: 'category', inverse: true, data: cap.map(c => `${fmt(c.n)} buses`), axisLabel: { color: t.muted }, axisLine: { lineStyle: { color: t.linea } } },
+      series: [{ name: 'Asientos', type: 'bar', stack: 'cap', data: cap.map(c => c.sentados), itemStyle: { color: css('--accent') }, barCategoryGap: '35%', label: { show: true, position: 'insideLeft', color: '#fff', formatter: (p) => p.value } },
+               { name: 'De pie', type: 'bar', stack: 'cap', data: cap.map(c => c.de_pie), itemStyle: { color: css('--r-cra54'), borderColor: t.fondo, borderWidth: 2 }, label: { show: true, position: 'insideLeft', color: '#fff', formatter: (p) => p.value } }],
+    }));
+    chart('c-flota-marcas', base(Object.assign(ejes(f.marcas.map(m => m.marca), 'buses', { x: { axisLabel: { color: t.muted, rotate: 25, interval: 0 } } }), { legend: { show: false }, grid: { left: 54, right: 20, top: 30, bottom: 60 }, series: [{ name: 'Buses', type: 'bar', data: f.marcas.map(m => m.n), itemStyle: { color: css('--accent'), borderRadius: [3, 3, 0, 0] } }] })));
+    document.getElementById('t-flota').innerHTML = `<thead><tr><th>Ruta</th><th class="num">Vehículos por día laboral</th><th class="num">Vueltas por bus y día</th><th class="num">Intervalo mediano laboral</th></tr></thead><tbody>` +
+      idsRutas.map(id => `<tr><td><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${colorRuta(id)};margin-right:6px"></span>${nombreRuta(id)}</td><td class="num">${fmt(f.vehiculos_por_dia[id])}</td><td class="num">${fmt(f.vueltas_por_bus_dia[id], 2)}</td><td class="num">${fmt(D.kpis.intervalo_mediano_min[id])} min</td></tr>`).join('') + '</tbody>';
+  }
+
+  // ---------- datos ----------
+  function dibujarDatos() {
+    const fuentes = [
+      ['progvehiculos', 'Un registro por viaje programado: ruta, vehículo, conductor, horas de salida, inicio y fin, pasajeros contados', fmt(D.kpis.viajes_programados) + ' viajes'],
+      ['conteo_pasajeros_destino', 'Eventos del contador de pasajeros con posición GPS; resumidos en el servidor por celda, hora, viaje y punto de control', fmt(D.kpis.eventos_gps) + ' eventos'],
+      ['rutas_segmentos', 'Trazado de cada ruta en segmentos de 500 m', '3 rutas'],
+      ['vehiculos', 'Catálogo de la flota: modelo, marca, asientos y pasajeros de pie', fmt(D.flota.resumen.total_catalogo) + ' buses'],
+      ['novedades_viales y festivos', 'Días de Carnaval registrados por Sobusa y festivos de Colombia (Ley Emiliani)', fmt(D.calendario.carnaval.length) + ' días de Carnaval'],
+    ];
+    document.getElementById('t-fuentes').innerHTML = `<thead><tr><th>Tabla</th><th>Contenido</th><th class="num">Tamaño</th></tr></thead><tbody>` + fuentes.map(f => `<tr><td><code>${f[0]}</code></td><td>${f[1]}</td><td class="num">${f[2]}</td></tr>`).join('') + '</tbody>';
+    const notas = [
+      'Viajes válidos: finalizados y no cancelados. Para promedios por viaje se usan además solo viajes de 30 a 360 minutos con 1 a 300 pasajeros.',
+      'La hora de los perfiles es la hora de salida del viaje. Las subidas reales ocurren hasta cuatro horas después, por eso el pico de salidas de las 5 h corresponde a abordajes entre las 5 y las 9.',
+      'La ocupación se reconstruye con los contadores acumulados de subidas y bajadas; se excluyen los viajes con contadores inconsistentes (alrededor de una quinta parte).',
+      'Los eventos GPS no cubren el último día de cada mes; esos días no entran en el mapa, la ocupación ni los puntos de control.',
+      'La capacidad de 192 buses del catálogo no está registrada; se les asigna la capacidad típica de 50 pasajeros.',
+      'Las tablas agregadas de Sobusa (timbradas) usan la hora de fin del viaje, no la de abordaje, y suman 3 a 4 % más viajes que la tabla de viajes.',
+    ].concat(D.meta.notas || []);
+    document.getElementById('notas').innerHTML = notas.map(n => `<li>${n}</li>`).join('');
+  }
+
+  // ---------- salidas ----------
+  const S = window.SALIDAS;
+  const hhmm = (m) => { if (m == null || m < 0 || isNaN(m)) return '–'; const h = Math.floor(m / 60), mi = Math.round(m % 60); return `${h}:${String(mi).padStart(2, '0')}`; };
+  const ordenados = (arr) => arr.filter(v => v != null && !isNaN(v)).sort((x, y) => x - y);
+  const mediana = (arr) => { const a = ordenados(arr); if (!a.length) return null; const k = Math.floor(a.length / 2); return a.length % 2 ? a[k] : (a[k - 1] + a[k]) / 2; };
+  const cuantil = (arr, q) => { const a = ordenados(arr); return a.length ? a[Math.min(a.length - 1, Math.floor(q * a.length))] : null; };
+  const medianaDurRuta = {};
+  function medianasDuracion(id) {
+    if (medianaDurRuta[id]) return medianaDurRuta[id];
+    const porHora = {};
+    S.viajes[id].forEach(v => { if (v[2] > 30 && v[2] < 360) { const h = Math.floor(v[1] / 60); (porHora[h] = porHora[h] || []).push(v[2]); } });
+    medianaDurRuta[id] = HORAS.map(h => porHora[h] ? mediana(porHora[h]) : null);
+    return medianaDurRuta[id];
+  }
+  function dibujarSalidas() {
+    const id = estado.salidasRuta, t = tema();
+    const etiqueta = document.getElementById('dia-etiqueta');
+    if (!S) { etiqueta.textContent = 'No se encontró dashboard_salidas.js junto a esta página.'; return; }
+    const idx = S.dias.indexOf(estado.dia);
+    const viajes = S.viajes[id].filter(v => v[0] === idx).sort((a, b) => a[1] - b[1]);
+    const d = new Date(estado.dia + 'T12:00:00');
+    const fest = D.calendario.nombres_festivos[estado.dia];
+    etiqueta.textContent = `${DIAS[(d.getDay() + 6) % 7]} ${fecha(estado.dia)}${fest ? ' · ' + fest : ''}${D.calendario.carnaval.includes(estado.dia) ? ' · Carnaval' : ''} · ${nombreRuta(id)}`;
+    const gaps = viajes.map((v, i) => i === 0 ? null : v[1] - viajes[i - 1][1]);
+    const dur = viajes.map(v => v[2] > 0 ? v[2] : null);
+    const pax = viajes.map(v => v[3] >= 0 ? v[3] : null);
+    const buses = new Set(viajes.map(v => v[4]).filter(x => x >= 0)).size;
+    const tiles = [
+      ['Salidas del día', fmt(viajes.length), `${fmt(buses)} buses distintos`],
+      ['Intervalo mediano', fmt(mediana(gaps), 0) + ' min', `percentil 90: ${fmt(cuantil(gaps, 0.9), 0)} min`],
+      ['Salidas a menos de 2 min', fmt(gaps.filter(g => g != null && g < 2).length), `${fmt(gaps.filter(g => g != null && g > 10).length)} huecos de más de 10 min`],
+      ['Duración mediana', fmt(mediana(dur), 0) + ' min', `de ${fmt(cuantil(dur, 0.1), 0)} a ${fmt(cuantil(dur, 0.9), 0)} min (p10 a p90)`],
+      ['Pasajeros del día', fmt(pax.reduce((s, v) => s + (v || 0), 0)), `${fmt(mediana(pax), 0)} por viaje (mediana)`],
+      ['Primera y última salida', viajes.length ? `${hhmm(viajes[0][1])} – ${hhmm(viajes[viajes.length - 1][1])}` : '–', 'salidas programadas'],
+    ];
+    document.getElementById('kpis-salidas').innerHTML = tiles.map(([l, v, s]) => `<div class="kpi"><div class="label">${l}</div><div class="value num">${v}</div><div class="delta">${s}</div></div>`).join('');
+    if (!viajes.length) { ['c-salidas-linea', 'c-salidas-intervalo', 'c-salidas-duracion'].forEach(c => chart(c, base({ title: { text: 'Sin viajes válidos ese día', left: 'center', top: 'middle', textStyle: { color: t.muted, fontSize: 14, fontWeight: 'normal' } } }))); return; }
+    const filas = viajes.map((v, i) => { const ini = v[5] >= 0 ? v[5] : v[1]; const durOk = v[2] > 0 && v[2] <= 360; const fin = durOk ? ini + v[2] : (v[2] > 360 ? ini + 360 : ini + 5); return [i, ini, Math.max(fin, ini + 3), v[3], v[4], v[1], v[2]]; });
+    const maxPax = Math.max(50, ...filas.map(f => f[3] || 0));
+    const xMin = Math.max(0, Math.floor((Math.min(...filas.map(f => f[1])) - 10) / 60) * 60), xMax = Math.min(26 * 60, Math.ceil((Math.max(...filas.map(f => f[2])) + 10) / 60) * 60);
+    chart('c-salidas-linea', base({
+      tooltip: { trigger: 'item', backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 }, formatter: (p) => { const f = p.value; return `<b>Salida ${hhmm(f[5])}</b> · bus ${f[4] >= 0 ? S.vehiculos[f[4]] : 'sin dato'}<br>inicio ${hhmm(f[1])} · ${f[6] > 360 ? `cierre registrado ${fmt(f[6])} min después (tardío; la barra se corta a 6 h)` : f[6] > 0 ? `fin ${hhmm(f[2])} · ${fmt(f[6])} min` : 'duración sin dato'}<br>${f[3] >= 0 ? fmt(f[3]) + ' pasajeros' : 'pasajeros sin dato'}`; } },
+      legend: { show: false },
+      grid: { left: 54, right: 20, top: 34, bottom: 36 },
+      xAxis: { type: 'value', min: xMin, max: xMax, interval: 60, axisLabel: { color: t.muted, formatter: (v) => hhmm(v) }, splitLine: { lineStyle: { color: t.linea } }, axisLine: { lineStyle: { color: t.linea } } },
+      yAxis: { type: 'value', inverse: true, min: -1, max: filas.length, axisLabel: { show: false }, splitLine: { show: false }, axisLine: { show: false }, axisTick: { show: false }, name: 'viajes en orden de salida', nameLocation: 'middle', nameGap: 14, nameTextStyle: { color: t.muted } },
+      visualMap: { show: true, min: 0, max: maxPax, dimension: 3, orient: 'horizontal', right: 20, top: 0, itemWidth: 10, itemHeight: 120, text: [fmt(maxPax) + ' pasajeros', '0'], textStyle: { color: t.muted, fontSize: 11 }, inRange: { color: [css('--surface-2'), colorRuta(id)] } },
+      series: [{ type: 'custom', data: filas, encode: { x: [1, 2], y: 0 }, renderItem: (params, api) => { const y = api.value(0); const a = api.coord([api.value(1), y]); const b = api.coord([api.value(2), y]); const h = Math.max(2, Math.min(10, api.size([0, 1])[1] * 0.8)); return { type: 'rect', shape: { x: a[0], y: a[1] - h / 2, width: Math.max(2, b[0] - a[0]), height: h, r: 2 }, style: api.style() }; } }],
+    }));
+    const etiquetas = viajes.map(v => hhmm(v[1]));
+    chart('c-salidas-intervalo', base(Object.assign(ejes(etiquetas, 'minutos desde la salida anterior', { x: { axisLabel: { color: t.muted, fontSize: 11, interval: Math.max(0, Math.floor(viajes.length / 16)) } } }), {
+      tooltip: { trigger: 'axis', backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 }, formatter: (ps) => { const p = ps[0]; return `Salida ${p.axisValue}<br><b>${p.value == null ? '–' : fmt(p.value) + ' min'}</b> desde la anterior`; } },
+      legend: { show: false },
+      series: [{ type: 'bar', data: gaps.map(g => ({ value: g, itemStyle: { color: g == null ? t.muted : g < 2 ? css('--bad') : g > 10 ? css('--warn') : colorRuta(id) } })), barCategoryGap: '25%' }],
+    })));
+    const med = medianasDuracion(id);
+    chart('c-salidas-duracion', base({
+      tooltip: { trigger: 'item', backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 }, formatter: (p) => p.seriesType === 'scatter' ? `Salida ${hhmm(p.value[0])}: <b>${fmt(p.value[1])} min</b>` : `Mediana 2025 a las ${hhmm(p.value[0] - 30)}: <b>${fmt(p.value[1])} min</b>` },
+      legend: { top: 0, textStyle: { color: t.muted, fontSize: 12.5 } },
+      xAxis: { type: 'value', min: 4 * 60, max: 21 * 60, interval: 120, axisLabel: { color: t.muted, formatter: (v) => hhmm(v) }, splitLine: { lineStyle: { color: t.linea } }, axisLine: { lineStyle: { color: t.linea } } },
+      yAxis: { type: 'value', name: 'minutos por vuelta', max: 400, nameTextStyle: { color: t.muted, align: 'left', padding: [0, 0, 0, -44] }, splitLine: { lineStyle: { color: t.linea } }, axisLabel: { color: t.muted } },
+      series: [
+        { name: 'Viajes del día', type: 'scatter', data: viajes.filter(v => v[2] > 0 && v[2] <= 400).map(v => [v[1], v[2]]), symbolSize: 8, itemStyle: { color: colorRuta(id), opacity: 0.75 } },
+        { name: 'Mediana 2025', type: 'line', data: HORAS.map((h, i) => [h * 60 + 30, med[i]]), symbol: 'none', lineStyle: { width: 2, color: t.texto, type: 'dashed' }, itemStyle: { color: t.texto } },
+      ],
+    }));
+  }
+  document.getElementById('dia-salidas').addEventListener('change', (e) => { if (e.target.value) { estado.dia = e.target.value; dibujarSalidas(); } });
+  function moverDia(n) { const d = new Date(estado.dia + 'T12:00:00'); d.setDate(d.getDate() + n); const s = d.toISOString().slice(0, 10); if (s < '2025-01-01' || s > '2025-12-31') return; estado.dia = s; document.getElementById('dia-salidas').value = s; dibujarSalidas(); }
+  document.getElementById('dia-prev').addEventListener('click', () => moverDia(-1));
+  document.getElementById('dia-next').addEventListener('click', () => moverDia(1));
+
+  // ---------- correlación entre rutas ----------
+  function dibujarCorrel() {
+    const C = window.CORRELACIONES, t = tema(), notas = document.getElementById('notas-correl');
+    if (!C) { notas.innerHTML = '<li class="muted">El análisis de correlación entre rutas todavía no se ha generado (experimento E6).</li>'; chart('c-correl', base({ title: { text: 'Sin datos todavía', left: 'center', top: 'middle', textStyle: { color: t.muted, fontSize: 14, fontWeight: 'normal' } } })); return; }
+    const m = C.diaria_desestacionalizada, r = C.rutas;
+    const datos = []; m.forEach((fila, i) => fila.forEach((v, j) => datos.push({ value: [j, i, +Number(v).toFixed(2)], label: { color: v > 0.55 ? '#ffffff' : t.texto } })));
+    chart('c-correl', base({
+      tooltip: { position: 'top', backgroundColor: t.fondo, borderColor: t.linea, textStyle: { color: t.texto, fontSize: 12.5 }, formatter: (p) => `${r[p.value[1]]} y ${r[p.value[0]]}: <b>${fmt(p.value[2], 2)}</b>` },
+      legend: { show: false }, grid: { left: 90, right: 20, top: 10, bottom: 40 },
+      xAxis: { type: 'category', data: r, axisLabel: { color: t.muted }, axisLine: { lineStyle: { color: t.linea } } },
+      yAxis: { type: 'category', data: r, inverse: true, axisLabel: { color: t.muted }, axisLine: { lineStyle: { color: t.linea } } },
+      visualMap: { show: false, min: 0, max: 1, inRange: { color: [css('--surface-2'), css('--accent')] } },
+      series: [{ type: 'heatmap', data: datos, label: { show: true, fontSize: 13, fontWeight: 600, formatter: (p) => fmt(p.value[2], 2) }, itemStyle: { borderColor: t.fondo, borderWidth: 3 } }],
+    }));
+    notas.innerHTML = (C.conclusiones || []).map(x => `<li>${x}</li>`).join('');
+  }
+
+  // ---------- orquestación ----------
+  function dibujarPanel(k) {
+    const f = { resumen: dibujarResumen, mapa: dibujarMapa, demanda: () => { dibujarDiaria(); dibujarCalendario(); dibujarCorrel(); }, horas: dibujarHoras, salidas: dibujarSalidas, operacion: dibujarOperacion, ocupacion: dibujarOcupacion, flota: dibujarFlota, datos: dibujarDatos }[k];
+    if (f) f();
+    dibujado[k] = true;
+  }
+  function redibujar() { dibujarPanel(estado.tabActiva); }
+  window.addEventListener('resize', () => { Object.values(charts).forEach(c => c.resize()); });
+
+  let inicial = 'resumen';
+  const h = location.hash.replace('#', '');
+  if (TABS.some(t => t[0] === h)) inicial = h; else if (!EMBEBIDO) { try { const g = localStorage.getItem('sobusa-tab'); if (g && TABS.some(t => t[0] === g)) inicial = g; } catch (e) {} }
+  activar(inicial);
+
+  // ---------- modo embebido (dentro de la app Sobusa Despacho) ----------
+  // La app manda {tipo:'tema'} y {tipo:'pestana'}; el tablero no tiene día ni hora ({tipo:'dia'} se ignora).
+  if (EMBEBIDO) {
+    const avisarApp = m => { if (window.parent !== window) { try { window.parent.postMessage(Object.assign({ pagina: 'EDA_visual.html' }, m), '*'); } catch (e) {} } };
+    // Solo modo claro: un tema que no sea «light» se ignora.
+    const ponerTema = t => {
+      if (t !== 'light' || document.documentElement.getAttribute('data-theme') === 'light') return;
+      document.documentElement.setAttribute('data-theme', 'light');
+      Object.values(charts).forEach(c => c.dispose()); for (const k in charts) delete charts[k];
+      ponerFondo();
+      document.querySelectorAll('.chip').forEach(b => { if (b.dataset.id) b.style.setProperty('--c', colorRuta(b.dataset.id)); });
+      dibujarPanel(estado.tabActiva);
+    };
+    window.addEventListener('message', ev => {
+      if (ev.source !== window.parent || !ev.data || typeof ev.data !== 'object') return;
+      const m = ev.data;
+      if (m.tipo === 'tema') ponerTema(m.tema);
+      else if (m.tipo === 'pestana') { const k = m.pestana || m.k; if (TABS.some(t => t[0] === k) && k !== estado.tabActiva) activar(k); }
+    });
+    window.addEventListener('hashchange', () => { const k = location.hash.replace('#', ''); if (TABS.some(t => t[0] === k) && k !== estado.tabActiva) activar(k); });
+    avisarApp({ tipo: 'listo', pestana: estado.tabActiva });
+  }
+})();
+</script>
+</body>
+</html>

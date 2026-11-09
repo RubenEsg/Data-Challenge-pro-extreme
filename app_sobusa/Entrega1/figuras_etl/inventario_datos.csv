@@ -1,0 +1,21 @@
+archivo,origen,filas,columnas,MB,compresion,periodo
+Procesos.parquet,exportar_tablas.py,1,88,0.030519,ZSTD,—
+rutas.parquet,exportar_tablas.py,3,43,0.012359,ZSTD,—
+vehiculos.parquet,exportar_tablas.py,656,144,0.109892,ZSTD,2016-12-21 → 2026-08-31 (fechaingreso)
+dias_semana.parquet,exportar_tablas.py,7,2,0.000906,ZSTD,—
+estacionalidades.parquet,exportar_tablas.py,24,5,0.002962,ZSTD,—
+estacionalidades_anio.parquet,exportar_tablas.py,231,6,0.00448,ZSTD,2017-01-01 → 2026-12-25 (fecha_inicio)
+novedades_viales.parquet,exportar_tablas.py,59,5,0.005367,ZSTD,—
+novedades_viales_fecha.parquet,exportar_tablas.py,28,8,0.003056,ZSTD,2023-02-10 → 2025-06-06 (fecha)
+novedades_viales_ruta.parquet,exportar_tablas.py,0,3,0.000532,—,—
+rutas_segmentos_config.parquet,exportar_tablas.py,22,10,0.003441,ZSTD,—
+rutas_segmentos.parquet,exportar_tablas.py,2695,9,67.369849,ZSTD,—
+timbradas_consolidado.parquet,exportar_tablas.py,10731,14,0.147455,ZSTD,—
+timbradas_anio.parquet,exportar_tablas.py,30913,15,0.395993,ZSTD,2023 → 2026 (ano)
+timbradas_segmentos.parquet,exportar_tablas.py,2795607,10,21.106822,ZSTD,2023-01-01 → 2023-02-27 (fecha)
+progvehiculos.parquet,exportar_tablas.py,564837,73,41.929501,ZSTD,2023-01-01 → 2025-12-31 (fechasalida)
+conteo_celdas_dia.parquet,agregar_conteo.py → consolidar_conteo.py,2245445,8,9.928391,ZSTD,2023-01-01 → 2026-01-15 (dia)
+conteo_celdas_hora.parquet,agregar_conteo.py → consolidar_conteo.py,2235063,9,8.696456,ZSTD,2023-01-01 → 2026-01-15 (dia)
+conteo_viajes.parquet,agregar_conteo.py → consolidar_conteo.py,538829,12,11.900029,ZSTD,2023-01-01 → 2025-12-30 (primer_evento)
+conteo_puntos_control.parquet,agregar_conteo.py → consolidar_conteo.py,5167266,9,130.879484,ZSTD,2023-01-01 → 2026-01-15 (llegada)
+conteo_tramos_control.parquet,agregar_tramos_control.py (--consolidar),8066678,10,125.130483,ZSTD,2023-01-01 → 2026-01-15 (inicio)

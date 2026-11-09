@@ -51,7 +51,7 @@ cifra del archivo de evidencia que se indica y no inventa valores.
 | Cobertura de app/ (suite final) | 94,28 % | `api_frecuencias/docs/evidencias/pruebas/coverage_final.xml` |
 | Cobertura de app/ (CI en copia limpia) | 91,94 % | `api_frecuencias/docs/evidencias/pruebas/ci/coverage.xml` |
 | SonarQube, puerta «Reto Sobusa v1.5» | OK (vulnerabilidades 0, bugs 0, críticos 0, bloqueantes 0, cobertura 94.3 %) | `api_frecuencias/docs/evidencias/sonarqube/quality_gate.json` |
-| GitHub Actions (runner limpio) | en verde en GitHub Actions (run 42627652053, 2026-11-09) | `api_frecuencias/docs/evidencias/pruebas/ci_github.txt` |
+| GitHub Actions (runner limpio) | en verde en GitHub Actions (run 42676559408, 2026-11-09) | `api_frecuencias/docs/evidencias/pruebas/ci_github.txt` |
 | k6, consultas paginadas | p95 451,3 ms, errores 0,00 % | `api_frecuencias/docs/evidencias/pruebas/k6_consultas.json` |
 | k6 con un año de resultados | p95 627,5 ms, errores 0,00 % | `api_frecuencias/docs/evidencias/pruebas/k6_volumen.json` |
 

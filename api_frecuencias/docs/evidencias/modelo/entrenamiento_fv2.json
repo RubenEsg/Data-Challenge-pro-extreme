@@ -1,0 +1,30 @@
+{
+  "version": "fv2-2026-11-09",
+  "hasta": "2025-08-31",
+  "semilla": 42,
+  "reproducibilidad": {
+    "sha256_1": "24c70b9ca3f6855480d7592855544b82e60e51179b30b88129ab09aa7ed92010",
+    "sha256_2": "24c70b9ca3f6855480d7592855544b82e60e51179b30b88129ab09aa7ed92010",
+    "identico": true
+  },
+  "model_id": "hgb_fv2_20250831_s42",
+  "sha256": "24c70b9ca3f6855480d7592855544b82e60e51179b30b88129ab09aa7ed92010",
+  "decision_entrenamiento": "activado: mejora a B1 en validación",
+  "compuerta": {
+    "activo_previo": "hgb_fv1_20250831_s42",
+    "candidato": "hgb_fv2_20250831_s42",
+    "wape_validacion": {
+      "candidato": 13.554,
+      "activo": 13.632,
+      "b1": 15.117
+    },
+    "wape_prueba": {
+      "candidato": 14.77,
+      "activo": 15.067,
+      "b1": 21.182
+    },
+    "decision": "activar: mejora a B1 y no empeora al modelo activo en validación",
+    "ventana_validacion": "2025-09-01 a 2025-10-31 (2025-09-01 en adelante)"
+  },
+  "nota": "Registro de la corrida del 2026-11-09 que activó fv2. La compuerta de esa versión del script también imprimía la prueba reservada (wape_prueba): por eso la prueba quedó como reporte informativo y no como una muestra nunca vista (decision_fv2.md). Desde entonces scripts/entrenar.py e inferencia.entrenar() solo miden la validación; la reproducibilidad (mismo SHA-256 en dos entrenamientos) no cambia."
+}

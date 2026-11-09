@@ -1,0 +1,12 @@
+Suite completa (tests/unit, tests/integracion, tests/replica, tests/contrato y tests/datos_ml), con SCHEMATHESIS_EJEMPLOS=3, una base de pruebas propia en el servidor PostgreSQL local (puerto 5433) y la réplica de solo lectura en el puerto 5434.
+Inicio: Mon Nov  9 05:33:07 HPS 2026. Fin: Mon Nov  9 05:40:16 HPS 2026. Tiempo de las pruebas según el junit: 524 s.
+Resultado (junit): 904 casos: 900 aprobados, 0 fallidos, 0 con error y 4 omitidos.
+Aprobados por carpeta: contrato 160, datos_ml 22, integracion 75, replica 177, unit 466.
+Pruebas de alertas: tests/unit/test_alertas.py 50 aprobadas; tests/unit/test_alertas_observadas.py 38 aprobadas; tests/unit/test_alertas_pronostico.py 37 aprobadas; tests/integracion/test_alertas_observadas.py 2 aprobadas; tests/integracion/test_export_alertas.py 2 aprobadas; tests/datos_ml/test_backtest_alertas.py 3 aprobadas.
+
+Fallidos: ninguno.
+Omitidos (a propósito, requieren una variable de entorno):
+- tests/integracion/test_caida.py::test_sigkill_en_lectura_y_prediccion_y_reserva_vencida: prueba de caída con procesos reales: active con PRUEBA_CAIDA=1 (~2 min)
+- tests/replica/test_integrado.py::test_ciclo_integrado_lee_exactamente_lo_nuevo_y_luego_nada: escribe en la réplica (llegada de datos y ai_frecuencias): REPLICA_PRUEBAS_ESCRITURA=1
+- tests/replica/test_llegada.py::test_trigger_llena_timbradas_segmentos_y_la_lectura_es_exacta: escribe en la réplica como extreme_dba: REPLICA_PRUEBAS_ESCRITURA=1
+- tests/replica/test_llegada.py::test_solape_recupera_la_captura_que_confirma_tarde_exactamente_una_vez: escribe en la réplica como extreme_dba: REPLICA_PRUEBAS_ESCRITURA=1

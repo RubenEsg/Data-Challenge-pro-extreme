@@ -1,0 +1,3 @@
+# Registros de Tectonic (compilar.py los revisa y los vuelve a escribir en cada corrida)
+*.log
+__pycache__/

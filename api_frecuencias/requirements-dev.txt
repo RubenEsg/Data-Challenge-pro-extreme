@@ -1,0 +1,59 @@
+# Herramientas de DESARROLLO, pruebas e integración continua (spec v1.5 §14.1, §14.2 «Calidad del código», RNF-007,
+# RNF-013, RNF-014). No van en la imagen de la API: se instalan en el venv de desarrollo y en los jobs de CI.
+#   python -m pip install -r requirements-dev.txt        (incluye requirements.txt)
+# Versiones exactas del entorno de desarrollo (pip freeze del .venv).
+-r requirements.txt
+
+# Pruebas unitarias, de integración y cobertura (pytest + unittest.mock)
+pytest==9.2.0
+pytest-cov==7.1.0
+coverage==7.17.2
+iniconfig==2.3.1
+pluggy==1.7.0
+Pygments==2.21.0
+# Cliente HTTP de las pruebas de la API (TestClient) y de los scripts de demostración y rendimiento
+httpx==0.28.1
+httpcore==1.0.9
+
+# Análisis estático (ruff y bandit; SonarQube corre aparte con scripts/sonar_local.py)
+ruff==0.17.4
+bandit==1.9.4
+stevedore==5.9.1
+rich==15.0.0
+markdown-it-py==4.2.0
+mdurl==0.1.2
+
+# PostgreSQL/PostGIS efímero (tests/testcontainers, TESTCONTAINERS=1)
+testcontainers==4.15.0
+docker==7.2.0
+pywin32==312; sys_platform == "win32"
+
+# Contrato OpenAPI: jsonschema (Draft 2020-12 = OpenAPI 3.1) y Schemathesis (pruebas por propiedades)
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+referencing==0.37.0
+rpds-py==2026.9.1
+attrs==26.1.0
+schemathesis==4.33.1
+hypothesis==6.170.15
+hypothesis-graphql==0.13.6
+graphql-core==3.3.2
+jsonschema_rs==0.60.3
+harfile==0.6.0
+pyrate-limiter==4.5.1
+sortedcontainers==2.4.0
+Werkzeug==3.1.9
+
+# Exportación del modelo a ONNX (solo scripts/exportar_onnx.py; la imagen usa onnxruntime, ya en requirements.txt)
+skl2onnx==1.20.0
+onnx==1.23.2
+ml_dtypes==0.6.0
+
+# Documentación y evidencias: capturas del navegador (Playwright), presentación (python-pptx) y video
+playwright==1.63.0
+pyee==13.0.1
+python-pptx==1.0.2
+lxml==6.1.3
+pillow==13.0.0
+xlsxwriter==3.3.1
+imageio-ffmpeg==0.8.1

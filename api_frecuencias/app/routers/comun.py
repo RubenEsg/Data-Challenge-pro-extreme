@@ -3,17 +3,34 @@ from __future__ import annotations
 
 import io
 from datetime import datetime
-from typing import Any
+from typing import Annotated, Any
 
 import pandas as pd
 from fastapi import Query
 from fastapi.responses import Response
+from pydantic import AfterValidator
 from sqlalchemy import Select, func, select
 from sqlalchemy.orm import Session
 
+from app.esquemas import bogota_profundo
 from app.servicios.ejecucion import ZONA, json_seguro
 
 LIMITE_EXPORTACION = 100_000
+HORIZONTES_VALIDOS = (30, 60, 120)
+DESPLAZAMIENTO_MAX = 1_000_000_000          # cabe en el BIGINT de PostgreSQL: fuera de rango es 422, no 500
+
+
+def _horizonte_valido(valor: int | None) -> int | None:
+    if valor is not None and valor not in HORIZONTES_VALIDOS:
+        raise ValueError("horizonte_min debe ser 30, 60 o 120")
+    return valor
+
+
+# Filtro opcional de horizonte en la consulta: Literal[30, 60, 120] no acepta el texto «60» de una URL, así que se
+# declara entero acotado con su enumeración (OpenAPI) y un validador que rechaza los demás valores con 422.
+HorizonteConsulta = Annotated[int | None, Query(ge=30, le=120, json_schema_extra={"enum": list(HORIZONTES_VALIDOS)},
+                                                description="Horizonte del pronóstico en minutos: 30, 60 o 120"),
+                              AfterValidator(_horizonte_valido)]
 
 
 class ErrorApi(Exception):
@@ -28,7 +45,7 @@ def no_encontrado(recurso: str, ident: Any) -> ErrorApi:
 
 class ParametrosPagina:
     def __init__(self, limite: int = Query(50, ge=1, le=500, description="Tamaño de página"),
-                 desplazamiento: int = Query(0, ge=0, description="Registros a saltar"),
+                 desplazamiento: int = Query(0, ge=0, le=DESPLAZAMIENTO_MAX, description="Registros a saltar"),
                  orden: str | None = Query(None, description="Campo de orden; prefijo '-' para descendente")):
         self.limite, self.desplazamiento, self.orden = limite, desplazamiento, orden
 
@@ -55,9 +72,38 @@ def _fila(obj) -> dict:
     return {c.key: getattr(obj, c.key) for c in obj.__table__.columns}
 
 
+CABECERAS_EXPORTACION = {
+    "X-Total-Count": {"description": "Registros que cumplen el filtro (aunque el archivo traiga menos)",
+                      "required": True, "schema": {"type": "integer", "minimum": 0}},
+    "X-Truncado": {"description": f"true si el archivo se cortó en el tope de {LIMITE_EXPORTACION:,} filas "
+                                  "(LIMITE_EXPORTACION); afine los filtros para exportar el resto",
+                   "required": True, "schema": {"type": "string", "enum": ["true", "false"]}},
+}
+
+
+def documentar_exportaciones(esquema: dict, prefijos_excluidos: tuple[str, ...] = ()) -> dict:
+    """Agrega X-Total-Count y X-Truncado a la respuesta 200 de cada /export que arma exportar() (idempotente)."""
+    for ruta, operaciones in esquema.get("paths", {}).items():
+        if not ruta.endswith("/export") or ruta.startswith(prefijos_excluidos):
+            continue
+        respuesta = (operaciones.get("get") or {}).get("responses", {}).get("200")
+        if respuesta is not None:
+            respuesta["headers"] = {**(respuesta.get("headers") or {}), **CABECERAS_EXPORTACION}
+    return esquema
+
+
 def exportar(sesion: Session, consulta: Select, modelo, formato: str, nombre: str, orden: str | None,
              por_defecto: str) -> Response:
-    filas = sesion.scalars(ordenar(consulta, modelo, orden, por_defecto).limit(LIMITE_EXPORTACION)).all()
+    """CSV (UTF-8 con BOM) o XLSX con los registros filtrados, hasta LIMITE_EXPORTACION filas. Siempre responde
+    X-Total-Count (registros que cumplen el filtro) y X-Truncado (true si el archivo se cortó en el tope)."""
+    filas = sesion.scalars(ordenar(consulta, modelo, orden, por_defecto).limit(LIMITE_EXPORTACION + 1)).all()
+    truncado = len(filas) > LIMITE_EXPORTACION
+    if truncado:
+        filas = filas[:LIMITE_EXPORTACION]
+        total = sesion.scalar(select(func.count()).select_from(consulta.order_by(None).subquery())) or 0
+    else:
+        total = len(filas)
+    cabeceras = {"X-Total-Count": str(total), "X-Truncado": "true" if truncado else "false"}
     registros = []
     for f in filas:
         d = _fila(f)
@@ -67,7 +113,8 @@ def exportar(sesion: Session, consulta: Select, modelo, formato: str, nombre: st
             elif isinstance(v, (dict, list)):
                 import json
 
-                d[k] = json.dumps(json_seguro(v), ensure_ascii=False)
+                # §8.1 también dentro del JSON de la celda (comentarios[].en, variables, métricas, detalle)
+                d[k] = json.dumps(bogota_profundo(json_seguro(v)), ensure_ascii=False)
             elif v is not None and not isinstance(v, (int, float, str, bool)):
                 d[k] = str(v)
         registros.append(d)
@@ -79,7 +126,8 @@ def exportar(sesion: Session, consulta: Select, modelo, formato: str, nombre: st
             df.to_excel(escritor, index=False, sheet_name=nombre[:31])
         return Response(buffer.getvalue(),
                         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        headers={"Content-Disposition": f'attachment; filename="{nombre}_{marca}.xlsx"'})
+                        headers={"Content-Disposition": f'attachment; filename="{nombre}_{marca}.xlsx"',
+                                 **cabeceras})
     contenido = df.to_csv(index=False).encode("utf-8-sig")
     return Response(contenido, media_type="text/csv; charset=utf-8",
-                    headers={"Content-Disposition": f'attachment; filename="{nombre}_{marca}.csv"'})
+                    headers={"Content-Disposition": f'attachment; filename="{nombre}_{marca}.csv"', **cabeceras})

@@ -4,6 +4,10 @@ Todo sale de archivos del propio proyecto generados por scripts/preparar_datos_a
 - demanda_horaria.parquet: pasajeros y salidas por ruta, fecha y hora de salida (4-20 h), 2023-2025.
 - catalogo_rutas.json: capacidad (50), tiempo de ciclo, flota y frecuencia actual por ruta.
 - parametros_operativos_hora.parquet: los mismos parámetros por ruta, tipo de día y hora.
+- contexto_operacional.parquet: novedades viales por hora y festivos oficiales (variables fv2, se conocen antes).
+- perfil_intrahorario.parquet: reparto de las subidas entre la primera y la segunda media hora (ventanas 30/60/120).
+- clima_diario.parquet: lluvia diaria observada, solo para evaluar por condición.
+Los tres últimos son opcionales: si faltan, las variables de contexto valen 0 y el reparto intrahorario es 0,5.
 
 La carpeta se puede cambiar con la variable de entorno DATA_DIR (la misma de app/config.py).
 No hay conexión a ninguna base de datos aquí: es la fuente offline y reproducible por defecto.
@@ -126,7 +130,60 @@ def tipo_dia_de(fecha: date, festivo: bool = False) -> int:
     return 1 if fecha.weekday() == 5 else 0
 
 
+COLUMNAS_CONTEXTO = ["fecha", "hora", "nov_impacto", "nov_sube", "festivo_oficial"]
+
+
+@lru_cache(maxsize=2)
+def _cargar_parquet_opcional(ruta_archivo: str, mtime: float) -> pd.DataFrame | None:
+    if mtime < 0:
+        return None
+    d = pd.read_parquet(ruta_archivo)
+    if "fecha" in d.columns:
+        d["fecha"] = pd.to_datetime(d["fecha"]).dt.date
+    return d
+
+
+def _opcional(nombre: str) -> pd.DataFrame | None:
+    archivo = carpeta_datos() / nombre
+    mtime = archivo.stat().st_mtime if archivo.exists() else -1.0
+    d = _cargar_parquet_opcional(str(archivo), mtime)
+    return None if d is None else d.copy()
+
+
+def huella_archivo(nombre: str) -> float:
+    """mtime del archivo de datos (-1 si no existe): sirve de llave de caché para lo que se calcula con él."""
+    archivo = carpeta_datos() / nombre
+    return archivo.stat().st_mtime if archivo.exists() else -1.0
+
+
+def contexto_operacional() -> pd.DataFrame:
+    """Contexto conocido por adelantado por fecha y hora (variables fv2): nov_impacto (porcentaje_impacto de la novedad
+    vial que cruza la hora, 0 si no hay), nov_sube (etiqueta SUBE) y festivo_oficial (FESTIVO_NACIONAL de
+    estacionalidades_anio). Tabla vacía con esas columnas si falta datos/contexto_operacional.parquet."""
+    d = _opcional("contexto_operacional.parquet")
+    if d is None:
+        return pd.DataFrame({c: pd.Series(dtype="float64" if c.startswith("nov_i") else "int64") for c in
+                             COLUMNAS_CONTEXTO}).astype({"fecha": "object"})
+    d["hora"] = d["hora"].astype(int)
+    return d[COLUMNAS_CONTEXTO]
+
+
+def perfil_intrahorario() -> pd.DataFrame:
+    """Fracción de las subidas de la hora que viaja en los buses que salen entre h:00 y h:29, por ruta, tipo_dia (0, 1,
+    2) y hora (viajes de 2024). Vacía si falta datos/perfil_intrahorario.parquet (se usa entonces el reparto 0,5)."""
+    d = _opcional("perfil_intrahorario.parquet")
+    if d is None:
+        return pd.DataFrame(columns=["ruta", "tipo_dia", "hora", "fraccion_primera_media", "dias"])
+    return d
+
+
+def clima_diario() -> pd.DataFrame | None:
+    """Lluvia diaria observada (solo para evaluar por condición; nunca es variable del pronóstico)."""
+    return _opcional("clima_diario.parquet")
+
+
 def limpiar_cache() -> None:
     _cargar_demanda.cache_clear()
     _cargar_catalogo.cache_clear()
     _cargar_parametros.cache_clear()
+    _cargar_parquet_opcional.cache_clear()

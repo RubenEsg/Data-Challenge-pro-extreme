@@ -1,0 +1,43 @@
+Sesión de lectura en la réplica: {'usuario': 'lector_ia', 'solo_lectura': 'on', 'zona': 'America/Bogota', 'timeout': '30s'}
+Cada consulta: validar_solo_select -> SET TRANSACTION READ ONLY -> SET LOCAL statement_timeout -> SELECT -> ROLLBACK (app.servicios.fuentes.FuentePostgresSoloLectura.consultar)
+
+Fidelidad réplica frente a exportaciones Parquet (mismas llaves, RF-014):
+  viajes     {"idruta": "2", "desde": "2025-03-03", "hasta": "2025-03-03"}          réplica       72 archivos       72  IGUAL
+  viajes     {"idruta": "16", "desde": "2024-01-01", "hasta": "2024-12-31"}         réplica    98916 archivos    98916  IGUAL
+  despachos  {"idruta": "21", "desde": "2025-01-01", "hasta": "2025-06-30"}         réplica    14645 archivos    14645  IGUAL
+  viajes     {}                                                                     réplica   564837 archivos   564837  IGUAL
+  despachos  {}                                                                     réplica   520648 archivos   520648  IGUAL
+  procesos   réplica        1 archivos        1  IGUAL
+  rutas      réplica        3 archivos        3  IGUAL
+  vehiculos  réplica      656 archivos      656  IGUAL
+  segmentos  réplica     2695
+
+Relaciones (contexto operativo consistente, §3.1):
+  viajes: 564837
+  viajes_sin_ruta: 0
+  viajes_sin_vehiculo: 0
+  segmentos_sin_ruta: 2309
+  segmentos_sin_config: 0
+  Longitud declarada (suma de longitud_m) frente a la geometría (geography), por config activa:
+    ruta   2 config   1:  135 segmentos, 67217.7 m declarados, 67217.7 m de geometría
+    ruta   3 config   2:  156 segmentos, 77772.3 m declarados, 77772.3 m de geometría
+    ruta   8 config   3:  135 segmentos, 67217.7 m declarados, 67217.7 m de geometría
+    ruta   9 config   4:  135 segmentos, 67217.7 m declarados, 67217.7 m de geometría
+    ruta  10 config   5:  156 segmentos, 77772.3 m declarados, 77772.3 m de geometría
+    ruta  12 config   6:   97 segmentos, 48476.3 m declarados, 48476.3 m de geometría
+    ruta  13 config   7:   97 segmentos, 48476.3 m declarados, 48476.3 m de geometría
+    ruta  14 config   8:   97 segmentos, 48476.3 m declarados, 48476.3 m de geometría
+    ruta  15 config   9:  123 segmentos, 61127.3 m declarados, 61127.3 m de geometría
+    ruta  16 config  10:  123 segmentos, 61127.3 m declarados, 61127.3 m de geometría
+    ruta  17 config  11:  123 segmentos, 61127.3 m declarados, 61127.3 m de geometría
+    ruta  18 config  12:  102 segmentos, 50815.4 m declarados, 50815.4 m de geometría
+    ruta  19 config  13:  102 segmentos, 50815.4 m declarados, 50815.4 m de geometría
+    ruta  20 config  14:  102 segmentos, 50815.4 m declarados, 50815.4 m de geometría
+    ruta  21 config  15:  128 segmentos, 63902.0 m declarados, 63902.0 m de geometría
+    ruta  22 config  16:  128 segmentos, 63902.0 m declarados, 63902.0 m de geometría
+    ruta  23 config  17:  128 segmentos, 63902.0 m declarados, 63902.0 m de geometría
+    ruta  81 config  18:   86 segmentos, 42711.5 m declarados, 42711.5 m de geometría
+    ruta 112 config  19:  128 segmentos, 63821.5 m declarados, 63821.5 m de geometría
+    ruta 113 config  20:  103 segmentos, 51161.4 m declarados, 51161.4 m de geometría
+    ruta 124 config  21:  166 segmentos, 82877.5 m declarados, 82877.5 m de geometría
+    ruta 126 config  22:  145 segmentos, 72356.6 m declarados, 72356.6 m de geometría

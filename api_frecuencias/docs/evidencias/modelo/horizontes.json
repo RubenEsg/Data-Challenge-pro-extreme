@@ -1,0 +1,52 @@
+{
+ "generado_en": "2026-11-09T05:51:33+00:00",
+ "protocolo": [
+  "Protocolo (origen móvil):",
+  "- Modelo fv2 congelado con datos <= 2024-12-31 (semilla 42, hiperparámetros por defecto).",
+  "- Peso del factor intradía (nowcast) calibrado en ene-feb 2025 con inferencia.calibrar_nowcast; evaluación mar-dic 2025.",
+  "- Un origen en cada h:00 (h = 6..20): el factor usa solo las horas cerradas h-2 y h-1 (observado / esperado).",
+  "  - 60 min: objetivo = pasajeros de la hora h.",
+  "  - 120 min: objetivo = horas h y h+1 (h = 6..19).",
+  "  - 30 min: objetivo = pasajeros de la hora h x fracción OBSERVADA de subidas de los viajes que salen entre h:00 y",
+  "    h:29 ese día (conteo_viajes + progvehiculos de 2025). Es una aproximación: las exportaciones no traen el conteo",
+  "    crudo por minuto. El pronóstico reparte la hora con 0,5 (prorrateo anterior) o con el perfil intrahorario de 2024",
+  "    (datos/perfil_intrahorario.parquet, sin datos de 2025: no hay fuga)."
+ ],
+ "modelo": "fv2 congelado <= 2024-12-31 (semilla 42)",
+ "peso_nowcast_calibrado_ene_feb_2025": 0.3,
+ "calibracion_wape_por_peso": {
+  "0.0": 14.87,
+  "0.1": 14.558,
+  "0.2": 14.333,
+  "0.3": 14.198,
+  "0.5": 14.236,
+  "1.0": 15.495
+ },
+ "evaluado": "2025-03-01 a 2025-12-31",
+ "h60": {
+  "n": 13770,
+  "modelo_sin_ajuste": 14.8,
+  "modelo_con_nowcast": 14.71,
+  "modelo_nowcast_peso_1": 16.53,
+  "b1": 18.96
+ },
+ "h120": {
+  "n": 12852,
+  "modelo_sin_ajuste": 10.94,
+  "modelo_con_nowcast": 10.87,
+  "b1": 15.44
+ },
+ "h30": {
+  "n": 13212,
+  "fraccion_observada_media": 0.5357,
+  "fraccion_perfil_media": 0.5374,
+  "modelo_sin_ajuste_prorrateo_0_5": 20.02,
+  "modelo_con_nowcast_prorrateo_0_5": 20.03,
+  "modelo_sin_ajuste_perfil": 19.43,
+  "modelo_con_nowcast_perfil": 19.43,
+  "b1_prorrateo_0_5": 23.79,
+  "b1_perfil": 23.12,
+  "nota": "observado de 30 min = pasajeros de la hora x fracción observada de subidas de los viajes que salen entre h:00 y h:29 (aproximación: no hay conteo crudo por minuto en las exportaciones)"
+ },
+ "segundos": 10.5
+}

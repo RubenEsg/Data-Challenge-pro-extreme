@@ -803,6 +803,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pantalla--despacho { gap: var(--e-3); max-width: calc(var(--ancho-contenido) + var(--e-8) * 5); }
 .desp-cab { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2) var(--e-4); min-width: 0; }
 .desp-titulo { flex: none; font-size: var(--t-2xl); line-height: var(--lh-uno); white-space: nowrap; }
+.desp-titulos { display: grid; gap: var(--e-1); flex: 0 1 calc(var(--e-8) * 5); min-width: 0; }
+/* RNF-012: el botón de atribución del mapa (MapLibre) también muestra el foco del teclado con el contorno de la app */
+.maplibregl-ctrl.maplibregl-ctrl-attrib .maplibregl-ctrl-attrib-button:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
+.desp-subtitulo { margin: 0; }
 .desp-mandos { display: flex; flex: 1 1 calc(var(--e-8) * 10); flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--e-2); min-width: 0; }
 .desp-mandos > .control-rotulado { gap: var(--e-1); padding: var(--e-1) var(--e-1) var(--e-1) var(--e-4); border-radius: var(--radio-xl); background: var(--superficie-2); }
 .desp-mandos .segmentado { padding: 0; background: transparent; }
@@ -933,4 +937,93 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .desp-alerta__texto { white-space: normal; }
   .desp-alertas-cuerpo { max-height: none; }
   .desp-tarjeta-alertas { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* --------------------------------------------------------------------------
+   Pantallas de la API del reto: Alertas, Recomendaciones y Operación (cliente_api.py). Solo tokens.
+   -------------------------------------------------------------------------- */
+:root {
+  --pantalla-alertas: var(--tinta);
+  --pantalla-recomendaciones: var(--tinta);
+  --pantalla-operacion: var(--tinta);
+  --pantalla-monitoreo: var(--tinta);
+}
+/* Once pestañas: desde 1101 px la barra va compacta (pestañas más angostas y el chip «Cálculo en vivo» solo con su
+   icono; el nombre sigue en title y aria-label). El ancho de la barra tiene tope, así que tampoco a 1600 o 1920 px
+   caben las pestañas anchas; compactas caben de 1280 px en adelante y, sin el nombre de la marca, desde 1101 px
+   (medido con Edge sin interfaz). */
+@media (min-width: 1101px) {
+  .barra__dentro { gap: var(--e-3); }
+  .barra__lista { gap: 0; }
+  .barra__enlace { padding: 0 var(--e-3); }
+  .barra__estado { padding: 0 var(--e-3); }
+  .barra__estado-texto { display: none; }
+  .barra__nombre { font-size: var(--t-l); }
+}
+/* Entre 1101 y 1279 px tampoco caben las once con el nombre de la marca: queda el logo (el enlace conserva su title) */
+@media (min-width: 1101px) and (max-width: 1279px) {
+  .barra__nombre { display: none; }
+}
+.api-respuesta { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--e-3); justify-items: start; }
+.api-respuesta:empty, .api-respuesta > div:empty { display: none; }
+.api-chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); }
+.api-tenue { color: var(--tinta-3); }
+.api-codigo { font-weight: var(--peso-fuerte); }
+.api-titular { color: var(--tinta-2); font-size: var(--t-s); }
+.api-resumen { display: grid; gap: var(--e-3); }
+/* Campos de texto y número: píldora con borde fino, como el selector de fecha */
+.campo-bloque { display: grid; gap: var(--e-1); min-width: 0; }
+.campo__rotulo { color: var(--tinta-2); font-size: var(--t-s); font-weight: var(--peso-medio); }
+.campo__ayuda { color: var(--tinta-3); font-size: var(--t-xs); }
+.campo { width: 100%; min-width: 0; height: 40px; padding: 0 var(--e-4); border: 1px solid var(--linea-fuerte); border-radius: var(--radio-pill);
+  background: var(--blanco); color: var(--tinta); font-size: var(--t-s); font-variant-numeric: tabular-nums; }
+.campo::placeholder { color: var(--tinta-3); }
+.campo:hover { background: var(--superficie-hover); }
+.campo:focus-visible, .campo:focus-within { outline: 2px solid var(--foco); outline-offset: 2px; }
+.campo input { min-width: 0; border: 0; outline: none; background: transparent; color: inherit; font: inherit; }
+.api-formulario { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: var(--e-3); }
+.api-acciones { display: grid; gap: var(--e-3); padding-top: var(--e-4); border-top: 1px solid var(--linea); }
+.api-usuario { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); }
+/* Desplegables de Dash con el estilo de las píldoras */
+.desplegable-api { min-width: 160px; font-size: var(--t-s); }
+.desplegable-api--ancho { min-width: 260px; max-width: 100%; }
+/* Lista: un botón por fila (abre el detalle) y la paginación */
+.api-fila { display: inline-flex; align-items: center; min-height: 28px; padding: 0 var(--e-2); border: 1px solid var(--linea-fuerte);
+  border-radius: var(--radio-pill); background: var(--blanco); color: var(--acento); font-size: var(--t-s); font-weight: var(--peso-medio);
+  white-space: nowrap; cursor: pointer; }
+.api-fila:hover { background: var(--acento-suave); color: var(--acento-sobre-suave); }
+.api-fila--activa, .api-fila--activa:hover { border-color: var(--tinta); background: var(--tinta); color: var(--tinta-inversa); }
+.api-paginacion { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--e-2); margin-top: var(--e-3); }
+.api-paginas { color: var(--tinta-2); font-size: var(--t-s); font-variant-numeric: tabular-nums; }
+/* Detalle: grupos con su título y pares rótulo-valor */
+.api-grupo { display: grid; gap: var(--e-2); padding-top: var(--e-4); border-top: 1px solid var(--linea); }
+.api-grupo__titulo { color: var(--tinta); font-size: var(--t-m); font-weight: var(--peso-fuerte); }
+.api-campos { display: grid; gap: var(--e-1); margin: 0; }
+.api-campos__fila { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: var(--e-3); align-items: baseline; }
+.api-campos dt { color: var(--tinta-2); font-size: var(--t-s); }
+.api-campos dd { margin: 0; min-width: 0; color: var(--tinta); font-size: var(--t-s); overflow-wrap: anywhere; }
+.api-campos code, .api-formula code, .api-linea code { font-family: var(--fuente-mono); font-size: var(--t-xs); overflow-wrap: anywhere; }
+.api-lista { display: grid; gap: var(--e-1); margin: 0; padding-left: var(--e-4); font-size: var(--t-s); }
+.api-formula { color: var(--tinta-2); font-size: var(--t-s); overflow-wrap: anywhere; }
+.api-escenario { display: grid; gap: var(--e-3); margin-top: var(--e-4); }
+.api-trabajo { display: grid; gap: var(--e-2); min-width: min(100%, 420px); }
+/* Línea de tiempo de la auditoría de un modelo */
+.api-linea { display: grid; gap: var(--e-2); margin: 0; padding-left: var(--e-4); border-left: 2px solid var(--linea); list-style: none; }
+.api-linea__evento { color: var(--tinta); font-size: var(--t-s); overflow-wrap: anywhere; }
+.api-linea__evento strong { font-weight: var(--peso-fuerte); }
+/* Foco visible del selector de fecha (el input no dibuja su contorno: lo dibuja la pildora que lo envuelve) */
+.dash-datepicker-input-wrapper.fecha:focus-within { outline: 2px solid var(--foco); outline-offset: 2px; }
+.control-rotulado .dash-datepicker, .campo-bloque .dash-datepicker { display: inline-flex; width: auto; background: transparent; }
+/* Piezas propias de Dash 4 dentro de los campos: placeholder del desplegable y botones de paso de los numericos */
+.desplegable-api .dash-dropdown-placeholder { color: var(--tinta-3); }
+.campo .dash-input-stepper { color: var(--tinta-2); font-weight: var(--peso-medio); }
+.api-vista { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--e-7); min-width: 0; }
+.api-vista[hidden] { display: none; }
+.api-nowrap { white-space: nowrap; }
+.api-marca { display: inline-block; min-width: calc(var(--e-8) * 3); }
+.api-motivo { min-width: calc(var(--e-8) * 4); }
+@media (max-width: 600px) {
+  .api-campos__fila { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .desplegable-api, .desplegable-api--ancho { min-width: 0; width: 100%; }
+  .api-trabajo { min-width: 0; }
 }

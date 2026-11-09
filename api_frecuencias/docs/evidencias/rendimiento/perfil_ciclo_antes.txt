@@ -1,0 +1,68 @@
+===== 25 funciones con más tiempo (cumulative) =====
+         7459028 function calls (7365080 primitive calls) in 183.320 seconds
+
+   Ordered by: cumulative time
+   List reduced from 5618 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      171    0.002    0.000  185.030    1.082 session.py:2141(_execute_internal)
+ 1685/740    0.004    0.000  185.008    0.250 state_changes.py:93(_go)
+       74    0.000    0.000  184.670    2.496 session.py:2313(execute)
+  709/418    0.002    0.000  183.512    0.439 <string>:1(_connection_for_bind)
+      173    0.000    0.000  183.476    1.061 session.py:2102(_connection_for_bind)
+      2/1    0.000    0.000  183.325  183.325 medir_ciclo.py:184(_correr)
+      7/6    0.000    0.000  183.323   30.554 testclient.py:413(request)
+      7/6    0.000    0.000  183.318   30.553 _client.py:771(request)
+      7/6    0.000    0.000  183.317   30.553 _client.py:879(send)
+      7/6    0.000    0.000  183.316   30.553 _client.py:930(_send_handling_auth)
+        6    0.000    0.000  183.316   30.553 _client.py:964(_send_handling_redirects)
+        6    0.000    0.000  183.316   30.553 _client.py:1001(_send_single_request)
+      197    0.001    0.000  183.316    0.931 base_events.py:1954(_run_once)
+        6    0.000    0.000  183.314   30.552 testclient.py:209(handle_request)
+  324/297    0.001    0.000  183.312    0.617 {method 'run' of '_contextvars.Context' objects}
+      4/3    0.000    0.000  183.264   61.088 testclient.py:522(post)
+      4/3    0.000    0.000  183.264   61.088 _client.py:1123(post)
+        3    0.000    0.000  183.170   61.057 ejecucion.py:282(ejecutar)
+        3    0.000    0.000  183.170   61.057 cola.py:310(procesar)
+        3    0.000    0.000  183.068   61.023 cola.py:304(_estado)
+        3    0.000    0.000  183.056   61.019 cola.py:270(correr_reclamo)
+        3    0.000    0.000  183.055   61.018 observabilidad.py:387(envuelta)
+        3    0.005    0.002  183.053   61.018 ejecucion.py:685(_ciclo_frecuencia)
+        3    0.004    0.001  155.294   51.765 ejecucion.py:604(alertas_observadas)
+    24/21    0.236    0.010  104.518    4.977 threading.py:641(wait)
+
+
+===== 25 funciones con más tiempo (tottime) =====
+         7459028 function calls (7365080 primitive calls) in 183.320 seconds
+
+   Ordered by: internal time
+   List reduced from 5618 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   894132   87.646    0.000   87.646    0.000 ejecucion.py:546(<genexpr>)
+   158400   80.177    0.001   80.387    0.001 predictor.py:45(predict)
+  602/600    3.845    0.006    3.802    0.006 {built-in method select.select}
+      396    2.318    0.006   81.715    0.206 gradient_boosting.py:1297(_predict_iterations)
+       24    0.837    0.035    0.837    0.035 {built-in method _winapi.WaitForSingleObject}
+       24    0.703    0.029    0.703    0.029 {built-in method _winapi.CreateProcess}
+      120    0.308    0.003    0.308    0.003 {built-in method shap._cext.dense_tree_shap}
+    51230    0.304    0.000   88.504    0.002 {built-in method builtins.sum}
+    24/21    0.236    0.010  104.518    4.977 threading.py:641(wait)
+   176043    0.235    0.000    0.235    0.000 {built-in method numpy.empty}
+1084305/1080896    0.212    0.000    0.316    0.000 {built-in method builtins.isinstance}
+     2078    0.158    0.000    0.167    0.000 {built-in method nt.stat}
+        1    0.157    0.157    0.189    0.189 _tree.py:1014(__init__)
+     4966    0.130    0.000    0.172    0.000 take.py:120(_take_nd_ndarray)
+      710    0.110    0.000    0.110    0.000 {built-in method _io.open}
+20177/19965    0.100    0.000    0.124    0.000 {method 'read' of '_io.BufferedReader' objects}
+    26958    0.094    0.000    0.129    0.000 pulp.py:672(__init__)
+     3007    0.091    0.000    0.091    0.000 {method 'copy' of 'numpy.ndarray' objects}
+   166609    0.089    0.000    0.146    0.000 pickle.py:281(read)
+      367    0.089    0.000    0.151    0.000 managers.py:2276(_merge_blocks)
+      4/1    0.087    0.022    0.516    0.516 pickle.py:1230(load)
+423685/372107    0.078    0.000    0.105    0.000 {built-in method builtins.len}
+        4    0.078    0.020    0.109    0.027 csvs.py:315(_save_chunk)
+       75    0.075    0.001    0.076    0.001 array_ops.py:113(comp_method_OBJECT_ARRAY)
+      290    0.073    0.000    0.073    0.000 {built-in method nt._getfinalpathname}
+
+

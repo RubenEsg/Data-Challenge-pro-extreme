@@ -55,6 +55,8 @@ def leer_args():
     ap.add_argument("--proyecto", default=str(AQUI.parent.parent), help="carpeta raíz del proyecto (por defecto, dos arriba)")
     ap.add_argument("--solo-despacho", action="store_true",
                     help="solo los días de ejemplo de la pantalla Despacho (datos/despacho/) y su entrada en origen.json")
+    ap.add_argument("--solo-producto", action="store_true",
+                    help="solo datos/modelo_producto.json (el modelo activo de la API) y su entrada en origen.json")
     return ap.parse_args()
 
 
@@ -116,6 +118,66 @@ def solo_despacho(R):
     org["generado"] = datetime.now().strftime("%Y-%m-%d %H:%M")
     org["total_bytes"] = sum(v["bytes"] for v in org["archivos"].values())
     p.write_text(json.dumps(org, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+# --- El modelo del producto (el que ejecuta la API) ----------------------------------------------------------------------
+F_EVAL = "EntregaFinal/api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.json"
+F_CAL = "EntregaFinal/api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json"
+F_REG = "EntregaFinal/api_frecuencias/datos/modelos/registro.json"
+
+
+def modelo_producto(R):
+    """datos/modelo_producto.json: el modelo activo de la API (registro.json), su error en la prueba de nov–dic 2025 frente
+    a la regla manual con el intervalo bootstrap (evaluacion_modelo.json) y la cobertura de la banda P10–P90 con la
+    calibración v2 y la v1 (calibracion_condicional.json). Cada cifra lleva su archivo y su clave en «origen»."""
+    ev = json.loads((R / F_EVAL).read_text(encoding="utf-8"))
+    cal = json.loads((R / F_CAL).read_text(encoding="utf-8"))
+    reg = json.loads((R / F_REG).read_text(encoding="utf-8"))
+    pr = ev["prueba_reservada"]
+    activo = pr["modelos"]["activo"]
+    if reg.get("activo") != activo or cal.get("model_id") != activo:
+        sys.exit(f"El modelo activo de {F_REG} ({reg.get('activo')}) no es el evaluado en {F_EVAL} ({activo}) "
+                 f"ni el calibrado en {F_CAL} ({cal.get('model_id')}).")
+    res = cal["resultados"]["prueba"]
+    v2, v1 = res["v2"]["global"], res["v1"]["global"]
+    out = {
+        "model_id": activo,
+        "modelo_anterior": pr["modelos"].get("fv1"),
+        "prueba": {"desde": pr["modelos"]["desde"], "hasta": pr["modelos"]["hasta"], "franjas": pr["global"]["cand"]["n"],
+                   "dias": pr["bootstrap"]["dias"]},
+        "wape_modelo": pr["global"]["cand"]["wape"], "wape_regla_manual": pr["global"]["b1"]["wape"],
+        "wape_modelo_anterior": pr["global"]["fv1"]["wape"],
+        "ic95_modelo": pr["bootstrap"]["cand"]["ic95"], "ic95_diferencia": pr["bootstrap"]["cand_menos_b1"]["ic95"],
+        "sesgo_pct": pr["global"]["cand"]["sesgo_pct"], "mae": pr["global"]["cand"]["mae"],
+        "cobertura_v2": v2["cobertura_pct"], "cobertura_v1": v1["cobertura_pct"],
+        "cobertura_objetivo": cal["objetivo_cobertura_pct"], "ancho_v2": v2["ancho_medio"], "ancho_v1": v1["ancho_medio"],
+        "bootstrap": {"B": pr["bootstrap"]["B"], "bloque_dias": pr["bootstrap"]["bloque_dias"]},
+        "generado_evaluacion": ev.get("generado_en"), "generado_calibracion": cal.get("generado"),
+    }
+    out["origen"] = {
+        "model_id": {"archivo": F_REG, "clave": "activo"},
+        "wape_modelo": {"archivo": F_EVAL, "clave": "prueba_reservada.global.cand.wape"},
+        "wape_regla_manual": {"archivo": F_EVAL, "clave": "prueba_reservada.global.b1.wape"},
+        "wape_modelo_anterior": {"archivo": F_EVAL, "clave": "prueba_reservada.global.fv1.wape"},
+        "ic95_modelo": {"archivo": F_EVAL, "clave": "prueba_reservada.bootstrap.cand.ic95"},
+        "ic95_diferencia": {"archivo": F_EVAL, "clave": "prueba_reservada.bootstrap.cand_menos_b1.ic95"},
+        "cobertura_v2": {"archivo": F_CAL, "clave": "resultados.prueba.v2.global.cobertura_pct"},
+        "cobertura_v1": {"archivo": F_CAL, "clave": "resultados.prueba.v1.global.cobertura_pct"},
+    }
+    return out
+
+
+def solo_producto(R):
+    """Escribe solo datos/modelo_producto.json y actualiza su entrada en datos/origen.json (sin tocar las demás)."""
+    (DESTINO / "modelo_producto.json").write_text(json.dumps(modelo_producto(R), ensure_ascii=False, indent=1), encoding="utf-8")
+    p = DESTINO / "origen.json"
+    org = json.loads(p.read_text(encoding="utf-8")) if p.is_file() else {"generador": "dash_app/preparar_datos.py", "archivos": {}}
+    tam = (DESTINO / "modelo_producto.json").stat().st_size
+    org.setdefault("archivos", {})["modelo_producto.json"] = {"fuentes": [F_REG, F_EVAL, F_CAL], "filas": None, "bytes": tam}
+    org["generado"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+    org["total_bytes"] = sum(v["bytes"] for v in org["archivos"].values())
+    p.write_text(json.dumps(org, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"  {'modelo_producto.json':28s} {tam / 1024:8.1f} KB")
 
 
 def pronosticos(R):
@@ -659,6 +721,11 @@ def main():
         print(f"Proyecto: {R} (solo Despacho)")
         solo_despacho(R)
         return
+    if a.solo_producto:
+        DESTINO.mkdir(exist_ok=True)
+        print(f"Proyecto: {R} (solo el modelo del producto)")
+        solo_producto(R)
+        return
     if not (R / "experimentos").is_dir():
         sys.exit(f"No encuentro la carpeta del proyecto en {R} (falta experimentos/). Use --proyecto.")
     DESTINO.mkdir(exist_ok=True)
@@ -692,6 +759,8 @@ def main():
         anotar(nombre, [rel])
     (DESTINO / "ahorro_anual.json").write_text(json.dumps(ahorro_anual(R), ensure_ascii=False, indent=1), encoding="utf-8")
     anotar("ahorro_anual.json", [F_REOPT, F_DEC_R, F_ESC, F_DEC_D5, F_D5J, F_PLAN, F_UNIT, F_AHO, F_BETA, F_LB, F_SIM, F_SENS, F_D6])
+    (DESTINO / "modelo_producto.json").write_text(json.dumps(modelo_producto(R), ensure_ascii=False, indent=1), encoding="utf-8")
+    anotar("modelo_producto.json", [F_REG, F_EVAL, F_CAL])
     if (R / F_REPLAY / "indice.js").is_file():
         for nombre, fuentes in despacho(R):
             anotar(nombre, fuentes)

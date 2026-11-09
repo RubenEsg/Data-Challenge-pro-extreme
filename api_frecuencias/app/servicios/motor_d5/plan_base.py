@@ -147,7 +147,7 @@ def _plan_cache(fecha, ruta, modelo, imax, claveP, fuente):
     sub = insumos(fecha, ruta, modelo, imax)
     ent = entradas_d5(sub)
     flota = float(sub["flota_disp"].iloc[0])
-    x, estado, holg, comp = milp.resolver_dia(ent, sub["ciclo"].values, flota, P, solver="cbc", devolver_detalle=True)
+    x, estado, holg, comp = milp.resolver_dia_detalle(ent, sub["ciclo"].values, flota, P, solver="cbc")
     seg = time.perf_counter() - t0
     sub["x_plan"] = x
     sub["programar"] = np.ceil(sub["x_plan"] / (1 - sub["tasa_no_valido"].fillna(0)))

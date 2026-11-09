@@ -1,0 +1,7 @@
+1101 px: pestañas 11 · lista visible 969 px · contenido 970 px · ¿desborda? no · borde derecho del chip 1085 px de 1101 px
+1180 px: pestañas 11 · lista visible 970 px · contenido 970 px · ¿desborda? no · borde derecho del chip 1164 px de 1180 px
+1280 px: pestañas 11 · lista visible 970 px · contenido 970 px · ¿desborda? no · borde derecho del chip 1264 px de 1280 px
+1366 px: pestañas 11 · lista visible 970 px · contenido 970 px · ¿desborda? no · borde derecho del chip 1339 px de 1355 px
+1440 px: pestañas 11 · lista visible 970 px · contenido 970 px · ¿desborda? no · borde derecho del chip 1376 px de 1392 px
+1600 px: pestañas 11 · lista visible 970 px · contenido 970 px · ¿desborda? no · borde derecho del chip 1456 px de 1472 px
+1920 px: pestañas 11 · lista visible 970 px · contenido 970 px · ¿desborda? no · borde derecho del chip 1616 px de 1632 px

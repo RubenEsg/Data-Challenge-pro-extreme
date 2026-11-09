@@ -1,9 +1,36 @@
+# Contexto de la imagen: solo lo que corre (app, alembic, scripts, datos con el modelo activo y los Parquet).
+# Secretos y entornos locales
 .env
+.env.*
+!.env.example
 .venv
+venv
+# Control de versiones, cachés y reportes de pruebas
+.git
+.gitignore
 **/__pycache__
 **/*.pyc
 .pytest_cache
 .ruff_cache
+.hypothesis
+.mypy_cache
 .coverage
+.coverage.*
+coverage.xml
 htmlcov
-.git
+.scannerwork
+# Pruebas, evidencias, documentación y herramientas de desarrollo (no se ejecutan en la imagen)
+tests
+docs
+reportes
+k6
+ci
+replica
+initdb_resultados
+*.md
+requirements-dev.txt
+requisitos_congelados.txt
+sonar-project.properties
+Dockerfile
+.dockerignore
+docker-compose*.yml

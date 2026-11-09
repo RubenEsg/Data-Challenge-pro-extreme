@@ -1,0 +1,129 @@
+Registro de producción del video E11 «Video de máximo 5 minutos» · 2026-11-09 (America/Bogota); escenas 11 y 12 regrabadas el mismo día con las evidencias finales
+
+Entregables
+  documentos/video/E11_video_demostracion.mp4  (288,43 s, 19,70 MB)
+  documentos/video/E11_video_demostracion.srt  (72 subtítulos)
+  documentos/video/guion.md                    (escena, segundos, narración, pantalla y evidencia)
+
+Herramientas y versiones
+  Sistema: Microsoft Windows 11 Home 10.0.26200
+  Navegador: Microsoft Edge 157.0.4341.42 (Playwright, channel=msedge), ventana 1600×900, device_scale_factor 1, locale es-CO
+  Playwright (Python): 1.63.0
+  Python: 3.13.3 (entorno virtual de la API)
+  Voz: Microsoft Sabina Desktop (es-MX), System.Speech de .NET desde PowerShell 5.1
+  ffmpeg: 9.0.2-essentials_build (incluido en imageio-ffmpeg 0.8.1)
+  ffprobe: no instalado en el equipo; la duración se mide con ffmpeg (contenedor y conteo de cuadros decodificados)
+  API: FastAPI + uvicorn del commit 8d4e651, PostgreSQL 14 local con migraciones alembic al día (escenas 1 a 10)
+  Tablero: Dash del commit 8d4e651 (entorno virtual del tablero; escenas 1 a 10)
+  Escenas 11 y 12: páginas de evidencia generadas por visores.py desde los archivos del commit b76546d; no usan la API ni el tablero
+
+Entorno de la grabación (aislado)
+  Código: instantánea del commit 8d4e651 (árbol de trabajo separado), sin cambios.
+  API: uvicorn en 127.0.0.1 con una base PostgreSQL 14 propia en el servidor local (migraciones al día con
+  alembic upgrade head) y una copia temporal de datos/; nunca se escribió en api_frecuencias/datos/.
+  Autenticación encendida: tres claves de prueba (operador, analista, admin) creadas solo para la grabación;
+  la API recibe únicamente sus hashes (API_KEYS). El tablero usa la clave de analista. En el navegador, la clave
+  viaja como cabecera X-API-Key agregada por Playwright: no se escribe en ningún campo y no aparece en pantalla.
+  Sin conexión a la base del reto: la fuente es el histórico en parquet de la entrega.
+
+Siembra del ciclo de demostración (antes de grabar)
+  POST /api/v1/frequency/executions hasta 2025-09-01: ok en 84,4 s · filas leídas 49725, válidas 49725 · marca (sin marca: carga inicial) -> 2025-09-01T23:59:59-05:00 · predicciones 9, recomendaciones 9, alertas 21
+  POST /api/v1/frequency/executions hasta 2025-09-02: ok en 51,3 s · filas leídas 51, válidas 51 · marca 2025-09-01T23:59:59-05:00 -> 2025-09-02T23:59:59-05:00 · predicciones 9, recomendaciones 9, alertas 22
+  POST /api/v1/frequency/executions hasta 2025-09-03: ok en 24,2 s · filas leídas 51, válidas 51 · marca 2025-09-02T23:59:59-05:00 -> 2025-09-03T23:59:59-05:00 · predicciones 9, recomendaciones 9, alertas 20
+  POST /api/v1/models/train (hasta 2025-07-03, datos_hasta 2025-09-03): ok en 82,0 s · Candidato hgb_fv2_20250703_s42 registrado
+  GET /api/v1/monitoring/policy: reentrenar = no · bloqueos: retador en sombra: hgb_fv2_20250703_s42
+
+Ensayo previo: antes de la toma final se grabaron de prueba las escenas 3, 4 y 8 (día 2025-09-04 y una alerta ALT-005
+cerrada); esa toma no se usa en el video. La toma final usa el día 2025-09-05. Las escenas 5 y 12 se regrabaron
+(segunda toma) después de corregir sus páginas de evidencia: la tabla del modelo mostraba una fila de otra tabla de
+evaluacion_modelo.md bajo la cabecera de WAPE, y las líneas de k6 se partían a mitad de cifra.
+
+Regrabación de las escenas 11 y 12 (2026-11-09, evidencias del commit b76546d)
+  Motivo: la escena 11 narraba la demostración anterior de §14.2 y la 12 las cifras de ingeniería anteriores.
+  Escena 11: demo_ciclo_api.txt final (demostración corrida en la pila Docker Compose creada desde cero):
+  49.623, 51 y 4.641 filas leídas, repetición con 0; candidato entrenado solo con lo ya llegado; misma ventana
+  2025-12-01 .. 2025-12-14 fuera de la muestra de ambos, WAPE 14,108 % del candidato frente a 13,982 % del activo;
+  la compuerta de cuatro criterios lo rechaza y el activo sigue.
+  Escena 12: suite_final.xml (1.060 casos, 0 fallas), quality_gate.json (puerta «Reto Sobusa v1.5» en OK, cobertura
+  94,3 %, 0 bugs, 0 vulnerabilidades, 0 críticos, 0 bloqueantes), ci_github.txt (en verde, runner limpio),
+  k6_consultas.json y k6_volumen.json (p95 451,3 ms y 627,5 ms, 0,00 % de errores) y arranque_limpio.txt (OK).
+  Se volvió a sintetizar solo la narración de esas dos escenas, con la misma voz y Rate = 1; se grabaron con
+  grabar.py s11_ciclo s12_ingenieria (páginas locales: sin API ni tablero, sin claves en pantalla). Las otras
+  once escenas conservan su toma, su tramo y su narración; la mezcla se rehízo completa con mezclar.py.
+
+Ejecución en vivo (escenas 3 y 4, desde Swagger /docs)
+  POST con {"hasta": "2025-09-05"} -> 202 «en_cola», execution_id 53a8b98e-94f8-44c0-a467-fbeab2dee36c
+  GET -> estado ok (Terminada) · filas leídas 51, válidas 51 · marca de agua 2025-09-04T23:59:59-05:00 -> 2025-09-05T23:59:59-05:00 · métricas {'predicciones': 9, 'recomendaciones': 9, 'alertas_nuevas': 20}
+  Alertas cerradas desde el tablero (reconocer, asignar y cerrar): ALT-003 7585d1a6-2d1a-4c11-8488-9764ad8ae809 -> cerrada, asignada a supervisor.turno; ALT-005 f2e7bd3e-46d9-4941-8546-d062cffe698a -> cerrada, asignada a supervisor.turno (la ALT-003 es la de la toma final; la ALT-005, la del ensayo)
+
+Narración
+  Voz Microsoft Sabina Desktop (es-MX), SpeechSynthesizer.Rate = 1 (la velocidad va por la propiedad Rate;
+  el SSML solo lleva la voz y una marca <mark> por subtítulo). WAV 22,05 kHz, 16 bits, mono.
+  Las marcas de System.Speech informan la posición en la escala de 16 kHz: se multiplican por 16000/22050;
+  comprobado en cada escena: la marca final queda 0,19 s antes del final del WAV (silencio de cierre).
+  Voz total 280,9 s en 13 escenas.
+
+Escenas (tiempo en el video final)
+  #  escena               inicio   video_s  voz_s   toma cruda (tramo)                      errores de consola
+  1  s01_problema           0:00    25,30   24,69  page@d96e08f89daad522787… [15,6–40,9]  0
+  2  s02_respuesta          0:25    16,97   16,34  page@d96e08f89daad522787… [40,9–57,8]  0
+  3  s03_dia_nuevo          0:42    20,93   20,34  page@d96e08f89daad522787… [61,5–82,4]  0
+  4  s04_lectura            1:03    16,20   15,61  page@d96e08f89daad522787… [99,9–116,1]  0
+  5  s05_modelo             1:19    23,13   22,88  page@6f859adb643d6d808ad… [0,9–24,0]  0 · ajuste: inicio movido de 0.553 a 0.903 s: los primeros 0,25 s de la toma estaban en blanco (primer cuadro del navegador)
+  6  s06_pronostico         1:42     8,77    8,16  page@d96e08f89daad522787… [145,4–154,2]  0
+  7  s07_despacho           1:51    11,03   10,43  page@d96e08f89daad522787… [161,1–172,1]  0
+  8  s08_alertas            2:02    25,40   24,78  page@d96e08f89daad522787… [176,1–201,5]  0
+  9  s09_recomendaciones    2:27    22,73   22,13  page@d96e08f89daad522787… [206,7–229,5]  0
+  10 s10_monitoreo          2:50    16,67   16,06  page@d96e08f89daad522787… [233,5–250,2]  0
+  11 s11_ciclo              3:07    47,97   47,37  page@5d55ac535bb1a137fd8… [0,5–48,4]  0
+  12 s12_ingenieria         3:55    38,53   37,94  page@5d55ac535bb1a137fd8… [48,9–87,4]  0
+  13 s13_cierre             4:33    14,80   14,19  page@d96e08f89daad522787… [311,1–325,9]  0
+
+Mezcla
+  ffmpeg (ffmpeg-win-x86_64-v9.0.2.exe): cada tramo se corta de la toma cruda (VP8/webm 1600×900, device_scale_factor 1),
+  se lleva a 30 cuadros/s con un número exacto de cuadros, se escala a 1920×1080 con lanczos y se une; la
+  narración de cada escena empieza con su tramo. H.264 CRF 28 (preset medium, yuv420p), AAC 128 kb/s 48 kHz,
+  +faststart. Subtítulos: SRT aparte, con el instante de cada frase tomado de las marcas de la síntesis.
+
+Comprobaciones
+  ffprobe no está instalado en el equipo; la duración y los flujos se leen con «ffmpeg -i» y el conteo de cuadros:
+  Duration: 00:04:48.43, start: 0.000000, bitrate: 546 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt470bg/unknown/unknown, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 427 kb/s, 30 fps, 30 tbr, 15360 tbn (default)
+  Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, mono, fltp, 110 kb/s (default)
+  cuadros 8653 · 288,430 s (límite 300 s: cumple)
+  tamaño 19,70 MB (límite 60 MB: cumple)
+  audio presente: volumedetect media -20,2 dB, máximo -0,7 dB
+  subtítulos: 72, ordenados y sin solaparse: sí, el último termina en 287,942 s (dentro del video: sí), máximo 46 caracteres por línea
+  claves de API en el SRT, el guion y este registro: 0
+  alineación de subtítulos: 69 de 72 empiezan a menos de 1 s de un inicio de voz; desfase mediano 0,11 s, p90 0,48 s, máximo 1,18 s (silencedetect de ffmpeg sobre el audio del MP4 (ruido -38 dB, silencios de 0,12 s o más); para cada subtítulo, el fin de silencio (inicio de voz) más cercano a su inicio; los desfases mayores son trozos de una frase larga partida a mitad (el tiempo de cada trozo se reparte por número de caracteres); los inicios de frase vienen de las marcas de la síntesis)
+
+Cuadros revisados a ojo (extraídos del MP4 final al 70 % de cada escena)
+  s01_problema (t = 17,7 s): Inicio con la tarjeta «Respuesta a la pregunta del reto»: la pregunta literal de §20 y las cifras de SILENCIO (cada 4,3 min en la hora pico, 8.329 pasajeros con banda, 31 vehículos de 45). Sin errores ni claves.
+  s02_respuesta (t = 37,2 s): La misma tarjeta en el instante del cambio a CRA 54 (el selector ya marca CRA 54 y la API está respondiendo); al cierre de la escena la tarjeta muestra CRA 54 (16.696 pasajeros, 67 vehículos de 79).
+  s03_dia_nuevo (t = 56,9 s): Swagger /docs: POST /api/v1/frequency/executions con {"hasta": "2025-09-05"}, respuesta 202 con execution_id y estado «en_cola». El comando curl no lleva la clave.
+  s04_lectura (t = 74,5 s): Swagger /docs: GET de la ejecución, 200: estado ok, marca de agua 2025-09-04T23:59:59 -> 2025-09-05T23:59:59, filas_leidas 51 y filas_validas 51.
+  s05_modelo (t = 95,6 s): Página de evidencia: tabla de evaluacion_modelo.md (activo 14,77 % con IC 13,10–16,87; B1 21,18 % con IC 16,61–26,79; B2 26,40 %), cobertura v2 77,82 % y pérdida Poisson, cada bloque con su ruta.
+  s06_pronostico (t = 108,7 s): Tablero, Horario de CRA 54 (después de mostrar Pronóstico): plan óptimo con CBC, salidas, horas de bus, kilómetros y costo.
+  s07_despacho (t = 119,0 s): Tablero, Despacho en vivo: el mapa con calles (OpenStreetMap/CARTO) y los buses de las tres rutas, próximos y últimos despachos. El mapa no está en blanco.
+  s08_alertas (t = 140,1 s): Tablero, Alertas: una ALT-003 abierta, ya reconocida y asignada a «supervisor.turno», con la recomendación y los botones de gestión; la bitácora se muestra al final de la escena.
+  s09_recomendaciones (t = 163,7 s): Tablero, Recomendaciones: escenario calculado por la API que no es viable, con el motivo (flota de 43 vehículos y ciclo de 238,9 min), la mejor aproximación y la función objetivo de §10.2.
+  s10_monitoreo (t = 182,1 s): Tablero, Monitoreo: política (no hace falta reentrenar; bloqueo por el retador en sombra) y retador hgb_fv2_20250703_s42 «En sombra» 14 días, con los cuatro criterios de la compuerta.
+  s11_ciclo (t = 220,7 s): Página de evidencia: demo_ciclo_api.txt final en los pasos (5) y (6): misma ventana 2025-12-01 .. 2025-12-14, WAPE 14.108 % del candidato frente a 13.982 % del activo, [NO cumple] en el primer criterio y «RECHAZADO … El activo hgb_fv2_20250831_s42 sigue.» resaltados. Revisados también t = 187,3 s (encabezado y paso 1 con 49623 y 51 filas) y t = 212,0 s (pasos 3 y 4: reentrenar True y candidato registrado). Sin errores ni claves.
+  s12_ingenieria (t = 262,1 s): Página de evidencia completa en un cuadro: 1.060 casos (fallas 0, errores 0, omitidos 5) de suite_final.xml; puerta OK de quality_gate.json con coverage 94.3, bugs, vulnerabilidades, críticos y bloqueantes en 0; k6 p(95) = 451.3 ms y 627.5 ms con 0.00 % de fallas y vus_max 50; GitHub Actions en verde y arranque_limpio.txt con «Resultado global: OK». Revisado también t = 245,0 s. Sin errores ni claves.
+  s13_cierre (t = 284,0 s): Tarjeta de cierre: plan en tres fases (conexión 4 semanas, modo sombra 4 semanas, piloto 8 semanas en CRA 54 y CL 72) y la pregunta del reto.
+
+Cifras narradas y su evidencia
+  - 51 filas leídas y válidas del día nuevo; marca de agua anterior y nueva: respuesta de GET /api/v1/frequency/executions/{id} durante la grabación (api_frecuencias/docs/evidencias/video/registro.txt, «Ejecución en vivo») y api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt, paso (2)
+  - WAPE 14,77 % del modelo activo frente a 21,18 % de la regla manual (prueba reservada 2025-11-01 a 2025-12-31): api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.md, filas «activo (hgb_fv2_20250831_s42)» y «B1 regla manual 8 sem»
+  - Cobertura de la banda P10–P90 de 77,8 % en la prueba reservada (calibración v2: 77,82 %): api_frecuencias/docs/evidencias/modelo/calibracion_condicional.md
+  - Gradient Boosting con pérdida Poisson: api_frecuencias/docs/evidencias/modelo/resumen_modelo.md
+  - Alertas por ruta y día: 6,08 con las reglas anteriores → 0,53 con las reglas sobre datos observados: api_frecuencias/docs/evidencias/alertas/backtest_alertas.md («Reglas anteriores: 6,083» y «Alertas observadas por ruta y día (todas): 0.534»)
+  - 14 días en sombra y compuerta de cuatro criterios: política de monitoreo de la API (GET /api/v1/monitoring/policy, umbral sombra_dias = 14) y pantalla Monitoreo
+  - Ciclo §14.2, llegada y lectura incremental: 49.623 filas de carga inicial, 51 de un día nuevo y 4.641 más; la repetición de la misma fecha lee 0: api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt, pasos (1) y (2)
+  - Ciclo §14.2, comparación y decisión: en la misma ventana 2025-12-01 a 2025-12-14, fuera de la muestra de ambos, WAPE 14,108 % del candidato frente a 13,982 % del activo; la compuerta de cuatro criterios lo rechaza y el activo sigue: api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt, pasos (3) a (6), y demo_esperado.md
+  - 1.060 pruebas automáticas sin fallas (0 fallas, 0 errores, 5 omitidas): api_frecuencias/docs/evidencias/pruebas/suite_final.xml
+  - 94,3 % de cobertura y puerta «Reto Sobusa v1.5» de SonarQube aprobada: 0 bugs, 0 vulnerabilidades, 0 críticos, 0 bloqueantes: api_frecuencias/docs/evidencias/sonarqube/quality_gate.json (status OK; coverage 94.3)
+  - Integración continua en verde en GitHub, en un runner limpio: api_frecuencias/docs/evidencias/pruebas/ci_github.txt
+  - k6 con 50 usuarios virtuales: p95 451,3 ms en consultas y 627,5 ms con un año de resultados, 0,00 % de errores: api_frecuencias/docs/evidencias/pruebas/k6_consultas.json y api_frecuencias/docs/evidencias/pruebas/k6_volumen.json
+  - Docker Compose desde volúmenes nuevos, con la comprobación completa en OK: api_frecuencias/docs/evidencias/despliegue/arranque_limpio.txt («Resultado global: OK»)
+  - Plan: 4 semanas de conexión, 4 en modo sombra y piloto de 8 semanas en CRA 54 y CL 72: documentos/notas_orador.txt (diapositiva 13) y PLAN_EVOLUCION.md

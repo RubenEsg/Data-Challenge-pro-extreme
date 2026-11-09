@@ -81,8 +81,23 @@ class _Notificador:
             "fecha": datetime.now(UTC),
         }
         if estado == "simulada":
-            log.info("Notificación %s simulada para %s: %s", self.canal, registro["destinatarios"], registro["codigo"])
+            # RNF-010: la entrega pasa por el circuit breaker del canal. Abierto -> no se intenta y la notificación
+            # queda registrada como omitida (la alerta ya está en la base); un fallo de red queda como «fallida».
+            from app.servicios import circuito
+
+            try:
+                circuito.obtener(f"notif_{self.canal}").llamar(self._entregar, registro)
+            except circuito.CircuitoAbierto as exc:
+                registro.update(estado="omitida_circuito_abierto", error=str(exc))
+                log.warning("Notificación %s omitida: %s", self.canal, exc)
+            except Exception as exc:  # noqa: BLE001 - un canal caído no detiene la ejecución ni pierde el registro
+                registro.update(estado="fallida", error=f"{type(exc).__name__}: {exc}"[:300])
+                log.warning("Notificación %s fallida: %s", self.canal, registro["error"])
         return registro
+
+    def _entregar(self, registro):
+        """Entrega al proveedor. En modo simulado solo escribe el log (destinatarios enmascarados)."""
+        log.info("Notificación %s simulada para %s: %s", self.canal, registro["destinatarios"], registro["codigo"])
 
 
 class NotificadorCorreo(_Notificador):
@@ -94,8 +109,8 @@ class NotificadorCorreo(_Notificador):
 
     def _mensaje(self, alerta):
         return {"de": self.remitente,
-                "asunto": f"[{(alerta.get('severidad') or '').upper()}] {alerta.get('codigo')} {alerta.get('nombre', '')} "
-                          f"- {alerta.get('ruta') or '-'}",
+                "asunto": f"[{(alerta.get('severidad') or '').upper()}] {alerta.get('codigo')} "
+                          f"{alerta.get('nombre', '')} - {alerta.get('ruta') or '-'}",
                 "cuerpo": _texto(alerta)}
 
 

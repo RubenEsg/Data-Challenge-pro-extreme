@@ -1,0 +1,80 @@
+Schemathesis 4.33.1: contrato por propiedades en TODAS las operaciones del OpenAPI (spec v1.5 §14.1 «Contrato»)
+Corrida: 09-11-2026, 07:47:18 a 07:49:26 (hora de Bogotá), 127.7 s; base local de pruebas PostgreSQL 14 + PostGIS 3.4; clave admin; 5 ejemplos por operación (SCHEMATHESIS_EJEMPLOS=5, derandomize). Código de salida de pytest: 0.
+Prueba: tests/contrato/test_schemathesis.py::test_ninguna_entrada_produce_error_5xx_y_todo_cumple_el_contrato
+Chequeos en cada respuesta: not_a_server_error, status_code_conformance, content_type_conformance,
+response_schema_conformance y response_headers_conformance (un 503 con el error uniforme solo se acepta si la
+operación lo declara). Sin lista de defectos conocidos ni xfail.
+Regenerar: python docs/evidencias/contrato/generar_evidencia_contrato.py (junit en schemathesis_junit.xml).
+
+Resultado junit: 63 casos (1 prueba + 62 subpruebas, una por operación), 0 fallas, 0 errores, 0 omitidas.
+Operaciones sin ninguna falla: 62 de 62.
+
+Operación                                                      Resultado
+POST /api/v1/frequency/executions                              ok
+GET /api/v1/frequency/executions                               ok
+GET /api/v1/frequency/executions/{execution_id}                ok
+GET /api/v1/frequency/executions/{execution_id}/errors         ok
+GET /api/v1/predictions/segmentos                              ok
+POST /api/v1/predictions/run                                   ok
+GET /api/v1/predictions                                        ok
+GET /api/v1/predictions/export                                 ok
+GET /api/v1/predictions/{prediction_id}                        ok
+POST /api/v1/recommendations/calculate                         ok
+GET /api/v1/recommendations/plan                               ok
+GET /api/v1/recommendations                                    ok
+GET /api/v1/recommendations/export                             ok
+GET /api/v1/alerts                                             ok
+GET /api/v1/alerts/export                                      ok
+GET /api/v1/alerts/{alert_id}                                  ok
+PATCH /api/v1/alerts/{alert_id}/status                         ok
+GET /api/v1/alerts/{alert_id}/history                          ok
+GET /api/v1/models                                             ok
+POST /api/v1/models/train                                      ok
+POST /api/v1/models/rollback                                   ok
+GET /api/v1/models/{model_id}                                  ok
+POST /api/v1/models/{model_id}/activate                        ok
+GET /api/v1/models/{model_id}/evaluation                       ok
+GET /api/v1/models/{model_id}/importance                       ok
+GET /api/v1/thresholds                                         ok
+PUT /api/v1/thresholds                                         ok
+GET /api/v1/thresholds/history                                 ok
+POST /api/v1/thresholds/{version}/aprobar                      ok
+GET /api/v1/scheduler                                          ok
+GET /api/v1/catalogos                                          ok
+GET /api/v1/catalogos/procesos                                 ok
+GET /api/v1/catalogos/procesos/export                          ok
+GET /api/v1/catalogos/empresas                                 ok
+GET /api/v1/catalogos/empresas/export                          ok
+GET /api/v1/catalogos/rutas                                    ok
+GET /api/v1/catalogos/rutas/export                             ok
+GET /api/v1/catalogos/rutas/{idruta}                           ok
+GET /api/v1/catalogos/segmentos                                ok
+GET /api/v1/catalogos/segmentos/export                         ok
+GET /api/v1/catalogos/vehiculos                                ok
+GET /api/v1/catalogos/vehiculos/export                         ok
+GET /api/v1/catalogos/vehiculos/tipologias                     ok
+GET /api/v1/catalogos/viajes                                   ok
+GET /api/v1/catalogos/viajes/export                            ok
+GET /api/v1/catalogos/despachos                                ok
+GET /api/v1/catalogos/despachos/export                         ok
+GET /api/v1/catalogos/capacidad                                ok
+PUT /api/v1/catalogos/capacidad                                ok
+GET /api/v1/catalogos/capacidad/historial                      ok
+GET /api/v1/monitoring                                         ok
+GET /api/v1/monitoring/export                                  ok
+GET /api/v1/monitoring/policy                                  ok
+GET /api/v1/monitoring/feature-snapshots                       ok
+GET /api/v1/segmentos/estadisticas                             ok
+GET /api/v1/segmentos/estadisticas/export                      ok
+GET /api/v1/segmentos/zonas                                    ok
+GET /api/v1/respuesta                                          ok
+POST /api/v1/respuesta/calcular                                ok
+GET /api/v1/respuesta/export                                   ok
+GET /health                                                    ok
+GET /metrics                                                   ok
+
+Historia de esta prueba:
+- primera corrida (09-11-2026, chequeo not_a_server_error solo): 500 por enteros sin cota y por el byte NUL; corregidos;
+- corrida estricta (cuatro chequeos): 2 operaciones respondían 400 no documentado con un cuerpo que no es
+  UTF-8 (POST /models/{model_id}/activate y PUT /thresholds); se documentó el 400 «cuerpo_ilegible»;
+- corridas siguientes (cinco chequeos, cabeceras incluidas): sin fallas; la de este archivo es la última.

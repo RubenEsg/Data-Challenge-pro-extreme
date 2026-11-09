@@ -1,0 +1,16 @@
+Conjunto gobernado antes: versión 4
+PUT /catalogos/capacidad como operador: 403 prohibido
+PUT /catalogos/capacidad como analista: 403 prohibido
+PUT como admin: 200 {"ruta": "CL 72", "idruta": 21, "tipologia": "TODAS", "capacidad": 46, "capacidad_catalogo": 50, "fuente": "ajuste_local", "clave": "capacidad_override.21.TODAS", "umbrales_version": 5, "por_tipologia": {"TODAS": 46}}
+PUT tipología BUSETA: 200 por_tipologia={'BUSETA': 30, 'TODAS': 46}
+Contrato del optimizador catalogos.capacidad_vigente('CL 72') -> {'ruta': 'CL 72', 'idruta': 21, 'tipologia': 'TODAS', 'capacidad': 46, 'capacidad_catalogo': 50, 'fuente': 'ajuste_local', 'clave': 'capacidad_override.21.TODAS', 'umbrales_version': 6, 'por_tipologia': {'BUSETA': 30, 'TODAS': 46}}
+catalogos.capacidad_vigente('CL 72', 'BUSETA') -> capacidad 30
+  recomendar(CL 72, 7 h, 900 pax/h, capacidad=50): buses_hora=9 headway=6.67 min viable=True
+  recomendar(CL 72, 7 h, 900 pax/h, capacidad=46): buses_hora=10 headway=6.0 min viable=True
+  recomendar(CL 72, 7 h, 900 pax/h, capacidad=30): buses_hora=15 headway=4.0 min viable=True
+Historial (más reciente primero):
+  v8 TODAS   retirado  46 -> None por evidencia_admin el 2026-11-09T02:42:24.867136-05:00: Evidencia: se retira el ajuste
+  v7 BUSETA  retirado  30 -> None por evidencia_admin el 2026-11-09T02:42:24.792112-05:00: Evidencia: se retira el ajuste
+  v6 BUSETA  creado    None -> 30 por evidencia_admin el 2026-11-09T02:42:24.707559-05:00: Evidencia: busetas de 30 puestos
+  v5 TODAS   creado    None -> 46 por evidencia_admin el 2026-11-09T02:42:24.618821-05:00: Evidencia: buses de 46 puestos en CL 72
+Conjunto gobernado después: versión 8; los umbrales de §5.1 no cambiaron: True

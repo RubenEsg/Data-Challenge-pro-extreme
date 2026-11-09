@@ -89,3 +89,67 @@ def test_variables_existen_hasta_7_dias_despues_del_ultimo_dato():
     fila = _fila(t, "SILENCIO", ultimo + timedelta(days=7), 6)
     assert pd.isna(fila["pasajeros"]) and not pd.isna(fila["lag7"])
     assert list(variables.matriz_x(t).columns) == variables.COLUMNAS_MODELO
+
+
+# ------------------------------------------------------------------------------- fv2: contexto operacional
+VACIO = pd.DataFrame(columns=["fecha", "hora", "nov_impacto", "nov_sube", "festivo_oficial"])
+
+
+def _contexto(filas: list[dict]) -> pd.DataFrame:
+    base = {"nov_impacto": 0.0, "nov_sube": 0, "festivo_oficial": 0}
+    return pd.DataFrame([dict(base, **f) for f in filas])
+
+
+def test_nov_impacto_vale_el_porcentaje_dentro_de_la_ventana_y_cero_fuera():
+    s = serie_juguete()
+    d = INICIO + timedelta(days=50)
+    ctx = _contexto([{"fecha": d, "hora": 6, "nov_impacto": 80.0, "nov_sube": 1},
+                     {"fecha": d, "hora": 7, "nov_impacto": 80.0, "nov_sube": 1}])
+    t = variables.construir_variables(s, contexto=ctx)
+    for ruta in ("SILENCIO", "CL 72"):  # novedades_viales_ruta está vacía: aplica a todas las rutas
+        assert _fila(t, ruta, d, 6)["nov_impacto"] == 80.0 and _fila(t, ruta, d, 6)["nov_sube"] == 1
+        assert _fila(t, ruta, d, 5)["nov_impacto"] == 0.0 and _fila(t, ruta, d, 5)["nov_sube"] == 0
+        assert _fila(t, ruta, d + timedelta(days=1), 6)["nov_impacto"] == 0.0
+    sin = variables.construir_variables(s, contexto=VACIO)
+    assert (sin["nov_impacto"] == 0).all()
+
+
+def test_vispera_y_post_festivo_usan_solo_el_calendario():
+    s = serie_juguete()
+    d = INICIO + timedelta(days=60)
+    s.loc[s["fecha"] == d, "festivo"] = 1
+    t = variables.construir_variables(s, contexto=VACIO)
+    assert _fila(t, "SILENCIO", d - timedelta(days=1), 6)["vispera_festivo"] == 1
+    assert _fila(t, "SILENCIO", d + timedelta(days=1), 6)["post_festivo"] == 1
+    assert _fila(t, "SILENCIO", d, 6)["vispera_festivo"] == 0
+    otra = s.copy()
+    otra.loc[otra["fecha"] >= d - timedelta(days=1), "pasajeros"] *= 9  # pasajeros posteriores: no cambian nada
+    t2 = variables.construir_variables(otra, contexto=VACIO)
+    for c in variables.CONTEXTO + ["festivo", "tipo_dia"]:
+        assert (t[c].to_numpy() == t2[c].to_numpy()).all(), c
+
+
+def test_festivo_oficial_marca_la_semana_siguiente_al_ultimo_dato():
+    s = serie_juguete(60)
+    ultimo = s["fecha"].max()
+    futuro = ultimo + timedelta(days=3)  # sin calendario en la serie: lo da estacionalidades_anio
+    ctx = _contexto([{"fecha": futuro, "hora": h, "festivo_oficial": 1} for h in range(4, 21)])
+    t = variables.construir_variables(s, contexto=ctx)
+    f = _fila(t, "SILENCIO", futuro, 6)
+    assert f["festivo"] == 1 and f["tipo_dia"] == 2
+    assert _fila(t, "SILENCIO", futuro - timedelta(days=1), 6)["vispera_festivo"] == 1
+    assert _fila(t, "SILENCIO", futuro + timedelta(days=1), 6)["post_festivo"] == 1
+
+
+def test_matriz_x_elige_las_columnas_de_cada_version():
+    t = variables.construir_variables(serie_juguete(60), contexto=VACIO)
+    assert list(variables.matriz_x(t, variables.FV1).columns) == variables.COLUMNAS_FV1
+    assert list(variables.matriz_x(t, variables.FV2).columns) == variables.COLUMNAS_FV2
+    assert variables.COLUMNAS_FV2[: len(variables.COLUMNAS_FV1)] == variables.COLUMNAS_FV1
+    assert variables.categoricas(variables.FV1) == ["ruta_cod"] and variables.categoricas(variables.FV2) == []
+    try:
+        variables.matriz_x(t, "fv0-desconocida")
+    except KeyError:
+        pass
+    else:
+        raise AssertionError("una versión no registrada debe fallar")

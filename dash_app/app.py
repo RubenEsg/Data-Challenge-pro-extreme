@@ -11,6 +11,12 @@ Uso:
 
 Si falta la carpeta datos/, se genera desde el proyecto completo con `python preparar_datos.py`.
 El sistema de diseño (colores por rol, escala, componentes) está en DISENO.md; lo comprueba verificar_estilo.py.
+
+Once pantallas. Siete leen los datos de la entrega (datos/); cuatro consumen la API del reto (api_frecuencias, /api/v1) a
+través de cliente_api.py: Alertas, Recomendaciones, Operación y Monitoreo (Inicio, además, trae la respuesta a la
+pregunta del reto de GET /api/v1/respuesta). Leen la URL de SOBUSA_API_URL (por omisión http://127.0.0.1:8000),
+envían X-API-Key si SOBUSA_API_KEY está definida y, sin API o con una clave sin validez, lo dicen sin inventar datos:
+    set SOBUSA_API_URL=http://127.0.0.1:8000 & set SOBUSA_API_KEY=… & python app.py      (Windows)
 """
 import json
 import os
@@ -48,6 +54,10 @@ NAV = [
     ("/pronostico", "pronostico", "Pronóstico", "¿Cuántos pasajeros habrá?"),
     ("/horario", "horario", "Horario", "¿Cuántos buses y cada cuánto?"),
     ("/despacho", "despacho", "Despacho", "¿Qué sale ahora y en qué bus?"),
+    ("/alertas", "alertas", "Alertas", "¿Qué pide atención ahora? (API del reto)"),
+    ("/recomendaciones", "recomendaciones", "Recomendaciones", "¿Cada cuánto debe salir un bus? (API del reto)"),
+    ("/operacion", "operacion", "Operación", "¿Cómo está corriendo el sistema? (API del reto)"),
+    ("/monitoreo", "monitoreo", "Monitoreo", "¿El modelo sigue sirviendo? (API del reto)"),
     ("/modelo", "modelo", "Modelo", "¿Qué modelo es y por qué?"),
     ("/resultado", "resultado", "Resultado", "¿Qué gana Sobusa?"),
     ("/enlaces", "enlaces", "Enlaces", "¿Dónde está el resto del proyecto?"),
@@ -65,8 +75,9 @@ CLASE_ENLACE = "barra__enlace"
 
 
 def barra_superior():
-    """Navegación arriba (la de la referencia): logo + «Sobusa Despacho» a la izquierda, las siete pantallas como pestañas de
-    texto (la activa en píldora negra) y el chip «Cálculo en vivo» a la derecha. En el teléfono las pestañas se desplazan."""
+    """Navegación arriba (la de la referencia): logo + «Sobusa Despacho» a la izquierda, las once pantallas como pestañas de
+    texto (la activa en píldora negra) y el chip «Cálculo en vivo» a la derecha. Desde 1101 px las pestañas van compactas y
+    el chip queda solo con su icono; en el teléfono las pestañas se desplazan."""
     enlaces = []
     for i, (ruta, pantalla, nombre, pregunta) in enumerate(NAV):
         enlaces.append(html.Li(dcc.Link(nombre, href=ruta, id=f"nav-{i}", title=pregunta, className=CLASE_ENLACE)))

@@ -19,8 +19,16 @@ Fuentes (rutas relativas a la raíz del proyecto «DATA CHALLENGE»):
 3. experimentos/D1_optimizacion/parametros_operativos.parquet: ciclo (min), flota_disp, intervalo_prog_med por
    ruta, tipo de día y hora (los mismos parámetros del optimizador D1/D5).
 4. EntregaFinal/dash_app/datos/insumos_d5_2025.parquet: nmin y nmax de salidas por hora (límites del MILP D5).
+5. datos/novedades_viales_fecha.parquet, novedades_viales_ruta.parquet, estacionalidades_anio.parquet y
+   estacionalidades.parquet (exportaciones de las tablas del mismo nombre) -> datos/contexto_operacional.parquet
+   (variables de contexto de la versión fv2: impacto de novedades viales por hora y festivos oficiales).
+6. datos/progvehiculos.parquet + datos/conteo_viajes.parquet (solo 2024) -> datos/perfil_intrahorario.parquet
+   (fracción de las subidas de la hora que viaja en los buses que salen entre h:00 y h:29).
+7. datos/clima_diario.parquet -> datos/clima_diario.parquet de la API (solo para evaluar por condición: la lluvia es
+   observada y diaria, usarla como variable del pronóstico sería fuga).
 
-Uso:  python scripts/preparar_datos_api.py [--raiz-proyecto RUTA]
+Uso:  python scripts/preparar_datos_api.py [--raiz-proyecto RUTA] [--solo-contexto]
+      --solo-contexto regenera solo los puntos 5-7 (no toca la serie ni el catálogo).
 """
 
 from __future__ import annotations
@@ -155,13 +163,166 @@ def catalogo(raiz: Path) -> tuple[list[dict], pd.DataFrame]:
     return salida, tabla
 
 
+def _hora(x) -> int:
+    return int(str(x).split(":")[0])
+
+
+def contexto_operacional(raiz: Path, desde: str = "2023-01-01", hasta: str = "2026-12-31") -> tuple[pd.DataFrame, dict]:
+    """Contexto conocido por adelantado, por fecha y hora de salida (4-20 h).
+
+    - nov_impacto: porcentaje_impacto de novedades_viales_fecha si la hora [h:00, h+1:00) cruza [hora_inicio, hora_fin]
+      (el máximo si hay varias); 0 si no. novedades_viales_ruta está vacía, así que cada novedad aplica a las 3 rutas.
+    - nov_sube: 1 si la novedad está marcada potencial_efecto = 'SUBE'.
+    - festivo_oficial: días FESTIVO_NACIONAL de estacionalidades_anio (respaldo del calendario de la serie, cubre 2026).
+    """
+    d = raiz / "datos"
+    nov = pd.read_parquet(d / "novedades_viales_fecha.parquet")
+    por_ruta = pd.read_parquet(d / "novedades_viales_ruta.parquet")
+    ea = pd.read_parquet(d / "estacionalidades_anio.parquet")
+    est = pd.read_parquet(d / "estacionalidades.parquet")
+    return contexto_desde_tablas(nov, por_ruta, ea, est, desde, hasta)
+
+
+def contexto_desde_tablas(nov: pd.DataFrame, por_ruta: pd.DataFrame, ea: pd.DataFrame, est: pd.DataFrame,
+                          desde: str = "2023-01-01", hasta: str = "2026-12-31") -> tuple[pd.DataFrame, dict]:
+    """El mismo contexto a partir de las tablas ya leídas (exportaciones Parquet o la réplica con lector_ia, como hace
+    scripts/reconstruir_desde_replica.py).
+
+    §11.2 cruza las novedades por fecha, rango horario y ruta. En Sobusa novedades_viales_ruta no tiene filas (lista
+    vacía = todas las rutas), así que el contexto por (fecha, hora) es exacto; si la tabla trae filas, se detiene en vez
+    de aplicar en silencio cada novedad a las tres rutas."""
+    if len(por_ruta):
+        raise ValueError(f"novedades_viales_ruta trae {len(por_ruta)} filas: el contexto empaquetado es por fecha y hora "
+                         "(todas las rutas); con novedades por ruta hay que construirlo por (ruta, fecha, hora).")
+    filas = []
+    for r in nov.itertuples():
+        for h in range(max(4, _hora(r.hora_inicio)), min(20, _hora(r.hora_fin)) + 1):
+            filas.append(
+                {
+                    "fecha": pd.Timestamp(r.fecha).date(),
+                    "hora": h,
+                    "nov_impacto": float(r.porcentaje_impacto or 0),
+                    "nov_sube": int(str(r.potencial_efecto).upper() == "SUBE"),
+                }
+            )
+    nv = pd.DataFrame(filas, columns=["fecha", "hora", "nov_impacto", "nov_sube"])
+    nv = nv.groupby(["fecha", "hora"], as_index=False).max()
+    ea = ea.drop(columns=["estacionalidad"], errors="ignore").merge(
+        est[["id_estacionalidad", "estacionalidad"]], on="id_estacionalidad")
+    festivos: set = set()
+    for r in ea[ea["estacionalidad"] == "FESTIVO_NACIONAL"].itertuples():
+        festivos |= {x.date() for x in pd.date_range(pd.Timestamp(r.fecha_inicio), pd.Timestamp(r.fecha_fin), freq="D")}
+    fechas = [x.date() for x in pd.date_range(desde, hasta, freq="D")]
+    base = pd.MultiIndex.from_product([fechas, range(4, 21)], names=["fecha", "hora"]).to_frame(index=False)
+    ctx = base.merge(nv, on=["fecha", "hora"], how="left")
+    ctx["nov_impacto"] = ctx["nov_impacto"].fillna(0).astype("float32")
+    ctx["nov_sube"] = ctx["nov_sube"].fillna(0).astype("int8")
+    ctx["festivo_oficial"] = ctx["fecha"].isin(festivos).astype("int8")
+    ctx["hora"] = ctx["hora"].astype("int8")
+    info = {
+        "novedades": int(len(nov)),
+        "dias_con_novedad": int(nov["fecha"].nunique()),
+        "horas_con_novedad": int((ctx["nov_impacto"] > 0).sum()),
+        "filas_novedades_viales_ruta": int(len(por_ruta)),
+        "festivos_oficiales_en_rango": int(ctx.loc[ctx["festivo_oficial"] == 1, "fecha"].nunique()),
+        "procesos_estacionalidades": sorted(map(str, ea["proceso"].unique())),
+    }
+    return ctx, info
+
+
+def perfil_intrahorario(raiz: Path, serie: pd.DataFrame, anio: int = 2024) -> pd.DataFrame:
+    """Fracción de las subidas de la hora h que viaja en los buses que salen entre h:00 y h:29 (por ruta, tipo de día y
+    hora), con los viajes de `anio` (conteo_viajes.subidas + progvehiculos.fechasalida). Es la media de las fracciones
+    diarias; sustituye el reparto uniforme (0,5) de la primera media hora en las ventanas de 30/60/120 min."""
+    d = raiz / "datos"
+    ids = {int(i): r for r, i in serie.groupby("ruta")["idruta"].first().items()}
+    pv = pd.read_parquet(d / "progvehiculos.parquet", columns=["idprogramacion", "idruta", "fechasalida", "cancelada"])
+    pv = pv[pv["idruta"].isin(ids)]
+    pv["fechasalida"] = pd.to_datetime(pv["fechasalida"])
+    pv = pv[(pv["fechasalida"] >= f"{anio}-01-01") & (pv["fechasalida"] < f"{anio + 1}-01-01")]
+    pv = pv[pv["cancelada"].astype(str).str.upper().ne("S")]  # cancelada: 'S' / 'N'
+    cv = pd.read_parquet(d / "conteo_viajes.parquet", columns=["idprogramacion", "subidas"])
+    v = pv.merge(cv, on="idprogramacion")
+    v["ruta"] = v["idruta"].map(ids)
+    v["fecha"] = v["fechasalida"].dt.date
+    v["hora"] = v["fechasalida"].dt.hour
+    v["s1"] = np.where(v["fechasalida"].dt.minute < 30, v["subidas"], 0.0)
+    hh = v.groupby(["ruta", "fecha", "hora"], as_index=False).agg(s1=("s1", "sum"), s=("subidas", "sum"))
+    hh = hh[(hh["s"] > 0) & hh["hora"].between(4, 20)]
+    tipos = serie[["ruta", "fecha", "tipo_dia"]].drop_duplicates(["ruta", "fecha"])
+    hh = hh.merge(tipos, on=["ruta", "fecha"], how="left")
+    dsem = pd.to_datetime(hh["fecha"]).dt.dayofweek
+    hh["tipo_dia"] = hh["tipo_dia"].fillna(pd.Series(np.where(dsem == 6, 2, np.where(dsem == 5, 1, 0)))).astype(int)
+    hh["fraccion"] = hh["s1"] / hh["s"]
+    p = hh.groupby(["ruta", "tipo_dia", "hora"], as_index=False).agg(
+        fraccion_primera_media=("fraccion", "mean"), dias=("fraccion", "size")
+    )
+    p["fraccion_primera_media"] = p["fraccion_primera_media"].clip(0.05, 0.95).astype("float32")
+    p["tipo_dia"] = p["tipo_dia"].astype("int8")
+    p["hora"] = p["hora"].astype("int8")
+    return p
+
+
+def preparar_contexto(raiz: Path, destino: Path, serie: pd.DataFrame) -> dict:
+    """Escribe contexto_operacional, perfil_intrahorario y clima_diario (para evaluar por condición)."""
+    ctx, info = contexto_operacional(raiz)
+    ctx.to_parquet(destino / "contexto_operacional.parquet", index=False)
+    perfil = perfil_intrahorario(raiz, serie)
+    perfil.to_parquet(destino / "perfil_intrahorario.parquet", index=False)
+    clima = pd.read_parquet(raiz / "datos" / "clima_diario.parquet", columns=["fecha", "precipitacion_4_21h_mm"])
+    clima["fecha"] = pd.to_datetime(clima["fecha"]).dt.date
+    clima.to_parquet(destino / "clima_diario.parquet", index=False)
+    return {
+        "contexto_operacional.parquet": {
+            "fuente": "datos/novedades_viales_fecha.parquet, novedades_viales_ruta.parquet, estacionalidades_anio.parquet, estacionalidades.parquet",
+            "filas": len(ctx),
+            "columnas": {
+                "nov_impacto": "porcentaje_impacto de la novedad vial si la hora de salida cruza [hora_inicio, hora_fin]; 0 si no (máximo si hay varias). novedades_viales_ruta está vacía: aplica a las 3 rutas",
+                "nov_sube": "1 si potencial_efecto = SUBE (la etiqueta no siempre coincide con los datos: el modelo aprende el signo)",
+                "festivo_oficial": "FESTIVO_NACIONAL de estacionalidades_anio (respaldo del calendario; cubre 2026 para la semana siguiente)",
+            },
+            **info,
+        },
+        "perfil_intrahorario.parquet": {
+            "fuente": "datos/progvehiculos.parquet (fechasalida, idruta, cancelada) + datos/conteo_viajes.parquet (subidas), viajes de 2024",
+            "filas": len(perfil),
+            "fraccion_media": round(float(perfil["fraccion_primera_media"].mean()), 4),
+            "definicion": "media diaria de subidas de los viajes que salen entre h:00 y h:29 / subidas de los viajes que salen en la hora h, por ruta, tipo de día y hora; si falta se usa 0,5",
+        },
+        "clima_diario.parquet": {
+            "fuente": "datos/clima_diario.parquet (precipitacion_4_21h_mm)",
+            "uso": "solo como condición en la evaluación (lluvia >= 5 y >= 20 mm, seco); nunca como variable del pronóstico",
+        },
+    }
+
+
+def _actualizar_origen(destino: Path, origen: dict) -> None:
+    ruta_origen = destino / "origen.json"
+    previo = {}
+    if ruta_origen.exists():  # el archivo es compartido con otros scripts: se actualizan solo estas llaves
+        try:
+            previo = json.loads(ruta_origen.read_text(encoding="utf-8"))
+        except ValueError:
+            previo = {}
+    previo.update(origen)
+    ruta_origen.write_text(json.dumps(previo, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--raiz-proyecto", type=Path, default=RAIZ_PROYECTO)
+    ap.add_argument("--solo-contexto", action="store_true", help="solo contexto, perfil intrahorario y clima")
     args = ap.parse_args()
     raiz = args.raiz_proyecto
     destino = RAIZ_API / "datos"
     destino.mkdir(parents=True, exist_ok=True)
+    if args.solo_contexto:
+        serie = pd.read_parquet(destino / "demanda_horaria.parquet", columns=["ruta", "idruta", "fecha", "tipo_dia"])
+        serie["fecha"] = pd.to_datetime(serie["fecha"]).dt.date
+        info = preparar_contexto(raiz, destino, serie)
+        _actualizar_origen(destino, info)
+        print(json.dumps(info, ensure_ascii=False, indent=1, default=str))
+        return
 
     ruta_e1 = raiz / "experimentos" / "E1_lgbm_salida" / "datos_modelado_salida.parquet"
     if ruta_e1.exists():
@@ -209,15 +370,8 @@ def main() -> None:
             "fuente": "experimentos/D1_optimizacion/parametros_operativos.parquet + nmin/nmax de EntregaFinal/dash_app/datos/insumos_d5_2025.parquet",
         },
     }
-    ruta_origen = destino / "origen.json"
-    previo = {}
-    if ruta_origen.exists():  # el archivo es compartido con otros scripts: se actualizan solo estas llaves
-        try:
-            previo = json.loads(ruta_origen.read_text(encoding="utf-8"))
-        except ValueError:
-            previo = {}
-    previo.update(origen)
-    ruta_origen.write_text(json.dumps(previo, ensure_ascii=False, indent=2), encoding="utf-8")
+    origen.update(preparar_contexto(raiz, destino, s))
+    _actualizar_origen(destino, origen)
     print(f"demanda_horaria: {len(s)} filas, {s['fecha'].min()} a {s['fecha'].max()}")
     print(json.dumps([{k: v for k, v in c.items() if k != "por_tipo_dia"} for c in cat], ensure_ascii=False))
 

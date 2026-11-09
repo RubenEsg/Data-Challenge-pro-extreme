@@ -15,10 +15,17 @@ license = { text = "Uso académico - Universidad del Norte" }
 testpaths = ["tests"]
 addopts = "-q -p no:cacheprovider"
 filterwarnings = ["ignore::DeprecationWarning"]
+# niveles de §14.1; las de Testcontainers solo corren con TESTCONTAINERS=1 (CI y scripts/ci_local.py)
+markers = [
+    "integracion: repositorios, migraciones y API contra PostgreSQL",
+    "testcontainers: PostgreSQL/PostGIS efímero con Testcontainers (TESTCONTAINERS=1)",
+    "contrato: contrato OpenAPI (esquemas, códigos, autenticación y compatibilidad)",
+    "datos_ml: distribución de variables, no regresión del modelo y fuga temporal",
+]
 
 [tool.coverage.run]
+# todo app/, también el motor D5 (tests/unit/test_motor_d5.py y test_optimizacion.py lo ejercitan)
 source = ["app"]
-omit = ["app/servicios/motor_d5/*"]
 
 [tool.coverage.report]
 show_missing = true

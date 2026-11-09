@@ -1,0 +1,192 @@
+{
+  "entrenamiento": "2023-01-01 a 2023-01-30",
+  "prueba": "2023-02-02 a 2023-02-27",
+  "metodo": "fracciones de enero aplicadas al total REAL de cada ruta-hora de febrero (error solo del reparto)",
+  "global": {
+    "wape_segmento_hora": 40.96,
+    "subidas_prueba": 1149933,
+    "suma_reparto_igual_total": true
+  },
+  "por_ruta": {
+    "CL 72": {
+      "wape_segmento_hora": 52.85,
+      "wape_sentido_hora": 8.92,
+      "segmentos": 128,
+      "sesgo_abs_mediano_segmentos_pct": 9.23,
+      "sesgo_abs_p90_segmentos_pct": 27.6,
+      "sesgo_abs_mediano_mitad_con_mas_subidas_pct": 7.75,
+      "peores_segmentos_por_sesgo": [
+        {
+          "nro_segmento": 69,
+          "sentido": "regreso",
+          "y": 8.0,
+          "sesgo_pct": 127.67
+        },
+        {
+          "nro_segmento": 59,
+          "sentido": "ida",
+          "y": 1686.0,
+          "sesgo_pct": -81.05
+        },
+        {
+          "nro_segmento": 122,
+          "sentido": "regreso",
+          "y": 108.0,
+          "sesgo_pct": -56.3
+        },
+        {
+          "nro_segmento": 75,
+          "sentido": "regreso",
+          "y": 2524.0,
+          "sesgo_pct": -54.1
+        },
+        {
+          "nro_segmento": 70,
+          "sentido": "regreso",
+          "y": 2017.0,
+          "sesgo_pct": -52.59
+        }
+      ]
+    },
+    "CRA 54": {
+      "wape_segmento_hora": 35.2,
+      "wape_sentido_hora": 7.93,
+      "segmentos": 123,
+      "sesgo_abs_mediano_segmentos_pct": 11.31,
+      "sesgo_abs_p90_segmentos_pct": 32.09,
+      "sesgo_abs_mediano_mitad_con_mas_subidas_pct": 8.71,
+      "peores_segmentos_por_sesgo": [
+        {
+          "nro_segmento": 4,
+          "sentido": "ida",
+          "y": 1.0,
+          "sesgo_pct": -100.0
+        },
+        {
+          "nro_segmento": 56,
+          "sentido": "ida",
+          "y": 5539.0,
+          "sesgo_pct": -66.51
+        },
+        {
+          "nro_segmento": 67,
+          "sentido": "regreso",
+          "y": 375.0,
+          "sesgo_pct": -66.27
+        },
+        {
+          "nro_segmento": 57,
+          "sentido": "ida",
+          "y": 70.0,
+          "sesgo_pct": -62.21
+        },
+        {
+          "nro_segmento": 72,
+          "sentido": "regreso",
+          "y": 9755.0,
+          "sesgo_pct": -50.42
+        }
+      ]
+    },
+    "SILENCIO": {
+      "wape_segmento_hora": 45.93,
+      "wape_sentido_hora": 9.41,
+      "segmentos": 135,
+      "sesgo_abs_mediano_segmentos_pct": 10.65,
+      "sesgo_abs_p90_segmentos_pct": 33.57,
+      "sesgo_abs_mediano_mitad_con_mas_subidas_pct": 9.85,
+      "peores_segmentos_por_sesgo": [
+        {
+          "nro_segmento": 2,
+          "sentido": "ida",
+          "y": 12.0,
+          "sesgo_pct": 153.71
+        },
+        {
+          "nro_segmento": 72,
+          "sentido": "regreso",
+          "y": 10.0,
+          "sesgo_pct": 139.33
+        },
+        {
+          "nro_segmento": 133,
+          "sentido": "regreso",
+          "y": 55.0,
+          "sesgo_pct": 105.43
+        },
+        {
+          "nro_segmento": 62,
+          "sentido": "ida",
+          "y": 3802.0,
+          "sesgo_pct": -79.53
+        },
+        {
+          "nro_segmento": 128,
+          "sentido": "regreso",
+          "y": 13.0,
+          "sesgo_pct": -69.32
+        }
+      ]
+    }
+  },
+  "por_sentido": [
+    {
+      "ruta": "CL 72",
+      "sentido": "ida",
+      "wape_segmento_hora": 49.33,
+      "sesgo_pct": -2.53,
+      "subidas": 105755.0
+    },
+    {
+      "ruta": "CL 72",
+      "sentido": "regreso",
+      "wape_segmento_hora": 57.39,
+      "sesgo_pct": 3.26,
+      "subidas": 82091.0
+    },
+    {
+      "ruta": "CRA 54",
+      "sentido": "ida",
+      "wape_segmento_hora": 32.19,
+      "sesgo_pct": -2.55,
+      "subidas": 366104.0
+    },
+    {
+      "ruta": "CRA 54",
+      "sentido": "regreso",
+      "wape_segmento_hora": 39.04,
+      "sesgo_pct": 3.24,
+      "subidas": 287502.0
+    },
+    {
+      "ruta": "SILENCIO",
+      "sentido": "ida",
+      "wape_segmento_hora": 41.23,
+      "sesgo_pct": -0.04,
+      "subidas": 193259.0
+    },
+    {
+      "ruta": "SILENCIO",
+      "sentido": "regreso",
+      "wape_segmento_hora": 53.81,
+      "sesgo_pct": 0.07,
+      "subidas": 115222.0
+    }
+  ],
+  "filas_reparto": 19300,
+  "periodo_reparto": "2023-01-01 a 2023-02-27",
+  "subidas_usadas": 2263584,
+  "viajes": 27025,
+  "segmentos_por_ruta": {
+    "CL 72": 128,
+    "CRA 54": 123,
+    "SILENCIO": 135
+  },
+  "sentido": "aproximado: mitad de la longitud acumulada del ciclo (las exportaciones no traen sentido)",
+  "limitaciones": [
+    "timbradas_segmentos solo cubre 2023-01-01 a 2023-02-27 (los triggers de segmentación no se han vuelto a ejecutar): el reparto es de hace casi tres años y no ve cambios de ruta posteriores",
+    "ene-feb incluye vacaciones y el inicio del año escolar; no hay Semana Santa ni diciembre",
+    "no hay modelo por segmento: es una desagregación del pronóstico de la ruta",
+    "el sentido es una aproximación geométrica, no un campo de Extreme"
+  ]
+}

@@ -1,0 +1,1150 @@
+{
+  "model_id": "hgb_fv2_20250831_s42",
+  "tipo": "candidato",
+  "algoritmo": "hist_gradient_boosting",
+  "artefacto": "modelo.joblib",
+  "sha256": "24c70b9ca3f6855480d7592855544b82e60e51179b30b88129ab09aa7ed92010",
+  "feature_version": "fv2-2026-11-09",
+  "data_cutoff": "2025-08-31",
+  "semilla": 42,
+  "hiperparametros": {
+    "learning_rate": 0.05,
+    "max_iter": 400,
+    "max_leaf_nodes": 31,
+    "min_samples_leaf": 40,
+    "l2_regularization": 1.0
+  },
+  "perdidas": {
+    "punto": "poisson",
+    "p10": "quantile 0.1",
+    "p90": "quantile 0.9"
+  },
+  "variables": [
+    "ruta_cod",
+    "hora",
+    "dia_semana",
+    "mes",
+    "tipo_dia",
+    "festivo",
+    "carnaval",
+    "semana_santa",
+    "vacaciones",
+    "navidad",
+    "primero_enero",
+    "lag7",
+    "lag14",
+    "b8",
+    "m4",
+    "sd8",
+    "nivel_7_13",
+    "nivel_7_34",
+    "dia_lag7",
+    "nov_impacto",
+    "nov_sube",
+    "vispera_festivo",
+    "post_festivo"
+  ],
+  "categoricas": [],
+  "descripcion_variables": "fv1 + novedades viales y víspera/día posterior a festivo; ruta_cod ordinal (SHAP exacto)",
+  "explicabilidad": {
+    "shap_local": true,
+    "version_shap": "0.54.1",
+    "base_log": 6.298589,
+    "base_pasajeros": 543.8,
+    "filas": 1000,
+    "error_reconstruccion_log_max": 2.9753977059954195e-14,
+    "media_abs_shap_log": [
+      {
+        "variable": "b8",
+        "media_abs": 0.3675
+      },
+      {
+        "variable": "m4",
+        "media_abs": 0.0935
+      },
+      {
+        "variable": "tipo_dia",
+        "media_abs": 0.0905
+      },
+      {
+        "variable": "hora",
+        "media_abs": 0.0613
+      },
+      {
+        "variable": "nivel_7_13",
+        "media_abs": 0.0566
+      },
+      {
+        "variable": "sd8",
+        "media_abs": 0.0448
+      },
+      {
+        "variable": "mes",
+        "media_abs": 0.0313
+      },
+      {
+        "variable": "festivo",
+        "media_abs": 0.0299
+      },
+      {
+        "variable": "ruta_cod",
+        "media_abs": 0.0238
+      },
+      {
+        "variable": "vacaciones",
+        "media_abs": 0.0142
+      },
+      {
+        "variable": "nivel_7_34",
+        "media_abs": 0.0129
+      },
+      {
+        "variable": "dia_lag7",
+        "media_abs": 0.0128
+      },
+      {
+        "variable": "dia_semana",
+        "media_abs": 0.0108
+      },
+      {
+        "variable": "lag7",
+        "media_abs": 0.008
+      },
+      {
+        "variable": "lag14",
+        "media_abs": 0.0065
+      },
+      {
+        "variable": "semana_santa",
+        "media_abs": 0.0054
+      },
+      {
+        "variable": "carnaval",
+        "media_abs": 0.0046
+      },
+      {
+        "variable": "nov_impacto",
+        "media_abs": 0.003
+      },
+      {
+        "variable": "primero_enero",
+        "media_abs": 0.0026
+      },
+      {
+        "variable": "vispera_festivo",
+        "media_abs": 0.0025
+      },
+      {
+        "variable": "post_festivo",
+        "media_abs": 0.0015
+      },
+      {
+        "variable": "navidad",
+        "media_abs": 0.0008
+      },
+      {
+        "variable": "nov_sube",
+        "media_abs": 0.0
+      }
+    ]
+  },
+  "conformal": {
+    "metodo": "CQR móvil por ruta",
+    "ventana_dias": 56,
+    "minimo_dias": 14,
+    "cobertura_objetivo": 0.8,
+    "solo_dias_fuera_de_muestra": true
+  },
+  "filas_entrenamiento": 49215,
+  "filas_validacion": 3111,
+  "filas_prueba": 3111,
+  "particion": {
+    "entrenamiento": "2023-01-08 a 2025-08-31",
+    "validacion": "2025-09-01 a 2025-10-31",
+    "prueba": "2025-11-01 a 2025-12-31"
+  },
+  "metricas": {
+    "validacion": {
+      "candidato": {
+        "n": 3111,
+        "mae": 97.542,
+        "rmse": 138.195,
+        "wape": 13.554,
+        "smape": 18.961,
+        "sesgo_pct": 1.191,
+        "cobertura_p10_p90": 81.74,
+        "bajo_p10_pct": 10.9,
+        "sobre_p90_pct": 7.36,
+        "por_ruta": {
+          "CL 72": {
+            "n": 1037,
+            "mae": 70.411,
+            "rmse": 94.249,
+            "wape": 18.409,
+            "smape": 24.217,
+            "sesgo_pct": 3.37
+          },
+          "CRA 54": {
+            "n": 1037,
+            "mae": 133.296,
+            "rmse": 181.322,
+            "wape": 11.238,
+            "smape": 13.695,
+            "sesgo_pct": 1.355
+          },
+          "SILENCIO": {
+            "n": 1037,
+            "mae": 88.918,
+            "rmse": 124.633,
+            "wape": 15.06,
+            "smape": 18.971,
+            "sesgo_pct": -0.55
+          }
+        },
+        "pico": {
+          "n": 1098,
+          "mae": 85.761,
+          "rmse": 121.346,
+          "wape": 12.931,
+          "smape": 16.669,
+          "sesgo_pct": 1.983
+        },
+        "valle": {
+          "n": 2013,
+          "mae": 103.968,
+          "rmse": 146.572,
+          "wape": 13.854,
+          "smape": 20.211,
+          "sesgo_pct": 0.809
+        },
+        "por_franja": {
+          "04-05": {
+            "n": 366,
+            "mae": 109.007,
+            "rmse": 159.963,
+            "wape": 11.714,
+            "smape": 26.502,
+            "sesgo_pct": -0.052
+          },
+          "06-08 pico": {
+            "n": 549,
+            "mae": 90.586,
+            "rmse": 126.858,
+            "wape": 10.062,
+            "smape": 11.774,
+            "sesgo_pct": 1.749
+          },
+          "09-16 valle": {
+            "n": 1464,
+            "mae": 110.256,
+            "rmse": 150.789,
+            "wape": 14.185,
+            "smape": 16.526,
+            "sesgo_pct": 1.036
+          },
+          "17-19 pico": {
+            "n": 549,
+            "mae": 80.936,
+            "rmse": 115.572,
+            "wape": 18.993,
+            "smape": 21.564,
+            "sesgo_pct": 2.475
+          },
+          "20": {
+            "n": 183,
+            "mae": 43.581,
+            "rmse": 56.926,
+            "wape": 24.794,
+            "smape": 37.11,
+            "sesgo_pct": 1.908
+          }
+        }
+      },
+      "b1_manual_8sem": {
+        "n": 3111,
+        "mae": 108.792,
+        "rmse": 159.966,
+        "wape": 15.117,
+        "smape": 19.432,
+        "sesgo_pct": -0.01,
+        "por_ruta": {
+          "CL 72": {
+            "n": 1037,
+            "mae": 76.527,
+            "rmse": 103.857,
+            "wape": 20.008,
+            "smape": 24.236,
+            "sesgo_pct": 0.743
+          },
+          "CRA 54": {
+            "n": 1037,
+            "mae": 151.706,
+            "rmse": 214.945,
+            "wape": 12.79,
+            "smape": 15.01,
+            "sesgo_pct": 0.06
+          },
+          "SILENCIO": {
+            "n": 1037,
+            "mae": 98.144,
+            "rmse": 140.639,
+            "wape": 16.623,
+            "smape": 19.05,
+            "sesgo_pct": -0.639
+          }
+        },
+        "pico": {
+          "n": 1098,
+          "mae": 94.712,
+          "rmse": 140.799,
+          "wape": 14.281,
+          "smape": 18.057,
+          "sesgo_pct": 0.862
+        },
+        "valle": {
+          "n": 2013,
+          "mae": 116.472,
+          "rmse": 169.51,
+          "wape": 15.52,
+          "smape": 20.182,
+          "sesgo_pct": -0.43
+        },
+        "por_franja": {
+          "04-05": {
+            "n": 366,
+            "mae": 130.826,
+            "rmse": 207.125,
+            "wape": 14.059,
+            "smape": 19.029,
+            "sesgo_pct": -0.36
+          },
+          "06-08 pico": {
+            "n": 549,
+            "mae": 104.93,
+            "rmse": 158.767,
+            "wape": 11.656,
+            "smape": 13.797,
+            "sesgo_pct": 0.56
+          },
+          "09-16 valle": {
+            "n": 1464,
+            "mae": 121.801,
+            "rmse": 168.333,
+            "wape": 15.67,
+            "smape": 18.19,
+            "sesgo_pct": -0.396
+          },
+          "17-19 pico": {
+            "n": 549,
+            "mae": 84.494,
+            "rmse": 120.173,
+            "wape": 19.828,
+            "smape": 22.316,
+            "sesgo_pct": 1.499
+          },
+          "20": {
+            "n": 183,
+            "mae": 45.136,
+            "rmse": 59.811,
+            "wape": 25.678,
+            "smape": 38.431,
+            "sesgo_pct": -2.383
+          }
+        }
+      },
+      "b2_ultima_semana": {
+        "n": 3111,
+        "mae": 141.366,
+        "rmse": 210.038,
+        "wape": 19.643,
+        "smape": 25.656,
+        "sesgo_pct": 0.231,
+        "por_ruta": {
+          "CL 72": {
+            "n": 1037,
+            "mae": 104.269,
+            "rmse": 144.486,
+            "wape": 27.262,
+            "smape": 32.155,
+            "sesgo_pct": 0.752
+          },
+          "CRA 54": {
+            "n": 1037,
+            "mae": 194.682,
+            "rmse": 280.295,
+            "wape": 16.413,
+            "smape": 19.775,
+            "sesgo_pct": 0.179
+          },
+          "SILENCIO": {
+            "n": 1037,
+            "mae": 125.149,
+            "rmse": 181.401,
+            "wape": 21.197,
+            "smape": 25.037,
+            "sesgo_pct": -0.001
+          }
+        },
+        "pico": {
+          "n": 1098,
+          "mae": 123.273,
+          "rmse": 184.773,
+          "wape": 18.588,
+          "smape": 23.789,
+          "sesgo_pct": 0.682
+        },
+        "valle": {
+          "n": 2013,
+          "mae": 151.235,
+          "rmse": 222.613,
+          "wape": 20.152,
+          "smape": 26.674,
+          "sesgo_pct": 0.014
+        },
+        "por_franja": {
+          "04-05": {
+            "n": 366,
+            "mae": 158.503,
+            "rmse": 257.878,
+            "wape": 17.033,
+            "smape": 24.093,
+            "sesgo_pct": 0.477
+          },
+          "06-08 pico": {
+            "n": 549,
+            "mae": 139.341,
+            "rmse": 211.299,
+            "wape": 15.478,
+            "smape": 18.63,
+            "sesgo_pct": 0.475
+          },
+          "09-16 valle": {
+            "n": 1464,
+            "mae": 160.086,
+            "rmse": 225.108,
+            "wape": 20.595,
+            "smape": 24.488,
+            "sesgo_pct": -0.133
+          },
+          "17-19 pico": {
+            "n": 549,
+            "mae": 107.206,
+            "rmse": 153.736,
+            "wape": 25.158,
+            "smape": 28.948,
+            "sesgo_pct": 1.119
+          },
+          "20": {
+            "n": 183,
+            "mae": 65.896,
+            "rmse": 82.048,
+            "wape": 37.489,
+            "smape": 49.328,
+            "sesgo_pct": 0.289
+          }
+        }
+      },
+      "desde": "2025-09-01",
+      "hasta": "2025-10-31"
+    }
+  },
+  "supera_linea_base_validacion": true,
+  "nowcast": {
+    "peso": 0.1,
+    "wape_por_peso": {
+      "0.0": 13.884,
+      "0.1": 13.835,
+      "0.2": 13.863,
+      "0.3": 13.975,
+      "0.5": 14.423,
+      "1.0": 16.137
+    },
+    "regla": "factor = clip(1 + peso*(obs/esp - 1), 0,8, 1,25)",
+    "calibrado_en": "validación 2025-09-01 a 2025-10-31"
+  },
+  "importancia_global": [
+    {
+      "variable": "b8",
+      "aumento_mae": 223.213
+    },
+    {
+      "variable": "tipo_dia",
+      "aumento_mae": 37.298
+    },
+    {
+      "variable": "m4",
+      "aumento_mae": 21.247
+    },
+    {
+      "variable": "nivel_7_13",
+      "aumento_mae": 18.863
+    },
+    {
+      "variable": "hora",
+      "aumento_mae": 10.399
+    },
+    {
+      "variable": "sd8",
+      "aumento_mae": 7.613
+    },
+    {
+      "variable": "ruta_cod",
+      "aumento_mae": 4.064
+    },
+    {
+      "variable": "festivo",
+      "aumento_mae": 4.051
+    },
+    {
+      "variable": "nivel_7_34",
+      "aumento_mae": 3.952
+    },
+    {
+      "variable": "dia_lag7",
+      "aumento_mae": 2.417
+    },
+    {
+      "variable": "lag7",
+      "aumento_mae": 2.348
+    },
+    {
+      "variable": "dia_semana",
+      "aumento_mae": 2.225
+    },
+    {
+      "variable": "lag14",
+      "aumento_mae": 0.903
+    },
+    {
+      "variable": "mes",
+      "aumento_mae": 0.279
+    },
+    {
+      "variable": "vispera_festivo",
+      "aumento_mae": 0.142
+    },
+    {
+      "variable": "post_festivo",
+      "aumento_mae": 0.114
+    },
+    {
+      "variable": "carnaval",
+      "aumento_mae": 0.0
+    },
+    {
+      "variable": "semana_santa",
+      "aumento_mae": 0.0
+    },
+    {
+      "variable": "vacaciones",
+      "aumento_mae": 0.0
+    },
+    {
+      "variable": "navidad",
+      "aumento_mae": 0.0
+    },
+    {
+      "variable": "primero_enero",
+      "aumento_mae": 0.0
+    },
+    {
+      "variable": "nov_impacto",
+      "aumento_mae": 0.0
+    },
+    {
+      "variable": "nov_sube",
+      "aumento_mae": 0.0
+    }
+  ],
+  "nota_importancia": "aumento del MAE (pasajeros) al permutar la variable en 3000 horas de validación",
+  "segundos_entrenamiento": 24.68,
+  "creado_en": "2026-11-09T05:43:25+00:00",
+  "versiones": {
+    "sklearn": "1.5.2",
+    "pandas": "2.2.3",
+    "numpy": "2.5.4"
+  },
+  "version_datos": {
+    "sha256_serie": "df29bf4ae8d281a041d4b42206d07614323c1614ced0c558ef8359858c349305",
+    "filas_serie": 55896,
+    "desde": "2023-01-01",
+    "hasta": "2025-12-31"
+  },
+  "codigo_sha256": {
+    "variables.py": "df73c55b75f9d977ff5dc53e0b8cad8423d90315f82a59f05f0a941ef504bb64",
+    "inferencia.py": "59f67ae408e9a0218e0397b348e97f5e0b999240b354040d5bc2752c06dd990a"
+  },
+  "version_contexto": {
+    "contexto_operacional_mtime": 1794202418.7713287,
+    "perfil_intrahorario_mtime": 1794202419.106798
+  },
+  "evaluacion": {
+    "generado_en": "2026-11-09T05:06:42-05:00",
+    "evidencia": "docs/evidencias/modelo/evaluacion_modelo.json",
+    "prueba_reservada": {
+      "desde": "2025-11-01",
+      "hasta": "2025-12-31",
+      "global": {
+        "cand": {
+          "n": 3111,
+          "mae": 96.27,
+          "rmse": 140.86,
+          "wape": 14.77,
+          "smape": 22.23,
+          "sesgo_pct": 2.75
+        },
+        "fv1": {
+          "n": 3111,
+          "mae": 98.2,
+          "rmse": 146.02,
+          "wape": 15.07,
+          "smape": 22.44,
+          "sesgo_pct": 2.54
+        },
+        "b1": {
+          "n": 3111,
+          "mae": 138.06,
+          "rmse": 225.99,
+          "wape": 21.18,
+          "smape": 26.28,
+          "sesgo_pct": 5.85
+        },
+        "b2": {
+          "n": 3111,
+          "mae": 172.05,
+          "rmse": 279.22,
+          "wape": 26.4,
+          "smape": 33.72,
+          "sesgo_pct": 3.84
+        }
+      },
+      "bootstrap": {
+        "dias": 61,
+        "bloque_dias": 7,
+        "B": 2000,
+        "semilla": 42,
+        "cand": {
+          "ic95": [
+            13.1,
+            16.87
+          ]
+        },
+        "fv1": {
+          "ic95": [
+            13.22,
+            17.43
+          ]
+        },
+        "b1": {
+          "ic95": [
+            16.61,
+            26.79
+          ]
+        },
+        "b2": {
+          "ic95": [
+            22.77,
+            30.57
+          ]
+        },
+        "cand_menos_b1": {
+          "ic95": [
+            -10.43,
+            -3.21
+          ],
+          "p_mejora": 1.0
+        },
+        "fv1_menos_b1": {
+          "ic95": [
+            -9.88,
+            -3.06
+          ],
+          "p_mejora": 1.0
+        },
+        "b2_menos_b1": {
+          "ic95": [
+            2.13,
+            7.89
+          ],
+          "p_mejora": 0.0005
+        },
+        "cand_menos_fv1": {
+          "ic95": [
+            -0.64,
+            -0.04
+          ],
+          "p_mejora": 0.9935
+        },
+        "b1_menos_fv1": {
+          "ic95": [
+            3.06,
+            9.88
+          ],
+          "p_mejora": 0.0
+        },
+        "b2_menos_fv1": {
+          "ic95": [
+            8.2,
+            14.26
+          ],
+          "p_mejora": 0.0
+        }
+      },
+      "cobertura": {
+        "cand": {
+          "banda_modelo": {
+            "cobertura_pct": 79.49,
+            "bajo_p10_pct": 12.18,
+            "sobre_p90_pct": 8.33,
+            "ancho_mediano_rel_pct": 53.9,
+            "ancho_medio": 318.9
+          },
+          "banda_conformal": {
+            "cobertura_pct": 77.88,
+            "bajo_p10_pct": 13.28,
+            "sobre_p90_pct": 8.84,
+            "ancho_mediano_rel_pct": 52.3,
+            "ancho_medio": 312.9
+          },
+          "horas_con_ajuste_pct": 100.0,
+          "por_ruta_conformal": {
+            "CL 72": 78.11,
+            "CRA 54": 76.18,
+            "SILENCIO": 79.36
+          },
+          "calibracion_v1": "v1: conformal móvil (CQR) por ruta, 56 días previos",
+          "calibracion": {
+            "version": "v2",
+            "nombre": "conformal de Mondrian por bloque",
+            "archivo": "calibracion_v2.json",
+            "sha256": "dae6b1a616ee0d89a92ff7d1d599f4d9fcf843a75643c7d7d39e3314d2667ac2",
+            "ajustado_con": "validación 2025-09-01 a 2025-10-31 (3111 horas); la prueba reservada no se usa"
+          },
+          "banda_calibrada_vigente": {
+            "cobertura_pct": 77.82,
+            "bajo_p10_pct": 12.95,
+            "sobre_p90_pct": 9.23,
+            "ancho_mediano_rel_pct": 51.7,
+            "ancho_medio": 303.4
+          },
+          "por_ruta_vigente": {
+            "CL 72": 78.4,
+            "CRA 54": 73.67,
+            "SILENCIO": 81.39
+          }
+        },
+        "fv1": {
+          "banda_modelo": {
+            "cobertura_pct": 80.94,
+            "bajo_p10_pct": 11.28,
+            "sobre_p90_pct": 7.78,
+            "ancho_mediano_rel_pct": 55.4,
+            "ancho_medio": 325.0
+          },
+          "banda_conformal": {
+            "cobertura_pct": 78.59,
+            "bajo_p10_pct": 12.86,
+            "sobre_p90_pct": 8.55,
+            "ancho_mediano_rel_pct": 53.3,
+            "ancho_medio": 316.3
+          },
+          "horas_con_ajuste_pct": 100.0,
+          "por_ruta_conformal": {
+            "CL 72": 78.69,
+            "CRA 54": 77.53,
+            "SILENCIO": 79.56
+          },
+          "calibracion_v1": "v1: conformal móvil (CQR) por ruta, 56 días previos",
+          "calibracion": {
+            "version": "v1"
+          }
+        }
+      },
+      "calibracion_vigente": {
+        "version": "v2",
+        "nombre": "conformal de Mondrian por bloque",
+        "archivo": "calibracion_v2.json",
+        "sha256": "dae6b1a616ee0d89a92ff7d1d599f4d9fcf843a75643c7d7d39e3314d2667ac2",
+        "ajustado_con": "validación 2025-09-01 a 2025-10-31 (3111 horas); la prueba reservada no se usa"
+      },
+      "por_ruta": {
+        "CL 72": {
+          "cand": {
+            "n": 1037,
+            "mae": 67.45,
+            "rmse": 88.89,
+            "wape": 19.23,
+            "smape": 27.05,
+            "sesgo_pct": 3.15
+          },
+          "fv1": {
+            "n": 1037,
+            "mae": 68.36,
+            "rmse": 90.74,
+            "wape": 19.48,
+            "smape": 27.29,
+            "sesgo_pct": 2.55
+          },
+          "b1": {
+            "n": 1037,
+            "mae": 88.64,
+            "rmse": 123.92,
+            "wape": 25.27,
+            "smape": 30.37,
+            "sesgo_pct": 4.34
+          },
+          "b2": {
+            "n": 1037,
+            "mae": 116.21,
+            "rmse": 161.13,
+            "wape": 33.12,
+            "smape": 39.55,
+            "sesgo_pct": 3.2
+          }
+        },
+        "CRA 54": {
+          "cand": {
+            "n": 1037,
+            "mae": 140.47,
+            "rmse": 198.44,
+            "wape": 13.04,
+            "smape": 18.55,
+            "sesgo_pct": 3.01
+          },
+          "fv1": {
+            "n": 1037,
+            "mae": 143.51,
+            "rmse": 206.09,
+            "wape": 13.33,
+            "smape": 18.79,
+            "sesgo_pct": 3.0
+          },
+          "b1": {
+            "n": 1037,
+            "mae": 213.17,
+            "rmse": 326.57,
+            "wape": 19.79,
+            "smape": 24.51,
+            "sesgo_pct": 5.94
+          },
+          "b2": {
+            "n": 1037,
+            "mae": 261.8,
+            "rmse": 401.28,
+            "wape": 24.31,
+            "smape": 31.39,
+            "sesgo_pct": 3.86
+          }
+        },
+        "SILENCIO": {
+          "cand": {
+            "n": 1037,
+            "mae": 80.9,
+            "rmse": 110.65,
+            "wape": 15.33,
+            "smape": 21.11,
+            "sesgo_pct": 1.96
+          },
+          "fv1": {
+            "n": 1037,
+            "mae": 82.74,
+            "rmse": 115.15,
+            "wape": 15.68,
+            "smape": 21.24,
+            "sesgo_pct": 1.6
+          },
+          "b1": {
+            "n": 1037,
+            "mae": 112.38,
+            "rmse": 176.68,
+            "wape": 21.3,
+            "smape": 23.97,
+            "sesgo_pct": 6.65
+          },
+          "b2": {
+            "n": 1037,
+            "mae": 138.14,
+            "rmse": 216.58,
+            "wape": 26.18,
+            "smape": 30.23,
+            "sesgo_pct": 4.23
+          }
+        }
+      },
+      "pico_valle": {
+        "pico": {
+          "cand": {
+            "n": 1098,
+            "mae": 90.1,
+            "rmse": 123.95,
+            "wape": 14.38,
+            "smape": 20.15,
+            "sesgo_pct": 3.08
+          },
+          "fv1": {
+            "n": 1098,
+            "mae": 92.24,
+            "rmse": 128.29,
+            "wape": 14.72,
+            "smape": 20.36,
+            "sesgo_pct": 2.82
+          },
+          "b1": {
+            "n": 1098,
+            "mae": 121.36,
+            "rmse": 199.95,
+            "wape": 19.37,
+            "smape": 24.21,
+            "sesgo_pct": 3.31
+          },
+          "b2": {
+            "n": 1098,
+            "mae": 156.42,
+            "rmse": 255.93,
+            "wape": 24.97,
+            "smape": 32.06,
+            "sesgo_pct": 2.93
+          }
+        },
+        "valle": {
+          "cand": {
+            "n": 2013,
+            "mae": 99.64,
+            "rmse": 149.28,
+            "wape": 14.97,
+            "smape": 23.37,
+            "sesgo_pct": 2.59
+          },
+          "fv1": {
+            "n": 2013,
+            "mae": 101.46,
+            "rmse": 154.84,
+            "wape": 15.24,
+            "smape": 23.57,
+            "sesgo_pct": 2.4
+          },
+          "b1": {
+            "n": 2013,
+            "mae": 147.17,
+            "rmse": 239.0,
+            "wape": 22.11,
+            "smape": 27.41,
+            "sesgo_pct": 7.15
+          },
+          "b2": {
+            "n": 2013,
+            "mae": 180.58,
+            "rmse": 291.14,
+            "wape": 27.13,
+            "smape": 34.63,
+            "sesgo_pct": 4.31
+          }
+        }
+      }
+    },
+    "robustez": {
+      "2024": {
+        "global": {
+          "fv2": {
+            "n": 18564,
+            "mae": 122.39,
+            "rmse": 180.02,
+            "wape": 16.26,
+            "smape": 24.53,
+            "sesgo_pct": 4.3
+          },
+          "fv1": {
+            "n": 18564,
+            "mae": 122.31,
+            "rmse": 179.77,
+            "wape": 16.25,
+            "smape": 24.56,
+            "sesgo_pct": 4.29
+          },
+          "b1": {
+            "n": 18564,
+            "mae": 162.17,
+            "rmse": 256.42,
+            "wape": 21.55,
+            "smape": 27.71,
+            "sesgo_pct": 0.66
+          }
+        },
+        "cobertura_fv2": {
+          "banda_modelo": {
+            "cobertura_pct": 67.67,
+            "bajo_p10_pct": 20.1,
+            "sobre_p90_pct": 12.23,
+            "ancho_mediano_rel_pct": 44.3,
+            "ancho_medio": 299.0
+          },
+          "banda_conformal": {
+            "cobertura_pct": 79.37,
+            "bajo_p10_pct": 13.2,
+            "sobre_p90_pct": 7.42,
+            "ancho_mediano_rel_pct": 58.1,
+            "ancho_medio": 397.2
+          },
+          "horas_con_ajuste_pct": 96.2,
+          "por_ruta_conformal": {
+            "CL 72": 79.52,
+            "CRA 54": 78.88,
+            "SILENCIO": 79.72
+          }
+        }
+      },
+      "2025": {
+        "global": {
+          "fv2": {
+            "n": 18615,
+            "mae": 100.14,
+            "rmse": 149.24,
+            "wape": 14.48,
+            "smape": 21.6,
+            "sesgo_pct": 2.23
+          },
+          "fv1": {
+            "n": 18615,
+            "mae": 100.45,
+            "rmse": 151.04,
+            "wape": 14.53,
+            "smape": 21.63,
+            "sesgo_pct": 2.23
+          },
+          "b1": {
+            "n": 18615,
+            "mae": 138.61,
+            "rmse": 228.84,
+            "wape": 20.04,
+            "smape": 24.74,
+            "sesgo_pct": 0.98
+          }
+        },
+        "cobertura_fv2": {
+          "banda_modelo": {
+            "cobertura_pct": 78.51,
+            "bajo_p10_pct": 12.95,
+            "sobre_p90_pct": 8.54,
+            "ancho_mediano_rel_pct": 52.0,
+            "ancho_medio": 318.7
+          },
+          "banda_conformal": {
+            "cobertura_pct": 80.12,
+            "bajo_p10_pct": 11.94,
+            "sobre_p90_pct": 7.94,
+            "ancho_mediano_rel_pct": 53.7,
+            "ancho_medio": 328.8
+          },
+          "horas_con_ajuste_pct": 96.2,
+          "por_ruta_conformal": {
+            "CL 72": 80.11,
+            "CRA 54": 79.98,
+            "SILENCIO": 80.27
+          }
+        }
+      }
+    }
+  },
+  "onnx": {
+    "opset": {
+      "": 17,
+      "ai.onnx.ml": 3
+    },
+    "archivos": {
+      "punto": {
+        "archivo": "modelo_punto.onnx",
+        "sha256": "36ede50e029e4f5bda661d1c1dee8750d507a9e5f2bbe1ee30b0d38150e42b5c",
+        "bytes": 917280,
+        "enlace": "exp (Poisson)"
+      },
+      "p10": {
+        "archivo": "modelo_p10.onnx",
+        "sha256": "7eff3ee4de4e58a6c089b949a2bcb0953d45cacadb4f2294674b763493132ee6",
+        "bytes": 917225,
+        "enlace": "identidad"
+      },
+      "p90": {
+        "archivo": "modelo_p90.onnx",
+        "sha256": "c236ed8603706150082d1440aa87711c87f1dbdfc354eb9a5415d80dbf9b8fd1",
+        "bytes": 917225,
+        "enlace": "identidad"
+      }
+    },
+    "tolerancia_rel": 0.001,
+    "exportado_en": "2026-11-09T07:06:29+00:00",
+    "versiones": {
+      "skl2onnx": "1.20.0",
+      "onnx": "1.23.2",
+      "onnxruntime": "1.31.1",
+      "sklearn": "1.5.2",
+      "numpy": "2.5.4",
+      "protobuf": "7.36.2"
+    },
+    "paridad_max_rel": {
+      "punto": 2.1610955390961107e-06,
+      "p10": 0.0001532794119543916,
+      "p90": 0.00034546424464250837
+    }
+  },
+  "calibracion": {
+    "version": "v2",
+    "archivo": "calibracion_v2.json",
+    "sha256": "dae6b1a616ee0d89a92ff7d1d599f4d9fcf843a75643c7d7d39e3314d2667ac2",
+    "nombre": "conformal de Mondrian por bloque",
+    "grupos": [
+      "bloque"
+    ],
+    "ajustado_con": "validación 2025-09-01 a 2025-10-31 (3111 horas); la prueba reservada no se usa",
+    "anterior": "v1: conformal móvil (CQR) por ruta, 56 días (clave «conformal»)",
+    "registrado_en": "2026-11-09T03:26:09-05:00",
+    "resumen": {
+      "validacion_cruzada": {
+        "peor_desviacion_pp": 4.15,
+        "cobertura_pct": 79.85,
+        "ancho_medio": 318.7
+      },
+      "v1_validacion": {
+        "peor_desviacion_pp": 10.6,
+        "cobertura_pct": 80.04,
+        "ancho_medio": 322.0
+      },
+      "prueba_reservada_solo_reporte": {
+        "v1": {
+          "peor_desviacion_pp": 13.33,
+          "cobertura_pct": 77.88,
+          "ancho_medio": 312.9
+        },
+        "v2": {
+          "peor_desviacion_pp": 14.97,
+          "cobertura_pct": 77.82,
+          "ancho_medio": 303.4
+        }
+      }
+    },
+    "evidencia": "docs/evidencias/modelo/calibracion_condicional.json"
+  },
+  "codigo_sin_docstring_sha256": {
+    "variables.py": "0ea7ce6e28de2dd0cce17dc98caae2cd400afecfe36fe2510544548205eee08b",
+    "inferencia.py": null
+  },
+  "codigo_normalizacion": "texto UTF-8 con fin de línea LF (CRLF y CR pasan a LF antes del SHA-256)",
+  "codigo_commit": null,
+  "codigo_verificacion": {
+    "variables.py": {
+      "sha256_lf_de_entrenamiento": "df73c55b75f9d977ff5dc53e0b8cad8423d90315f82a59f05f0a941ef504bb64",
+      "igual_al_archivo_actual": true,
+      "sin_docstring_igual_al_actual": true,
+      "primer_commit_con_ese_contenido": "5f2d4b55ab758068531104fdde800be90f3f78df",
+      "nota": null
+    },
+    "inferencia.py": {
+      "sha256_lf_de_entrenamiento": "59f67ae408e9a0218e0397b348e97f5e0b999240b354040d5bc2752c06dd990a",
+      "igual_al_archivo_actual": false,
+      "sin_docstring_igual_al_actual": false,
+      "primer_commit_con_ese_contenido": null,
+      "nota": "la versión con la que se entrenó no quedó en ningún commit (copia de trabajo sin confirmar); su reproducibilidad se comprueba reentrenando y comparando el SHA-256 del artefacto"
+    }
+  },
+  "historial_prueba_reservada": "Al entrenarse, inferencia.entrenar() también midió la prueba reservada (2025-11-01 a 2025-12-31) y esa cifra se consultó al comparar fv2 con fv1: la prueba quedó como reporte informativo, no como una muestra nunca vista (docs/evidencias/modelo/decision_fv2.md). Desde entonces entrenar() y la compuerta solo miden la validación; el informe de la prueba está en la clave «evaluacion» (scripts/evaluar_modelo.py).",
+  "nota_prueba_reservada": "la prueba reservada no se evalúa al entrenar ni en la compuerta: su informe lo escribe scripts/evaluar_modelo.py en la clave «evaluacion»"
+}

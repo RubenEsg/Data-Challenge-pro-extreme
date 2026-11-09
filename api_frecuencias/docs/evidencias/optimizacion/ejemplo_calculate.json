@@ -1,0 +1,403 @@
+{
+ "solicitud": {
+  "ruta": "CRA 54",
+  "hora": 7,
+  "fecha": "2025-03-04",
+  "demanda_hora": 1000,
+  "demanda_p90": 1180,
+  "demanda_p10": 850
+ },
+ "respuesta": {
+  "recommendation_id": "7177830e-b8bc-4899-8a1d-7d061f6f3e10",
+  "execution_id": null,
+  "prediction_id": null,
+  "ruta": "CRA 54",
+  "fecha": "2025-03-04",
+  "hora": 7,
+  "demanda_hora": 1000.0,
+  "demanda_p90": 1180.0,
+  "buses_hora": 12,
+  "headway_min": 5.0,
+  "vehiculos_requeridos": 51,
+  "capacidad_efectiva": 51.57,
+  "ocupacion_esperada": 0.678,
+  "viable": true,
+  "motivo": null,
+  "frecuencia_actual_min": 2.94,
+  "diferencia_min": 2.06,
+  "formula": "§10.2 min α·costo_operativo + β·tiempo_espera + γ·penalización_sobreocupación + δ·desviación_frecuencia con α = 1,00, β = 1,00, γ = 1,00, δ = 1,00; nivel de servicio 0,90 -> carga de diseño 582,4 pas/h (banda P90 calibrada); óptimo: 12 buses/h (3 × T2 50 puestos + 5 × T3 58 puestos + 4 × T4 72 puestos), headway 60 / 12 = 5,00 min, vehículos 51; costo operativo 2.662.930 + espera 433.768 + sobreocupación 4.403 + desviación 221.977 COP/h. Línea base §10.3 ajustada: capacidad_efectiva = 50 × 0,85 = 42,5; carga_critica = 0,494 × P90 1.180,0 = 582,4; buses_hora = max(ceil(582,4 / 42,5) = 14, ceil(60 / 10,00) = 6) = 14; headway = 60 / 14 = 4,29 → [2,00, 10,00] = 4,29 min; vehiculos_requeridos = ceil(249,1 / 4,29) = 59",
+  "umbrales_version": 5,
+  "creado_en": "2026-11-09T07:39:59.781334-05:00",
+  "origen": "franja",
+  "idruta": 16,
+  "idempresa": null,
+  "idproceso": "sobusa",
+  "id_dia_semana": 2,
+  "id_estacionalidad": null,
+  "metodo": "funcion_objetivo_10_2",
+  "objetivo": {
+   "expresion": "min α·costo_operativo + β·tiempo_espera + γ·penalización_sobreocupación + δ·desviación_frecuencia",
+   "pesos": {
+    "alfa": {
+     "simbolo": "α",
+     "nombre": "peso_costo_operativo",
+     "valor": 1.0,
+     "fuente": "threshold_config v5"
+    },
+    "beta": {
+     "simbolo": "β",
+     "nombre": "peso_tiempo_espera",
+     "valor": 1.0,
+     "fuente": "threshold_config v5"
+    },
+    "gamma": {
+     "simbolo": "γ",
+     "nombre": "peso_sobreocupacion",
+     "valor": 1.0,
+     "fuente": "threshold_config v5"
+    },
+    "delta": {
+     "simbolo": "δ",
+     "nombre": "peso_desviacion_frecuencia",
+     "valor": 1.0,
+     "fuente": "threshold_config v5"
+    }
+   },
+   "parametros": {
+    "nivel_servicio": {
+     "valor": 0.9,
+     "fuente": "threshold_config v5"
+    },
+    "costo_bus_hora_cop": {
+     "valor": 26400.22,
+     "fuente": "threshold_config v5"
+    },
+    "costo_km_cop": {
+     "valor": 1991.24,
+     "fuente": "threshold_config v5"
+    },
+    "valor_tiempo_espera_cop_h": {
+     "valor": 7000.0,
+     "fuente": "threshold_config v5"
+    },
+    "penalidad_sobreocupacion_cop": {
+     "valor": 10000.0,
+     "fuente": "threshold_config v5"
+    },
+    "costo_cambio_frecuencia_cop": {
+     "valor": 26400.22,
+     "fuente": "threshold_config v5"
+    }
+   },
+   "definiciones": {
+    "costo_operativo": "buses/h × (ciclo/60 × costo_bus_hora + km_ciclo × costo_km)",
+    "tiempo_espera": "pasajeros/h × (headway/2 × (1 + cv²)) / 60 × valor_tiempo_espera",
+    "penalizacion_sobreocupacion": "penalidad × E[(L - capacidad × ocupación_crítica)+], L lognormal calibrada",
+    "desviacion_frecuencia": "costo_cambio × |buses/h - buses/h programados|"
+   },
+   "datos_ruta": {
+    "km_ciclo": 56.4,
+    "cv_intervalos": 0.698,
+    "tiempo_ciclo_min": 249.1,
+    "flota_disponible": 79.0
+   }
+  },
+  "demanda": {
+   "puntual": 1000.0,
+   "p10": 850.0,
+   "p90": 1180.0,
+   "nivel_servicio": 0.9,
+   "criterio": "banda P90 calibrada",
+   "factor_carga": 0.4936,
+   "sigma_log": 0.1292,
+   "carga_critica_mediana": 493.6,
+   "carga_critica_diseno": 582.45,
+   "capacidad_requerida_puestos": 685.23
+  },
+  "solver": {
+   "formulacion": "MILP de la franja (PuLP/CBC)",
+   "estado": "Optimal",
+   "segundos": 0.0698,
+   "verificacion_enumeracion": null
+  },
+  "restricciones": [
+   {
+    "nombre": "headway_minimo",
+    "descripcion": "Headway mínimo (separación mínima entre despachos)",
+    "valor": 5.0,
+    "limite": 2.0,
+    "unidad": "min",
+    "activa": false,
+    "holgura": 3.0
+   },
+   {
+    "nombre": "headway_maximo",
+    "descripcion": "Headway máximo (espera máxima de la política de servicio)",
+    "valor": 5.0,
+    "limite": 10.0,
+    "unidad": "min",
+    "activa": false,
+    "holgura": 5.0
+   },
+   {
+    "nombre": "nivel_servicio",
+    "descripcion": "Capacidad: capacidad efectiva >= carga crítica del nivel de servicio",
+    "valor": 618.8,
+    "limite": 582.45,
+    "unidad": "pasajeros/h",
+    "activa": true,
+    "holgura": 36.35
+   },
+   {
+    "nombre": "flota_disponible",
+    "descripcion": "Vehículos requeridos (Σ ceil(ciclo × n_t / 60)) <= flota disponible",
+    "valor": 51,
+    "limite": 79.0,
+    "unidad": "vehículos",
+    "activa": false,
+    "holgura": 28.0
+   },
+   {
+    "nombre": "duracion_ciclo",
+    "descripcion": "Duración del ciclo: cada salida ocupa un bus un ciclo completo",
+    "valor": 249.1,
+    "limite": null,
+    "unidad": "min",
+    "activa": true,
+    "holgura": null
+   },
+   {
+    "nombre": "flota_T1",
+    "descripcion": "Buses/h de Bus corto <= vehículos disponibles × 60 / ciclo",
+    "valor": 0,
+    "limite": 2,
+    "unidad": "buses/h",
+    "activa": false,
+    "holgura": 2
+   },
+   {
+    "nombre": "flota_T2",
+    "descripcion": "Buses/h de Bus estándar <= vehículos disponibles × 60 / ciclo",
+    "valor": 3,
+    "limite": 6,
+    "unidad": "buses/h",
+    "activa": false,
+    "holgura": 3
+   },
+   {
+    "nombre": "flota_T3",
+    "descripcion": "Buses/h de Bus largo <= vehículos disponibles × 60 / ciclo",
+    "valor": 5,
+    "limite": 5,
+    "unidad": "buses/h",
+    "activa": true,
+    "holgura": 0
+   },
+   {
+    "nombre": "flota_T4",
+    "descripcion": "Buses/h de Bus de alta capacidad <= vehículos disponibles × 60 / ciclo",
+    "valor": 4,
+    "limite": 4,
+    "unidad": "buses/h",
+    "activa": true,
+    "holgura": 0
+   },
+   {
+    "nombre": "ocupacion_objetivo_minima",
+    "descripcion": "Ocupación objetivo mínima (§5.1): por debajo hay sobreoferta (marca informativa, no restricción dura)",
+    "valor": 0.678,
+    "limite": 0.65,
+    "unidad": "fracción",
+    "activa": false,
+    "holgura": 0.028
+   }
+  ],
+  "limites_activos": [
+   "nivel_servicio",
+   "flota_T3",
+   "flota_T4"
+  ],
+  "tipologias": {
+   "usadas": true,
+   "fuente": "app/servicios/tipologias_flota.json (flota_sobusa.csv, sin placas)",
+   "asignacion": [
+    {
+     "codigo": "T1",
+     "nombre": "Bus corto",
+     "capacidad": 47,
+     "buses_hora": 0,
+     "vehiculos": 0,
+     "disponibles": 10,
+     "maximo_buses_hora": 2
+    },
+    {
+     "codigo": "T2",
+     "nombre": "Bus estándar",
+     "capacidad": 50,
+     "buses_hora": 3,
+     "vehiculos": 13,
+     "disponibles": 25,
+     "maximo_buses_hora": 6
+    },
+    {
+     "codigo": "T3",
+     "nombre": "Bus largo",
+     "capacidad": 58,
+     "buses_hora": 5,
+     "vehiculos": 21,
+     "disponibles": 24,
+     "maximo_buses_hora": 5
+    },
+    {
+     "codigo": "T4",
+     "nombre": "Bus de alta capacidad",
+     "capacidad": 72,
+     "buses_hora": 4,
+     "vehiculos": 17,
+     "disponibles": 20,
+     "maximo_buses_hora": 4
+    }
+   ]
+  },
+  "margen": {
+   "un_bus_menos": {
+    "factible": false
+   },
+   "un_bus_mas": {
+    "factible": true,
+    "buses_hora": 13,
+    "delta_componentes_cop": {
+     "costo_operativo": 221910.85,
+     "tiempo_espera": -33366.75,
+     "sobreocupacion": -3431.02,
+     "desviacion_frecuencia": -26400.22
+    },
+    "delta_total_ponderado_cop": 158712.84
+   }
+  },
+  "linea_base_10_3": {
+   "buses_hora": 14,
+   "headway_min": 4.29,
+   "vehiculos_requeridos": 59,
+   "capacidad_efectiva": 42.5,
+   "ocupacion_esperada": 0.7051,
+   "viable": true,
+   "motivo": null,
+   "formula": "capacidad_efectiva = 50 × 0,85 = 42,5; carga_critica = 0,494 × P90 1.180,0 = 582,4; buses_hora = max(ceil(582,4 / 42,5) = 14, ceil(60 / 10,00) = 6) = 14; headway = 60 / 14 = 4,29 → [2,00, 10,00] = 4,29 min; vehiculos_requeridos = ceil(249,1 / 4,29) = 59",
+   "nombre": "§10.3 ajustada: ceil(carga crítica de diseño / capacidad efectiva), carga crítica = factor de carga × P90",
+   "factor_carga": 0.4936,
+   "criterio_demanda": "p90"
+  },
+  "linea_base_10_3_literal": {
+   "buses_hora": 24,
+   "headway_min": 2.5,
+   "vehiculos_requeridos": 100,
+   "capacidad_efectiva": 42.5,
+   "ocupacion_esperada": 0.8333,
+   "viable": false,
+   "motivo": "La flota disponible (79 vehículos) no alcanza: con un ciclo de 249,1 min y un headway de 2,50 min se requieren 100 vehículos; la flota solo sostiene 19 buses/h.",
+   "formula": "capacidad_efectiva = 50 × 0,85 = 42,5; carga_critica = 1,000 × demanda 1.000,0 = 1.000,0; buses_hora = max(ceil(1.000,0 / 42,5) = 24, ceil(60 / 10,00) = 6) = 24; headway = 60 / 24 = 2,50 → [2,00, 10,00] = 2,50 min; vehiculos_requeridos = ceil(249,1 / 2,50) = 100",
+   "nombre": "§10.3 literal: ceil(demanda puntual / capacidad efectiva), factor 1",
+   "factor_carga": 1.0,
+   "criterio_demanda": "puntual"
+  },
+  "sobreoferta": false,
+  "motivo_sobreoferta": null,
+  "mejor_aproximacion": null,
+  "comparacion_actual": {
+   "actual": {
+    "rotulo": "frecuencia actual (programada)",
+    "frecuencia_min": 2.94,
+    "buses_hora": 20.41,
+    "vehiculos_requeridos": 85,
+    "capacidad_ofrecida": 1020.4,
+    "ocupacion_esperada": 0.4837,
+    "cumple_nivel_servicio": true,
+    "cabe_en_la_flota": false,
+    "espera_media_min": 2.186,
+    "sobrecarga_esperada_pax": 0.0,
+    "componentes_cop": {
+     "costo_operativo": 4528792.84,
+     "tiempo_espera": 255055.49,
+     "sobreocupacion": 0.18,
+     "desviacion_frecuencia": 0.0
+    },
+    "total_ponderado_cop": 4783848.51
+   },
+   "recomendada": {
+    "frecuencia_min": 5.0,
+    "buses_hora": 12,
+    "vehiculos_requeridos": 51,
+    "capacidad_ofrecida": 728.0,
+    "ocupacion_esperada": 0.678,
+    "cumple_nivel_servicio": true,
+    "cabe_en_la_flota": true,
+    "espera_media_min": 3.718,
+    "sobrecarga_esperada_pax": 0.44,
+    "componentes_cop": {
+     "costo_operativo": 2662930.19,
+     "tiempo_espera": 433767.83,
+     "sobreocupacion": 4403.0,
+     "desviacion_frecuencia": 221977.36
+    },
+    "total_ponderado_cop": 3323078.39
+   },
+   "diferencia": {
+    "buses_hora": -8.41,
+    "espera_media_min": 1.532,
+    "sobrecarga_esperada_pax": 0.44,
+    "costo_operativo_cop": -1865862.65,
+    "total_ponderado_cop": -1460770.12,
+    "vehiculos_requeridos": -34
+   },
+   "conclusion": "la actual no cabe en la flota disponible; cambio de -8,4 buses/h, espera 1,53 min, costo ponderado -1.460.770 COP/h (la desviación no se cuenta en la actual)."
+  },
+  "escenario": null,
+  "sensibilidad": null,
+  "contexto_franja": {
+   "tipo_dia": "Laboral",
+   "tiempo_ciclo_min": 249.1,
+   "flota_disponible": 79,
+   "frecuencia_actual_min": 2.94,
+   "fuente": "datos/parametros_operativos_hora.parquet (mediana 2025 por ruta, tipo de día y hora; D1)",
+   "headway_maximo": {
+    "valor": 10.0,
+    "manda": "headway_maximo_min",
+    "regla": "headway máximo efectivo = min(headway_maximo_min, 2 × espera_max_min): la espera máxima de §5.1 se lee como espera media del pasajero, headway / 2 con llegadas aleatorias (supuesto S12)",
+    "headway_maximo_min": {
+     "valor": 10.0,
+     "fuente": "threshold_config v5"
+    },
+    "espera_max_min": {
+     "valor": 5.0,
+     "fuente": "threshold_config v5"
+    },
+    "dos_por_espera_min": 10.0,
+    "nota": null
+   },
+   "factor_carga": {
+    "factor_carga": 0.4936,
+    "dias": 236,
+    "fuente": "mediana 2025 de carga crítica / abordajes por ruta, tipo de día y hora (insumos D5)"
+   }
+  },
+  "capacidad_gobernada": {
+   "capacidad": 50,
+   "fuente": "catalogo",
+   "clave": null,
+   "tipologia": "TODAS",
+   "umbrales_version": 5
+  },
+  "explicacion": [
+   "Se recomiendan 12 buses/h (un despacho cada 5,00 min) con 51 vehículos en el ciclo de 249,1 min.",
+   "Demanda de diseño: 582,4 pasajeros en el punto de carga máxima (banda P90 calibrada, nivel de servicio 90 %); capacidad efectiva ofrecida 618,8.",
+   "Límites que mandan: la capacidad del nivel de servicio, la flota de Bus largo (T3), la flota de Bus de alta capacidad (T4).",
+   "Un bus más por hora costaría 221.911 COP/h de operación y cambiaría la espera en -33.367 y la sobreocupación en -3.431 COP/h: el objetivo sube 158.713 COP/h.",
+   "Un bus menos no es factible: violaría el nivel de servicio.",
+   "Asignación de capacidad sugerida: 3 × Bus estándar (50 puestos) + 5 × Bus largo (58 puestos) + 4 × Bus de alta capacidad (72 puestos).",
+   "Frecuencia actual (programada): cada 2,94 min (20,4 buses/h); la recomendada es cada 5,00 min.",
+   "La línea base §10.3 ajustada daría 14 buses/h (viable); la diferencia: la mezcla de tipologías ofrece 60,7 puestos por bus en promedio frente a los 50 de la línea base.",
+   "Línea base §10.3 literal (factor 1, demanda puntual): 24 buses/h, headway 2,50 min (no viable); ajustada (factor de carga 0,494, P90): 14 buses/h, headway 4,29 min (viable)."
+  ]
+ }
+}

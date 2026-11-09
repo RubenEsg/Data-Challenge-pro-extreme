@@ -1,0 +1,52 @@
+Nivel «Contrato» (tests/contrato), última corrida: 09-11-2026, 07:49:26 a 07:51:46 (Bogotá), 140 s
+Comando (desde EntregaFinal/api_frecuencias, PostgreSQL local de pruebas en el puerto 5433):
+  SCHEMATHESIS_EJEMPLOS=5 TEST_DATABASE_NAME=ai_frecuencias_pruebas_contrato_f python -m pytest tests/contrato
+Código de salida: 0.
+
+Resultado (contado en el junit de la corrida): 178 casos = 116 pruebas + 62 subpruebas de Schemathesis
+(una por operación del OpenAPI). Fallas: 0. Errores: 0. Omitidas: 0. Sin xfail.
+Por módulo: test_compatibilidad_openapi 6; test_contrato_openapi 101; test_presentacion_y_guarda 8; test_schemathesis 1.
+
+Qué cubre (sin ningún xfail ni lista de defectos conocidos)
+- test_contrato_openapi.py: cada operación válida contra su esquema (jsonschema, Draft 2020-12), también las
+  escrituras POST /api/v1/respuesta/calcular (202 con analista, 403 con operador, 404 «sin_datos» para 2030-01-01 sin
+  encolar) y POST /api/v1/thresholds/{version}/aprobar (admin, idempotente, 403, 404 y 422); 401/403/404/422 con el
+  error uniforme; cada ErrorApi(<estado>, "<código>") del código declarado con su estado y en «x-codigos-error»; los
+  códigos propios provocados en vivo (422 «rango_invalido», «motivo_requerido» y «ventana_en_muestra»; 404
+  «sin_calcular» y «sin_datos»); 409/503/400 documentados; tipos de contenido; cabeceras; byte NUL; valores fuera de
+  rango (también el filtro idruta con un entero de 64 bits: 422, nunca 500); filtro espacial; §8.1 en PATCH de
+  alertas; el documento completado es idempotente.
+- test_compatibilidad_openapi.py: compatibilidad hacia atrás contra docs/openapi.json (RNF-009).
+- test_presentacion_y_guarda.py: presentación §8.1 de los JSONB y guarda NUL (unidad).
+- test_schemathesis.py: todas las operaciones con cinco chequeos (ver schemathesis.txt).
+OpenAPI sin deriva: «python scripts/ci_local.py openapi» -> «OpenAPI sin deriva: openapi.json coincide con el generado
+(59 rutas)»; el documento tiene 62 operaciones.
+
+Corrida anterior (antecedente, con el código de ese momento):
+Suite completa de pruebas con el contrato estricto (spec v1.5 §14.1 y §14.2), 09-11-2026, 03:42 a 03:55 (Bogotá)
+Comando (desde EntregaFinal/api_frecuencias, PostgreSQL local de pruebas en el puerto 5433 y la réplica en el 5434):
+  TEST_DATABASE_NAME=ai_frecuencias_pruebas_calidad_api python -m pytest tests/unit tests/integracion tests/replica
+  tests/contrato tests/datos_ml -q --junitxml=docs/evidencias/contrato/suite_completa_junit.xml
+SCHEMATHESIS_EJEMPLOS=10 (valor por omisión). Código de salida: 0. Duración: 808,1 s.
+
+Resultado (contado en suite_completa_junit.xml)
+- 828 casos en el junit = 764 pruebas aprobadas + 4 omitidas + 60 subpruebas de Schemathesis aprobadas (una por
+  operación del OpenAPI). 0 fallas, 0 errores y 0 xfail.
+- Por nivel: unit 397 aprobadas; integracion 70 aprobadas y 1 omitida; replica 177 aprobadas y 3 omitidas;
+  contrato 160 casos aprobados (100 pruebas + 60 subpruebas de Schemathesis); datos_ml 20 aprobadas.
+- Las 4 omitidas lo están a propósito y dicen cómo activarlas:
+  tests/integracion/test_caida.py (caída con procesos reales, PRUEBA_CAIDA=1) y 3 de tests/replica que escriben en la
+  réplica (REPLICA_PRUEBAS_ESCRITURA=1).
+
+Nivel «Contrato» (tests/contrato), sin ningún xfail ni lista de defectos conocidos
+- test_contrato_openapi.py: cada operación válida contra su esquema (jsonschema, Draft 2020-12), 401/403/404/422 con
+  el error uniforme, códigos lanzados por el código = códigos declarados, 409/503/400 documentados, tipos de contenido
+  (text/plain, text/csv, xlsx), cabeceras (X-Correlation-Id, WWW-Authenticate), byte NUL, rangos, filtro espacial y
+  §8.1 en la respuesta de PATCH /alerts/{id}/status.
+- test_compatibilidad_openapi.py: compatibilidad hacia atrás contra docs/openapi.json (RNF-009).
+- test_presentacion_y_guarda.py: presentación §8.1 de los JSONB y guarda NUL (unidad).
+- test_schemathesis.py: 60 operaciones con cinco chequeos (ver schemathesis.txt).
+Prueba §8.1 estricta: tests/integracion/test_catalogos_api.py::test_toda_la_api_presenta_los_instantes_en_bogota
+(PENDIENTES_AJENOS vacío). RNF-006: tests/integracion/test_traza_entre_replicas.py (3 pruebas).
+OpenAPI sin deriva: «python scripts/ci_local.py openapi» -> «OpenAPI sin deriva: openapi.json coincide con el
+generado (57 rutas)».

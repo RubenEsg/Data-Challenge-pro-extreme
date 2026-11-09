@@ -1,0 +1,7 @@
+GET /api/v1/alerts sin clave -> 401 no_autenticado
+POST /api/v1/frequency/executions con operador -> 403 prohibido {'rol': 'operador', 'rol_requerido': 'analista'}
+POST /api/v1/frequency/executions con analista -> 202
+ejecución a1882a40-fb85-4f65-971a-0c8420c7e51e: estado=ok etapa=terminada worker_id=None mensaje=Terminada
+traza 0cf04835c3dd6a790935168eef5b2c67 en Jaeger: 39 spans
+raíz: POST /api/v1/frequency/executions
+etapas: ejecucion.alertas, ejecucion.calidad, ejecucion.ciclo_frecuencia, ejecucion.guardar_errores_calidad, ejecucion.incorporar_historico, ejecucion.lectura_incremental, ejecucion.notificaciones, ejecucion.prediccion

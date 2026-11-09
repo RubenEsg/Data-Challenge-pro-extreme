@@ -1,0 +1,157 @@
+Operaciones del contrato OpenAPI y códigos de respuesta declarados (spec v1.5 §12.1, §12.2, RNF-009)
+Generado desde app.openapi() (app/openapi_doc.py) el 09-11-2026, 07:47:18 (Bogotá) | versión de la API 1.0.0 | OpenAPI 3.1.0
+59 rutas y 62 operaciones. Todo 4xx/5xx declarado usa el esquema uniforme RespuestaError {error: {codigo, mensaje, detalle, correlation_id}}.
+Columnas: método, ruta, rol mínimo (x-rol-minimo), estados declarados, tipos de contenido del éxito.
+
+GET    /api/v1/alerts                                          operador  200 401 422 500                    application/json
+GET    /api/v1/alerts/export                                   operador  200 401 422 500                    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/alerts/{alert_id}                               operador  200 401 404 422 500                application/json
+GET    /api/v1/alerts/{alert_id}/history                       operador  200 401 404 422 500                application/json
+PATCH  /api/v1/alerts/{alert_id}/status                        operador  200 400 401 404 409 422 500        application/json
+GET    /api/v1/catalogos                                       operador  200 401 422 500 503                application/json
+GET    /api/v1/catalogos/capacidad                             operador  200 401 404 422 500 503            application/json
+PUT    /api/v1/catalogos/capacidad                             admin     200 400 401 403 404 422 500        application/json
+GET    /api/v1/catalogos/capacidad/historial                   operador  200 401 422 500 503                application/json
+GET    /api/v1/catalogos/despachos                             operador  200 401 422 500 503                application/json
+GET    /api/v1/catalogos/despachos/export                      operador  200 401 422 500 503                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/catalogos/empresas                              operador  200 401 422 500 503                application/json
+GET    /api/v1/catalogos/empresas/export                       operador  200 401 422 500 503                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/catalogos/procesos                              operador  200 401 422 500 503                application/json
+GET    /api/v1/catalogos/procesos/export                       operador  200 401 422 500 503                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/catalogos/rutas                                 operador  200 401 422 500 503                application/json
+GET    /api/v1/catalogos/rutas/export                          operador  200 401 422 500 503                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/catalogos/rutas/{idruta}                        operador  200 401 404 422 500 503            application/json
+GET    /api/v1/catalogos/segmentos                             operador  200 401 422 500 503                application/json
+GET    /api/v1/catalogos/segmentos/export                      operador  200 401 422 500 503                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/catalogos/vehiculos                             operador  200 401 422 500 503                application/json
+GET    /api/v1/catalogos/vehiculos/export                      operador  200 401 422 500 503                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/catalogos/vehiculos/tipologias                  operador  200 401 422 500 503                application/json
+GET    /api/v1/catalogos/viajes                                operador  200 401 422 500 503                application/json
+GET    /api/v1/catalogos/viajes/export                         operador  200 401 422 500 503                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/frequency/executions                            operador  200 401 422 500                    application/json
+POST   /api/v1/frequency/executions                            analista  202 400 401 403 422 500            application/json
+GET    /api/v1/frequency/executions/{execution_id}             operador  200 401 404 422 500                application/json
+GET    /api/v1/frequency/executions/{execution_id}/errors      operador  200 401 404 422 500                application/json
+GET    /api/v1/models                                          operador  200 401 422 500                    application/json
+POST   /api/v1/models/rollback                                 admin     200 400 401 403 404 409 422 500    application/json
+POST   /api/v1/models/train                                    analista  202 400 401 403 422 500            application/json
+GET    /api/v1/models/{model_id}                               operador  200 401 404 422 500                application/json
+POST   /api/v1/models/{model_id}/activate                      admin     200 400 401 403 404 409 422 500    application/json
+GET    /api/v1/models/{model_id}/evaluation                    operador  200 401 404 409 422 500            application/json
+GET    /api/v1/models/{model_id}/importance                    operador  200 401 404 409 422 500            application/json
+GET    /api/v1/monitoring                                      operador  200 401 422 500                    application/json
+GET    /api/v1/monitoring/export                               operador  200 401 422 500                    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/monitoring/feature-snapshots                    operador  200 401 422 500                    application/json
+GET    /api/v1/monitoring/policy                               operador  200 401 422 500                    application/json
+GET    /api/v1/predictions                                     operador  200 401 422 500                    application/json
+GET    /api/v1/predictions/export                              operador  200 401 422 500                    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+POST   /api/v1/predictions/run                                 analista  201 400 401 403 404 422 500        application/json
+GET    /api/v1/predictions/segmentos                           operador  200 401 404 422 500 503            application/json
+GET    /api/v1/predictions/{prediction_id}                     operador  200 401 404 422 500                application/json
+GET    /api/v1/recommendations                                 operador  200 401 422 500                    application/json
+POST   /api/v1/recommendations/calculate                       analista  201 400 401 403 404 422 500        application/json
+GET    /api/v1/recommendations/export                          operador  200 401 422 500                    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/recommendations/plan                            operador  200 401 404 422 500                application/json
+GET    /api/v1/respuesta                                       operador  200 401 404 422 500                application/json
+POST   /api/v1/respuesta/calcular                              analista  202 400 401 403 404 422 500        application/json
+GET    /api/v1/respuesta/export                                operador  200 401 404 422 500                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/scheduler                                       operador  200 401 422 500                    application/json
+GET    /api/v1/segmentos/estadisticas                          operador  200 401 422 500 503                application/json
+GET    /api/v1/segmentos/estadisticas/export                   operador  200 401 422 500 503                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/segmentos/zonas                                 operador  200 401 422 500 503                application/json
+GET    /api/v1/thresholds                                      operador  200 401 422 500                    application/json
+PUT    /api/v1/thresholds                                      admin     200 400 401 403 422 500            application/json
+GET    /api/v1/thresholds/history                              operador  200 401 422 500                    application/json
+POST   /api/v1/thresholds/{version}/aprobar                    admin     200 400 401 403 404 422 500        application/json
+GET    /health                                                 -         200 422 500 503                    application/json
+GET    /metrics                                                -         200 401 422 500                    text/plain
+
+Valores de «codigo» propios de cada operación (x-codigos-error, además de los generales). Generales: 400 cuerpo_ilegible; 401 no_autenticado; 403 prohibido; 404 no_encontrado; 422 validacion, fuera_de_rango; 500 error_interno; «no_encontrado» en el 404 de las rutas con parámetro y «orden_invalido» en el 422 de las que aceptan «orden».
+Prueba: tests/contrato/test_contrato_openapi.py::test_codigos_que_lanza_el_codigo_estan_documentados (cada ErrorApi(<estado>, "<código>") del router está declarado) y ::test_errores_propios_en_vivo_son_uniformes_y_declarados (llamadas reales).
+
+PATCH  /api/v1/alerts/{alert_id}/status                        409  transicion_invalida
+PATCH  /api/v1/alerts/{alert_id}/status                        422  datos_incompletos
+GET    /api/v1/catalogos                                       422  filtro_invalido
+GET    /api/v1/catalogos                                       500  operacion_no_permitida
+GET    /api/v1/catalogos                                       503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/capacidad                             404  no_encontrado
+GET    /api/v1/catalogos/capacidad                             422  tipologia_invalida
+PUT    /api/v1/catalogos/capacidad                             404  no_encontrado, ajuste_inexistente
+PUT    /api/v1/catalogos/capacidad                             422  ruta_desconocida, capacidad_invalida
+GET    /api/v1/catalogos/despachos                             422  filtro_invalido
+GET    /api/v1/catalogos/despachos                             500  operacion_no_permitida
+GET    /api/v1/catalogos/despachos                             503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/despachos/export                      422  filtro_invalido
+GET    /api/v1/catalogos/despachos/export                      500  operacion_no_permitida
+GET    /api/v1/catalogos/despachos/export                      503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/empresas                              422  filtro_invalido
+GET    /api/v1/catalogos/empresas                              500  operacion_no_permitida
+GET    /api/v1/catalogos/empresas                              503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/empresas/export                       422  filtro_invalido
+GET    /api/v1/catalogos/empresas/export                       500  operacion_no_permitida
+GET    /api/v1/catalogos/empresas/export                       503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/procesos                              422  filtro_invalido
+GET    /api/v1/catalogos/procesos                              500  operacion_no_permitida
+GET    /api/v1/catalogos/procesos                              503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/procesos/export                       422  filtro_invalido
+GET    /api/v1/catalogos/procesos/export                       500  operacion_no_permitida
+GET    /api/v1/catalogos/procesos/export                       503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/rutas                                 422  filtro_invalido
+GET    /api/v1/catalogos/rutas                                 500  operacion_no_permitida
+GET    /api/v1/catalogos/rutas                                 503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/rutas/export                          422  filtro_invalido
+GET    /api/v1/catalogos/rutas/export                          500  operacion_no_permitida
+GET    /api/v1/catalogos/rutas/export                          503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/rutas/{idruta}                        422  filtro_invalido
+GET    /api/v1/catalogos/rutas/{idruta}                        500  operacion_no_permitida
+GET    /api/v1/catalogos/rutas/{idruta}                        503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/segmentos                             422  filtro_invalido
+GET    /api/v1/catalogos/segmentos                             500  operacion_no_permitida
+GET    /api/v1/catalogos/segmentos                             503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/segmentos/export                      422  filtro_invalido
+GET    /api/v1/catalogos/segmentos/export                      500  operacion_no_permitida
+GET    /api/v1/catalogos/segmentos/export                      503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/vehiculos                             422  filtro_invalido
+GET    /api/v1/catalogos/vehiculos                             500  operacion_no_permitida
+GET    /api/v1/catalogos/vehiculos                             503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/vehiculos/export                      422  filtro_invalido
+GET    /api/v1/catalogos/vehiculos/export                      500  operacion_no_permitida
+GET    /api/v1/catalogos/vehiculos/export                      503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/vehiculos/tipologias                  422  filtro_invalido
+GET    /api/v1/catalogos/vehiculos/tipologias                  500  operacion_no_permitida
+GET    /api/v1/catalogos/vehiculos/tipologias                  503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/viajes                                422  filtro_invalido
+GET    /api/v1/catalogos/viajes                                500  operacion_no_permitida
+GET    /api/v1/catalogos/viajes                                503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/viajes/export                         422  filtro_invalido
+GET    /api/v1/catalogos/viajes/export                         500  operacion_no_permitida
+GET    /api/v1/catalogos/viajes/export                         503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/frequency/executions                            422  rango_invalido
+POST   /api/v1/models/rollback                                 404  no_encontrado
+POST   /api/v1/models/rollback                                 409  sin_version_anterior
+POST   /api/v1/models/{model_id}/activate                      409  ya_activo, requiere_forzar, activacion_rechazada, sin_datos_validacion, validacion_fallida
+POST   /api/v1/models/{model_id}/activate                      422  ventana_en_muestra, motivo_requerido, sin_ventana_validacion
+GET    /api/v1/models/{model_id}/evaluation                    404  modelo_no_encontrado
+GET    /api/v1/models/{model_id}/evaluation                    409  integridad_modelo
+GET    /api/v1/models/{model_id}/evaluation                    422  ventana_invalida, sin_datos
+GET    /api/v1/models/{model_id}/importance                    404  modelo_no_encontrado
+GET    /api/v1/models/{model_id}/importance                    409  integridad_modelo
+GET    /api/v1/monitoring/feature-snapshots                    422  filtro_requerido
+POST   /api/v1/predictions/run                                 404  ruta_desconocida, modelo_no_encontrado
+POST   /api/v1/predictions/run                                 422  parametros_invalidos, prediccion_invalida
+GET    /api/v1/predictions/segmentos                           404  no_encontrado, ruta_desconocida, modelo_no_encontrado, ruta_sin_segmentos
+GET    /api/v1/predictions/segmentos                           422  parametros_requeridos, horizonte_invalido, prediccion_invalida
+GET    /api/v1/predictions/segmentos                           503  reparto_no_disponible
+POST   /api/v1/recommendations/calculate                       404  no_encontrado, ruta_desconocida
+POST   /api/v1/recommendations/calculate                       422  parametros_invalidos
+GET    /api/v1/recommendations/plan                            404  sin_calcular, plan_no_disponible, ruta_desconocida
+GET    /api/v1/respuesta                                       404  sin_calcular
+POST   /api/v1/respuesta/calcular                              404  sin_datos
+GET    /api/v1/respuesta/export                                404  sin_calcular
+GET    /api/v1/segmentos/estadisticas                          422  parametro_invalido
+GET    /api/v1/segmentos/estadisticas                          503  fuente_no_disponible
+GET    /api/v1/segmentos/estadisticas/export                   422  parametro_invalido
+GET    /api/v1/segmentos/estadisticas/export                   503  fuente_no_disponible
+GET    /api/v1/segmentos/zonas                                 422  parametro_invalido
+GET    /api/v1/segmentos/zonas                                 503  fuente_no_disponible
+PUT    /api/v1/thresholds                                      422  umbral_invalido

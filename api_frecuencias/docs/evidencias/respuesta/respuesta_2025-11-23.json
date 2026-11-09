@@ -1,0 +1,2464 @@
+{
+ "pregunta": "con los datos históricos y recientes, ¿cada cuánto despachar buses para optimizar la flota y el recaudo? ¿Cuántos pasajeros y vehículos se esperan, y qué situaciones requieren atención inmediata?",
+ "fecha": "2025-11-23",
+ "tipo_dia": "Domingo/festivo",
+ "generado_en": "2026-11-09T07:36:02-05:00",
+ "consultado_en": "2026-11-09T07:36:04-05:00",
+ "trazabilidad": {
+  "fuentes": [
+   "Plan de despacho: app/servicios/optimizacion.plan_dia (MILP de D5 con PuLP/CBC y los umbrales vigentes de threshold_config), con el pronóstico horario del modelo activo",
+   "Pasajeros esperados: app/servicios/inferencia.predecir (modelo hgb_fv2_20250831_s42, ventana de 60 min por hora de salida, banda P10-P90 calibrada, sin factor intradía)",
+   "Datos históricos: datos/demanda_horaria.parquet (serie empaquetada); datos recientes: ai_frecuencias.demanda_observada (lo que incorpora el ciclo diario)",
+   "Frecuencia programada, ciclo y flota: datos/parametros_operativos_hora.parquet (D1, mediana 2025 por ruta, tipo de día y hora)",
+   "Costos y tarifa: datos/costos_fuente.json (param_d5(fuente=True))",
+   "Foto de la respuesta: tabla ai_frecuencias.respuesta_reto (una fila por fecha, ruta, modelo y versión de umbrales)",
+   "Atención inmediata: tabla ai_frecuencias.alert (abiertas ahora: estados nueva, reconocida y asignada)"
+  ],
+  "model_id": "hgb_fv2_20250831_s42",
+  "data_cutoff": "2025-08-31",
+  "datos_hasta": "2025-12-31",
+  "execution_id": "b4b413bc-5277-4fe9-9877-6577d4210f30",
+  "feature_version": "fv2-2026-11-09",
+  "umbrales_version": 5,
+  "calibracion_banda": "v2",
+  "fuente_pronostico": "modelo_activo",
+  "calibracion_version": "v2",
+  "ultima_ejecucion_ciclo": "2384402c-a177-426c-905e-6456ac5d3ee7",
+  "ejecuciones_por_ruta": {
+   "SILENCIO": "b4b413bc-5277-4fe9-9877-6577d4210f30",
+   "CRA 54": "b4b413bc-5277-4fe9-9877-6577d4210f30",
+   "CL 72": "b4b413bc-5277-4fe9-9877-6577d4210f30"
+  }
+ },
+ "rutas": [
+  {
+   "ruta": "SILENCIO",
+   "idruta": 2,
+   "vehiculos": {
+    "nota": "requeridos_pico = máximo de buses en ruta a la vez con el plan (conteo de D5 cada 15 min con el ciclo de cada hora); requeridos_pico_10_3 = máximo de ceil(ciclo / headway) de §10.3 en las horas completas (60 min operados), que supone que la frecuencia de la hora se mantiene un ciclo completo y por eso difiere del conteo cuando la frecuencia cambia de una hora a otra; requeridos_programados = el mismo conteo de buses en ruta con las salidas programadas hoy (D1).",
+    "hora_pico": 18,
+    "requeridos_pico": 21,
+    "flota_disponible": 27,
+    "requeridos_pico_10_3": 21,
+    "requeridos_programados": 29
+   },
+   "flota_y_recaudo": {
+    "nota": "Recaudo = pasajeros esperados × tarifa neta de 3.182 COP por pasajero: tarifa pública del Área Metropolitana 2026 (3.700 COP) × 0,86 que retiene el operador (datos/costos_fuente.json, la misma de param_d5(fuente=True)); Extreme no suministró la tarifa (§19), así que es una cifra de referencia. Costo operativo = bus-hora (26.400 COP) + km (1.991 COP) del plan; con lo programado hoy sería 23.364.217 COP. vehiculos_hora_ahorrados > 0: el plan usa menos vehículos-hora que lo programado; < 0: usa más.",
+    "tarifa_neta_cop": 3182.0,
+    "espera_media_min": 6.89,
+    "costo_operativo_cop": 19569709,
+    "ingreso_perdido_cop": 1376504,
+    "recaudo_esperado_cop": 17292261,
+    "espera_media_actual_min": 5.84,
+    "vehiculos_hora_actuales": 364.6,
+    "sobreocupacion_pasajeros": 0.4,
+    "vehiculos_hora_ahorrados": 59.8,
+    "costo_operativo_actual_cop": 23364217,
+    "vehiculos_hora_recomendados": 304.8,
+    "sobreocupacion_pasajeros_actual": 1.7
+   },
+   "resumen_despacho": {
+    "hora_pico": 17,
+    "por_franja": [
+     {
+      "franja": "madrugada (4-5 h)",
+      "salidas": 7,
+      "headway_min": 8.6,
+      "horas_no_viables": [],
+      "headway_actual_min": 5.59,
+      "salidas_programadas": 10.7
+     },
+     {
+      "franja": "pico mañana (6-8 h)",
+      "salidas": 18,
+      "headway_min": 10.0,
+      "horas_no_viables": [],
+      "headway_actual_min": 7.6,
+      "salidas_programadas": 23.7
+     },
+     {
+      "franja": "valle (9-16 h)",
+      "salidas": 48,
+      "headway_min": 10.0,
+      "horas_no_viables": [],
+      "headway_actual_min": 8.55,
+      "salidas_programadas": 56.1
+     },
+     {
+      "franja": "pico tarde (17-19 h)",
+      "salidas": 18,
+      "headway_min": 9.91,
+      "horas_no_viables": [],
+      "headway_actual_min": 9.6,
+      "salidas_programadas": 18.6
+     },
+     {
+      "franja": "cierre (20 h)",
+      "salidas": 1,
+      "headway_min": 7.29,
+      "horas_no_viables": [],
+      "headway_actual_min": 12.74,
+      "salidas_programadas": 0.6
+     }
+    ],
+    "headway_pico_min": 10.0,
+    "headway_valle_min": 10.0,
+    "salidas_dia_programadas": 109.7,
+    "salidas_dia_recomendadas": 92
+   },
+   "pasajeros_esperados": {
+    "dia": 5434.4,
+    "p10": 3883.8,
+    "p90": 7022.4,
+    "por_hora": [
+     {
+      "p10": 0.0,
+      "p90": 0.1,
+      "hora": 4,
+      "esperado": 0.1
+     },
+     {
+      "p10": 274.8,
+      "p90": 444.6,
+      "hora": 5,
+      "esperado": 347.2
+     },
+     {
+      "p10": 304.2,
+      "p90": 440.0,
+      "hora": 6,
+      "esperado": 374.0
+     },
+     {
+      "p10": 280.2,
+      "p90": 448.9,
+      "hora": 7,
+      "esperado": 354.7
+     },
+     {
+      "p10": 288.3,
+      "p90": 467.8,
+      "hora": 8,
+      "esperado": 372.5
+     },
+     {
+      "p10": 318.4,
+      "p90": 480.6,
+      "hora": 9,
+      "esperado": 400.1
+     },
+     {
+      "p10": 279.7,
+      "p90": 479.9,
+      "hora": 10,
+      "esperado": 379.5
+     },
+     {
+      "p10": 265.3,
+      "p90": 458.9,
+      "hora": 11,
+      "esperado": 374.2
+     },
+     {
+      "p10": 208.4,
+      "p90": 454.9,
+      "hora": 12,
+      "esperado": 329.5
+     },
+     {
+      "p10": 215.5,
+      "p90": 441.7,
+      "hora": 13,
+      "esperado": 324.9
+     },
+     {
+      "p10": 241.3,
+      "p90": 509.3,
+      "hora": 14,
+      "esperado": 382.4
+     },
+     {
+      "p10": 288.6,
+      "p90": 555.9,
+      "hora": 15,
+      "esperado": 407.7
+     },
+     {
+      "p10": 268.9,
+      "p90": 489.0,
+      "hora": 16,
+      "esperado": 403.4
+     },
+     {
+      "p10": 312.4,
+      "p90": 520.2,
+      "hora": 17,
+      "esperado": 422.6
+     },
+     {
+      "p10": 168.6,
+      "p90": 395.9,
+      "hora": 18,
+      "esperado": 271.4
+     },
+     {
+      "p10": 168.8,
+      "p90": 356.0,
+      "hora": 19,
+      "esperado": 254.4
+     },
+     {
+      "p10": 0.4,
+      "p90": 78.7,
+      "hora": 20,
+      "esperado": 35.8
+     }
+    ]
+   },
+   "cada_cuanto_despachar": [
+    {
+     "hora": 4,
+     "franja": "madrugada (4-5 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 41.5,
+      "una_salida_mas": {
+       "salidas": 2,
+       "factible": false
+      },
+      "una_salida_menos": {
+       "salidas": 0,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 1.0,
+      "capacidad_efectiva_pax_h": 42.5,
+      "cobertura_demanda_diseno": 41.4245
+     },
+     "motivo": "Viable: una sola salida en 0,2 min operados (no hay intervalo entre salidas dentro de la hora) y como máximo 1,0 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 1,
+     "headway_min": 0.18,
+     "demanda_diseno": 1.0,
+     "limites_activos": [
+      "headway_minimo",
+      "headway_maximo"
+     ],
+     "buses_hora_actual": null,
+     "headway_actual_min": null
+    },
+    {
+     "hora": 5,
+     "franja": "madrugada (4-5 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 81.1,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 117190.62
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 173.9,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.4668
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 6,5 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 173.9,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 10.73,
+     "headway_actual_min": 5.59
+    },
+    {
+     "hora": 6,
+     "franja": "pico mañana (6-8 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 79.2,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 105410.06
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 175.8,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.4506
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 12,0 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 175.8,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 9.41,
+     "headway_actual_min": 6.38
+    },
+    {
+     "hora": 7,
+     "franja": "pico mañana (6-8 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 84.1,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 103353.69
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 170.9,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.4917
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 18,0 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 170.9,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 7.89,
+     "headway_actual_min": 7.6
+    },
+    {
+     "hora": 8,
+     "franja": "pico mañana (6-8 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 78.6,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 72410.36
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 176.4,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.4459
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 18,6 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 176.4,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 6.37,
+     "headway_actual_min": 9.42
+    },
+    {
+     "hora": 9,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 72.7,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 78786.48
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 182.3,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.3988
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,1 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 182.3,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 7.13,
+     "headway_actual_min": 8.41
+    },
+    {
+     "hora": 10,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 73.2,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 92925.16
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 181.8,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.4025
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,4 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 181.8,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 7.47,
+     "headway_actual_min": 8.04
+    },
+    {
+     "hora": 11,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 94.9,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 82918.53
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 160.1,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.593
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,5 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 160.1,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 6.89,
+     "headway_actual_min": 8.7
+    },
+    {
+     "hora": 12,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 90.0,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 83660.0
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 165.0,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.5455
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,9 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 165.0,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 6.41,
+     "headway_actual_min": 9.36
+    },
+    {
+     "hora": 13,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 95.2,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 98173.5
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 159.8,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.5962
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,5 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 159.8,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 6.66,
+     "headway_actual_min": 9.02
+    },
+    {
+     "hora": 14,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 72.1,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 89620.91
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 182.9,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.3944
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,6 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 182.9,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 7.36,
+     "headway_actual_min": 8.15
+    },
+    {
+     "hora": 15,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 57.3,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 89620.28
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 197.7,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.29
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,6 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 197.7,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 7.74,
+     "headway_actual_min": 7.76
+    },
+    {
+     "hora": 16,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 81.0,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 72454.65
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 174.0,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.4656
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,4 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 174.0,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 6.49,
+     "headway_actual_min": 9.24
+    },
+    {
+     "hora": 17,
+     "franja": "pico tarde (17-19 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 74.8,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 65546.38
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 180.2,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.4148
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,4 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 180.2,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 6.63,
+     "headway_actual_min": 9.05
+    },
+    {
+     "hora": 18,
+     "franja": "pico tarde (17-19 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 98.0,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 112840.41
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 157.0,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.6238
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,9 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 157.0,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 6.23,
+     "headway_actual_min": 9.64
+    },
+    {
+     "hora": 19,
+     "franja": "pico tarde (17-19 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 93.0,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 110961.55
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 162.0,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.574
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,9 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 9.73,
+     "demanda_diseno": 162.0,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 5.71,
+     "headway_actual_min": 10.21
+    },
+    {
+     "hora": 20,
+     "franja": "cierre (20 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 10.4,
+      "una_salida_mas": {
+       "salidas": 2,
+       "factible": true,
+       "delta_costo_cop": 138948.7
+      },
+      "una_salida_menos": {
+       "salidas": 0,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 32.1,
+      "capacidad_efectiva_pax_h": 42.5,
+      "cobertura_demanda_diseno": 1.3234
+     },
+     "motivo": "Viable: una sola salida en 7,3 min operados (no hay intervalo entre salidas dentro de la hora) y como máximo 19,6 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 1,
+     "headway_min": 7.29,
+     "demanda_diseno": 32.1,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 0.57,
+     "headway_actual_min": 12.74
+    }
+   ],
+   "atencion_inmediata": [
+    {
+     "alert_id": "bb12ed88-0a33-45ff-949b-815ed4bf01f4",
+     "codigo": "ALT-002",
+     "severidad": "critica",
+     "estado": "nueva",
+     "ruta": "SILENCIO",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:36-05:00",
+     "ventana_inicio": "2025-12-31T13:00:00-05:00",
+     "explicacion": "La ocupación observada (121,5 %) alcanza o supera el umbral crítico (90,0 %). Esperada: 46,5 %; observada: 121,5 % (= factor de carga 0,423 × 287 pasajeros ÷ (2 salidas × 50 puestos) en 13:00-14:00).",
+     "recomendacion": "Programar un despacho adicional y hacer seguimiento a la ocupación."
+    },
+    {
+     "alert_id": "ecb40227-030a-419e-90a0-2bf735b03c59",
+     "codigo": "ALT-002",
+     "severidad": "critica",
+     "estado": "nueva",
+     "ruta": "SILENCIO",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:36-05:00",
+     "ventana_inicio": "2025-12-31T17:00:00-05:00",
+     "explicacion": "La ocupación observada (116,2 %) alcanza o supera el umbral crítico (90,0 %). Esperada: 29,3 %; observada: 116,2 % (= factor de carga 0,396 × 440 pasajeros ÷ (3 salidas × 50 puestos) en 17:00-18:00).",
+     "recomendacion": "Programar un despacho adicional y hacer seguimiento a la ocupación."
+    },
+    {
+     "alert_id": "efb9e1db-5e4d-4a1f-abae-aa8714f15dea",
+     "codigo": "ALT-006",
+     "severidad": "critica",
+     "estado": "nueva",
+     "ruta": "SILENCIO",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:36-05:00",
+     "ventana_inicio": "2025-12-31T13:00:00-05:00",
+     "explicacion": "En 13:00-20:00 (7 h): salieron 13 de 62 despachos esperados (60 / intervalo programado). Despacho ausente o tardío: salieron 13 de 62 despachos esperados (déficit 79,0 %, tolerancia 50,0 %).",
+     "recomendacion": "Verificar la disponibilidad del vehículo y la operación del despacho."
+    },
+    {
+     "alert_id": "ad0b1ae5-6138-4250-9e25-982d00115fa5",
+     "codigo": "ALT-005",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "SILENCIO",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:36-05:00",
+     "ventana_inicio": "2025-12-31T13:00:00-05:00",
+     "explicacion": "Durante 4 hora(s) seguidas (13:00-17:00) la demanda real (1.125 pasajeros) cayó 48,1 % frente al patrón del modelo (2.168); el umbral de caída es 30,0 % (límite 1.518) y quedó bajo el P10 calibrado (1.507); persistencia exigida: 2 h.",
+     "recomendacion": "Validar si hay un evento, un problema en la ruta o una falla de captura."
+    },
+    {
+     "alert_id": "c037bf61-7ed1-47ae-8d30-4bb658671cec",
+     "codigo": "ALT-007",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "SILENCIO",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:36-05:00",
+     "ventana_inicio": "2025-12-31T04:00:00-05:00",
+     "explicacion": "Durante 2 hora(s) seguidas (04:00-06:00) la demanda real (846) quedó por debajo del P10 del intervalo calibrado (1.027); pronóstico 1.366, error 38,1 % (umbral 15,0 %); persistencia exigida: 2 h.",
+     "recomendacion": "Revisar la frecuencia y recalibrar el escenario del pronóstico."
+    },
+    {
+     "alert_id": "cc8a395d-0a6a-4743-a4f0-34955dff8e2e",
+     "codigo": "ALT-007",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "SILENCIO",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:36-05:00",
+     "ventana_inicio": "2025-12-27T00:00:00-05:00",
+     "explicacion": "Ruptura de comportamiento: desde el 27/12/2025 la demanda real diaria quedó por debajo del pronóstico de forma sostenida (3 días hasta la detección; residuo medio -9,4 % frente a 3,0 % del nivel anterior (referencia de 28 días: -2,1 %), cambio -12,3 %). El CUSUM llegó a 7,78 con umbral h = 6,0 (k = 0,5). No es una hora aislada: cambió el nivel de la demanda frente al patrón del modelo.",
+     "recomendacion": "Revisar la frecuencia y recalibrar el escenario del pronóstico."
+    },
+    {
+     "alert_id": "d132dd73-8758-47f0-b0dd-5238c192d5fa",
+     "codigo": "ALT-008",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "SILENCIO",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:36-05:00",
+     "ventana_inicio": "2025-12-31T00:00:00-05:00",
+     "explicacion": "Consolidado atípico: subidas = 6.225 frente a la mediana de 10.543,0 (z = -6,32) (umbral |z| ≥ 3,5). Referencia: 37 días laboral de las 8 semanas previas (mediana y 1,4826·MAD). Límite para subidas: 8.151 (mediana 10.543 - 3,5 × 683,5).",
+     "recomendacion": "Validar la fuente, el trigger de consolidación y el período afectado."
+    },
+    {
+     "alert_id": "e59447e1-b20b-480a-913d-729b79b55959",
+     "codigo": "ALT-005",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "SILENCIO",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:36-05:00",
+     "ventana_inicio": "2025-12-31T19:00:00-05:00",
+     "explicacion": "Durante 2 hora(s) seguidas (19:00-21:00) la demanda real (0 pasajeros) cayó 100,0 % frente al patrón del modelo (262); el umbral de caída es 30,0 % (límite 183) y quedó bajo el P10 calibrado (96); persistencia exigida: 2 h.",
+     "recomendacion": "Validar si hay un evento, un problema en la ruta o una falla de captura."
+    }
+   ],
+   "alertas_de_la_fecha": [],
+   "atencion_resumen": {
+    "consultado_en": "2026-11-09T07:36:04-05:00",
+    "abiertas_ahora": 8,
+    "abiertas_ahora_por_severidad": {
+     "critica": 3,
+     "preventiva": 5
+    },
+    "de_la_fecha": 0,
+    "de_la_fecha_por_severidad": {},
+    "nota": "«Abiertas ahora»: alertas sin cerrar ni descartar en ai_frecuencias.alert en el momento de la consulta (2026-11-09T07:36:04-05:00), de cualquier fecha; es lo que pide atención inmediata. «De la fecha»: alertas detectadas el 2025-11-23 (día de Bogotá), en cualquier estado."
+   }
+  },
+  {
+   "ruta": "CRA 54",
+   "idruta": 16,
+   "vehiculos": {
+    "nota": "requeridos_pico = máximo de buses en ruta a la vez con el plan (conteo de D5 cada 15 min con el ciclo de cada hora); requeridos_pico_10_3 = máximo de ceil(ciclo / headway) de §10.3 en las horas completas (60 min operados), que supone que la frecuencia de la hora se mantiene un ciclo completo y por eso difiere del conteo cuando la frecuencia cambia de una hora a otra; requeridos_programados = el mismo conteo de buses en ruta con las salidas programadas hoy (D1).",
+    "hora_pico": 8,
+    "requeridos_pico": 23,
+    "flota_disponible": 45,
+    "requeridos_pico_10_3": 26,
+    "requeridos_programados": 39
+   },
+   "flota_y_recaudo": {
+    "nota": "Recaudo = pasajeros esperados × tarifa neta de 3.182 COP por pasajero: tarifa pública del Área Metropolitana 2026 (3.700 COP) × 0,86 que retiene el operador (datos/costos_fuente.json, la misma de param_d5(fuente=True)); Extreme no suministró la tarifa (§19), así que es una cifra de referencia. Costo operativo = bus-hora (26.400 COP) + km (1.991 COP) del plan; con lo programado hoy sería 34.758.050 COP. vehiculos_hora_ahorrados > 0: el plan usa menos vehículos-hora que lo programado; < 0: usa más.",
+    "tarifa_neta_cop": 3182.0,
+    "espera_media_min": 5.47,
+    "costo_operativo_cop": 21396530,
+    "ingreso_perdido_cop": 5887528,
+    "recaudo_esperado_cop": 32233978,
+    "espera_media_actual_min": 3.37,
+    "vehiculos_hora_actuales": 529.0,
+    "sobreocupacion_pasajeros": 27.7,
+    "vehiculos_hora_ahorrados": 203.4,
+    "costo_operativo_actual_cop": 34758050,
+    "vehiculos_hora_recomendados": 325.5,
+    "sobreocupacion_pasajeros_actual": 30.7
+   },
+   "resumen_despacho": {
+    "hora_pico": 8,
+    "por_franja": [
+     {
+      "franja": "madrugada (4-5 h)",
+      "salidas": 11,
+      "headway_min": 5.86,
+      "horas_no_viables": [],
+      "headway_actual_min": 4.14,
+      "salidas_programadas": 15.6
+     },
+     {
+      "franja": "pico mañana (6-8 h)",
+      "salidas": 25,
+      "headway_min": 7.2,
+      "horas_no_viables": [],
+      "headway_actual_min": 4.46,
+      "salidas_programadas": 40.4
+     },
+     {
+      "franja": "valle (9-16 h)",
+      "salidas": 55,
+      "headway_min": 8.73,
+      "horas_no_viables": [],
+      "headway_actual_min": 4.67,
+      "salidas_programadas": 102.8
+     },
+     {
+      "franja": "pico tarde (17-19 h)",
+      "salidas": 21,
+      "headway_min": 8.53,
+      "horas_no_viables": [],
+      "headway_actual_min": 7.03,
+      "salidas_programadas": 25.5
+     },
+     {
+      "franja": "cierre (20 h)",
+      "salidas": 2,
+      "headway_min": 4.88,
+      "horas_no_viables": [],
+      "headway_actual_min": 11.47,
+      "salidas_programadas": 0.8
+     }
+    ],
+    "headway_pico_min": 6.67,
+    "headway_valle_min": 8.57,
+    "salidas_dia_programadas": 185.2,
+    "salidas_dia_recomendadas": 114
+   },
+   "pasajeros_esperados": {
+    "dia": 10130.1,
+    "p10": 7822.3,
+    "p90": 11983.9,
+    "por_hora": [
+     {
+      "p10": 82.6,
+      "p90": 191.0,
+      "hora": 4,
+      "esperado": 105.4
+     },
+     {
+      "p10": 582.1,
+      "p90": 878.4,
+      "hora": 5,
+      "esperado": 707.4
+     },
+     {
+      "p10": 494.0,
+      "p90": 707.5,
+      "hora": 6,
+      "esperado": 601.7
+     },
+     {
+      "p10": 562.8,
+      "p90": 783.3,
+      "hora": 7,
+      "esperado": 693.5
+     },
+     {
+      "p10": 601.6,
+      "p90": 833.0,
+      "hora": 8,
+      "esperado": 730.6
+     },
+     {
+      "p10": 543.3,
+      "p90": 787.6,
+      "hora": 9,
+      "esperado": 694.8
+     },
+     {
+      "p10": 559.5,
+      "p90": 816.9,
+      "hora": 10,
+      "esperado": 717.3
+     },
+     {
+      "p10": 471.1,
+      "p90": 740.5,
+      "hora": 11,
+      "esperado": 621.0
+     },
+     {
+      "p10": 523.1,
+      "p90": 828.6,
+      "hora": 12,
+      "esperado": 697.7
+     },
+     {
+      "p10": 505.1,
+      "p90": 771.8,
+      "hora": 13,
+      "esperado": 672.4
+     },
+     {
+      "p10": 556.7,
+      "p90": 827.7,
+      "hora": 14,
+      "esperado": 715.4
+     },
+     {
+      "p10": 499.3,
+      "p90": 795.1,
+      "hora": 15,
+      "esperado": 685.2
+     },
+     {
+      "p10": 572.2,
+      "p90": 859.4,
+      "hora": 16,
+      "esperado": 733.4
+     },
+     {
+      "p10": 485.0,
+      "p90": 746.0,
+      "hora": 17,
+      "esperado": 633.5
+     },
+     {
+      "p10": 424.8,
+      "p90": 688.2,
+      "hora": 18,
+      "esperado": 602.7
+     },
+     {
+      "p10": 316.1,
+      "p90": 553.9,
+      "hora": 19,
+      "esperado": 426.0
+     },
+     {
+      "p10": 43.0,
+      "p90": 175.0,
+      "hora": 20,
+      "esperado": 92.1
+     }
+    ]
+   },
+   "cada_cuanto_despachar": [
+    {
+     "hora": 4,
+     "franja": "madrugada (4-5 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -11.4,
+      "una_salida_mas": {
+       "salidas": 3,
+       "factible": false
+      },
+      "una_salida_menos": {
+       "salidas": 1,
+       "factible": true,
+       "delta_costo_cop": 131685.0
+      },
+      "demanda_diseno_pax_h": 96.4,
+      "capacidad_efectiva_pax_h": 85.0,
+      "cobertura_demanda_diseno": 0.8813
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 2,0 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 2,
+     "headway_min": 2.24,
+     "demanda_diseno": 96.4,
+     "limites_activos": [
+      "headway_minimo"
+     ],
+     "buses_hora_actual": 0.9,
+     "headway_actual_min": 5.0
+    },
+    {
+     "hora": 5,
+     "franja": "madrugada (4-5 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -91.9,
+      "una_salida_mas": {
+       "salidas": 10,
+       "factible": true,
+       "delta_costo_cop": 20735.14
+      },
+      "una_salida_menos": {
+       "salidas": 8,
+       "factible": true,
+       "delta_costo_cop": 71052.77
+      },
+      "demanda_diseno_pax_h": 474.4,
+      "capacidad_efectiva_pax_h": 382.5,
+      "cobertura_demanda_diseno": 0.8063
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 11,0 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 9,
+     "headway_min": 6.67,
+     "demanda_diseno": 474.4,
+     "limites_activos": [],
+     "buses_hora_actual": 14.67,
+     "headway_actual_min": 4.09
+    },
+    {
+     "hora": 6,
+     "franja": "pico mañana (6-8 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -47.7,
+      "una_salida_mas": {
+       "salidas": 9,
+       "factible": true,
+       "delta_costo_cop": 60986.13
+      },
+      "una_salida_menos": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 19887.63
+      },
+      "demanda_diseno_pax_h": 387.7,
+      "capacidad_efectiva_pax_h": 340.0,
+      "cobertura_demanda_diseno": 0.8769
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 18,5 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 8,
+     "headway_min": 7.5,
+     "demanda_diseno": 387.7,
+     "limites_activos": [],
+     "buses_hora_actual": 13.17,
+     "headway_actual_min": 4.56
+    },
+    {
+     "hora": 7,
+     "franja": "pico mañana (6-8 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -54.8,
+      "una_salida_mas": {
+       "salidas": 9,
+       "factible": true,
+       "delta_costo_cop": 46530.13
+      },
+      "una_salida_menos": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 77200.52
+      },
+      "demanda_diseno_pax_h": 394.8,
+      "capacidad_efectiva_pax_h": 340.0,
+      "cobertura_demanda_diseno": 0.8612
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 22,3 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 8,
+     "headway_min": 7.5,
+     "demanda_diseno": 394.8,
+     "limites_activos": [],
+     "buses_hora_actual": 13.46,
+     "headway_actual_min": 4.46
+    },
+    {
+     "hora": 8,
+     "franja": "pico mañana (6-8 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -51.7,
+      "una_salida_mas": {
+       "salidas": 10,
+       "factible": true,
+       "delta_costo_cop": 54314.51
+      },
+      "una_salida_menos": {
+       "salidas": 8,
+       "factible": true,
+       "delta_costo_cop": 23720.7
+      },
+      "demanda_diseno_pax_h": 434.2,
+      "capacidad_efectiva_pax_h": 382.5,
+      "cobertura_demanda_diseno": 0.8809
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 22,9 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 9,
+     "headway_min": 6.67,
+     "demanda_diseno": 434.2,
+     "limites_activos": [],
+     "buses_hora_actual": 13.77,
+     "headway_actual_min": 4.36
+    },
+    {
+     "hora": 9,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -58.1,
+      "una_salida_mas": {
+       "salidas": 8,
+       "factible": true,
+       "delta_costo_cop": 25856.92
+      },
+      "una_salida_menos": {
+       "salidas": 6,
+       "factible": true,
+       "delta_costo_cop": 158433.6
+      },
+      "demanda_diseno_pax_h": 355.6,
+      "capacidad_efectiva_pax_h": 297.5,
+      "cobertura_demanda_diseno": 0.8366
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 22,7 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 7,
+     "headway_min": 8.57,
+     "demanda_diseno": 355.6,
+     "limites_activos": [],
+     "buses_hora_actual": 13.79,
+     "headway_actual_min": 4.35
+    },
+    {
+     "hora": 10,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -57.1,
+      "una_salida_mas": {
+       "salidas": 8,
+       "factible": true,
+       "delta_costo_cop": 20049.94
+      },
+      "una_salida_menos": {
+       "salidas": 6,
+       "factible": true,
+       "delta_costo_cop": 155214.98
+      },
+      "demanda_diseno_pax_h": 354.6,
+      "capacidad_efectiva_pax_h": 297.5,
+      "cobertura_demanda_diseno": 0.8389
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 22,0 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 7,
+     "headway_min": 8.57,
+     "demanda_diseno": 354.6,
+     "limites_activos": [],
+     "buses_hora_actual": 13.49,
+     "headway_actual_min": 4.45
+    },
+    {
+     "hora": 11,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -43.9,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 22408.62
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 298.9,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 0.8531
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,8 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 298.9,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 12.58,
+     "headway_actual_min": 4.77
+    },
+    {
+     "hora": 12,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -28.9,
+      "una_salida_mas": {
+       "salidas": 8,
+       "factible": true,
+       "delta_costo_cop": 31190.2
+      },
+      "una_salida_menos": {
+       "salidas": 6,
+       "factible": true,
+       "delta_costo_cop": 42272.94
+      },
+      "demanda_diseno_pax_h": 326.4,
+      "capacidad_efectiva_pax_h": 297.5,
+      "cobertura_demanda_diseno": 0.9115
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,2 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 7,
+     "headway_min": 8.57,
+     "demanda_diseno": 326.4,
+     "limites_activos": [],
+     "buses_hora_actual": 12.34,
+     "headway_actual_min": 4.86
+    },
+    {
+     "hora": 13,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -16.0,
+      "una_salida_mas": {
+       "salidas": 8,
+       "factible": true,
+       "delta_costo_cop": 49455.48
+      },
+      "una_salida_menos": {
+       "salidas": 6,
+       "factible": true,
+       "delta_costo_cop": 3104.31
+      },
+      "demanda_diseno_pax_h": 313.5,
+      "capacidad_efectiva_pax_h": 297.5,
+      "cobertura_demanda_diseno": 0.9489
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,3 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 7,
+     "headway_min": 8.57,
+     "demanda_diseno": 313.5,
+     "limites_activos": [],
+     "buses_hora_actual": 13.54,
+     "headway_actual_min": 4.43
+    },
+    {
+     "hora": 14,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -48.4,
+      "una_salida_mas": {
+       "salidas": 8,
+       "factible": true,
+       "delta_costo_cop": 24064.37
+      },
+      "una_salida_menos": {
+       "salidas": 6,
+       "factible": true,
+       "delta_costo_cop": 106819.05
+      },
+      "demanda_diseno_pax_h": 345.9,
+      "capacidad_efectiva_pax_h": 297.5,
+      "cobertura_demanda_diseno": 0.8601
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,3 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 7,
+     "headway_min": 8.57,
+     "demanda_diseno": 345.9,
+     "limites_activos": [],
+     "buses_hora_actual": 13.06,
+     "headway_actual_min": 4.59
+    },
+    {
+     "hora": 15,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -50.5,
+      "una_salida_mas": {
+       "salidas": 8,
+       "factible": true,
+       "delta_costo_cop": 24362.13
+      },
+      "una_salida_menos": {
+       "salidas": 6,
+       "factible": true,
+       "delta_costo_cop": 109274.4
+      },
+      "demanda_diseno_pax_h": 348.0,
+      "capacidad_efectiva_pax_h": 297.5,
+      "cobertura_demanda_diseno": 0.8548
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,3 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 7,
+     "headway_min": 8.57,
+     "demanda_diseno": 348.0,
+     "limites_activos": [],
+     "buses_hora_actual": 12.23,
+     "headway_actual_min": 4.91
+    },
+    {
+     "hora": 16,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -45.7,
+      "una_salida_mas": {
+       "salidas": 8,
+       "factible": true,
+       "delta_costo_cop": 16677.7
+      },
+      "una_salida_menos": {
+       "salidas": 6,
+       "factible": true,
+       "delta_costo_cop": 97759.01
+      },
+      "demanda_diseno_pax_h": 343.2,
+      "capacidad_efectiva_pax_h": 297.5,
+      "cobertura_demanda_diseno": 0.8668
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,3 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 7,
+     "headway_min": 8.57,
+     "demanda_diseno": 343.2,
+     "limites_activos": [],
+     "buses_hora_actual": 11.81,
+     "headway_actual_min": 5.08
+    },
+    {
+     "hora": 17,
+     "franja": "pico tarde (17-19 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -18.1,
+      "una_salida_mas": {
+       "salidas": 8,
+       "factible": true,
+       "delta_costo_cop": 35062.5
+      },
+      "una_salida_menos": {
+       "salidas": 6,
+       "factible": true,
+       "delta_costo_cop": 18453.11
+      },
+      "demanda_diseno_pax_h": 315.6,
+      "capacidad_efectiva_pax_h": 297.5,
+      "cobertura_demanda_diseno": 0.9426
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,6 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 7,
+     "headway_min": 8.57,
+     "demanda_diseno": 315.6,
+     "limites_activos": [],
+     "buses_hora_actual": 10.14,
+     "headway_actual_min": 5.92
+    },
+    {
+     "hora": 18,
+     "franja": "pico tarde (17-19 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -27.3,
+      "una_salida_mas": {
+       "salidas": 8,
+       "factible": true,
+       "delta_costo_cop": 26560.76
+      },
+      "una_salida_menos": {
+       "salidas": 6,
+       "factible": true,
+       "delta_costo_cop": 46935.87
+      },
+      "demanda_diseno_pax_h": 324.8,
+      "capacidad_efectiva_pax_h": 297.5,
+      "cobertura_demanda_diseno": 0.916
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,7 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 7,
+     "headway_min": 8.57,
+     "demanda_diseno": 324.8,
+     "limites_activos": [],
+     "buses_hora_actual": 8.68,
+     "headway_actual_min": 6.91
+    },
+    {
+     "hora": 19,
+     "franja": "pico tarde (17-19 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 30.6,
+      "una_salida_mas": {
+       "salidas": 8,
+       "factible": true,
+       "delta_costo_cop": 51633.82
+      },
+      "una_salida_menos": {
+       "salidas": 6,
+       "factible": true,
+       "delta_costo_cop": -34292.11
+      },
+      "demanda_diseno_pax_h": 266.9,
+      "capacidad_efectiva_pax_h": 297.5,
+      "cobertura_demanda_diseno": 1.1146
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,7 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 7,
+     "headway_min": 8.45,
+     "demanda_diseno": 266.9,
+     "limites_activos": [],
+     "buses_hora_actual": 6.67,
+     "headway_actual_min": 8.86
+    },
+    {
+     "hora": 20,
+     "franja": "cierre (20 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 4.1,
+      "una_salida_mas": {
+       "salidas": 3,
+       "factible": true,
+       "delta_costo_cop": 22097.09
+      },
+      "una_salida_menos": {
+       "salidas": 1,
+       "factible": true,
+       "delta_costo_cop": 69565.41
+      },
+      "demanda_diseno_pax_h": 80.9,
+      "capacidad_efectiva_pax_h": 85.0,
+      "cobertura_demanda_diseno": 1.0501
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,3 buses en ruta de 45 disponibles.",
+     "viable": true,
+     "buses_hora": 2,
+     "headway_min": 4.88,
+     "demanda_diseno": 80.9,
+     "limites_activos": [],
+     "buses_hora_actual": 0.85,
+     "headway_actual_min": 11.47
+    }
+   ],
+   "atencion_inmediata": [
+    {
+     "alert_id": "5aed0cee-7346-43da-932e-7a9218899da5",
+     "codigo": "ALT-006",
+     "severidad": "critica",
+     "estado": "nueva",
+     "ruta": "CRA 54",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:42-05:00",
+     "ventana_inicio": "2025-12-31T12:00:00-05:00",
+     "explicacion": "En 12:00-20:00 (8 h): salieron 17 de 136 despachos esperados (60 / intervalo programado). Despacho ausente o tardío: van al menos 180 min sin despacho (cota inferior: horas cerradas sin salidas), más que el headway programado (4,3 min) más la tolerancia (5 min, threshold_config.tolerancia_despacho_min); salieron 17 de 136 despachos esperados (déficit 87,5 %, tolerancia 50,0 %).",
+     "recomendacion": "Verificar la disponibilidad del vehículo y la operación del despacho."
+    },
+    {
+     "alert_id": "68ca9701-a3e9-46c6-a3d6-de118b5ae59c",
+     "codigo": "ALT-002",
+     "severidad": "critica",
+     "estado": "nueva",
+     "ruta": "CRA 54",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:42-05:00",
+     "ventana_inicio": "2025-12-31T12:00:00-05:00",
+     "explicacion": "La ocupación observada (189,5 %) alcanza o supera el umbral crítico (90,0 %). Esperada: 41,9 %; observada: 189,5 % (= factor de carga 0,411 × 461 pasajeros ÷ (2 salidas × 50 puestos) en 16:00-17:00).",
+     "recomendacion": "Programar un despacho adicional y hacer seguimiento a la ocupación."
+    },
+    {
+     "alert_id": "2eb91481-f7d0-46fe-8964-ea06e5874ca3",
+     "codigo": "ALT-005",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "CRA 54",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:42-05:00",
+     "ventana_inicio": "2025-12-31T12:00:00-05:00",
+     "explicacion": "Durante 9 hora(s) seguidas (12:00-21:00) la demanda real (2.812 pasajeros) cayó 57,7 % frente al patrón del modelo (6.653); el umbral de caída es 30,0 % (límite 4.657) y quedó bajo el P10 calibrado (4.703); persistencia exigida: 2 h.",
+     "recomendacion": "Validar si hay un evento, un problema en la ruta o una falla de captura."
+    },
+    {
+     "alert_id": "645504aa-7925-42b1-9811-b4329ab35111",
+     "codigo": "ALT-008",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "CRA 54",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:42-05:00",
+     "ventana_inicio": "2025-12-31T00:00:00-05:00",
+     "explicacion": "Consolidado atípico: subidas = 10.686 frente a la mediana de 21.718,0 (z = -6,73); nro_viajes = 134 frente a la mediana de 257,0 (z = -6,91) (umbral |z| ≥ 3,5). Referencia: 37 días laboral de las 8 semanas previas (mediana y 1,4826·MAD). Límite para nro_viajes: 195 (mediana 257 - 3,5 × 17,8).",
+     "recomendacion": "Validar la fuente, el trigger de consolidación y el período afectado."
+    },
+    {
+     "alert_id": "b81c725c-513e-44e5-bbf9-7a77d947b265",
+     "codigo": "ALT-007",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "CRA 54",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:42-05:00",
+     "ventana_inicio": "2025-12-30T00:00:00-05:00",
+     "explicacion": "Ruptura de comportamiento: desde el 30/12/2025 la demanda real diaria quedó por debajo del pronóstico de forma sostenida (2 días hasta la detección; residuo medio -21,5 % frente a -4,6 % del nivel anterior (referencia de 28 días: -0,8 %), cambio -17,0 %). El CUSUM llegó a 8,43 con umbral h = 6,0 (k = 0,5). No es una hora aislada: cambió el nivel de la demanda frente al patrón del modelo.",
+     "recomendacion": "Revisar la frecuencia y recalibrar el escenario del pronóstico."
+    },
+    {
+     "alert_id": "d20195c5-20db-445d-85e3-52937f3a0e64",
+     "codigo": "ALT-005",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "CRA 54",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:42-05:00",
+     "ventana_inicio": "2025-12-31T04:00:00-05:00",
+     "explicacion": "Durante 2 hora(s) seguidas (04:00-06:00) la demanda real (1.407 pasajeros) cayó 34,1 % frente al patrón del modelo (2.136); el umbral de caída es 30,0 % (límite 1.495) y quedó bajo el P10 calibrado (1.556); persistencia exigida: 2 h.",
+     "recomendacion": "Validar si hay un evento, un problema en la ruta o una falla de captura."
+    }
+   ],
+   "alertas_de_la_fecha": [],
+   "atencion_resumen": {
+    "consultado_en": "2026-11-09T07:36:04-05:00",
+    "abiertas_ahora": 6,
+    "abiertas_ahora_por_severidad": {
+     "critica": 2,
+     "preventiva": 4
+    },
+    "de_la_fecha": 0,
+    "de_la_fecha_por_severidad": {},
+    "nota": "«Abiertas ahora»: alertas sin cerrar ni descartar en ai_frecuencias.alert en el momento de la consulta (2026-11-09T07:36:04-05:00), de cualquier fecha; es lo que pide atención inmediata. «De la fecha»: alertas detectadas el 2025-11-23 (día de Bogotá), en cualquier estado."
+   }
+  },
+  {
+   "ruta": "CL 72",
+   "idruta": 21,
+   "vehiculos": {
+    "nota": "requeridos_pico = máximo de buses en ruta a la vez con el plan (conteo de D5 cada 15 min con el ciclo de cada hora); requeridos_pico_10_3 = máximo de ceil(ciclo / headway) de §10.3 en las horas completas (60 min operados), que supone que la frecuencia de la hora se mantiene un ciclo completo y por eso difiere del conteo cuando la frecuencia cambia de una hora a otra; requeridos_programados = el mismo conteo de buses en ruta con las salidas programadas hoy (D1).",
+    "hora_pico": 19,
+    "requeridos_pico": 23,
+    "flota_disponible": 27,
+    "requeridos_pico_10_3": 21,
+    "requeridos_programados": 17
+   },
+   "flota_y_recaudo": {
+    "nota": "Recaudo = pasajeros esperados × tarifa neta de 3.182 COP por pasajero: tarifa pública del Área Metropolitana 2026 (3.700 COP) × 0,86 que retiene el operador (datos/costos_fuente.json, la misma de param_d5(fuente=True)); Extreme no suministró la tarifa (§19), así que es una cifra de referencia. Costo operativo = bus-hora (26.400 COP) + km (1.991 COP) del plan; con lo programado hoy sería 13.004.395 COP. vehiculos_hora_ahorrados > 0: el plan usa menos vehículos-hora que lo programado; < 0: usa más.",
+    "tarifa_neta_cop": 3182.0,
+    "espera_media_min": 6.03,
+    "costo_operativo_cop": 18466125,
+    "ingreso_perdido_cop": -2438182,
+    "recaudo_esperado_cop": 10896441,
+    "espera_media_actual_min": 8.7,
+    "vehiculos_hora_actuales": 210.6,
+    "sobreocupacion_pasajeros": 4.6,
+    "vehiculos_hora_ahorrados": -89.0,
+    "costo_operativo_actual_cop": 13004395,
+    "vehiculos_hora_recomendados": 299.6,
+    "sobreocupacion_pasajeros_actual": 13.6
+   },
+   "resumen_despacho": {
+    "hora_pico": 19,
+    "por_franja": [
+     {
+      "franja": "madrugada (4-5 h)",
+      "salidas": 6,
+      "headway_min": 10.0,
+      "horas_no_viables": [],
+      "headway_actual_min": 9.17,
+      "salidas_programadas": 6.5
+     },
+     {
+      "franja": "pico mañana (6-8 h)",
+      "salidas": 18,
+      "headway_min": 10.0,
+      "horas_no_viables": [],
+      "headway_actual_min": 12.67,
+      "salidas_programadas": 14.2
+     },
+     {
+      "franja": "valle (9-16 h)",
+      "salidas": 48,
+      "headway_min": 10.0,
+      "horas_no_viables": [],
+      "headway_actual_min": 14.12,
+      "salidas_programadas": 34.0
+     },
+     {
+      "franja": "pico tarde (17-19 h)",
+      "salidas": 20,
+      "headway_min": 8.79,
+      "horas_no_viables": [],
+      "headway_actual_min": 16.53,
+      "salidas_programadas": 10.6
+     },
+     {
+      "franja": "cierre (20 h)",
+      "salidas": 1,
+      "headway_min": 4.29,
+      "horas_no_viables": [],
+      "headway_actual_min": 23.12,
+      "salidas_programadas": 0.2
+     }
+    ],
+    "headway_pico_min": 6.98,
+    "headway_valle_min": 10.0,
+    "salidas_dia_programadas": 65.6,
+    "salidas_dia_recomendadas": 93
+   },
+   "pasajeros_esperados": {
+    "dia": 3424.4,
+    "p10": 2003.8,
+    "p90": 4674.6,
+    "por_hora": [
+     {
+      "p10": 0.0,
+      "p90": 7.8,
+      "hora": 4,
+      "esperado": 0.1
+     },
+     {
+      "p10": 149.8,
+      "p90": 294.4,
+      "hora": 5,
+      "esperado": 218.8
+     },
+     {
+      "p10": 136.1,
+      "p90": 269.3,
+      "hora": 6,
+      "esperado": 211.6
+     },
+     {
+      "p10": 128.0,
+      "p90": 284.0,
+      "hora": 7,
+      "esperado": 214.4
+     },
+     {
+      "p10": 139.2,
+      "p90": 302.7,
+      "hora": 8,
+      "esperado": 225.9
+     },
+     {
+      "p10": 130.7,
+      "p90": 291.8,
+      "hora": 9,
+      "esperado": 213.8
+     },
+     {
+      "p10": 132.5,
+      "p90": 281.7,
+      "hora": 10,
+      "esperado": 217.8
+     },
+     {
+      "p10": 126.3,
+      "p90": 287.7,
+      "hora": 11,
+      "esperado": 219.3
+     },
+     {
+      "p10": 137.6,
+      "p90": 301.1,
+      "hora": 12,
+      "esperado": 222.2
+     },
+     {
+      "p10": 119.8,
+      "p90": 273.6,
+      "hora": 13,
+      "esperado": 212.8
+     },
+     {
+      "p10": 138.2,
+      "p90": 305.3,
+      "hora": 14,
+      "esperado": 219.6
+     },
+     {
+      "p10": 159.2,
+      "p90": 375.8,
+      "hora": 15,
+      "esperado": 272.0
+     },
+     {
+      "p10": 140.1,
+      "p90": 357.0,
+      "hora": 16,
+      "esperado": 268.2
+     },
+     {
+      "p10": 149.2,
+      "p90": 372.8,
+      "hora": 17,
+      "esperado": 259.9
+     },
+     {
+      "p10": 121.3,
+      "p90": 317.3,
+      "hora": 18,
+      "esperado": 244.6
+     },
+     {
+      "p10": 95.6,
+      "p90": 258.9,
+      "hora": 19,
+      "esperado": 184.0
+     },
+     {
+      "p10": 0.2,
+      "p90": 93.4,
+      "hora": 20,
+      "esperado": 19.4
+     }
+    ]
+   },
+   "cada_cuanto_despachar": [
+    {
+     "hora": 4,
+     "franja": "madrugada (4-5 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -6.8,
+      "una_salida_mas": {
+       "salidas": 1,
+       "factible": false
+      },
+      "una_salida_menos": {
+       "salidas": -1,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 6.8,
+      "capacidad_efectiva_pax_h": 0.0,
+      "cobertura_demanda_diseno": 0.0
+     },
+     "motivo": "Hora sin salidas en el plan (sin minutos operados o sin demanda que las justifique).",
+     "viable": true,
+     "buses_hora": 0,
+     "headway_min": null,
+     "demanda_diseno": 6.8,
+     "limites_activos": [],
+     "buses_hora_actual": null,
+     "headway_actual_min": null
+    },
+    {
+     "hora": 5,
+     "franja": "madrugada (4-5 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 131.6,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 118553.13
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 123.4,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 2.0662
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 6,0 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 123.4,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 6.54,
+     "headway_actual_min": 9.17
+    },
+    {
+     "hora": 6,
+     "franja": "pico mañana (6-8 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 137.7,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 110250.18
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 117.3,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 2.1735
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 12,0 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 117.3,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 5.36,
+     "headway_actual_min": 11.2
+    },
+    {
+     "hora": 7,
+     "franja": "pico mañana (6-8 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 134.0,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 104997.56
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 121.0,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 2.1066
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 18,0 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 121.0,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 4.95,
+     "headway_actual_min": 12.13
+    },
+    {
+     "hora": 8,
+     "franja": "pico mañana (6-8 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 130.5,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 80604.08
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 124.5,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 2.0478
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 18,0 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 124.5,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 3.91,
+     "headway_actual_min": 15.36
+    },
+    {
+     "hora": 9,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 140.8,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 97948.62
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 114.2,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 2.2321
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 18,3 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 114.2,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 4.33,
+     "headway_actual_min": 13.85
+    },
+    {
+     "hora": 10,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 148.6,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 101035.6
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 106.4,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 2.3963
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 18,5 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 106.4,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 4.49,
+     "headway_actual_min": 13.36
+    },
+    {
+     "hora": 11,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 150.4,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 99673.99
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 104.6,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 2.4378
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 18,7 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 104.6,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 4.44,
+     "headway_actual_min": 13.51
+    },
+    {
+     "hora": 12,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 140.5,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 83000.86
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 114.5,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 2.2272
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,3 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 114.5,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 3.77,
+     "headway_actual_min": 15.9
+    },
+    {
+     "hora": 13,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 154.0,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 92506.01
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 101.0,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 2.525
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,6 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 101.0,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 3.97,
+     "headway_actual_min": 15.11
+    },
+    {
+     "hora": 14,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 134.5,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 98318.0
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 120.5,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 2.1163
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,8 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 120.5,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 4.5,
+     "headway_actual_min": 13.33
+    },
+    {
+     "hora": 15,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 107.5,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 76420.84
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 147.5,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.7284
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,8 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 147.5,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 4.55,
+     "headway_actual_min": 13.19
+    },
+    {
+     "hora": 16,
+     "franja": "valle (9-16 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 113.6,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 66958.98
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 141.4,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.8039
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,6 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 141.4,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 3.94,
+     "headway_actual_min": 15.23
+    },
+    {
+     "hora": 17,
+     "franja": "pico tarde (17-19 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 115.2,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 64011.55
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 139.8,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.824
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 19,7 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 139.8,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 3.72,
+     "headway_actual_min": 16.12
+    },
+    {
+     "hora": 18,
+     "franja": "pico tarde (17-19 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 124.6,
+      "una_salida_mas": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": 72184.46
+      },
+      "una_salida_menos": {
+       "salidas": 5,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 130.4,
+      "capacidad_efectiva_pax_h": 255.0,
+      "cobertura_demanda_diseno": 1.9552
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 20,0 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 6,
+     "headway_min": 10.0,
+     "demanda_diseno": 130.4,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 3.74,
+     "headway_actual_min": 16.03
+    },
+    {
+     "hora": 19,
+     "franja": "pico tarde (17-19 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": 216.8,
+      "una_salida_mas": {
+       "salidas": 9,
+       "factible": true,
+       "delta_costo_cop": 94441.03
+      },
+      "una_salida_menos": {
+       "salidas": 7,
+       "factible": true,
+       "delta_costo_cop": -91511.28
+      },
+      "demanda_diseno_pax_h": 123.2,
+      "capacidad_efectiva_pax_h": 340.0,
+      "cobertura_demanda_diseno": 2.7593
+     },
+     "motivo": "Viable: intervalo dentro de 2,0-10,0 min y como máximo 22,2 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 8,
+     "headway_min": 6.98,
+     "demanda_diseno": 123.2,
+     "limites_activos": [],
+     "buses_hora_actual": 3.18,
+     "headway_actual_min": 17.59
+    },
+    {
+     "hora": 20,
+     "franja": "cierre (20 h)",
+     "margen": {
+      "nota": "Costo de D5 de la hora (operación + espera + sobrecarga + ingreso perdido), sin suavidad ni flota",
+      "holgura_pax_h": -2.9,
+      "una_salida_mas": {
+       "salidas": 2,
+       "factible": true,
+       "delta_costo_cop": 136820.19
+      },
+      "una_salida_menos": {
+       "salidas": 0,
+       "factible": false
+      },
+      "demanda_diseno_pax_h": 45.4,
+      "capacidad_efectiva_pax_h": 42.5,
+      "cobertura_demanda_diseno": 0.9351
+     },
+     "motivo": "Viable: una sola salida en 4,3 min operados (no hay intervalo entre salidas dentro de la hora) y como máximo 20,9 buses en ruta de 27 disponibles.",
+     "viable": true,
+     "buses_hora": 1,
+     "headway_min": 4.29,
+     "demanda_diseno": 45.4,
+     "limites_activos": [
+      "headway_maximo"
+     ],
+     "buses_hora_actual": 0.19,
+     "headway_actual_min": 23.12
+    }
+   ],
+   "atencion_inmediata": [
+    {
+     "alert_id": "b9905288-734c-4d27-ad09-a0ca97719058",
+     "codigo": "ALT-006",
+     "severidad": "critica",
+     "estado": "nueva",
+     "ruta": "CL 72",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:48-05:00",
+     "ventana_inicio": "2025-12-31T14:00:00-05:00",
+     "explicacion": "En 14:00-20:00 (6 h): salieron 4 de 31 despachos esperados (60 / intervalo programado). Despacho ausente o tardío: van al menos 60 min sin despacho (cota inferior: horas cerradas sin salidas), más que el headway programado (12,0 min) más la tolerancia (5 min, threshold_config.tolerancia_despacho_min); salieron 4 de 31 despachos esperados (déficit 87,1 %, tolerancia 50,0 %).",
+     "recomendacion": "Verificar la disponibilidad del vehículo y la operación del despacho."
+    },
+    {
+     "alert_id": "fd8de5ae-016b-42dc-934a-9454899b6c22",
+     "codigo": "ALT-010",
+     "severidad": "critica",
+     "estado": "nueva",
+     "ruta": "CL 72",
+     "origen": "modelo",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:34-05:00",
+     "ventana_inicio": "2026-01-01T06:00:00-05:00",
+     "explicacion": "El WAPE móvil del modelo (21,2 %) supera la tolerancia (20,0 %) frente a las observaciones del modelo hgb_fv2_20250831_s42.",
+     "recomendacion": "Suspender la versión del modelo o reentrenarlo."
+    },
+    {
+     "alert_id": "01a77749-a830-4817-bf8d-e7c9b4ab4692",
+     "codigo": "ALT-005",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "CL 72",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:48-05:00",
+     "ventana_inicio": "2025-12-31T05:00:00-05:00",
+     "explicacion": "Durante 3 hora(s) seguidas (05:00-08:00) la demanda real (930 pasajeros) cayó 41,7 % frente al patrón del modelo (1.595); el umbral de caída es 30,0 % (límite 1.116) y quedó bajo el P10 calibrado (1.262); persistencia exigida: 2 h.",
+     "recomendacion": "Validar si hay un evento, un problema en la ruta o una falla de captura."
+    },
+    {
+     "alert_id": "28483fbf-f276-490c-8cd7-3c531c6e91c3",
+     "codigo": "ALT-008",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "CL 72",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:48-05:00",
+     "ventana_inicio": "2025-12-31T00:00:00-05:00",
+     "explicacion": "Consolidado atípico: subidas = 3.542 frente a la mediana de 7.069,0 (z = -8,94); nro_viajes = 56 frente a la mediana de 88,0 (z = -5,40) (umbral |z| ≥ 3,5). Referencia: 37 días laboral de las 8 semanas previas (mediana y 1,4826·MAD). Límite para subidas: 5.689 (mediana 7.069 - 3,5 × 394,4).",
+     "recomendacion": "Validar la fuente, el trigger de consolidación y el período afectado."
+    },
+    {
+     "alert_id": "ca9376f1-d82d-43a1-9bfc-9a0c33f3f28d",
+     "codigo": "ALT-005",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "CL 72",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:48-05:00",
+     "ventana_inicio": "2025-12-31T17:00:00-05:00",
+     "explicacion": "Durante 4 hora(s) seguidas (17:00-21:00) la demanda real (0 pasajeros) cayó 100,0 % frente al patrón del modelo (665); el umbral de caída es 30,0 % (límite 466) y quedó bajo el P10 calibrado (289); persistencia exigida: 2 h.",
+     "recomendacion": "Validar si hay un evento, un problema en la ruta o una falla de captura."
+    },
+    {
+     "alert_id": "e7ab695d-e641-48fb-b22f-0f26bf3658cf",
+     "codigo": "ALT-005",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "CL 72",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:48-05:00",
+     "ventana_inicio": "2025-12-31T13:00:00-05:00",
+     "explicacion": "Durante 2 hora(s) seguidas (13:00-15:00) la demanda real (177 pasajeros) cayó 79,5 % frente al patrón del modelo (865); el umbral de caída es 30,0 % (límite 605) y quedó bajo el P10 calibrado (560); persistencia exigida: 2 h.",
+     "recomendacion": "Validar si hay un evento, un problema en la ruta o una falla de captura."
+    },
+    {
+     "alert_id": "e909e7fd-479d-42b4-a821-f33c23f27fcf",
+     "codigo": "ALT-007",
+     "severidad": "preventiva",
+     "estado": "nueva",
+     "ruta": "CL 72",
+     "origen": "observado",
+     "alcance": "abierta ahora",
+     "detectada_en": "2026-11-09T07:35:48-05:00",
+     "ventana_inicio": "2025-12-22T00:00:00-05:00",
+     "explicacion": "Ruptura de comportamiento: desde el 22/12/2025 la demanda real diaria quedó por debajo del pronóstico de forma sostenida (4 días hasta la detección; residuo medio -15,2 % frente a -0,9 % del nivel anterior (referencia de 28 días: -0,9 %), cambio -14,3 %). El CUSUM llegó a 8,14 con umbral h = 6,0 (k = 0,5). No es una hora aislada: cambió el nivel de la demanda frente al patrón del modelo.",
+     "recomendacion": "Revisar la frecuencia y recalibrar el escenario del pronóstico."
+    }
+   ],
+   "alertas_de_la_fecha": [],
+   "atencion_resumen": {
+    "consultado_en": "2026-11-09T07:36:04-05:00",
+    "abiertas_ahora": 7,
+    "abiertas_ahora_por_severidad": {
+     "critica": 2,
+     "preventiva": 5
+    },
+    "de_la_fecha": 0,
+    "de_la_fecha_por_severidad": {},
+    "nota": "«Abiertas ahora»: alertas sin cerrar ni descartar en ai_frecuencias.alert en el momento de la consulta (2026-11-09T07:36:04-05:00), de cualquier fecha; es lo que pide atención inmediata. «De la fecha»: alertas detectadas el 2025-11-23 (día de Bogotá), en cualquier estado."
+   }
+  }
+ ],
+ "limitaciones": [
+  "El plan de despacho y los pasajeros esperados salen del mismo pronóstico horario del modelo activo hgb_fv2_20250831_s42 (P10, P50 y P90 calibrados de cada hora): se puede calcular para cualquier día con variables, incluido el día siguiente al último dato.",
+  "El headway mínimo gobernado en threshold_config (headway_minimo_min; 2 min por omisión) es una restricción explícita del plan (§10.2): ninguna hora programa más de floor(minutos / headway mínimo) salidas. Donde la demanda pediría más, la hora sale «no viable» con su motivo y el plan muestra la mejor aproximación ejecutable, sin forzar una cifra (§10.3 y §18).",
+  "«Espera máxima» de §5.1 se interpreta como la espera media del pasajero (headway / 2 con llegadas aleatorias): el headway máximo efectivo es min(headway_maximo_min, 2 × espera_max_min) (supuesto S12, pregunta a Extreme en docs/hallazgos_extreme.md).",
+  "La banda P10-P90 del día suma las bandas de cada hora: es más ancha que la banda del total del día.",
+  "La tarifa no la suministró Extreme (§19): el recaudo usa la tarifa pública 2026 del Área Metropolitana × 0,86 (datos/costos_fuente.json) y es una cifra de referencia.",
+  "Ciclo, flota disponible e intervalo programado son medianas de 2025 por ruta, tipo de día y hora (D1) y no siempre cuadran entre sí: con la programación de hoy, los buses en ruta pueden superar la flota (vehiculos.requeridos_programados). Extreme debe confirmar el ciclo y la flota por franja (§19).",
+  "El valor del tiempo de espera (7.000 COP/h) y la penalidad por pasajero sobre la capacidad (10.000 COP) son supuestos de D5 que debe validar el área operativa (§5.1). Elasticidad: β estimada ≈ 0,70 por observación, sin validar en campo; el plan usa 0,5 por prudencia; la sensibilidad está en docs/evidencias/optimizacion/sensibilidad.md; el piloto la mide.",
+  "Atención inmediata: la lista «abiertas ahora» son las alertas sin cerrar ni descartar en el momento de la consulta, de cualquier fecha; las de la fecha consultada van aparte en alertas_de_la_fecha."
+ ],
+ "contraste_observado": {
+  "SILENCIO": {
+   "horas_con_dato": 17,
+   "observado_dia": 5314.0,
+   "esperado_dia": 5434.4,
+   "error_dia_pct": 2.27,
+   "wape_horario_pct": 12.34,
+   "horas_dentro_p10_p90": 16
+  },
+  "CRA 54": {
+   "horas_con_dato": 17,
+   "observado_dia": 9547.0,
+   "esperado_dia": 10130.1,
+   "error_dia_pct": 6.11,
+   "wape_horario_pct": 12.79,
+   "horas_dentro_p10_p90": 14
+  },
+  "CL 72": {
+   "horas_con_dato": 17,
+   "observado_dia": 3528.0,
+   "esperado_dia": 3424.4,
+   "error_dia_pct": -2.94,
+   "wape_horario_pct": 17.7,
+   "horas_dentro_p10_p90": 16
+  }
+ },
+ "calculo_en_la_cola": {
+  "execution_id": "b4b413bc-5277-4fe9-9877-6577d4210f30",
+  "estado": "ok",
+  "segundos": 1.9,
+  "mensaje": "Respuesta del 2025-11-23 calculada (3 rutas)"
+ }
+}

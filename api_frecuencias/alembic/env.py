@@ -6,7 +6,8 @@ from logging.config import fileConfig
 from sqlalchemy import create_engine, pool, text
 
 from alembic import context
-from app.config import ESQUEMA, obtener_ajustes
+from app.config import ESQUEMA
+from app.db import url_resultados
 from app.modelos_db import Base
 
 config = context.config
@@ -18,7 +19,8 @@ target_metadata = Base.metadata
 
 
 def _url() -> str:
-    return config.get_main_option("sqlalchemy.url") or obtener_ajustes().database_url
+    # Sin URL por omisión en el código: si falta DATABASE_URL, url_resultados() lo dice con un mensaje claro.
+    return config.get_main_option("sqlalchemy.url") or url_resultados()
 
 
 def run_migrations_offline() -> None:
@@ -36,7 +38,11 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     motor = create_engine(_url(), poolclass=pool.NullPool)
     with motor.connect() as conexion:
-        conexion.execute(text(f"CREATE SCHEMA IF NOT EXISTS {ESQUEMA}"))
+        # Modo integrado (§8.1, §11.3): escritor_ia es dueño de ai_frecuencias pero no tiene CREATE en la base, y
+        # PostgreSQL revisa ese permiso ANTES del IF NOT EXISTS (42501). Solo se crea si de verdad falta.
+        existe = conexion.execute(text("SELECT 1 FROM pg_namespace WHERE nspname = :e"), {"e": ESQUEMA}).scalar()
+        if not existe:
+            conexion.execute(text(f"CREATE SCHEMA IF NOT EXISTS {ESQUEMA}"))
         conexion.commit()
         context.configure(
             connection=conexion,

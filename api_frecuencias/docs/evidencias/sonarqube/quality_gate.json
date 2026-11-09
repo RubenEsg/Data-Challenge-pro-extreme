@@ -1,0 +1,143 @@
+{
+ "servidor": "SonarQube 26.11.0.134175 (Community Build, Docker)",
+ "proyecto": "sobusa-api-frecuencias",
+ "generado_en": "2026-11-09T12:50:34-05:00",
+ "ultimo_analisis": {
+  "key": "3ab7e497-44d9-4381-a942-d2486d5e99f9",
+  "date": "2026-11-09T17:49:56+0000",
+  "events": [
+   {
+    "key": "cb99317f-b4d8-433b-9508-b06890078632",
+    "category": "VERSION",
+    "name": "1.0.0"
+   }
+  ],
+  "projectVersion": "1.0.0",
+  "manualNewCodePeriodBaseline": false,
+  "detectedCI": "undetected"
+ },
+ "puerta": "Reto Sobusa v1.5",
+ "estado": {
+  "status": "OK",
+  "conditions": [
+   {
+    "status": "OK",
+    "metricKey": "coverage",
+    "comparator": "LT",
+    "errorThreshold": "85",
+    "actualValue": "94.3"
+   },
+   {
+    "status": "OK",
+    "metricKey": "duplicated_lines_density",
+    "comparator": "GT",
+    "errorThreshold": "3",
+    "actualValue": "0.0"
+   },
+   {
+    "status": "OK",
+    "metricKey": "blocker_violations",
+    "comparator": "GT",
+    "errorThreshold": "0",
+    "actualValue": "0"
+   },
+   {
+    "status": "OK",
+    "metricKey": "bugs",
+    "comparator": "GT",
+    "errorThreshold": "0",
+    "actualValue": "0"
+   },
+   {
+    "status": "OK",
+    "metricKey": "critical_violations",
+    "comparator": "GT",
+    "errorThreshold": "0",
+    "actualValue": "0"
+   },
+   {
+    "status": "OK",
+    "metricKey": "vulnerabilities",
+    "comparator": "GT",
+    "errorThreshold": "0",
+    "actualValue": "0"
+   }
+  ],
+  "ignoredConditions": false,
+  "period": {
+   "mode": "PREVIOUS_VERSION",
+   "date": "2026-11-09T08:20:14+0000"
+  },
+  "caycStatus": "non-compliant"
+ },
+ "definicion": {
+  "name": "Reto Sobusa v1.5",
+  "conditions": [
+   {
+    "id": "347452fb-9382-4d57-a24e-4145cdfe7b1a",
+    "metric": "vulnerabilities",
+    "op": "GT",
+    "error": "0",
+    "isCaycCondition": false
+   },
+   {
+    "id": "339f99c6-645a-493b-adbe-9a474ad964d2",
+    "metric": "bugs",
+    "op": "GT",
+    "error": "0",
+    "isCaycCondition": false
+   },
+   {
+    "id": "88ea2b6f-7303-4b5a-a0e6-cd2c29027aa6",
+    "metric": "blocker_violations",
+    "op": "GT",
+    "error": "0",
+    "isCaycCondition": false
+   },
+   {
+    "id": "cf2bbabe-1265-4853-a306-dc55b1926942",
+    "metric": "critical_violations",
+    "op": "GT",
+    "error": "0",
+    "isCaycCondition": false
+   },
+   {
+    "id": "5edd6ecd-5450-40a4-aa5c-ea0425cf06bc",
+    "metric": "security_hotspots_reviewed",
+    "op": "LT",
+    "error": "100",
+    "isCaycCondition": false
+   },
+   {
+    "id": "8f342cdc-54d9-43a1-9ff7-9fc22ba2d53a",
+    "metric": "coverage",
+    "op": "LT",
+    "error": "85",
+    "isCaycCondition": false
+   },
+   {
+    "id": "a637bdd7-7cde-4983-8e03-b82d7ec2f3fc",
+    "metric": "duplicated_lines_density",
+    "op": "GT",
+    "error": "3",
+    "isCaycCondition": false
+   }
+  ],
+  "isBuiltIn": false,
+  "actions": {
+   "rename": true,
+   "setAsDefault": true,
+   "copy": true,
+   "associateProjects": true,
+   "delete": true,
+   "manageConditions": true,
+   "delegate": true,
+   "manageAiCodeAssurance": false
+  },
+  "caycStatus": "non-compliant",
+  "isDefault": false,
+  "hasStandardConditions": true,
+  "hasMQRConditions": false,
+  "isAiCodeSupported": false
+ }
+}

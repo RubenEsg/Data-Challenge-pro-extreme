@@ -11,6 +11,7 @@ Uso:  python scripts/medir_rendimiento.py --base http://127.0.0.1:8000 --salida 
 from __future__ import annotations
 
 import argparse
+import os
 import statistics
 import sys
 import time
@@ -39,7 +40,8 @@ def p95(valores: list[float]) -> float:
 
 def medir_api(base: str, n: int) -> None:
     log(f"RNF-002: {n} GET paginados por recurso (limite=50), secuenciales, tras 3 de calentamiento; API {base}")
-    with httpx.Client(base_url=base, timeout=30) as c:
+    clave = os.environ.get("SOBUSA_API_KEY", "").strip()      # §7.2: la clave solo llega por el entorno
+    with httpx.Client(base_url=base, timeout=30, headers={"X-API-Key": clave} if clave else {}) as c:
         for ruta in ("/api/v1/predictions", "/api/v1/recommendations", "/api/v1/alerts",
                      "/api/v1/frequency/executions"):
             for _ in range(3):
@@ -52,7 +54,8 @@ def medir_api(base: str, n: int) -> None:
                 r.raise_for_status()
                 total = r.json()["total"]
             log(f"   GET {ruta:<30} filas en la tabla={total:>5}  p50={statistics.median(tiempos):7.1f} ms  "
-                f"p95={p95(tiempos):7.1f} ms  máx={max(tiempos):7.1f} ms  -> {'cumple' if p95(tiempos) < 2000 else 'NO cumple'} p95 < 2 s")
+                f"p95={p95(tiempos):7.1f} ms  máx={max(tiempos):7.1f} ms  -> "
+                f"{'cumple' if p95(tiempos) < 2000 else 'NO cumple'} p95 < 2 s")
 
 
 def medir_ingesta() -> None:
@@ -99,7 +102,8 @@ def medir_ingesta() -> None:
         f"errores={len(errores)}")
     log(f"   inserción con upsert en PostgreSQL local (lotes de 5.000, transacción revertida): {insertadas:,} filas "
         f"en {t_insercion:6.2f} s")
-    log(f"   total {total:6.2f} s ({len(lote) / total:,.0f} filas/s); memoria pico (tracemalloc) {pico / 2**20:,.0f} MiB")
+    log(f"   total {total:6.2f} s ({len(lote) / total:,.0f} filas/s); "
+        f"memoria pico (tracemalloc) {pico / 2**20:,.0f} MiB")
 
 
 def main() -> int:

@@ -1,0 +1,24 @@
+
+== Bien (20) ==
+  [En vivo · inicio · 1366 px] 8 tamaños (14px, 16px, 20px, 24px, 32px, 44px, 60px, 72px) · 22 colores calculados · 0 errores de consola · contenido de 1366 px en 1366 px
+  [En vivo · pronostico · 1366 px] 7 tamaños (14px, 16px, 20px, 24px, 32px, 60px, 72px) · 15 colores calculados · 0 errores de consola · contenido de 1366 px en 1366 px
+  [En vivo · horario · 1366 px] 8 tamaños (14px, 16px, 20px, 24px, 32px, 44px, 60px, 72px) · 21 colores calculados · 0 errores de consola · contenido de 1366 px en 1366 px
+  [En vivo · despacho · 1366 px] 7 tamaños (12px, 14px, 16px, 20px, 24px, 32px, 60px) · 22 colores calculados · 0 errores de consola · contenido de 1366 px en 1366 px
+  [En vivo · alertas · 1366 px] 7 tamaños (12px, 14px, 16px, 20px, 24px, 32px, 60px) · 23 colores calculados · 0 errores de consola · contenido de 1366 px en 1366 px
+  [En vivo · recomendaciones · 1366 px] 8 tamaños (12px, 14px, 16px, 20px, 24px, 32px, 44px, 60px) · 24 colores calculados · 0 errores de consola · contenido de 1366 px en 1366 px
+  [En vivo · operacion · 1366 px] 7 tamaños (14px, 16px, 20px, 24px, 32px, 44px, 60px) · 15 colores calculados · 0 errores de consola · contenido de 1366 px en 1366 px
+  [En vivo · modelo · 1366 px] 8 tamaños (14px, 16px, 20px, 24px, 32px, 44px, 60px, 72px) · 17 colores calculados · 0 errores de consola · contenido de 1366 px en 1366 px
+  [En vivo · resultado · 1366 px] 8 tamaños (14px, 16px, 20px, 24px, 32px, 44px, 60px, 72px) · 27 colores calculados · 0 errores de consola · contenido de 1366 px en 1366 px
+  [En vivo · enlaces · 1366 px] 6 tamaños (14px, 16px, 20px, 24px, 32px, 60px) · 14 colores calculados · 0 errores de consola · contenido de 1366 px en 1366 px
+  [En vivo · inicio · 400 px] 7 tamaños (14px, 16px, 20px, 22px, 26px, 36px, 46px) · 22 colores calculados · 0 errores de consola · contenido de 400 px en 400 px
+  [En vivo · pronostico · 400 px] 7 tamaños (14px, 16px, 20px, 22px, 26px, 36px, 46px) · 15 colores calculados · 0 errores de consola · contenido de 400 px en 400 px
+  [En vivo · horario · 400 px] 7 tamaños (14px, 16px, 20px, 22px, 26px, 36px, 46px) · 21 colores calculados · 0 errores de consola · contenido de 400 px en 400 px
+  [En vivo · despacho · 400 px] 7 tamaños (12px, 14px, 16px, 20px, 22px, 26px, 36px) · 22 colores calculados · 0 errores de consola · contenido de 400 px en 400 px
+  [En vivo · alertas · 400 px] 6 tamaños (12px, 14px, 16px, 22px, 26px, 36px) · 23 colores calculados · 0 errores de consola · contenido de 400 px en 400 px
+  [En vivo · recomendaciones · 400 px] 6 tamaños (12px, 14px, 16px, 22px, 26px, 36px) · 24 colores calculados · 0 errores de consola · contenido de 400 px en 400 px
+  [En vivo · operacion · 400 px] 5 tamaños (14px, 16px, 22px, 26px, 36px) · 15 colores calculados · 0 errores de consola · contenido de 400 px en 400 px
+  [En vivo · modelo · 400 px] 7 tamaños (14px, 16px, 20px, 22px, 26px, 36px, 46px) · 17 colores calculados · 0 errores de consola · contenido de 400 px en 400 px
+  [En vivo · resultado · 400 px] 7 tamaños (14px, 16px, 20px, 22px, 26px, 36px, 46px) · 27 colores calculados · 0 errores de consola · contenido de 400 px en 400 px
+  [En vivo · enlaces · 400 px] 5 tamaños (14px, 16px, 22px, 26px, 36px) · 14 colores calculados · 0 errores de consola · contenido de 400 px en 400 px
+
+Resultado: PASA · 20 bien · 0 avisos · 0 fallas

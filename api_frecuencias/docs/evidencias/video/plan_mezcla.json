@@ -1,0 +1,163 @@
+{
+ "escenas": [
+  {
+   "id": "s01_problema",
+   "inicio_final_s": 0.0,
+   "duracion_s": 25.3,
+   "cuadros": 759,
+   "audio_s": 24.686,
+   "toma": "page@d96e08f89daad5227871f4021450ead0.webm",
+   "tramo_crudo": [
+    15.585,
+    40.877
+   ]
+  },
+  {
+   "id": "s02_respuesta",
+   "inicio_final_s": 25.3,
+   "duracion_s": 16.967,
+   "cuadros": 509,
+   "audio_s": 16.341,
+   "toma": "page@d96e08f89daad5227871f4021450ead0.webm",
+   "tramo_crudo": [
+    40.877,
+    57.834
+   ]
+  },
+  {
+   "id": "s03_dia_nuevo",
+   "inicio_final_s": 42.267,
+   "duracion_s": 20.933,
+   "cuadros": 628,
+   "audio_s": 20.336,
+   "toma": "page@d96e08f89daad5227871f4021450ead0.webm",
+   "tramo_crudo": [
+    61.494,
+    82.439
+   ]
+  },
+  {
+   "id": "s04_lectura",
+   "inicio_final_s": 63.2,
+   "duracion_s": 16.2,
+   "cuadros": 486,
+   "audio_s": 15.612,
+   "toma": "page@d96e08f89daad5227871f4021450ead0.webm",
+   "tramo_crudo": [
+    99.894,
+    116.109
+   ]
+  },
+  {
+   "id": "s05_modelo",
+   "inicio_final_s": 79.4,
+   "duracion_s": 23.133,
+   "cuadros": 694,
+   "audio_s": 22.882,
+   "toma": "page@6f859adb643d6d808ad2de805effddea.webm",
+   "tramo_crudo": [
+    0.903,
+    24.04
+   ]
+  },
+  {
+   "id": "s06_pronostico",
+   "inicio_final_s": 102.533,
+   "duracion_s": 8.767,
+   "cuadros": 263,
+   "audio_s": 8.158,
+   "toma": "page@d96e08f89daad5227871f4021450ead0.webm",
+   "tramo_crudo": [
+    145.4,
+    154.165
+   ]
+  },
+  {
+   "id": "s07_despacho",
+   "inicio_final_s": 111.3,
+   "duracion_s": 11.033,
+   "cuadros": 331,
+   "audio_s": 10.427,
+   "toma": "page@d96e08f89daad5227871f4021450ead0.webm",
+   "tramo_crudo": [
+    161.095,
+    172.122
+   ]
+  },
+  {
+   "id": "s08_alertas",
+   "inicio_final_s": 122.333,
+   "duracion_s": 25.4,
+   "cuadros": 762,
+   "audio_s": 24.781,
+   "toma": "page@d96e08f89daad5227871f4021450ead0.webm",
+   "tramo_crudo": [
+    176.093,
+    201.481
+   ]
+  },
+  {
+   "id": "s09_recomendaciones",
+   "inicio_final_s": 147.733,
+   "duracion_s": 22.733,
+   "cuadros": 682,
+   "audio_s": 22.13,
+   "toma": "page@d96e08f89daad5227871f4021450ead0.webm",
+   "tramo_crudo": [
+    206.724,
+    229.464
+   ]
+  },
+  {
+   "id": "s10_monitoreo",
+   "inicio_final_s": 170.467,
+   "duracion_s": 16.667,
+   "cuadros": 500,
+   "audio_s": 16.058,
+   "toma": "page@d96e08f89daad5227871f4021450ead0.webm",
+   "tramo_crudo": [
+    233.523,
+    250.192
+   ]
+  },
+  {
+   "id": "s11_ciclo",
+   "inicio_final_s": 187.133,
+   "duracion_s": 47.967,
+   "cuadros": 1439,
+   "audio_s": 47.365,
+   "toma": "page@5d55ac535bb1a137fd85d45ad7cc0184.webm",
+   "tramo_crudo": [
+    0.45,
+    48.429
+   ]
+  },
+  {
+   "id": "s12_ingenieria",
+   "inicio_final_s": 235.1,
+   "duracion_s": 38.533,
+   "cuadros": 1156,
+   "audio_s": 37.936,
+   "toma": "page@5d55ac535bb1a137fd85d45ad7cc0184.webm",
+   "tramo_crudo": [
+    48.875,
+    87.413
+   ]
+  },
+  {
+   "id": "s13_cierre",
+   "inicio_final_s": 273.633,
+   "duracion_s": 14.8,
+   "cuadros": 444,
+   "audio_s": 14.191,
+   "toma": "page@d96e08f89daad5227871f4021450ead0.webm",
+   "tramo_crudo": [
+    311.112,
+    325.907
+   ]
+  }
+ ],
+ "duracion_s": 288.433,
+ "crf": "28",
+ "subtitulos": 72
+}

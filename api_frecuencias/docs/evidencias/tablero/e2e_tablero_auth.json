@@ -1,0 +1,35 @@
+{
+ "pruebas": [
+  {
+   "prueba": "auth: la lista carga con la clave de operador",
+   "ok": true,
+   "detalle": "Página 1 de 7 · 130 alertas con estos filtros"
+  },
+  {
+   "prueba": "auth: la nota dice que manda la clave",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "auth: reconocer queda a nombre del usuario de la clave (operador)",
+   "ok": true,
+   "detalle": "Acción registrada\n\nReconocida por operador · estado actual: reconocida"
+  },
+  {
+   "prueba": "auth: exportar CSV pasa la clave por el servidor del Dash",
+   "ok": true,
+   "detalle": "alertas_20261109_012558.csv"
+  },
+  {
+   "prueba": "auth: un operador no puede cambiar umbrales (403 prohibido visible)",
+   "ok": true,
+   "detalle": "La API no guardó el umbral\n\nprohibido: la clave configurada no tiene el rol para esta acción. El rol operador no puede PUT /api/v1/thresholds"
+  },
+  {
+   "prueba": "auth: 0 errores de consola",
+   "ok": true,
+   "detalle": "[]"
+  }
+ ],
+ "fallas": []
+}

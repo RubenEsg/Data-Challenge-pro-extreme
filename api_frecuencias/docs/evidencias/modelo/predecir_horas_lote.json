@@ -1,0 +1,34 @@
+{
+  "modelo": "hgb_fv2_20250831_s42",
+  "fecha": "2025-12-18",
+  "repeticiones": 5,
+  "generado_en": "2026-11-09T06:44:12-05:00",
+  "script": "scripts/evaluar_lote_inferencia.py",
+  "nota": "ventana de 60 min al inicio de cada hora, sin factor intradía (como el contexto de las alertas observadas y el plan del día); el lote llama una vez a los tres modelos y a SHAP",
+  "rutas": [
+    {
+      "ruta": "SILENCIO",
+      "horas": 17,
+      "identicos_hora_por_hora": true,
+      "segundos_lote_mediana": 0.6318,
+      "segundos_hora_por_hora_mediana": 9.8043,
+      "aceleracion": 15.52
+    },
+    {
+      "ruta": "CRA 54",
+      "horas": 17,
+      "identicos_hora_por_hora": true,
+      "segundos_lote_mediana": 0.275,
+      "segundos_hora_por_hora_mediana": 4.8703,
+      "aceleracion": 17.71
+    },
+    {
+      "ruta": "CL 72",
+      "horas": 17,
+      "identicos_hora_por_hora": true,
+      "segundos_lote_mediana": 0.21,
+      "segundos_hora_por_hora_mediana": 3.1071,
+      "aceleracion": 14.8
+    }
+  ]
+}

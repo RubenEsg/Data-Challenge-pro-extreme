@@ -1,0 +1,171 @@
+{
+ "precalentar": {
+  "model_id": "hgb_fv2_20250831_s42",
+  "segundos": 1.42
+ },
+ "modelo": {
+  "model_id": "hgb_fv2_20250831_s42",
+  "feature_version": "fv2-2026-11-09",
+  "sha256": "24c70b9ca3f6855480d7592855544b82e60e51179b30b88129ab09aa7ed92010",
+  "shap_exacto": true
+ },
+ "reconstruccion_prueba_reservada": {
+  "filas": 3111,
+  "error_rel_max": 2.2465201935485466e-14,
+  "error_rel_p99": 1.3986746838065009e-14,
+  "base_pasajeros": 543.8
+ },
+ "importancia_media_abs_shap_prueba": [
+  {
+   "variable": "b8",
+   "media_abs_log": 0.3543
+  },
+  {
+   "variable": "tipo_dia",
+   "media_abs_log": 0.1032
+  },
+  {
+   "variable": "m4",
+   "media_abs_log": 0.0934
+  },
+  {
+   "variable": "hora",
+   "media_abs_log": 0.0759
+  },
+  {
+   "variable": "nivel_7_13",
+   "media_abs_log": 0.0599
+  },
+  {
+   "variable": "festivo",
+   "media_abs_log": 0.0552
+  },
+  {
+   "variable": "sd8",
+   "media_abs_log": 0.0462
+  },
+  {
+   "variable": "ruta_cod",
+   "media_abs_log": 0.0277
+  },
+  {
+   "variable": "mes",
+   "media_abs_log": 0.0264
+  },
+  {
+   "variable": "vacaciones",
+   "media_abs_log": 0.0207
+  }
+ ],
+ "latencia_predecir_ms": {
+  "n": 75,
+  "p50": 47.2,
+  "p95": 96.0,
+  "max": 169.1
+ },
+ "latencia_shap_por_fila_ms": {
+  "n": 200,
+  "p50": 3.2,
+  "p95": 5.57
+ },
+ "ejemplo_CL72_2025_11_01_04h_60min": {
+  "pasajeros": 165.4,
+  "p10": 121.27,
+  "p90": 202.18,
+  "p10_modelo": 121.2,
+  "p90_modelo": 202.25,
+  "ajuste_conformal": -0.000431,
+  "explicacion": [
+   "Hora 4:00 del sábado (sábado)",
+   "Misma hora hace 7 días: 204 pasajeros",
+   "Regla manual (media de 8 semanas): 153 pasajeros",
+   "Sin observaciones suficientes en las 2 h previas: factor intradía 1,00",
+   "Ventana de 60 min repartida con el perfil intrahorario (subidas por media hora, 2024) sobre 1 hora(s) de servicio",
+   "Banda P10-P90 calibrada (conformal móvil de 56 días, 56 días fuera de muestra): ajuste -0,000 x pronóstico; banda del modelo 121-202",
+   "Explicación local (SHAP) de la hora 4:00: base 544 pasajeros; La media de 8 semanas (regla manual) (153) reduce ×0,45; La hora (4) reduce ×0,78; La media de 4 semanas (134) reduce ×0,84",
+   "Variables más influyentes del modelo: b8, tipo_dia, m4"
+  ],
+  "explicacion_local": {
+   "metodo": "shap_tree_exacto",
+   "hora": 4,
+   "fecha": "2025-11-01",
+   "base_pasajeros": 543.8,
+   "pronostico_hora": 165.4,
+   "factores": [
+    {
+     "variable": "b8",
+     "descripcion": "la media de 8 semanas (regla manual)",
+     "valor": 153.12,
+     "phi_log": -0.791904,
+     "factor_multiplicativo": 0.453,
+     "efecto_pasajeros": -251.8
+    },
+    {
+     "variable": "hora",
+     "descripcion": "la hora",
+     "valor": 4.0,
+     "phi_log": -0.252009,
+     "factor_multiplicativo": 0.7772,
+     "efecto_pasajeros": -80.1
+    },
+    {
+     "variable": "m4",
+     "descripcion": "la media de 4 semanas",
+     "valor": 133.75,
+     "phi_log": -0.17711,
+     "factor_multiplicativo": 0.8377,
+     "efecto_pasajeros": -56.3
+    },
+    {
+     "variable": "tipo_dia",
+     "descripcion": "el tipo de día",
+     "valor": 1.0,
+     "phi_log": 0.175575,
+     "factor_multiplicativo": 1.1919,
+     "efecto_pasajeros": 55.8
+    },
+    {
+     "variable": "nivel_7_13",
+     "descripcion": "el nivel de la semana anterior",
+     "valor": 198.57,
+     "phi_log": -0.108236,
+     "factor_multiplicativo": 0.8974,
+     "efecto_pasajeros": -34.4
+    }
+   ],
+   "factor_resto": 0.9641,
+   "efecto_resto_pasajeros": -11.6,
+   "error_reconstruccion_rel": 8.763603965178042e-15,
+   "ventana_ponderada": [
+    {
+     "variable": "b8",
+     "factor_multiplicativo": 0.453
+    },
+    {
+     "variable": "hora",
+     "factor_multiplicativo": 0.7772
+    },
+    {
+     "variable": "m4",
+     "factor_multiplicativo": 0.8377
+    },
+    {
+     "variable": "tipo_dia",
+     "factor_multiplicativo": 1.1919
+    },
+    {
+     "variable": "nivel_7_13",
+     "factor_multiplicativo": 0.8974
+    }
+   ],
+   "frase": "La media de 8 semanas (regla manual) (153) reduce ×0,45; La hora (4) reduce ×0,78; La media de 4 semanas (134) reduce ×0,84"
+  }
+ },
+ "reversion_fv1_predice": {
+  "model_id": "hgb_fv1_20250831_s42",
+  "feature_version": "fv1-2026-11-08",
+  "pasajeros": 1489.43,
+  "explicacion_local": "importancia_global_permutacion"
+ },
+ "segundos": 14.6
+}

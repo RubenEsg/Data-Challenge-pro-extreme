@@ -1,0 +1,10 @@
+Suite completa (unit + integraciÃ³n), 2026-11-09 01:16, TEST_DATABASE_NAME=ai_frecuencias_pruebas_modelo
+349 pruebas: 348 pasan, 0 fallos, 0 errores, 1 omitida (tests/integracion/test_caida.py: requiere PRUEBA_CAIDA=1), 105,6 s
+Archivos del paquete modelo: test_variables.py 8, test_inferencia.py 28, test_datos.py 8 pruebas (antes 4, 13 y 6)
+.........s.............................................................. [ 20%]
+........................................................................ [ 41%]
+........................................................................ [ 61%]
+........................................................................ [ 82%]
+.............................................................            [100%]
+=========================== short test summary info ===========================
+SKIPPED [1] tests\integracion\test_caida.py:31: prueba de caída con procesos reales: active con PRUEBA_CAIDA=1 (~2 min)

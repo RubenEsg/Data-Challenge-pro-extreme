@@ -1,0 +1,66 @@
+
+
+  █ THRESHOLDS 
+
+    errores_funcionales
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_duration
+    ✓ 'p(95)<2000' p(95)=451.33ms
+
+      {recurso:alerts}
+      ✓ 'p(95)<2000' p(95)=436.21ms
+
+      {recurso:executions}
+      ✓ 'p(95)<2000' p(95)=347.5ms
+
+      {recurso:models}
+      ✓ 'p(95)<2000' p(95)=282.41ms
+
+      {recurso:predictions}
+      ✓ 'p(95)<2000' p(95)=563.09ms
+
+      {recurso:recommendations}
+      ✓ 'p(95)<2000' p(95)=427.01ms
+
+    http_req_failed
+    ✓ 'rate<0.01' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 10644   176.273957/s
+    checks_succeeded...: 100.00% 10644 out of 10644
+    checks_failed......: 0.00%   0 out of 10644
+
+    ✓ estado 200
+    ✓ página con total e items
+    ✓ correlation id devuelto
+
+    CUSTOM
+    errores_funcionales.............: 0.00%  0 out of 3548
+
+    HTTP
+    http_req_duration...............: avg=171.51ms min=8.79ms   med=136.94ms p(90)=370.07ms p(95)=451.33ms p(99)=571.69ms max=791.63ms
+      { expected_response:true }....: avg=171.51ms min=8.79ms   med=136.94ms p(90)=370.07ms p(95)=451.33ms p(99)=571.69ms max=791.63ms
+      { recurso:alerts }............: avg=186.4ms  min=23.56ms  med=155.26ms p(90)=380.11ms p(95)=436.21ms p(99)=535.36ms max=580.73ms
+      { recurso:executions }........: avg=140.54ms min=14.99ms  med=116.34ms p(90)=285.71ms p(95)=347.5ms  p(99)=462.82ms max=541.2ms 
+      { recurso:models }............: avg=108.89ms min=8.79ms   med=80.02ms  p(90)=229.24ms p(95)=282.41ms p(99)=415.79ms max=489.84ms
+      { recurso:predictions }.......: avg=248.28ms min=36.64ms  med=208.86ms p(90)=501.35ms p(95)=563.09ms p(99)=669.16ms max=785.57ms
+      { recurso:recommendations }...: avg=174.87ms min=18.69ms  med=145.65ms p(90)=370.27ms p(95)=427.01ms p(99)=530.17ms max=791.63ms
+    http_req_failed.................: 0.00%  0 out of 3553
+    http_reqs.......................: 3553   58.84079/s
+
+    EXECUTION
+    iteration_duration..............: avg=526.33ms min=212.11ms med=506.49ms p(90)=744.58ms p(95)=833.11ms p(99)=983.62ms max=1.28s   
+    iterations......................: 3548   58.757986/s
+    vus.............................: 2      min=2         max=49
+    vus_max.........................: 50     min=50        max=50
+
+    NETWORK
+    data_received...................: 407 MB 6.7 MB/s
+    data_sent.......................: 750 kB 12 kB/s
+
+
+
+exit=0

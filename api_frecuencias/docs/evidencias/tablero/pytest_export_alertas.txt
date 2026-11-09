@@ -1,0 +1,10 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.3, pytest-9.2.0, pluggy-1.7.0
+rootdir: D:\Ruben\universidad\machine_learning\DATA CHALLENGE\EntregaFinal\api_frecuencias
+configfile: pyproject.toml
+plugins: anyio-4.16.0, cov-7.1.0
+collected 2 items
+
+tests\integracion\test_export_alertas.py ..                              [100%]
+
+============================== 2 passed in 4.93s ==============================

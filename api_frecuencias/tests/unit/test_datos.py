@@ -60,3 +60,24 @@ def test_parametros_operativos_por_hora():
     p = datos.parametros_operativos("SILENCIO", "Laboral")
     assert len(p) > 0
     assert {"tiempo_ciclo_min", "flota", "intervalo_programado_min", "nmin", "nmax"} <= set(p.columns)
+
+
+def test_contexto_operacional_y_perfil_intrahorario():
+    c = datos.contexto_operacional()
+    assert list(c.columns) == datos.COLUMNAS_CONTEXTO
+    if len(c):
+        assert (c["nov_impacto"] >= 0).all() and c["hora"].between(4, 20).all()
+        assert c["festivo_oficial"].isin([0, 1]).all()
+        assert not c.duplicated(["fecha", "hora"]).any()
+    p = datos.perfil_intrahorario()
+    if len(p):
+        assert p["fraccion_primera_media"].between(0.05, 0.95).all()
+        assert set(p["tipo_dia"].unique()) <= {0, 1, 2}
+
+
+def test_archivos_opcionales_faltantes_dan_tablas_vacias(tmp_path, monkeypatch):
+    monkeypatch.setenv("DATA_DIR", str(tmp_path))
+    assert len(datos.contexto_operacional()) == 0
+    assert list(datos.contexto_operacional().columns) == datos.COLUMNAS_CONTEXTO
+    assert len(datos.perfil_intrahorario()) == 0
+    assert datos.clima_diario() is None

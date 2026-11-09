@@ -1,0 +1,112 @@
+{
+  "model_id": "hgb_fv2_20250831_s42",
+  "feature_version": "fv2-2026-11-09",
+  "columnas": [
+    "ruta_cod",
+    "hora",
+    "dia_semana",
+    "mes",
+    "tipo_dia",
+    "festivo",
+    "carnaval",
+    "semana_santa",
+    "vacaciones",
+    "navidad",
+    "primero_enero",
+    "lag7",
+    "lag14",
+    "b8",
+    "m4",
+    "sd8",
+    "nivel_7_13",
+    "nivel_7_34",
+    "dia_lag7",
+    "nov_impacto",
+    "nov_sube",
+    "vispera_festivo",
+    "post_festivo"
+  ],
+  "sha256_joblib": "24c70b9ca3f6855480d7592855544b82e60e51179b30b88129ab09aa7ed92010",
+  "opset": {
+    "": 17,
+    "ai.onnx.ml": 3
+  },
+  "archivos": {
+    "punto": {
+      "archivo": "modelo_punto.onnx",
+      "sha256": "36ede50e029e4f5bda661d1c1dee8750d507a9e5f2bbe1ee30b0d38150e42b5c",
+      "bytes": 917280,
+      "enlace": "exp (Poisson)"
+    },
+    "p10": {
+      "archivo": "modelo_p10.onnx",
+      "sha256": "7eff3ee4de4e58a6c089b949a2bcb0953d45cacadb4f2294674b763493132ee6",
+      "bytes": 917225,
+      "enlace": "identidad"
+    },
+    "p90": {
+      "archivo": "modelo_p90.onnx",
+      "sha256": "c236ed8603706150082d1440aa87711c87f1dbdfc354eb9a5415d80dbf9b8fd1",
+      "bytes": 917225,
+      "enlace": "identidad"
+    }
+  },
+  "paridad": {
+    "punto": {
+      "filas": 3000,
+      "max_abs": 0.0028084801110708213,
+      "max_rel": 2.1610955390961107e-06,
+      "p999_rel": 2.0148909561869086e-06,
+      "wape_sklearn": 14.0256,
+      "wape_onnx": 14.0256,
+      "ms_lote_sklearn": 69.99,
+      "ms_lote_onnx": 25.05,
+      "ms_fila_sklearn": 12.615,
+      "ms_fila_onnx": 0.103,
+      "aprobada": true
+    },
+    "p10": {
+      "filas": 3000,
+      "max_abs": 0.0021164509180380264,
+      "max_rel": 0.0001532794119543916,
+      "p999_rel": 9.132766334497989e-05,
+      "wape_sklearn": 23.841,
+      "wape_onnx": 23.841,
+      "ms_lote_sklearn": 96.64,
+      "ms_lote_onnx": 22.44,
+      "ms_fila_sklearn": 75.444,
+      "ms_fila_onnx": 0.122,
+      "aprobada": true
+    },
+    "p90": {
+      "filas": 3000,
+      "max_abs": 0.001797211245843755,
+      "max_rel": 0.00034546424464250837,
+      "p999_rel": 0.00034546424464250837,
+      "wape_sklearn": 27.0455,
+      "wape_onnx": 27.0455,
+      "ms_lote_sklearn": 381.31,
+      "ms_lote_onnx": 26.81,
+      "ms_fila_sklearn": 64.091,
+      "ms_fila_onnx": 0.101,
+      "aprobada": true
+    }
+  },
+  "tolerancia_rel": 0.001,
+  "tolerancia_abs_pasajeros": 0.01,
+  "aprobada": true,
+  "muestra": {
+    "desde": "2025-09-01",
+    "hasta": "2025-12-31",
+    "posteriores_al_corte": true
+  },
+  "versiones": {
+    "skl2onnx": "1.20.0",
+    "onnx": "1.23.2",
+    "onnxruntime": "1.31.1",
+    "sklearn": "1.5.2",
+    "numpy": "2.5.4",
+    "protobuf": "7.36.2"
+  },
+  "exportado_en": "2026-11-09T07:06:29+00:00"
+}

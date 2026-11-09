@@ -1,0 +1,99 @@
+{
+  "descripcion": "Duraciones internas del cierre del ciclo (execution_log.metricas) en la base de medición de scripts/medir_ciclo.py, misma corrida que ciclo_dimensiones_plan.json",
+  "corridas": [
+    {
+      "hasta": "2025-08-30",
+      "filas_leidas": 49623,
+      "duracion_ciclo_s": 103.161,
+      "plan_dia_s": 5.001,
+      "respuesta_s": 61.215,
+      "recomendaciones_plan_dia": 51,
+      "respuesta_guardadas": 3,
+      "plan_dia_rutas": {
+        "CL 72": {
+          "horas": 17,
+          "model_id": "hgb_fv2_20250831_s42",
+          "salidas_dia": 93,
+          "fuente_pronostico": "modelo_activo",
+          "calibracion_version": "v2"
+        },
+        "CRA 54": {
+          "horas": 17,
+          "model_id": "hgb_fv2_20250831_s42",
+          "salidas_dia": 108,
+          "fuente_pronostico": "modelo_activo",
+          "calibracion_version": "v2"
+        },
+        "SILENCIO": {
+          "horas": 17,
+          "model_id": "hgb_fv2_20250831_s42",
+          "salidas_dia": 92,
+          "fuente_pronostico": "modelo_activo",
+          "calibracion_version": "v2"
+        }
+      },
+      "calidad": {
+        "filas": 49623,
+        "filas_cuarentena": 0,
+        "latencia_media_h": -0.0002777777777777778,
+        "errores_por_codigo": {},
+        "errores_de_catalogo": 0,
+        "errores_por_dimension": {}
+      },
+      "notificaciones_por_estado": null
+    },
+    {
+      "hasta": "2025-08-31",
+      "filas_leidas": 51,
+      "duracion_ciclo_s": 50.76,
+      "plan_dia_s": 13.644,
+      "respuesta_s": 16.557,
+      "recomendaciones_plan_dia": 51,
+      "respuesta_guardadas": 3,
+      "plan_dia_rutas": {
+        "CL 72": {
+          "horas": 17,
+          "model_id": "hgb_fv2_20250831_s42",
+          "salidas_dia": 106,
+          "fuente_pronostico": "modelo_activo",
+          "calibracion_version": "v2"
+        },
+        "CRA 54": {
+          "horas": 17,
+          "model_id": "hgb_fv2_20250831_s42",
+          "salidas_dia": 252,
+          "fuente_pronostico": "modelo_activo",
+          "calibracion_version": "v2"
+        },
+        "SILENCIO": {
+          "horas": 17,
+          "model_id": "hgb_fv2_20250831_s42",
+          "salidas_dia": 136,
+          "fuente_pronostico": "modelo_activo",
+          "calibracion_version": "v2"
+        }
+      },
+      "calidad": {
+        "filas": 51,
+        "filas_cuarentena": 0,
+        "latencia_media_h": -0.0002777777777777778,
+        "errores_por_codigo": {},
+        "errores_de_catalogo": 0,
+        "errores_por_dimension": {}
+      },
+      "notificaciones_por_estado": null
+    },
+    {
+      "hasta": "2025-08-31",
+      "filas_leidas": 0,
+      "duracion_ciclo_s": 0.11,
+      "plan_dia_s": null,
+      "respuesta_s": null,
+      "recomendaciones_plan_dia": 0,
+      "respuesta_guardadas": null,
+      "plan_dia_rutas": {},
+      "calidad": null,
+      "notificaciones_por_estado": null
+    }
+  ]
+}

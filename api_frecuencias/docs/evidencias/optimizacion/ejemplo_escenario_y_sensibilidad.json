@@ -1,0 +1,1441 @@
+{
+ "solicitud": {
+  "ruta": "CRA 54",
+  "hora": 7,
+  "fecha": "2025-03-04",
+  "demanda_hora": 1000,
+  "demanda_p90": 1180,
+  "demanda_p10": 850,
+  "escenario": {
+   "factor_demanda": 1.3,
+   "pesos": {
+    "beta": 3
+   }
+  },
+  "sensibilidad": true
+ },
+ "escenario": {
+  "escenario": {
+   "factor_demanda": 1.3,
+   "pesos": {
+    "beta": 3.0
+   }
+  },
+  "resultado": {
+   "buses_hora": 16,
+   "headway_min": 3.75,
+   "vehiculos_requeridos": 68,
+   "ocupacion_esperada": 0.6937,
+   "viable": true,
+   "motivo": null,
+   "costo_total_ponderado_cop": 4944869.2,
+   "limites_activos": [
+    "nivel_servicio",
+    "flota_T2",
+    "flota_T3",
+    "flota_T4"
+   ],
+   "asignacion": [
+    {
+     "codigo": "T1",
+     "nombre": "Bus corto",
+     "capacidad": 47,
+     "buses_hora": 1,
+     "vehiculos": 5,
+     "disponibles": 10,
+     "maximo_buses_hora": 2
+    },
+    {
+     "codigo": "T2",
+     "nombre": "Bus estándar",
+     "capacidad": 50,
+     "buses_hora": 6,
+     "vehiculos": 25,
+     "disponibles": 25,
+     "maximo_buses_hora": 6
+    },
+    {
+     "codigo": "T3",
+     "nombre": "Bus largo",
+     "capacidad": 58,
+     "buses_hora": 5,
+     "vehiculos": 21,
+     "disponibles": 24,
+     "maximo_buses_hora": 5
+    },
+    {
+     "codigo": "T4",
+     "nombre": "Bus de alta capacidad",
+     "capacidad": 72,
+     "buses_hora": 4,
+     "vehiculos": 17,
+     "disponibles": 20,
+     "maximo_buses_hora": 4
+    }
+   ]
+  },
+  "diferencia_frente_a_base": {
+   "buses_hora": 4,
+   "headway_min": -1.25,
+   "vehiculos_requeridos": 17,
+   "total_ponderado_cop": 1621790.81
+  },
+  "explicacion": [
+   "Se recomiendan 16 buses/h (un despacho cada 3,75 min) con 68 vehículos en el ciclo de 249,1 min.",
+   "Demanda de diseño: 757,2 pasajeros en el punto de carga máxima (banda P90 calibrada, nivel de servicio 90 %); capacidad efectiva ofrecida 786,2.",
+   "Límites que mandan: la capacidad del nivel de servicio, la flota de Bus estándar (T2), la flota de Bus largo (T3), la flota de Bus de alta capacidad (T4).",
+   "Un bus más por hora costaría 221.911 COP/h de operación y cambiaría la espera en -24.878 y la sobreocupación en -5.944 COP/h: el objetivo sube 114.933 COP/h.",
+   "Un bus menos no es factible: violaría el nivel de servicio.",
+   "Asignación de capacidad sugerida: 1 × Bus corto (47 puestos) + 6 × Bus estándar (50 puestos) + 5 × Bus largo (58 puestos) + 4 × Bus de alta capacidad (72 puestos).",
+   "Frecuencia actual (programada): cada 2,94 min (20,4 buses/h); la recomendada es cada 3,75 min.",
+   "La línea base §10.3 ajustada daría 18 buses/h (viable); la diferencia: la mezcla de tipologías ofrece 57,8 puestos por bus en promedio frente a los 50 de la línea base.",
+   "Línea base §10.3 literal (factor 1, demanda puntual): 30 buses/h, headway 2,00 min (no viable); ajustada (factor de carga 0,494, P90): 18 buses/h, headway 3,33 min (viable)."
+  ],
+  "limites_activos": [
+   "nivel_servicio",
+   "flota_T2",
+   "flota_T3",
+   "flota_T4"
+  ]
+ },
+ "sensibilidad": {
+  "base": {
+   "buses_hora": 12,
+   "headway_min": 5.0,
+   "vehiculos_requeridos": 51,
+   "ocupacion_esperada": 0.678,
+   "viable": true,
+   "motivo": null,
+   "costo_total_ponderado_cop": 3323078.39,
+   "limites_activos": [
+    "nivel_servicio",
+    "flota_T3",
+    "flota_T4"
+   ],
+   "asignacion": [
+    {
+     "codigo": "T1",
+     "nombre": "Bus corto",
+     "capacidad": 47,
+     "buses_hora": 0,
+     "vehiculos": 0,
+     "disponibles": 10,
+     "maximo_buses_hora": 2
+    },
+    {
+     "codigo": "T2",
+     "nombre": "Bus estándar",
+     "capacidad": 50,
+     "buses_hora": 3,
+     "vehiculos": 13,
+     "disponibles": 25,
+     "maximo_buses_hora": 6
+    },
+    {
+     "codigo": "T3",
+     "nombre": "Bus largo",
+     "capacidad": 58,
+     "buses_hora": 5,
+     "vehiculos": 21,
+     "disponibles": 24,
+     "maximo_buses_hora": 5
+    },
+    {
+     "codigo": "T4",
+     "nombre": "Bus de alta capacidad",
+     "capacidad": 72,
+     "buses_hora": 4,
+     "vehiculos": 17,
+     "disponibles": 20,
+     "maximo_buses_hora": 4
+    }
+   ]
+  },
+  "variaciones": [
+   {
+    "variacion": "peso_costo_operativo × 0,0",
+    "parametro": "peso_costo_operativo",
+    "valor": 0.0,
+    "buses_hora": 17,
+    "headway_min": 3.53,
+    "vehiculos_requeridos": 72,
+    "ocupacion_esperada": 0.5078,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 396166.44,
+    "limites_activos": [
+     "flota_T1",
+     "flota_T2",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 2,
+      "vehiculos": 9,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 6,
+      "vehiculos": 25,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": true
+   },
+   {
+    "variacion": "peso_costo_operativo × 0,5",
+    "parametro": "peso_costo_operativo",
+    "valor": 0.5,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 1991613.29,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_costo_operativo × 2,0",
+    "parametro": "peso_costo_operativo",
+    "valor": 2.0,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 5986008.58,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_costo_operativo × 5,0",
+    "parametro": "peso_costo_operativo",
+    "valor": 5.0,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 13974799.15,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_tiempo_espera × 0,0",
+    "parametro": "peso_tiempo_espera",
+    "valor": 0.0,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 2889310.55,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_tiempo_espera × 0,5",
+    "parametro": "peso_tiempo_espera",
+    "valor": 0.5,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3106194.47,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_tiempo_espera × 2,0",
+    "parametro": "peso_tiempo_espera",
+    "valor": 2.0,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3756846.22,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_tiempo_espera × 5,0",
+    "parametro": "peso_tiempo_espera",
+    "valor": 5.0,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 5058149.72,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_sobreocupacion × 0,0",
+    "parametro": "peso_sobreocupacion",
+    "valor": 0.0,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 52,
+    "ocupacion_esperada": 0.7185,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3318675.39,
+    "limites_activos": [
+     "nivel_servicio"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 1,
+      "vehiculos": 5,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_sobreocupacion × 0,5",
+    "parametro": "peso_sobreocupacion",
+    "valor": 0.5,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3320876.89,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_sobreocupacion × 2,0",
+    "parametro": "peso_sobreocupacion",
+    "valor": 2.0,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3327481.38,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_sobreocupacion × 5,0",
+    "parametro": "peso_sobreocupacion",
+    "valor": 5.0,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3340690.38,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_desviacion_frecuencia × 0,0",
+    "parametro": "peso_desviacion_frecuencia",
+    "valor": 0.0,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3101101.03,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_desviacion_frecuencia × 0,5",
+    "parametro": "peso_desviacion_frecuencia",
+    "valor": 0.5,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3212089.71,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_desviacion_frecuencia × 2,0",
+    "parametro": "peso_desviacion_frecuencia",
+    "valor": 2.0,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3545055.75,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "peso_desviacion_frecuencia × 5,0",
+    "parametro": "peso_desviacion_frecuencia",
+    "valor": 5.0,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 4210987.83,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "nivel_servicio = 0,80",
+    "parametro": "nivel_servicio",
+    "valor": 0.8,
+    "buses_hora": 11,
+    "headway_min": 5.45,
+    "vehiculos_requeridos": 47,
+    "ocupacion_esperada": 0.728,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3180016.94,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 2,
+      "vehiculos": 9,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": true
+   },
+   {
+    "variacion": "nivel_servicio = 0,95",
+    "parametro": "nivel_servicio",
+    "valor": 0.95,
+    "buses_hora": 12,
+    "headway_min": 5.0,
+    "vehiculos_requeridos": 51,
+    "ocupacion_esperada": 0.678,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3323078.39,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 3,
+      "vehiculos": 13,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": false
+   },
+   {
+    "variacion": "nivel_servicio = 0,99",
+    "parametro": "nivel_servicio",
+    "valor": 0.99,
+    "buses_hora": 14,
+    "headway_min": 4.29,
+    "vehiculos_requeridos": 59,
+    "ocupacion_esperada": 0.5961,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3647921.49,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": true
+   },
+   {
+    "variacion": "demanda × 0,80",
+    "parametro": "factor_demanda",
+    "valor": 0.8,
+    "buses_hora": 9,
+    "headway_min": 6.67,
+    "vehiculos_requeridos": 38,
+    "ocupacion_esperada": 0.6832,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 2765188.08,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": true
+   },
+   {
+    "variacion": "demanda × 1,20",
+    "parametro": "factor_demanda",
+    "valor": 1.2,
+    "buses_hora": 14,
+    "headway_min": 4.29,
+    "vehiculos_requeridos": 59,
+    "ocupacion_esperada": 0.7154,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3737322.83,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": true
+   },
+   {
+    "variacion": "demanda × 1,50",
+    "parametro": "factor_demanda",
+    "valor": 1.5,
+    "buses_hora": 17,
+    "headway_min": 3.53,
+    "vehiculos_requeridos": 72,
+    "ocupacion_esperada": 0.7617,
+    "viable": false,
+    "motivo": "La flota disponible (79 vehículos, ciclo de 249,1 min) solo sostiene 826 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 874 (94,6 % de cobertura). Se informa la mejor aproximación ejecutable: 17 buses/h cada 3,53 min, que cubre el 94,6 % de la carga del nivel de servicio.",
+    "costo_total_ponderado_cop": null,
+    "limites_activos": [],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 2,
+      "vehiculos": 9,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 6,
+      "vehiculos": 25,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": true
+   },
+   {
+    "variacion": "ocupacion_objetivo = 0,75",
+    "parametro": "ocupacion_objetivo",
+    "valor": 0.75,
+    "buses_hora": 13,
+    "headway_min": 4.62,
+    "vehiculos_requeridos": 55,
+    "ocupacion_esperada": 0.6344,
+    "viable": true,
+    "motivo": null,
+    "costo_total_ponderado_cop": 3481791.23,
+    "limites_activos": [
+     "nivel_servicio",
+     "flota_T3",
+     "flota_T4"
+    ],
+    "asignacion": [
+     {
+      "codigo": "T1",
+      "nombre": "Bus corto",
+      "capacidad": 47,
+      "buses_hora": 0,
+      "vehiculos": 0,
+      "disponibles": 10,
+      "maximo_buses_hora": 2
+     },
+     {
+      "codigo": "T2",
+      "nombre": "Bus estándar",
+      "capacidad": 50,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 25,
+      "maximo_buses_hora": 6
+     },
+     {
+      "codigo": "T3",
+      "nombre": "Bus largo",
+      "capacidad": 58,
+      "buses_hora": 5,
+      "vehiculos": 21,
+      "disponibles": 24,
+      "maximo_buses_hora": 5
+     },
+     {
+      "codigo": "T4",
+      "nombre": "Bus de alta capacidad",
+      "capacidad": 72,
+      "buses_hora": 4,
+      "vehiculos": 17,
+      "disponibles": 20,
+      "maximo_buses_hora": 4
+     }
+    ],
+    "cambia_la_recomendacion": true
+   }
+  ],
+  "resumen": "7 de 23 variaciones cambian los buses/h o la viabilidad de la base."
+ }
+}

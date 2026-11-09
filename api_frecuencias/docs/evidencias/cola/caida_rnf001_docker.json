@@ -1,0 +1,72 @@
+{
+ "escenarios": [
+  {
+   "escenario": "sigkill_lectura_incremental",
+   "execution_id": "98beaf12-10bd-4271-8180-838e36f22369",
+   "api_de_vuelta_s": 3.7,
+   "ok_tras_kill_s": 18.0,
+   "predicciones_visibles_antes_del_kill": 0,
+   "intentos": 2,
+   "traza": [
+    [
+     1,
+     "caida-a:1:e36019:t1",
+     "abandonado"
+    ],
+    [
+     2,
+     "caida-a:1:0fd04d:t1",
+     "ok"
+    ]
+   ]
+  },
+  {
+   "escenario": "sigkill_prediccion",
+   "execution_id": "ca88e21a-23f4-4b77-a935-9dcb9dead2bd",
+   "api_de_vuelta_s": 3.5,
+   "ok_tras_kill_s": 20.1,
+   "predicciones_visibles_antes_del_kill": 0,
+   "intentos": 2,
+   "traza": [
+    [
+     1,
+     "caida-a:1:0fd04d:t1",
+     "abandonado"
+    ],
+    [
+     2,
+     "caida-a:1:820ab1:t1",
+     "ok"
+    ]
+   ]
+  },
+  {
+   "escenario": "reserva_vencida_otra_replica",
+   "execution_id": "7c563427-01f7-42b9-94d7-fdfc88febf14",
+   "retomada_tras_kill_s": 6.7,
+   "ok_tras_kill_s": 20.6,
+   "intentos": 2,
+   "traza": [
+    [
+     1,
+     "caida-a:1:820ab1:t1",
+     "abandonado"
+    ],
+    [
+     2,
+     "caida-b:1:4a4bb0:t1",
+     "ok"
+    ]
+   ]
+  }
+ ],
+ "referencia": {
+  "execution_id": "55b5c10f-b425-4ff2-acc2-563b2b860704",
+  "predicciones": 9,
+  "recomendaciones": 9,
+  "alertas": 11,
+  "intentos": 1
+ },
+ "ok": true,
+ "fallas": []
+}

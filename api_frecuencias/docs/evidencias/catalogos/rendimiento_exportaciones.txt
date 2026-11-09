@@ -1,0 +1,30 @@
+Rendimiento de los dos catálogos más pesados con las exportaciones Parquet locales (modo archivos, sin réplica)
+Fecha: 09-11-2026, 05:12 (antes) y 05:18 (después). Mismo equipo (Windows 11, Python 3.13.3), cargado con otras
+suites de pruebas en paralelo: los tiempos absolutos son conservadores; lo que importa es la diferencia.
+Se mide en proceso, sin HTTP, con las mismas funciones que llaman los routers (app/servicios/catalogos.py).
+
+1) GET /api/v1/catalogos/segmentos?geometria=completa&limite=50
+   = segmentos(geometria="completa") + paginar + geometria_completa(ids de la página)
+   Antes:   primera petición 8,09 s; siguientes 0,78 s.
+   Después: primera petición 1,68 s; siguientes 0,48 s.
+   Causa y cambio: para «completa» (y para «ninguna») la lista se arma sin geometría, pero el código convertía y
+   simplificaba la WKT de los 2.695 segmentos (unos 250 MB de texto) antes de descartarla. Ahora, sin geometría,
+   solo se cuentan los vértices de la WKT (_vertices_wkt) y la geometría completa se lee únicamente para los
+   segmentos de la página (50 segmentos, 125.632 vértices en esta medición).
+
+2) GET /api/v1/catalogos/despachos/export?formato=xlsx (sin filtros: 520.648 despachos, tope de 100.000 filas)
+   Antes:   27,6 s y 40,3 s (de ellos, escribir el XLSX: 36,9 s).
+   Después: 18,4 s y 18,3 s (de ellos, escribir el XLSX: 16,6 s). Archivo de 6,6 MB.
+   Cambio: el XLSX se escribe con openpyxl en modo write_only (fila por fila) en lugar de pandas.to_excel. En una
+   prueba aislada con 100.000 filas x 12 columnas: 12,7 s frente a 20,8 s, el mismo archivo y la misma lectura con
+   pandas.read_excel (tests/unit/test_catalogos.py::test_xlsx_en_modo_write_only_se_lee_igual).
+   Con filtros (ruta y fecha, el uso normal del tablero) la exportación tiene cientos de filas y tarda menos de 1 s;
+   el CSV de las 100.000 filas no pasa por openpyxl. Para exportaciones masivas se recomienda formato=csv.
+
+Reproducir: desde EntregaFinal/api_frecuencias, con las exportaciones del reto en datos/ de la raíz del proyecto:
+    .venv\Scripts\python docs\evidencias\catalogos\medir_exportaciones.py
+(llama a C.segmentos, C.paginar, C.geometria_completa, C.programacion("despachos", limite=100000) y
+C.exportar(..., "xlsx") y mide con time.perf_counter; no escribe nada).
+Pruebas que cubren los cambios: tests/unit/test_catalogos.py::test_vertices_wkt_sin_convertir_la_geometria,
+::test_xlsx_en_modo_write_only_se_lee_igual y tests/integracion/test_catalogos_api.py::
+test_catalogos_offline_paginados_con_su_fuente (la geometría completa conserva todos sus vértices).

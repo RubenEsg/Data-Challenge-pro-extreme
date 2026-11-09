@@ -1,0 +1,44 @@
+Suite completa de pruebas: calibración propia de cada candidato, política de reentrenamiento y refactorización sin cambio de comportamiento del modelo
+Fecha: 2026-11-09, de 05:32:11 a 05:39:37 (hora de Bogotá); 442,1 s.
+Comando (desde EntregaFinal/api_frecuencias, con la réplica operacional local arriba en el puerto 5434 y DATA_DIR /
+MODELOS_DIR en una copia temporal de datos/):
+  TEST_DATABASE_NAME=ai_frecuencias_pruebas_modelo_4 SCHEMATHESIS_EJEMPLOS=3 \
+  .venv/Scripts/python.exe -m pytest tests/unit tests/integracion tests/replica tests/contrato tests/datos_ml -q -rfEs \
+  -p no:cacheprovider --junitxml=<directorio temporal>/junit_suite.xml
+
+Resultado (junit): 904 pruebas, 900 pasan, 0 fallos o errores, 4 omitidas.
+  tests/unit         466 pasan
+  tests/integracion  75 pasan, 1 omitida(s)
+  tests/replica      177 pasan, 3 omitida(s)
+  tests/contrato     160 pasan
+  tests/datos_ml     22 pasan
+
+Módulos del modelo, la calibración, el monitoreo y la política (todas pasan si no se indica otra cosa):
+  test_inferencia: 31 pasan
+  test_onnx: 5 pasan
+  test_calibracion: 15 pasan
+  test_politica: 17 pasan
+  test_monitoreo: 15 pasan
+  test_monitoreo_api: 10 pasan
+  test_no_regresion: 6 pasan
+
+Pruebas nuevas o cambiadas:
+  tests/unit/test_calibracion.py: cada candidato entrenado trae su calibración versionada (SHA-256 junto a su
+    artefacto, ajustada con su validación); su cuantil por grupo es el del script; predecir y evaluar usan esa banda;
+    calibrar=False deja v1 y otros grupos se registran sin cambiar las métricas; --model-id del script no pisa la
+    evidencia del activo ni los archivos del modelo.
+  tests/unit/test_politica.py: antigüedad nunca negativa en el reloj de los datos; creado_en de la sombra en -05:00
+    con la calibración del candidato; la compuerta dice qué calibración midió en cada modelo; el candidato se
+    calibra con los grupos del activo.
+  tests/unit/test_inferencia.py: hiperparámetros explícitos sin cambio de modelo (y el valor de scikit-learn si
+    falta la tasa); frases de la explicación en el mismo orden.
+  tests/integracion/test_monitoreo_api.py: el reentrenamiento siembra su propio historial validado (pasa sola);
+    GET /monitoring/policy presenta los instantes de la sombra en -05:00 y no da días negativos.
+
+Fallidas: ninguna.
+
+Omitidas (a propósito):
+  tests/integracion/test_caida.py::test_sigkill_en_lectura_y_prediccion_y_reserva_vencida: prueba de caída con procesos reales: active con PRUEBA_CAIDA=1 (~2 min)
+  tests/replica/test_integrado.py::test_ciclo_integrado_lee_exactamente_lo_nuevo_y_luego_nada: escribe en la réplica (llegada de datos y ai_frecuencias): REPLICA_PRUEBAS_ESCRITURA=1
+  tests/replica/test_llegada.py::test_trigger_llena_timbradas_segmentos_y_la_lectura_es_exacta: escribe en la réplica como extreme_dba: REPLICA_PRUEBAS_ESCRITURA=1
+  tests/replica/test_llegada.py::test_solape_recupera_la_captura_que_confirma_tarde_exactamente_una_vez: escribe en la réplica como extreme_dba: REPLICA_PRUEBAS_ESCRITURA=1

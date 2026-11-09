@@ -1,0 +1,7 @@
+fecha | filas | segundos | filas/s | pico proceso MB | pico Arrow MB | FK huérfanas
+# corridas del 9-11-2026: 1 = primera carga (venv); 2 = volumen nuevo desde cero (venv); 3 = recarga sobre la réplica ya cargada (venv) con otros procesos pesados del equipo en paralelo; 4 = servicio cargador_replica dentro de compose (imagen de la API, Linux), también con el equipo cargado; 5 = recarga final (venv) que deja la réplica en su estado actual (secuencia de conteo_pasajeros por encima de la muestra)
+2026-11-09T00:42:44-05:00 | 3379899 | 66.13 | 51110 | 1732.7 | 877.2 | 0
+2026-11-09T00:52:12-05:00 | 3379899 | 84.03 | 40223 | 1725.0 | 877.2 | 0
+2026-11-09T01:09:59-05:00 | 3379899 | 154.91 | 21818 | 1986.0 | 877.2 | 0
+2026-11-09T01:18:05-05:00 | 3379899 | 148.95 | 22692 | 1654.6 | 877.2 | 0
+2026-11-09T01:22:35-05:00 | 3379899 | 74.08 | 45625 | 1632.8 | 877.2 | 0

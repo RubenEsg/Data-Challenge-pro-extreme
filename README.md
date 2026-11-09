@@ -7,6 +7,93 @@
 > Un modelo pronostica cuántos pasajeros habrá en cada ruta y hora con una semana de antelación, y un optimizador reparte
 > las salidas: menos en el valle y más en los picos, con casi las mismas horas de bus.
 
+## Guía para el jurado
+
+La especificación v1.5 de Extreme Technologies se revisa en cuatro documentos:
+
+- `MATRIZ_CUMPLIMIENTO.md`: cada requisito (RF, RNF, §4–§15 y los criterios de §16) con su estado y su evidencia.
+- `documentos/mapeo_especificacion.md`: cada frase de §1–§3 y §17–§20 con lo que hicimos, la evidencia y la prueba que
+  lo comprueba, más la respuesta a la pregunta final. Su sección 0 lista los supuestos (S0 a S13) con quién debe
+  validarlos, y su sección 9, las limitaciones declaradas.
+- `api_frecuencias/docs/evidencias/README.md`: índice de todas las evidencias, con qué demuestra cada archivo y cómo se
+  regenera.
+- `documentos/respuesta_pregunta_reto.md`: la respuesta a la pregunta final de la especificación, con sus cifras y su
+  trazabilidad. Sus cifras salen de `api_frecuencias/scripts/respuesta_reto.py`, que corre el ciclo diario con el código
+  de producción y lee cada respuesta como `GET /api/v1/respuesta`; la evidencia está en
+  `api_frecuencias/docs/evidencias/respuesta/`.
+
+### Dónde está cada entregable (§15)
+
+| Código | Entregable | Dónde está |
+|---|---|---|
+| E01 | Documento ejecutivo | `documentos/E01_documento_ejecutivo.pdf` |
+| E02 | Especificación técnica | `documentos/E02_especificacion_tecnica.pdf` |
+| E03 | Código fuente | `api_frecuencias/`: código en `app/`, dependencias en `pyproject.toml`, `requirements.txt` y `requisitos_congelados.txt`, pruebas en `tests/` y reporte de SonarQube en `docs/evidencias/sonarqube/` (`resumen.md`: puerta de calidad condición por condición; se repite con `scripts/sonar_local.py`). El historial está en el repositorio. |
+| E04 | Base de datos | `api_frecuencias/alembic/versions/` (DDL del esquema `ai_frecuencias`, índices y datos semilla de umbrales). El registro de modelos se siembra desde `api_frecuencias/datos/modelos/registro.json`. |
+| E05 | Modelo IA | `api_frecuencias/datos/modelos/hgb_fv2_20250831_s42/` (artefacto y manifiesto con SHA-256). Entrenamiento reproducible con `api_frecuencias/scripts/entrenar.py`; métricas en `api_frecuencias/docs/evidencias/modelo/`. |
+| E06 | Prototipo | API (`api_frecuencias/`) y tablero (`dash_app/`: las pantallas Alertas, Recomendaciones, Operación y Monitoreo, la sección «Modelo activo (API)» de Pronóstico y la tarjeta de Inicio con la respuesta del reto consumen la API). Capturas y recorrido en `api_frecuencias/docs/evidencias/tablero/`. |
+| E07 | Integración PostgreSQL | `api_frecuencias/docs/integracion_postgresql.md` (consultas de solo lectura, marca de agua, mapa de tablas y EXPLAIN), `api_frecuencias/docs/evidencias/replica/` y `api_frecuencias/docs/hallazgos_extreme.md`. |
+| E08 | Pruebas | `api_frecuencias/tests/` (unitarias, integración, contrato, datos/ML, réplica y Testcontainers), `api_frecuencias/k6/` (carga) y `api_frecuencias/docs/evidencias/pruebas/`. Integración continua: `.github/workflows/api_frecuencias.yml` en la raíz del repositorio de entrega (la misma definición está en `api_frecuencias/ci/github_actions_entrega.yml`). Los conteos de la suite, la cobertura y la carga con k6 están en la tabla «Cifras vigentes del backend», más abajo. |
+| E09 | Contenedores | `api_frecuencias/Dockerfile`, `api_frecuencias/docker-compose.yml` (más `docker-compose.replicas.yml` y `docker-compose.integracion.yml`) y `api_frecuencias/.env.example`. |
+| E10 | Documentación | `api_frecuencias/README.md`, `api_frecuencias/docs/openapi.json` (OpenAPI 3.1: 59 rutas y 62 operaciones, cada una con su rol mínimo y sus errores), `api_frecuencias/docs/manual_tecnico.md`, `api_frecuencias/docs/manual_usuario.md`, `api_frecuencias/docs/despliegue.md` y el índice de evidencias `api_frecuencias/docs/evidencias/README.md`. |
+| E11 | Demostración | Video de menos de 5 minutos: `documentos/video/E11_video_demostracion.mp4`, con subtítulos (`.srt`) y guion (`documentos/video/guion.md`); cómo se grabó y se verificó, en `api_frecuencias/docs/evidencias/video/`. Presentación final: `documentos/presentacion_final.pdf` y `documentos/presentacion_final.pptx` (notas del orador en `documentos/notas_orador.txt`). La demostración reproducible está abajo. |
+| E12 | Plan de evolución | `PLAN_EVOLUCION.md` |
+
+### La demostración en cinco comandos
+
+Con Python 3.11 o más reciente y Docker Desktop abierto, desde `api_frecuencias/`:
+
+```
+python -m venv .venv
+.venv\Scripts\python -m pip install -r requirements-dev.txt
+.venv\Scripts\python scripts\verificar_despliegue.py
+copy .env.example .env
+docker compose -p sobusa_api up -d --build
+```
+
+- **`verificar_despliegue.py` (de 15 a 25 minutos).** Levanta una pila aislada desde cero (proyecto `sobusa_limpio`,
+  puertos 8010 y 5440, volúmenes propios) y aplica las migraciones 0001 → 0007. Crea las claves de API y corre el ciclo
+  completo de §14.2 con `scripts/demo_ciclo_api.py`:
+  1. **llegada de información nueva:** carga inicial hasta el 30-08-2025 (49.623 filas), un día nuevo (51 filas) y los
+     días hasta el 30-11-2025 (4.641 filas);
+  2. **lectura incremental:** cada ejecución muestra su marca de agua anterior y la nueva, y la repetición lee 0 filas;
+  3. **evaluación del error** del modelo activo en lo que llegó, con el monitoreo y la decisión de la política;
+  4. **modelo candidato** `hgb_fv2_20250930_s42`, con corte 30-09-2025 y solo los datos ya llegados (la política lo
+     encola sola por periodicidad, y el script espera ese trabajo en vez de pedir otro igual);
+  5. **comparación** en la misma ventana para los dos, 2025-12-01..14, fuera de la muestra del candidato y del activo:
+     WAPE 14,108 % del candidato frente a 13,982 % del activo;
+  6. **decisión:** la compuerta de cuatro criterios lo rechaza porque no mejora al activo (los otros tres se cumplen), y
+     activarlo sin forzar responde 409 `requiere_forzar`. El activo sigue siendo `hgb_fv2_20250831_s42`.
+
+  Después prueba que la API sobrevive a un `docker kill` sin perder ni duplicar datos y lo borra todo al final. Qué
+  muestra cada paso y por qué, con la salida de referencia, está en
+  `api_frecuencias/docs/evidencias/despliegue/demo_esperado.md`. La salida de la corrida en Docker queda en
+  `demo_ciclo_api.txt` de esa misma carpeta, que `verificar_despliegue.py` reescribe en cada corrida, y el arranque
+  desde cero, en `arranque_limpio.txt` («Resultado global: OK»). Como el candidato no queda activo, no hay nada que
+  revertir; la activación y la reversión se prueban aparte en
+  `api_frecuencias/tests/integracion/test_api_integracion.py::test_activacion_controlada_y_reversion` y
+  `api_frecuencias/tests/integracion/test_monitoreo_api.py::test_retador_en_sombra_compuerta_y_reversion`.
+- **`copy` y `docker compose`.** Dejan la API en http://127.0.0.1:8000 para explorarla con Swagger (`/docs`). Si ya hay
+  un `.env`, no lo copie encima: `copy` lo reemplaza. Antes de levantarla, cambie en el `.env` `POSTGRES_PASSWORD` y
+  `SEUDONIMO_SECRETO` y cree una clave como dice `api_frecuencias/README.md` («Inicio rápido»).
+- **El mismo ciclo sin Docker para la API.** Con la API corriendo en el venv (`uvicorn`, ver «Cómo correrla» en
+  `api_frecuencias/README.md`) y una clave de admin en `SOBUSA_API_KEY`:
+  `.venv\Scripts\python scripts\demo_ciclo_api.py --base http://127.0.0.1:8000 --revertir` (por omisión,
+  `--hasta 2025-08-30 --corte 2025-09-30`). Se verificó el 9-11-2026 contra una base de pruebas nueva y una copia
+  temporal de los datos: dos corridas con código 0 (139 s y 125 s, según la carga de la máquina) y la misma salida, con
+  el mismo rechazo del candidato. La referencia está en
+  `api_frecuencias/docs/evidencias/despliegue/demo_esperado.md`.
+
+Para ver el tablero conectado a esa API, desde `dash_app/`:
+
+```
+set SOBUSA_API_URL=http://127.0.0.1:8000
+set SOBUSA_API_KEY=<clave>
+python app.py
+```
+
+y abra http://127.0.0.1:8050. El recorrido por cada pantalla está en `api_frecuencias/docs/manual_usuario.md`.
+
 ## Qué hay en esta entrega
 
 | Archivo o carpeta | Qué es | Cómo se abre |
@@ -15,15 +102,20 @@
 | `entrega_final.html` | **Cuaderno final ejecutado**, en HTML: entrena el modelo, lo evalúa, resuelve el despacho de un día y comprueba 151 cifras. | Doble clic (navegador). |
 | `entrega_final.ipynb` | El mismo cuaderno, con sus salidas. | Jupyter o VS Code. Para volver a ejecutarlo hace falta el proyecto completo (abajo). |
 | `dash_app/` | **Laboratorio del modelo** (Dash, Python): el pronóstico y el optimizador corren en vivo. | En Windows, doble clic en `dash_app/iniciar_dash.bat`; en cualquier sistema, `python app.py` (abajo). |
-| `app_sobusa/app.html` | **App «Sobusa Despacho»**: nueve pantallas con todo el proyecto, la consola de despacho y la vista 3D. *Solo en el ZIP completo.* | Doble clic, en Edge o Chrome, sin internet. |
+| `app_sobusa/app.html` | **App «Sobusa Despacho»**: nueve pantallas con todo el proyecto, la repetición de un día de 2025 en la consola (sin mandos sobre los buses) y la vista 3D. *Solo en el ZIP completo (`Entrega_final_Sobusa.zip`); no viene en el ZIP ligero.* | Doble clic, en Edge o Chrome, sin internet. |
 | `api_frecuencias/` | **Backend del reto** (FastAPI + PostgreSQL 14): ejecución incremental, pronóstico a 30/60/120 min, recomendación de frecuencia y flota, alertas y registro de modelos. | Con Docker, dos comandos (abajo). |
-| `MATRIZ_CUMPLIMIENTO.md` · `PLAN_EVOLUCION.md` | Cada requisito de la especificación v1.5 con dónde se cumple y su estado; plan de integración, escalabilidad, costos y riesgos. | Cualquier visor de Markdown. |
+| `MATRIZ_CUMPLIMIENTO.md` · `PLAN_EVOLUCION.md` | Cada requisito de la especificación v1.5 con dónde se cumple y su estado; plan de integración, escalabilidad, costos, riesgos, hoja de ruta y adopción. | Cualquier visor de Markdown. |
+| `documentos/` | Documento ejecutivo (E01), especificación técnica (E02), presentación final y video de E11 (`video/`), la respuesta a la pregunta del reto (`respuesta_pregunta_reto.md`) y el mapeo de §1–§3 y §17–§20 de la especificación a la evidencia (`mapeo_especificacion.md`). | Lector de PDF, reproductor de video o visor de Markdown. |
 | `informe/` | Fuentes LaTeX del informe, figuras y `compilar.py`. | `python informe/compilar.py` (usa Tectonic). |
 | `requirements_cuaderno.txt` | Versiones exactas con que se ejecutó el cuaderno. | `pip install -r requirements_cuaderno.txt` |
 
-**Orden sugerido:** el informe (10 minutos para el resumen, las tablas 1 y 3 y las recomendaciones), después el laboratorio
-Dash para ver el modelo funcionando y la app para recorrer el proyecto entero. El cuaderno es la prueba técnica: cada cifra
-se calcula ahí mismo o se lee de su archivo de resultados y se contrasta.
+**Orden sugerido:**
+
+1. Lo que pide la especificación: `MATRIZ_CUMPLIMIENTO.md` y `documentos/mapeo_especificacion.md`.
+2. El producto: E01 y E02 (`documentos/`), la API con la demostración de arriba y el tablero (`dash_app/`).
+3. La parte académica: el informe técnico (10 minutos para el resumen, las tablas 1 y 3 y las recomendaciones) y el
+   cuaderno, que es su prueba técnica: cada cifra se calcula ahí mismo o se lee de su archivo de resultados y se
+   contrasta. La app HTML recorre el proyecto entero.
 
 ## Cómo correr el laboratorio Dash
 
@@ -44,10 +136,20 @@ python app.py
 ```
 
 Abra **http://127.0.0.1:8050**. No necesita internet ni la base de datos (solo el mapa de calles de la pantalla Despacho se carga de internet): usa los 2,3 MB de `dash_app/datos/`. El
-solucionador CBC viene dentro de PuLP. Las seis pantallas: Inicio, Pronóstico (ruta, día y modelo de 2025), **Horario en
-vivo** (el optimizador D5 resuelto en el momento, con los costos, la elasticidad y el intervalo que usted elija), El
-modelo, Qué gana Sobusa y App completa e informe (abre `app_sobusa/app.html`, este PDF y el cuaderno). Detalle en
-`dash_app/README.md`.
+solucionador CBC viene dentro de PuLP. Las pantallas del laboratorio son:
+
+- Inicio;
+- Pronóstico (con la API, los pronósticos del modelo activo; sin ella, ruta, día y experimento del informe en 2025);
+- **Horario en vivo** (el optimizador D5 resuelto en el momento, con los costos, la elasticidad y el intervalo que usted
+  elija);
+- Despacho en vivo (la repetición de un día de 2025 con el plan; no tiene mandos sobre los buses, como pide §3.2);
+- El modelo (los experimentos del informe académico, no el modelo desplegado en la API);
+- Resultado (qué gana Sobusa);
+- Enlaces (abre el informe, el cuaderno y, si está la carpeta `app_sobusa/` del ZIP completo, la app HTML).
+
+Las pantallas **Alertas, Recomendaciones, Operación y Monitoreo**, la sección «Modelo activo (API)» de Pronóstico y la
+tarjeta de Inicio con la respuesta a la pregunta del reto consumen la API del reto. Para usarlas, levante la API (abajo) y defina `SOBUSA_API_URL` y
+`SOBUSA_API_KEY`. Detalle en `dash_app/README.md` y en `api_frecuencias/docs/manual_usuario.md`.
 
 ## Backend del reto (FastAPI + PostgreSQL)
 
@@ -59,26 +161,90 @@ todo en su propio esquema `ai_frecuencias`; por omisión lee los datos del reto 
 escribe en la base compartida. Con Docker Desktop abierto, desde `api_frecuencias/`:
 
 ```
-copy .env.example .env               (y cambie POSTGRES_PASSWORD; en macOS o Linux: cp)
-docker compose up -d --build
+copy .env.example .env               (cambie POSTGRES_PASSWORD y SEUDONIMO_SECRETO; en macOS o Linux: cp)
+python scripts\crear_api_key.py --rol admin --usuario demo      (pegue en API_KEYS del .env la entrada con el hash)
+docker compose -p sobusa_api up -d --build
 ```
 
-Swagger queda en **http://localhost:8000/docs**. Detalle, endpoints y el ciclo de la demostración en
-`api_frecuencias/README.md`; estado de cada requisito en `MATRIZ_CUMPLIMIENTO.md`.
+Swagger queda en **http://localhost:8000/docs**, y cada petición a `/api/v1` lleva la cabecera `X-API-Key` con la clave
+que imprimió el segundo comando. Inicio rápido, tabla de endpoints y ciclo de la demostración en
+`api_frecuencias/README.md`; manuales en `api_frecuencias/docs/`; estado de cada requisito en `MATRIZ_CUMPLIMIENTO.md`.
+
+Cifras vigentes del backend, cada una con su archivo en `api_frecuencias/docs/evidencias/`:
+
+| Qué | Resultado | Archivo |
+|---|---|---|
+| Modelo activo `hgb_fv2_20250831_s42` en la prueba reservada (nov.–dic. 2025) | WAPE 14,77 % (IC95 13,10–16,87) frente a 21,18 % (16,61–26,79) de la regla manual B1 | `modelo/evaluacion_modelo.md` |
+| Banda P10–P90 con la calibración v2 por bloque horario | Cobertura de 77,82 % (v1: 77,88 %) con un ancho medio de 303,4 pasajeros (v1: 312,9) | `modelo/calibracion_condicional.md` |
+| Volumen de alertas observadas (15-09 a 31-12-2025, 324 días-ruta) | 1,238 por ruta y día en total, con la ALT-002 observada (0,691) y la ruptura de RF-009 (0,012); las que ya medía la versión anterior (ALT-005 a ALT-009) bajan a 0,534, frente a 6,08 con las reglas anteriores | `alertas/backtest_alertas.md` |
+| Volumen de alertas de pronóstico (por hora, mismo periodo) | ALT-001 0,435, ALT-002 0,315, ALT-003 0,380 y ALT-004 0,031 por ruta y día (1,161); con las observadas, 2,399 por ruta y día | `alertas/backtest_alertas_pronostico.md` |
+| Revisión doble de 96 alertas | Kappa de 0,943 entre los dos revisores (automatizados) antes de conciliar; precisión reponderada de 0,839 (intervalo 95 %: 0,757–0,882). Falta la validación del área operativa | `alertas/revision_doble/conciliacion.json` |
+| Ciclo diario completo (con plan del día, foto de la respuesta y serie de la ruptura) | Carga inicial en 24,1 s y un día nuevo en 21,4 s | `rendimiento/ciclo_final.md` |
+| Pruebas | Suite completa final: 1.060 casos (567 unitarias, 106 de integración, 185 de réplica, 178 de contrato y 24 de datos/ML), 0 fallas, 0 errores y 5 omitidas a propósito (las que se activan con `PRUEBA_CAIDA=1`, `PRUEBA_PLANIFICADOR=1` o `REPLICA_PRUEBAS_ESCRITURA=1`); cobertura de `app/` (con `motor_d5/`) de 94,27 % (10.566 de 11.208 líneas) | `pruebas/suite_final.xml`, `pruebas/coverage_final.xml` (la misma corrida que importa SonarQube) |
+| Carga con k6 | Consultas paginadas: p95 de 451,3 ms con 0 % de errores (umbral: 2 s). Con un año de resultados sembrado (`scripts/sembrar_volumen.py`) y 50 usuarios: p95 de 627,5 ms y 0 % de errores. `/segmentos/estadisticas` pasa de 2 s (8,8 s en frío con `k6/en_frio.js` y 11,9 s en caliente; limitación declarada) | `rendimiento.txt`, `pruebas/k6_volumen.txt` |
+| Calidad de código | Puerta de SonarQube «Reto Sobusa v1.5» **aprobada (OK)** en el análisis del 9-11-2026, 12:49, sobre todo el código: 0 vulnerabilidades, 0 bugs, 0 hallazgos bloqueantes y 0 críticos (umbral: 0), duplicación de 0,0 % (umbral: 3 %) y cobertura de 94,3 % (umbral: 85 %); 1 hallazgo de mantenibilidad aceptado con su justificación (la copia literal del solver D5, app/servicios/motor_d5/milp.py) | `sonarqube/quality_gate.json`, `sonarqube/resumen.md` |
 
 ## Las cifras principales
 
-| | Hoy (regla manual) | Con el modelo |
+### El modelo del producto (la API del reto)
+
+El modelo que corre en la API, y que evalúan E01, E02 y la presentación, es `hgb_fv2_20250831_s42`: gradient boosting
+de scikit-learn con pérdida Poisson, cuantiles P10 y P90 y banda calibrada. Pronostica los pasajeros de cada ruta y
+hora.
+
+| Ventana de evaluación | Regla manual B1 | Modelo activo `hgb_fv2_20250831_s42` | Archivo |
+|---|---|---|---|
+| Prueba reservada, nov.–dic. 2025 (3.111 franjas de ruta y hora) | 21,18 % (IC95 16,61–26,79) | **14,77 %** (IC95 13,10–16,87) | `api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.md` |
+| Todo 2025, con el modelo congelado al 31-12-2024 (18.615 franjas) | 20,04 % | 14,48 % (IC95 13,78–15,28) | el mismo archivo, sección «Robustez» |
+
+Sobre la prueba reservada, con honestidad: la consultamos al elegir las variables fv2 frente a fv1
+(`api_frecuencias/docs/evidencias/modelo/decision_fv2.md`), así que ya no es una prueba «nunca vista». El criterio de
+selección fue la validación (sep.–oct. 2025) y los backtests con modelos congelados en 2024 y 2025. La cifra de
+nov.–dic. queda como reporte informativo, y pedimos a Extreme un periodo de 2026 como prueba limpia
+(`documentos/mapeo_especificacion.md`, sección 6).
+
+### Los experimentos del informe académico
+
+El informe técnico compara 51 modelos. Sus cifras usan otro protocolo, así que no se comparan uno a uno con las del
+producto:
+
+| WAPE a 7 días de antelación, todo 2025, reentrenando cada mes (18.615 franjas) | Resultado |
+|---|---|
+| Regla manual B1 (promedio de las ocho semanas anteriores) | 20,04 % |
+| Experimento 1 (primer LightGBM) | 14,40 % |
+| Experimento 11 (LightGBM mejorado) | 13,94 % |
+| Experimento 12 (híbrido con el modelo fundacional Chronos-2) | 13,62 % |
+
+Por qué difieren de la cifra del producto:
+
+- **La ventana.** Los experimentos miden todo 2025; la prueba del producto mide solo noviembre y diciembre, con
+  festivos y Navidad, donde también la regla manual empeora (21,18 % frente a 20,04 %).
+- **El protocolo.** Los experimentos se reentrenan cada mes (doce pliegues con origen móvil). El producto es un solo
+  modelo congelado en su fecha de corte, como funcionaría en producción hasta que la compuerta apruebe un retador.
+- **El horizonte.** Los experimentos pronostican cada franja con 7 días de antelación para armar el horario semanal. El
+  producto pronostica la hora con variables de 7 o más días de antigüedad y un ajuste intradía para las ventanas de 30,
+  60 y 120 minutos (`api_frecuencias/docs/evidencias/modelo/horizontes.json`).
+- **La métrica comparable.** En la misma ventana (todo 2025) y frente a la misma regla manual (20,04 %), el modelo del
+  producto congelado da 14,48 %, entre el experimento 1 y el experimento 11.
+
+Los experimentos 11 y 12 no se despliegan. El 12 depende de un modelo fundacional preentrenado (Chronos-2), pesado de
+descargar y de correr sin GPU. El producto prefiere un modelo reproducible solo con scikit-learn, con paridad ONNX y
+banda calibrada (E02, sección «Decisiones técnicas»). El tablero los muestra como experimentos del informe, aparte del
+modelo activo de la API.
+
+### El plan anual de 2025 del informe
+
+| | Hoy (regla manual) | Con el plan del informe |
 |---|---|---|
-| Error del pronóstico a 7 días (WAPE, 2025) | 20,04 % | 13,94 % modelo final (E11) · **13,62 % híbrido (E12), recomendado** |
 | Salidas válidas por día (tres rutas) | 460 | 451 |
 | Horas de bus por día | 1.732 | 1.723 (−0,5 %) |
 | Espera media | 4,43 min | 4,30 min |
 | Pasajeros por día sobre la capacidad (50 por bus) | 317 | 267 |
 
 El plan que reasigna ahorra poco en operación (+501 M COP al año); lo que decide si paga es cuántos pasajeros se pierden
-donde se quitan salidas y cuántos se ganan donde se ponen. Con la elasticidad medida (β = 0,70, rango 0,55–0,90) el saldo
-anual va de **−2.825 M COP** (contando solo los pasajeros perdidos: 2.864 al día en riesgo) a **+1.600 M COP** (contando
+donde se quitan salidas y cuántos se ganan donde se ponen. Con la elasticidad estimada por observación (β ≈ 0,70, rango
+0,55–0,90, sin validar en campo; el plan del día de la API usa 0,5 por prudencia y la sensibilidad está en
+`api_frecuencias/docs/evidencias/optimizacion/sensibilidad.md`) el saldo anual va de **−2.825 M COP** (contando solo los pasajeros perdidos: 2.864 al día en riesgo) a **+1.600 M COP** (contando
 también los ganados: +946 netos al día). Por eso la recomendación incluye un **piloto de ocho semanas** en CRA 54 y CL 72
 que mide β con días sorteados (potencia 0,89; arriesga 22.904 pasajeros, el 0,30 % del año de CRA 54).
 
@@ -92,32 +258,41 @@ reasignar.
 
 ## Lo que hay que saber
 
-- El plan anual de 2025 se calculó con el pronóstico del primer modelo (E1, 14,40 %), no con el final ni con el híbrido:
-  el optimizador se construyó antes. Con el pronóstico final sería algo mejor; el laboratorio Dash permite planear con
-  cualquiera de los cuatro pronósticos.
+- El plan anual de 2025 del informe se calculó con el pronóstico del experimento 1 (14,40 %), no con el del
+  experimento 11 ni con el híbrido del experimento 12: el optimizador se construyó antes. Con un pronóstico mejor sería
+  algo mejor; el laboratorio Dash permite planear con cualquiera de los cuatro pronósticos. El plan del día de la API,
+  en cambio, usa el pronóstico horario del modelo activo (`api_frecuencias/docs/manual_tecnico.md`, sección 7).
 - El modelo persona a persona de la vista 3D, que no limita el cupo de cada bus, da saldos más extremos en las dos
   contabilidades (−3.212 M COP contando solo los perdidos y +2.312 contando también los ganados, en los 353 días de 2025
   con GPS, frente a −2.825 y +1.600 del optimizador en los 365 días) y muestra dónde el plan se queda corto: deja 2.742
-  personas por día por encima de la capacidad (388
-  con el horario real). Hace falta una restricción de cupo por bus antes de llevar el plan a la calle.
+  personas por día por encima de la capacidad (388 con el horario real). Hace falta una restricción de cupo por bus
+  antes de llevar el plan a la calle. La vista 3D está en la app HTML del ZIP completo.
 - El backtest en tiempo real (13 de octubre de 2026) y el modelo persona a persona no tuvieron revisor independiente.
 - Los pasajeros que ganan los buses añadidos no se han medido; de ellos depende el signo del saldo. Eso mide el piloto.
 
 ## Reproducir
 
-Todo se reproduce sin consultar la base del reto (compartida y de solo lectura): los datos se exportaron una vez a Parquet
-(`datos/`, que no viaja en esta entrega por su tamaño y se regenera con `scripts/exportar_tablas.py`). El proyecto completo
-está en el repositorio privado del equipo en GitHub; ahí:
+Todo se reproduce sin consultar la base del reto, que es compartida y de solo lectura: los datos se exportaron una vez a
+Parquet.
 
-```
-cd EntregaFinal
-pip install -r requirements_cuaderno.txt
-python -m nbconvert --to notebook --execute --inplace entrega_final.ipynb      (unos 20 s)
-python dash_app/preparar_datos.py                                              (vuelve a copiar los datos del Dash)
-python informe/compilar.py                                                     (informe en PDF)
-python empaquetar_entrega.py                                                   (este ZIP)
-```
+**Desde este repositorio**, sin nada más:
 
-Ninguna cifra está escrita a mano: `app/generar_datos_app.py` lee 202 cifras de los resultados, cada una con su archivo y su
-clave (`app/DATOS.md`), y `app/verificar_datos_app.py` las comprueba; el cuaderno contrasta 151 de ellas al ejecutarse.
-Semilla 42 en todo el proyecto. Ningún archivo de la entrega trae credenciales ni datos personales de conductores.
+- la API, sus pruebas y la demostración del ciclo: «La demostración en cinco comandos», arriba, y
+  `api_frecuencias/docs/manual_tecnico.md`, sección 13 (la API trae sus datos derivados en `api_frecuencias/datos/`);
+- el laboratorio Dash, con los datos que trae `dash_app/datos/`;
+- los documentos de entrega, con `python documentos/compilar.py`, y el informe, con `python informe/compilar.py` (los dos
+  usan Tectonic).
+
+**Solo en el proyecto completo** (el repositorio privado del equipo, que trae los experimentos y los datos exportados):
+
+- volver a ejecutar el cuaderno (`python -m nbconvert --to notebook --execute --inplace entrega_final.ipynb`, con
+  `requirements_cuaderno.txt`), porque lee los resultados de los experimentos;
+- volver a copiar los datos del laboratorio (`dash_app/preparar_datos.py`, que lee la carpeta `experimentos/`);
+- volver a exportar las tablas del reto a Parquet (`scripts/exportar_tablas.py`, la única lectura de la base del reto);
+- regenerar y comprobar las 202 cifras de la app HTML (`app/generar_datos_app.py`, `app/DATOS.md` y
+  `app/verificar_datos_app.py`; en el ZIP completo viajan copias en `app_sobusa/app/`, pero necesitan los resultados
+  del proyecto para correr).
+
+Ninguna cifra está escrita a mano: cada una se lee de su archivo de resultados, y el cuaderno contrasta 151 de ellas al
+ejecutarse. Semilla 42 en todo el proyecto. Ningún archivo de la entrega trae credenciales ni datos personales de
+conductores.

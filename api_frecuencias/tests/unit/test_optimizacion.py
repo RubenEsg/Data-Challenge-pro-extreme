@@ -157,3 +157,50 @@ def test_plan_dia_d5_errores():
         O.plan_dia_d5("CL 72", "2025-03-10", modelo="ZZ")
     with pytest.raises(ValueError):
         O.plan_dia_d5("CL 72", "2030-01-01")
+
+
+# ------------------------------------------------------------------ festivos entre semana
+def test_festivo_entre_semana_usa_la_programacion_de_domingo_o_festivo():
+    """El 17-nov-2025 es lunes festivo (Independencia de Cartagena): la programación de comparación, el contexto de la
+    franja y el factor de carga usan los parámetros de domingo o festivo, el mismo tipo de día del plan D5."""
+    from datetime import date
+
+    festivo, domingo, lunes = date(2025, 11, 17), date(2025, 11, 16), date(2025, 11, 10)
+    assert O.es_festivo(festivo) and not O.es_festivo(lunes)
+    assert O.tipo_dia_operacion(festivo) == 2 and O.tipo_dia_operacion(lunes) == 0
+    assert O.tipo_dia_operacion(None) == 0
+    assert O._intervalos_programados("SILENCIO", festivo) == O._intervalos_programados("SILENCIO", domingo)
+    assert O._intervalos_programados("SILENCIO", festivo) != O._intervalos_programados("SILENCIO", lunes)
+    ctx = O.contexto_franja("SILENCIO", festivo, 7)
+    assert ctx["tipo_dia"] == "Domingo/festivo" and ctx == O.contexto_franja("SILENCIO", domingo, 7)
+    assert O.factor_carga_franja("CRA 54", festivo, 11) == O.factor_carga_franja("CRA 54", domingo, 11)
+    plan = O.resumen_plan_d5("SILENCIO", festivo)
+    assert plan["tipo_dia"] == "Domingo/festivo"
+    programado = O._intervalos_programados("SILENCIO", domingo)
+    for h in plan["horas"]:
+        if h["frecuencia_actual_min"] is not None:
+            assert h["frecuencia_actual_min"] == round(programado[h["hora"]], 2)
+
+
+# ------------------------------------------------------------------ headway mínimo gobernado en el plan D5
+def test_plan_d5_respeta_el_headway_minimo_gobernado():
+    """§10.2 «sujeto a headway mínimo»: D5 admitía hasta 35 salidas por hora donde la operación ya las tuvo; con el
+    tope ninguna hora pasa de floor(minutos / headway mínimo) y la hora que la demanda pedía más queda marcada."""
+    plan = O.resumen_plan_d5("CRA 54", "2025-11-19")          # 5 h: D5 sin tope pedía 34 salidas (1,76 min)
+    assert plan["headway_minimo_min"] == 2.0 and plan["estado_solver"] == "Optimal"
+    for h in plan["horas"]:
+        assert h["salidas"] <= h["maximo_salidas_headway"]
+        assert h["maximo_salidas_headway"] >= math.floor(h["minutos_operados"] / 2.0 + 1e-9)
+        if h["salidas"] >= 2:
+            assert h["headway_min"] >= 2.0 - 0.01
+    cinco = next(h for h in plan["horas"] if h["hora"] == 5)
+    assert cinco["limitada_por_headway_minimo"] and cinco["salidas_sin_tope"] > cinco["maximo_salidas_headway"]
+    assert cinco["salidas"] == cinco["maximo_salidas_headway"] == 30 and cinco["headway_min"] == 2.0
+    assert plan["horas_limitadas_por_headway_minimo"] == [5]
+    # un mínimo gobernado más laxo deja el plan de D5 tal cual (sin horas limitadas)
+    laxo = O.resumen_plan_d5("CRA 54", "2025-11-19", headway_min=1.5)
+    assert laxo["horas_limitadas_por_headway_minimo"] == []
+    assert next(h for h in laxo["horas"] if h["hora"] == 5)["salidas"] == cinco["salidas_sin_tope"]
+    # sin horas por encima del tope, el plan es exactamente el de D5
+    plan_cl72 = O.resumen_plan_d5("CL 72", "2025-11-19")
+    assert all(h["salidas"] == h["salidas_sin_tope"] for h in plan_cl72["horas"])

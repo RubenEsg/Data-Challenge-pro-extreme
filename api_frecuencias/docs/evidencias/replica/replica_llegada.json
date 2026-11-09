@@ -1,0 +1,412 @@
+{
+ "inicio": "2026-11-09T06:29:49.007231-05:00",
+ "rol_escritura": "extreme_dba",
+ "ciclo_api": {
+  "preparacion": {
+   "reinicio": {
+    "objetos_borrados": 18
+   },
+   "alembic_upgrade_head_como_escritor_ia": true,
+   "alembic_segundos": 2.23,
+   "alembic_salida": [
+    "INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Esquema ai_frecuencias: registro de modelos, predicciones, recomendaciones, alertas,",
+    "INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Cola de trabajos en PostgreSQL para N réplicas (RNF-001, RNF-004, RNF-005, §7.1).",
+    "INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Estructura completa de la alerta (especificación v1.5, §5.3, §8.1, §9.4 y §18) y umbrales afinados (§5.1).",
+    "INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Monitoreo del modelo, foto de variables particionada y trazabilidad (§9.2, §9.4, §9.5, §11.2, §8.1, RNF-011).",
+    "INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Pesos y costos de la función objetivo de §10.2 versionados desde el inicio (§5.1 «regla de gobierno»).",
+    "INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Dimensiones de §8.3, trazabilidad de la calidad, llaves naturales, aprobación de umbrales y respuesta del reto."
+   ]
+  },
+  "corridas": [
+   {
+    "corrida": "1_carga_inicial_antes_de_la_llegada",
+    "http": 202,
+    "segundos": 64.04,
+    "estado": "ok",
+    "filas_leidas": 2757,
+    "filas_validas": 2757,
+    "marca_agua_anterior": null,
+    "marca_agua_nueva": "2026-08-14T00:52:39.363697-05:00",
+    "lectura": {
+     "desde": "1969-12-31T19:00:00-05:00",
+     "tabla": "demanda_segmentos",
+     "leidas": 2757,
+     "nuevas": 2757,
+     "tardias": 0,
+     "truncada": false,
+     "entregadas": 2757,
+     "solape_min": 15,
+     "marca_nueva": "2026-08-14T00:52:39.363697-05:00",
+     "modificadas": 0,
+     "huellas_estado": 1262,
+     "marca_anterior": "1969-12-31T19:00:00-05:00",
+     "duplicadas_llave": 0,
+     "repetidas_solape": 0
+    },
+    "incorporadas_historico": 2757,
+    "predicciones": 9,
+    "recomendaciones": 9,
+    "alertas_nuevas": 13,
+    "nota": null,
+    "errores_calidad": {},
+    "fallos": [],
+    "mensaje": "Terminada"
+   },
+   {
+    "corrida": "2_despues_de_la_llegada",
+    "http": 202,
+    "segundos": 17.99,
+    "estado": "ok",
+    "filas_leidas": 1,
+    "filas_validas": 1,
+    "marca_agua_anterior": "2026-08-14T00:52:39.363697-05:00",
+    "marca_agua_nueva": "2026-11-09T06:31:59.366894-05:00",
+    "lectura": {
+     "desde": "2026-08-14T00:37:39.363697-05:00",
+     "tabla": "demanda_segmentos",
+     "leidas": 1263,
+     "nuevas": 1,
+     "tardias": 0,
+     "truncada": false,
+     "entregadas": 1,
+     "solape_min": 15,
+     "marca_nueva": "2026-11-09T06:31:59.366894-05:00",
+     "modificadas": 0,
+     "huellas_estado": 1,
+     "marca_anterior": "2026-08-14T00:52:39.363697-05:00",
+     "duplicadas_llave": 0,
+     "repetidas_solape": 1262
+    },
+    "incorporadas_historico": 1,
+    "predicciones": 9,
+    "recomendaciones": 9,
+    "alertas_nuevas": 7,
+    "nota": null,
+    "errores_calidad": {
+     "oportunidad": 1
+    },
+    "fallos": [],
+    "mensaje": "Terminada"
+   },
+   {
+    "corrida": "3_sin_datos_nuevos",
+    "http": 202,
+    "segundos": 2.33,
+    "estado": "ok",
+    "filas_leidas": 0,
+    "filas_validas": 0,
+    "marca_agua_anterior": "2026-11-09T06:31:59.366894-05:00",
+    "marca_agua_nueva": "2026-11-09T06:31:59.366894-05:00",
+    "lectura": {
+     "desde": "2026-11-09T06:16:59.366894-05:00",
+     "tabla": "demanda_segmentos",
+     "leidas": 1,
+     "nuevas": 0,
+     "tardias": 0,
+     "truncada": false,
+     "entregadas": 0,
+     "solape_min": 15,
+     "marca_nueva": "2026-11-09T06:31:59.366894-05:00",
+     "modificadas": 0,
+     "huellas_estado": 1,
+     "marca_anterior": "2026-11-09T06:31:59.366894-05:00",
+     "duplicadas_llave": 0,
+     "repetidas_solape": 1
+    },
+    "incorporadas_historico": 0,
+    "predicciones": 0,
+    "recomendaciones": 0,
+    "alertas_nuevas": 0,
+    "nota": "Sin datos nuevos desde la marca de agua: no se reprocesa el histórico.",
+    "errores_calidad": {},
+    "fallos": [],
+    "mensaje": "Terminada"
+   }
+  ]
+ },
+ "viajes": [
+  5141355,
+  5141356,
+  5141357
+ ],
+ "t0": "2026-11-09T06:29:49.189851-05:00",
+ "antes": {
+  "timbradas_segmentos": {
+   "filas": 2769692,
+   "max_marca": "2026-08-14T00:52:39.363697"
+  },
+  "timbradas_anio": {
+   "filas": 30913,
+   "max_marca": "2026-08-13T00:59:29.480726"
+  },
+  "timbradas_anio_zonas": {
+   "filas": 0,
+   "max_marca": null
+  },
+  "timbradas_consolidado": {
+   "filas": 10731,
+   "max_marca": "2026-08-14T11:29:05.057003"
+  },
+  "timbradas_consolidado_zonas": {
+   "filas": 0,
+   "max_marca": null
+  },
+  "timbradas_segmentos_anio": {
+   "filas": 0,
+   "max_marca": null
+  },
+  "timbradas_segmentos_consolidado": {
+   "filas": 0,
+   "max_marca": null
+  }
+ },
+ "llegada": {
+  "filas": 584,
+  "segundos": 89.6,
+  "ms_por_fila": 153.4,
+  "por_viaje": {
+   "5141355": {
+    "filas": 216,
+    "segundos": 35.76
+   },
+   "5141356": {
+    "filas": 172,
+    "segundos": 24.62
+   },
+   "5141357": {
+    "filas": 196,
+    "segundos": 29.21
+   }
+  }
+ },
+ "liquidacion": [
+  {
+   "viaje": 5141355,
+   "resultado": true,
+   "segundos": 0.682
+  },
+  {
+   "viaje": 5141356,
+   "resultado": true,
+   "segundos": 0.548
+  },
+  {
+   "viaje": 5141357,
+   "resultado": true,
+   "segundos": 0.517
+  }
+ ],
+ "consolidacion": {
+  "resultado": true,
+  "segundos": 0.664,
+  "filas": 10731,
+  "reselladas_misma_huella": 2779,
+  "cambiadas_contenido": 7952,
+  "nuevas": 0
+ },
+ "h7_resellado_visto_por_lector_ia": {
+  "leidas": 10731,
+  "entregadas": 7952,
+  "modificadas": 7952,
+  "nuevas": 0,
+  "repetidas_solape": 2779,
+  "marca_anterior": "2026-08-14T11:29:05.057003-05:00",
+  "marca_nueva": "2026-11-09T06:32:30.669494-05:00"
+ },
+ "despues": {
+  "timbradas_segmentos": {
+   "filas": 2769920,
+   "max_marca": "2026-11-09T06:31:59.366894"
+  },
+  "timbradas_anio": {
+   "filas": 30913,
+   "max_marca": "2026-11-09T06:32:29.815787"
+  },
+  "timbradas_anio_zonas": {
+   "filas": 0,
+   "max_marca": null
+  },
+  "timbradas_consolidado": {
+   "filas": 10731,
+   "max_marca": "2026-11-09T06:32:30.669494"
+  },
+  "timbradas_consolidado_zonas": {
+   "filas": 0,
+   "max_marca": null
+  },
+  "timbradas_segmentos_anio": {
+   "filas": 162,
+   "max_marca": "2026-11-09T06:32:29.815787"
+  },
+  "timbradas_segmentos_consolidado": {
+   "filas": 162,
+   "max_marca": "2026-11-09T06:32:30.669494"
+  }
+ },
+ "filas_con_marca_posterior_a_t0": {
+  "timbradas_segmentos": 228,
+  "timbradas_anio": 2,
+  "timbradas_anio_zonas": 0,
+  "timbradas_consolidado": 10731,
+  "timbradas_consolidado_zonas": 0,
+  "timbradas_segmentos_anio": 162,
+  "timbradas_segmentos_consolidado": 162
+ },
+ "equivalencia_trigger_vs_exportacion": {
+  "pares_exportacion": 223,
+  "pares_trigger": 223,
+  "pares_comunes": 223,
+  "pares_iguales": 223,
+  "porcentaje_iguales": 100.0,
+  "subidas_export": 201,
+  "subidas_trigger": 201,
+  "bajadas_export": 209,
+  "bajadas_trigger": 209
+ },
+ "lecturas_lector_ia": {
+  "demanda_segmentos": {
+   "primera": {
+    "leidas": 1,
+    "entregadas": 1,
+    "nuevas": 1,
+    "tardias": 0,
+    "modificadas": 0,
+    "repetidas_solape": 0,
+    "marca_nueva": "2026-11-09T06:31:59.366894-05:00"
+   },
+   "segunda": {
+    "leidas": 1,
+    "entregadas": 0,
+    "repetidas_solape": 1
+   }
+  },
+  "timbradas_segmentos": {
+   "primera": {
+    "leidas": 228,
+    "entregadas": 228,
+    "nuevas": 228,
+    "tardias": 0,
+    "modificadas": 0,
+    "repetidas_solape": 0,
+    "marca_nueva": "2026-11-09T06:31:59.366894-05:00"
+   },
+   "segunda": {
+    "leidas": 228,
+    "entregadas": 0,
+    "repetidas_solape": 228
+   }
+  },
+  "timbradas_anio": {
+   "primera": {
+    "leidas": 2,
+    "entregadas": 2,
+    "nuevas": 2,
+    "tardias": 0,
+    "modificadas": 0,
+    "repetidas_solape": 0,
+    "marca_nueva": "2026-11-09T06:32:29.815787-05:00"
+   },
+   "segunda": {
+    "leidas": 2,
+    "entregadas": 0,
+    "repetidas_solape": 2
+   }
+  },
+  "timbradas_consolidado": {
+   "primera": {
+    "leidas": 10731,
+    "entregadas": 10731,
+    "nuevas": 10731,
+    "tardias": 0,
+    "modificadas": 0,
+    "repetidas_solape": 0,
+    "marca_nueva": "2026-11-09T06:32:30.669494-05:00"
+   },
+   "segunda": {
+    "leidas": 10731,
+    "entregadas": 0,
+    "repetidas_solape": 10731
+   }
+  },
+  "timbradas_segmentos_anio": {
+   "primera": {
+    "leidas": 162,
+    "entregadas": 162,
+    "nuevas": 162,
+    "tardias": 0,
+    "modificadas": 0,
+    "repetidas_solape": 0,
+    "marca_nueva": "2026-11-09T06:32:29.815787-05:00"
+   },
+   "segunda": {
+    "leidas": 162,
+    "entregadas": 0,
+    "repetidas_solape": 162
+   }
+  },
+  "timbradas_segmentos_consolidado": {
+   "primera": {
+    "leidas": 162,
+    "entregadas": 162,
+    "nuevas": 162,
+    "tardias": 0,
+    "modificadas": 0,
+    "repetidas_solape": 0,
+    "marca_nueva": "2026-11-09T06:32:30.669494-05:00"
+   },
+   "segunda": {
+    "leidas": 162,
+    "entregadas": 0,
+    "repetidas_solape": 162
+   }
+  }
+ },
+ "tablas_de_escritor_ia_por_esquema": {
+  "ai_frecuencias": 17
+ },
+ "restauracion": {
+  "timbradas_segmentos_borradas": 228,
+  "conteo_pasajeros_borradas": 584,
+  "tablas_restauradas": [
+   "timbradas_anio",
+   "timbradas_anio_trazabilidad",
+   "timbradas_anio_zonas",
+   "timbradas_anio_zonas_trazabilidad",
+   "timbradas_consolidado",
+   "timbradas_consolidado_zonas",
+   "timbradas_segmentos_anio",
+   "timbradas_segmentos_anio_trazabilidad",
+   "timbradas_segmentos_consolidado"
+  ]
+ },
+ "tras_restaurar": {
+  "timbradas_segmentos": {
+   "filas": 2769692,
+   "max_marca": "2026-08-14T00:52:39.363697"
+  },
+  "timbradas_anio": {
+   "filas": 30913,
+   "max_marca": "2026-08-13T00:59:29.480726"
+  },
+  "timbradas_anio_zonas": {
+   "filas": 0,
+   "max_marca": null
+  },
+  "timbradas_consolidado": {
+   "filas": 10731,
+   "max_marca": "2026-08-14T11:29:05.057003"
+  },
+  "timbradas_consolidado_zonas": {
+   "filas": 0,
+   "max_marca": null
+  },
+  "timbradas_segmentos_anio": {
+   "filas": 0,
+   "max_marca": null
+  },
+  "timbradas_segmentos_consolidado": {
+   "filas": 0,
+   "max_marca": null
+  }
+ }
+}

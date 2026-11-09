@@ -1,0 +1,17 @@
+{
+ "caso": "SILENCIO, 16/10/2025 (jueves laboral), 7 h: 669 pasajeros/h, P90 759",
+ "frecuencia_programada_buses_h": 8.13,
+ "capacidad_ofrecida_puestos_h": 406.5,
+ "factor_carga": 0.4368,
+ "ocupacion_optimizador_frecuencia_actual": 0.7189,
+ "ocupacion_alerta_ahora": 0.7189,
+ "alertas_ahora": [],
+ "ocupacion_alerta_sin_factor": 1.6457,
+ "alertas_sin_factor": [
+  "ALT-001",
+  "ALT-002"
+ ],
+ "recomendacion_buses_h": 7,
+ "recomendacion_ocupacion": 0.7093,
+ "prueba": "tests/unit/test_alertas_optimizador.py::test_silencio_7h_la_alerta_y_la_recomendacion_dicen_la_misma_ocupacion"
+}

@@ -1,0 +1,18 @@
+Consola de despacho: carga en frío del mapa (9-nov-2026)
+
+Qué se prueba: en la primera carga, el mapa de calles (MapLibre con el estilo de CARTO) tarda en cargar su estilo.
+Si el tablero le manda el parche de los buses antes, el navegador falla con «Style is not done loading».
+Arreglo: dash_app/paginas/despacho.py marca el mapa como listo (desp-mapa-listo) solo cuando MapLibre terminó
+de cargar el estilo; hasta entonces no se le manda ningún parche (mover_buses y pintar_foto).
+
+Cómo se corre: Dash en el puerto 8361; Edge sin interfaz, un contexto nuevo por carga (sin caché), 1600x900;
+se cuentan los errores de consola y los buses dibujados a los 9 s y a los 12 s.
+
+carga 1: buses 57 -> 61, errores de consola 0 (estilo 0)
+carga 2: buses 57 -> 61, errores de consola 0 (estilo 0)
+carga 3: buses 57 -> 61, errores de consola 0 (estilo 0)
+carga 4: buses 57 -> 61, errores de consola 0 (estilo 0)
+carga 5: buses 57 -> 61, errores de consola 0 (estilo 0)
+RESULTADO: 5 de 5 cargas en frío sin errores y con buses en el mapa
+
+Además, verificar_estilo.py --vivo 8361 --solo-vivo pasó dos veces seguidas: «PASA · 22 bien · 0 avisos · 0 fallas».

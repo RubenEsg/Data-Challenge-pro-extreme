@@ -44,17 +44,17 @@ def test_contexto_normal_no_dispara_nada():
     ("ALT-001", dict(demanda_prevista=420, p90=520, p10=380, pasajeros_observados=None), "preventiva"),
     ("ALT-001", dict(demanda_prevista=480, p90=560, p10=420, pasajeros_observados=None), "critica"),
     ("ALT-002", dict(ocupacion_observada=0.95), "critica"),
-    ("ALT-003", dict(buses_hora_actual=6, buses_hora_recomendado=9), "preventiva"),
+    ("ALT-003", dict(buses_hora_actual=8, buses_hora_recomendado=9), "preventiva"),   # 400 × 0,85 = 340 < 350
     ("ALT-004", dict(demanda_prevista=100, p10=80, p90=120, pasajeros_observados=None, demanda_patron=None,
                      buses_hora_recomendado=6), "informativa"),
-    ("ALT-005", dict(pasajeros_observados=150, p10=100), "preventiva"),
+    ("ALT-005", dict(pasajeros_observados=150, p10=200), "preventiva"),       # bajo 0,7 × patrón y bajo el P10
     ("ALT-006", dict(minutos_desde_ultimo_despacho=15), "critica"),
-    ("ALT-006", dict(salidas_observadas=6), "critica"),
+    ("ALT-006", dict(salidas_observadas=4), "critica"),                       # déficit 55,6 % > 50 %
     ("ALT-007", dict(pasajeros_observados=420), "preventiva"),
     ("ALT-008", dict(consolidado={"subidas": 900, "bajadas": 280, "nro_viajes": 9,
                                   "referencia": {"subidas": (290, 30)}}), "preventiva"),
     ("ALT-008", dict(consolidado={"subidas": 50, "bajadas": 10, "nro_viajes": 0}), "preventiva"),
-    ("ALT-009", dict(minutos_sin_datos=130), "critica"),
+    ("ALT-009", dict(minutos_sin_datos=2_880), "critica"),   # 2 períodos × 1.440 min (valor de threshold_config)
     ("ALT-009", dict(campos_faltantes=["subidas"]), "critica"),
     ("ALT-010", dict(wape_movil=0.26, model_id="E11-v1"), "critica"),
 ])
@@ -64,9 +64,17 @@ def test_cada_codigo_se_dispara_con_su_condicion(codigo, cambios, severidad):
     assert a["estado"] == "nueva"
     assert CAMPOS_53 <= set(a)
     assert a["explicacion"] and a["recomendacion"]
-    assert a["observado"] is not None and a["umbral"] is not None
+    if codigo in ("ALT-001", "ALT-004"):
+        # alertas de pronóstico: no hay valor observado; la proyección va en esperado (§5.3)
+        assert a["observado"] is None and a["esperado"] is not None
+    else:
+        assert a["observado"] is not None
+    assert a["umbral"] is not None
     assert 0.5 <= a["puntaje"] <= 1.0
-    assert a["clave_dedup"] == f"{codigo}|CRA 54|{T0.isoformat()}|{T1.isoformat()}"
+    if codigo == "ALT-010":
+        assert a["clave_dedup"] == "ALT-010|E11-v1|CRA 54|episodio"      # un episodio por modelo y ruta
+    else:
+        assert a["clave_dedup"] == f"{codigo}|CRA 54|{T0.isoformat()}|{T1.isoformat()}"
     assert a["version_umbrales"] == A.UMBRALES_POR_DEFECTO["version"]
 
 
@@ -79,10 +87,12 @@ def test_cada_codigo_se_dispara_con_su_condicion(codigo, cambios, severidad):
     ("ALT-005", dict(pasajeros_observados=211, p10=200)),       # caída del 29,7 % < 30 %
     ("ALT-005", dict(pasajeros_observados=1, demanda_patron=5, demanda_prevista=5, p10=0, p90=10)),  # patrón muy bajo
     ("ALT-006", dict(minutos_desde_ultimo_despacho=11, salidas_observadas=8)),
+    ("ALT-006", dict(salidas_observadas=4.5)),                  # déficit 50 % = tolerancia: no la supera
+    ("ALT-005", dict(pasajeros_observados=150, p10=140)),       # cae 50 % pero queda sobre el P10 calibrado
     ("ALT-007", dict(pasajeros_observados=345)),                # error 15 % pero dentro del intervalo
     ("ALT-008", dict(consolidado={"subidas": 370, "bajadas": 280, "nro_viajes": 9,
                                   "referencia": {"subidas": (290, 30)}})),
-    ("ALT-009", dict(minutos_sin_datos=119)),
+    ("ALT-009", dict(minutos_sin_datos=2_879)),               # bajo 2 × 1.440 min
     ("ALT-010", dict(wape_movil=0.20)),
 ])
 def test_cada_codigo_no_se_dispara_bajo_el_umbral(codigo, cambios):
@@ -91,7 +101,28 @@ def test_cada_codigo_no_se_dispara_bajo_el_umbral(codigo, cambios):
 
 def test_alt002_calcula_la_ocupacion_esperada_si_falta():
     a = una(base(demanda_prevista=420, p90=430, p10=400, pasajeros_observados=None, buses_hora_actual=9), "ALT-002")
-    assert a["observado"] == pytest.approx(420 / 450, abs=1e-4)
+    assert a["esperado"] == pytest.approx(420 / 450, abs=1e-4)
+    assert a["observado"] is None                    # la ocupación esperada no es una observación
+    assert a["variables"]["tipo_ocupacion"] == "esperada"
+
+
+def test_periodo_de_ingesta_por_omision_es_el_de_la_base():
+    """El valor por omisión del código es el de threshold_config (migración 0001: 1.440 min, ciclo diario): ALT-009
+    por frescura salta a los 2 × 1.440 = 2.880 min, no a los 120."""
+    assert A.UMBRALES_POR_DEFECTO["periodo_ingesta_min"] == 1440.0
+    assert "ALT-009" not in codigos(base(minutos_sin_datos=130))
+    a = una(base(minutos_sin_datos=3_000), "ALT-009")
+    assert a["umbral"] == 2_880 and "2.880 min" in a["explicacion"]
+    # con el valor de la base pasado explícitamente (como lo hace el ciclo) el resultado es el mismo
+    assert una(base(minutos_sin_datos=3_000), "ALT-009", {"periodo_ingesta_min": 1440})["umbral"] == 2_880
+    assert "ALT-009" in codigos(base(minutos_sin_datos=130), {"periodo_ingesta_min": 60})
+
+
+def test_alt010_un_episodio_por_modelo_y_ruta_aunque_cambie_la_ventana():
+    a = una(base(wape_movil=0.26, model_id="hgb_x"), "ALT-010")
+    b = una(base(wape_movil=0.30, model_id="hgb_x", ventana_inicio=T1, ventana_fin=T1), "ALT-010")
+    assert a["clave_dedup"] == b["clave_dedup"] == A.clave_modelo("hgb_x", "CRA 54")
+    assert una(base(wape_movil=0.26, model_id="otro"), "ALT-010")["clave_dedup"] != a["clave_dedup"]
 
 
 def test_alt007_por_debajo_del_intervalo():
@@ -124,7 +155,9 @@ def test_deduplicacion():
     existentes = {primera[0]["clave_dedup"]}
     assert [a["codigo"] for a in A.deduplicar(segunda, existentes)] == [a["codigo"] for a in segunda[1:]]
     otra_ventana = A.evaluar_alertas(base(wape_movil=0.3, minutos_sin_datos=500, ventana_inicio=T1))
-    assert not ({a["clave_dedup"] for a in otra_ventana} & {a["clave_dedup"] for a in primera})
+    # otra ventana es otra alerta, salvo ALT-010: la degradación es un episodio del modelo en la ruta
+    comunes = {a["clave_dedup"] for a in otra_ventana} & {a["clave_dedup"] for a in primera}
+    assert comunes == {A.clave_modelo(None, "CRA 54")}
 
 
 def test_flujo_completo_de_estados_con_historial():

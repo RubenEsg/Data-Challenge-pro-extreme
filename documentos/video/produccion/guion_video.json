@@ -1,0 +1,330 @@
+{
+ "titulo": "Sobusa Despacho: demostración para Extreme Technologies (E11, máximo 5 minutos)",
+ "voz": {
+  "nombre": "Microsoft Sabina Desktop (es-MX)",
+  "tasa": 1
+ },
+ "escenas": [
+  {
+   "id": "s01_problema",
+   "titulo": "El problema y la pregunta del reto",
+   "pantalla": "Tablero, pantalla Inicio (parte superior).",
+   "evidencia": [
+    "documentos/especificacion_tecnica_reto_frecuencias_v1.5.md §20 (pregunta)",
+    "api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.md (fila «B1 regla manual 8 sem»)"
+   ],
+   "cues": [
+    [
+     "Sobusa programa hoy cada hora con el promedio de las ocho semanas anteriores.",
+     "Sobusa programa hoy cada hora con el promedio de las ocho semanas anteriores."
+    ],
+    [
+     "Esa regla no mira la carga de la hora, ni avisa cuando algo se sale de lo normal.",
+     "Esa regla no mira la carga de la hora, ni avisa cuando algo se sale de lo normal."
+    ],
+    [
+     "Extreme Technologies pregunta: ¿cada cuánto despachar buses en Silencio, Carrera cincuenta y cuatro y Calle setenta y dos, para optimizar la flota y el recaudo?",
+     "Extreme Technologies pregunta: ¿cada cuánto despachar buses en SILENCIO, CRA 54 y CL 72, para optimizar la flota y el recaudo?"
+    ],
+    [
+     "¿Cuántos pasajeros y vehículos se esperan, y qué situaciones requieren atención inmediata?",
+     "¿Cuántos pasajeros y vehículos se esperan, y qué situaciones requieren atención inmediata?"
+    ]
+   ]
+  },
+  {
+   "id": "s02_respuesta",
+   "titulo": "La tarjeta de Inicio que responde la pregunta",
+   "pantalla": "Tablero, Inicio: tarjeta «Respuesta a la pregunta del reto» (GET /api/v1/respuesta), ruta SILENCIO y luego CRA 54.",
+   "evidencia": [
+    "api_frecuencias/docs/evidencias/tablero/e2e_tablero_completo.txt (inicio: la tarjeta = API)",
+    "api_frecuencias/docs/evidencias/respuesta/"
+   ],
+   "cues": [
+    [
+     "La pantalla de inicio responde con lo que entrega la A P I, por ruta y para un día laboral:",
+     "La pantalla de inicio responde con lo que entrega la API, por ruta y para un día laboral:"
+    ],
+    [
+     "las salidas recomendadas frente a las programadas, el intervalo en pico y en valle, y los pasajeros esperados con su banda;",
+     "las salidas recomendadas frente a las programadas, el intervalo en pico y en valle, y los pasajeros esperados con su banda;"
+    ],
+    [
+     "los vehículos de la hora pico frente a la flota, y las alertas abiertas.",
+     "los vehículos de la hora pico frente a la flota, y las alertas abiertas."
+    ]
+   ]
+  },
+  {
+   "id": "s03_dia_nuevo",
+   "titulo": "Llega un día nuevo (§14.2 paso 1) e integración sin interferir",
+   "pantalla": "Swagger /docs: POST /api/v1/frequency/executions con {\"hasta\": \"2025-09-05\"} y la respuesta 202 en cola (la clave viaja en la cabecera, nunca en pantalla).",
+   "evidencia": [
+    "api_frecuencias/docs/evidencias/video/registro.txt (respuesta de la API durante la grabación)",
+    "api_frecuencias/docs/evidencias/replica/replica_roles.txt",
+    "api_frecuencias/docs/evidencias/replica/replica_llegada.txt"
+   ],
+   "cues": [
+    [
+     "Así llega un día nuevo. La A P I, en Fast A P I y Postgres catorce, recibe la orden y responde de inmediato con un trabajo en cola.",
+     "Así llega un día nuevo. La API, en FastAPI y PostgreSQL 14, recibe la orden y responde de inmediato con un trabajo en cola."
+    ],
+    [
+     "Lee la fuente con un usuario de solo lectura, y escribe solo en su propio esquema, con migraciones.",
+     "Lee la fuente con un usuario de solo lectura, y escribe solo en su propio esquema, con migraciones."
+    ],
+    [
+     "En la réplica con el trigger de Extreme, el usuario de lectura no pudo escribir ni una vez.",
+     "En la réplica con el trigger de Extreme, el usuario de lectura no pudo escribir ni una vez."
+    ]
+   ]
+  },
+  {
+   "id": "s04_lectura",
+   "titulo": "Lectura incremental y calidad (§14.2 paso 2)",
+   "pantalla": "Swagger /docs: GET /api/v1/frequency/executions/{execution_id} de esa ejecución: marca de agua anterior y nueva, filas leídas y válidas.",
+   "evidencia": [
+    "api_frecuencias/docs/evidencias/video/registro.txt (respuesta de la API durante la grabación)",
+    "api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt (paso 2 y la repetición sin datos nuevos)"
+   ],
+   "cues": [
+    [
+     "La ejecución termina: leyó solo las cincuenta y una filas posteriores a la marca de agua, las validó, y movió la marca al nuevo día.",
+     "La ejecución termina: leyó solo las 51 filas posteriores a la marca de agua, las validó, y movió la marca al nuevo día."
+    ],
+    [
+     "Cada error de calidad queda con su lote, su fila y su causa. Repetir la misma fecha no relee ni duplica nada.",
+     "Cada error de calidad queda con su lote, su fila y su causa. Repetir la misma fecha no relee ni duplica nada."
+    ]
+   ]
+  },
+  {
+   "id": "s05_modelo",
+   "titulo": "El modelo frente a la línea base, con su banda de incertidumbre",
+   "pantalla": "Evidencia evaluacion_modelo.md (prueba reservada) y calibracion_condicional.md (banda P10–P90).",
+   "evidencia": [
+    "api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.md (filas activo y B1)",
+    "api_frecuencias/docs/evidencias/modelo/calibracion_condicional.md (cobertura v2 77,82 %)",
+    "api_frecuencias/docs/evidencias/modelo/resumen_modelo.md (pérdida Poisson)"
+   ],
+   "cues": [
+    [
+     "El modelo activo es un Gradient Boosting con pérdida Poisson.",
+     "El modelo activo es un Gradient Boosting con pérdida Poisson."
+    ],
+    [
+     "En la prueba reservada de noviembre y diciembre de dos mil veinticinco, que nunca vio,",
+     "En la prueba reservada de noviembre y diciembre de 2025, que nunca vio,"
+    ],
+    [
+     "su error es de catorce coma setenta y siete por ciento; el de la regla manual, de veintiuno coma dieciocho.",
+     "su error es de 14,77 %; el de la regla manual, de 21,18 %."
+    ],
+    [
+     "Cada pronóstico trae su banda del percentil diez al noventa, que en esa prueba cubre el setenta y siete coma ocho por ciento de los casos.",
+     "Cada pronóstico trae su banda del percentil 10 al 90, que en esa prueba cubre el 77,8 % de los casos."
+    ]
+   ]
+  },
+  {
+   "id": "s06_pronostico",
+   "titulo": "Pronóstico y horario en el tablero",
+   "pantalla": "Tablero: Pronóstico (real frente a pronosticado y regla manual) y Horario.",
+   "evidencia": [
+    "api_frecuencias/docs/evidencias/tablero/dash_pronostico.png",
+    "api_frecuencias/docs/evidencias/tablero/dash_horario.png"
+   ],
+   "cues": [
+    [
+     "En el tablero, el pronóstico se compara hora a hora con lo real y con la regla manual,",
+     "En el tablero, el pronóstico se compara hora a hora con lo real y con la regla manual,"
+    ],
+    [
+     "y el horario lo convierte en salidas por hora para cada ruta.",
+     "y el horario lo convierte en salidas por hora para cada ruta."
+    ]
+   ]
+  },
+  {
+   "id": "s07_despacho",
+   "titulo": "Despacho en tiempo real",
+   "pantalla": "Tablero: Despacho, mapa con los buses sobre las calles de su ruta y próximos despachos.",
+   "evidencia": [
+    "api_frecuencias/docs/evidencias/tablero/dash_despacho.png",
+    "api_frecuencias/docs/evidencias/tablero/despacho_carga_en_frio.txt"
+   ],
+   "cues": [
+    [
+     "La consola de despacho lo muestra en tiempo real: cada punto es un bus que sigue su ruta por las calles,",
+     "La consola de despacho lo muestra en tiempo real: cada punto es un bus que sigue su ruta por las calles,"
+    ],
+    [
+     "con lo que sale ahora, en qué bus, y qué ajustar si dos buses se juntan.",
+     "con lo que sale ahora, en qué bus, y qué ajustar si dos buses se juntan."
+    ]
+   ]
+  },
+  {
+   "id": "s08_alertas",
+   "titulo": "Alertas con explicación y gestión",
+   "pantalla": "Tablero: Alertas. Se abre una alerta, se reconoce, se asigna y se cierra con comentario; la bitácora lo registra.",
+   "evidencia": [
+    "api_frecuencias/docs/evidencias/alertas/backtest_alertas.md (6,083 → 0,534 alertas por ruta y día)",
+    "api_frecuencias/docs/evidencias/tablero/e2e_tablero_completo.txt (detalle de §5.3)"
+   ],
+   "cues": [
+    [
+     "Las alertas siguen el catálogo de diez códigos de la especificación.",
+     "Las alertas siguen el catálogo de diez códigos de la especificación."
+    ],
+    [
+     "Cada una trae lo observado, lo esperado, el umbral, la tendencia, su puntaje y la acción sugerida.",
+     "Cada una trae lo observado, lo esperado, el umbral, la tendencia, su puntaje y la acción sugerida."
+    ],
+    [
+     "El despachador la reconoce, la asigna y la cierra con un comentario, y la bitácora guarda cada cambio.",
+     "El despachador la reconoce, la asigna y la cierra con un comentario, y la bitácora guarda cada cambio."
+    ],
+    [
+     "Con las reglas sobre datos observados, el volumen bajó de seis coma cero ocho a cero coma cincuenta y tres alertas por ruta y día.",
+     "Con las reglas sobre datos observados, el volumen bajó de 6,08 a 0,53 alertas por ruta y día."
+    ]
+   ]
+  },
+  {
+   "id": "s09_recomendaciones",
+   "titulo": "Recomendaciones: objetivo de §10.2, viabilidad y plan D5",
+   "pantalla": "Tablero: Recomendaciones. Plan del día (motor D5) y un escenario calculado por la API (POST /recommendations/calculate) que no es viable.",
+   "evidencia": [
+    "api_frecuencias/docs/evidencias/optimizacion/",
+    "api_frecuencias/docs/evidencias/tablero/dash_recomendaciones_no_viable.png"
+   ],
+   "cues": [
+    [
+     "Las recomendaciones resuelven la función objetivo de la sección diez punto dos: costo, espera, sobreocupación y desviación,",
+     "Las recomendaciones resuelven la función objetivo de la sección 10.2: costo, espera, sobreocupación y desviación,"
+    ],
+    [
+     "con el intervalo mínimo, el nivel de servicio, la flota y el ciclo como restricciones; y el plan del día sale del motor D cinco.",
+     "con el intervalo mínimo, el nivel de servicio, la flota y el ciclo como restricciones; y el plan del día sale del motor D5."
+    ],
+    [
+     "Si la flota no alcanza, dice que no es viable, explica el motivo, y propone la mejor aproximación.",
+     "Si la flota no alcanza, dice que no es viable, explica el motivo, y propone la mejor aproximación."
+    ]
+   ]
+  },
+  {
+   "id": "s10_monitoreo",
+   "titulo": "Monitoreo, retador en sombra y compuerta",
+   "pantalla": "Tablero: Monitoreo. Error móvil, sesgo, cobertura, PSI por variable, política y retador en sombra.",
+   "evidencia": [
+    "api_frecuencias/docs/evidencias/video/registro.txt (política: retador en sombra)",
+    "api_frecuencias/docs/evidencias/monitoreo/"
+   ],
+   "cues": [
+    [
+     "El monitoreo mide el error móvil, el sesgo, la cobertura y la deriva de cada variable.",
+     "El monitoreo mide el error móvil, el sesgo, la cobertura y la deriva de cada variable."
+    ],
+    [
+     "Un candidato pasa catorce días en sombra junto al activo, y una compuerta de cuatro criterios decide si entra.",
+     "Un candidato pasa 14 días en sombra junto al activo, y una compuerta de cuatro criterios decide si entra."
+    ],
+    [
+     "Aquí está el retador en sombra que entrenamos para esta demostración.",
+     "Aquí está el retador en sombra que entrenamos para esta demostración."
+    ]
+   ]
+  },
+  {
+   "id": "s11_ciclo",
+   "titulo": "El ciclo completo de §14.2, pasos 1 a 6",
+   "pantalla": "Evidencia demo_ciclo_api.txt (la demostración corrida en la pila de Docker Compose creada desde cero), recorrida paso a paso con las cifras resaltadas.",
+   "evidencia": [
+    "api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt (pasos 1 a 6)",
+    "api_frecuencias/docs/evidencias/despliegue/demo_esperado.md (línea de tiempo y por qué esas fechas)",
+    "api_frecuencias/docs/evidencias/despliegue/arranque_limpio.txt (paso 5: la demostración corre en la pila creada desde cero)"
+   ],
+   "cues": [
+    [
+     "Este es el ciclo de la sección catorce punto dos, contra la A P I recién desplegada.",
+     "Este es el ciclo de la sección 14.2, contra la API recién desplegada."
+    ],
+    [
+     "Uno: llegan datos nuevos: cuarenta y nueve mil seiscientas veintitrés filas de carga inicial, cincuenta y una de un día, y cuatro mil seiscientas cuarenta y una más.",
+     "1. Llegan datos nuevos: 49.623 filas de carga inicial, 51 de un día, y 4.641 más."
+    ],
+    [
+     "Dos: la lectura es incremental; repetir la misma fecha lee cero filas.",
+     "2. La lectura es incremental; repetir la misma fecha lee 0 filas."
+    ],
+    [
+     "Tres: se mide el error del activo en lo recién llegado. Cuatro: la política entrena un candidato solo con lo que ya llegó.",
+     "3. Se mide el error del activo en lo recién llegado. 4. La política entrena un candidato solo con lo que ya llegó."
+    ],
+    [
+     "Cinco: los dos se comparan en la misma ventana, del uno al catorce de diciembre, fuera de la muestra de ambos: catorce coma ciento ocho por ciento el candidato, y trece coma novecientos ochenta y dos el activo.",
+     "5. Los dos se comparan en la misma ventana, del 1 al 14 de diciembre, fuera de la muestra de ambos: 14,108 % el candidato, y 13,982 % el activo."
+    ],
+    [
+     "Seis: como no mejora al activo, la compuerta de cuatro criterios lo rechaza, y el activo se conserva.",
+     "6. Como no mejora al activo, la compuerta de cuatro criterios lo rechaza, y el activo se conserva."
+    ]
+   ]
+  },
+  {
+   "id": "s12_ingenieria",
+   "titulo": "Ingeniería: pruebas, integración continua, SonarQube, k6 y Docker",
+   "pantalla": "Evidencias de ingeniería: suite completa, puerta de calidad de SonarQube, k6 (consultas y un año de resultados), integración continua en GitHub y arranque limpio con Docker Compose.",
+   "evidencia": [
+    "api_frecuencias/docs/evidencias/pruebas/suite_final.xml (1.060 casos, 0 fallas, 0 errores, 5 omitidos)",
+    "api_frecuencias/docs/evidencias/sonarqube/quality_gate.json (puerta «Reto Sobusa v1.5» en OK; cobertura 94,3 %; 0 bugs, 0 vulnerabilidades, 0 críticos, 0 bloqueantes)",
+    "api_frecuencias/docs/evidencias/pruebas/ci_github.txt (GitHub Actions en verde, runner limpio)",
+    "api_frecuencias/docs/evidencias/pruebas/k6_consultas.json y k6_volumen.json (p95 451,3 ms y 627,5 ms, 0,00 % de errores, 50 usuarios virtuales)",
+    "api_frecuencias/docs/evidencias/despliegue/arranque_limpio.txt (volúmenes nuevos, «Resultado global: OK»)"
+   ],
+   "cues": [
+    [
+     "La ingeniería se puede auditar: mil sesenta pruebas automáticas, sin fallas, y noventa y cuatro coma tres por ciento de cobertura.",
+     "La ingeniería se puede auditar: 1.060 pruebas automáticas, sin fallas, y 94,3 % de cobertura."
+    ],
+    [
+     "La integración continua pasa en verde en Guit Jab, en una máquina limpia, y SonarQube aprueba su puerta, con cero bugs, cero vulnerabilidades y cero problemas críticos o bloqueantes.",
+     "La integración continua pasa en verde en GitHub, en una máquina limpia, y SonarQube aprueba su puerta, con 0 bugs, 0 vulnerabilidades y 0 problemas críticos o bloqueantes."
+    ],
+    [
+     "Con cincuenta usuarios simultáneos en k seis, el percentil noventa y cinco es de cuatrocientos cincuenta y uno coma tres milisegundos, y de seiscientos veintisiete coma cinco con un año de resultados, sin errores.",
+     "Con 50 usuarios simultáneos en k6, el percentil 95 es de 451,3 ms, y de 627,5 ms con un año de resultados, sin errores."
+    ],
+    [
+     "Y Docker Compose levanta la A P I y su base desde volúmenes nuevos, y la comprobación completa sale bien.",
+     "Y Docker Compose levanta la API y su base desde volúmenes nuevos, y la comprobación completa sale bien."
+    ]
+   ]
+  },
+  {
+   "id": "s13_cierre",
+   "titulo": "Cierre: el plan",
+   "pantalla": "Tarjeta de cierre con el plan en tres fases.",
+   "evidencia": [
+    "documentos/notas_orador.txt (diapositivas 13 y 14)",
+    "PLAN_EVOLUCION.md"
+   ],
+   "cues": [
+    [
+     "El plan tiene tres fases: cuatro semanas de conexión con una réplica de lectura,",
+     "El plan tiene tres fases: cuatro semanas de conexión con una réplica de lectura,"
+    ],
+    [
+     "cuatro semanas en modo sombra, y un piloto de ocho semanas en Carrera cincuenta y cuatro y Calle setenta y dos, con el despachador al mando.",
+     "cuatro semanas en modo sombra, y un piloto de ocho semanas en CRA 54 y CL 72, con el despachador al mando."
+    ],
+    [
+     "Gracias.",
+     "Gracias."
+    ]
+   ]
+  }
+ ]
+}

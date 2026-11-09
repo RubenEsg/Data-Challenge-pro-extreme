@@ -1,0 +1,37 @@
+Respuesta a la pregunta del reto por HTTP: uvicorn en 127.0.0.1:8601 contra la base temporal ai_frecuencias_evidencia_respuesta (migrada con «alembic upgrade head», con el ciclo diario ya corrido), autenticación encendida, un trabajador de la cola y claves de operador y analista generadas para la corrida (no se guardan). Datos: copia temporal de datos/ (DATA_DIR y MODELOS_DIR).
+Fecha de la corrida: 2026-11-09 07:36:05 (hora local)
+
+GET /api/v1/respuesta sin X-API-Key -> 401 no_autenticado
+POST /api/v1/respuesta/calcular (operador) -> 403 prohibido
+GET /api/v1/respuesta?ruta=KRA 99 (operador) -> 422 validacion
+GET /api/v1/respuesta?fecha=2025-03-04 (operador, sin foto) -> 404 sin_calcular: La respuesta del 2025-03-04 no está calculada para SILENCIO, CRA 54, CL 72 con el modelo hgb_fv2_20250831_s42 y la versión de umbrales 5: pídala con POST /api/v1/respuesta/calcular (rol analista) y vuelva a consultar
+  pista: POST /api/v1/respuesta/calcular con {"fecha": "2025-03-04", "rutas": ["SILENCIO", "CRA 54", "CL 72"]} (rol analista)
+POST /api/v1/respuesta/calcular {"fecha": "2026-01-01"} (analista) -> 202 en 249 ms, execution_id 9d99d9c9-3c2a-48c9-b0db-8c9aba7e535e, estado en_cola
+  GET /api/v1/frequency/executions/9d99d9c9-3c2a-48c9-b0db-8c9aba7e535e -> «ok» tras 61 sondeos (64.9 s desde el POST)
+GET /api/v1/respuesta {"fecha": "2026-01-01"} (operador) -> 200, 21 lecturas de la foto: mediana 32 ms, máximo 60 ms; X-Correlation-Id presente
+  fecha 2026-01-01 (Domingo/festivo), generado_en 2026-11-09T07:37:09-05:00, consultado_en 2026-11-09T07:37:14-05:00
+  trazabilidad: model_id hgb_fv2_20250831_s42, calibracion_version v2, fuente_pronostico modelo_activo, umbrales_version 5, execution_id 9d99d9c9-3c2a-48c9-b0db-8c9aba7e535e, datos_hasta 2025-12-31
+  SILENCIO: 92 salidas (programadas 109.7), headway pico 10.0 min a las 15 h, 4609 pasajeros, 21 vehículos de 27; abiertas ahora 8 {"critica": 3, "preventiva": 5}, de la fecha 0
+    ALT-002 critica nueva (abierta ahora) detectada 2026-11-09T07:35:36-05:00
+    ALT-002 critica nueva (abierta ahora) detectada 2026-11-09T07:35:36-05:00
+    ALT-006 critica nueva (abierta ahora) detectada 2026-11-09T07:35:36-05:00
+  CRA 54: 100 salidas (programadas 185.2), headway pico 7.5 min a las 15 h, 7509 pasajeros, 20 vehículos de 45; abiertas ahora 6 {"critica": 2, "preventiva": 4}, de la fecha 0
+    ALT-006 critica nueva (abierta ahora) detectada 2026-11-09T07:35:42-05:00
+    ALT-002 critica nueva (abierta ahora) detectada 2026-11-09T07:35:42-05:00
+    ALT-005 preventiva nueva (abierta ahora) detectada 2026-11-09T07:35:42-05:00
+  CL 72: 93 salidas (programadas 65.6), headway pico 6.98 min a las 19 h, 3006 pasajeros, 23 vehículos de 27; abiertas ahora 7 {"critica": 2, "preventiva": 5}, de la fecha 1
+    ALT-006 critica nueva (abierta ahora) detectada 2026-11-09T07:35:48-05:00
+    ALT-010 critica nueva (abierta ahora) detectada 2026-11-09T07:35:34-05:00
+    ALT-005 preventiva nueva (abierta ahora) detectada 2026-11-09T07:35:48-05:00
+POST /api/v1/respuesta/calcular {"fecha": "2025-11-19", "rutas": ["CRA 54"]} (analista) -> 202 en 25 ms, execution_id d9f2f51f-2aa4-462f-a1af-ce5089988844, estado en_cola
+  GET /api/v1/frequency/executions/d9f2f51f-2aa4-462f-a1af-ce5089988844 -> «ok» tras 2 sondeos (2.1 s desde el POST)
+GET /api/v1/respuesta {"fecha": "2025-11-19", "ruta": "CRA 54"} (operador) -> 200, 21 lecturas de la foto: mediana 17 ms, máximo 19 ms; X-Correlation-Id presente
+  fecha 2025-11-19 (Laboral), generado_en 2026-11-09T07:37:15-05:00, consultado_en 2026-11-09T07:37:16-05:00
+  trazabilidad: model_id hgb_fv2_20250831_s42, calibracion_version v2, fuente_pronostico modelo_activo, umbrales_version 5, execution_id d9f2f51f-2aa4-462f-a1af-ce5089988844, datos_hasta 2025-12-31
+  CRA 54: 247 salidas (programadas 290.2), headway pico 2.0 min a las 5 h, 22800 pasajeros, 79 vehículos de 79; abiertas ahora 6 {"critica": 2, "preventiva": 4}, de la fecha 0
+    ALT-006 critica nueva (abierta ahora) detectada 2026-11-09T07:35:42-05:00
+    ALT-002 critica nueva (abierta ahora) detectada 2026-11-09T07:35:42-05:00
+    ALT-005 preventiva nueva (abierta ahora) detectada 2026-11-09T07:35:42-05:00
+  cuerpo completo en api_respuesta_CRA54_2025-11-19.json
+GET /api/v1/respuesta/export?formato=csv&fecha=2026-01-01 -> 200, 51 filas; encabezado: fecha,tipo_dia,ruta,idruta,hora,franja,headway_min,buses_hora,headway_actual_min,buses_hora_actual,viable,motivo,pasajeros_esperados,pasajeros_p10,pasajeros_p90,model_id,calibracion_version,fuente_pronostico,umbrales_version,execution_id,generado_en
+GET /api/v1/respuesta/export?formato=xlsx&fecha=2026-01-01 -> 200 application/vnd.openxmlformats-officedocument.spreadsheetml.sheet (10650 bytes)

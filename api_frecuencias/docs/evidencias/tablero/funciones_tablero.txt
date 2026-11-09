@@ -1,0 +1,10 @@
+OK    prioridad: críticas primero y, dentro del nivel, la más reciente
+OK    escalada: una entrada «escalar» en la bitácora
+OK    escalada: sin «escalar» no hay chip
+OK    escalada: bitácora vacía o con basura
+OK    D9: «de E11» → «del experimento 11» y «E12» → «el experimento 12»
+OK    D9: no toca palabras que contienen «de»
+OK    pronóstico: lo real de una ventana de una hora = el real de esa hora
+OK    pronóstico: una ventana que cruza dos horas suma las fracciones
+OK    pronóstico: fuera de 2025 lo real no se conoce
+9 de 9 bien

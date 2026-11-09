@@ -1,0 +1,65 @@
+Pruebas de las 7 pantallas existentes contra el Dash del puerto 8205 (adaptadas de probar_*_8106.py y probar_despacho_8501.py). Todas terminaron con código 0.
+
+===== probar_despacho_8205.log
+BIEN  rutas con el trazado por las calles ([883, 788, 827] vértices)
+BIEN  halo 55 = buses [18, 27, 10]; hover [['Bus 409 · SILENCIO · 41 de 50 · salió 04:33 · km 24,9'], ['Bus 482 · SILENCIO · 42 de 50 · salió 04:50 · km 18,5']]
+BIEN  instante 1 (05:36): 55 buses, el más lejos de su ruta a 0.1 m (< 30 m)
+BIEN  x60: 15 pasos en 15 s, mayor hueco 1.03 s
+BIEN  instante 2 (05:52): 73 buses, el más lejos de su ruta a 0.1 m (< 30 m)
+BIEN  los buses se movieron entre pasos
+BIEN  los buses cambian de un paso al siguiente
+BIEN  tiempo real: los buses se mueven de un segundo al siguiente (05:53:03)
+BIEN  tiempo real: 73 buses, el más lejos de su ruta a 0.1 m (< 30 m)
+BIEN  ruta CRA 54: buses [0, 35, 0]
+BIEN  errores de consola = 0 []
+FALLAS: 0
+
+===== probar_horario_8205.log
+  "nombre": "horario_CRA54_2025-06-03_E12.csv"
+ },
+ "copiar": {
+  "texto": "Copiado"
+ },
+ "hover": {
+  "hv-graf-salidas": "Hoy (salidas de 2025): 15 salidasOráculo: 17 salidasCon el plan: 22 salidas",
+  "hv-graf-carga": "Capacidad con el plan: 1.100 pasajeros por horaCapacidad hoy: 750 pasajeros por horaCarga prevista con el híbrido (E12): 856 pasajeros por horaCarga real: 802 pasajeros por hora"
+ }
+}
+400: {"tamanos": {"36px": 7, "16px": 30, "14px": 647, "22px": 5, "46px": 1, "20px": 1, "26px": 2}, "pesos": ["400", "500", "600"], "encabezados": "H1 H2 H3 H3 H3 H3", "salto": null, "desborde": 0, "barra_max_px": 5.4} errores []
+errores: {"carga_1366": [], "controles": [], "carga_400": []}
+
+===== probar_inicio_enlaces_8205.log
+inicio 1366 {"desborde": 0, "fuera": [], "encabezados": [1, 2, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3], "saltos": [], "tamanos": {"60px": 1, "20px": 5, "32px": 6, "24px": 9, "14px": 80, "16px": 27, "72px": 2, "44px": 4}, "pesos": {"400": 108, "500": 22, "600": 4}, "errores": []}
+enlaces 1366 {"desborde": 0, "fuera": [], "encabezados": [1, 2, 3, 3, 2, 3, 3, 3, 3, 3, 3], "saltos": [], "tamanos": {"60px": 1, "20px": 1, "32px": 2, "24px": 8, "14px": 20, "16px": 6}, "pesos": {"400": 27, "500": 9, "600": 2}, "errores": []}
+controles {"/pronostico": {"h1": "¿Cuántos pasajeros habrá?", "errores": []}, "/horario": {"h1": "¿Cuántos buses y cada cuánto?", "errores": []}, "/modelo": {"h1": "¿Qué modelo es y por qué?", "errores": []}, "/resultado": {"h1": "¿Qué gana Sobusa?", "errores": []}, "heroe->/resultado": {"h1": "¿Qué gana Sobusa?", "errores": []}, "mas": {"inicio-heroe": {"abierto": true, "visible": true, "filas_tabla": 0, "fuentes": 8, "texto": "Ver los datos\n\nFuentes:datos/ahorro_anual.json · costos/resultados/d5_reoptimizado.csv · experimentos/D5_optimizacion_milp/escenarios.csv · costos/resultados/li"}, "inicio-salidas": {"abierto": true, "visible": true, "filas_tabla": 3, "fuentes": 4, "texto": "Ver los datos\n\nTipo de día\tHoy\tCon el plan\tCambio\nLaboral\t503,6\t511,0\t+1,5 %\nSábado\t455,7\t433,8\t−4,8 %\nDomingo/festivo\t305,5\t247,6\t−18,9 %\n\nSalidas por día, hoy"}, "inicio-errores": {"abierto": true, "visible": true, "filas_tabla": 0, "fuentes": 6, "texto": "Ver los datos\n\nFuentes:experimentos/E11_modelo_mejorado/resultados.json · experimentos/E12_comparacion_modelos/resultados.json · dashboard_datos.js · experiment"}, "inicio-forma": {"abierto": true, "visible": true, "filas_tabla": 0, "fuentes": 5, "texto": "Ver los datos\n\nFuentes:datos/ahorro_anual.json · experimentos/D5_optimizacion_milp/escenarios.csv · costos/resultados/d5_reoptimizado.csv"}}, "mas_errores": [], "enlaces_hrefs": {"/proyecto/app.html": 200, "/entrega/Informe_tecnico_Sobusa.pdf": 200, "/entrega/entrega_final.html": 200, "/proyecto/consola_despacho.html": 200, "/proyecto/vista_3d.html": 200, "/proyecto/planificador.html": 200, "/proyecto/simulador_ahorro.html": 200, "/proyecto/documentos/metodologia/main.pdf": 200, "/proyecto/documentos/informe_resultados.md": 200}, "enlaces_target": ["_blank"]}
+inicio 400 {"desborde": 0, "fuera": [], "encabezados": [1, 2, 3, 3, 3, 3, 2, 3, 3, 3, 3, 3], "saltos": [], "tamanos": {"36px": 5, "16px": 28, "26px": 6, "22px": 9, "14px": 80, "46px": 2, "20px": 4}, "pesos": {"400": 108, "500": 22, "600": 4}, "errores": []}
+enlaces 400 {"desborde": 0, "fuera": [], "encabezados": [1, 2, 3, 3, 2, 3, 3, 3, 3, 3, 3], "saltos": [], "tamanos": {"36px": 1, "16px": 7, "26px": 2, "22px": 8, "14px": 20}, "pesos": {"400": 27, "500": 9, "600": 2}, "errores": []}
+mas móvil: {'abierto': True, 'izq': 31, 'der': 367, 'ancho_vista': 400, 'desborde': 0}
+
+===== probar_pronostico_modelo_8205.log
+ "hover_mes": "12 de junio | Real: 9.515 pasajeros | Regla manual (hoy): 9.402 pasajeros | Híbrido (E12): 9.910 pasajeros | Modelo final (E11): 10.077 pasajeros",
+ "tres_rutas": {
+  "titulo": "Las tres rutas, jueves 19 de junio de 2025: el modelo final se equivoca en 84 de cada 100 pasajeros; la regla manual, en 82",
+  "fichas": "Error del día · Modelo final (E11)\n\n83,72\n%\n\nRegla manual:\n82,30 %\n\njueves 19 de junio de 2025 · Laboral\n\nPasajeros del día\n\n22.855\n\nPronóstico del modelo final: 38.448 (+68,2 %)\n\nSuma de las 17 horas"
+ },
+ "errores": []
+}
+hover modelo: Híbrido (E12): 13,62 %
+pronostico 1280 {"ancho_doc": 1280, "ancho_ventana": 1280, "tamanos": {"14px": 250, "16px": 23, "20px": 3, "24px": 4, "32px": 3, "56.32px": 1, "69.12px": 2}, "pesos": ["400", "500", "600"], "encabezados": "H1 H2 H3 H3 H2 H3 H3", "salto": null, "barra_max_px": 13.5, "n_barras": 47, "menos_ascii": [], "heroes": 0, "errores": []}
+modelo 1280 {"ancho_doc": 1280, "ancho_ventana": 1280, "tamanos": {"14px": 97, "16px": 59, "20px": 2, "24px": 6, "32px": 12, "44px": 2, "56.32px": 1, "69.12px": 1}, "pesos": ["400", "600", "500"], "encabezados": "H1 H2 H3 H2 H3 H3 H2 H3 H3 H2 H3", "salto": null, "barra_max_px": 21.4, "n_barras": 4, "menos_ascii": [], "heroes": 0, "errores": []}
+pronostico 400 {"ancho_doc": 400, "ancho_ventana": 400, "tamanos": {"14px": 254, "16px": 24, "20px": 2, "22px": 4, "26px": 3, "36px": 1, "46px": 2}, "pesos": ["400", "500", "600"], "encabezados": "H1 H2 H3 H3 H2 H3 H3", "salto": null, "barra_max_px": 5.5, "n_barras": 47, "menos_ascii": [], "heroes": 0, "errores": []}
+modelo 400 {"ancho_doc": 400, "ancho_ventana": 400, "tamanos": {"14px": 97, "16px": 60, "20px": 1, "22px": 6, "26px": 12, "36px": 3, "46px": 1}, "pesos": ["400", "600", "500"], "encabezados": "H1 H2 H3 H2 H3 H3 H2 H3 H3 H2 H3", "salto": null, "barra_max_px": 23.2, "n_barras": 4, "menos_ascii": [], "heroes": 0, "errores": []}
+
+===== probar_resultado_8205.log
+   "arriba": 297,
+   "abajo": 1141,
+   "valor_abajo": 471
+  },
+  "salidos": [],
+  "tablas_desplazan": [
+   "rs-salidas 337/284"
+  ],
+  "ascii_menos": [],
+  "errores": []
+ }
+}

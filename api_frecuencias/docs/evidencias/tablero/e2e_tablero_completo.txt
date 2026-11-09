@@ -1,0 +1,140 @@
+E2E del tablero (once pantallas) · Edge sin interfaz · 1600×900 · 2026-11-09 07:05:43 → 2026-11-09 07:08:30
+Dash con la clave de analista en 8511, de operador en 8512 y una clave inválida en 8513; API de desarrollo en 8514.
+Resultado: 135 de 135 comprobaciones bien, 0 fallas.
+
+OK    inicio: carga con su título y sin errores de consola · h1 «¿Qué proponemos?» · errores []
+OK    inicio: sin desplazamiento horizontal a 1600 px · [1600, 1600]
+OK    inicio: contraste del texto visible (WCAG AA) · 353 textos · mínimo 3.45:1 · []
+OK    inicio: Tab recorre 31 elementos con foco visible · barra (12 enlaces) → contenido: summary:Ver los datos → a:Ver qué gana Sobusa → summary:Ver los datos → summary:Ver los datos → input:SILENCIO → button:Exportar CSV → button:Exportar XLSX → summary:Cómo calcula la API lo
+OK    pronostico: carga con su título y sin errores de consola · h1 «¿Cuántos pasajeros habrá?» · errores []
+OK    pronostico: sin desplazamiento horizontal a 1600 px · [1600, 1600]
+OK    pronostico: contraste del texto visible (WCAG AA) · 571 textos · mínimo 5.5:1 · []
+OK    pronostico: Tab recorre 32 elementos con foco visible · barra (12 enlaces) → contenido: input:CRA 54 → button:Día anterior → input:dd/mm/aaaa → button:Día siguiente → input:60 → button:Exportar CSV → button:Exportar XLSX → summary:Ver los datos → summary:Ver los datos → summa
+OK    horario: carga con su título y sin errores de consola · h1 «¿Cuántos buses y cada cuánto?» · errores []
+OK    horario: sin desplazamiento horizontal a 1600 px · [1600, 1600]
+OK    horario: contraste del texto visible (WCAG AA) · 705 textos · mínimo 5.44:1 · []
+OK    horario: Tab recorre 32 elementos con foco visible · barra (12 enlaces) → contenido: input:CRA 54 → button:Día anterior → input:Elige un día → button:Día siguiente → input:E12 → button:Restablecer → span:SPAN → span:SPAN → span:SPAN → span:SPAN → span:SPAN → span:SPAN → in
+AVISO despacho: en la primera carga en frío MapLibre avisó ['pageerror: Style is not done loading.', 'pageerror: Style is not done loading.'] (estilo del mapa aún sin cargar); se repite la carga
+OK    despacho: carga con su título y sin errores de consola · h1 «Despacho en vivo» · errores []
+OK    despacho: sin desplazamiento horizontal a 1600 px · [1600, 1600]
+OK    despacho: contraste del texto visible (WCAG AA) · 550 textos · mínimo 4.99:1 · []
+OK    despacho: el subtítulo dice que es la repetición de un día de 2025 y que no despacha (§3.2) · Despacho en vivo |  | Repetición de un día de 2025 como si fuera hoy. Muestra lo que vería el despachador; no despacha ni cambia la operación.
+OK    despacho: Tab recorre 32 elementos con foco visible · barra (12 enlaces) → contenido: button:Día anterior → input:Elige un día → button:Día siguiente → input:todas → button:Pausar → input:60 → span:SPAN → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos
+OK    alertas: carga con su título y sin errores de consola · h1 «Alertas» · errores []
+OK    alertas: sin desplazamiento horizontal a 1600 px · [1600, 1600]
+OK    alertas: contraste del texto visible (WCAG AA) · 374 textos · mínimo 4.99:1 · []
+OK    alertas: Tab recorre 32 elementos con foco visible · barra (12 enlaces) → contenido: input:nueva → input:todas → input:todas → button:Todos → input:dd/mm/aaaa → input:dd/mm/aaaa → button:Exportar CSV → button:Exportar XLSX → summary:Ver los datos → button:ALT-002 → button:
+OK    recomendaciones: carga con su título y sin errores de consola · h1 «Recomendaciones» · errores []
+OK    recomendaciones: sin desplazamiento horizontal a 1600 px · [1600, 1600]
+OK    recomendaciones: contraste del texto visible (WCAG AA) · 754 textos · mínimo 4.99:1 · []
+OK    recomendaciones: Tab recorre 32 elementos con foco visible · barra (12 enlaces) → contenido: input:SILENCIO → input:todas → button:Datos hasta 3 sep 2025 · 5b50e57d → button:jueves 4 de septiembre de 2025 → button:Exportar CSV → button:Exportar XLSX → summary:Ver los datos → summa
+OK    operacion: carga con su título y sin errores de consola · h1 «Operación» · errores []
+OK    operacion: sin desplazamiento horizontal a 1600 px · [1600, 1600]
+OK    operacion: contraste del texto visible (WCAG AA) · 159 textos · mínimo 4.99:1 · []
+OK    operacion: Tab recorre 31 elementos con foco visible · barra (12 enlaces) → contenido: input:ejecuciones → button:Ejecutar día siguiente → summary:Ver los datos → div:Ejecución	Estado	Tipo	Progreso	Marca de  → button:5b50e57d · frecuencia · terminada · 9 no → summary:Ver los
+OK    monitoreo: carga con su título y sin errores de consola · h1 «Monitoreo» · errores []
+OK    monitoreo: sin desplazamiento horizontal a 1600 px · [1600, 1600]
+OK    monitoreo: contraste del texto visible (WCAG AA) · 223 textos · mínimo 4.99:1 · []
+OK    monitoreo: Tab recorre 31 elementos con foco visible · barra (12 enlaces) → contenido: button:Actualizar → button:Exportar CSV → button:Exportar XLSX → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → a:S
+OK    modelo: carga con su título y sin errores de consola · h1 «¿Qué modelo es y por qué?» · errores []
+OK    modelo: sin desplazamiento horizontal a 1600 px · [1600, 1600]
+OK    modelo: contraste del texto visible (WCAG AA) · 234 textos · mínimo 3.45:1 · []
+OK    modelo: Tab recorre 31 elementos con foco visible · barra (12 enlaces) → contenido: summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los dato
+OK    resultado: carga con su título y sin errores de consola · h1 «¿Qué gana Sobusa?» · errores []
+OK    resultado: sin desplazamiento horizontal a 1600 px · [1600, 1600]
+OK    resultado: contraste del texto visible (WCAG AA) · 365 textos · mínimo 4.99:1 · []
+OK    resultado: Tab recorre 31 elementos con foco visible · barra (12 enlaces) → contenido: summary:Ver los datos → summary:Ver los datos → summary:Ver los datos (los dos planes, M COP al  → summary:Ver los datos → summary:Ver los datos → input:Laboral → summary:Ver los datos (sa
+OK    enlaces: carga con su título y sin errores de consola · h1 «¿Dónde está el resto del proyecto?» · errores []
+OK    enlaces: sin desplazamiento horizontal a 1600 px · [1600, 1600]
+OK    enlaces: contraste del texto visible (WCAG AA) · 38 textos · mínimo 5.44:1 · []
+OK    enlaces: Tab recorre 31 elementos con foco visible · barra (12 enlaces) → contenido: a:Abrir la app completa → a:Informe técnico final (PDF) → a:Cuaderno final ejecutado (HTML) → a:Consola de despacho |  | Qué hace el despach → a:Vista 3D |  | Los buses en las calles de Bar → a:Pl
+OK    alertas: la bandeja va en orden de prioridad (crítica → preventiva → informativa) · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica
+OK    alertas: el orden de la bandeja = GET /alerts?orden=prioridad · 20 filas · API ['ALT-002', 'ALT-002', 'ALT-002', 'ALT-002', 'ALT-001']
+OK    alertas: el chip «Escalada» marca las alertas con «escalar» en su bitácora · 0 chips · 0 escaladas en la API
+OK    alertas: el detalle muestra «Origen» · ALT-002
+OK    alertas: el detalle muestra «Tendencia» · ALT-002
+OK    alertas: el detalle muestra «Pendiente» · ALT-002
+OK    alertas: el detalle muestra «Serie reciente» · ALT-002
+OK    alertas: el detalle muestra «Probabilidad» · ALT-002
+OK    alertas: el detalle muestra «Método del puntaje» · ALT-002
+OK    alertas: el detalle muestra «Variables influyentes» · ALT-002
+OK    alertas: el detalle muestra «Ubicación» · ALT-002
+OK    alertas: la pendiente coincide con la API · API None
+OK    alertas: la serie reciente se dibuja · [{'inicio': '2025-09-03T11:00:00-05:00', 'pasajeros': 593.0, 'salidas_observadas': 4, 'ocupacion_observada': 1.018774}, {'inicio': '2025-09-03T12:00:00-05:00', 'pasajeros': 562.0, 'salidas_observadas': 5, 'ocupacion_obse
+OK    alertas: hay alertas observadas en la API · ALT-007
+OK    alertas: 0 errores de consola en el detalle · []
+OK    recomendaciones: salidas del día del plan (modelo activo, persistido por el ciclo) = API · API 131 · Salidas del día con el plan |  | 131 | salidas |  | programadas: — |  | jueves 4 de septiembre de 2025 · Laboral |  | Hora con más salidas
+OK    recomendaciones: vehículos en la hora pico = API · 83
+OK    recomendaciones: una fila por hora del plan · 17 filas · API 17 horas
+OK    recomendaciones: escenario calculado con la clave de analista o superior · El escenario no es viable |  | La flota disponible (45 vehículos, ciclo de 205,6 min) solo sostiene 542 pasajeros/h de capac
+OK    recomendaciones: inviable con su motivo y la mejor aproximación (§18) · El escenario no es viable |  | La flota disponible (45 vehículos, ciclo de 205,6 min) solo sostiene 542 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 1.251 (43,4 % de cobertura). S
+OK    recomendaciones: el escenario muestra «Función objetivo (§10.2)» · 
+OK    recomendaciones: el escenario muestra «α · Costo operativo» · 
+OK    recomendaciones: el escenario muestra «β · Tiempo de espera» · 
+OK    recomendaciones: el escenario muestra «γ · Sobreocupación» · 
+OK    recomendaciones: el escenario muestra «δ · Desviación de la frecuencia» · 
+OK    recomendaciones: el escenario muestra «peso: » · 
+OK    recomendaciones: el escenario muestra «Total ponderado» · 
+OK    recomendaciones: el escenario muestra «Restricciones y límites que mandan» · 
+OK    recomendaciones: el escenario muestra «Holgura» · 
+OK    recomendaciones: el escenario muestra «Límites que mandan» · 
+OK    recomendaciones: el escenario muestra «Mezcla de tipologías (§10.1)» · 
+OK    recomendaciones: el escenario muestra «Actual frente a recomendada (RF-008)» · 
+OK    recomendaciones: el escenario muestra «Cumple el nivel de servicio» · 
+OK    recomendaciones: el escenario viable no muestra el aviso de inviable · 	Vigente a las 10:00	Escenario | Demanda (pas/h)	626	300 | Buses por hora	6	6 | Headway	10,00 min	10,00 min | Vehículos requeridos	25	27 | Ocupación esperada	75,7 %	32,0 
+OK    recomendaciones: un peso de la solicitud se muestra con su fuente · ['peso: solicitud\t2,00\t1.404.979\t2.809.957', 'peso: threshold_config v5\t1,00\t248.257\t248.257', 'peso: threshold_config v5\t1,00\t0\t0', 'peso: threshold_config v5\t1,00\t79.082\t79.082']
+OK    recomendaciones: 0 errores de consola · []
+OK    monitoreo: WAPE móvil = API · 0.12494999999999999
+OK    monitoreo: MAE móvil = API · 89.538
+OK    monitoreo: cobertura P10–P90 = API · 0.7878000000000001
+OK    monitoreo: sesgo = API · 0.0036
+OK    monitoreo: una fila de PSI por variable de la API · 8 · API 8
+OK    monitoreo: el estado de cada variable va con icono y palabra · ['Sin novedad', 'Sin novedad', 'Sin novedad']
+OK    monitoreo: decisión de reentrenar = API · False
+OK    monitoreo: retador en sombra = API · ['hgb_fv2_20250703_s42']
+OK    monitoreo: los cuatro criterios de la compuerta · 
+OK    monitoreo: «Actualizar» recarga sin errores · []
+OK    monitoreo: exporta CSV (GET /monitoring/export) · monitoreo_20261109_070726.csv · 5370 bytes
+OK    monitoreo: exporta XLSX (GET /monitoring/export) · monitoreo_20261109_070726.xlsx · 6338 bytes
+OK    pronóstico API: el modelo y la versión de la calibración = GET /predictions · ['hgb_fv2_20250831_s42'] · calibración ['v2']
+OK    pronóstico API: una ventana por instante del día en la banda = API · 17 ventanas · API 17 instantes el 2025-09-04
+OK    pronóstico API: la banda P10–P90, el P50 y lo real se dibujan · 3 trazas · leyenda ['Real (validaciones de 2025)', 'Pronóstico del modelo activo (P50)', 'Banda P10–P90 calibrada']
+OK    pronóstico API: la paginación cuenta los pronósticos de la API · Página 1 de 2 · 18 pronósticos de CRA 54 con 60 min el 4 sep 2025
+OK    pronóstico API: «Siguiente» trae la página 2 (limite y desplazamiento de la API) · Página 2 de 2 · 18 pronósticos de CRA 54 con 60 min el 4 sep 2025
+OK    pronóstico API: el detalle del pronóstico elegido trae su variable SHAP principal y su efecto · b8 1055.1 · banda 1996.45–2569.11
+OK    pronóstico API: la banda del elegido = API · (1996.45, 2569.11)
+OK    pronóstico API: exporta CSV (GET /predictions/export) · predicciones_20261109_070736.csv · 105326 bytes
+OK    pronóstico API: exporta XLSX (GET /predictions/export) · predicciones_20261109_070736.xlsx · 16330 bytes
+OK    pronóstico: el laboratorio va rotulado «experimento 11 / experimento 12» y dice que no es el modelo de la API · Laboratorio del informe académico: experimento 11 / experimento 12 |  | Los pronósticos fuera de muestra del informe académi
+OK    pronóstico: no se nombra «modelo final» ni «E11/E12» a secas · 
+OK    pronóstico: 0 errores de consola · []
+OK    modelo: la primera tarjeta es el modelo del producto con sus cifras de evaluación y calibración · hgb_fv2_20250831_s42 · 14.77 frente a 21.18 · cobertura 77.82
+OK    modelo: el producto va primero y los experimentos del informe en su sección rotulada · ['El modelo del producto', 'Laboratorio del informe académico: experimentos 11 y 12']
+OK    modelo: declara el uso honesto de la prueba de nov–dic 2025 · 
+OK    modelo: la importancia del modelo activo = GET /models/{id}/importance (media de |SHAP|) · b8 0.3675
+OK    modelo: 0 errores de consola · []
+OK    operación: la vista «Salud del servicio» muestra /health y /metrics · Salud del servicio |  | /health, /metrics en formato Prometheus y el error del pronóstico frente a su tolerancia. |  | Actualizar | Monitoreo del modelo | Servicio en línea
+OK    operación: 0 errores de consola en «Salud del servicio» · []
+OK    inicio: con umbrales nuevos la foto queda vieja y GET /respuesta responde 404 «sin_calcular» · PUT 200 · GET 404 sin_calcular
+OK    inicio: la tarjeta muestra «Calculando…», pide el cálculo y consulta cada 3 s hasta tener la respuesta · «Calculando…» visto: True · respuesta en 3.3 s
+OK    inicio: el cálculo pedido por el tablero es una ejecución «respuesta» de la cola · ('d82b0b3d-b2dd-41bb-9bc1-83650becdb0e', 'ok')
+OK    inicio: la tarjeta trae la pregunta literal de la especificación · con los datos históricos y recientes, ¿cada cuánto despachar buses para optimiza
+OK    inicio: pasajeros esperados del día = API · 4608.7
+OK    inicio: vehículos en la hora pico = API · {'requeridos_pico': 21, 'flota_disponible': 27, 'hora_pico': 18, 'requeridos_pico_10_3': 21, 'requeridos_programados': 29, 'nota': 'requeridos_pico = máximo de buses en ruta a la vez con el plan (conteo de D5 cada 15 min
+OK    inicio: la trazabilidad nombra el modelo, la calibración y la fuente del pronóstico · ['Trazabilidad: modelo hgb_fv2_20250831_s42 · calibración de la banda v2 · plan con el pronóstico hora por hora del modelo activo · variables fv2-2026-11-09 · corte de datos 31 ago 2025 · umbrales versión 6 · ejecución d
+OK    inicio: «Atención inmediata» dice que son las alertas abiertas ahora · 
+OK    inicio: la ruta CRA 54 cambia la respuesta (pasó por «Calculando…») · 7509.3
+OK    inicio: la ruta CL 72 cambia la respuesta (pasó por «Calculando…») · 3006.5
+OK    inicio: el «…» de la tarjeta trae la tabla hora por hora · 17 filas
+OK    inicio: exporta la respuesta en CSV (GET /respuesta/export) · respuesta_2026-01-01_20261109_070800.csv · 5362 bytes
+OK    inicio: exporta la respuesta en XLSX (GET /respuesta/export) · respuesta_2026-01-01_20261109_070800.xlsx · 7280 bytes
+OK    inicio: 0 errores de consola · []
+OK    auth operador: calcular escenario → 403 con un aviso claro · La API no calculó el escenario |  | prohibido: la clave configurada no tiene el rol para esta acción. El rol operador no puede POST /api/v1/recommendations/calculate |  | Pida una clave con el rol que indica 
+OK    auth operador: Monitoreo se puede leer (GET es de operador) · 
+OK    auth operador: 0 errores de consola · []
+OK    auth clave inválida: inicio dice que la API pide una clave válida · La API pide una clave válida |  | no_autenticado: la API pide una clave válida (defina SOBUSA_API_KEY). Falta la cabecera X-API-Key o la clave no es válida |  | Defina SOBUSA_API_KEY con u
+OK    auth clave inválida: alertas dice que la API pide una clave válida · La API pide una clave válida |  | no_autenticado: la API pide una clave válida (defina SOBUSA_API_KEY). Falta la cabecera X-API-Key o la clave no es válida |  | Defina SOBUSA_API_KEY con u
+OK    auth clave inválida: recomendaciones dice que la API pide una clave válida · La API pide una clave válida |  | no_autenticado: la API pide una clave válida (defina SOBUSA_API_KEY). Falta la cabecera X-API-Key o la clave no es válida |  | Defina SOBUSA_API_KEY con u
+OK    auth clave inválida: monitoreo dice que la API pide una clave válida · La API pide una clave válida |  | no_autenticado: la API pide una clave válida (defina SOBUSA_API_KEY). Falta la cabecera X-API-Key o la clave no es válida |  | Defina SOBUSA_API_KEY con u
+OK    auth clave inválida: operacion dice que la API pide una clave válida · La API pide una clave válida |  | no_autenticado: la API pide una clave válida (defina SOBUSA_API_KEY). Falta la cabecera X-API-Key o la clave no es válida |  | Defina SOBUSA_API_KEY con u
+OK    auth invalida: 0 errores de consola · []

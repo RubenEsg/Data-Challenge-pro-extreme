@@ -1,0 +1,2044 @@
+{
+ "result": {
+  "resourceSpans": [
+   {
+    "resource": {
+     "attributes": [
+      {
+       "key": "deployment.environment",
+       "value": {
+        "stringValue": "demo"
+       }
+      },
+      {
+       "key": "service.instance.id",
+       "value": {
+        "stringValue": "ebe30046-ce90-478b-840d-9f96b4be1e1a"
+       }
+      },
+      {
+       "key": "service.name",
+       "value": {
+        "stringValue": "api-frecuencias"
+       }
+      },
+      {
+       "key": "service.version",
+       "value": {
+        "stringValue": "1.0.0"
+       }
+      },
+      {
+       "key": "telemetry.sdk.language",
+       "value": {
+        "stringValue": "python"
+       }
+      },
+      {
+       "key": "telemetry.sdk.name",
+       "value": {
+        "stringValue": "opentelemetry"
+       }
+      },
+      {
+       "key": "telemetry.sdk.version",
+       "value": {
+        "stringValue": "1.45.2"
+       }
+      }
+     ]
+    },
+    "scopeSpans": [
+     {
+      "scope": {
+       "name": "opentelemetry.instrumentation.sqlalchemy",
+       "version": "0.66b2"
+      },
+      "spans": [
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "0b3bae35f964a8c8",
+        "parentSpanId": "7abf129d35f3cdbb",
+        "flags": 256,
+        "name": "connect",
+        "kind": 3,
+        "startTimeUnixNano": "1794204121772007400",
+        "endTimeUnixNano": "1794204121773513300",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "a6b863f0da85926a",
+        "parentSpanId": "7abf129d35f3cdbb",
+        "flags": 256,
+        "name": "INSERT ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204121780371900",
+        "endTimeUnixNano": "1794204121784607200",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "INSERT ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "INSERT INTO ai_frecuencias.execution_log (execution_id, tipo, estado, etapa, progreso, intentos, marca_agua_anterior, marca_agua_nueva, data_cutoff, filas_leidas, filas_validas, model_id, feature_version, umbrales_version, parametros, metricas, correlation_id, mensaje, iniciado_en, terminado_en, worker_id, lease_hasta, disponible_desde, programada_para) VALUES (%(execution_id)s::UUID, %(tipo)s::VARCHAR, %(estado)s::VARCHAR, %(etapa)s::VARCHAR, %(progreso)s, %(intentos)s::INTEGER, %(marca_agua_anterior)s::TIMESTAMP WITH TIME ZONE, %(marca_agua_nueva)s::TIMESTAMP WITH TIME ZONE, %(data_cutoff)s::TIMESTAMP WITH TIME ZONE, %(filas_leidas)s::INTEGER, %(filas_validas)s::INTEGER, %(model_id)s::VARCHAR, %(feature_version)s::VARCHAR, %(umbrales_version)s::INTEGER, %(parametros)s::JSONB, %(metricas)s::JSONB, %(correlation_id)s::VARCHAR, %(mensaje)s::VARCHAR, %(iniciado_en)s::TIMESTAMP WITH TIME ZONE, %(terminado_en)s::TIMESTAMP WITH TIME ZONE, %(worker_id)s::VARCHAR, %(lease_hasta)s::TIMESTAMP WITH TIME ZONE, %(disponible_desde)s::TIMESTAMP WITH TIME ZONE, %(programada_para)s::TIMESTAMP WITH TIME ZONE) RETURNING ai_frecuencias.execution_log.creado_en, ai_frecuencias.execution_log.actualizado_en"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.11.0"
+     },
+     {
+      "scope": {
+       "name": "opentelemetry.instrumentation.fastapi",
+       "version": "0.66b2"
+      },
+      "spans": [
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "7abf129d35f3cdbb",
+        "flags": 256,
+        "name": "POST /api/v1/frequency/executions",
+        "kind": 2,
+        "startTimeUnixNano": "1794204121751948900",
+        "endTimeUnixNano": "1794204122022016500",
+        "attributes": [
+         {
+          "key": "correlation_id",
+          "value": {
+           "stringValue": "evid-jaeger-1"
+          }
+         },
+         {
+          "key": "execution_id",
+          "value": {
+           "stringValue": "a1882a40-fb85-4f65-971a-0c8420c7e51e"
+          }
+         },
+         {
+          "key": "http.flavor",
+          "value": {
+           "stringValue": "1.1"
+          }
+         },
+         {
+          "key": "http.host",
+          "value": {
+           "stringValue": "127.0.0.1:8102"
+          }
+         },
+         {
+          "key": "http.method",
+          "value": {
+           "stringValue": "POST"
+          }
+         },
+         {
+          "key": "http.route",
+          "value": {
+           "stringValue": "/api/v1/frequency/executions"
+          }
+         },
+         {
+          "key": "http.scheme",
+          "value": {
+           "stringValue": "http"
+          }
+         },
+         {
+          "key": "http.server_name",
+          "value": {
+           "stringValue": "127.0.0.1:8102"
+          }
+         },
+         {
+          "key": "http.status_code",
+          "value": {
+           "intValue": "202"
+          }
+         },
+         {
+          "key": "http.target",
+          "value": {
+           "stringValue": "/api/v1/frequency/executions"
+          }
+         },
+         {
+          "key": "http.url",
+          "value": {
+           "stringValue": "http://127.0.0.1:8102/api/v1/frequency/executions"
+          }
+         },
+         {
+          "key": "http.user_agent",
+          "value": {
+           "stringValue": "python-httpx/0.28.1"
+          }
+         },
+         {
+          "key": "net.host.port",
+          "value": {
+           "intValue": "8102"
+          }
+         },
+         {
+          "key": "net.peer.ip",
+          "value": {
+           "stringValue": "127.0.0.1"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "58725"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "e7db63d1a9e11d2c",
+        "parentSpanId": "7abf129d35f3cdbb",
+        "flags": 256,
+        "name": "BackgroundTask ejecutar",
+        "kind": 1,
+        "startTimeUnixNano": "1794204122022105800",
+        "endTimeUnixNano": "1794204122022276900",
+        "attributes": [
+         {
+          "key": "@jaeger@warnings",
+          "value": {
+           "arrayValue": {
+            "values": [
+             {
+              "stringValue": "clock skew adjustment disabled; not applying calculated delta of -135.20865ms"
+             }
+            ]
+           }
+          }
+         }
+        ],
+        "status": {}
+       }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.11.0"
+     }
+    ]
+   },
+   {
+    "resource": {
+     "attributes": [
+      {
+       "key": "deployment.environment",
+       "value": {
+        "stringValue": "demo"
+       }
+      },
+      {
+       "key": "service.instance.id",
+       "value": {
+        "stringValue": "ebe30046-ce90-478b-840d-9f96b4be1e1a"
+       }
+      },
+      {
+       "key": "service.name",
+       "value": {
+        "stringValue": "api-frecuencias"
+       }
+      },
+      {
+       "key": "service.version",
+       "value": {
+        "stringValue": "1.0.0"
+       }
+      },
+      {
+       "key": "telemetry.sdk.language",
+       "value": {
+        "stringValue": "python"
+       }
+      },
+      {
+       "key": "telemetry.sdk.name",
+       "value": {
+        "stringValue": "opentelemetry"
+       }
+      },
+      {
+       "key": "telemetry.sdk.version",
+       "value": {
+        "stringValue": "1.45.2"
+       }
+      }
+     ]
+    },
+    "scopeSpans": [
+     {
+      "scope": {
+       "name": "opentelemetry.instrumentation.sqlalchemy",
+       "version": "0.66b2"
+      },
+      "spans": [
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "106cc14928ad6315",
+        "parentSpanId": "dfd690f88faae590",
+        "flags": 256,
+        "name": "connect",
+        "kind": 3,
+        "startTimeUnixNano": "1794204126994922400",
+        "endTimeUnixNano": "1794204127002627800",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "3b63f591c4a0962b",
+        "parentSpanId": "dfd690f88faae590",
+        "flags": 256,
+        "name": "SELECT ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204127006986800",
+        "endTimeUnixNano": "1794204127008697700",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias.execution_log.execution_id AS ai_frecuencias_execution_log_execution_id, ai_frecuencias.execution_log.tipo AS ai_frecuencias_execution_log_tipo, ai_frecuencias.execution_log.estado AS ai_frecuencias_execution_log_estado, ai_frecuencias.execution_log.etapa AS ai_frecuencias_execution_log_etapa, ai_frecuencias.execution_log.progreso AS ai_frecuencias_execution_log_progreso, ai_frecuencias.execution_log.intentos AS ai_frecuencias_execution_log_intentos, ai_frecuencias.execution_log.marca_agua_anterior AS ai_frecuencias_execution_log_marca_agua_anterior, ai_frecuencias.execution_log.marca_agua_nueva AS ai_frecuencias_execution_log_marca_agua_nueva, ai_frecuencias.execution_log.data_cutoff AS ai_frecuencias_execution_log_data_cutoff, ai_frecuencias.execution_log.filas_leidas AS ai_frecuencias_execution_log_filas_leidas, ai_frecuencias.execution_log.filas_validas AS ai_frecuencias_execution_log_filas_validas, ai_frecuencias.execution_log.model_id AS ai_frecuencias_execution_log_model_id, ai_frecuencias.execution_log.feature_version AS ai_frecuencias_execution_log_feature_version, ai_frecuencias.execution_log.umbrales_version AS ai_frecuencias_execution_log_umbrales_version, ai_frecuencias.execution_log.parametros AS ai_frecuencias_execution_log_parametros, ai_frecuencias.execution_log.metricas AS ai_frecuencias_execution_log_metricas, ai_frecuencias.execution_log.correlation_id AS ai_frecuencias_execution_log_correlation_id, ai_frecuencias.execution_log.mensaje AS ai_frecuencias_execution_log_mensaje, ai_frecuencias.execution_log.creado_en AS ai_frecuencias_execution_log_creado_en, ai_frecuencias.execution_log.iniciado_en AS ai_frecuencias_execution_log_iniciado_en, ai_frecuencias.execution_log.terminado_en AS ai_frecuencias_execution_log_terminado_en, ai_frecuencias.execution_log.actualizado_en AS ai_frecuencias_execution_log_actualizado_en, ai_frecuencias.execution_log.worker_id AS ai_frecuencias_execution_log_worker_id, ai_frecuencias.execution_log.lease_hasta AS ai_frecuencias_execution_log_lease_hasta, ai_frecuencias.execution_log.disponible_desde AS ai_frecuencias_execution_log_disponible_desde, ai_frecuencias.execution_log.programada_para AS ai_frecuencias_execution_log_programada_para \nFROM ai_frecuencias.execution_log \nWHERE ai_frecuencias.execution_log.execution_id = %(pk_1)s::UUID"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "c298670865d09152",
+        "parentSpanId": "dfd690f88faae590",
+        "flags": 256,
+        "name": "SELECT ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204127014943400",
+        "endTimeUnixNano": "1794204127016883000",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "SELECT max(ai_frecuencias.execution_log.marca_agua_nueva) AS max_1 \nFROM ai_frecuencias.execution_log \nWHERE ai_frecuencias.execution_log.tipo = %(tipo_1)s::VARCHAR AND ai_frecuencias.execution_log.estado = %(estado_1)s::VARCHAR"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "4829257a3c842728",
+        "parentSpanId": "dfd690f88faae590",
+        "flags": 256,
+        "name": "connect",
+        "kind": 3,
+        "startTimeUnixNano": "1794204127019023000",
+        "endTimeUnixNano": "1794204127019975800",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "f1b9a6c4bc76811b",
+        "parentSpanId": "dfd690f88faae590",
+        "flags": 256,
+        "name": "UPDATE ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204127021090900",
+        "endTimeUnixNano": "1794204127022424800",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias.execution_log SET etapa=%(etapa)s::VARCHAR, progreso=%(progreso)s, marca_agua_anterior=%(marca_agua_anterior)s::TIMESTAMP WITH TIME ZONE, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.execution_log.execution_id = %(execution_id_1)s::UUID"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "df3575e7bd0ab94a",
+        "parentSpanId": "850deaa13b57a8ee",
+        "flags": 256,
+        "name": "connect",
+        "kind": 3,
+        "startTimeUnixNano": "1794204127855582100",
+        "endTimeUnixNano": "1794204127856646100",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "f7d1b28a65476bd7",
+        "parentSpanId": "850deaa13b57a8ee",
+        "flags": 256,
+        "name": "UPDATE ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204127860639700",
+        "endTimeUnixNano": "1794204127862561300",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias.execution_log SET etapa=%(etapa)s::VARCHAR, progreso=%(progreso)s, filas_leidas=%(filas_leidas)s::INTEGER, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.execution_log.execution_id = %(execution_id_1)s::UUID"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "401786c46200bb4e",
+        "parentSpanId": "b16a263d41e93741",
+        "flags": 256,
+        "name": "SELECT ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204127877192900",
+        "endTimeUnixNano": "1794204127879832800",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias.threshold_config.id, ai_frecuencias.threshold_config.nombre, ai_frecuencias.threshold_config.valor, ai_frecuencias.threshold_config.descripcion, ai_frecuencias.threshold_config.version, ai_frecuencias.threshold_config.vigente, ai_frecuencias.threshold_config.creado_por, ai_frecuencias.threshold_config.motivo, ai_frecuencias.threshold_config.creado_en \nFROM ai_frecuencias.threshold_config \nWHERE ai_frecuencias.threshold_config.vigente"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "d93d85730b6e4001",
+        "parentSpanId": "b16a263d41e93741",
+        "flags": 256,
+        "name": "SELECT ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204127881890500",
+        "endTimeUnixNano": "1794204127882937000",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias.model_registry.id, ai_frecuencias.model_registry.model_id, ai_frecuencias.model_registry.version, ai_frecuencias.model_registry.tipo, ai_frecuencias.model_registry.artefacto, ai_frecuencias.model_registry.sha256, ai_frecuencias.model_registry.feature_version, ai_frecuencias.model_registry.data_cutoff, ai_frecuencias.model_registry.metricas, ai_frecuencias.model_registry.estado, ai_frecuencias.model_registry.aprobado_por, ai_frecuencias.model_registry.activado_en, ai_frecuencias.model_registry.anterior_model_id, ai_frecuencias.model_registry.motivo, ai_frecuencias.model_registry.auditoria, ai_frecuencias.model_registry.execution_id, ai_frecuencias.model_registry.creado_en \nFROM ai_frecuencias.model_registry \nWHERE ai_frecuencias.model_registry.estado = %(estado_1)s::VARCHAR"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "4087e9d65f8ed21d",
+        "parentSpanId": "b16a263d41e93741",
+        "flags": 256,
+        "name": "connect",
+        "kind": 3,
+        "startTimeUnixNano": "1794204127883501100",
+        "endTimeUnixNano": "1794204127884109000",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "645dd5b0955cde34",
+        "parentSpanId": "b16a263d41e93741",
+        "flags": 256,
+        "name": "UPDATE ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204127884594900",
+        "endTimeUnixNano": "1794204127888412800",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias.execution_log SET etapa=%(etapa)s::VARCHAR, progreso=%(progreso)s, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.execution_log.execution_id = %(execution_id_1)s::UUID"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.11.0"
+     },
+     {
+      "scope": {
+       "name": "api_frecuencias"
+      },
+      "spans": [
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "850deaa13b57a8ee",
+        "parentSpanId": "dfd690f88faae590",
+        "flags": 256,
+        "name": "ejecucion.lectura_incremental",
+        "kind": 1,
+        "startTimeUnixNano": "1794204127044752300",
+        "endTimeUnixNano": "1794204127874394400",
+        "attributes": [
+         {
+          "key": "etapa",
+          "value": {
+           "stringValue": "lectura_incremental"
+          }
+         },
+         {
+          "key": "execution_id",
+          "value": {
+           "stringValue": "a1882a40-fb85-4f65-971a-0c8420c7e51e"
+          }
+         },
+         {
+          "key": "progreso",
+          "value": {
+           "doubleValue": 10
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "a746585de3a125fa",
+        "parentSpanId": "b16a263d41e93741",
+        "flags": 256,
+        "name": "ejecucion.guardar_errores_calidad",
+        "kind": 1,
+        "startTimeUnixNano": "1794204127875108800",
+        "endTimeUnixNano": "1794204127875124300",
+        "attributes": [
+         {
+          "key": "execution_id",
+          "value": {
+           "stringValue": "a1882a40-fb85-4f65-971a-0c8420c7e51e"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "189a6c83baf6824a",
+        "parentSpanId": "b16a263d41e93741",
+        "flags": 256,
+        "name": "ejecucion.incorporar_historico",
+        "kind": 1,
+        "startTimeUnixNano": "1794204127875192500",
+        "endTimeUnixNano": "1794204127876039600",
+        "attributes": [
+         {
+          "key": "execution_id",
+          "value": {
+           "stringValue": "a1882a40-fb85-4f65-971a-0c8420c7e51e"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "b16a263d41e93741",
+        "parentSpanId": "dfd690f88faae590",
+        "flags": 256,
+        "name": "ejecucion.calidad",
+        "kind": 1,
+        "startTimeUnixNano": "1794204127874705200",
+        "endTimeUnixNano": "1794204127931695000",
+        "attributes": [
+         {
+          "key": "etapa",
+          "value": {
+           "stringValue": "calidad"
+          }
+         },
+         {
+          "key": "execution_id",
+          "value": {
+           "stringValue": "a1882a40-fb85-4f65-971a-0c8420c7e51e"
+          }
+         },
+         {
+          "key": "filas_leidas",
+          "value": {
+           "intValue": "0"
+          }
+         },
+         {
+          "key": "progreso",
+          "value": {
+           "doubleValue": 25
+          }
+         }
+        ],
+        "status": {}
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "resource": {
+     "attributes": [
+      {
+       "key": "deployment.environment",
+       "value": {
+        "stringValue": "demo"
+       }
+      },
+      {
+       "key": "service.instance.id",
+       "value": {
+        "stringValue": "ebe30046-ce90-478b-840d-9f96b4be1e1a"
+       }
+      },
+      {
+       "key": "service.name",
+       "value": {
+        "stringValue": "api-frecuencias"
+       }
+      },
+      {
+       "key": "service.version",
+       "value": {
+        "stringValue": "1.0.0"
+       }
+      },
+      {
+       "key": "telemetry.sdk.language",
+       "value": {
+        "stringValue": "python"
+       }
+      },
+      {
+       "key": "telemetry.sdk.name",
+       "value": {
+        "stringValue": "opentelemetry"
+       }
+      },
+      {
+       "key": "telemetry.sdk.version",
+       "value": {
+        "stringValue": "1.45.2"
+       }
+      }
+     ]
+    },
+    "scopeSpans": [
+     {
+      "scope": {
+       "name": "opentelemetry.instrumentation.sqlalchemy",
+       "version": "0.66b2"
+      },
+      "spans": [
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "db13e286f683ce6e",
+        "parentSpanId": "5f7debe633a53db8",
+        "flags": 256,
+        "name": "INSERT ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131660872700",
+        "endTimeUnixNano": "1794204131664971400",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "INSERT ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "INSERT INTO ai_frecuencias.prediction (prediction_id, execution_id, ruta, instante, horizonte_min, objetivo, fecha, hora, pasajeros, p10, p90, model_id, feature_version, data_cutoff, generated_at, latencia_ms, explicacion, variables) VALUES (%(prediction_id)s::UUID, %(execution_id)s::UUID, %(ruta)s::VARCHAR, %(instante)s::TIMESTAMP WITH TIME ZONE, %(horizonte_min)s::INTEGER, %(objetivo)s::TIMESTAMP WITH TIME ZONE, %(fecha)s::DATE, %(hora)s::INTEGER, %(pasajeros)s, %(p10)s, %(p90)s, %(model_id)s::VARCHAR, %(feature_version)s::VARCHAR, %(data_cutoff)s::TIMESTAMP WITH TIME ZONE, %(generated_at)s::TIMESTAMP WITH TIME ZONE, %(latencia_ms)s, %(explicacion)s::JSONB, %(variables)s::JSONB) RETURNING ai_frecuencias.prediction.creado_en"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "6ac5c4d8a54ae231",
+        "parentSpanId": "5f7debe633a53db8",
+        "flags": 256,
+        "name": "connect",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131666487700",
+        "endTimeUnixNano": "1794204131667659600",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "dca8ecb63214ca4f",
+        "parentSpanId": "5f7debe633a53db8",
+        "flags": 256,
+        "name": "UPDATE ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131668199000",
+        "endTimeUnixNano": "1794204131669893600",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias.execution_log SET etapa=%(etapa)s::VARCHAR, progreso=%(progreso)s, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.execution_log.execution_id = %(execution_id_1)s::UUID"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "08350179e6fd1e1c",
+        "parentSpanId": "362797e7dbd5883f",
+        "flags": 256,
+        "name": "INSERT ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131690128800",
+        "endTimeUnixNano": "1794204131694112000",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "INSERT ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "INSERT INTO ai_frecuencias.recommendation (recommendation_id, execution_id, prediction_id, ruta, fecha, hora, demanda_hora, demanda_p90, buses_hora, headway_min, vehiculos_requeridos, capacidad_efectiva, ocupacion_esperada, viable, motivo, frecuencia_actual_min, diferencia_min, formula, umbrales_version, detalle) VALUES (%(recommendation_id)s::UUID, %(execution_id)s::UUID, %(prediction_id)s::UUID, %(ruta)s::VARCHAR, %(fecha)s::DATE, %(hora)s::INTEGER, %(demanda_hora)s, %(demanda_p90)s, %(buses_hora)s::INTEGER, %(headway_min)s, %(vehiculos_requeridos)s::INTEGER, %(capacidad_efectiva)s, %(ocupacion_esperada)s, %(viable)s, %(motivo)s::VARCHAR, %(frecuencia_actual_min)s, %(diferencia_min)s, %(formula)s::VARCHAR, %(umbrales_version)s::INTEGER, %(detalle)s::JSONB) RETURNING ai_frecuencias.recommendation.creado_en"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "ac716d19c3e159b7",
+        "parentSpanId": "362797e7dbd5883f",
+        "flags": 256,
+        "name": "SELECT ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131696511500",
+        "endTimeUnixNano": "1794204131697713600",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias.alert.alert_id, ai_frecuencias.alert.codigo, ai_frecuencias.alert.execution_id, ai_frecuencias.alert.empresa, ai_frecuencias.alert.ruta, ai_frecuencias.alert.sentido, ai_frecuencias.alert.viaje, ai_frecuencias.alert.conductor, ai_frecuencias.alert.vehiculo, ai_frecuencias.alert.detectada_en, ai_frecuencias.alert.ventana_inicio, ai_frecuencias.alert.ventana_fin, ai_frecuencias.alert.horizonte_min, ai_frecuencias.alert.severidad, ai_frecuencias.alert.estado, ai_frecuencias.alert.observado, ai_frecuencias.alert.esperado, ai_frecuencias.alert.umbral, ai_frecuencias.alert.puntaje, ai_frecuencias.alert.explicacion, ai_frecuencias.alert.variables, ai_frecuencias.alert.recomendacion, ai_frecuencias.alert.asignado_a, ai_frecuencias.alert.comentarios, ai_frecuencias.alert.clave_dedup, ai_frecuencias.alert.ocurrencias, ai_frecuencias.alert.ultima_deteccion, ai_frecuencias.alert.creado_en, ai_frecuencias.alert.actualizado_en \nFROM ai_frecuencias.alert \nWHERE ai_frecuencias.alert.clave_dedup = %(clave_dedup_1)s::VARCHAR AND (ai_frecuencias.alert.estado NOT IN (%(estado_1_1)s::VARCHAR, %(estado_1_2)s::VARCHAR))"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "2191fab288477cba",
+        "parentSpanId": "362797e7dbd5883f",
+        "flags": 256,
+        "name": "UPDATE ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131700305600",
+        "endTimeUnixNano": "1794204131701692000",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias.alert SET ocurrencias=%(ocurrencias)s::INTEGER, ultima_deteccion=%(ultima_deteccion)s::TIMESTAMP WITH TIME ZONE, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.alert.alert_id = %(ai_frecuencias_alert_alert_id)s::UUID"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "0d5f9c1d72143827",
+        "parentSpanId": "362797e7dbd5883f",
+        "flags": 256,
+        "name": "SELECT ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131702243700",
+        "endTimeUnixNano": "1794204131702974100",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias.alert.alert_id, ai_frecuencias.alert.codigo, ai_frecuencias.alert.execution_id, ai_frecuencias.alert.empresa, ai_frecuencias.alert.ruta, ai_frecuencias.alert.sentido, ai_frecuencias.alert.viaje, ai_frecuencias.alert.conductor, ai_frecuencias.alert.vehiculo, ai_frecuencias.alert.detectada_en, ai_frecuencias.alert.ventana_inicio, ai_frecuencias.alert.ventana_fin, ai_frecuencias.alert.horizonte_min, ai_frecuencias.alert.severidad, ai_frecuencias.alert.estado, ai_frecuencias.alert.observado, ai_frecuencias.alert.esperado, ai_frecuencias.alert.umbral, ai_frecuencias.alert.puntaje, ai_frecuencias.alert.explicacion, ai_frecuencias.alert.variables, ai_frecuencias.alert.recomendacion, ai_frecuencias.alert.asignado_a, ai_frecuencias.alert.comentarios, ai_frecuencias.alert.clave_dedup, ai_frecuencias.alert.ocurrencias, ai_frecuencias.alert.ultima_deteccion, ai_frecuencias.alert.creado_en, ai_frecuencias.alert.actualizado_en \nFROM ai_frecuencias.alert \nWHERE ai_frecuencias.alert.clave_dedup = %(clave_dedup_1)s::VARCHAR AND (ai_frecuencias.alert.estado NOT IN (%(estado_1_1)s::VARCHAR, %(estado_1_2)s::VARCHAR))"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "5c0aa607bf2ad503",
+        "parentSpanId": "362797e7dbd5883f",
+        "flags": 256,
+        "name": "UPDATE ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131703536400",
+        "endTimeUnixNano": "1794204131706045100",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias.alert SET ocurrencias=%(ocurrencias)s::INTEGER, ultima_deteccion=%(ultima_deteccion)s::TIMESTAMP WITH TIME ZONE, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.alert.alert_id = %(ai_frecuencias_alert_alert_id)s::UUID"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "54ed5b92d009e92a",
+        "parentSpanId": "362797e7dbd5883f",
+        "flags": 256,
+        "name": "SELECT ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131706858200",
+        "endTimeUnixNano": "1794204131708243300",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias.alert.alert_id, ai_frecuencias.alert.codigo, ai_frecuencias.alert.execution_id, ai_frecuencias.alert.empresa, ai_frecuencias.alert.ruta, ai_frecuencias.alert.sentido, ai_frecuencias.alert.viaje, ai_frecuencias.alert.conductor, ai_frecuencias.alert.vehiculo, ai_frecuencias.alert.detectada_en, ai_frecuencias.alert.ventana_inicio, ai_frecuencias.alert.ventana_fin, ai_frecuencias.alert.horizonte_min, ai_frecuencias.alert.severidad, ai_frecuencias.alert.estado, ai_frecuencias.alert.observado, ai_frecuencias.alert.esperado, ai_frecuencias.alert.umbral, ai_frecuencias.alert.puntaje, ai_frecuencias.alert.explicacion, ai_frecuencias.alert.variables, ai_frecuencias.alert.recomendacion, ai_frecuencias.alert.asignado_a, ai_frecuencias.alert.comentarios, ai_frecuencias.alert.clave_dedup, ai_frecuencias.alert.ocurrencias, ai_frecuencias.alert.ultima_deteccion, ai_frecuencias.alert.creado_en, ai_frecuencias.alert.actualizado_en \nFROM ai_frecuencias.alert \nWHERE ai_frecuencias.alert.clave_dedup = %(clave_dedup_1)s::VARCHAR AND (ai_frecuencias.alert.estado NOT IN (%(estado_1_1)s::VARCHAR, %(estado_1_2)s::VARCHAR))"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "86f3b08712094c6c",
+        "parentSpanId": "362797e7dbd5883f",
+        "flags": 256,
+        "name": "connect",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131708952600",
+        "endTimeUnixNano": "1794204131709608900",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "c728e527c3b5eff4",
+        "parentSpanId": "362797e7dbd5883f",
+        "flags": 256,
+        "name": "UPDATE ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131709884900",
+        "endTimeUnixNano": "1794204131711299700",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias.execution_log SET etapa=%(etapa)s::VARCHAR, progreso=%(progreso)s, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.execution_log.execution_id = %(execution_id_1)s::UUID"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "930a9c2ed48a1808",
+        "parentSpanId": "549c641cae2032d2",
+        "flags": 256,
+        "name": "UPDATE ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131724883500",
+        "endTimeUnixNano": "1794204131726310700",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias.alert SET ocurrencias=%(ocurrencias)s::INTEGER, ultima_deteccion=%(ultima_deteccion)s::TIMESTAMP WITH TIME ZONE, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.alert.alert_id = %(ai_frecuencias_alert_alert_id)s::UUID"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "8112a1a618348643",
+        "parentSpanId": "549c641cae2032d2",
+        "flags": 256,
+        "name": "SELECT ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131727937400",
+        "endTimeUnixNano": "1794204131728718100",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "SELECT ai_frecuencias.prediction.feature_version \nFROM ai_frecuencias.prediction \nWHERE ai_frecuencias.prediction.execution_id = %(execution_id_1)s::UUID \n LIMIT %(param_1)s::INTEGER"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "6f66d719fd7f8db3",
+        "parentSpanId": "549c641cae2032d2",
+        "flags": 256,
+        "name": "UPDATE ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131730910700",
+        "endTimeUnixNano": "1794204131733986600",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias.execution_log SET estado=%(estado)s::VARCHAR, etapa=%(etapa)s::VARCHAR, progreso=%(progreso)s, marca_agua_anterior=%(marca_agua_anterior)s::TIMESTAMP WITH TIME ZONE, marca_agua_nueva=%(marca_agua_nueva)s::TIMESTAMP WITH TIME ZONE, data_cutoff=%(data_cutoff)s::TIMESTAMP WITH TIME ZONE, filas_leidas=%(filas_leidas)s::INTEGER, filas_validas=%(filas_validas)s::INTEGER, model_id=%(model_id)s::VARCHAR, feature_version=%(feature_version)s::VARCHAR, umbrales_version=%(umbrales_version)s::INTEGER, metricas=%(metricas)s::JSONB, mensaje=%(mensaje)s::VARCHAR, terminado_en=%(terminado_en)s::TIMESTAMP WITH TIME ZONE, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE, lease_hasta=%(lease_hasta)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.execution_log.execution_id = %(execution_id_1)s::UUID AND ai_frecuencias.execution_log.worker_id = %(worker_id_1)s::VARCHAR AND ai_frecuencias.execution_log.estado = %(estado_1)s::VARCHAR"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "c5c3cdf613d15449",
+        "parentSpanId": "549c641cae2032d2",
+        "flags": 256,
+        "name": "UPDATE ai_frecuencias_pruebas_seguridad",
+        "kind": 3,
+        "startTimeUnixNano": "1794204131734797800",
+        "endTimeUnixNano": "1794204131736161500",
+        "attributes": [
+         {
+          "key": "db.name",
+          "value": {
+           "stringValue": "ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.operation",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias_pruebas_seguridad"
+          }
+         },
+         {
+          "key": "db.statement",
+          "value": {
+           "stringValue": "UPDATE ai_frecuencias.execution_attempt SET resultado = 'ok', terminado_en = now() WHERE execution_id = %(id)s AND worker_id = %(w)s AND resultado = 'corriendo'"
+          }
+         },
+         {
+          "key": "db.system",
+          "value": {
+           "stringValue": "postgresql"
+          }
+         },
+         {
+          "key": "db.user",
+          "value": {
+           "stringValue": "sobusa"
+          }
+         },
+         {
+          "key": "net.peer.name",
+          "value": {
+           "stringValue": "localhost"
+          }
+         },
+         {
+          "key": "net.peer.port",
+          "value": {
+           "intValue": "5433"
+          }
+         }
+        ],
+        "status": {}
+       }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.11.0"
+     },
+     {
+      "scope": {
+       "name": "api_frecuencias"
+      },
+      "spans": [
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "2e307fae00b72033",
+        "parentSpanId": "5f7debe633a53db8",
+        "flags": 256,
+        "name": "optimizacion.recomendar",
+        "kind": 1,
+        "startTimeUnixNano": "1794204131665632300",
+        "endTimeUnixNano": "1794204131665731100",
+        "attributes": [
+         {
+          "key": "execution_id",
+          "value": {
+           "stringValue": "a1882a40-fb85-4f65-971a-0c8420c7e51e"
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "5f7debe633a53db8",
+        "parentSpanId": "dfd690f88faae590",
+        "flags": 256,
+        "name": "ejecucion.prediccion",
+        "kind": 1,
+        "startTimeUnixNano": "1794204127931802800",
+        "endTimeUnixNano": "1794204131687905400",
+        "attributes": [
+         {
+          "key": "etapa",
+          "value": {
+           "stringValue": "prediccion"
+          }
+         },
+         {
+          "key": "execution_id",
+          "value": {
+           "stringValue": "a1882a40-fb85-4f65-971a-0c8420c7e51e"
+          }
+         },
+         {
+          "key": "progreso",
+          "value": {
+           "doubleValue": 45
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "362797e7dbd5883f",
+        "parentSpanId": "dfd690f88faae590",
+        "flags": 256,
+        "name": "ejecucion.alertas",
+        "kind": 1,
+        "startTimeUnixNano": "1794204131688007300",
+        "endTimeUnixNano": "1794204131724077200",
+        "attributes": [
+         {
+          "key": "etapa",
+          "value": {
+           "stringValue": "alertas"
+          }
+         },
+         {
+          "key": "execution_id",
+          "value": {
+           "stringValue": "a1882a40-fb85-4f65-971a-0c8420c7e51e"
+          }
+         },
+         {
+          "key": "progreso",
+          "value": {
+           "doubleValue": 70
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "549c641cae2032d2",
+        "parentSpanId": "dfd690f88faae590",
+        "flags": 256,
+        "name": "ejecucion.notificaciones",
+        "kind": 1,
+        "startTimeUnixNano": "1794204131724190800",
+        "endTimeUnixNano": "1794204131741745800",
+        "attributes": [
+         {
+          "key": "etapa",
+          "value": {
+           "stringValue": "notificaciones"
+          }
+         },
+         {
+          "key": "execution_id",
+          "value": {
+           "stringValue": "a1882a40-fb85-4f65-971a-0c8420c7e51e"
+          }
+         },
+         {
+          "key": "progreso",
+          "value": {
+           "doubleValue": 85
+          }
+         }
+        ],
+        "status": {}
+       },
+       {
+        "traceId": "0cf04835c3dd6a790935168eef5b2c67",
+        "spanId": "dfd690f88faae590",
+        "parentSpanId": "7abf129d35f3cdbb",
+        "flags": 256,
+        "name": "ejecucion.ciclo_frecuencia",
+        "kind": 1,
+        "startTimeUnixNano": "1794204122821792300",
+        "endTimeUnixNano": "1794204131741772700",
+        "attributes": [
+         {
+          "key": "correlation_id",
+          "value": {
+           "stringValue": "evid-jaeger-1"
+          }
+         },
+         {
+          "key": "execution_id",
+          "value": {
+           "stringValue": "a1882a40-fb85-4f65-971a-0c8420c7e51e"
+          }
+         },
+         {
+          "key": "tipo",
+          "value": {
+           "stringValue": "frecuencia"
+          }
+         },
+         {
+          "key": "worker_id",
+          "value": {
+           "stringValue": "replica-evidencia:26520:9b0854:t1"
+          }
+         }
+        ],
+        "status": {}
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

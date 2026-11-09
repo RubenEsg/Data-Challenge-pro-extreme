@@ -1,0 +1,108 @@
+{
+  "referencia": "2024-09-01 a 2025-08-31 (365 días de entrenamiento del modelo activo)",
+  "ventanas_2025": [
+    {
+      "ventana": "2025-09-01 + 28 días",
+      "psi_vs_anio_referencia": {
+        "dia_lag7": 0.566,
+        "lag7": 0.007,
+        "nivel_7_34": 0.025
+      },
+      "psi_dia_lag7_vs_misma_ventana_anio_anterior": 0.65,
+      "psi_dia_lag7_una_fila_por_ruta_y_dia": 0.571
+    },
+    {
+      "ventana": "2025-10-01 + 28 días",
+      "psi_vs_anio_referencia": {
+        "dia_lag7": 0.784,
+        "lag7": 0.014,
+        "nivel_7_34": 0.059
+      },
+      "psi_dia_lag7_vs_misma_ventana_anio_anterior": 0.882,
+      "psi_dia_lag7_una_fila_por_ruta_y_dia": 0.786
+    },
+    {
+      "ventana": "2025-11-01 + 28 días",
+      "psi_vs_anio_referencia": {
+        "dia_lag7": 0.279,
+        "lag7": 0.007,
+        "nivel_7_34": 0.072
+      },
+      "psi_dia_lag7_vs_misma_ventana_anio_anterior": 1.235,
+      "psi_dia_lag7_una_fila_por_ruta_y_dia": 0.278
+    },
+    {
+      "ventana": "2025-12-01 + 28 días",
+      "psi_vs_anio_referencia": {
+        "dia_lag7": 1.153,
+        "lag7": 0.019,
+        "nivel_7_34": 0.048
+      },
+      "psi_dia_lag7_vs_misma_ventana_anio_anterior": 1.261,
+      "psi_dia_lag7_una_fila_por_ruta_y_dia": 1.148
+    }
+  ],
+  "ruido_28_dias_al_azar_de_la_referencia": {
+    "p50": 0.077,
+    "p95": 0.177
+  },
+  "ventanas_contiguas_dentro_de_la_referencia": {
+    "p50": 0.133,
+    "max": 1.63,
+    "detalle": [
+      {
+        "desde": "2024-09-01",
+        "psi": 0.259
+      },
+      {
+        "desde": "2024-09-29",
+        "psi": 0.063
+      },
+      {
+        "desde": "2024-10-27",
+        "psi": 0.088
+      },
+      {
+        "desde": "2024-11-24",
+        "psi": 0.131
+      },
+      {
+        "desde": "2024-12-22",
+        "psi": 0.5
+      },
+      {
+        "desde": "2025-01-19",
+        "psi": 0.081
+      },
+      {
+        "desde": "2025-02-16",
+        "psi": 0.458
+      },
+      {
+        "desde": "2025-03-16",
+        "psi": 0.246
+      },
+      {
+        "desde": "2025-04-13",
+        "psi": 0.133
+      },
+      {
+        "desde": "2025-05-11",
+        "psi": 0.127
+      },
+      {
+        "desde": "2025-06-08",
+        "psi": 1.016
+      },
+      {
+        "desde": "2025-07-06",
+        "psi": 1.63
+      },
+      {
+        "desde": "2025-08-03",
+        "psi": 0.038
+      }
+    ]
+  },
+  "conclusion": "dia_lag7 es diaria (una por ruta y día, repetida en 17 horas), autocorrelacionada y estacional: 28 días contiguos solo ven una estación, y dentro del MISMO año de entrenamiento ya dan PSI de hasta 1,6, mientras 28 días al azar dan ~0,08. No es un error de datos ni de granularidad horaria (una fila por día da lo mismo) y tampoco se corrige con la misma ventana del año anterior. Se reporta con su umbral calibrado (p95 del ruido contiguo) y NO dispara el reentrenamiento; las variables horarias (lag7, b8, m4, nivel_7_34) sí, con el umbral fijo."
+}

@@ -1,0 +1,3221 @@
+{
+ "inicio": "2026-11-09 07:05:43",
+ "pruebas": [
+  {
+   "prueba": "inicio: carga con su título y sin errores de consola",
+   "ok": true,
+   "detalle": "h1 «¿Qué proponemos?» · errores []"
+  },
+  {
+   "prueba": "inicio: sin desplazamiento horizontal a 1600 px",
+   "ok": true,
+   "detalle": "[1600, 1600]"
+  },
+  {
+   "prueba": "inicio: contraste del texto visible (WCAG AA)",
+   "ok": true,
+   "detalle": "353 textos · mínimo 3.45:1 · []"
+  },
+  {
+   "prueba": "inicio: Tab recorre 31 elementos con foco visible",
+   "ok": true,
+   "detalle": "barra (12 enlaces) → contenido: summary:Ver los datos → a:Ver qué gana Sobusa → summary:Ver los datos → summary:Ver los datos → input:SILENCIO → button:Exportar CSV → button:Exportar XLSX → summary:Cómo calcula la API los vehículos y el r → a:Ir a Alertas → summary:Limitaciones que declara la API → summary:Ver los datos → summary:Ver los datos → a:Pronóstico\n\nLos pronósticos que guarda l → a:Horar"
+  },
+  {
+   "prueba": "pronostico: carga con su título y sin errores de consola",
+   "ok": true,
+   "detalle": "h1 «¿Cuántos pasajeros habrá?» · errores []"
+  },
+  {
+   "prueba": "pronostico: sin desplazamiento horizontal a 1600 px",
+   "ok": true,
+   "detalle": "[1600, 1600]"
+  },
+  {
+   "prueba": "pronostico: contraste del texto visible (WCAG AA)",
+   "ok": true,
+   "detalle": "571 textos · mínimo 5.5:1 · []"
+  },
+  {
+   "prueba": "pronostico: Tab recorre 32 elementos con foco visible",
+   "ok": true,
+   "detalle": "barra (12 enlaces) → contenido: input:CRA 54 → button:Día anterior → input:dd/mm/aaaa → button:Día siguiente → input:60 → button:Exportar CSV → button:Exportar XLSX → summary:Ver los datos → summary:Ver los datos → summary:La explicación de la API → summary:Ver los datos → button:04:00–05:00 → button:05:00–06:00 → button:06:00–07:00 → button:06:00–07:00 → button:07:00–08:00 → button:08:00–09:00 → "
+  },
+  {
+   "prueba": "horario: carga con su título y sin errores de consola",
+   "ok": true,
+   "detalle": "h1 «¿Cuántos buses y cada cuánto?» · errores []"
+  },
+  {
+   "prueba": "horario: sin desplazamiento horizontal a 1600 px",
+   "ok": true,
+   "detalle": "[1600, 1600]"
+  },
+  {
+   "prueba": "horario: contraste del texto visible (WCAG AA)",
+   "ok": true,
+   "detalle": "705 textos · mínimo 5.44:1 · []"
+  },
+  {
+   "prueba": "horario: Tab recorre 32 elementos con foco visible",
+   "ok": true,
+   "detalle": "barra (12 enlaces) → contenido: input:CRA 54 → button:Día anterior → input:Elige un día → button:Día siguiente → input:E12 → button:Restablecer → span:SPAN → span:SPAN → span:SPAN → span:SPAN → span:SPAN → span:SPAN → input:auto → summary:Ver los datos → input:supuestos → input:oraculo → summary:Ver los datos → summary:Ver los datos → input:0.7 → summary:Ver los datos"
+  },
+  {
+   "prueba": "despacho: carga con su título y sin errores de consola",
+   "ok": true,
+   "detalle": "h1 «Despacho en vivo» · errores []"
+  },
+  {
+   "prueba": "despacho: sin desplazamiento horizontal a 1600 px",
+   "ok": true,
+   "detalle": "[1600, 1600]"
+  },
+  {
+   "prueba": "despacho: contraste del texto visible (WCAG AA)",
+   "ok": true,
+   "detalle": "550 textos · mínimo 4.99:1 · []"
+  },
+  {
+   "prueba": "despacho: el subtítulo dice que es la repetición de un día de 2025 y que no despacha (§3.2)",
+   "ok": true,
+   "detalle": "Despacho en vivo\n\nRepetición de un día de 2025 como si fuera hoy. Muestra lo que vería el despachador; no despacha ni cambia la operación."
+  },
+  {
+   "prueba": "despacho: Tab recorre 32 elementos con foco visible",
+   "ok": true,
+   "detalle": "barra (12 enlaces) → contenido: button:Día anterior → input:Elige un día → button:Día siguiente → input:todas → button:Pausar → input:60 → span:SPAN → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → canvas:Map → summary:Toggle attribution → a:OpenStreetMap → a:CARTO → summary:Ver los datos → div:Media\nSILENCIO\nFlota al límite: el plan  → input:despachos → summary:Ver los da"
+  },
+  {
+   "prueba": "alertas: carga con su título y sin errores de consola",
+   "ok": true,
+   "detalle": "h1 «Alertas» · errores []"
+  },
+  {
+   "prueba": "alertas: sin desplazamiento horizontal a 1600 px",
+   "ok": true,
+   "detalle": "[1600, 1600]"
+  },
+  {
+   "prueba": "alertas: contraste del texto visible (WCAG AA)",
+   "ok": true,
+   "detalle": "374 textos · mínimo 4.99:1 · []"
+  },
+  {
+   "prueba": "alertas: Tab recorre 32 elementos con foco visible",
+   "ok": true,
+   "detalle": "barra (12 enlaces) → contenido: input:nueva → input:todas → input:todas → button:Todos → input:dd/mm/aaaa → input:dd/mm/aaaa → button:Exportar CSV → button:Exportar XLSX → summary:Ver los datos → button:ALT-002 → button:ALT-002 → button:ALT-002 → button:ALT-002 → button:ALT-001 → button:ALT-002 → button:ALT-002 → button:ALT-002 → button:ALT-002 → button:ALT-002 → button:ALT-002"
+  },
+  {
+   "prueba": "recomendaciones: carga con su título y sin errores de consola",
+   "ok": true,
+   "detalle": "h1 «Recomendaciones» · errores []"
+  },
+  {
+   "prueba": "recomendaciones: sin desplazamiento horizontal a 1600 px",
+   "ok": true,
+   "detalle": "[1600, 1600]"
+  },
+  {
+   "prueba": "recomendaciones: contraste del texto visible (WCAG AA)",
+   "ok": true,
+   "detalle": "754 textos · mínimo 4.99:1 · []"
+  },
+  {
+   "prueba": "recomendaciones: Tab recorre 32 elementos con foco visible",
+   "ok": true,
+   "detalle": "barra (12 enlaces) → contenido: input:SILENCIO → input:todas → button:Datos hasta 3 sep 2025 · 5b50e57d → button:jueves 4 de septiembre de 2025 → button:Exportar CSV → button:Exportar XLSX → summary:Ver los datos → summary:Fórmula → summary:Fórmula → summary:Motivo y fórmula → summary:Fórmula → summary:Motivo y fórmula → summary:Motivo y fórmula → summary:Fórmula → summary:Fórmula → summary:Fórmul"
+  },
+  {
+   "prueba": "operacion: carga con su título y sin errores de consola",
+   "ok": true,
+   "detalle": "h1 «Operación» · errores []"
+  },
+  {
+   "prueba": "operacion: sin desplazamiento horizontal a 1600 px",
+   "ok": true,
+   "detalle": "[1600, 1600]"
+  },
+  {
+   "prueba": "operacion: contraste del texto visible (WCAG AA)",
+   "ok": true,
+   "detalle": "159 textos · mínimo 4.99:1 · []"
+  },
+  {
+   "prueba": "operacion: Tab recorre 31 elementos con foco visible",
+   "ok": true,
+   "detalle": "barra (12 enlaces) → contenido: input:ejecuciones → button:Ejecutar día siguiente → summary:Ver los datos → div:Ejecución\tEstado\tTipo\tProgreso\tMarca de  → button:5b50e57d · frecuencia · terminada · 9 no → summary:Ver los datos → input:op-f-lote → input:op-f-dimension → input:op-f-codigo → a:Sobusa Despacho → a:Inicio → a:Pronóstico → a:Horario → a:Despacho → a:Alertas → a:Recomendaciones → a:Opera"
+  },
+  {
+   "prueba": "monitoreo: carga con su título y sin errores de consola",
+   "ok": true,
+   "detalle": "h1 «Monitoreo» · errores []"
+  },
+  {
+   "prueba": "monitoreo: sin desplazamiento horizontal a 1600 px",
+   "ok": true,
+   "detalle": "[1600, 1600]"
+  },
+  {
+   "prueba": "monitoreo: contraste del texto visible (WCAG AA)",
+   "ok": true,
+   "detalle": "223 textos · mínimo 4.99:1 · []"
+  },
+  {
+   "prueba": "monitoreo: Tab recorre 31 elementos con foco visible",
+   "ok": true,
+   "detalle": "barra (12 enlaces) → contenido: button:Actualizar → button:Exportar CSV → button:Exportar XLSX → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → a:Sobusa Despacho → a:Inicio → a:Pronóstico → a:Horario → a:Despacho → a:Alertas → a:Recomendaciones → a:Operación → a:Monitoreo → a:Modelo → a:Resultado"
+  },
+  {
+   "prueba": "modelo: carga con su título y sin errores de consola",
+   "ok": true,
+   "detalle": "h1 «¿Qué modelo es y por qué?» · errores []"
+  },
+  {
+   "prueba": "modelo: sin desplazamiento horizontal a 1600 px",
+   "ok": true,
+   "detalle": "[1600, 1600]"
+  },
+  {
+   "prueba": "modelo: contraste del texto visible (WCAG AA)",
+   "ok": true,
+   "detalle": "234 textos · mínimo 3.45:1 · []"
+  },
+  {
+   "prueba": "modelo: Tab recorre 31 elementos con foco visible",
+   "ok": true,
+   "detalle": "barra (12 enlaces) → contenido: summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Ver los datos → summary:Motivo tal como lo dejó el experimento 1 → a:Sobusa Despacho → a:Inicio → a:Pronóstico → a:Horario → a:Despacho → a:Alertas → a:Recomendaciones → a:Operación → a:Monito"
+  },
+  {
+   "prueba": "resultado: carga con su título y sin errores de consola",
+   "ok": true,
+   "detalle": "h1 «¿Qué gana Sobusa?» · errores []"
+  },
+  {
+   "prueba": "resultado: sin desplazamiento horizontal a 1600 px",
+   "ok": true,
+   "detalle": "[1600, 1600]"
+  },
+  {
+   "prueba": "resultado: contraste del texto visible (WCAG AA)",
+   "ok": true,
+   "detalle": "365 textos · mínimo 4.99:1 · []"
+  },
+  {
+   "prueba": "resultado: Tab recorre 31 elementos con foco visible",
+   "ok": true,
+   "detalle": "barra (12 enlaces) → contenido: summary:Ver los datos → summary:Ver los datos → summary:Ver los datos (los dos planes, M COP al  → summary:Ver los datos → summary:Ver los datos → input:Laboral → summary:Ver los datos (salidas en cada hora del  → summary:Ver los datos → summary:Ver los datos (M COP al año) → summary:Qué mide cada cifra → a:Sobusa Despacho → a:Inicio → a:Pronóstico → a:Horario → a:D"
+  },
+  {
+   "prueba": "enlaces: carga con su título y sin errores de consola",
+   "ok": true,
+   "detalle": "h1 «¿Dónde está el resto del proyecto?» · errores []"
+  },
+  {
+   "prueba": "enlaces: sin desplazamiento horizontal a 1600 px",
+   "ok": true,
+   "detalle": "[1600, 1600]"
+  },
+  {
+   "prueba": "enlaces: contraste del texto visible (WCAG AA)",
+   "ok": true,
+   "detalle": "38 textos · mínimo 5.44:1 · []"
+  },
+  {
+   "prueba": "enlaces: Tab recorre 31 elementos con foco visible",
+   "ok": true,
+   "detalle": "barra (12 enlaces) → contenido: a:Abrir la app completa → a:Informe técnico final (PDF) → a:Cuaderno final ejecutado (HTML) → a:Consola de despacho\n\nQué hace el despach → a:Vista 3D\n\nLos buses en las calles de Bar → a:Planificador\n\nEl horario recomendado por → a:Simulador de ahorro\n\nCostos, conductores → a:Metodología del Entregable 2 (PDF) → a:Informe de resultados (texto) → a:Sobusa Despacho → a"
+  },
+  {
+   "prueba": "alertas: la bandeja va en orden de prioridad (crítica → preventiva → informativa)",
+   "ok": true,
+   "detalle": "Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica · Crítica"
+  },
+  {
+   "prueba": "alertas: el orden de la bandeja = GET /alerts?orden=prioridad",
+   "ok": true,
+   "detalle": "20 filas · API ['ALT-002', 'ALT-002', 'ALT-002', 'ALT-002', 'ALT-001']"
+  },
+  {
+   "prueba": "alertas: el chip «Escalada» marca las alertas con «escalar» en su bitácora",
+   "ok": true,
+   "detalle": "0 chips · 0 escaladas en la API"
+  },
+  {
+   "prueba": "alertas: el detalle muestra «Origen»",
+   "ok": true,
+   "detalle": "ALT-002"
+  },
+  {
+   "prueba": "alertas: el detalle muestra «Tendencia»",
+   "ok": true,
+   "detalle": "ALT-002"
+  },
+  {
+   "prueba": "alertas: el detalle muestra «Pendiente»",
+   "ok": true,
+   "detalle": "ALT-002"
+  },
+  {
+   "prueba": "alertas: el detalle muestra «Serie reciente»",
+   "ok": true,
+   "detalle": "ALT-002"
+  },
+  {
+   "prueba": "alertas: el detalle muestra «Probabilidad»",
+   "ok": true,
+   "detalle": "ALT-002"
+  },
+  {
+   "prueba": "alertas: el detalle muestra «Método del puntaje»",
+   "ok": true,
+   "detalle": "ALT-002"
+  },
+  {
+   "prueba": "alertas: el detalle muestra «Variables influyentes»",
+   "ok": true,
+   "detalle": "ALT-002"
+  },
+  {
+   "prueba": "alertas: el detalle muestra «Ubicación»",
+   "ok": true,
+   "detalle": "ALT-002"
+  },
+  {
+   "prueba": "alertas: la pendiente coincide con la API",
+   "ok": true,
+   "detalle": "API None"
+  },
+  {
+   "prueba": "alertas: la serie reciente se dibuja",
+   "ok": true,
+   "detalle": "[{'inicio': '2025-09-03T11:00:00-05:00', 'pasajeros': 593.0, 'salidas_observadas': 4, 'ocupacion_observada': 1.018774}, {'inicio': '2025-09-03T12:00:00-05:00', 'pasajeros': 562.0, 'salidas_observadas': 5, 'ocupacion_observada': 0.8274888}]"
+  },
+  {
+   "prueba": "alertas: hay alertas observadas en la API",
+   "ok": true,
+   "detalle": "ALT-007"
+  },
+  {
+   "prueba": "alertas: 0 errores de consola en el detalle",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "recomendaciones: salidas del día del plan (modelo activo, persistido por el ciclo) = API",
+   "ok": true,
+   "detalle": "API 131 · Salidas del día con el plan\n\n131\nsalidas\n\nprogramadas: —\n\njueves 4 de septiembre de 2025 · Laboral\n\nHora con más salidas"
+  },
+  {
+   "prueba": "recomendaciones: vehículos en la hora pico = API",
+   "ok": true,
+   "detalle": "83"
+  },
+  {
+   "prueba": "recomendaciones: una fila por hora del plan",
+   "ok": true,
+   "detalle": "17 filas · API 17 horas"
+  },
+  {
+   "prueba": "recomendaciones: escenario calculado con la clave de analista o superior",
+   "ok": true,
+   "detalle": "El escenario no es viable\n\nLa flota disponible (45 vehículos, ciclo de 205,6 min) solo sostiene 542 pasajeros/h de capac"
+  },
+  {
+   "prueba": "recomendaciones: inviable con su motivo y la mejor aproximación (§18)",
+   "ok": true,
+   "detalle": "El escenario no es viable\n\nLa flota disponible (45 vehículos, ciclo de 205,6 min) solo sostiene 542 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 1.251 (43,4 % de cobertura). S"
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «Función objetivo (§10.2)»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «α · Costo operativo»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «β · Tiempo de espera»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «γ · Sobreocupación»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «δ · Desviación de la frecuencia»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «peso: »",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «Total ponderado»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «Restricciones y límites que mandan»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «Holgura»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «Límites que mandan»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «Mezcla de tipologías (§10.1)»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «Actual frente a recomendada (RF-008)»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario muestra «Cumple el nivel de servicio»",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: el escenario viable no muestra el aviso de inviable",
+   "ok": true,
+   "detalle": "\tVigente a las 10:00\tEscenario\nDemanda (pas/h)\t626\t300\nBuses por hora\t6\t6\nHeadway\t10,00 min\t10,00 min\nVehículos requeridos\t25\t27\nOcupación esperada\t75,7 %\t32,0 "
+  },
+  {
+   "prueba": "recomendaciones: un peso de la solicitud se muestra con su fuente",
+   "ok": true,
+   "detalle": "['peso: solicitud\\t2,00\\t1.404.979\\t2.809.957', 'peso: threshold_config v5\\t1,00\\t248.257\\t248.257', 'peso: threshold_config v5\\t1,00\\t0\\t0', 'peso: threshold_config v5\\t1,00\\t79.082\\t79.082']"
+  },
+  {
+   "prueba": "recomendaciones: 0 errores de consola",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "monitoreo: WAPE móvil = API",
+   "ok": true,
+   "detalle": "0.12494999999999999"
+  },
+  {
+   "prueba": "monitoreo: MAE móvil = API",
+   "ok": true,
+   "detalle": "89.538"
+  },
+  {
+   "prueba": "monitoreo: cobertura P10–P90 = API",
+   "ok": true,
+   "detalle": "0.7878000000000001"
+  },
+  {
+   "prueba": "monitoreo: sesgo = API",
+   "ok": true,
+   "detalle": "0.0036"
+  },
+  {
+   "prueba": "monitoreo: una fila de PSI por variable de la API",
+   "ok": true,
+   "detalle": "8 · API 8"
+  },
+  {
+   "prueba": "monitoreo: el estado de cada variable va con icono y palabra",
+   "ok": true,
+   "detalle": "['Sin novedad', 'Sin novedad', 'Sin novedad']"
+  },
+  {
+   "prueba": "monitoreo: decisión de reentrenar = API",
+   "ok": true,
+   "detalle": "False"
+  },
+  {
+   "prueba": "monitoreo: retador en sombra = API",
+   "ok": true,
+   "detalle": "['hgb_fv2_20250703_s42']"
+  },
+  {
+   "prueba": "monitoreo: los cuatro criterios de la compuerta",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "monitoreo: «Actualizar» recarga sin errores",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "monitoreo: exporta CSV (GET /monitoring/export)",
+   "ok": true,
+   "detalle": "monitoreo_20261109_070726.csv · 5370 bytes"
+  },
+  {
+   "prueba": "monitoreo: exporta XLSX (GET /monitoring/export)",
+   "ok": true,
+   "detalle": "monitoreo_20261109_070726.xlsx · 6338 bytes"
+  },
+  {
+   "prueba": "pronóstico API: el modelo y la versión de la calibración = GET /predictions",
+   "ok": true,
+   "detalle": "['hgb_fv2_20250831_s42'] · calibración ['v2']"
+  },
+  {
+   "prueba": "pronóstico API: una ventana por instante del día en la banda = API",
+   "ok": true,
+   "detalle": "17 ventanas · API 17 instantes el 2025-09-04"
+  },
+  {
+   "prueba": "pronóstico API: la banda P10–P90, el P50 y lo real se dibujan",
+   "ok": true,
+   "detalle": "3 trazas · leyenda ['Real (validaciones de 2025)', 'Pronóstico del modelo activo (P50)', 'Banda P10–P90 calibrada']"
+  },
+  {
+   "prueba": "pronóstico API: la paginación cuenta los pronósticos de la API",
+   "ok": true,
+   "detalle": "Página 1 de 2 · 18 pronósticos de CRA 54 con 60 min el 4 sep 2025"
+  },
+  {
+   "prueba": "pronóstico API: «Siguiente» trae la página 2 (limite y desplazamiento de la API)",
+   "ok": true,
+   "detalle": "Página 2 de 2 · 18 pronósticos de CRA 54 con 60 min el 4 sep 2025"
+  },
+  {
+   "prueba": "pronóstico API: el detalle del pronóstico elegido trae su variable SHAP principal y su efecto",
+   "ok": true,
+   "detalle": "b8 1055.1 · banda 1996.45–2569.11"
+  },
+  {
+   "prueba": "pronóstico API: la banda del elegido = API",
+   "ok": true,
+   "detalle": "(1996.45, 2569.11)"
+  },
+  {
+   "prueba": "pronóstico API: exporta CSV (GET /predictions/export)",
+   "ok": true,
+   "detalle": "predicciones_20261109_070736.csv · 105326 bytes"
+  },
+  {
+   "prueba": "pronóstico API: exporta XLSX (GET /predictions/export)",
+   "ok": true,
+   "detalle": "predicciones_20261109_070736.xlsx · 16330 bytes"
+  },
+  {
+   "prueba": "pronóstico: el laboratorio va rotulado «experimento 11 / experimento 12» y dice que no es el modelo de la API",
+   "ok": true,
+   "detalle": "Laboratorio del informe académico: experimento 11 / experimento 12\n\nLos pronósticos fuera de muestra del informe académi"
+  },
+  {
+   "prueba": "pronóstico: no se nombra «modelo final» ni «E11/E12» a secas",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "pronóstico: 0 errores de consola",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "modelo: la primera tarjeta es el modelo del producto con sus cifras de evaluación y calibración",
+   "ok": true,
+   "detalle": "hgb_fv2_20250831_s42 · 14.77 frente a 21.18 · cobertura 77.82"
+  },
+  {
+   "prueba": "modelo: el producto va primero y los experimentos del informe en su sección rotulada",
+   "ok": true,
+   "detalle": "['El modelo del producto', 'Laboratorio del informe académico: experimentos 11 y 12']"
+  },
+  {
+   "prueba": "modelo: declara el uso honesto de la prueba de nov–dic 2025",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "modelo: la importancia del modelo activo = GET /models/{id}/importance (media de |SHAP|)",
+   "ok": true,
+   "detalle": "b8 0.3675"
+  },
+  {
+   "prueba": "modelo: 0 errores de consola",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "operación: la vista «Salud del servicio» muestra /health y /metrics",
+   "ok": true,
+   "detalle": "Salud del servicio\n\n/health, /metrics en formato Prometheus y el error del pronóstico frente a su tolerancia.\n\nActualizar\nMonitoreo del modelo\nServicio en línea"
+  },
+  {
+   "prueba": "operación: 0 errores de consola en «Salud del servicio»",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "inicio: con umbrales nuevos la foto queda vieja y GET /respuesta responde 404 «sin_calcular»",
+   "ok": true,
+   "detalle": "PUT 200 · GET 404 sin_calcular"
+  },
+  {
+   "prueba": "inicio: la tarjeta muestra «Calculando…», pide el cálculo y consulta cada 3 s hasta tener la respuesta",
+   "ok": true,
+   "detalle": "«Calculando…» visto: True · respuesta en 3.3 s"
+  },
+  {
+   "prueba": "inicio: el cálculo pedido por el tablero es una ejecución «respuesta» de la cola",
+   "ok": true,
+   "detalle": "('d82b0b3d-b2dd-41bb-9bc1-83650becdb0e', 'ok')"
+  },
+  {
+   "prueba": "inicio: la tarjeta trae la pregunta literal de la especificación",
+   "ok": true,
+   "detalle": "con los datos históricos y recientes, ¿cada cuánto despachar buses para optimiza"
+  },
+  {
+   "prueba": "inicio: pasajeros esperados del día = API",
+   "ok": true,
+   "detalle": "4608.7"
+  },
+  {
+   "prueba": "inicio: vehículos en la hora pico = API",
+   "ok": true,
+   "detalle": "{'requeridos_pico': 21, 'flota_disponible': 27, 'hora_pico': 18, 'requeridos_pico_10_3': 21, 'requeridos_programados': 29, 'nota': 'requeridos_pico = máximo de buses en ruta a la vez con el plan (conteo de D5 cada 15 min con el ciclo de cada hora); requeridos_pico_10_3 = máximo de ceil(ciclo / headway) de §10.3 en las horas completas (60 min operados), que supone que la frecuencia de la hora se ma"
+  },
+  {
+   "prueba": "inicio: la trazabilidad nombra el modelo, la calibración y la fuente del pronóstico",
+   "ok": true,
+   "detalle": "['Trazabilidad: modelo hgb_fv2_20250831_s42 · calibración de la banda v2 · plan con el pronóstico hora por hora del modelo activo · variables fv2-2026-11-09 · corte de datos 31 ago 2025 · umbrales versión 6 · ejecución d82b0b3d · generada el 9 nov 2026 · 07:07.']"
+  },
+  {
+   "prueba": "inicio: «Atención inmediata» dice que son las alertas abiertas ahora",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "inicio: la ruta CRA 54 cambia la respuesta (pasó por «Calculando…»)",
+   "ok": true,
+   "detalle": "7509.3"
+  },
+  {
+   "prueba": "inicio: la ruta CL 72 cambia la respuesta (pasó por «Calculando…»)",
+   "ok": true,
+   "detalle": "3006.5"
+  },
+  {
+   "prueba": "inicio: el «…» de la tarjeta trae la tabla hora por hora",
+   "ok": true,
+   "detalle": "17 filas"
+  },
+  {
+   "prueba": "inicio: exporta la respuesta en CSV (GET /respuesta/export)",
+   "ok": true,
+   "detalle": "respuesta_2026-01-01_20261109_070800.csv · 5362 bytes"
+  },
+  {
+   "prueba": "inicio: exporta la respuesta en XLSX (GET /respuesta/export)",
+   "ok": true,
+   "detalle": "respuesta_2026-01-01_20261109_070800.xlsx · 7280 bytes"
+  },
+  {
+   "prueba": "inicio: 0 errores de consola",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "auth operador: calcular escenario → 403 con un aviso claro",
+   "ok": true,
+   "detalle": "La API no calculó el escenario\n\nprohibido: la clave configurada no tiene el rol para esta acción. El rol operador no puede POST /api/v1/recommendations/calculate\n\nPida una clave con el rol que indica "
+  },
+  {
+   "prueba": "auth operador: Monitoreo se puede leer (GET es de operador)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "auth operador: 0 errores de consola",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "auth clave inválida: inicio dice que la API pide una clave válida",
+   "ok": true,
+   "detalle": "La API pide una clave válida\n\nno_autenticado: la API pide una clave válida (defina SOBUSA_API_KEY). Falta la cabecera X-API-Key o la clave no es válida\n\nDefina SOBUSA_API_KEY con u"
+  },
+  {
+   "prueba": "auth clave inválida: alertas dice que la API pide una clave válida",
+   "ok": true,
+   "detalle": "La API pide una clave válida\n\nno_autenticado: la API pide una clave válida (defina SOBUSA_API_KEY). Falta la cabecera X-API-Key o la clave no es válida\n\nDefina SOBUSA_API_KEY con u"
+  },
+  {
+   "prueba": "auth clave inválida: recomendaciones dice que la API pide una clave válida",
+   "ok": true,
+   "detalle": "La API pide una clave válida\n\nno_autenticado: la API pide una clave válida (defina SOBUSA_API_KEY). Falta la cabecera X-API-Key o la clave no es válida\n\nDefina SOBUSA_API_KEY con u"
+  },
+  {
+   "prueba": "auth clave inválida: monitoreo dice que la API pide una clave válida",
+   "ok": true,
+   "detalle": "La API pide una clave válida\n\nno_autenticado: la API pide una clave válida (defina SOBUSA_API_KEY). Falta la cabecera X-API-Key o la clave no es válida\n\nDefina SOBUSA_API_KEY con u"
+  },
+  {
+   "prueba": "auth clave inválida: operacion dice que la API pide una clave válida",
+   "ok": true,
+   "detalle": "La API pide una clave válida\n\nno_autenticado: la API pide una clave válida (defina SOBUSA_API_KEY). Falta la cabecera X-API-Key o la clave no es válida\n\nDefina SOBUSA_API_KEY con u"
+  },
+  {
+   "prueba": "auth invalida: 0 errores de consola",
+   "ok": true,
+   "detalle": "[]"
+  }
+ ],
+ "teclado": {
+  "inicio": [
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 20
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado",
+    "visible": true,
+    "x": 1200,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Enlaces",
+    "visible": true,
+    "x": 1290,
+    "y": 17
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 920,
+    "y": 314
+   },
+   {
+    "tag": "a",
+    "nombre": "Ver qué gana Sobusa",
+    "visible": true,
+    "x": 193,
+    "y": 1076
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 306
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 1222
+   },
+   {
+    "tag": "input",
+    "nombre": "SILENCIO",
+    "visible": true,
+    "x": 227,
+    "y": 1302
+   },
+   {
+    "tag": "button",
+    "nombre": "Exportar CSV",
+    "visible": true,
+    "x": 507,
+    "y": 1304
+   },
+   {
+    "tag": "button",
+    "nombre": "Exportar XLSX",
+    "visible": true,
+    "x": 656,
+    "y": 1304
+   },
+   {
+    "tag": "summary",
+    "nombre": "Cómo calcula la API los vehículos y el r",
+    "visible": true,
+    "x": 185,
+    "y": 1785
+   },
+   {
+    "tag": "a",
+    "nombre": "Ir a Alertas",
+    "visible": true,
+    "x": 343,
+    "y": 2411
+   },
+   {
+    "tag": "summary",
+    "nombre": "Limitaciones que declara la API",
+    "visible": true,
+    "x": 185,
+    "y": 2530
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 2730
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 3355
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico\n\nLos pronósticos que guarda l",
+    "visible": true,
+    "x": 160,
+    "y": 3941
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario\n\nEl optimizador corre en el mome",
+    "visible": true,
+    "x": 486,
+    "y": 3941
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho\n\nUn día de 2025 repetido como s",
+    "visible": true,
+    "x": 812,
+    "y": 3941
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo\n\nEl modelo activo de la API: cuán",
+    "visible": true,
+    "x": 1138,
+    "y": 3941
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado\n\nCuánto se ahorra al año, dónd",
+    "visible": true,
+    "x": 160,
+    "y": 4184
+   },
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 3621
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 3618
+   }
+  ],
+  "pronostico": [
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 20
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado",
+    "visible": true,
+    "x": 1200,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Enlaces",
+    "visible": true,
+    "x": 1290,
+    "y": 17
+   },
+   {
+    "tag": "input",
+    "nombre": "CRA 54",
+    "visible": true,
+    "x": 300,
+    "y": 401
+   },
+   {
+    "tag": "button",
+    "nombre": "Día anterior",
+    "visible": true,
+    "x": 522,
+    "y": 399
+   },
+   {
+    "tag": "input",
+    "nombre": "dd/mm/aaaa",
+    "visible": true,
+    "x": 583,
+    "y": 403
+   },
+   {
+    "tag": "button",
+    "nombre": "Día siguiente",
+    "visible": true,
+    "x": 710,
+    "y": 399
+   },
+   {
+    "tag": "input",
+    "nombre": "60",
+    "visible": true,
+    "x": 921,
+    "y": 401
+   },
+   {
+    "tag": "button",
+    "nombre": "Exportar CSV",
+    "visible": true,
+    "x": 1103,
+    "y": 403
+   },
+   {
+    "tag": "button",
+    "nombre": "Exportar XLSX",
+    "visible": true,
+    "x": 1252,
+    "y": 403
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 928,
+    "y": 762
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 762
+   },
+   {
+    "tag": "summary",
+    "nombre": "La explicación de la API",
+    "visible": true,
+    "x": 1046,
+    "y": 1634
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 1756
+   },
+   {
+    "tag": "button",
+    "nombre": "04:00–05:00",
+    "visible": true,
+    "x": 198,
+    "y": 1879
+   },
+   {
+    "tag": "button",
+    "nombre": "05:00–06:00",
+    "visible": true,
+    "x": 198,
+    "y": 1924
+   },
+   {
+    "tag": "button",
+    "nombre": "06:00–07:00",
+    "visible": true,
+    "x": 198,
+    "y": 1969
+   },
+   {
+    "tag": "button",
+    "nombre": "06:00–07:00",
+    "visible": true,
+    "x": 198,
+    "y": 2014
+   },
+   {
+    "tag": "button",
+    "nombre": "07:00–08:00",
+    "visible": true,
+    "x": 198,
+    "y": 2059
+   },
+   {
+    "tag": "button",
+    "nombre": "08:00–09:00",
+    "visible": true,
+    "x": 198,
+    "y": 2104
+   },
+   {
+    "tag": "button",
+    "nombre": "09:00–10:00",
+    "visible": true,
+    "x": 198,
+    "y": 2149
+   },
+   {
+    "tag": "button",
+    "nombre": "10:00–11:00",
+    "visible": true,
+    "x": 198,
+    "y": 2194
+   },
+   {
+    "tag": "button",
+    "nombre": "11:00–12:00",
+    "visible": true,
+    "x": 198,
+    "y": 2239
+   }
+  ],
+  "horario": [
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 20
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado",
+    "visible": true,
+    "x": 1200,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Enlaces",
+    "visible": true,
+    "x": 1290,
+    "y": 17
+   },
+   {
+    "tag": "input",
+    "nombre": "CRA 54",
+    "visible": true,
+    "x": 942,
+    "y": 255
+   },
+   {
+    "tag": "button",
+    "nombre": "Día anterior",
+    "visible": true,
+    "x": 1208,
+    "y": 253
+   },
+   {
+    "tag": "input",
+    "nombre": "Elige un día",
+    "visible": true,
+    "x": 1269,
+    "y": 257
+   },
+   {
+    "tag": "button",
+    "nombre": "Día siguiente",
+    "visible": true,
+    "x": 1396,
+    "y": 253
+   },
+   {
+    "tag": "input",
+    "nombre": "E12",
+    "visible": true,
+    "x": 1243,
+    "y": 309
+   },
+   {
+    "tag": "button",
+    "nombre": "Restablecer",
+    "visible": true,
+    "x": 325,
+    "y": 433
+   },
+   {
+    "tag": "span",
+    "nombre": "SPAN",
+    "visible": true,
+    "x": 247,
+    "y": 514
+   },
+   {
+    "tag": "span",
+    "nombre": "SPAN",
+    "visible": true,
+    "x": 292,
+    "y": 648
+   },
+   {
+    "tag": "span",
+    "nombre": "SPAN",
+    "visible": true,
+    "x": 303,
+    "y": 782
+   },
+   {
+    "tag": "span",
+    "nombre": "SPAN",
+    "visible": true,
+    "x": 310,
+    "y": 1078
+   },
+   {
+    "tag": "span",
+    "nombre": "SPAN",
+    "visible": true,
+    "x": 271,
+    "y": 1214
+   },
+   {
+    "tag": "span",
+    "nombre": "SPAN",
+    "visible": true,
+    "x": 274,
+    "y": 1339
+   },
+   {
+    "tag": "input",
+    "nombre": "auto",
+    "visible": true,
+    "x": 189,
+    "y": 1204
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 1005
+   },
+   {
+    "tag": "input",
+    "nombre": "supuestos",
+    "visible": true,
+    "x": 631,
+    "y": 1078
+   },
+   {
+    "tag": "input",
+    "nombre": "oraculo",
+    "visible": true,
+    "x": 631,
+    "y": 1109
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 891,
+    "y": 1624
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 1624
+   },
+   {
+    "tag": "input",
+    "nombre": "0.7",
+    "visible": true,
+    "x": 1191,
+    "y": 1725
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 2516
+   }
+  ],
+  "despacho": [
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 20
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado",
+    "visible": true,
+    "x": 1200,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Enlaces",
+    "visible": true,
+    "x": 1290,
+    "y": 17
+   },
+   {
+    "tag": "button",
+    "nombre": "Día anterior",
+    "visible": true,
+    "x": 487,
+    "y": 98
+   },
+   {
+    "tag": "input",
+    "nombre": "Elige un día",
+    "visible": true,
+    "x": 548,
+    "y": 102
+   },
+   {
+    "tag": "button",
+    "nombre": "Día siguiente",
+    "visible": true,
+    "x": 675,
+    "y": 98
+   },
+   {
+    "tag": "input",
+    "nombre": "todas",
+    "visible": true,
+    "x": 777,
+    "y": 103
+   },
+   {
+    "tag": "button",
+    "nombre": "Pausar",
+    "visible": true,
+    "x": 1084,
+    "y": 98
+   },
+   {
+    "tag": "input",
+    "nombre": "60",
+    "visible": true,
+    "x": 1394,
+    "y": 103
+   },
+   {
+    "tag": "span",
+    "nombre": "SPAN",
+    "visible": true,
+    "x": 495,
+    "y": 147
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 351,
+    "y": 212
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 347,
+    "y": 614
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1040,
+    "y": 216
+   },
+   {
+    "tag": "canvas",
+    "nombre": "Map",
+    "visible": true,
+    "x": 441,
+    "y": 300
+   },
+   {
+    "tag": "summary",
+    "nombre": "Toggle attribution",
+    "visible": true,
+    "x": 1050,
+    "y": 723
+   },
+   {
+    "tag": "a",
+    "nombre": "OpenStreetMap",
+    "visible": true,
+    "x": 817,
+    "y": 727
+   },
+   {
+    "tag": "a",
+    "nombre": "CARTO",
+    "visible": true,
+    "x": 1005,
+    "y": 727
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 512,
+    "y": 803
+   },
+   {
+    "tag": "div",
+    "nombre": "Media\nSILENCIO\nFlota al límite: el plan ",
+    "visible": true,
+    "x": 564,
+    "y": 803
+   },
+   {
+    "tag": "input",
+    "nombre": "despachos",
+    "visible": true,
+    "x": 1121,
+    "y": 203
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1507,
+    "y": 266
+   },
+   {
+    "tag": "div",
+    "nombre": "05:36\nhace 1 min\nSILENCIO\nBus 246\nAtrasa",
+    "visible": true,
+    "x": 1134,
+    "y": 321
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1507,
+    "y": 647
+   }
+  ],
+  "alertas": [
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 20
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado",
+    "visible": true,
+    "x": 1200,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Enlaces",
+    "visible": true,
+    "x": 1290,
+    "y": 17
+   },
+   {
+    "tag": "input",
+    "nombre": "nueva",
+    "visible": true,
+    "x": 522,
+    "y": 226
+   },
+   {
+    "tag": "input",
+    "nombre": "todas",
+    "visible": true,
+    "x": 1071,
+    "y": 226
+   },
+   {
+    "tag": "input",
+    "nombre": "todas",
+    "visible": true,
+    "x": 1109,
+    "y": 278
+   },
+   {
+    "tag": "button",
+    "nombre": "Todos",
+    "visible": true,
+    "x": 215,
+    "y": 539
+   },
+   {
+    "tag": "input",
+    "nombre": "dd/mm/aaaa",
+    "visible": true,
+    "x": 458,
+    "y": 540
+   },
+   {
+    "tag": "input",
+    "nombre": "dd/mm/aaaa",
+    "visible": true,
+    "x": 667,
+    "y": 540
+   },
+   {
+    "tag": "button",
+    "nombre": "Exportar CSV",
+    "visible": true,
+    "x": 812,
+    "y": 540
+   },
+   {
+    "tag": "button",
+    "nombre": "Exportar XLSX",
+    "visible": true,
+    "x": 961,
+    "y": 540
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 928,
+    "y": 649
+   },
+   {
+    "tag": "button",
+    "nombre": "ALT-002",
+    "visible": true,
+    "x": 198,
+    "y": 772
+   },
+   {
+    "tag": "button",
+    "nombre": "ALT-002",
+    "visible": true,
+    "x": 198,
+    "y": 819
+   },
+   {
+    "tag": "button",
+    "nombre": "ALT-002",
+    "visible": true,
+    "x": 198,
+    "y": 866
+   },
+   {
+    "tag": "button",
+    "nombre": "ALT-002",
+    "visible": true,
+    "x": 198,
+    "y": 913
+   },
+   {
+    "tag": "button",
+    "nombre": "ALT-001",
+    "visible": true,
+    "x": 198,
+    "y": 960
+   },
+   {
+    "tag": "button",
+    "nombre": "ALT-002",
+    "visible": true,
+    "x": 198,
+    "y": 1007
+   },
+   {
+    "tag": "button",
+    "nombre": "ALT-002",
+    "visible": true,
+    "x": 198,
+    "y": 1054
+   },
+   {
+    "tag": "button",
+    "nombre": "ALT-002",
+    "visible": true,
+    "x": 198,
+    "y": 1101
+   },
+   {
+    "tag": "button",
+    "nombre": "ALT-002",
+    "visible": true,
+    "x": 198,
+    "y": 1148
+   },
+   {
+    "tag": "button",
+    "nombre": "ALT-002",
+    "visible": true,
+    "x": 198,
+    "y": 1195
+   },
+   {
+    "tag": "button",
+    "nombre": "ALT-002",
+    "visible": true,
+    "x": 198,
+    "y": 1242
+   }
+  ],
+  "recomendaciones": [
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 20
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado",
+    "visible": true,
+    "x": 1200,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Enlaces",
+    "visible": true,
+    "x": 1290,
+    "y": 17
+   },
+   {
+    "tag": "input",
+    "nombre": "SILENCIO",
+    "visible": true,
+    "x": 827,
+    "y": 193
+   },
+   {
+    "tag": "input",
+    "nombre": "todas",
+    "visible": true,
+    "x": 1176,
+    "y": 193
+   },
+   {
+    "tag": "button",
+    "nombre": "Datos hasta 3 sep 2025 · 5b50e57d",
+    "visible": true,
+    "x": 231,
+    "y": 421
+   },
+   {
+    "tag": "button",
+    "nombre": "jueves 4 de septiembre de 2025",
+    "visible": true,
+    "x": 582,
+    "y": 421
+   },
+   {
+    "tag": "button",
+    "nombre": "Exportar CSV",
+    "visible": true,
+    "x": 860,
+    "y": 422
+   },
+   {
+    "tag": "button",
+    "nombre": "Exportar XLSX",
+    "visible": true,
+    "x": 1009,
+    "y": 422
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 1290
+   },
+   {
+    "tag": "summary",
+    "nombre": "Fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 1872
+   },
+   {
+    "tag": "summary",
+    "nombre": "Fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 1919
+   },
+   {
+    "tag": "summary",
+    "nombre": "Motivo y fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 1966
+   },
+   {
+    "tag": "summary",
+    "nombre": "Fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 2013
+   },
+   {
+    "tag": "summary",
+    "nombre": "Motivo y fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 2060
+   },
+   {
+    "tag": "summary",
+    "nombre": "Motivo y fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 2107
+   },
+   {
+    "tag": "summary",
+    "nombre": "Fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 2154
+   },
+   {
+    "tag": "summary",
+    "nombre": "Fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 2201
+   },
+   {
+    "tag": "summary",
+    "nombre": "Fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 2248
+   },
+   {
+    "tag": "summary",
+    "nombre": "Fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 2295
+   },
+   {
+    "tag": "summary",
+    "nombre": "Fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 2342
+   },
+   {
+    "tag": "summary",
+    "nombre": "Fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 2389
+   },
+   {
+    "tag": "summary",
+    "nombre": "Fórmula",
+    "visible": true,
+    "x": 1364,
+    "y": 2436
+   }
+  ],
+  "operacion": [
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 20
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado",
+    "visible": true,
+    "x": 1200,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Enlaces",
+    "visible": true,
+    "x": 1290,
+    "y": 17
+   },
+   {
+    "tag": "input",
+    "nombre": "ejecuciones",
+    "visible": true,
+    "x": 984,
+    "y": 193
+   },
+   {
+    "tag": "button",
+    "nombre": "Ejecutar día siguiente",
+    "visible": true,
+    "x": 160,
+    "y": 397
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 486
+   },
+   {
+    "tag": "div",
+    "nombre": "Ejecución\tEstado\tTipo\tProgreso\tMarca de ",
+    "visible": true,
+    "x": 185,
+    "y": 562
+   },
+   {
+    "tag": "button",
+    "nombre": "5b50e57d · frecuencia · terminada · 9 no",
+    "visible": true,
+    "x": 231,
+    "y": 1110
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 1193
+   },
+   {
+    "tag": "input",
+    "nombre": "op-f-lote",
+    "visible": true,
+    "x": 854,
+    "y": 1287
+   },
+   {
+    "tag": "input",
+    "nombre": "op-f-dimension",
+    "visible": true,
+    "x": 1051,
+    "y": 1287
+   },
+   {
+    "tag": "input",
+    "nombre": "op-f-codigo",
+    "visible": true,
+    "x": 1247,
+    "y": 1287
+   },
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 695
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 692
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 692
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 692
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 692
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 692
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 692
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 692
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 692
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 692
+   }
+  ],
+  "monitoreo": [
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 20
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado",
+    "visible": true,
+    "x": 1200,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Enlaces",
+    "visible": true,
+    "x": 1290,
+    "y": 17
+   },
+   {
+    "tag": "button",
+    "nombre": "Actualizar",
+    "visible": true,
+    "x": 1013,
+    "y": 170
+   },
+   {
+    "tag": "button",
+    "nombre": "Exportar CSV",
+    "visible": true,
+    "x": 1139,
+    "y": 170
+   },
+   {
+    "tag": "button",
+    "nombre": "Exportar XLSX",
+    "visible": true,
+    "x": 1288,
+    "y": 170
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 928,
+    "y": 937
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 937
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 719,
+    "y": 2011
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 2011
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 2734
+   },
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 2231
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 2228
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 2228
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 2228
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 2228
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 2228
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 2228
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 2228
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 2228
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 2228
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado",
+    "visible": true,
+    "x": 1200,
+    "y": 2228
+   }
+  ],
+  "modelo": [
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 20
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado",
+    "visible": true,
+    "x": 1200,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Enlaces",
+    "visible": true,
+    "x": 1290,
+    "y": 17
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 928,
+    "y": 398
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 398
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 928,
+    "y": 1747
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 719,
+    "y": 2280
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 2280
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 719,
+    "y": 3063
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 3063
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 3834
+   },
+   {
+    "tag": "summary",
+    "nombre": "Motivo tal como lo dejó el experimento 1",
+    "visible": true,
+    "x": 185,
+    "y": 4409
+   },
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 3698
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 3695
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 3695
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 3695
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 3695
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 3695
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 3695
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 3695
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 3695
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 3695
+   }
+  ],
+  "resultado": [
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 20
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado",
+    "visible": true,
+    "x": 1200,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Enlaces",
+    "visible": true,
+    "x": 1290,
+    "y": 17
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 920,
+    "y": 314
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 306
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos (los dos planes, M COP al ",
+    "visible": true,
+    "x": 928,
+    "y": 913
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 719,
+    "y": 1560
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 1560
+   },
+   {
+    "tag": "input",
+    "nombre": "Laboral",
+    "visible": true,
+    "x": 245,
+    "y": 2195
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos (salidas en cada hora del ",
+    "visible": true,
+    "x": 1371,
+    "y": 2284
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos",
+    "visible": true,
+    "x": 1371,
+    "y": 2960
+   },
+   {
+    "tag": "summary",
+    "nombre": "Ver los datos (M COP al año)",
+    "visible": true,
+    "x": 928,
+    "y": 4898
+   },
+   {
+    "tag": "summary",
+    "nombre": "Qué mide cada cifra",
+    "visible": true,
+    "x": 161,
+    "y": 5594
+   },
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 4863
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 4860
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 4860
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 4860
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 4860
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 4860
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 4860
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 4860
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 4860
+   }
+  ],
+  "enlaces": [
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 20
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Resultado",
+    "visible": true,
+    "x": 1200,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Enlaces",
+    "visible": true,
+    "x": 1290,
+    "y": 17
+   },
+   {
+    "tag": "a",
+    "nombre": "Abrir la app completa",
+    "visible": true,
+    "x": 185,
+    "y": 478
+   },
+   {
+    "tag": "a",
+    "nombre": "Informe técnico final (PDF)",
+    "visible": true,
+    "x": 1046,
+    "y": 403
+   },
+   {
+    "tag": "a",
+    "nombre": "Cuaderno final ejecutado (HTML)",
+    "visible": true,
+    "x": 1046,
+    "y": 451
+   },
+   {
+    "tag": "a",
+    "nombre": "Consola de despacho\n\nQué hace el despach",
+    "visible": true,
+    "x": 160,
+    "y": 683
+   },
+   {
+    "tag": "a",
+    "nombre": "Vista 3D\n\nLos buses en las calles de Bar",
+    "visible": true,
+    "x": 812,
+    "y": 683
+   },
+   {
+    "tag": "a",
+    "nombre": "Planificador\n\nEl horario recomendado por",
+    "visible": true,
+    "x": 160,
+    "y": 863
+   },
+   {
+    "tag": "a",
+    "nombre": "Simulador de ahorro\n\nCostos, conductores",
+    "visible": true,
+    "x": 812,
+    "y": 863
+   },
+   {
+    "tag": "a",
+    "nombre": "Metodología del Entregable 2 (PDF)",
+    "visible": true,
+    "x": 185,
+    "y": 1168
+   },
+   {
+    "tag": "a",
+    "nombre": "Informe de resultados (texto)",
+    "visible": true,
+    "x": 185,
+    "y": 1232
+   },
+   {
+    "tag": "a",
+    "nombre": "Sobusa Despacho",
+    "visible": true,
+    "x": 144,
+    "y": 528
+   },
+   {
+    "tag": "a",
+    "nombre": "Inicio",
+    "visible": true,
+    "x": 405,
+    "y": 525
+   },
+   {
+    "tag": "a",
+    "nombre": "Pronóstico",
+    "visible": true,
+    "x": 464,
+    "y": 525
+   },
+   {
+    "tag": "a",
+    "nombre": "Horario",
+    "visible": true,
+    "x": 559,
+    "y": 525
+   },
+   {
+    "tag": "a",
+    "nombre": "Despacho",
+    "visible": true,
+    "x": 632,
+    "y": 525
+   },
+   {
+    "tag": "a",
+    "nombre": "Alertas",
+    "visible": true,
+    "x": 724,
+    "y": 525
+   },
+   {
+    "tag": "a",
+    "nombre": "Recomendaciones",
+    "visible": true,
+    "x": 795,
+    "y": 525
+   },
+   {
+    "tag": "a",
+    "nombre": "Operación",
+    "visible": true,
+    "x": 942,
+    "y": 525
+   },
+   {
+    "tag": "a",
+    "nombre": "Monitoreo",
+    "visible": true,
+    "x": 1035,
+    "y": 525
+   },
+   {
+    "tag": "a",
+    "nombre": "Modelo",
+    "visible": true,
+    "x": 1126,
+    "y": 525
+   }
+  ]
+ },
+ "contraste": {
+  "inicio": {
+   "textos": 353,
+   "minimo": 3.45,
+   "malos": [],
+   "n_malos": 0
+  },
+  "pronostico": {
+   "textos": 571,
+   "minimo": 5.5,
+   "malos": [],
+   "n_malos": 0
+  },
+  "horario": {
+   "textos": 705,
+   "minimo": 5.44,
+   "malos": [],
+   "n_malos": 0
+  },
+  "despacho": {
+   "textos": 550,
+   "minimo": 4.99,
+   "malos": [],
+   "n_malos": 0
+  },
+  "alertas": {
+   "textos": 374,
+   "minimo": 4.99,
+   "malos": [],
+   "n_malos": 0
+  },
+  "recomendaciones": {
+   "textos": 754,
+   "minimo": 4.99,
+   "malos": [],
+   "n_malos": 0
+  },
+  "operacion": {
+   "textos": 159,
+   "minimo": 4.99,
+   "malos": [],
+   "n_malos": 0
+  },
+  "monitoreo": {
+   "textos": 223,
+   "minimo": 4.99,
+   "malos": [],
+   "n_malos": 0
+  },
+  "modelo": {
+   "textos": 234,
+   "minimo": 3.45,
+   "malos": [],
+   "n_malos": 0
+  },
+  "resultado": {
+   "textos": 365,
+   "minimo": 4.99,
+   "malos": [],
+   "n_malos": 0
+  },
+  "enlaces": {
+   "textos": 38,
+   "minimo": 5.44,
+   "malos": [],
+   "n_malos": 0
+  }
+ },
+ "errores_consola": {
+  "inicio": [],
+  "pronostico": [],
+  "horario": [],
+  "despacho": [],
+  "alertas": [],
+  "recomendaciones": [],
+  "operacion": [],
+  "monitoreo": [],
+  "modelo": [],
+  "resultado": [],
+  "enlaces": []
+ },
+ "avisos": [
+  {
+   "despacho_primera_carga": [
+    "pageerror: Style is not done loading.",
+    "pageerror: Style is not done loading."
+   ]
+  }
+ ],
+ "fin": "2026-11-09 07:08:30",
+ "resumen": {
+  "pruebas": 135,
+  "fallas": 0,
+  "lista_fallas": []
+ }
+}

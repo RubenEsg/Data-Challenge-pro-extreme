@@ -1,0 +1,47 @@
+§14.2 · ejecución PROGRAMADA que procesa lo nuevo o modificado (2026-11-09 06:41:43, Windows 11, PostgreSQL 14 local)
+Base local desechable ai_frecuencias_pruebas_infra_5_plan, migrada desde cero; datos en una copia temporal (fuente Parquet cortada en 2025-11-24); código: commit 3d6781d con cambios sin confirmar
+Planificador interno (APScheduler) con PLAN_EJECUCION_CRON='*/1 * * * *': ninguna ejecución se crea con POST; todas las de abajo las encola el planificador (parametros.origen = planificador).
+
+GET /api/v1/scheduler -> habilitado=True activo_en_esta_replica=True trabajos=[{"id": "ejecucion_diaria", "cron": "*/1 * * * *", "proxima": "2026-11-09T06:42:00-05:00"}, {"id": "reentrenamiento", "cron": "0 3 1 1 *", "proxima": "2027-01-01T03:00:00-05:00"}]
+
+1) Franja programada con la carga inicial (histórico hasta el corte)
+   franja 06:42  estado=ok  filas_leidas=54009  filas_validas=54009  predicciones=9  recomendaciones=60  alertas=14  marca_agua None -> 2025-11-24 23:59:59-05:00  worker=DESKTOP-RA73BA3:25792:206d36:t1  terminada=06:43:05
+      alertas_observadas={"por_codigo": {"ALT-002": 3, "ALT-005": 2, "ALT-007": 1, "ALT-009": 3}, "referencia": "2026-11-09T06:42:26.591438-05:00", "horas_evaluadas": 51}
+   franja 06:43  estado=ok  filas_leidas=0  filas_validas=0  predicciones=0  recomendaciones=0  alertas=0  marca_agua 2025-11-24 23:59:59-05:00 -> 2025-11-24 23:59:59-05:00  worker=DESKTOP-RA73BA3:25792:206d36:t1  terminada=06:43:06
+      alertas_observadas={"por_codigo": {"ALT-009": 3}, "referencia": "2026-11-09T06:43:06.320011-05:00", "horas_evaluadas": 0}
+      nota: Sin datos nuevos desde la marca de agua: no se reprocesa el histórico.   (franja que corrió antes de la llegada)
+
+2) Llega información nueva y modificada (sin tocar la API)
+   06:43:08: día 2025-11-25 agregado (51 filas nuevas) y 3 filas del 2025-11-24 modificadas: [{"ruta": "CL 72", "fecha": "2025-11-24", "hora": 7, "pasajeros_antes": 538.0, "pasajeros_despues": 563.0}, {"ruta": "CRA 54", "fecha": "2025-11-24", "hora": 7, "pasajeros_antes": 1497.0, "pasajeros_despues": 1522.0}, {"ruta": "SILENCIO", "fecha": "2025-11-24", "hora": 7, "pasajeros_antes": 556.0, "pasajeros_despues": 581.0}]
+
+3) Siguiente franja programada: lee solo lo nuevo o modificado
+   franja 06:44  estado=ok  filas_leidas=54  filas_validas=54  predicciones=9  recomendaciones=60  alertas=8  marca_agua 2025-11-24 23:59:59-05:00 -> 2025-11-25 23:59:59-05:00  worker=DESKTOP-RA73BA3:25792:206d36:t1  terminada=06:44:21
+      alertas_observadas={"por_codigo": {"ALT-002": 4, "ALT-009": 3}, "referencia": "2026-11-09T06:44:08.242081-05:00", "horas_evaluadas": 51}
+
+4) Franja siguiente, sin llegada: 0 filas, no reprocesa el histórico
+   franja 06:45  estado=ok  filas_leidas=0  filas_validas=0  predicciones=0  recomendaciones=0  alertas=0  marca_agua 2025-11-25 23:59:59-05:00 -> 2025-11-25 23:59:59-05:00  worker=DESKTOP-RA73BA3:25792:206d36:t1  terminada=06:45:00
+      alertas_observadas={"por_codigo": {"ALT-009": 3}, "referencia": "2026-11-09T06:45:00.324256-05:00", "horas_evaluadas": 0}
+      nota: Sin datos nuevos desde la marca de agua: no se reprocesa el histórico.
+
+GET /api/v1/scheduler al final -> franjas_recientes (las encoló el planificador, una por minuto):
+   2026-11-09T06:45:00-05:00  frecuencia  ok  intentos=1  execution_id=aff62b06-4af8-4679-8d6c-879b0847b921
+   2026-11-09T06:44:00-05:00  frecuencia  ok  intentos=1  execution_id=fa1ac0c0-255a-433a-a62c-6faa0d85ed11
+   2026-11-09T06:43:00-05:00  frecuencia  ok  intentos=1  execution_id=a983c4f4-75b7-4cf3-9b36-c431f201d65f
+   2026-11-09T06:42:00-05:00  frecuencia  ok  intentos=1  execution_id=82e3c45f-0068-48da-9279-4ab3922c56b5
+Ejecuciones de frecuencia creadas por el planificador: 4; creadas a mano (POST): 0
+   franja  estado  filas_leidas  predicciones  recomendaciones  alertas
+   06:42   ok             54009             9               60       14
+   06:43   ok                 0             0                0        0
+   06:44   ok                54             9               60        8
+   06:45   ok                 0             0                0        0
+Totales en la base: {"prediction": 18, "recommendation": 120, "alert": 22, "demanda_observada": 54060}
+   demanda_observada = 54009 (carga inicial) + 51 (día nuevo) = 54060: las 3 filas modificadas se actualizaron en su lugar, sin duplicar
+   [OK] la carga inicial la hizo una franja programada
+   [OK] tras la llegada, la franja programada leyó solo lo nuevo o modificado
+   [OK] esa franja creó predicciones, recomendaciones y alertas nuevas
+   [OK] la marca de agua avanzó
+   [OK] sin llegada, la franja siguiente leyó 0 filas
+   [OK] las filas modificadas no se duplicaron en demanda_observada
+   [OK] ninguna ejecución de frecuencia se creó con POST
+
+RESULTADO: TODO OK

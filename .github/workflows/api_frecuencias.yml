@@ -1,0 +1,226 @@
+# Integración continua de la API de frecuencias para el REPOSITORIO DE ENTREGA (raíz con api_frecuencias/ directamente).
+# Copie este archivo a .github/workflows/api_frecuencias.yml en la raíz de ese repositorio.
+# Es el mismo flujo de .github/workflows/api_frecuencias.yml del repositorio del proyecto (spec v1.5 §14.2 «Calidad del
+# código: las pruebas automatizadas pasan en integración continua», RNF-007, RNF-013, RNF-014, E03, E08); solo cambia la
+# carpeta: api_frecuencias/ en lugar de EntregaFinal/api_frecuencias/. Ensayo local idéntico: python scripts/ci_local.py
+# Sin secretos: la base es un servicio efímero del runner con autenticación «trust»; las claves de API de las pruebas se
+# generan en cada corrida (tests/integracion/conftest.py) y nunca se guardan.
+name: API de frecuencias · CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "api_frecuencias/**"
+      - ".github/workflows/api_frecuencias.yml"
+  pull_request:
+    paths:
+      - "api_frecuencias/**"
+      - ".github/workflows/api_frecuencias.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-frecuencias-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pruebas:
+    name: ruff · bandit · migraciones · pytest (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.13"]
+    defaults:
+      run:
+        working-directory: api_frecuencias
+    services:
+      db:
+        image: postgis/postgis:14-3.4
+        env:
+          POSTGRES_DB: ai_frecuencias
+          POSTGRES_USER: sobusa
+          # base efímera del runner: sin contraseña y solo alcanzable desde este job
+          POSTGRES_HOST_AUTH_METHOD: trust
+          TZ: America/Bogota
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U sobusa -d ai_frecuencias"
+          --health-interval 5s --health-timeout 5s --health-retries 30
+    env:
+      DATABASE_URL: postgresql+psycopg://sobusa@localhost:5432/ai_frecuencias
+      TEST_DATABASE_URL: postgresql+psycopg://sobusa@localhost:5432/ai_frecuencias
+      TZ: America/Bogota
+      REANUDAR_EJECUCIONES: "false"
+      PYTHONDONTWRITEBYTECODE: "1"
+      TESTCONTAINERS: "1"              # tests/testcontainers: PostGIS 14-3.4 efímero con Testcontainers (Docker del runner)
+      SCHEMATHESIS_EJEMPLOS: "10"
+    steps:
+      - name: Código (solo la API)
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            api_frecuencias
+            .github/workflows
+          sparse-checkout-cone-mode: true
+
+      - name: Python ${{ matrix.python }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: api_frecuencias/requirements*.txt
+
+      - name: Dependencias fijadas (ruedas binarias)
+        run: |
+          python -m pip install --upgrade pip
+          # requirements-dev.txt incluye requirements.txt (ejecución, lo mismo que la imagen) y agrega pruebas,
+          # análisis estático y herramientas de documentación, todo con versiones exactas
+          pip install --only-binary=:all: -r requirements-dev.txt
+          mkdir -p reportes
+
+      # ruff, bandit y la deriva del OpenAPI no cortan el job: todos los reportes se generan y la «Puerta de calidad»
+      # del final hace fallar el job si alguno falló (así un aviso de estilo no oculta el resultado de las pruebas)
+      - name: ruff (estilo, errores y reglas S de seguridad)
+        id: ruff
+        continue-on-error: true
+        run: |
+          # todo el repositorio de la API: app, tests, scripts, alembic y los guiones de docs/evidencias
+          ruff check . --output-format json -o reportes/ruff.json || true
+          ruff check . --output-format github
+
+      - name: bandit (seguridad)
+        id: bandit
+        continue-on-error: true
+        run: |
+          bandit -r app -c pyproject.toml -f json -o reportes/bandit.json || true
+          # severidad media o mayor en la aplicación y en los scripts (los # nosec llevan su motivo)
+          bandit -r app scripts -c pyproject.toml -ll -q
+
+      - name: Migraciones desde cero (upgrade -> downgrade -> upgrade)
+        run: |
+          alembic upgrade head
+          alembic downgrade base
+          alembic upgrade head
+
+      - name: pytest con cobertura >= 85 % y junit (unitarias, integración, contrato, datos/ML, Testcontainers)
+        run: >-
+          python -m pytest -p no:cacheprovider -rfE
+          --cov=app --cov-report=xml:reportes/coverage.xml --cov-report=term:skip-covered
+          --cov-fail-under=85 --junitxml=reportes/pytest.xml
+
+      - name: OpenAPI sin deriva (docs/openapi.json igual al generado)
+        id: openapi
+        if: always()
+        continue-on-error: true
+        run: python scripts/ci_local.py openapi docs/openapi.json
+
+      - name: Resumen en la ejecución
+        if: always()
+        run: |
+          if [ -f reportes/pytest.xml ]; then
+            python scripts/ci_local.py resumen reportes/pytest.xml reportes/coverage.xml >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Reportes (junit, cobertura, ruff, bandit)
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: reportes-api-frecuencias-py${{ matrix.python }}
+          path: api_frecuencias/reportes/
+          retention-days: 30
+
+      - name: Puerta de calidad (ruff, bandit y OpenAPI sin deriva)
+        if: always()
+        run: |
+          echo "ruff=${{ steps.ruff.outcome }} bandit=${{ steps.bandit.outcome }} openapi=${{ steps.openapi.outcome }}"
+          test "${{ steps.ruff.outcome }}" = "success"
+          test "${{ steps.bandit.outcome }}" = "success"
+          test "${{ steps.openapi.outcome }}" = "success"
+
+  caida:
+    # RNF-001: matar la API a mitad de una ejecución y comprobar que se retoma sin perder ni duplicar (unos 2 min).
+    # §14.2: la ejecución PROGRAMADA (planificador cada minuto, sin POST) procesa solo lo nuevo (unos 4 min).
+    name: Prueba de caída RNF-001 y ejecución programada §14.2 (Python 3.11)
+    needs: pruebas
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: api_frecuencias
+    services:
+      db:
+        image: postgis/postgis:14-3.4
+        env:
+          POSTGRES_DB: ai_frecuencias
+          POSTGRES_USER: sobusa
+          POSTGRES_HOST_AUTH_METHOD: trust
+          TZ: America/Bogota
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U sobusa -d ai_frecuencias"
+          --health-interval 5s --health-timeout 5s --health-retries 30
+    env:
+      DATABASE_URL: postgresql+psycopg://sobusa@localhost:5432/ai_frecuencias
+      TEST_DATABASE_URL: postgresql+psycopg://sobusa@localhost:5432/ai_frecuencias
+      TZ: America/Bogota
+      PRUEBA_CAIDA: "1"
+      PRUEBA_PLANIFICADOR: "1"
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            api_frecuencias
+          sparse-checkout-cone-mode: true
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: api_frecuencias/requirements*.txt
+      - run: |
+          python -m pip install --upgrade pip
+          # requirements-dev.txt incluye requirements.txt (ejecución, lo mismo que la imagen) y agrega pruebas,
+          # análisis estático y herramientas de documentación, todo con versiones exactas
+          pip install --only-binary=:all: -r requirements-dev.txt
+      - run: >-
+          python -m pytest -p no:cacheprovider -rfE tests/integracion/test_caida.py
+          tests/integracion/test_planificador_programado.py
+
+  sonarqube:
+    # Opcional: solo corre si el repositorio define la variable SONAR_HOST_URL y el secreto SONAR_TOKEN
+    name: SonarQube (puerta de calidad)
+    needs: pruebas
+    if: ${{ vars.SONAR_HOST_URL != '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            api_frecuencias
+      - uses: actions/download-artifact@v5
+        with:
+          name: reportes-api-frecuencias-py3.11
+          path: api_frecuencias/reportes
+      - name: Análisis y puerta de calidad
+        uses: SonarSource/sonarqube-scan-action@v6
+        with:
+          projectBaseDir: api_frecuencias
+          args: >-
+            -Dsonar.python.coverage.reportPaths=reportes/coverage.xml
+            -Dsonar.python.xunit.reportPath=reportes/pytest.xml
+            -Dsonar.python.ruff.reportPaths=reportes/ruff.json
+            -Dsonar.python.bandit.reportPaths=reportes/bandit.json
+            -Dsonar.qualitygate.wait=true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}

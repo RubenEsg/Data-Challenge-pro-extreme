@@ -1,0 +1,109 @@
+{
+ "generado_en": "2026-11-09T06:40:33-05:00",
+ "script": "scripts/reconstruir_desde_replica.py --linaje",
+ "lee": "réplica local (lector_ia, transacciones READ ONLY)",
+ "exportacion_original": "Exportación del 2026-10-03 21:51:37 (scripts/exportar_tablas.py del repositorio del equipo, no se vuelve a ejecutar): una sesión de solo lectura (set_session(readonly=True)) sobre la base compartida del reto y, por cada una de las 15 tablas (Procesos, rutas, vehiculos, dias_semana, estacionalidades, estacionalidades_anio, novedades_viales, novedades_viales_fecha, novedades_viales_ruta, rutas_segmentos_config, rutas_segmentos, timbradas_consolidado, timbradas_anio, timbradas_segmentos y progvehiculos), un único SELECT de columnas explícitas FROM public.\"tabla\" leído con un cursor de servidor en bloques de 100.000 filas, más un SELECT count(*) para comprobar que las filas exportadas coinciden con las del servidor (15 de 15 coinciden; progvehiculos 564.837 filas). Las credenciales viven fuera del repositorio. Desde entonces el proyecto solo usa esas exportaciones: la réplica local se cargó con ellas (scripts/replica_cargar.py).",
+ "entradas": {
+  "progvehiculos": {
+   "filas_2023_2025": 564837,
+   "columnas": "idprogramacion, idruta, fechasalida, finalizado, cancelada, numeropasajeros",
+   "sha256_contenido": "daf98150879d38c3a04d22aba8da6db40c6bbb043be7f7962d1c1656d9308022"
+  },
+  "novedades_viales_fecha": {
+   "filas": 28,
+   "sha256_contenido": "8e60d4bfd3910457cb48ec24bbc6f0c99570e58a7ed3d7cfa183cfcca309efcf"
+  },
+  "novedades_viales_ruta": {
+   "filas": 0,
+   "sha256_contenido": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+  },
+  "estacionalidades_anio": {
+   "filas": 231,
+   "sha256_contenido": "fa83493e12a8e414b52293d687099890de8e7253bd883dc6ebc4d9b84bfa438b"
+  },
+  "estacionalidades": {
+   "filas": 24,
+   "sha256_contenido": "b7228f42f823e93d9ab7bffab79a6e2fb8f91776acb22e7af0edc14f6c69f041"
+  }
+ },
+ "demanda_horaria": {
+  "archivo": "datos/demanda_horaria.parquet",
+  "sha256_archivo": "f5b9435afd5d9b932da713e75198cb940077b9f12d9031922d377cd97e078a03",
+  "columnas_comparadas": [
+   "ruta",
+   "idruta",
+   "fecha",
+   "hora",
+   "pasajeros",
+   "salidas"
+  ],
+  "sha256_contenido_empaquetado": "76392ca4e92259b75a8d3c387a9747a91d1eadfd6a21a1685525f3d2eb4d6536",
+  "sha256_contenido_reconstruido": "76392ca4e92259b75a8d3c387a9747a91d1eadfd6a21a1685525f3d2eb4d6536",
+  "contenido_identico": true,
+  "comparacion": {
+   "filas_empaquetadas": 55896,
+   "filas_reconstruidas": 55896,
+   "solo_empaquetado": 0,
+   "solo_replica": 0,
+   "pasajeros": {
+    "iguales": 55896,
+    "distintas": 0,
+    "suma_empaquetado": 42166279.0,
+    "suma_replica": 42166279.0,
+    "max_diferencia_abs": 0.0
+   },
+   "salidas": {
+    "iguales": 55896,
+    "distintas": 0,
+    "suma_empaquetado": 520638.0,
+    "suma_replica": 520638.0,
+    "max_diferencia_abs": 0.0
+   }
+  },
+  "no_reconstruido": "calendario (tipo_dia, festivo, carnaval, semana_santa, vacaciones, navidad, primero_enero) y excluido: reglas propias del proyecto, no datos de Extreme"
+ },
+ "contexto_operacional": {
+  "archivo": "datos/contexto_operacional.parquet",
+  "sha256_archivo": "b2547486b08b57112de2834db0f6b9c303788abfeb2a557a3b27800253f0cd31",
+  "sha256_contenido_empaquetado": "39e07d16040d301c346cea3f48dd497820b0edf90e160249ab05c64558d6a36e",
+  "sha256_contenido_reconstruido": "39e07d16040d301c346cea3f48dd497820b0edf90e160249ab05c64558d6a36e",
+  "contenido_identico": true,
+  "comparacion": {
+   "filas_empaquetadas": 24837,
+   "filas_reconstruidas": 24837,
+   "solo_empaquetado": 0,
+   "solo_replica": 0,
+   "nov_impacto": {
+    "iguales": 24837,
+    "distintas": 0,
+    "suma_empaquetado": 23585.0,
+    "suma_replica": 23585.0,
+    "max_diferencia_abs": 0.0
+   },
+   "nov_sube": {
+    "iguales": 24837,
+    "distintas": 0,
+    "suma_empaquetado": 246.0,
+    "suma_replica": 246.0,
+    "max_diferencia_abs": 0.0
+   },
+   "festivo_oficial": {
+    "iguales": 24837,
+    "distintas": 0,
+    "suma_empaquetado": 1224.0,
+    "suma_replica": 1224.0,
+    "max_diferencia_abs": 0.0
+   }
+  },
+  "resumen_reconstruido": {
+   "novedades": 28,
+   "dias_con_novedad": 25,
+   "horas_con_novedad": 246,
+   "filas_novedades_viales_ruta": 0,
+   "festivos_oficiales_en_rango": 72,
+   "procesos_estacionalidades": [
+    "sobusa"
+   ]
+  }
+ }
+}

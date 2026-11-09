@@ -1,0 +1,69 @@
+% Generado por documentos/tabla_api.py desde la aplicación FastAPI (app.main): 62 operaciones. No editar a mano.
+\begin{longtable}{@{}l>{\raggedright\arraybackslash}p{5.3cm}l>{\raggedright\arraybackslash}p{7.2cm}@{}}
+\toprule Método & Ruta (bajo \texttt{/api/v1}) & Rol mínimo & Finalidad \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{POST} & \path{/frequency/executions} & analista & Ejecutar lectura incremental, predicción y optimización (job en segundo plano) \\
+\texttt{GET} & \path{/frequency/executions} & operador & Listar ejecuciones \\
+\texttt{GET} & \path{/frequency/executions/{execution_id}} & operador & Corte, estado, métricas y errores \\
+\texttt{GET} & \path{/frequency/executions/{execution_id}/errors} & operador & Errores de calidad de la ejecución por lote, fila, llave y causa \\
+\texttt{GET} & \path{/predictions/segmentos} & operador & Pronóstico por segmento y sentido (desagregación documentada del pronóstico de la ruta) \\
+\texttt{POST} & \path{/predictions/run} & analista & Inferencia para una ruta y un horizonte (incluye la recomendación derivada) \\
+\texttt{GET} & \path{/predictions} & operador & Consultar pronósticos por filtros \\
+\texttt{GET} & \path{/predictions/export} & operador & Exportar pronósticos filtrados (CSV o XLSX) \\
+\texttt{GET} & \path{/predictions/{prediction_id}} & operador & Una predicción \\
+\texttt{POST} & \path{/recommendations/calculate} & analista & Calcular frecuencia y flota con la función objetivo de §10.2, tipologías, escenarios y… \\
+\texttt{GET} & \path{/recommendations/plan} & operador & Plan del día por hora con el modelo activo (salidas, headway, vehículos, viabilidad y costo) \\
+\texttt{GET} & \path{/recommendations} & operador & Consultar recomendaciones \\
+\texttt{GET} & \path{/recommendations/export} & operador & Exportar recomendaciones filtradas (CSV o XLSX) \\
+\texttt{GET} & \path{/alerts} & operador & Listar alertas por estado, nivel, ruta, fecha y lugar \\
+\texttt{GET} & \path{/alerts/export} & operador & Exportar alertas filtradas (CSV o XLSX) \\
+\texttt{GET} & \path{/alerts/{alert_id}} & operador & Una alerta \\
+\texttt{PATCH} & \path{/alerts/{alert_id}/status} & operador & Reconocer, asignar, comentar, cerrar o descartar (queda en la bitácora) \\
+\texttt{GET} & \path{/alerts/{alert_id}/history} & operador & Bitácora de cambios de la alerta \\
+\texttt{GET} & \path{/models} & operador & Consultar el registro de modelos \\
+\texttt{POST} & \path{/models/train} & analista & Entrenar un modelo candidato con los datos validados hasta una fecha (job) \\
+\texttt{POST} & \path{/models/rollback} & admin & Revertir al modelo activo anterior \\
+\texttt{GET} & \path{/models/{model_id}} & operador & Ficha de un modelo \\
+\texttt{POST} & \path{/models/{model_id}/activate} & admin & Activar una versión con la compuerta de cuatro criterios, en una ventana posterior a todo… \\
+\texttt{GET} & \path{/models/{model_id}/evaluation} & operador & Evaluación del modelo: la registrada y, con desde/hasta, la de una ventana sobre datos… \\
+\texttt{GET} & \path{/models/{model_id}/importance} & operador & Importancia global: permutación (aumento del MAE) y media de |SHAP| \\
+\texttt{GET} & \path{/thresholds} & operador & Umbrales vigentes, su versión y si están aprobados \\
+\texttt{PUT} & \path{/thresholds} & admin & Cambiar umbrales: crea una versión nueva del conjunto \\
+\texttt{GET} & \path{/thresholds/history} & operador & Histórico de versiones de los umbrales \\
+\texttt{POST} & \path{/thresholds/{version}/aprobar} & admin & Aprobar una versión de umbrales (validación del área operativa, §5.1) \\
+\texttt{GET} & \path{/scheduler} & operador & Planificador interno: próximas ejecuciones, últimas franjas encoladas y estado de la cola \\
+\texttt{GET} & \path{/catalogos} & operador & Catálogos disponibles y fuente configurada \\
+\texttt{GET} & \path{/catalogos/procesos} & operador & Procesos (empresa operadora) \\
+\texttt{GET} & \path{/catalogos/procesos/export} & operador & Exportar procesos (CSV o XLSX) \\
+\texttt{GET} & \path{/catalogos/empresas} & operador & Empresas por proceso \\
+\texttt{GET} & \path{/catalogos/empresas/export} & operador & Exportar empresas (CSV o XLSX) \\
+\texttt{GET} & \path{/catalogos/rutas} & operador & Rutas: frecuencia vigente, capacidad (y cap\_min/cap\_max si existen), ciclo y flota \\
+\texttt{GET} & \path{/catalogos/rutas/export} & operador & Exportar rutas (CSV o XLSX) \\
+\texttt{GET} & \path{/catalogos/rutas/{idruta}} & operador & Una ruta con sus parámetros por hora \\
+\texttt{GET} & \path{/catalogos/segmentos} & operador & Segmentos de ruta (rutas\_segmentos) con longitud y geometría GeoJSON \\
+\texttt{GET} & \path{/catalogos/segmentos/export} & operador & Exportar segmentos (CSV o XLSX; geometría simplificada como GeoJSON) \\
+\texttt{GET} & \path{/catalogos/vehiculos} & operador & Vehículos: capacidad sentados + de pie y tipología (sin placa, conductor ni propietario) \\
+\texttt{GET} & \path{/catalogos/vehiculos/export} & operador & Exportar vehículos (CSV o XLSX) \\
+\texttt{GET} & \path{/catalogos/vehiculos/tipologias} & operador & Capacidad por ruta y tipología (vehículos, mediana, mínimo y máximo) \\
+\texttt{GET} & \path{/catalogos/viajes} & operador & Programación de viajes (idprogramacion, ruta, hora programada y vehículo) \\
+\texttt{GET} & \path{/catalogos/viajes/export} & operador & Exportar viajes filtrados (CSV o XLSX) \\
+\texttt{GET} & \path{/catalogos/despachos} & operador & Despachos reales: salida y llegada, retraso frente a la hora programada \\
+\texttt{GET} & \path{/catalogos/despachos/export} & operador & Exportar despachos filtrados (CSV o XLSX) \\
+\texttt{GET} & \path{/catalogos/capacidad} & operador & Capacidad vigente por ruta (catálogo o ajuste local) y ajustes por tipología \\
+\texttt{PUT} & \path{/catalogos/capacidad} & admin & Ajustar la capacidad operativa de una ruta o tipología (admin; versión nueva y auditada) \\
+\texttt{GET} & \path{/catalogos/capacidad/historial} & operador & Historial de ajustes de capacidad (versión, acción, valor anterior y nuevo, quién y por qué) \\
+\texttt{GET} & \path{/monitoring} & operador & Monitoreo por ejecución: deriva (PSI), error móvil, cobertura, volumen y alertas descartadas \\
+\texttt{GET} & \path{/monitoring/export} & operador & Exportar el monitoreo filtrado (CSV o XLSX) \\
+\texttt{GET} & \path{/monitoring/policy} & operador & Política de aprendizaje continuo: ¿reentrenar?, retadores en sombra y umbrales \\
+\texttt{GET} & \path{/monitoring/feature-snapshots} & operador & Foto de variables (§11.2) por ejecución, predicción o ruta, con fecha de corte y versión \\
+\texttt{GET} & \path{/segmentos/estadisticas} & operador & Promedio, máximo y mínimo de subidas, bajadas y pasajeros por segmento, estacionalidad,… \\
+\texttt{GET} & \path{/segmentos/estadisticas/export} & operador & Exportar las estadísticas por segmento (CSV o XLSX) \\
+\texttt{GET} & \path{/segmentos/zonas} & operador & Demanda por zona tarifaria (timbradas\_anio\_zonas / timbradas\_consolidado\_zonas) \\
+\texttt{GET} & \path{/respuesta} & operador & Respuesta a la pregunta final del reto (§20) \\
+\texttt{POST} & \path{/respuesta/calcular} & analista & Calcular la respuesta del reto para una fecha (job en la cola, rol analista) \\
+\texttt{GET} & \path{/respuesta/export} & operador & Exportar la respuesta del reto por ruta y hora (CSV o XLSX) \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{En la raíz del servidor, fuera de \texttt{/api/v1} (ruta absoluta)}} \\
+\texttt{GET} & \path{/health} & pública & Estado del servicio y de la base \\
+\texttt{GET} & \path{/metrics} & pública & Métricas Prometheus \\
+\end{longtable}

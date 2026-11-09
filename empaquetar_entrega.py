@@ -28,7 +28,7 @@ NOMBRE = "Entrega_final_Sobusa"
 # Lo que va de EntregaFinal/
 ARCHIVOS_ENTREGA = ["README.md", "Informe_tecnico_Sobusa.pdf", "entrega_final.ipynb", "entrega_final.html",
                     "requirements_cuaderno.txt", "empaquetar_entrega.py", "MATRIZ_CUMPLIMIENTO.md", "PLAN_EVOLUCION.md"]
-CARPETAS_ENTREGA = ["dash_app", "informe", "api_frecuencias"]
+CARPETAS_ENTREGA = ["documentos", "dash_app", "informe", "api_frecuencias"]
 # Entornos, cachés y datos locales de PostgreSQL nunca viajan; .env (con secretos) tampoco: solo .env.example
 EXCLUIR_PARTES = {".venv", "venv", "__pycache__", ".ipynb_checkpoints", "paquete", ".pytest_cache", ".ruff_cache",
                   ".mypy_cache", "htmlcov", "pgdata", ".env"}
@@ -36,7 +36,7 @@ EXCLUIR_SUFIJOS = {".pyc", ".log", ".blg", ".aux", ".bbl", ".xdv", ".out", ".syn
 EXCLUIR_NOMBRES = {"main.pdf",          # informe/main.pdf es la misma que Informe_tecnico_Sobusa.pdf
                    ".env", ".coverage"}
 # Carpetas datos/ propias de la entrega (datos derivados y pequeños, no los crudos): no cuentan para la lista negra
-DATOS_PERMITIDOS = ("dash_app/datos/", "api_frecuencias/datos/")
+DATOS_PERMITIDOS = ("dash_app/datos/", "api_frecuencias/datos/", "api_frecuencias/docs/evidencias/datos/")
 
 # App HTML: punto de partida y carpetas que entran completas
 SEMILLAS = ["app.html"]
@@ -84,13 +84,24 @@ def archivos_app(git: set[str]) -> list[str]:
     return sorted(elegidos)
 
 
+def no_ignorados() -> set[str]:
+    """Archivos que git versiona o versionaría (respeta .gitignore): cachés, .env y salidas locales quedan fuera."""
+    r = subprocess.run(["git", "ls-files", "-co", "--exclude-standard", "-z"], cwd=PROYECTO, capture_output=True,
+                       check=True)
+    return {f for f in r.stdout.decode("utf-8").split("\0") if f}
+
+
 def archivos_entrega() -> list[Path]:
     out = [ENTREGA / a for a in ARCHIVOS_ENTREGA if (ENTREGA / a).is_file()]
+    permitidos = no_ignorados()
+    prefijo = ENTREGA.relative_to(PROYECTO).as_posix() + "/"
     for c in CARPETAS_ENTREGA:
+        if not (ENTREGA / c).is_dir():
+            continue
         for p in sorted((ENTREGA / c).rglob("*")):
             rel = p.relative_to(ENTREGA)
-            if (p.is_file() and not (set(rel.parts) & EXCLUIR_PARTES) and p.suffix.lower() not in EXCLUIR_SUFIJOS
-                    and p.name not in EXCLUIR_NOMBRES):
+            if (p.is_file() and prefijo + rel.as_posix() in permitidos and not (set(rel.parts) & EXCLUIR_PARTES)
+                    and p.suffix.lower() not in EXCLUIR_SUFIJOS and p.name not in EXCLUIR_NOMBRES):
                 out.append(p)
     return out
 

@@ -1,0 +1,19 @@
+RNF-005 · dos réplicas comparten la cola 2026-11-09 01:06:58 (base local ai_frecuencias_pruebas_cola_demo)
+Filas pendientes limpiadas antes de empezar: 0
+
+Planificador con 2 réplicas: PLAN_EJECUCION_CRON='*/1 * * * *' durante 3 min
+   franja 01:08  réplica=replica-8104  estado=ok  filas_leidas=52326  predicciones=9  
+   franja 01:09  réplica=replica-8103  estado=ok  filas_leidas=0  predicciones=0  Sin datos nuevos desde la marca de agua: no se reprocesa el histórico.
+   franja 01:10  réplica=replica-8104  estado=ok  filas_leidas=0  predicciones=0  Sin datos nuevos desde la marca de agua: no se reprocesa el histórico.
+   GET /api/v1/scheduler (réplica A): trabajos=[{"id": "ejecucion_diaria", "cron": "*/1 * * * *", "proxima": "2026-11-09T01:11:00-05:00"}, {"id": "reentrenamiento", "cron": "0 4 * * 1", "proxima": "2026-11-09T04:00:00-05:00"}]
+   log replica-8103: 01:08:00 replica-8103:26752 Planificador: franja 2026-11-09T01:08:00-05:00 de frecuencia encolada 98c5adc9-4ff1-403c-8132-6aca405cd2c1
+   log replica-8103: 01:09:00 replica-8103:26752 Planificador: franja 2026-11-09T01:09:00-05:00 de frecuencia ya encolada por otra réplica
+   log replica-8103: 01:10:00 replica-8103:26752 Planificador: franja 2026-11-09T01:10:00-05:00 de frecuencia ya encolada por otra réplica
+   log replica-8104: 01:08:00 replica-8104:12872 Planificador: franja 2026-11-09T01:08:00-05:00 de frecuencia ya encolada por otra réplica
+   log replica-8104: 01:09:00 replica-8104:12872 Planificador: franja 2026-11-09T01:09:00-05:00 de frecuencia encolada df021e2e-7cbc-4503-bf66-fd22ed15684f
+   log replica-8104: 01:10:00 replica-8104:12872 Planificador: franja 2026-11-09T01:10:00-05:00 de frecuencia encolada 163ae899-d899-4184-b5c0-2785f1f19e16
+   [OK] 3 franjas encoladas (una por minuto)
+   [OK] ninguna franja encolada dos veces
+   [OK] todas terminadas ok
+
+RESULTADO: TODO OK

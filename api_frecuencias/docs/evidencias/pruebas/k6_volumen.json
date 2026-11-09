@@ -1,0 +1,409 @@
+{
+ "fecha": "2026-11-09",
+ "codigo": "commit 3d6781d (copia congelada)",
+ "dataset": {
+  "ejecuciones_originales": 33,
+  "copias_totales": 12,
+  "paso_dias": 7,
+  "tramo_original": [
+   "2025-01-01",
+   "2026-01-01"
+  ],
+  "tramo_sembrado": [
+   "2024-10-16",
+   "2026-01-01"
+  ],
+  "base": "ai_frecuencias_volumen_infra5",
+  "servidor": "postgresql+psycopg://sobusa:***@localhost:5433/ai_frecuencias_volumen_infra5",
+  "plantilla": "ai_frecuencias_pruebas_pruebas_k6",
+  "filas_antes": {
+   "execution_log": 33,
+   "execution_attempt": 33,
+   "data_quality_error": 0,
+   "prediction": 279,
+   "recommendation": 279,
+   "alert": 749,
+   "alert_history": 749,
+   "feature_snapshot": 372
+  },
+  "filas_despues": {
+   "execution_log": 396,
+   "execution_attempt": 396,
+   "data_quality_error": 0,
+   "prediction": 3348,
+   "recommendation": 3348,
+   "alert": 8988,
+   "alert_history": 8988,
+   "feature_snapshot": 4464
+  },
+  "tamano_base": "77 MB",
+  "segundos": 2.7
+ },
+ "carga": {
+  "root_group": {
+   "path": "",
+   "id": "d41d8cd98f00b204e9800998ecf8427e",
+   "groups": {},
+   "checks": {
+    "estado 200": {
+     "passes": 2868,
+     "fails": 0,
+     "name": "estado 200",
+     "path": "::estado 200",
+     "id": "188e815b6e6374ff2b2dfda559ffcad9"
+    },
+    "página con total e items": {
+     "id": "ac5b15b0306e8cd954d3716ee8cdf76a",
+     "passes": 2868,
+     "fails": 0,
+     "name": "página con total e items",
+     "path": "::página con total e items"
+    },
+    "correlation id devuelto": {
+     "fails": 0,
+     "name": "correlation id devuelto",
+     "path": "::correlation id devuelto",
+     "id": "db9850b59ca2e6621587077719e7013f",
+     "passes": 2868
+    }
+   },
+   "name": ""
+  },
+  "metrics": {
+   "http_req_sending": {
+    "avg": 0.04708962895927602,
+    "min": 0.00537,
+    "med": 0.023941,
+    "p(90)": 0.05243120000000001,
+    "p(95)": 0.07276400000000005,
+    "p(99)": 0.27245412000000313,
+    "max": 6.216182
+   },
+   "iterations": {
+    "count": 2868,
+    "rate": 47.537263398358256
+   },
+   "vus": {
+    "value": 3,
+    "min": 2,
+    "max": 49
+   },
+   "http_req_duration{recurso:models}": {
+    "p(95)": 504.65146565,
+    "p(99)": 645.5949002800005,
+    "max": 833.983725,
+    "avg": 230.8299319983053,
+    "min": 10.741857,
+    "med": 216.9274795,
+    "p(90)": 443.40244830000006,
+    "thresholds": {
+     "p(95)<2000": false
+    }
+   },
+   "http_req_duration{recurso:recommendations}": {
+    "avg": 297.2249804700703,
+    "min": 22.436516,
+    "med": 296.296928,
+    "p(90)": 509.18419400000005,
+    "p(95)": 591.7936718999998,
+    "p(99)": 810.8344031000001,
+    "max": 1190.088115,
+    "thresholds": {
+     "p(95)<2000": false
+    }
+   },
+   "http_req_duration{expected_response:true}": {
+    "min": 10.330634,
+    "med": 287.877135,
+    "p(90)": 543.5646766000001,
+    "p(95)": 627.52108,
+    "p(99)": 926.9684428400008,
+    "max": 1278.919118,
+    "avg": 301.06142411416596
+   },
+   "http_req_receiving": {
+    "min": 0.034211,
+    "med": 28.443501,
+    "p(90)": 140.9393042000001,
+    "p(95)": 236.9441342000001,
+    "p(99)": 466.31093560000147,
+    "max": 880.258317,
+    "avg": 59.07333319735472
+   },
+   "errores_funcionales": {
+    "passes": 0,
+    "fails": 2868,
+    "thresholds": {
+     "rate<0.01": false
+    },
+    "value": 0
+   },
+   "http_req_duration{recurso:alerts}": {
+    "p(90)": 619.437712,
+    "p(95)": 711.5352257999998,
+    "p(99)": 996.2488532200014,
+    "max": 1278.919118,
+    "avg": 360.86944151012926,
+    "min": 39.151055,
+    "med": 347.026824,
+    "thresholds": {
+     "p(95)<2000": false
+    }
+   },
+   "http_reqs": {
+    "count": 2873,
+    "rate": 47.6201386832229
+   },
+   "data_received": {
+    "count": 328940650,
+    "rate": 5452210.014462055
+   },
+   "http_req_failed": {
+    "passes": 0,
+    "fails": 2873,
+    "thresholds": {
+     "rate<0.01": false
+    },
+    "value": 0
+   },
+   "http_req_blocked": {
+    "avg": 0.2548814497041411,
+    "min": 0.00223,
+    "med": 0.006391,
+    "p(90)": 0.008318200000000001,
+    "p(95)": 0.010276000000000004,
+    "p(99)": 2.874534080000072,
+    "max": 130.478121
+   },
+   "vus_max": {
+    "value": 50,
+    "min": 50,
+    "max": 50
+   },
+   "iteration_duration": {
+    "max": 1732.697349,
+    "avg": 652.5167071701534,
+    "min": 217.221556,
+    "med": 637.643213,
+    "p(90)": 917.8776914000001,
+    "p(95)": 1007.6542749500002,
+    "p(99)": 1271.90315793
+   },
+   "http_req_tls_handshaking": {
+    "min": 0,
+    "med": 0,
+    "p(90)": 0,
+    "p(95)": 0,
+    "p(99)": 0,
+    "max": 0,
+    "avg": 0
+   },
+   "http_req_connecting": {
+    "avg": 0.23404521545422904,
+    "min": 0,
+    "med": 0,
+    "p(90)": 0,
+    "p(95)": 0,
+    "p(99)": 2.7150251600000073,
+    "max": 130.364208
+   },
+   "data_sent": {
+    "rate": 10100.740268960646,
+    "count": 609394
+   },
+   "http_req_waiting": {
+    "p(99)": 607.4764919200002,
+    "max": 816.328743,
+    "avg": 241.94100128785215,
+    "min": 10.0393,
+    "med": 232.934084,
+    "p(90)": 442.53394760000003,
+    "p(95)": 499.26167820000006
+   },
+   "http_req_duration{recurso:predictions}": {
+    "med": 342.7531315,
+    "p(90)": 618.6159122000001,
+    "p(95)": 729.7310654999999,
+    "p(99)": 1058.623239460001,
+    "max": 1265.1397,
+    "avg": 355.23608941695517,
+    "min": 38.080121,
+    "thresholds": {
+     "p(95)<2000": false
+    }
+   },
+   "http_req_duration{recurso:executions}": {
+    "p(99)": 690.2474556000001,
+    "max": 966.517699,
+    "avg": 269.16964117487294,
+    "min": 18.712752,
+    "med": 258.624577,
+    "p(90)": 486.9935706000001,
+    "p(95)": 567.1257434,
+    "thresholds": {
+     "p(95)<2000": false
+    }
+   },
+   "http_req_duration": {
+    "avg": 301.06142411416596,
+    "min": 10.330634,
+    "med": 287.877135,
+    "p(90)": 543.5646766000001,
+    "p(95)": 627.52108,
+    "p(99)": 926.9684428400008,
+    "max": 1278.919118,
+    "thresholds": {
+     "p(95)<2000": false
+    }
+   },
+   "checks": {
+    "passes": 8604,
+    "fails": 0,
+    "value": 1
+   }
+  },
+  "setup_data": {
+   "totales": {
+    "recommendations": 3348,
+    "alerts": 8988,
+    "executions": 396,
+    "models": 6,
+    "predictions": 3348
+   }
+  }
+ },
+ "en_frio": [
+  {
+   "ruta": "GET /api/v1/predictions?limite=50",
+   "frio": 62.4,
+   "estado": 200,
+   "caliente": 52.2
+  },
+  {
+   "ruta": "GET /api/v1/recommendations?limite=50",
+   "frio": 30.4,
+   "estado": 200,
+   "caliente": 33.9
+  },
+  {
+   "ruta": "GET /api/v1/alerts?limite=50",
+   "frio": 56.7,
+   "estado": 200,
+   "caliente": 48.5
+  },
+  {
+   "ruta": "GET /api/v1/alerts?severidad=critica",
+   "frio": 41.5,
+   "estado": 200,
+   "caliente": 48.3
+  },
+  {
+   "ruta": "GET /api/v1/frequency/executions",
+   "frio": 22.9,
+   "estado": 200,
+   "caliente": 21.8
+  },
+  {
+   "ruta": "GET /api/v1/models",
+   "frio": 13.8,
+   "estado": 200,
+   "caliente": 13.6
+  },
+  {
+   "ruta": "GET /api/v1/thresholds",
+   "frio": 10.8,
+   "estado": 200,
+   "caliente": 10.2
+  },
+  {
+   "ruta": "GET /api/v1/monitoring",
+   "frio": 20.0,
+   "estado": 200,
+   "caliente": 17.8
+  },
+  {
+   "ruta": "GET /api/v1/monitoring/policy",
+   "frio": 23.1,
+   "estado": 200,
+   "caliente": 17.9
+  },
+  {
+   "ruta": "GET /api/v1/monitoring/feature-snapshots?ruta=CL 72",
+   "frio": 23.7,
+   "estado": 200,
+   "caliente": 15.6
+  },
+  {
+   "ruta": "GET /api/v1/catalogos",
+   "frio": 4.4,
+   "estado": 200,
+   "caliente": 3.4
+  },
+  {
+   "ruta": "GET /api/v1/catalogos/rutas",
+   "frio": 54.9,
+   "estado": 200,
+   "caliente": 12.2
+  },
+  {
+   "ruta": "GET /api/v1/catalogos/empresas",
+   "frio": 13.7,
+   "estado": 200,
+   "caliente": 7.5
+  },
+  {
+   "ruta": "GET /api/v1/catalogos/procesos",
+   "frio": 6.2,
+   "estado": 200,
+   "caliente": 6.3
+  },
+  {
+   "ruta": "GET /api/v1/catalogos/segmentos?limite=50",
+   "frio": 5004.4,
+   "estado": 200,
+   "caliente": 65.5
+  },
+  {
+   "ruta": "GET /api/v1/catalogos/vehiculos?limite=50",
+   "frio": 68.3,
+   "estado": 200,
+   "caliente": 52.8
+  },
+  {
+   "ruta": "GET /api/v1/catalogos/capacidad",
+   "frio": 8.0,
+   "estado": 200,
+   "caliente": 10.6
+  },
+  {
+   "ruta": "GET /api/v1/segmentos/estadisticas?limite=50",
+   "frio": 8783.3,
+   "estado": 200,
+   "caliente": 11881.5
+  },
+  {
+   "ruta": "GET /api/v1/segmentos/estadisticas?limite=50&idruta=2",
+   "frio": 2916.3,
+   "estado": 200,
+   "caliente": 2279.2
+  },
+  {
+   "ruta": "GET /api/v1/segmentos/zonas?limite=50",
+   "frio": 50.3,
+   "estado": 200,
+   "caliente": 33.3
+  },
+  {
+   "ruta": "GET /api/v1/predictions/export?formato=csv (3.348 filas)",
+   "frio": 3425.0,
+   "estado": 200,
+   "caliente": 4155.8
+  },
+  {
+   "ruta": "GET /api/v1/alerts/export?formato=csv (8.988 filas)",
+   "frio": 5165.2,
+   "estado": 200,
+   "caliente": 4067.6
+  }
+ ]
+}

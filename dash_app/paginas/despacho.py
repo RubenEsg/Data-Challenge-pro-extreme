@@ -30,6 +30,9 @@ import ui
 dash.register_page(__name__, path="/despacho", name="Despacho", order=3, title="Despacho · Sobusa Despacho")
 
 TITULO = "Despacho en vivo"
+# §3.2 excluye el control de despachos: la consola repite un día de 2025 y solo muestra; no manda nada a la operación
+SUBTITULO = ("Repetición de un día de 2025 como si fuera hoy. Muestra lo que vería el despachador; no despacha ni "
+             "cambia la operación.")
 VELOCIDADES = [1, 60, 300, 900]                   # segundos del día por segundo de reloj (1 = tiempo real)
 VEL_INICIAL = 60
 # Calles claras de CARTO sobre OpenStreetMap (estilo vectorial «carto-positron» de MapLibre). Las teselas ráster de CARTO
@@ -92,7 +95,8 @@ def _cabecera(fechas, f0):
                                 updatemode="mouseup", allow_direct_input=False, className="deslizador"), className="desp-pista",
                      title="Mueve el reloj a otra hora del día")
     return html.Div([
-        html.H1(TITULO, className="desp-titulo"),
+        html.Div([html.H1(TITULO, className="desp-titulo"), html.P(SUBTITULO, className="nota desp-subtitulo")],
+                 className="desp-titulos"),
         html.Div([ui.control("Día", _selector_dia(fechas, f0)), ui.control("Ruta", ruta), _boton_play(),
                   ui.control("Velocidad", vel), pista], className="desp-mandos"),
     ], className="desp-cab")
@@ -228,6 +232,7 @@ def layout(**_):
         dcc.Store(id="desp-foto", data=None),
         dcc.Store(id="desp-clave", data=None),
         dcc.Store(id="desp-horas-clave", data=None),
+        dcc.Store(id="desp-mapa-listo", data=False),
         dcc.Interval(id="desp-tic", interval=1000, disabled=False),
         _cabecera(fechas, f0),
         html.H2("El despacho a la hora del reloj", className="oculto"),
@@ -270,6 +275,19 @@ clientside_callback(
     Output("desp-reloj", "data"), Output("desp-slider", "value"), Output("desp-play", "className"), Output("desp-hora", "children"),
     Input("desp-tic", "n_intervals"), Input("desp-play", "n_clicks"), Input("desp-slider", "value"),
     Input("desp-vel", "value"), State("desp-reloj", "data"))
+
+# El mapa queda «listo» cuando MapLibre terminó de cargar el estilo de calles (en frío tarda más que el primer paso del
+# reloj). Hasta entonces no se le manda ningún parche: parchar antes rompe con «Style is not done loading».
+clientside_callback(
+    """function (n, listo) {
+        if (listo) { return window.dash_clientside.no_update; }
+        var cont = document.getElementById('desp-mapa');
+        var gd = cont && (cont.classList.contains('js-plotly-plot') ? cont : cont.querySelector('.js-plotly-plot'));
+        var sub = gd && gd._fullLayout && gd._fullLayout.map && gd._fullLayout.map._subplot;
+        var m = sub && sub.map;
+        return (m && typeof m.isStyleLoaded === 'function' && m.isStyleLoaded()) ? true : window.dash_clientside.no_update;
+    }""",
+    Output("desp-mapa-listo", "data"), Input("desp-tic", "n_intervals"), State("desp-mapa-listo", "data"))
 
 # «Despachos | Vehículos»: solo cambia qué panel se ve (en el navegador)
 clientside_callback(
@@ -573,8 +591,9 @@ def pintar(reloj, fecha, ruta, foto, vel, clave):
     Output("desp-mapa", "figure"), Output("desp-mapa-tabla", "children"), Output("desp-mapa-lienzo", "aria-label"),
     Output("desp-horas", "figure"), Output("desp-horas-tabla", "children"), Output("desp-horas-lienzo", "aria-label"),
     Output("desp-horas-clave", "data"),
-    Input("desp-foto", "data"), Input("desp-vista", "value"), State("desp-horas-clave", "data"))
-def pintar_foto(foto, vista, hclave):
+    Input("desp-foto", "data"), Input("desp-vista", "value"), Input("desp-mapa-listo", "data"),
+    State("desp-horas-clave", "data"))
+def pintar_foto(foto, vista, listo, hclave):
     """A la hora exacta de la foto vigente (nunca después): lo que el motor sabía en esa foto. Solo se envía lo que cambió."""
     if not foto:
         raise PreventUpdate
@@ -586,6 +605,8 @@ def pintar_foto(foto, vista, hclave):
         # solo cambió el panel de la derecha: el mapa, las alertas y las barras ya están al día
         return (veh,) + (dash.no_update,) * 8
     fm, tm, em = _parche_mapa(e, rutas)
+    if not listo:
+        fm = dash.no_update                    # el estilo del mapa aún carga: el parche llega cuando quede listo
     horas, ha, plan, _reopt, hechas, faltan = _series_horas(e)
     llave = [fecha, ruta, ha]
     valores = [plan, hechas, faltan]
@@ -610,8 +631,10 @@ def pintar_foto(foto, vista, hclave):
 # los puntos de los buses y su halo; la ocupación es la del mismo bus en la foto vigente, si está.
 @callback(Output("desp-mapa", "figure", allow_duplicate=True),
           Input("desp-reloj", "data"), Input("desp-fecha", "date"), Input("desp-ruta", "value"),
-          prevent_initial_call="initial_duplicate")
-def mover_buses(reloj, fecha, ruta):
+          Input("desp-mapa-listo", "data"), prevent_initial_call="initial_duplicate")
+def mover_buses(reloj, fecha, ruta, listo):
+    if not listo:
+        raise PreventUpdate               # el estilo del mapa aún carga (ver el callback de «desp-mapa-listo»)
     fecha, ruta = _fecha_ruta(fecha, ruta)
     seg = int((reloj or {}).get("seg", HORA_INICIAL))
     pos = DD.posiciones_calles(fecha, seg, ruta)

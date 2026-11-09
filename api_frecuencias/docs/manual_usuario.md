@@ -1,62 +1,393 @@
-# Manual de usuario · API de frecuencias
+# Manual de usuario · Tablero y API de frecuencias
 
-Para el despachador, el jefe de operación o el jurado. La API se usa desde el navegador en **Swagger**
-(http://localhost:8000/docs): cada endpoint tiene «Try it out», un ejemplo de entrada y la respuesta. Cómo levantarla:
-`../README.md` (dos comandos con Docker).
+Para el despachador, el supervisor de turno y el analista de operación. Explica qué responde cada pantalla del tablero,
+cómo gestionar una alerta, cómo leer una recomendación y cómo usar la API directamente. Cómo instalar y levantar todo:
+`../README.md` (API) y `../../dash_app/README.md` (tablero); despliegue con Docker: `despliegue.md`.
 
-## 1. Las cuatro preguntas y dónde se ven
+## 1. Las cuatro preguntas y dónde se responden
 
-| Quiero saber… | Endpoint | Qué mirar en la respuesta |
-|---|---|---|
-| Cuántos pasajeros vienen en la próxima hora | `POST /api/v1/predictions/run` | pasajeros esperados, banda p10-p90, `model_id`, explicación |
-| Cada cuánto despachar | `POST /api/v1/recommendations/calculate` | `headway_min`, `buses_hora`, frente a `frecuencia_actual_min` |
-| Cuántos buses necesito | la misma | `vehiculos_requeridos` y `viable` (si es `false`, el `motivo`) |
-| Qué requiere atención ya | `GET /api/v1/alerts?estado=nueva` | severidad, explicación, observado frente a esperado, recomendación |
+| Quiero saber… | En el tablero | En la API | Qué mirar |
+|---|---|---|---|
+| Cuántos pasajeros vienen | Pronóstico · Recomendaciones | `GET /api/v1/predictions`, `POST /api/v1/predictions/run` | pasajeros esperados, banda P10–P90, `model_id` y explicación |
+| Cada cuánto despachar | Recomendaciones · Horario | `GET /api/v1/recommendations`, `POST /api/v1/recommendations/calculate`, `GET /api/v1/recommendations/plan` | `headway_min` y `buses_hora` frente a la frecuencia programada (`frecuencia_actual_min`) |
+| Cuántos buses necesito | Recomendaciones · Inicio | las mismas y `GET /api/v1/respuesta` | por franja, `vehiculos_requeridos` (⌈ciclo / headway⌉) frente a la flota disponible, y `viable` con su `motivo`; para el día, `vehiculos.requeridos_pico` de la respuesta (los buses en ruta a la vez en el momento más cargado) frente a `flota_disponible` |
+| Qué requiere atención ya | Alertas · Operación | `GET /api/v1/alerts?estado=nueva` | severidad, explicación, observado frente a esperado y umbral, y recomendación |
+| Todo lo anterior junto: la pregunta del reto | Inicio (tarjeta «Respuesta a la pregunta del reto») | `GET /api/v1/respuesta` (`ruta` y `fecha` opcionales) | por ruta: cada cuánto despachar por hora frente a lo programado, pasajeros esperados con P10–P90, vehículos frente a la flota, flota y recaudo, y las alertas que piden atención, con la trazabilidad (modelo, datos, umbrales) |
 
-Severidades: **crítica** (actuar ahora), **preventiva** (revisar en la hora), **informativa** (para planear).
+Severidades: **crítica** (actuar ahora), **preventiva** (revisar en la hora) e **informativa** (para planear).
 
-## 2. Recorrido de la demostración (unos 5 minutos)
+## 2. Antes de empezar: clave y rol
 
-1. **Llegan datos nuevos y se procesan.** En `POST /api/v1/frequency/executions`, «Try it out», escriba
-   `{"hasta": "2025-06-10"}` (los datos disponibles llegan hasta ese día) y «Execute». Copie el `execution_id` de la
-   respuesta. Para simular el día siguiente, repita con `"hasta": "2025-06-11"`.
-2. **Seguir la ejecución.** En `GET /api/v1/frequency/executions/{execution_id}` vea la etapa y el progreso, la marca de
-   agua anterior y la nueva (solo se leyó lo nuevo) y cuántas filas se aceptaron o rechazaron. Los errores de calidad, con
-   su lote, fila y causa, están en la lista de errores de esa ejecución.
-3. **Repetir la ejecución.** Ejecute de nuevo el paso 1: no se duplica nada, porque no hay datos posteriores a la marca.
-4. **Ver los resultados.** `GET /api/v1/predictions`, `GET /api/v1/recommendations` y `GET /api/v1/alerts`, filtrando
-   por ruta (`SILENCIO`, `CRA 54` o `CL 72`).
-5. **Gestionar una alerta.** En `PATCH /api/v1/alerts/{id}/status` envíe `reconocer` con su usuario y un comentario;
-   después `asignar` (con `asignado_a`) y, resuelta, `cerrar`. Si no procede, `descartar` (en cualquier momento antes de
-   cerrarla). `comentar` agrega una nota sin cambiar el estado. El historial de la alerta conserva cada cambio.
-6. **Modelo candidato frente al activo.** `POST /api/v1/models/train` con `{"hasta": "2025-06-10"}` entrena un candidato
-   con los datos ya validados. En `GET /api/v1/models` compare sus métricas (WAPE, MAE, RMSE, por ruta, pico y valle) con
-   las del activo y su fecha de corte.
-7. **Activar o rechazar.** `POST /api/v1/models/{id}/activate` con `aprobado_por` y el motivo. Si el WAPE del candidato
-   no es menor o igual que el del activo en la misma validación, la API no lo activa y deja registrada la decisión; si lo
-   activa, el anterior queda guardado y `POST /api/v1/models/rollback` vuelve a él.
+Cada persona usa una clave de API que le entrega el administrador (`scripts/crear_api_key.py`). La clave define el
+rol, y la API registra en la bitácora al usuario de la clave:
 
-## 3. Leer una recomendación
-
-Ejemplo: CRA 54 a las 7 de la mañana con 620 pasajeros esperados (p90 = 700) y buses de 50 puestos llenos al 85 %:
-
-- capacidad efectiva = 50 × 0,85 = 42,5 pasajeros por bus;
-- buses por hora = ⌈700 / 42,5⌉ = 17 → un bus cada 60 / 17 ≈ 3,5 minutos;
-- vehículos = ⌈tiempo de ciclo / headway⌉; si pasa de la flota disponible, la recomendación sale **no viable** y dice por
-  qué, en lugar de inventar una cifra.
-
-La respuesta trae esa misma cuenta en el campo `formula`.
-
-## 4. Exportar
-
-Las consultas de predicciones, recomendaciones y alertas se pueden exportar filtradas en CSV o XLSX (ver la sección de
-exportación en Swagger); el archivo trae las mismas columnas que la respuesta JSON.
-
-## 5. Si algo falla
-
-| Síntoma | Qué hacer |
+| Rol | Qué puede hacer |
 |---|---|
-| Swagger no abre | Revise que `docker compose ps` muestre `api` y `db` en ejecución; vea `docker compose logs api`. |
-| La ejecución queda en `error` | Abra `GET /frequency/executions/{id}`: el campo de errores dice la etapa y la causa. La marca de agua no avanzó, así que puede relanzarla. |
-| `viable = false` | No alcanza la flota o el headway mínimo para esa demanda: el `motivo` lo explica. Es una respuesta válida. |
-| Error 422 | Un campo de la petición no es válido (por ejemplo, un horizonte distinto de 30, 60 o 120); el mensaje dice cuál. |
+| `operador` | Ver todo y gestionar alertas (reconocer, asignar, comentar, cerrar o descartar). |
+| `analista` | Lo anterior, y además lanzar ejecuciones, pedir pronósticos y recomendaciones y entrenar candidatos. |
+| `admin` | Lo anterior, y además activar o revertir modelos y cambiar umbrales y capacidad. |
+
+El tablero lee la clave de la variable `SOBUSA_API_KEY` y la URL de la API de `SOBUSA_API_URL`. Por ejemplo, en
+PowerShell, desde `dash_app/`:
+
+```
+$env:SOBUSA_API_URL="http://127.0.0.1:8000"; $env:SOBUSA_API_KEY="<su clave>"; python app.py
+```
+
+Después abra http://127.0.0.1:8050. La clave nunca llega al navegador: las exportaciones pasan por el servidor del
+tablero.
+
+## 3. El tablero, pantalla por pantalla
+
+Cada pantalla abre con su pregunta en grande y sus controles a la derecha. El botón «…» de cada tarjeta abre la tabla
+con los datos del gráfico y sus fuentes. Hay dos grupos de pantallas:
+
+- **Alertas, Recomendaciones, Operación y Monitoreo** consumen la API en vivo, y también la tarjeta «Respuesta a la
+  pregunta del reto» de Inicio. Si la API no responde, lo dicen («La API no responde en …») y no muestran cifras
+  inventadas.
+- **El resto** (Inicio, Pronóstico, Horario, Despacho, El modelo, Resultado y Enlaces) lee los datos del proyecto que
+  vienen con el tablero.
+
+### 3.1 Alertas · ¿Qué pide atención ahora?
+
+![Bandeja de alertas](evidencias/tablero/dash_alertas.png)
+
+- **Bandeja.** Muestra las alertas de `GET /api/v1/alerts`, de la más reciente a la más antigua y 20 por página. Se
+  filtran por estado, nivel, ruta, código y fechas. El nivel y el estado aparecen como chips con icono y palabra, para
+  que no dependan solo del color.
+- **Detalle.** Clic en una fila. Muestra todos los campos de §5.3, agrupados:
+  - identificación y contexto: origen (pronóstico, observado, calidad de datos o modelo), ruta, sentido, viaje y
+    vehículo;
+  - tiempo: detección, ventana y horizonte;
+  - evidencia: observado, esperado, umbral, puntaje y probabilidad con su método (nunca una cifra opaca, §9.4), y la
+    tendencia (al alza, a la baja o estable) con su pendiente, como chip con icono y palabra;
+  - serie reciente: un gráfico pequeño con lo real frente a lo esperado de las horas analizadas; su tabla está en el «…»;
+  - lectura: explicación en lenguaje operativo, variables influyentes del modelo (SHAP) ordenadas por su efecto en
+    pasajeros y recomendación;
+  - ubicación: coordenadas y enlace al mapa (OpenStreetMap) cuando la fuente trae el lugar; si no, el detalle lo dice
+    («la fuente no trae coordenadas»), como pasa con la fuente Parquet;
+  - gestión: asignación, comentarios y bitácora completa (`/history`).
+
+  ![Detalle de una alerta: evidencia, tendencia y serie reciente](evidencias/tablero/dash_alertas_detalle.png)
+- **Por lugar (solo en la API).** `GET /api/v1/alerts?cerca_de=<lat>,<lon>&radio_m=<metros>` devuelve las alertas a esa
+  distancia o menos (radio por omisión 1.000 m, máximo 50 km); la exportación acepta el mismo filtro (sección 7).
+- **Acciones.** Solo se activan las que permite el estado actual (sección 4).
+- **Exportar.** CSV y XLSX con los mismos filtros (`GET /api/v1/alerts/export`).
+
+### 3.2 Recomendaciones · ¿Cada cuánto debe salir un bus?
+
+![Recomendaciones](evidencias/tablero/dash_recomendaciones.png)
+
+- **Controles.** Ruta, viabilidad, ejecución y fecha. Los datos salen de `GET /api/v1/recommendations` y
+  `GET /api/v1/frequency/executions`.
+- **Cifras de la hora pico.** Compara:
+  - los buses por hora recomendados con los programados;
+  - los vehículos requeridos con la flota disponible;
+  - la ocupación esperada con el rango objetivo de los umbrales vigentes.
+- **Gráfico.** El headway recomendado frente a la **frecuencia actual (programada)**, hora por hora.
+- **Tabla por franja.** Demanda, P90, buses por hora, headways, diferencia, vehículos, ocupación, si es viable y el
+  motivo con la fórmula. Las franjas no viables aparecen señaladas con su motivo
+  (`evidencias/tablero/dash_recomendaciones_no_viable.png`); el plan del día por hora, en
+  `evidencias/tablero/dash_recomendaciones_plan.png`.
+- **Cómo leer el plan del día (`GET /api/v1/recommendations/plan`).** Una hora con una sola salida trae
+  `sin_intervalo = true`: no hay intervalo entre salidas que revisar, así que esa hora no sale «no viable» por el
+  headway mínimo. El plan da dos cifras de vehículos, explicadas en `definicion_vehiculos`:
+  - `vehiculos_hora_pico`, la de §10.3 (⌈ciclo / headway⌉ en la hora más exigente), que puede pasar la flota;
+  - `buses_en_ruta_pico`, los buses en la calle a la vez con el plan, que es la que se compara con la flota disponible.
+
+  En el ejemplo de CRA 54 del 19-11-2025 son 106 y 78,55, con 79 buses disponibles
+  (`evidencias/optimizacion/ejemplo_plan_d5.json`).
+- **«Calcular escenario».** Llama a `POST /api/v1/recommendations/calculate` (rol analista) con la demanda, la capacidad
+  y, si quiere cambiarlos, el nivel de servicio y los pesos α, β, γ y δ. Pone el resultado al lado de la recomendación
+  vigente, con todo lo que explica la API:
+  - la función objetivo de §10.2 término por término (α·costo operativo + β·tiempo de espera + γ·sobreocupación +
+    δ·desviación de la frecuencia): componente, peso, valor ponderado y de dónde salió cada peso (código,
+    `threshold_config` o la solicitud);
+  - las restricciones con su valor, su límite y su holgura, y los límites que mandan (capacidad del nivel de servicio,
+    flota, headway mínimo o máximo);
+  - la mezcla de tipologías de bus (§10.1);
+  - la frecuencia programada frente a la recomendada (RF-008);
+  - si no es viable, el motivo con sus cifras y la mejor aproximación ejecutable (§18).
+
+  ![Escenario: función objetivo y restricciones](evidencias/tablero/dash_recomendaciones_escenario.png)
+- **Plan del día por hora.** Para una ruta y una fecha, el plan del optimizador D5 con el pronóstico del modelo
+  activo (`GET /api/v1/recommendations/plan`): fichas del día, un gráfico con lo programado (escalón gris) frente al
+  plan (barras) y la tabla con los despachos de cada hora (`evidencias/tablero/dash_recomendaciones_plan.png`). Cada
+  hora dice qué límite manda (flota, headway mínimo o máximo), si es viable y por qué. El plan lo calcula la ejecución
+  diaria para el día siguiente; si todavía no está calculado para esa fecha, la API responde 404 `sin_calcular`, y un
+  analista lo pide con `POST /api/v1/respuesta/calcular`.
+- **El headway máximo.** Es el menor entre `headway_maximo_min` y el doble de la espera máxima (`espera_max_min`),
+  porque la espera media de un pasajero es la mitad del intervalo entre buses. Con los valores vigentes (10 y 5 min)
+  son 10 min. Si la operación decide que la espera máxima es el intervalo entre despachos, basta con una versión nueva
+  de umbrales (sección 3.3).
+- **Exportar.** CSV y XLSX.
+
+### 3.3 Operación · ¿Cómo está corriendo el sistema?
+
+![Operación](evidencias/tablero/dash_operacion.png)
+
+Tiene cuatro vistas (Ejecuciones, Modelos, Umbrales y Salud del servicio). Las capturas `*_1366x768.png` de esta sección
+son de la versión anterior del tablero, con diez pestañas y la cuarta vista todavía llamada «Monitoreo»; el contenido de
+cada vista es el mismo.
+
+- **Ejecuciones.**
+  - Para cada ejecución: la marca de agua anterior y la nueva (solo se leyó lo nuevo), el corte de datos, las filas
+    leídas y válidas, lo producido y la duración.
+  - El detalle trae el WAPE, la cobertura P10–P90 y los errores de calidad, filtrables por lote, dimensión y código.
+    Cada error dice qué registro lo tuvo (la llave: ruta, fecha y hora), el valor que llegó, la causa y si bloqueó la
+    fila (las filas bloqueadas no entran al histórico; los errores de oportunidad solo informan). Un ejemplo con un
+    error de cada regla está en `evidencias/datos/errores_lote.txt`.
+  - «Ejecutar día siguiente» lanza el job (rol analista) y el tablero sigue su progreso cada 2 segundos.
+- **Modelos.** ![Modelos](evidencias/tablero/operacion_modelos_1366x768.png)
+  - El registro: estado, corte, variables, SHA-256, WAPE de validación, quién lo aprobó y cuál era el anterior.
+  - La comparación con las líneas base y la auditoría en una línea de tiempo.
+  - Las acciones activar y revertir (rol admin) y entrenar candidato (rol analista). Si la activación se rechaza
+    (409), el tablero muestra el motivo.
+- **Umbrales.** La versión vigente y el historial de cada umbral. Una versión nueva se crea con su motivo (rol
+  admin) y queda como propuesta hasta que el área operativa la aprueba (`POST /api/v1/thresholds/{version}/aprobar`,
+  rol admin), que registra quién y cuándo. `GET /api/v1/thresholds` dice si la versión vigente está aprobada.
+  ![Umbrales](evidencias/tablero/operacion_umbrales_1366x768.png)
+- **Salud del servicio.** `/health`, las métricas (peticiones, errores y p95 aproximado por ruta), las alertas nuevas
+  por nivel y el WAPE frente a su tolerancia. El monitoreo del modelo (deriva, error móvil, reentrenamiento y retador en
+  sombra) tiene su propia pantalla, Monitoreo (sección 3.4), y esta vista enlaza a ella.
+  ![Salud del servicio (captura de la versión anterior)](evidencias/tablero/operacion_monitoreo_1366x768.png)
+
+Con una clave de operador, las acciones de analista o de administrador quedan bloqueadas y el tablero dice qué rol
+hace falta (`evidencias/tablero/operacion_403_operador_1366x768.png`).
+
+### 3.4 Monitoreo · ¿El modelo sigue sirviendo?
+
+![Monitoreo](evidencias/tablero/dash_monitoreo.png)
+
+Lee `GET /api/v1/monitoring`, `GET /api/v1/monitoring/policy`, `GET /api/v1/models` y los umbrales vigentes:
+
+| Sección o tarjeta | Qué responde |
+|---|---|
+| Error y cobertura del modelo activo | ¿El modelo sigue acertando? Estado general con sus motivos; WAPE, MAE y sesgo de la ventana móvil y cobertura P10–P90, cada uno frente a su umbral versionado. |
+| Deriva de los datos (PSI por variable) | ¿Los datos de hoy se parecen a los del entrenamiento? El PSI de cada variable con su umbral de aviso y de alerta. |
+| Volumen y alertas descartadas | ¿Cuántas predicciones se hicieron y qué parte de las alertas se descartó (posibles falsos positivos)? |
+| ¿Hay que reentrenar? | La decisión de la política con cada disparador (periodicidad, degradación, deriva y cobertura), sus motivos y sus bloqueos. |
+| Retador en sombra y su compuerta | Si hay un candidato prediciendo en paralelo y cómo va en los cuatro criterios de la compuerta. |
+| Últimas filas de monitoreo | Una fila por ejecución: error móvil, cobertura, sesgo, deriva máxima y estado. Se exportan en CSV y XLSX (`GET /api/v1/monitoring/export`; ejemplo en `evidencias/tablero/export_monitoreo_dash.csv`). |
+
+Los estados siempre van con icono y palabra («Sin novedad», «Aviso», «Alerta»), no solo con color.
+![Monitoreo: reentrenamiento y sombra](evidencias/tablero/dash_monitoreo_politica.png)
+
+### 3.5 Las pantallas del laboratorio del modelo
+
+![Inicio con la respuesta a la pregunta del reto](evidencias/tablero/dash_inicio_respuesta.png)
+
+| Pantalla | Pregunta que responde | Qué mirar |
+|---|---|---|
+| Inicio | ¿Qué proponemos? | La propuesta en una frase, el ahorro en operación con sus dos saldos (según cómo se cuenten los pasajeros), el error de la regla manual frente al modelo y el servicio (pasajeros sobre la capacidad y espera). La tarjeta «Respuesta a la pregunta del reto» trae, desde la API, cada cuánto despachar, cuántos pasajeros y vehículos se esperan y qué alertas piden atención, por ruta. |
+| Pronóstico | ¿Cuántos pasajeros habrá? | Arriba, la sección «Modelo activo (API)»: los pronósticos que guarda la API con su modelo (`GET /api/v1/predictions`), con la banda P10–P90 calibrada frente a lo real, las variables que más mueven cada pronóstico (SHAP) y la exportación. Debajo, los experimentos del informe: pasajeros reales frente a pronosticados hora por hora para una ruta y un día de 2025, con la banda de la hora pico y la regla manual, hechos con 7 días de antelación. |
+| Horario | ¿Cuántos buses y cada cuánto? | El optimizador D5 resuelto en el momento con los costos, la elasticidad y el intervalo que usted elija: salidas por hora frente a las de hoy, carga del punto más lleno, balance del día y horario minuto a minuto (CSV). |
+| Despacho | ¿Qué sale ahora y en qué bus? | Un día de 2025 repetido como si fuera en vivo: reloj, fichas (salidas frente al plan, buses en la calle, próximo despacho), mapa con los buses, alertas y próximos despachos. Es una repetición sin mandos: no controla ningún bus (§3.2). |
+| El modelo | ¿Qué modelo es y por qué? | El error de los modelos del informe académico (experimentos 1, 11 y 12, a 7 días y sobre todo 2025) frente a la regla manual, su ficha y las variables que más pesan. No es el modelo que corre en la API: ese es `hgb_fv2_20250831_s42`, y su error está en `evidencias/modelo/evaluacion_modelo.md`. |
+| Resultado | ¿Qué gana Sobusa? | Dónde se quitan y se ponen salidas, la cascada del ahorro al saldo, la comparación entre reasignar y recortar, y la sensibilidad a la elasticidad. |
+| Enlaces | ¿Dónde está el resto? | Accesos a la app completa y a los documentos del proyecto. |
+
+El detalle de cada tarjeta está en `../../dash_app/README.md`.
+
+### 3.6 Rutina sugerida por turno
+
+| Momento | Quién | Qué hacer en el tablero |
+|---|---|---|
+| Al empezar el turno | Despachador | En Inicio, leer la tarjeta «Respuesta a la pregunta del reto» de su ruta: headway por franja, pasajeros esperados, vehículos y alertas abiertas. En Alertas, filtrar `estado = nueva` y `nivel = crítica`. |
+| Durante el turno | Despachador | Reconocer cada alerta crítica en cuanto la vea, asignarla a quien la atiende y comentar lo que se hizo. Antes de un refuerzo, revisar en Recomendaciones la franja y su viabilidad. |
+| Cada hora pico | Supervisor de turno | Revisar las franjas no viables y decidir el refuerzo o el cambio de tipología. Dejar en el comentario de la alerta por qué se siguió o no la recomendación. |
+| Una vez al día | Analista | En Operación, confirmar que la ejecución diaria terminó en `ok` y revisar los errores de calidad. En Monitoreo, mirar el estado del modelo y si la política pide reentrenar. |
+| Una vez a la semana | Analista y supervisor | Revisar las alertas descartadas (posibles falsos positivos) y proponer, con su motivo, una versión nueva de umbrales si hace falta. |
+
+## 4. Cómo gestionar una alerta
+
+```
+ nueva ──reconocer──► reconocida ──asignar──► asignada ──cerrar──► cerrada
+   │                      │                      │  ▲
+   └──────descartar───────┴──────descartar───────┘  └─ asignar (reasignar)
+                                ▼
+                            descartada            «comentar» agrega una nota sin cambiar el estado
+```
+
+1. **Reconocer**: «la vi y me hago cargo». Pase de `nueva` a `reconocida`.
+2. **Asignar** a una persona (campo `asignado_a`, obligatorio). Si falta, la API responde 422 y el tablero lo muestra.
+3. **Comentar** lo que se hizo (por ejemplo, «se envía un bus de refuerzo»).
+4. **Cerrar** cuando quedó resuelta, o **descartar** si no procede (desde `nueva`, `reconocida` o `asignada`). Las
+   descartadas cuentan en el monitoreo como posibles falsos positivos (§9.4).
+
+Una transición que no existe, como cerrar una alerta nueva, responde 409 `transicion_invalida` y no cambia nada
+(`evidencias/tablero/alertas_409_1366x768.png`). Cada acción queda en la bitácora con usuario, fecha y comentario.
+
+**Si la misma situación sigue**, no aparece una alerta nueva: se actualiza la misma, suben sus ocurrencias y la
+bitácora anota «redetección». Así la bandeja no se llena de repetidas (§18 «Alertas excesivas»).
+
+**Si la situación empeora**, la misma alerta sube de severidad (por ejemplo, de preventiva a crítica) sin cambiar de
+estado, y la bitácora anota «escalar» con la severidad anterior y la nueva. Si queda crítica, se notifica. La severidad
+nunca baja sola: si la situación mejora, la alerta conserva su severidad y solo suma la ocurrencia; quien la atiende la
+cierra.
+
+## 5. Cómo leer una recomendación
+
+Ejemplo real de la API, guardado en `evidencias/optimizacion/ejemplo_calculate.json`. Para CRA 54 a las 7 h, con 1.000
+pasajeros por hora esperados (P90 = 1.180), la respuesta trae:
+
+- `buses_hora = 12` y `headway_min = 5,00`: un despacho cada 5 minutos;
+- `vehiculos_requeridos = 51` para un ciclo de 249,1 minutos;
+- `ocupacion_esperada = 0,678` (67,8 %), dentro del rango objetivo de 65 % a 85 % de §5.1;
+- `frecuencia_actual_min = 2,94`, la frecuencia programada hoy, para comparar;
+- `explicacion`: las frases que dicen qué límite manda (capacidad del nivel de servicio, flota, headway mínimo o
+  máximo) y por qué se eligió ese número de buses y no uno más o uno menos;
+- `objetivo`: la función objetivo de §10.2 con cada peso (α, β, γ y δ), su valor y su fuente (por ejemplo,
+  `threshold_config` y su versión, o la solicitud);
+- `restricciones` y `limites_activos`: cada restricción con su valor, su límite y su holgura, y cuáles mandan (en el
+  ejemplo, el nivel de servicio y la flota de dos tipologías);
+- `tipologias`: cuántos buses de cada tipología usa la recomendación frente a los disponibles (§10.1);
+- `linea_base_10_3`: la cuenta simple de §10.3, para contrastar;
+- `comparacion_actual`: costo, espera, sobreocupación esperada y vehículos de la frecuencia programada frente a los de
+  la recomendada.
+
+**Viabilidad.** Si la flota o el headway mínimo no alcanzan para la demanda, la recomendación sale `viable = false` con
+un `motivo` en cifras, en lugar de forzar un número. En `evidencias/optimizacion/ejemplo_calculate_no_viable.json`,
+6.000 pasajeros por hora en CRA 54 exigirían 4.065 puestos por hora y el máximo posible es 2.160; la flota disponible
+(79 vehículos) no lo sostiene. La respuesta trae además la mejor aproximación ejecutable, que respeta la flota y el
+headway mínimo y dice qué parte de la demanda cubre. Es una respuesta válida: le dice al supervisor que hace falta
+refuerzo o un cambio de tipología.
+
+## 6. Monitoreo del modelo
+
+`GET /api/v1/monitoring` (y la pantalla Monitoreo del tablero, sección 3.4) da, por ejecución:
+
+- el WAPE, el MAE y el sesgo móviles de 28 días;
+- la cobertura de la banda P10–P90;
+- la deriva de cada variable (PSI);
+- el volumen de predicciones y el porcentaje de alertas descartadas.
+
+El estado puede ser `ok`, `aviso` o `alerta`. `GET /api/v1/monitoring/policy` dice si toca reentrenar y por qué, y si
+hay un candidato en sombra. Si el error móvil de una ruta pasa la tolerancia, aparece la alerta ALT-010 «Modelo
+degradado». Activar o revertir un modelo es una decisión del administrador (sección 3.3).
+
+## 7. Usar la API directamente (curl)
+
+Cada petición a `/api/v1` lleva la cabecera `X-API-Key`. Swagger (http://localhost:8000/docs, solo en ambientes local,
+pruebas o demo) permite probar cada endpoint con el botón «Authorize». Los ejemplos son para `cmd` de Windows; en
+PowerShell use `curl.exe` y `` ` `` para continuar la línea, y en bash, `\`.
+
+```
+set CLAVE=<su clave>
+
+rem La pregunta del reto respondida para una ruta (rol operador); sin fecha, el día siguiente al último dato.
+rem Lee la foto que guardó el ciclo; si no la hay, responde 404 sin_calcular
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/respuesta?ruta=CRA%2054"
+rem Pedir el cálculo de una fecha (rol analista): responde 202 con execution_id y dónde consultar el estado
+curl -X POST http://localhost:8000/api/v1/respuesta/calcular -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"fecha\": \"2025-11-19\"}"
+rem La misma respuesta, una fila por ruta y hora, en CSV (sin foto, 404 sin_calcular)
+curl -H "X-API-Key: %CLAVE%" -o respuesta.csv "http://localhost:8000/api/v1/respuesta/export?formato=csv&ruta=CRA%2054"
+
+rem Lanzar una ejecución con los datos hasta una fecha (rol analista); responde 202 con execution_id
+curl -X POST http://localhost:8000/api/v1/frequency/executions -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"hasta\": \"2025-09-30\"}"
+curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/frequency/executions/<execution_id>
+curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/frequency/executions/<execution_id>/errors
+
+rem Pronóstico de una ruta a 60 minutos (rol analista)
+curl -X POST http://localhost:8000/api/v1/predictions/run -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" ^
+     -d "{\"ruta\": \"CRA 54\", \"instante\": \"2025-10-01T07:00:00-05:00\", \"horizonte_min\": 60}"
+
+rem Recomendación para una franja (rol analista) y plan del día (rol operador)
+curl -X POST http://localhost:8000/api/v1/recommendations/calculate -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"ruta\": \"CRA 54\", \"hora\": 7, \"demanda_hora\": 1000, \"demanda_p90\": 1180}"
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/recommendations/plan?ruta=CRA%2054&fecha=2025-03-04"
+
+rem Alertas nuevas y críticas de una ruta, alertas a 500 m de un punto, y gestión de una alerta (rol operador)
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/alerts?estado=nueva&severidad=critica&ruta=CL%2072"
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/alerts?cerca_de=10.981,-74.801&radio_m=500"
+curl -X PATCH http://localhost:8000/api/v1/alerts/<alert_id>/status -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"accion\": \"reconocer\", \"comentario\": \"Se envía un bus de refuerzo\"}"
+curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/alerts/<alert_id>/history
+
+rem Registro de modelos, entrenamiento de un candidato (analista), activación y reversión (admin)
+curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/models
+curl -X POST http://localhost:8000/api/v1/models/train -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"hasta\": \"2025-09-30\", \"semilla\": 42}"
+curl -X POST http://localhost:8000/api/v1/models/<model_id>/activate -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"validacion_desde\": \"2025-12-01\", \"validacion_hasta\": \"2025-12-14\", \"motivo\": \"Compuerta de cuatro criterios\"}"
+curl -X POST "http://localhost:8000/api/v1/models/<model_id>/activate?forzar=true" -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"motivo\": \"Aprobado por el comité de operación\"}"
+curl -X POST http://localhost:8000/api/v1/models/rollback -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"motivo\": \"Prueba de reversión\"}"
+```
+
+Qué responde la activación:
+
+- **200**: el modelo pasó la compuerta de cuatro criterios en la ventana pedida (por omisión, los 28 días siguientes a
+  lo que vio el candidato) y quedó activo; el anterior queda guardado para la reversión.
+- **422 `ventana_en_muestra`**: la ventana empieza dentro de lo que el candidato ya vio (su corte más los 61 días de
+  validación); el detalle dice desde qué día se puede comparar.
+- **409 `activacion_rechazada`**: algún criterio no se cumplió; el modelo queda «rechazado» con el motivo.
+- **409 `requiere_forzar`**: el modelo ya fue rechazado o sigue en sombra (la compuerta de sombra decide al terminar
+  sus 14 días).
+- **`?forzar=true`**: activa aunque no se cumplan los criterios, solo con un `motivo` (sin él, 422
+  `motivo_requerido`), y deja la decisión en la auditoría del modelo.
+
+Rutas válidas en todos los filtros: `SILENCIO`, `CRA 54` y `CL 72` (en la URL, el espacio va como `%20`). Todas las
+fechas salen en hora de Bogotá (`-05:00`). Las colecciones se paginan con `limite` y `desplazamiento`, y cada respuesta
+trae la cabecera `X-Correlation-Id`: si algo falla, ese valor ubica el caso en los logs.
+
+## 8. Exportar
+
+Todas las consultas filtradas se pueden descargar en CSV o XLSX (`?formato=csv` o `?formato=xlsx`) con los mismos
+filtros de la consulta. Cada descarga trae dos cabeceras: `X-Total-Count`, cuántos registros cumplen el filtro, y
+`X-Truncado`, que vale `true` si el archivo se cortó en el tope de 100.000 filas (en ese caso, afine los filtros para
+bajar el resto):
+
+| Qué | Endpoint |
+|---|---|
+| Respuesta a la pregunta del reto (una fila por ruta y hora) | `GET /api/v1/respuesta/export` |
+| Pronósticos | `GET /api/v1/predictions/export` |
+| Recomendaciones | `GET /api/v1/recommendations/export` |
+| Alertas (con los campos de §5.3) | `GET /api/v1/alerts/export` |
+| Monitoreo | `GET /api/v1/monitoring/export` |
+| Estadísticas por segmento | `GET /api/v1/segmentos/estadisticas/export` |
+| Catálogos (procesos, empresas, rutas, segmentos, vehículos, viajes, despachos) | `GET /api/v1/catalogos/<catálogo>/export` |
+
+Ejemplo: `curl -H "X-API-Key: %CLAVE%" -o alertas.xlsx "http://localhost:8000/api/v1/alerts/export?formato=xlsx&estado=nueva"`.
+En el tablero, los botones CSV y XLSX de Alertas, Recomendaciones, Monitoreo y la tarjeta de la respuesta en Inicio
+hacen lo mismo. Hay archivos de ejemplo en `evidencias/tablero/export_alertas_dash.xlsx`,
+`evidencias/tablero/export_recomendaciones_dash.csv`, `evidencias/tablero/export_monitoreo_dash.csv` y
+`evidencias/tablero/export_respuesta_dash.csv`. La exportación de alertas acepta también el filtro por lugar
+(`cerca_de` y `radio_m`).
+
+## 9. Preguntas frecuentes
+
+| Pregunta o síntoma | Respuesta |
+|---|---|
+| La pantalla dice «La API no responde en …» | Revise que la API esté arriba (`docker compose -p sobusa_api ps` o `GET /health`) y que `SOBUSA_API_URL` apunte a ella. Las siete pantallas del laboratorio siguen funcionando sin API. |
+| La API responde 401 | Falta la cabecera `X-API-Key` o la clave no es válida. Pida una clave al administrador. |
+| La API responde 403 | Su rol no alcanza para esa acción. La respuesta dice el rol exigido (`rol_requerido`). |
+| La API responde 409 | Hay un conflicto de estado: una transición de alerta no permitida o una activación rechazada porque el candidato no mejora al activo. El mensaje explica el motivo. |
+| La API responde 400 `cuerpo_ilegible` | El cuerpo de la petición no se pudo leer (por ejemplo, un archivo que no está en UTF-8). Guarde el JSON en UTF-8 y repita. |
+| La API responde 422 | Un dato de la petición no es válido (por ejemplo, un horizonte distinto de 30, 60 o 120, asignar sin persona o un radio de más de 50 km). El detalle dice qué campo. Con `tipo` = `caracter_nulo`, el valor trae el byte NUL (0x00), que no se admite. Con `codigo` = `fuera_de_rango`, una fecha u otro valor es demasiado extremo para procesarlo (por ejemplo, `hasta=9999-12-31`). |
+| Una recomendación sale `viable = false` | No alcanza la flota o el headway mínimo para esa demanda. El `motivo` lo explica con cifras y viene la mejor aproximación ejecutable (sección 5). |
+| La ejecución terminó con 0 filas | No llegaron datos nuevos desde la marca de agua. Es lo esperado y no se reprocesa el histórico. |
+| La API responde 404 `sin_calcular` en el plan o en la respuesta del reto | El plan de esa fecha todavía no está calculado (la ejecución diaria lo calcula para el día siguiente). Un analista lo pide con `POST /api/v1/respuesta/calcular`; la tarjeta de Inicio lo pide sola y muestra «Calculando…» mientras tanto. |
+| Una alerta cambió de severidad sin que nadie la tocara | La situación empeoró y el sistema la escaló: la bitácora tiene la entrada «escalar» con la severidad anterior y la nueva (sección 4). |
+| La ejecución quedó en `error` | `GET /api/v1/frequency/executions/{id}` dice la etapa y la causa. La marca de agua no avanzó, así que se puede relanzar. |
+| ¿Por qué el sistema recomendó esto? | Cada pronóstico trae su explicación (las variables que más pesaron) y su versión de modelo y de datos. Cada recomendación trae la fórmula, los límites que mandan y la versión de umbrales. Cada alerta trae el observado, el esperado, el umbral y la explicación. |
+| ¿El sistema despacha buses solo? | No. Recomienda y alerta; el despachador decide (§3.2). |
+
+## 10. Glosario
+
+| Término | Qué significa aquí |
+|---|---|
+| Franja | Una hora de servicio de una ruta (por ejemplo, CRA 54 de 7:00 a 8:00). |
+| Headway | Minutos entre dos despachos seguidos de la misma ruta: 60 / buses por hora. |
+| Frecuencia programada | El intervalo con que hoy está programada la franja; contra él se compara la recomendación. |
+| Banda P10–P90 | El rango de pasajeros en que debería caer la demanda 8 de cada 10 veces: por debajo del P10, una de cada diez, y por encima del P90, otra de cada diez. |
+| Nivel de servicio | Qué parte de la demanda posible se cubre al recomendar. Con 0,90, la capacidad alcanza para el P90. |
+| Viable | La recomendación cabe en la flota, en el ciclo y en los límites de headway. Si no, sale `viable = false` con el motivo. |
+| Marca de agua | La fecha y hora del último dato leído. La ejecución siguiente solo lee lo posterior, así que nada se procesa dos veces. |
+| WAPE | Error del pronóstico: la suma de los errores absolutos dividida por la suma de los pasajeros reales. 15 % quiere decir que, en conjunto, el pronóstico se equivoca en 15 de cada 100 pasajeros. |
+| Episodio | Horas seguidas con la misma situación en la misma ruta. Generan una sola alerta, que se actualiza mientras dure. |
+| Modelo activo, candidato y sombra | El activo es el que hace los pronósticos. Un candidato es un modelo reentrenado que todavía no se usa. En sombra, el candidato predice en paralelo para compararlo antes de activarlo. |

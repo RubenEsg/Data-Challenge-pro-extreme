@@ -1,0 +1,85 @@
+RNF-001 · prueba de caída 2026-11-09 01:26:31 (Windows 11; base local ai_frecuencias_pruebas_cola_docker)
+Réplicas en contenedores Linux de la imagen sobusa_cola_caida:prueba: SIGKILL = docker kill (señal 9 al proceso de la API); reinicio = docker start del mismo contenedor.
+Filas pendientes limpiadas antes de empezar: 0
+Réplica A arrancó en 5.4 s (pausa inyectada: 3 s en la lectura, 0,8 s por predicción, para que el SIGKILL caiga dentro de la etapa)
+
+0) Ejecución de referencia SIN caída (55b5c10f-b425-4ff2-acc2-563b2b860704, hasta 2023-01-07):
+   referencia: estado=ok intentos=1 filas_leidas=357 predicciones=9 recomendaciones=9 alertas=11 notificaciones=0 errores_dq=0
+   traza de intentos: [(1, 'caida-a:1:e36019:t1', 'ok')]
+   marca de agua: None -> 2023-01-07 23:59:59-05:00
+   [OK] estado ok
+   [OK] intentos = 1
+   [OK] traza [ok]
+   [OK] predicciones = referencia y sin duplicados
+   [OK] recomendaciones = referencia
+   [OK] alertas = alertas_nuevas de la ejecución
+   [OK] una sola entrada «crear» por alerta
+   [OK] notificaciones = las de las métricas
+   [OK] errores de calidad = 0 (validar el lote una vez)
+   [OK] filas leídas = 357 (las del día nuevo)
+   [OK] marca de agua contigua
+
+1) SIGKILL a la réplica A durante «lectura_incremental» (98beaf12-10bd-4271-8180-838e36f22369, hasta 2023-01-08); predicciones visibles desde fuera antes del kill: 0 (transacción sin confirmar)
+   API de vuelta en 3.7 s; ejecución terminada 18.0 s después del kill
+   lectura_incremental: estado=ok intentos=2 filas_leidas=51 predicciones=9 recomendaciones=9 alertas=13 notificaciones=0 errores_dq=0
+   traza de intentos: [(1, 'caida-a:1:e36019:t1', 'abandonado'), (2, 'caida-a:1:0fd04d:t1', 'ok')]
+   marca de agua: 2023-01-07 23:59:59-05:00 -> 2023-01-08 23:59:59-05:00
+   [OK] estado ok
+   [OK] intentos = 2
+   [OK] traza [abandonado, ok]
+   [OK] predicciones = referencia y sin duplicados
+   [OK] recomendaciones = referencia
+   [OK] alertas = alertas_nuevas de la ejecución
+   [OK] una sola entrada «crear» por alerta
+   [OK] notificaciones = las de las métricas
+   [OK] errores de calidad = 0 (validar el lote una vez)
+   [OK] filas leídas = 51 (las del día nuevo)
+   [OK] marca de agua contigua
+
+2) SIGKILL a la réplica A durante «prediccion» (ca88e21a-23f4-4b77-a935-9dcb9dead2bd, hasta 2023-01-09); predicciones visibles desde fuera antes del kill: 0 (transacción sin confirmar)
+   API de vuelta en 3.5 s; ejecución terminada 20.1 s después del kill
+   prediccion: estado=ok intentos=2 filas_leidas=51 predicciones=9 recomendaciones=9 alertas=27 notificaciones=0 errores_dq=0
+   traza de intentos: [(1, 'caida-a:1:0fd04d:t1', 'abandonado'), (2, 'caida-a:1:820ab1:t1', 'ok')]
+   marca de agua: 2023-01-08 23:59:59-05:00 -> 2023-01-09 23:59:59-05:00
+   [OK] estado ok
+   [OK] intentos = 2
+   [OK] traza [abandonado, ok]
+   [OK] predicciones = referencia y sin duplicados
+   [OK] recomendaciones = referencia
+   [OK] alertas = alertas_nuevas de la ejecución
+   [OK] una sola entrada «crear» por alerta
+   [OK] notificaciones = las de las métricas
+   [OK] errores de calidad = 0 (validar el lote una vez)
+   [OK] filas leídas = 51 (las del día nuevo)
+   [OK] marca de agua contigua
+
+Réplica B arrancó en 3.7 s
+
+3) SIGKILL a la réplica caida-a (dueña de 7c563427-01f7-42b9-94d7-fdfc88febf14) sin reiniciarla; la réplica caida-b sigue viva (reserva de 6 s)
+   caida-b la retomó 6.7 s después del kill (reserva vencida); terminada 20.6 s después
+   reserva_vencida: estado=ok intentos=2 filas_leidas=51 predicciones=9 recomendaciones=9 alertas=25 notificaciones=0 errores_dq=0
+   traza de intentos: [(1, 'caida-a:1:820ab1:t1', 'abandonado'), (2, 'caida-b:1:4a4bb0:t1', 'ok')]
+   marca de agua: 2023-01-09 23:59:59-05:00 -> 2023-01-10 23:59:59-05:00
+   [OK] estado ok
+   [OK] intentos = 2
+   [OK] traza [abandonado, ok]
+   [OK] predicciones = referencia y sin duplicados
+   [OK] recomendaciones = referencia
+   [OK] alertas = alertas_nuevas de la ejecución
+   [OK] una sola entrada «crear» por alerta
+   [OK] notificaciones = las de las métricas
+   [OK] errores de calidad = 0 (validar el lote una vez)
+   [OK] filas leídas = 51 (las del día nuevo)
+   [OK] marca de agua contigua
+   [OK] intento 1 de caida-a, intento 2 de caida-b
+
+Histórico propio demanda_observada: 510 filas, 510 claves distintas -> sin duplicados
+   log caida-a: 01:26:36 caida-a:1 Arranque: 0 ejecuciones reencoladas
+   log caida-a: 01:26:59 caida-a:1 Ejecución 98beaf12-10bd-4271-8180-838e36f22369 devuelta por reinicio de la réplica caida-a: queda en_cola
+   log caida-a: 01:26:59 caida-a:1 Arranque: 1 ejecuciones reencoladas
+   log caida-a: 01:27:23 caida-a:1 Ejecución ca88e21a-23f4-4b77-a935-9dcb9dead2bd devuelta por reinicio de la réplica caida-a: queda en_cola
+   log caida-a: 01:27:23 caida-a:1 Arranque: 1 ejecuciones reencoladas
+   log caida-b: 01:27:43 caida-b:1 Arranque: 0 ejecuciones reencoladas
+   log caida-b: 01:27:55 caida-b:1 Ejecución 7c563427-01f7-42b9-94d7-fdfc88febf14 devuelta por reserva vencida: queda en_cola
+
+RESULTADO: TODO OK

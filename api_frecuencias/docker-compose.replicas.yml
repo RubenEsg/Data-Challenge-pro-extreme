@@ -1,0 +1,10 @@
+# RNF-005: dos réplicas de la API sobre la misma base y la misma cola (SKIP LOCKED + reserva que vence).
+# Uso:  docker compose -p sobusa_api -f docker-compose.yml -f docker-compose.replicas.yml up -d --build
+# Las réplicas quedan en los puertos 8000 y 8001 del equipo; cada una reclama trabajos de la cola con su propia
+# identidad (el HOSTNAME del contenedor). La migración la corre una sola vez el servicio «migrar».
+services:
+  api:
+    deploy:
+      replicas: 2
+    ports: !override
+      - "${API_PUERTO_HOST_DESDE:-8000}-${API_PUERTO_HOST_HASTA:-8001}:8000"

@@ -1,0 +1,2884 @@
+{
+ "generado": "2026-11-09T05:10:42-05:00",
+ "model_id": "hgb_fv1_20250831_s42",
+ "validacion": "2025-09-01 a 2025-10-31",
+ "prueba_reservada": "2025-11-01 a 2025-12-31",
+ "objetivo_cobertura_pct": 80.0,
+ "criterio": "Se adopta una candidata solo si, en la validación cruzada por semanas, baja la peor desviación |cobertura - 80 %| de los grupos por hora, ruta y tipo de día frente a v1 y su ancho medio (pasajeros) no supera al de v1. La prueba reservada solo se reporta.",
+ "decision": [
+  {
+   "candidata": "mondrian_bloque",
+   "grupos": "bloque",
+   "peor_desviacion_pp": 5.25,
+   "ancho_medio": 322.1,
+   "cobertura_global_pct": 79.81,
+   "baja_la_peor_desviacion": true,
+   "no_ensancha": true,
+   "cumple": true
+  },
+  {
+   "candidata": "mondrian_ruta_bloque",
+   "grupos": "ruta×bloque",
+   "peor_desviacion_pp": 4.7,
+   "ancho_medio": 325.8,
+   "cobertura_global_pct": 80.3,
+   "baja_la_peor_desviacion": true,
+   "no_ensancha": true,
+   "cumple": true
+  },
+  {
+   "candidata": "mondrian_ruta_hora",
+   "grupos": "ruta×hora",
+   "peor_desviacion_pp": 7.87,
+   "ancho_medio": 338.5,
+   "cobertura_global_pct": 81.04,
+   "baja_la_peor_desviacion": true,
+   "no_ensancha": false,
+   "cumple": false
+  },
+  {
+   "candidata": "mondrian_tipo_bloque",
+   "grupos": "tipo×bloque",
+   "peor_desviacion_pp": 4.7,
+   "ancho_medio": 327.1,
+   "cobertura_global_pct": 79.62,
+   "baja_la_peor_desviacion": true,
+   "no_ensancha": false,
+   "cumple": false
+  }
+ ],
+ "adoptada": "mondrian_ruta_bloque",
+ "calibracion": {
+  "version": "v2",
+  "nombre": "conformal de Mondrian por ruta × bloque",
+  "model_id": "hgb_fv1_20250831_s42",
+  "metodo": "CQR de Mondrian (conformal partido por grupo)",
+  "puntaje": "s = max(P10 - y, y - P90) / max(P50, 1)",
+  "aplicacion": "P10' = max(0, min(P10 - q·max(P50, 1), P50)); P90' = max(P90 + q·max(P50, 1), P50)",
+  "grupos": [
+   "ruta",
+   "bloque"
+  ],
+  "cobertura_objetivo": 0.8,
+  "minimo_por_grupo": 30,
+  "ajustado_con": "validación 2025-09-01 a 2025-10-31 (3111 horas); la prueba reservada no se usa",
+  "q": {
+   "*": -0.006911,
+   "CL 72|04-05": 0.038768,
+   "CL 72|06-08 pico": -0.014351,
+   "CL 72|09-16 valle": -0.020512,
+   "CL 72|17-19 pico": -0.024331,
+   "CL 72|20": 0.0,
+   "CRA 54|04-05": 0.015069,
+   "CRA 54|06-08 pico": -0.002694,
+   "CRA 54|09-16 valle": -0.006911,
+   "CRA 54|17-19 pico": 0.002674,
+   "CRA 54|20": 0.011184,
+   "SILENCIO|04-05": 0.013479,
+   "SILENCIO|06-08 pico": -0.034277,
+   "SILENCIO|09-16 valle": -0.014245,
+   "SILENCIO|17-19 pico": -0.019753,
+   "SILENCIO|20": -0.062316
+  },
+  "n_por_grupo": {
+   "CL 72|04-05": 122,
+   "CL 72|06-08 pico": 183,
+   "CL 72|09-16 valle": 488,
+   "CL 72|17-19 pico": 183,
+   "CL 72|20": 61,
+   "CRA 54|04-05": 122,
+   "CRA 54|06-08 pico": 183,
+   "CRA 54|09-16 valle": 488,
+   "CRA 54|17-19 pico": 183,
+   "CRA 54|20": 61,
+   "SILENCIO|04-05": 122,
+   "SILENCIO|06-08 pico": 183,
+   "SILENCIO|09-16 valle": 488,
+   "SILENCIO|17-19 pico": 183,
+   "SILENCIO|20": 61
+  },
+  "generado_en": "2026-11-09T05:10:42-05:00",
+  "script": "scripts/calibrar_por_grupo.py",
+  "evidencia": "docs/evidencias/modelo/calibracion_condicional_hgb_fv1_20250831_s42.json"
+ },
+ "resultados": {
+  "validacion": {
+   "modelo": {
+    "global": {
+     "n": 3111,
+     "cobertura_pct": 81.58,
+     "bajo_p10_pct": 10.7,
+     "sobre_p90_pct": 7.71,
+     "ancho_medio": 337.3,
+     "ancho_relativo_mediano_pct": 55.0
+    },
+    "por_hora": {
+     "4": {
+      "n": 183,
+      "cobertura_pct": 72.68,
+      "bajo_p10_pct": 19.67,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 179.4,
+      "ancho_relativo_mediano_pct": 58.3
+     },
+     "5": {
+      "n": 183,
+      "cobertura_pct": 73.77,
+      "bajo_p10_pct": 12.57,
+      "sobre_p90_pct": 13.66,
+      "ancho_medio": 468.8,
+      "ancho_relativo_mediano_pct": 34.7
+     },
+     "6": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 6.01,
+      "ancho_medio": 377.1,
+      "ancho_relativo_mediano_pct": 40.2
+     },
+     "7": {
+      "n": 183,
+      "cobertura_pct": 84.7,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 4.92,
+      "ancho_medio": 319.9,
+      "ancho_relativo_mediano_pct": 43.9
+     },
+     "8": {
+      "n": 183,
+      "cobertura_pct": 85.79,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 4.37,
+      "ancho_medio": 315.3,
+      "ancho_relativo_mediano_pct": 44.9
+     },
+     "9": {
+      "n": 183,
+      "cobertura_pct": 85.79,
+      "bajo_p10_pct": 8.74,
+      "sobre_p90_pct": 5.46,
+      "ancho_medio": 307.5,
+      "ancho_relativo_mediano_pct": 45.5
+     },
+     "10": {
+      "n": 183,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 328.9,
+      "ancho_relativo_mediano_pct": 50.2
+     },
+     "11": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 8.74,
+      "ancho_medio": 324.6,
+      "ancho_relativo_mediano_pct": 56.7
+     },
+     "12": {
+      "n": 183,
+      "cobertura_pct": 87.43,
+      "bajo_p10_pct": 8.2,
+      "sobre_p90_pct": 4.37,
+      "ancho_medio": 384.0,
+      "ancho_relativo_mediano_pct": 55.5
+     },
+     "13": {
+      "n": 183,
+      "cobertura_pct": 86.34,
+      "bajo_p10_pct": 6.56,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 437.9,
+      "ancho_relativo_mediano_pct": 55.4
+     },
+     "14": {
+      "n": 183,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 8.74,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 463.6,
+      "ancho_relativo_mediano_pct": 60.0
+     },
+     "15": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 10.93,
+      "ancho_medio": 439.4,
+      "ancho_relativo_mediano_pct": 62.0
+     },
+     "16": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 9.29,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 406.1,
+      "ancho_relativo_mediano_pct": 61.5
+     },
+     "17": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 8.74,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 323.9,
+      "ancho_relativo_mediano_pct": 65.9
+     },
+     "18": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 14.75,
+      "sobre_p90_pct": 3.28,
+      "ancho_medio": 279.5,
+      "ancho_relativo_mediano_pct": 74.2
+     },
+     "19": {
+      "n": 183,
+      "cobertura_pct": 82.51,
+      "bajo_p10_pct": 8.74,
+      "sobre_p90_pct": 8.74,
+      "ancho_medio": 225.7,
+      "ancho_relativo_mediano_pct": 73.8
+     },
+     "20": {
+      "n": 183,
+      "cobertura_pct": 79.23,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 152.2,
+      "ancho_relativo_mediano_pct": 92.9
+     }
+    },
+    "por_ruta": {
+     "CL 72": {
+      "n": 1037,
+      "cobertura_pct": 81.1,
+      "bajo_p10_pct": 12.34,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 239.1,
+      "ancho_relativo_mediano_pct": 65.1
+     },
+     "CRA 54": {
+      "n": 1037,
+      "cobertura_pct": 81.2,
+      "bajo_p10_pct": 10.32,
+      "sobre_p90_pct": 8.49,
+      "ancho_medio": 460.8,
+      "ancho_relativo_mediano_pct": 40.8
+     },
+     "SILENCIO": {
+      "n": 1037,
+      "cobertura_pct": 82.45,
+      "bajo_p10_pct": 9.45,
+      "sobre_p90_pct": 8.1,
+      "ancho_medio": 312.0,
+      "ancho_relativo_mediano_pct": 58.3
+     }
+    },
+    "por_tipo": {
+     "Domingo/festivo": {
+      "n": 459,
+      "cobertura_pct": 78.43,
+      "bajo_p10_pct": 15.25,
+      "sobre_p90_pct": 6.32,
+      "ancho_medio": 208.2,
+      "ancho_relativo_mediano_pct": 69.0
+     },
+     "Laboral": {
+      "n": 2244,
+      "cobertura_pct": 81.77,
+      "bajo_p10_pct": 9.98,
+      "sobre_p90_pct": 8.24,
+      "ancho_medio": 370.6,
+      "ancho_relativo_mediano_pct": 53.4
+     },
+     "Sábado": {
+      "n": 408,
+      "cobertura_pct": 84.07,
+      "bajo_p10_pct": 9.56,
+      "sobre_p90_pct": 6.37,
+      "ancho_medio": 299.6,
+      "ancho_relativo_mediano_pct": 51.5
+     }
+    },
+    "por_bloque": {
+     "20": {
+      "n": 183,
+      "cobertura_pct": 79.23,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 152.2,
+      "ancho_relativo_mediano_pct": 92.9
+     },
+     "04-05": {
+      "n": 366,
+      "cobertura_pct": 73.22,
+      "bajo_p10_pct": 16.12,
+      "sobre_p90_pct": 10.66,
+      "ancho_medio": 324.1,
+      "ancho_relativo_mediano_pct": 40.1
+     },
+     "06-08 pico": {
+      "n": 549,
+      "cobertura_pct": 84.15,
+      "bajo_p10_pct": 10.75,
+      "sobre_p90_pct": 5.1,
+      "ancho_medio": 337.4,
+      "ancho_relativo_mediano_pct": 42.8
+     },
+     "09-16 valle": {
+      "n": 1464,
+      "cobertura_pct": 82.79,
+      "bajo_p10_pct": 9.36,
+      "sobre_p90_pct": 7.86,
+      "ancho_medio": 386.5,
+      "ancho_relativo_mediano_pct": 55.5
+     },
+     "17-19 pico": {
+      "n": 549,
+      "cobertura_pct": 82.15,
+      "bajo_p10_pct": 10.75,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 276.4,
+      "ancho_relativo_mediano_pct": 70.4
+     }
+    },
+    "por_especial": {
+     "especial": {
+      "n": 51,
+      "cobertura_pct": 86.27,
+      "bajo_p10_pct": 11.76,
+      "sobre_p90_pct": 1.96,
+      "ancho_medio": 230.7,
+      "ancho_relativo_mediano_pct": 70.3
+     },
+     "normal": {
+      "n": 3060,
+      "cobertura_pct": 81.5,
+      "bajo_p10_pct": 10.69,
+      "sobre_p90_pct": 7.81,
+      "ancho_medio": 339.1,
+      "ancho_relativo_mediano_pct": 54.6
+     }
+    },
+    "peor_desviacion_pp": 7.43,
+    "peor_desviacion_por_particion_pp": {
+     "hora": 7.43,
+     "ruta": 2.45,
+     "tipo": 4.07
+    }
+   },
+   "v1": {
+    "global": {
+     "n": 3111,
+     "cobertura_pct": 80.07,
+     "bajo_p10_pct": 11.86,
+     "sobre_p90_pct": 8.07,
+     "ancho_medio": 326.7,
+     "ancho_relativo_mediano_pct": 52.8
+    },
+    "por_hora": {
+     "4": {
+      "n": 183,
+      "cobertura_pct": 69.4,
+      "bajo_p10_pct": 21.31,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 174.1,
+      "ancho_relativo_mediano_pct": 55.7
+     },
+     "5": {
+      "n": 183,
+      "cobertura_pct": 72.13,
+      "bajo_p10_pct": 14.21,
+      "sobre_p90_pct": 13.66,
+      "ancho_medio": 444.8,
+      "ancho_relativo_mediano_pct": 32.8
+     },
+     "6": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 13.11,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 362.3,
+      "ancho_relativo_mediano_pct": 37.8
+     },
+     "7": {
+      "n": 183,
+      "cobertura_pct": 82.51,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 5.46,
+      "ancho_medio": 308.1,
+      "ancho_relativo_mediano_pct": 41.4
+     },
+     "8": {
+      "n": 183,
+      "cobertura_pct": 85.25,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 4.37,
+      "ancho_medio": 303.9,
+      "ancho_relativo_mediano_pct": 42.7
+     },
+     "9": {
+      "n": 183,
+      "cobertura_pct": 83.06,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 6.01,
+      "ancho_medio": 296.5,
+      "ancho_relativo_mediano_pct": 43.3
+     },
+     "10": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 13.11,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 318.5,
+      "ancho_relativo_mediano_pct": 48.3
+     },
+     "11": {
+      "n": 183,
+      "cobertura_pct": 78.14,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 314.8,
+      "ancho_relativo_mediano_pct": 54.3
+     },
+     "12": {
+      "n": 183,
+      "cobertura_pct": 85.79,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 4.37,
+      "ancho_medio": 372.1,
+      "ancho_relativo_mediano_pct": 53.5
+     },
+     "13": {
+      "n": 183,
+      "cobertura_pct": 85.25,
+      "bajo_p10_pct": 7.65,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 425.0,
+      "ancho_relativo_mediano_pct": 54.1
+     },
+     "14": {
+      "n": 183,
+      "cobertura_pct": 79.78,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 450.9,
+      "ancho_relativo_mediano_pct": 59.0
+     },
+     "15": {
+      "n": 183,
+      "cobertura_pct": 77.05,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 11.48,
+      "ancho_medio": 428.1,
+      "ancho_relativo_mediano_pct": 61.0
+     },
+     "16": {
+      "n": 183,
+      "cobertura_pct": 79.23,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 395.4,
+      "ancho_relativo_mediano_pct": 59.8
+     },
+     "17": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 315.8,
+      "ancho_relativo_mediano_pct": 62.7
+     },
+     "18": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 14.75,
+      "sobre_p90_pct": 3.28,
+      "ancho_medio": 273.3,
+      "ancho_relativo_mediano_pct": 72.0
+     },
+     "19": {
+      "n": 183,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 8.74,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 220.9,
+      "ancho_relativo_mediano_pct": 70.9
+     },
+     "20": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 149.7,
+      "ancho_relativo_mediano_pct": 91.4
+     }
+    },
+    "por_ruta": {
+     "CL 72": {
+      "n": 1037,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 12.92,
+      "sobre_p90_pct": 6.75,
+      "ancho_medio": 233.7,
+      "ancho_relativo_mediano_pct": 63.9
+     },
+     "CRA 54": {
+      "n": 1037,
+      "cobertura_pct": 79.94,
+      "bajo_p10_pct": 11.38,
+      "sobre_p90_pct": 8.68,
+      "ancho_medio": 451.1,
+      "ancho_relativo_mediano_pct": 40.0
+     },
+     "SILENCIO": {
+      "n": 1037,
+      "cobertura_pct": 79.94,
+      "bajo_p10_pct": 11.28,
+      "sobre_p90_pct": 8.78,
+      "ancho_medio": 295.4,
+      "ancho_relativo_mediano_pct": 55.1
+     }
+    },
+    "por_tipo": {
+     "Domingo/festivo": {
+      "n": 459,
+      "cobertura_pct": 76.69,
+      "bajo_p10_pct": 16.56,
+      "sobre_p90_pct": 6.75,
+      "ancho_medio": 202.9,
+      "ancho_relativo_mediano_pct": 66.5
+     },
+     "Laboral": {
+      "n": 2244,
+      "cobertura_pct": 80.17,
+      "bajo_p10_pct": 11.23,
+      "sobre_p90_pct": 8.6,
+      "ancho_medio": 358.6,
+      "ancho_relativo_mediano_pct": 51.3
+     },
+     "Sábado": {
+      "n": 408,
+      "cobertura_pct": 83.33,
+      "bajo_p10_pct": 10.05,
+      "sobre_p90_pct": 6.62,
+      "ancho_medio": 290.5,
+      "ancho_relativo_mediano_pct": 49.9
+     }
+    },
+    "por_bloque": {
+     "20": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 149.7,
+      "ancho_relativo_mediano_pct": 91.4
+     },
+     "04-05": {
+      "n": 366,
+      "cobertura_pct": 70.77,
+      "bajo_p10_pct": 17.76,
+      "sobre_p90_pct": 11.48,
+      "ancho_medio": 309.5,
+      "ancho_relativo_mediano_pct": 38.7
+     },
+     "06-08 pico": {
+      "n": 549,
+      "cobertura_pct": 82.7,
+      "bajo_p10_pct": 11.84,
+      "sobre_p90_pct": 5.46,
+      "ancho_medio": 324.8,
+      "ancho_relativo_mediano_pct": 40.9
+     },
+     "09-16 valle": {
+      "n": 1464,
+      "cobertura_pct": 81.08,
+      "bajo_p10_pct": 10.72,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 375.2,
+      "ancho_relativo_mediano_pct": 52.9
+     },
+     "17-19 pico": {
+      "n": 549,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 11.11,
+      "sobre_p90_pct": 7.47,
+      "ancho_medio": 270.0,
+      "ancho_relativo_mediano_pct": 68.5
+     }
+    },
+    "por_especial": {
+     "especial": {
+      "n": 51,
+      "cobertura_pct": 80.39,
+      "bajo_p10_pct": 17.65,
+      "sobre_p90_pct": 1.96,
+      "ancho_medio": 227.2,
+      "ancho_relativo_mediano_pct": 68.9
+     },
+     "normal": {
+      "n": 3060,
+      "cobertura_pct": 80.07,
+      "bajo_p10_pct": 11.76,
+      "sobre_p90_pct": 8.17,
+      "ancho_medio": 328.4,
+      "ancho_relativo_mediano_pct": 52.5
+     }
+    },
+    "peor_desviacion_pp": 10.6,
+    "peor_desviacion_por_particion_pp": {
+     "hora": 10.6,
+     "ruta": 0.33,
+     "tipo": 3.33
+    },
+    "dias_con_ajuste_pct": 77.0
+   },
+   "mondrian_bloque": {
+    "global": {
+     "n": 3111,
+     "cobertura_pct": 79.81,
+     "bajo_p10_pct": 11.86,
+     "sobre_p90_pct": 8.33,
+     "ancho_medio": 322.1,
+     "ancho_relativo_mediano_pct": 52.6
+    },
+    "por_hora": {
+     "4": {
+      "n": 183,
+      "cobertura_pct": 84.15,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 5.46,
+      "ancho_medio": 191.3,
+      "ancho_relativo_mediano_pct": 61.5
+     },
+     "5": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 521.1,
+      "ancho_relativo_mediano_pct": 37.9
+     },
+     "6": {
+      "n": 183,
+      "cobertura_pct": 75.96,
+      "bajo_p10_pct": 15.85,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 325.1,
+      "ancho_relativo_mediano_pct": 34.5
+     },
+     "7": {
+      "n": 183,
+      "cobertura_pct": 77.05,
+      "bajo_p10_pct": 14.75,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 279.3,
+      "ancho_relativo_mediano_pct": 39.1
+     },
+     "8": {
+      "n": 183,
+      "cobertura_pct": 79.78,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 8.74,
+      "ancho_medio": 276.9,
+      "ancho_relativo_mediano_pct": 39.2
+     },
+     "9": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 13.11,
+      "sobre_p90_pct": 6.01,
+      "ancho_medio": 289.2,
+      "ancho_relativo_mediano_pct": 43.0
+     },
+     "10": {
+      "n": 183,
+      "cobertura_pct": 79.23,
+      "bajo_p10_pct": 14.21,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 311.7,
+      "ancho_relativo_mediano_pct": 48.4
+     },
+     "11": {
+      "n": 183,
+      "cobertura_pct": 77.6,
+      "bajo_p10_pct": 12.57,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 308.0,
+      "ancho_relativo_mediano_pct": 54.4
+     },
+     "12": {
+      "n": 183,
+      "cobertura_pct": 85.25,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 4.92,
+      "ancho_medio": 364.1,
+      "ancho_relativo_mediano_pct": 53.2
+     },
+     "13": {
+      "n": 183,
+      "cobertura_pct": 84.7,
+      "bajo_p10_pct": 8.2,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 416.6,
+      "ancho_relativo_mediano_pct": 52.9
+     },
+     "14": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 10.93,
+      "ancho_medio": 442.4,
+      "ancho_relativo_mediano_pct": 58.4
+     },
+     "15": {
+      "n": 183,
+      "cobertura_pct": 77.6,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 11.48,
+      "ancho_medio": 420.7,
+      "ancho_relativo_mediano_pct": 59.8
+     },
+     "16": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 388.8,
+      "ancho_relativo_mediano_pct": 58.7
+     },
+     "17": {
+      "n": 183,
+      "cobertura_pct": 79.78,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 307.2,
+      "ancho_relativo_mediano_pct": 61.6
+     },
+     "18": {
+      "n": 183,
+      "cobertura_pct": 79.78,
+      "bajo_p10_pct": 16.94,
+      "sobre_p90_pct": 3.28,
+      "ancho_medio": 266.6,
+      "ancho_relativo_mediano_pct": 70.8
+     },
+     "19": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 8.74,
+      "sobre_p90_pct": 10.93,
+      "ancho_medio": 215.3,
+      "ancho_relativo_mediano_pct": 69.9
+     },
+     "20": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 151.5,
+      "ancho_relativo_mediano_pct": 92.8
+     }
+    },
+    "por_ruta": {
+     "CL 72": {
+      "n": 1037,
+      "cobertura_pct": 79.85,
+      "bajo_p10_pct": 12.73,
+      "sobre_p90_pct": 7.43,
+      "ancho_medio": 231.1,
+      "ancho_relativo_mediano_pct": 63.7
+     },
+     "CRA 54": {
+      "n": 1037,
+      "cobertura_pct": 78.5,
+      "bajo_p10_pct": 12.73,
+      "sobre_p90_pct": 8.78,
+      "ancho_medio": 434.1,
+      "ancho_relativo_mediano_pct": 39.5
+     },
+     "SILENCIO": {
+      "n": 1037,
+      "cobertura_pct": 81.1,
+      "bajo_p10_pct": 10.13,
+      "sobre_p90_pct": 8.78,
+      "ancho_medio": 301.2,
+      "ancho_relativo_mediano_pct": 56.4
+     }
+    },
+    "por_tipo": {
+     "Domingo/festivo": {
+      "n": 459,
+      "cobertura_pct": 80.39,
+      "bajo_p10_pct": 12.85,
+      "sobre_p90_pct": 6.75,
+      "ancho_medio": 199.5,
+      "ancho_relativo_mediano_pct": 65.6
+     },
+     "Laboral": {
+      "n": 2244,
+      "cobertura_pct": 79.63,
+      "bajo_p10_pct": 11.63,
+      "sobre_p90_pct": 8.73,
+      "ancho_medio": 354.2,
+      "ancho_relativo_mediano_pct": 51.1
+     },
+     "Sábado": {
+      "n": 408,
+      "cobertura_pct": 80.15,
+      "bajo_p10_pct": 12.01,
+      "sobre_p90_pct": 7.84,
+      "ancho_medio": 283.8,
+      "ancho_relativo_mediano_pct": 49.3
+     }
+    },
+    "por_bloque": {
+     "20": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 151.5,
+      "ancho_relativo_mediano_pct": 92.8
+     },
+     "04-05": {
+      "n": 366,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 356.2,
+      "ancho_relativo_mediano_pct": 43.3
+     },
+     "06-08 pico": {
+      "n": 549,
+      "cobertura_pct": 77.6,
+      "bajo_p10_pct": 14.03,
+      "sobre_p90_pct": 8.38,
+      "ancho_medio": 293.8,
+      "ancho_relativo_mediano_pct": 38.0
+     },
+     "09-16 valle": {
+      "n": 1464,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 11.34,
+      "sobre_p90_pct": 8.33,
+      "ancho_medio": 367.7,
+      "ancho_relativo_mediano_pct": 53.0
+     },
+     "17-19 pico": {
+      "n": 549,
+      "cobertura_pct": 79.96,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 8.01,
+      "ancho_medio": 263.0,
+      "ancho_relativo_mediano_pct": 67.5
+     }
+    },
+    "por_especial": {
+     "especial": {
+      "n": 51,
+      "cobertura_pct": 84.31,
+      "bajo_p10_pct": 13.73,
+      "sobre_p90_pct": 1.96,
+      "ancho_medio": 225.5,
+      "ancho_relativo_mediano_pct": 69.5
+     },
+     "normal": {
+      "n": 3060,
+      "cobertura_pct": 79.74,
+      "bajo_p10_pct": 11.83,
+      "sobre_p90_pct": 8.43,
+      "ancho_medio": 323.7,
+      "ancho_relativo_mediano_pct": 52.4
+     }
+    },
+    "peor_desviacion_pp": 5.25,
+    "peor_desviacion_por_particion_pp": {
+     "hora": 5.25,
+     "ruta": 1.5,
+     "tipo": 0.39
+    },
+    "esquema": "validación cruzada por semanas ISO (pares/impares)"
+   },
+   "mondrian_ruta_bloque": {
+    "global": {
+     "n": 3111,
+     "cobertura_pct": 80.3,
+     "bajo_p10_pct": 11.73,
+     "sobre_p90_pct": 7.97,
+     "ancho_medio": 325.8,
+     "ancho_relativo_mediano_pct": 53.4
+    },
+    "por_hora": {
+     "4": {
+      "n": 183,
+      "cobertura_pct": 83.06,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 5.46,
+      "ancho_medio": 195.3,
+      "ancho_relativo_mediano_pct": 63.1
+     },
+     "5": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 536.0,
+      "ancho_relativo_mediano_pct": 38.4
+     },
+     "6": {
+      "n": 183,
+      "cobertura_pct": 75.41,
+      "bajo_p10_pct": 16.94,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 336.5,
+      "ancho_relativo_mediano_pct": 34.4
+     },
+     "7": {
+      "n": 183,
+      "cobertura_pct": 79.23,
+      "bajo_p10_pct": 13.66,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 287.1,
+      "ancho_relativo_mediano_pct": 37.3
+     },
+     "8": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 283.4,
+      "ancho_relativo_mediano_pct": 37.0
+     },
+     "9": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 13.11,
+      "sobre_p90_pct": 6.01,
+      "ancho_medio": 289.5,
+      "ancho_relativo_mediano_pct": 43.2
+     },
+     "10": {
+      "n": 183,
+      "cobertura_pct": 79.23,
+      "bajo_p10_pct": 14.21,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 312.1,
+      "ancho_relativo_mediano_pct": 48.8
+     },
+     "11": {
+      "n": 183,
+      "cobertura_pct": 78.14,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 308.3,
+      "ancho_relativo_mediano_pct": 54.2
+     },
+     "12": {
+      "n": 183,
+      "cobertura_pct": 84.7,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 4.92,
+      "ancho_medio": 364.6,
+      "ancho_relativo_mediano_pct": 52.9
+     },
+     "13": {
+      "n": 183,
+      "cobertura_pct": 84.15,
+      "bajo_p10_pct": 8.2,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 417.1,
+      "ancho_relativo_mediano_pct": 51.8
+     },
+     "14": {
+      "n": 183,
+      "cobertura_pct": 79.23,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 10.93,
+      "ancho_medio": 442.9,
+      "ancho_relativo_mediano_pct": 58.3
+     },
+     "15": {
+      "n": 183,
+      "cobertura_pct": 77.6,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 11.48,
+      "ancho_medio": 421.0,
+      "ancho_relativo_mediano_pct": 60.6
+     },
+     "16": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 389.3,
+      "ancho_relativo_mediano_pct": 59.4
+     },
+     "17": {
+      "n": 183,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 312.0,
+      "ancho_relativo_mediano_pct": 59.8
+     },
+     "18": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 15.85,
+      "sobre_p90_pct": 3.83,
+      "ancho_medio": 270.5,
+      "ancho_relativo_mediano_pct": 66.6
+     },
+     "19": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 8.74,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 218.8,
+      "ancho_relativo_mediano_pct": 67.6
+     },
+     "20": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 8.74,
+      "ancho_medio": 154.9,
+      "ancho_relativo_mediano_pct": 91.4
+     }
+    },
+    "por_ruta": {
+     "CL 72": {
+      "n": 1037,
+      "cobertura_pct": 79.56,
+      "bajo_p10_pct": 12.92,
+      "sobre_p90_pct": 7.52,
+      "ancho_medio": 230.0,
+      "ancho_relativo_mediano_pct": 61.9
+     },
+     "CRA 54": {
+      "n": 1037,
+      "cobertura_pct": 80.71,
+      "bajo_p10_pct": 11.86,
+      "sobre_p90_pct": 7.43,
+      "ancho_medio": 451.1,
+      "ancho_relativo_mediano_pct": 39.8
+     },
+     "SILENCIO": {
+      "n": 1037,
+      "cobertura_pct": 80.62,
+      "bajo_p10_pct": 10.41,
+      "sobre_p90_pct": 8.97,
+      "ancho_medio": 296.5,
+      "ancho_relativo_mediano_pct": 56.3
+     }
+    },
+    "por_tipo": {
+     "Domingo/festivo": {
+      "n": 459,
+      "cobertura_pct": 79.52,
+      "bajo_p10_pct": 13.51,
+      "sobre_p90_pct": 6.97,
+      "ancho_medio": 200.7,
+      "ancho_relativo_mediano_pct": 65.9
+     },
+     "Laboral": {
+      "n": 2244,
+      "cobertura_pct": 80.53,
+      "bajo_p10_pct": 11.19,
+      "sobre_p90_pct": 8.29,
+      "ancho_medio": 358.5,
+      "ancho_relativo_mediano_pct": 52.1
+     },
+     "Sábado": {
+      "n": 408,
+      "cobertura_pct": 79.9,
+      "bajo_p10_pct": 12.75,
+      "sobre_p90_pct": 7.35,
+      "ancho_medio": 287.0,
+      "ancho_relativo_mediano_pct": 49.8
+     }
+    },
+    "por_bloque": {
+     "20": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 8.74,
+      "ancho_medio": 154.9,
+      "ancho_relativo_mediano_pct": 91.4
+     },
+     "04-05": {
+      "n": 366,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 11.2,
+      "sobre_p90_pct": 6.83,
+      "ancho_medio": 365.7,
+      "ancho_relativo_mediano_pct": 46.6
+     },
+     "06-08 pico": {
+      "n": 549,
+      "cobertura_pct": 78.51,
+      "bajo_p10_pct": 14.03,
+      "sobre_p90_pct": 7.47,
+      "ancho_medio": 302.4,
+      "ancho_relativo_mediano_pct": 36.2
+     },
+     "09-16 valle": {
+      "n": 1464,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 11.13,
+      "sobre_p90_pct": 8.54,
+      "ancho_medio": 368.1,
+      "ancho_relativo_mediano_pct": 52.7
+     },
+     "17-19 pico": {
+      "n": 549,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 11.66,
+      "sobre_p90_pct": 7.47,
+      "ancho_medio": 267.1,
+      "ancho_relativo_mediano_pct": 64.5
+     }
+    },
+    "por_especial": {
+     "especial": {
+      "n": 51,
+      "cobertura_pct": 84.31,
+      "bajo_p10_pct": 13.73,
+      "sobre_p90_pct": 1.96,
+      "ancho_medio": 227.1,
+      "ancho_relativo_mediano_pct": 66.9
+     },
+     "normal": {
+      "n": 3060,
+      "cobertura_pct": 80.23,
+      "bajo_p10_pct": 11.7,
+      "sobre_p90_pct": 8.07,
+      "ancho_medio": 327.5,
+      "ancho_relativo_mediano_pct": 53.0
+     }
+    },
+    "peor_desviacion_pp": 4.7,
+    "peor_desviacion_por_particion_pp": {
+     "hora": 4.7,
+     "ruta": 0.71,
+     "tipo": 0.53
+    },
+    "esquema": "validación cruzada por semanas ISO (pares/impares)"
+   },
+   "mondrian_ruta_hora": {
+    "global": {
+     "n": 3111,
+     "cobertura_pct": 81.04,
+     "bajo_p10_pct": 11.15,
+     "sobre_p90_pct": 7.81,
+     "ancho_medio": 338.5,
+     "ancho_relativo_mediano_pct": 54.1
+    },
+    "por_hora": {
+     "4": {
+      "n": 183,
+      "cobertura_pct": 72.13,
+      "bajo_p10_pct": 19.67,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 176.1,
+      "ancho_relativo_mediano_pct": 59.0
+     },
+     "5": {
+      "n": 183,
+      "cobertura_pct": 75.41,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 12.57,
+      "ancho_medio": 497.6,
+      "ancho_relativo_mediano_pct": 36.2
+     },
+     "6": {
+      "n": 183,
+      "cobertura_pct": 83.61,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 5.46,
+      "ancho_medio": 414.5,
+      "ancho_relativo_mediano_pct": 42.7
+     },
+     "7": {
+      "n": 183,
+      "cobertura_pct": 82.51,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 5.46,
+      "ancho_medio": 309.5,
+      "ancho_relativo_mediano_pct": 43.6
+     },
+     "8": {
+      "n": 183,
+      "cobertura_pct": 86.34,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 3.83,
+      "ancho_medio": 330.1,
+      "ancho_relativo_mediano_pct": 44.0
+     },
+     "9": {
+      "n": 183,
+      "cobertura_pct": 83.06,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 6.01,
+      "ancho_medio": 294.2,
+      "ancho_relativo_mediano_pct": 43.2
+     },
+     "10": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 12.57,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 329.0,
+      "ancho_relativo_mediano_pct": 49.9
+     },
+     "11": {
+      "n": 183,
+      "cobertura_pct": 79.78,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 322.0,
+      "ancho_relativo_mediano_pct": 56.7
+     },
+     "12": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 350.9,
+      "ancho_relativo_mediano_pct": 49.0
+     },
+     "13": {
+      "n": 183,
+      "cobertura_pct": 86.34,
+      "bajo_p10_pct": 6.56,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 430.0,
+      "ancho_relativo_mediano_pct": 55.0
+     },
+     "14": {
+      "n": 183,
+      "cobertura_pct": 83.06,
+      "bajo_p10_pct": 8.2,
+      "sobre_p90_pct": 8.74,
+      "ancho_medio": 490.6,
+      "ancho_relativo_mediano_pct": 60.8
+     },
+     "15": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 8.74,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 450.3,
+      "ancho_relativo_mediano_pct": 63.2
+     },
+     "16": {
+      "n": 183,
+      "cobertura_pct": 78.14,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 384.2,
+      "ancho_relativo_mediano_pct": 56.1
+     },
+     "17": {
+      "n": 183,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 9.29,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 329.0,
+      "ancho_relativo_mediano_pct": 65.0
+     },
+     "18": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 15.3,
+      "sobre_p90_pct": 2.73,
+      "ancho_medio": 280.1,
+      "ancho_relativo_mediano_pct": 73.2
+     },
+     "19": {
+      "n": 183,
+      "cobertura_pct": 79.78,
+      "bajo_p10_pct": 9.29,
+      "sobre_p90_pct": 10.93,
+      "ancho_medio": 210.9,
+      "ancho_relativo_mediano_pct": 72.5
+     },
+     "20": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 8.74,
+      "ancho_medio": 154.9,
+      "ancho_relativo_mediano_pct": 91.4
+     }
+    },
+    "por_ruta": {
+     "CL 72": {
+      "n": 1037,
+      "cobertura_pct": 81.1,
+      "bajo_p10_pct": 12.34,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 239.4,
+      "ancho_relativo_mediano_pct": 64.5
+     },
+     "CRA 54": {
+      "n": 1037,
+      "cobertura_pct": 80.52,
+      "bajo_p10_pct": 11.09,
+      "sobre_p90_pct": 8.39,
+      "ancho_medio": 463.8,
+      "ancho_relativo_mediano_pct": 41.0
+     },
+     "SILENCIO": {
+      "n": 1037,
+      "cobertura_pct": 81.49,
+      "bajo_p10_pct": 10.03,
+      "sobre_p90_pct": 8.49,
+      "ancho_medio": 312.2,
+      "ancho_relativo_mediano_pct": 58.0
+     }
+    },
+    "por_tipo": {
+     "Domingo/festivo": {
+      "n": 459,
+      "cobertura_pct": 79.08,
+      "bajo_p10_pct": 14.6,
+      "sobre_p90_pct": 6.32,
+      "ancho_medio": 207.9,
+      "ancho_relativo_mediano_pct": 67.7
+     },
+     "Laboral": {
+      "n": 2244,
+      "cobertura_pct": 81.28,
+      "bajo_p10_pct": 10.47,
+      "sobre_p90_pct": 8.24,
+      "ancho_medio": 372.1,
+      "ancho_relativo_mediano_pct": 52.7
+     },
+     "Sábado": {
+      "n": 408,
+      "cobertura_pct": 81.86,
+      "bajo_p10_pct": 11.03,
+      "sobre_p90_pct": 7.11,
+      "ancho_medio": 300.5,
+      "ancho_relativo_mediano_pct": 51.4
+     }
+    },
+    "por_bloque": {
+     "20": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 8.74,
+      "ancho_medio": 154.9,
+      "ancho_relativo_mediano_pct": 91.4
+     },
+     "04-05": {
+      "n": 366,
+      "cobertura_pct": 73.77,
+      "bajo_p10_pct": 15.85,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 336.8,
+      "ancho_relativo_mediano_pct": 41.4
+     },
+     "06-08 pico": {
+      "n": 549,
+      "cobertura_pct": 84.15,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 4.92,
+      "ancho_medio": 351.4,
+      "ancho_relativo_mediano_pct": 43.8
+     },
+     "09-16 valle": {
+      "n": 1464,
+      "cobertura_pct": 81.76,
+      "bajo_p10_pct": 10.04,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 381.4,
+      "ancho_relativo_mediano_pct": 53.9
+     },
+     "17-19 pico": {
+      "n": 549,
+      "cobertura_pct": 81.06,
+      "bajo_p10_pct": 11.29,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 273.3,
+      "ancho_relativo_mediano_pct": 68.8
+     }
+    },
+    "por_especial": {
+     "especial": {
+      "n": 51,
+      "cobertura_pct": 80.39,
+      "bajo_p10_pct": 17.65,
+      "sobre_p90_pct": 1.96,
+      "ancho_medio": 230.0,
+      "ancho_relativo_mediano_pct": 70.0
+     },
+     "normal": {
+      "n": 3060,
+      "cobertura_pct": 81.05,
+      "bajo_p10_pct": 11.05,
+      "sobre_p90_pct": 7.91,
+      "ancho_medio": 340.3,
+      "ancho_relativo_mediano_pct": 53.9
+     }
+    },
+    "peor_desviacion_pp": 7.87,
+    "peor_desviacion_por_particion_pp": {
+     "hora": 7.87,
+     "ruta": 1.49,
+     "tipo": 1.86
+    },
+    "esquema": "validación cruzada por semanas ISO (pares/impares)"
+   },
+   "mondrian_tipo_bloque": {
+    "global": {
+     "n": 3111,
+     "cobertura_pct": 79.62,
+     "bajo_p10_pct": 12.31,
+     "sobre_p90_pct": 8.07,
+     "ancho_medio": 327.1,
+     "ancho_relativo_mediano_pct": 52.9
+    },
+    "por_hora": {
+     "4": {
+      "n": 183,
+      "cobertura_pct": 75.41,
+      "bajo_p10_pct": 19.13,
+      "sobre_p90_pct": 5.46,
+      "ancho_medio": 198.3,
+      "ancho_relativo_mediano_pct": 62.1
+     },
+     "5": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 549.9,
+      "ancho_relativo_mediano_pct": 38.6
+     },
+     "6": {
+      "n": 183,
+      "cobertura_pct": 77.05,
+      "bajo_p10_pct": 15.85,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 332.6,
+      "ancho_relativo_mediano_pct": 35.9
+     },
+     "7": {
+      "n": 183,
+      "cobertura_pct": 79.78,
+      "bajo_p10_pct": 13.66,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 285.3,
+      "ancho_relativo_mediano_pct": 39.0
+     },
+     "8": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 282.5,
+      "ancho_relativo_mediano_pct": 39.9
+     },
+     "9": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 13.66,
+      "sobre_p90_pct": 6.01,
+      "ancho_medio": 290.2,
+      "ancho_relativo_mediano_pct": 43.1
+     },
+     "10": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 14.21,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 312.6,
+      "ancho_relativo_mediano_pct": 48.8
+     },
+     "11": {
+      "n": 183,
+      "cobertura_pct": 77.6,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 309.1,
+      "ancho_relativo_mediano_pct": 54.5
+     },
+     "12": {
+      "n": 183,
+      "cobertura_pct": 84.15,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 4.92,
+      "ancho_medio": 365.6,
+      "ancho_relativo_mediano_pct": 53.4
+     },
+     "13": {
+      "n": 183,
+      "cobertura_pct": 84.7,
+      "bajo_p10_pct": 7.65,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 418.5,
+      "ancho_relativo_mediano_pct": 53.3
+     },
+     "14": {
+      "n": 183,
+      "cobertura_pct": 79.78,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 444.4,
+      "ancho_relativo_mediano_pct": 58.8
+     },
+     "15": {
+      "n": 183,
+      "cobertura_pct": 77.6,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 11.48,
+      "ancho_medio": 422.1,
+      "ancho_relativo_mediano_pct": 60.2
+     },
+     "16": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 390.1,
+      "ancho_relativo_mediano_pct": 58.4
+     },
+     "17": {
+      "n": 183,
+      "cobertura_pct": 79.78,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 316.9,
+      "ancho_relativo_mediano_pct": 64.1
+     },
+     "18": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 16.39,
+      "sobre_p90_pct": 3.28,
+      "ancho_medio": 275.0,
+      "ancho_relativo_mediano_pct": 71.6
+     },
+     "19": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 7.65,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 222.0,
+      "ancho_relativo_mediano_pct": 71.0
+     },
+     "20": {
+      "n": 183,
+      "cobertura_pct": 77.05,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 10.93,
+      "ancho_medio": 145.6,
+      "ancho_relativo_mediano_pct": 89.9
+     }
+    },
+    "por_ruta": {
+     "CL 72": {
+      "n": 1037,
+      "cobertura_pct": 79.07,
+      "bajo_p10_pct": 13.6,
+      "sobre_p90_pct": 7.33,
+      "ancho_medio": 233.9,
+      "ancho_relativo_mediano_pct": 63.5
+     },
+     "CRA 54": {
+      "n": 1037,
+      "cobertura_pct": 78.5,
+      "bajo_p10_pct": 13.02,
+      "sobre_p90_pct": 8.49,
+      "ancho_medio": 441.7,
+      "ancho_relativo_mediano_pct": 39.5
+     },
+     "SILENCIO": {
+      "n": 1037,
+      "cobertura_pct": 81.29,
+      "bajo_p10_pct": 10.32,
+      "sobre_p90_pct": 8.39,
+      "ancho_medio": 305.7,
+      "ancho_relativo_mediano_pct": 56.6
+     }
+    },
+    "por_tipo": {
+     "Domingo/festivo": {
+      "n": 459,
+      "cobertura_pct": 78.0,
+      "bajo_p10_pct": 15.9,
+      "sobre_p90_pct": 6.1,
+      "ancho_medio": 209.5,
+      "ancho_relativo_mediano_pct": 67.7
+     },
+     "Laboral": {
+      "n": 2244,
+      "cobertura_pct": 80.17,
+      "bajo_p10_pct": 11.36,
+      "sobre_p90_pct": 8.47,
+      "ancho_medio": 360.2,
+      "ancho_relativo_mediano_pct": 51.7
+     },
+     "Sábado": {
+      "n": 408,
+      "cobertura_pct": 78.43,
+      "bajo_p10_pct": 13.48,
+      "sobre_p90_pct": 8.09,
+      "ancho_medio": 277.4,
+      "ancho_relativo_mediano_pct": 48.1
+     }
+    },
+    "por_bloque": {
+     "20": {
+      "n": 183,
+      "cobertura_pct": 77.05,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 10.93,
+      "ancho_medio": 145.6,
+      "ancho_relativo_mediano_pct": 89.9
+     },
+     "04-05": {
+      "n": 366,
+      "cobertura_pct": 77.87,
+      "bajo_p10_pct": 15.3,
+      "sobre_p90_pct": 6.83,
+      "ancho_medio": 374.1,
+      "ancho_relativo_mediano_pct": 47.0
+     },
+     "06-08 pico": {
+      "n": 549,
+      "cobertura_pct": 79.05,
+      "bajo_p10_pct": 13.66,
+      "sobre_p90_pct": 7.29,
+      "ancho_medio": 300.1,
+      "ancho_relativo_mediano_pct": 38.4
+     },
+     "09-16 valle": {
+      "n": 1464,
+      "cobertura_pct": 80.19,
+      "bajo_p10_pct": 11.34,
+      "sobre_p90_pct": 8.47,
+      "ancho_medio": 369.1,
+      "ancho_relativo_mediano_pct": 53.2
+     },
+     "17-19 pico": {
+      "n": 549,
+      "cobertura_pct": 80.69,
+      "bajo_p10_pct": 11.66,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 271.3,
+      "ancho_relativo_mediano_pct": 67.9
+     }
+    },
+    "por_especial": {
+     "especial": {
+      "n": 51,
+      "cobertura_pct": 80.39,
+      "bajo_p10_pct": 17.65,
+      "sobre_p90_pct": 1.96,
+      "ancho_medio": 239.2,
+      "ancho_relativo_mediano_pct": 71.4
+     },
+     "normal": {
+      "n": 3060,
+      "cobertura_pct": 79.61,
+      "bajo_p10_pct": 12.22,
+      "sobre_p90_pct": 8.17,
+      "ancho_medio": 328.6,
+      "ancho_relativo_mediano_pct": 52.7
+     }
+    },
+    "peor_desviacion_pp": 4.7,
+    "peor_desviacion_por_particion_pp": {
+     "hora": 4.7,
+     "ruta": 1.5,
+     "tipo": 2.0
+    },
+    "esquema": "validación cruzada por semanas ISO (pares/impares)"
+   },
+   "v2_ajuste_completo": {
+    "global": {
+     "n": 3111,
+     "cobertura_pct": 80.39,
+     "bajo_p10_pct": 11.31,
+     "sobre_p90_pct": 8.29,
+     "ancho_medio": 327.6,
+     "ancho_relativo_mediano_pct": 53.0
+    },
+    "por_hora": {
+     "4": {
+      "n": 183,
+      "cobertura_pct": 83.06,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 192.9,
+      "ancho_relativo_mediano_pct": 62.1
+     },
+     "5": {
+      "n": 183,
+      "cobertura_pct": 78.14,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 525.8,
+      "ancho_relativo_mediano_pct": 38.6
+     },
+     "6": {
+      "n": 183,
+      "cobertura_pct": 77.6,
+      "bajo_p10_pct": 14.75,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 351.0,
+      "ancho_relativo_mediano_pct": 34.1
+     },
+     "7": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 12.57,
+      "sobre_p90_pct": 5.46,
+      "ancho_medio": 298.9,
+      "ancho_relativo_mediano_pct": 39.0
+     },
+     "8": {
+      "n": 183,
+      "cobertura_pct": 82.51,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 294.8,
+      "ancho_relativo_mediano_pct": 39.3
+     },
+     "9": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 6.01,
+      "ancho_medio": 290.1,
+      "ancho_relativo_mediano_pct": 42.1
+     },
+     "10": {
+      "n": 183,
+      "cobertura_pct": 79.78,
+      "bajo_p10_pct": 13.11,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 312.7,
+      "ancho_relativo_mediano_pct": 47.0
+     },
+     "11": {
+      "n": 183,
+      "cobertura_pct": 77.05,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 11.48,
+      "ancho_medio": 309.0,
+      "ancho_relativo_mediano_pct": 53.3
+     },
+     "12": {
+      "n": 183,
+      "cobertura_pct": 85.25,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 4.92,
+      "ancho_medio": 365.3,
+      "ancho_relativo_mediano_pct": 52.5
+     },
+     "13": {
+      "n": 183,
+      "cobertura_pct": 82.51,
+      "bajo_p10_pct": 8.2,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 417.8,
+      "ancho_relativo_mediano_pct": 52.2
+     },
+     "14": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 9.29,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 443.6,
+      "ancho_relativo_mediano_pct": 56.9
+     },
+     "15": {
+      "n": 183,
+      "cobertura_pct": 75.96,
+      "bajo_p10_pct": 12.57,
+      "sobre_p90_pct": 11.48,
+      "ancho_medio": 421.6,
+      "ancho_relativo_mediano_pct": 58.9
+     },
+     "16": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 389.8,
+      "ancho_relativo_mediano_pct": 59.1
+     },
+     "17": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 314.3,
+      "ancho_relativo_mediano_pct": 62.1
+     },
+     "18": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 15.85,
+      "sobre_p90_pct": 3.28,
+      "ancho_medio": 272.1,
+      "ancho_relativo_mediano_pct": 70.1
+     },
+     "19": {
+      "n": 183,
+      "cobertura_pct": 79.23,
+      "bajo_p10_pct": 8.74,
+      "sobre_p90_pct": 12.02,
+      "ancho_medio": 220.1,
+      "ancho_relativo_mediano_pct": 69.6
+     },
+     "20": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 149.0,
+      "ancho_relativo_mediano_pct": 86.8
+     }
+    },
+    "por_ruta": {
+     "CL 72": {
+      "n": 1037,
+      "cobertura_pct": 80.14,
+      "bajo_p10_pct": 12.25,
+      "sobre_p90_pct": 7.62,
+      "ancho_medio": 231.0,
+      "ancho_relativo_mediano_pct": 62.7
+     },
+     "CRA 54": {
+      "n": 1037,
+      "cobertura_pct": 80.62,
+      "bajo_p10_pct": 11.38,
+      "sobre_p90_pct": 8.0,
+      "ancho_medio": 456.6,
+      "ancho_relativo_mediano_pct": 40.5
+     },
+     "SILENCIO": {
+      "n": 1037,
+      "cobertura_pct": 80.42,
+      "bajo_p10_pct": 10.32,
+      "sobre_p90_pct": 9.26,
+      "ancho_medio": 295.1,
+      "ancho_relativo_mediano_pct": 55.6
+     }
+    },
+    "por_tipo": {
+     "Domingo/festivo": {
+      "n": 459,
+      "cobertura_pct": 80.39,
+      "bajo_p10_pct": 12.42,
+      "sobre_p90_pct": 7.19,
+      "ancho_medio": 201.7,
+      "ancho_relativo_mediano_pct": 65.9
+     },
+     "Laboral": {
+      "n": 2244,
+      "cobertura_pct": 80.39,
+      "bajo_p10_pct": 11.01,
+      "sobre_p90_pct": 8.6,
+      "ancho_medio": 360.3,
+      "ancho_relativo_mediano_pct": 51.7
+     },
+     "Sábado": {
+      "n": 408,
+      "cobertura_pct": 80.39,
+      "bajo_p10_pct": 11.76,
+      "sobre_p90_pct": 7.84,
+      "ancho_medio": 289.6,
+      "ancho_relativo_mediano_pct": 50.1
+     }
+    },
+    "por_bloque": {
+     "20": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 149.0,
+      "ancho_relativo_mediano_pct": 86.8
+     },
+     "04-05": {
+      "n": 366,
+      "cobertura_pct": 80.6,
+      "bajo_p10_pct": 10.66,
+      "sobre_p90_pct": 8.74,
+      "ancho_medio": 359.3,
+      "ancho_relativo_mediano_pct": 44.8
+     },
+     "06-08 pico": {
+      "n": 549,
+      "cobertura_pct": 80.69,
+      "bajo_p10_pct": 12.75,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 314.9,
+      "ancho_relativo_mediano_pct": 37.6
+     },
+     "09-16 valle": {
+      "n": 1464,
+      "cobertura_pct": 80.19,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 8.88,
+      "ancho_medio": 368.8,
+      "ancho_relativo_mediano_pct": 52.3
+     },
+     "17-19 pico": {
+      "n": 549,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 268.9,
+      "ancho_relativo_mediano_pct": 66.5
+     }
+    },
+    "por_especial": {
+     "especial": {
+      "n": 51,
+      "cobertura_pct": 86.27,
+      "bajo_p10_pct": 11.76,
+      "sobre_p90_pct": 1.96,
+      "ancho_medio": 224.7,
+      "ancho_relativo_mediano_pct": 65.6
+     },
+     "normal": {
+      "n": 3060,
+      "cobertura_pct": 80.29,
+      "bajo_p10_pct": 11.31,
+      "sobre_p90_pct": 8.4,
+      "ancho_medio": 329.3,
+      "ancho_relativo_mediano_pct": 52.8
+     }
+    },
+    "peor_desviacion_pp": 5.25,
+    "peor_desviacion_por_particion_pp": {
+     "hora": 5.25,
+     "ruta": 0.62,
+     "tipo": 0.39
+    },
+    "nota": "en la misma muestra del ajuste (referencia; la decisión usa la validación cruzada)"
+   }
+  },
+  "prueba": {
+   "modelo": {
+    "global": {
+     "n": 3111,
+     "cobertura_pct": 80.94,
+     "bajo_p10_pct": 11.28,
+     "sobre_p90_pct": 7.78,
+     "ancho_medio": 325.0,
+     "ancho_relativo_mediano_pct": 55.5
+    },
+    "por_hora": {
+     "4": {
+      "n": 183,
+      "cobertura_pct": 71.58,
+      "bajo_p10_pct": 24.59,
+      "sobre_p90_pct": 3.83,
+      "ancho_medio": 146.7,
+      "ancho_relativo_mediano_pct": 59.4
+     },
+     "5": {
+      "n": 183,
+      "cobertura_pct": 83.61,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 4.37,
+      "ancho_medio": 457.5,
+      "ancho_relativo_mediano_pct": 42.1
+     },
+     "6": {
+      "n": 183,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 7.1,
+      "sobre_p90_pct": 14.21,
+      "ancho_medio": 404.2,
+      "ancho_relativo_mediano_pct": 42.7
+     },
+     "7": {
+      "n": 183,
+      "cobertura_pct": 90.71,
+      "bajo_p10_pct": 3.28,
+      "sobre_p90_pct": 6.01,
+      "ancho_medio": 329.5,
+      "ancho_relativo_mediano_pct": 43.9
+     },
+     "8": {
+      "n": 183,
+      "cobertura_pct": 85.79,
+      "bajo_p10_pct": 7.65,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 317.0,
+      "ancho_relativo_mediano_pct": 44.5
+     },
+     "9": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 304.1,
+      "ancho_relativo_mediano_pct": 46.1
+     },
+     "10": {
+      "n": 183,
+      "cobertura_pct": 84.7,
+      "bajo_p10_pct": 8.2,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 307.9,
+      "ancho_relativo_mediano_pct": 52.0
+     },
+     "11": {
+      "n": 183,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 311.1,
+      "ancho_relativo_mediano_pct": 55.4
+     },
+     "12": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 13.11,
+      "sobre_p90_pct": 6.56,
+      "ancho_medio": 364.7,
+      "ancho_relativo_mediano_pct": 54.7
+     },
+     "13": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 6.01,
+      "ancho_medio": 408.1,
+      "ancho_relativo_mediano_pct": 55.6
+     },
+     "14": {
+      "n": 183,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 7.65,
+      "sobre_p90_pct": 10.93,
+      "ancho_medio": 451.6,
+      "ancho_relativo_mediano_pct": 59.7
+     },
+     "15": {
+      "n": 183,
+      "cobertura_pct": 83.06,
+      "bajo_p10_pct": 8.2,
+      "sobre_p90_pct": 8.74,
+      "ancho_medio": 418.8,
+      "ancho_relativo_mediano_pct": 61.7
+     },
+     "16": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 8.74,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 359.7,
+      "ancho_relativo_mediano_pct": 59.7
+     },
+     "17": {
+      "n": 183,
+      "cobertura_pct": 85.79,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 4.37,
+      "ancho_medio": 298.1,
+      "ancho_relativo_mediano_pct": 62.7
+     },
+     "18": {
+      "n": 183,
+      "cobertura_pct": 75.96,
+      "bajo_p10_pct": 16.39,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 255.1,
+      "ancho_relativo_mediano_pct": 72.7
+     },
+     "19": {
+      "n": 183,
+      "cobertura_pct": 75.41,
+      "bajo_p10_pct": 16.39,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 226.8,
+      "ancho_relativo_mediano_pct": 70.9
+     },
+     "20": {
+      "n": 183,
+      "cobertura_pct": 71.58,
+      "bajo_p10_pct": 16.39,
+      "sobre_p90_pct": 12.02,
+      "ancho_medio": 164.5,
+      "ancho_relativo_mediano_pct": 89.6
+     }
+    },
+    "por_ruta": {
+     "CL 72": {
+      "n": 1037,
+      "cobertura_pct": 81.58,
+      "bajo_p10_pct": 11.09,
+      "sobre_p90_pct": 7.33,
+      "ancho_medio": 232.9,
+      "ancho_relativo_mediano_pct": 68.5
+     },
+     "CRA 54": {
+      "n": 1037,
+      "cobertura_pct": 78.11,
+      "bajo_p10_pct": 12.83,
+      "sobre_p90_pct": 9.06,
+      "ancho_medio": 454.9,
+      "ancho_relativo_mediano_pct": 42.4
+     },
+     "SILENCIO": {
+      "n": 1037,
+      "cobertura_pct": 83.12,
+      "bajo_p10_pct": 9.93,
+      "sobre_p90_pct": 6.94,
+      "ancho_medio": 287.3,
+      "ancho_relativo_mediano_pct": 56.9
+     }
+    },
+    "por_tipo": {
+     "Domingo/festivo": {
+      "n": 663,
+      "cobertura_pct": 81.3,
+      "bajo_p10_pct": 11.01,
+      "sobre_p90_pct": 7.69,
+      "ancho_medio": 232.9,
+      "ancho_relativo_mediano_pct": 69.3
+     },
+     "Laboral": {
+      "n": 1989,
+      "cobertura_pct": 80.64,
+      "bajo_p10_pct": 11.76,
+      "sobre_p90_pct": 7.59,
+      "ancho_medio": 361.3,
+      "ancho_relativo_mediano_pct": 53.0
+     },
+     "Sábado": {
+      "n": 459,
+      "cobertura_pct": 81.7,
+      "bajo_p10_pct": 9.59,
+      "sobre_p90_pct": 8.71,
+      "ancho_medio": 300.8,
+      "ancho_relativo_mediano_pct": 51.8
+     }
+    },
+    "por_bloque": {
+     "20": {
+      "n": 183,
+      "cobertura_pct": 71.58,
+      "bajo_p10_pct": 16.39,
+      "sobre_p90_pct": 12.02,
+      "ancho_medio": 164.5,
+      "ancho_relativo_mediano_pct": 89.6
+     },
+     "04-05": {
+      "n": 366,
+      "cobertura_pct": 77.6,
+      "bajo_p10_pct": 18.31,
+      "sobre_p90_pct": 4.1,
+      "ancho_medio": 302.1,
+      "ancho_relativo_mediano_pct": 48.3
+     },
+     "06-08 pico": {
+      "n": 549,
+      "cobertura_pct": 85.06,
+      "bajo_p10_pct": 6.01,
+      "sobre_p90_pct": 8.93,
+      "ancho_medio": 350.2,
+      "ancho_relativo_mediano_pct": 43.9
+     },
+     "09-16 valle": {
+      "n": 1464,
+      "cobertura_pct": 82.1,
+      "bajo_p10_pct": 9.77,
+      "sobre_p90_pct": 8.13,
+      "ancho_medio": 365.7,
+      "ancho_relativo_mediano_pct": 55.4
+     },
+     "17-19 pico": {
+      "n": 549,
+      "cobertura_pct": 79.05,
+      "bajo_p10_pct": 14.21,
+      "sobre_p90_pct": 6.74,
+      "ancho_medio": 260.0,
+      "ancho_relativo_mediano_pct": 68.2
+     }
+    },
+    "por_especial": {
+     "especial": {
+      "n": 969,
+      "cobertura_pct": 76.88,
+      "bajo_p10_pct": 15.69,
+      "sobre_p90_pct": 7.43,
+      "ancho_medio": 327.2,
+      "ancho_relativo_mediano_pct": 61.5
+     },
+     "normal": {
+      "n": 2142,
+      "cobertura_pct": 82.77,
+      "bajo_p10_pct": 9.29,
+      "sobre_p90_pct": 7.94,
+      "ancho_medio": 324.0,
+      "ancho_relativo_mediano_pct": 52.9
+     }
+    },
+    "peor_desviacion_pp": 10.71,
+    "peor_desviacion_por_particion_pp": {
+     "hora": 10.71,
+     "ruta": 3.12,
+     "tipo": 1.7
+    }
+   },
+   "v1": {
+    "global": {
+     "n": 3111,
+     "cobertura_pct": 78.59,
+     "bajo_p10_pct": 12.86,
+     "sobre_p90_pct": 8.55,
+     "ancho_medio": 316.3,
+     "ancho_relativo_mediano_pct": 53.2
+    },
+    "por_hora": {
+     "4": {
+      "n": 183,
+      "cobertura_pct": 65.57,
+      "bajo_p10_pct": 30.05,
+      "sobre_p90_pct": 4.37,
+      "ancho_medio": 143.1,
+      "ancho_relativo_mediano_pct": 56.9
+     },
+     "5": {
+      "n": 183,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 13.66,
+      "sobre_p90_pct": 4.92,
+      "ancho_medio": 439.9,
+      "ancho_relativo_mediano_pct": 39.5
+     },
+     "6": {
+      "n": 183,
+      "cobertura_pct": 77.05,
+      "bajo_p10_pct": 7.1,
+      "sobre_p90_pct": 15.85,
+      "ancho_medio": 391.5,
+      "ancho_relativo_mediano_pct": 40.4
+     },
+     "7": {
+      "n": 183,
+      "cobertura_pct": 88.52,
+      "bajo_p10_pct": 3.83,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 319.6,
+      "ancho_relativo_mediano_pct": 41.2
+     },
+     "8": {
+      "n": 183,
+      "cobertura_pct": 82.51,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 307.5,
+      "ancho_relativo_mediano_pct": 41.8
+     },
+     "9": {
+      "n": 183,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 294.9,
+      "ancho_relativo_mediano_pct": 43.0
+     },
+     "10": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 299.5,
+      "ancho_relativo_mediano_pct": 49.5
+     },
+     "11": {
+      "n": 183,
+      "cobertura_pct": 79.78,
+      "bajo_p10_pct": 11.48,
+      "sobre_p90_pct": 8.74,
+      "ancho_medio": 302.9,
+      "ancho_relativo_mediano_pct": 53.3
+     },
+     "12": {
+      "n": 183,
+      "cobertura_pct": 78.14,
+      "bajo_p10_pct": 13.66,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 355.1,
+      "ancho_relativo_mediano_pct": 51.4
+     },
+     "13": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 13.11,
+      "sobre_p90_pct": 6.01,
+      "ancho_medio": 397.8,
+      "ancho_relativo_mediano_pct": 53.0
+     },
+     "14": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 7.65,
+      "sobre_p90_pct": 11.48,
+      "ancho_medio": 440.8,
+      "ancho_relativo_mediano_pct": 56.7
+     },
+     "15": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 408.9,
+      "ancho_relativo_mediano_pct": 59.2
+     },
+     "16": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 9.29,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 350.8,
+      "ancho_relativo_mediano_pct": 57.4
+     },
+     "17": {
+      "n": 183,
+      "cobertura_pct": 84.7,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 4.92,
+      "ancho_medio": 291.2,
+      "ancho_relativo_mediano_pct": 60.8
+     },
+     "18": {
+      "n": 183,
+      "cobertura_pct": 73.22,
+      "bajo_p10_pct": 19.13,
+      "sobre_p90_pct": 7.65,
+      "ancho_medio": 249.7,
+      "ancho_relativo_mediano_pct": 69.9
+     },
+     "19": {
+      "n": 183,
+      "cobertura_pct": 74.32,
+      "bajo_p10_pct": 16.39,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 222.4,
+      "ancho_relativo_mediano_pct": 68.2
+     },
+     "20": {
+      "n": 183,
+      "cobertura_pct": 64.48,
+      "bajo_p10_pct": 22.95,
+      "sobre_p90_pct": 12.57,
+      "ancho_medio": 162.1,
+      "ancho_relativo_mediano_pct": 87.9
+     }
+    },
+    "por_ruta": {
+     "CL 72": {
+      "n": 1037,
+      "cobertura_pct": 78.69,
+      "bajo_p10_pct": 13.02,
+      "sobre_p90_pct": 8.29,
+      "ancho_medio": 226.4,
+      "ancho_relativo_mediano_pct": 66.8
+     },
+     "CRA 54": {
+      "n": 1037,
+      "cobertura_pct": 77.53,
+      "bajo_p10_pct": 13.11,
+      "sobre_p90_pct": 9.35,
+      "ancho_medio": 453.3,
+      "ancho_relativo_mediano_pct": 42.1
+     },
+     "SILENCIO": {
+      "n": 1037,
+      "cobertura_pct": 79.56,
+      "bajo_p10_pct": 12.44,
+      "sobre_p90_pct": 8.0,
+      "ancho_medio": 269.3,
+      "ancho_relativo_mediano_pct": 53.5
+     }
+    },
+    "por_tipo": {
+     "Domingo/festivo": {
+      "n": 663,
+      "cobertura_pct": 77.83,
+      "bajo_p10_pct": 13.88,
+      "sobre_p90_pct": 8.3,
+      "ancho_medio": 228.2,
+      "ancho_relativo_mediano_pct": 66.9
+     },
+     "Laboral": {
+      "n": 1989,
+      "cobertura_pct": 78.88,
+      "bajo_p10_pct": 12.77,
+      "sobre_p90_pct": 8.35,
+      "ancho_medio": 351.3,
+      "ancho_relativo_mediano_pct": 50.8
+     },
+     "Sábado": {
+      "n": 459,
+      "cobertura_pct": 78.43,
+      "bajo_p10_pct": 11.76,
+      "sobre_p90_pct": 9.8,
+      "ancho_medio": 292.3,
+      "ancho_relativo_mediano_pct": 49.4
+     }
+    },
+    "por_bloque": {
+     "20": {
+      "n": 183,
+      "cobertura_pct": 64.48,
+      "bajo_p10_pct": 22.95,
+      "sobre_p90_pct": 12.57,
+      "ancho_medio": 162.1,
+      "ancho_relativo_mediano_pct": 87.9
+     },
+     "04-05": {
+      "n": 366,
+      "cobertura_pct": 73.5,
+      "bajo_p10_pct": 21.86,
+      "sobre_p90_pct": 4.64,
+      "ancho_medio": 291.5,
+      "ancho_relativo_mediano_pct": 46.2
+     },
+     "06-08 pico": {
+      "n": 549,
+      "cobertura_pct": 82.7,
+      "bajo_p10_pct": 6.92,
+      "sobre_p90_pct": 10.38,
+      "ancho_medio": 339.5,
+      "ancho_relativo_mediano_pct": 41.2
+     },
+     "09-16 valle": {
+      "n": 1464,
+      "cobertura_pct": 80.53,
+      "bajo_p10_pct": 10.66,
+      "sobre_p90_pct": 8.81,
+      "ancho_medio": 356.3,
+      "ancho_relativo_mediano_pct": 52.7
+     },
+     "17-19 pico": {
+      "n": 549,
+      "cobertura_pct": 77.41,
+      "bajo_p10_pct": 15.3,
+      "sobre_p90_pct": 7.29,
+      "ancho_medio": 254.4,
+      "ancho_relativo_mediano_pct": 65.8
+     }
+    },
+    "por_especial": {
+     "especial": {
+      "n": 969,
+      "cobertura_pct": 73.68,
+      "bajo_p10_pct": 17.65,
+      "sobre_p90_pct": 8.67,
+      "ancho_medio": 320.4,
+      "ancho_relativo_mediano_pct": 59.1
+     },
+     "normal": {
+      "n": 2142,
+      "cobertura_pct": 80.81,
+      "bajo_p10_pct": 10.69,
+      "sobre_p90_pct": 8.5,
+      "ancho_medio": 314.5,
+      "ancho_relativo_mediano_pct": 50.6
+     }
+    },
+    "peor_desviacion_pp": 15.52,
+    "peor_desviacion_por_particion_pp": {
+     "hora": 15.52,
+     "ruta": 2.47,
+     "tipo": 2.17
+    },
+    "dias_con_ajuste_pct": 100.0
+   },
+   "v2": {
+    "global": {
+     "n": 3111,
+     "cobertura_pct": 79.78,
+     "bajo_p10_pct": 11.48,
+     "sobre_p90_pct": 8.74,
+     "ancho_medio": 315.1,
+     "ancho_relativo_mediano_pct": 53.3
+    },
+    "por_hora": {
+     "4": {
+      "n": 183,
+      "cobertura_pct": 84.15,
+      "bajo_p10_pct": 12.02,
+      "sobre_p90_pct": 3.83,
+      "ancho_medio": 156.5,
+      "ancho_relativo_mediano_pct": 63.3
+     },
+     "5": {
+      "n": 183,
+      "cobertura_pct": 86.89,
+      "bajo_p10_pct": 9.29,
+      "sobre_p90_pct": 3.83,
+      "ancho_medio": 502.6,
+      "ancho_relativo_mediano_pct": 47.2
+     },
+     "6": {
+      "n": 183,
+      "cobertura_pct": 76.5,
+      "bajo_p10_pct": 7.1,
+      "sobre_p90_pct": 16.39,
+      "ancho_medio": 378.3,
+      "ancho_relativo_mediano_pct": 38.8
+     },
+     "7": {
+      "n": 183,
+      "cobertura_pct": 86.89,
+      "bajo_p10_pct": 3.83,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 309.2,
+      "ancho_relativo_mediano_pct": 38.9
+     },
+     "8": {
+      "n": 183,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 297.6,
+      "ancho_relativo_mediano_pct": 38.6
+     },
+     "9": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 8.74,
+      "ancho_medio": 287.8,
+      "ancho_relativo_mediano_pct": 42.7
+     },
+     "10": {
+      "n": 183,
+      "cobertura_pct": 81.97,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 8.2,
+      "ancho_medio": 293.3,
+      "ancho_relativo_mediano_pct": 49.0
+     },
+     "11": {
+      "n": 183,
+      "cobertura_pct": 78.14,
+      "bajo_p10_pct": 12.57,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 296.5,
+      "ancho_relativo_mediano_pct": 52.3
+     },
+     "12": {
+      "n": 183,
+      "cobertura_pct": 76.5,
+      "bajo_p10_pct": 14.21,
+      "sobre_p90_pct": 9.29,
+      "ancho_medio": 347.7,
+      "ancho_relativo_mediano_pct": 52.0
+     },
+     "13": {
+      "n": 183,
+      "cobertura_pct": 81.42,
+      "bajo_p10_pct": 12.57,
+      "sobre_p90_pct": 6.01,
+      "ancho_medio": 389.7,
+      "ancho_relativo_mediano_pct": 52.1
+     },
+     "14": {
+      "n": 183,
+      "cobertura_pct": 80.87,
+      "bajo_p10_pct": 7.65,
+      "sobre_p90_pct": 11.48,
+      "ancho_medio": 432.7,
+      "ancho_relativo_mediano_pct": 56.9
+     },
+     "15": {
+      "n": 183,
+      "cobertura_pct": 80.33,
+      "bajo_p10_pct": 9.84,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 401.8,
+      "ancho_relativo_mediano_pct": 58.8
+     },
+     "16": {
+      "n": 183,
+      "cobertura_pct": 79.78,
+      "bajo_p10_pct": 10.38,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 344.5,
+      "ancho_relativo_mediano_pct": 56.8
+     },
+     "17": {
+      "n": 183,
+      "cobertura_pct": 84.15,
+      "bajo_p10_pct": 10.93,
+      "sobre_p90_pct": 4.92,
+      "ancho_medio": 289.2,
+      "ancho_relativo_mediano_pct": 59.7
+     },
+     "18": {
+      "n": 183,
+      "cobertura_pct": 74.32,
+      "bajo_p10_pct": 18.58,
+      "sobre_p90_pct": 7.1,
+      "ancho_medio": 248.2,
+      "ancho_relativo_mediano_pct": 68.8
+     },
+     "19": {
+      "n": 183,
+      "cobertura_pct": 73.77,
+      "bajo_p10_pct": 16.39,
+      "sobre_p90_pct": 9.84,
+      "ancho_medio": 221.1,
+      "ancho_relativo_mediano_pct": 67.7
+     },
+     "20": {
+      "n": 183,
+      "cobertura_pct": 68.85,
+      "bajo_p10_pct": 18.58,
+      "sobre_p90_pct": 12.57,
+      "ancho_medio": 160.6,
+      "ancho_relativo_mediano_pct": 86.3
+     }
+    },
+    "por_ruta": {
+     "CL 72": {
+      "n": 1037,
+      "cobertura_pct": 81.0,
+      "bajo_p10_pct": 10.51,
+      "sobre_p90_pct": 8.49,
+      "ancho_medio": 224.5,
+      "ancho_relativo_mediano_pct": 65.8
+     },
+     "CRA 54": {
+      "n": 1037,
+      "cobertura_pct": 77.63,
+      "bajo_p10_pct": 12.92,
+      "sobre_p90_pct": 9.45,
+      "ancho_medio": 450.4,
+      "ancho_relativo_mediano_pct": 41.5
+     },
+     "SILENCIO": {
+      "n": 1037,
+      "cobertura_pct": 80.71,
+      "bajo_p10_pct": 10.99,
+      "sobre_p90_pct": 8.29,
+      "ancho_medio": 270.6,
+      "ancho_relativo_mediano_pct": 53.9
+     }
+    },
+    "por_tipo": {
+     "Domingo/festivo": {
+      "n": 663,
+      "cobertura_pct": 82.81,
+      "bajo_p10_pct": 8.75,
+      "sobre_p90_pct": 8.45,
+      "ancho_medio": 226.1,
+      "ancho_relativo_mediano_pct": 66.1
+     },
+     "Laboral": {
+      "n": 1989,
+      "cobertura_pct": 78.83,
+      "bajo_p10_pct": 12.52,
+      "sobre_p90_pct": 8.65,
+      "ancho_medio": 350.5,
+      "ancho_relativo_mediano_pct": 51.4
+     },
+     "Sábado": {
+      "n": 459,
+      "cobertura_pct": 79.52,
+      "bajo_p10_pct": 10.89,
+      "sobre_p90_pct": 9.59,
+      "ancho_medio": 290.4,
+      "ancho_relativo_mediano_pct": 49.7
+     }
+    },
+    "por_bloque": {
+     "20": {
+      "n": 183,
+      "cobertura_pct": 68.85,
+      "bajo_p10_pct": 18.58,
+      "sobre_p90_pct": 12.57,
+      "ancho_medio": 160.6,
+      "ancho_relativo_mediano_pct": 86.3
+     },
+     "04-05": {
+      "n": 366,
+      "cobertura_pct": 85.52,
+      "bajo_p10_pct": 10.66,
+      "sobre_p90_pct": 3.83,
+      "ancho_medio": 329.5,
+      "ancho_relativo_mediano_pct": 53.1
+     },
+     "06-08 pico": {
+      "n": 549,
+      "cobertura_pct": 81.6,
+      "bajo_p10_pct": 7.1,
+      "sobre_p90_pct": 11.29,
+      "ancho_medio": 328.4,
+      "ancho_relativo_mediano_pct": 38.8
+     },
+     "09-16 valle": {
+      "n": 1464,
+      "cobertura_pct": 79.92,
+      "bajo_p10_pct": 11.0,
+      "sobre_p90_pct": 9.08,
+      "ancho_medio": 349.3,
+      "ancho_relativo_mediano_pct": 52.2
+     },
+     "17-19 pico": {
+      "n": 549,
+      "cobertura_pct": 77.41,
+      "bajo_p10_pct": 15.3,
+      "sobre_p90_pct": 7.29,
+      "ancho_medio": 252.8,
+      "ancho_relativo_mediano_pct": 64.8
+     }
+    },
+    "por_especial": {
+     "especial": {
+      "n": 969,
+      "cobertura_pct": 75.23,
+      "bajo_p10_pct": 15.89,
+      "sobre_p90_pct": 8.88,
+      "ancho_medio": 318.0,
+      "ancho_relativo_mediano_pct": 59.4
+     },
+     "normal": {
+      "n": 2142,
+      "cobertura_pct": 81.84,
+      "bajo_p10_pct": 9.48,
+      "sobre_p90_pct": 8.68,
+      "ancho_medio": 313.8,
+      "ancho_relativo_mediano_pct": 50.9
+     }
+    },
+    "peor_desviacion_pp": 11.15,
+    "peor_desviacion_por_particion_pp": {
+     "hora": 11.15,
+     "ruta": 2.37,
+     "tipo": 2.81
+    }
+   }
+  },
+  "caso_6h": {
+   "validacion": {
+    "CL 72": {
+     "hora_6": {
+      "mediana": 1.23,
+      "p95": 1.298,
+      "maximo": 1.568,
+      "fecha_maximo": "2025-10-13",
+      "p50_en_el_maximo": 185.7,
+      "p90_en_el_maximo": 291.2,
+      "observado_en_el_maximo": 177.0,
+      "media_observada_6h": 484.3,
+      "desviacion_observada_6h": 156.2
+     }
+    },
+    "CRA 54": {
+     "hora_6": {
+      "mediana": 1.155,
+      "p95": 1.21,
+      "maximo": 1.225,
+      "fecha_maximo": "2025-10-13",
+      "p50_en_el_maximo": 617.5,
+      "p90_en_el_maximo": 756.2,
+      "observado_en_el_maximo": 683.0,
+      "media_observada_6h": 1987.6,
+      "desviacion_observada_6h": 624.3
+     }
+    },
+    "SILENCIO": {
+     "hora_6": {
+      "mediana": 1.211,
+      "p95": 1.297,
+      "maximo": 1.385,
+      "fecha_maximo": "2025-10-13",
+      "p50_en_el_maximo": 305.0,
+      "p90_en_el_maximo": 422.3,
+      "observado_en_el_maximo": 377.0,
+      "media_observada_6h": 774.9,
+      "desviacion_observada_6h": 203.0
+     }
+    },
+    "horas_con_razon_mayor_o_igual_2_9": {
+     "n": 28,
+     "de": 3111,
+     "horas": [
+      4,
+      20
+     ],
+     "p50_mediano": 16.4,
+     "pct_en_dias_especiales": 21.4
+    }
+   },
+   "prueba": {
+    "CL 72": {
+     "hora_6": {
+      "mediana": 1.236,
+      "p95": 1.605,
+      "maximo": 1.706,
+      "fecha_maximo": "2025-12-08",
+      "p50_en_el_maximo": 160.6,
+      "p90_en_el_maximo": 273.9,
+      "observado_en_el_maximo": 155.0,
+      "media_observada_6h": 492.7,
+      "desviacion_observada_6h": 188.5
+     }
+    },
+    "CRA 54": {
+     "hora_6": {
+      "mediana": 1.161,
+      "p95": 1.255,
+      "maximo": 1.663,
+      "fecha_maximo": "2025-12-25",
+      "p50_en_el_maximo": 401.6,
+      "p90_en_el_maximo": 668.0,
+      "observado_en_el_maximo": 303.0,
+      "media_observada_6h": 1788.5,
+      "desviacion_observada_6h": 681.8
+     }
+    },
+    "SILENCIO": {
+     "hora_6": {
+      "mediana": 1.16,
+      "p95": 1.28,
+      "maximo": 2.312,
+      "fecha_maximo": "2025-12-25",
+      "p50_en_el_maximo": 201.4,
+      "p90_en_el_maximo": 465.6,
+      "observado_en_el_maximo": 188.0,
+      "media_observada_6h": 825.6,
+      "desviacion_observada_6h": 275.4
+     }
+    },
+    "horas_con_razon_mayor_o_igual_2_9": {
+     "n": 50,
+     "de": 3111,
+     "horas": [
+      4,
+      5,
+      20
+     ],
+     "p50_mediano": 14.8,
+     "pct_en_dias_especiales": 60.0
+    }
+   }
+  }
+ },
+ "duracion_s": 5.5,
+ "datos": "datos"
+}

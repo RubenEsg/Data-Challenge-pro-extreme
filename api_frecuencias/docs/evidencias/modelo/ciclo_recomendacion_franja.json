@@ -1,0 +1,706 @@
+{
+ "generado": "2026-11-09T03:15-05:00 (antes) y 03:22-05:00 (después)",
+ "protocolo": "POST /api/v1/frequency/executions (ciclo diario completo: lectura incremental, calidad, evaluación, monitoreo, 9 predicciones = 3 rutas x 30/60/120 min, 9 recomendaciones, alertas) con la fuente Parquet de 2025-10-01 a 2025-10-16 y tres cortes seguidos (hasta = 14, 15 y 16 de octubre de 2025); base local de pruebas ai_frecuencias_pruebas_modelo_ciclo (servidor 5433); el primer ciclo incluye la carga del modelo y de las variables.",
+ "antes": {
+  "metodo": "optimizacion.recomendar() con la demanda de la ventana de 30/60/120 min como si fuera horaria",
+  "corridas": [
+   {
+    "hasta": "2025-10-14",
+    "estado": "ok",
+    "duracion_ciclo_s": 6.641,
+    "segundos_peticion": 6.72,
+    "predicciones": 9,
+    "recomendaciones": 9,
+    "fallos": 0,
+    "recomendaciones_detalle": [
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-15",
+      "hora": 6,
+      "demanda_hora": 430.54,
+      "demanda_p90": 517.45,
+      "buses_hora": 6,
+      "headway_min": 10.0,
+      "viable": true
+     },
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-15",
+      "hora": 7,
+      "demanda_hora": 773.58,
+      "demanda_p90": 929.74,
+      "buses_hora": 9,
+      "headway_min": 6.67,
+      "viable": true
+     },
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-15",
+      "hora": 8,
+      "demanda_hora": 1399.85,
+      "demanda_p90": 1714.05,
+      "buses_hora": 17,
+      "headway_min": 3.53,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-15",
+      "hora": 6,
+      "demanda_hora": 1129.09,
+      "demanda_p90": 1323.4,
+      "buses_hora": 15,
+      "headway_min": 4.0,
+      "viable": true
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-15",
+      "hora": 7,
+      "demanda_hora": 2174.77,
+      "demanda_p90": 2549.05,
+      "buses_hora": 28,
+      "headway_min": 2.14,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-15",
+      "hora": 8,
+      "demanda_hora": 3794.28,
+      "demanda_p90": 4401.17,
+      "buses_hora": 30,
+      "headway_min": 2.0,
+      "viable": false
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-15",
+      "hora": 6,
+      "demanda_hora": 297.88,
+      "demanda_p90": 372.34,
+      "buses_hora": 6,
+      "headway_min": 10.0,
+      "viable": true
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-15",
+      "hora": 7,
+      "demanda_hora": 560.46,
+      "demanda_p90": 700.56,
+      "buses_hora": 7,
+      "headway_min": 8.57,
+      "viable": true
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-15",
+      "hora": 8,
+      "demanda_hora": 1064.46,
+      "demanda_p90": 1337.6,
+      "buses_hora": 13,
+      "headway_min": 4.62,
+      "viable": false
+     }
+    ]
+   },
+   {
+    "hasta": "2025-10-15",
+    "estado": "ok",
+    "duracion_ciclo_s": 4.652,
+    "segundos_peticion": 4.71,
+    "predicciones": 9,
+    "recomendaciones": 9,
+    "fallos": 0,
+    "recomendaciones_detalle": [
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-16",
+      "hora": 6,
+      "demanda_hora": 471.87,
+      "demanda_p90": 569.58,
+      "buses_hora": 6,
+      "headway_min": 10.0,
+      "viable": true
+     },
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-16",
+      "hora": 7,
+      "demanda_hora": 847.85,
+      "demanda_p90": 1023.4,
+      "buses_hora": 10,
+      "headway_min": 6.0,
+      "viable": true
+     },
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-16",
+      "hora": 8,
+      "demanda_hora": 1471.39,
+      "demanda_p90": 1802.73,
+      "buses_hora": 18,
+      "headway_min": 3.33,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-16",
+      "hora": 6,
+      "demanda_hora": 1136.64,
+      "demanda_p90": 1322.35,
+      "buses_hora": 15,
+      "headway_min": 4.0,
+      "viable": true
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-16",
+      "hora": 7,
+      "demanda_hora": 2189.33,
+      "demanda_p90": 2547.02,
+      "buses_hora": 28,
+      "headway_min": 2.14,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-16",
+      "hora": 8,
+      "demanda_hora": 3713.1,
+      "demanda_p90": 4282.07,
+      "buses_hora": 30,
+      "headway_min": 2.0,
+      "viable": false
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-16",
+      "hora": 6,
+      "demanda_hora": 306.91,
+      "demanda_p90": 377.42,
+      "buses_hora": 6,
+      "headway_min": 10.0,
+      "viable": true
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-16",
+      "hora": 7,
+      "demanda_hora": 577.45,
+      "demanda_p90": 710.1,
+      "buses_hora": 7,
+      "headway_min": 8.57,
+      "viable": true
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-16",
+      "hora": 8,
+      "demanda_hora": 1089.87,
+      "demanda_p90": 1362.72,
+      "buses_hora": 14,
+      "headway_min": 4.29,
+      "viable": false
+     }
+    ]
+   },
+   {
+    "hasta": "2025-10-16",
+    "estado": "ok",
+    "duracion_ciclo_s": 3.656,
+    "segundos_peticion": 3.71,
+    "predicciones": 9,
+    "recomendaciones": 9,
+    "fallos": 0,
+    "recomendaciones_detalle": [
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-17",
+      "hora": 6,
+      "demanda_hora": 479.93,
+      "demanda_p90": 596.12,
+      "buses_hora": 6,
+      "headway_min": 10.0,
+      "viable": true
+     },
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-17",
+      "hora": 7,
+      "demanda_hora": 862.32,
+      "demanda_p90": 1071.09,
+      "buses_hora": 11,
+      "headway_min": 5.45,
+      "viable": false
+     },
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-17",
+      "hora": 8,
+      "demanda_hora": 1506.48,
+      "demanda_p90": 1851.06,
+      "buses_hora": 18,
+      "headway_min": 3.33,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-17",
+      "hora": 6,
+      "demanda_hora": 1164.38,
+      "demanda_p90": 1337.86,
+      "buses_hora": 15,
+      "headway_min": 4.0,
+      "viable": true
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-17",
+      "hora": 7,
+      "demanda_hora": 2242.75,
+      "demanda_p90": 2576.89,
+      "buses_hora": 28,
+      "headway_min": 2.14,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-17",
+      "hora": 8,
+      "demanda_hora": 3867.42,
+      "demanda_p90": 4443.74,
+      "buses_hora": 30,
+      "headway_min": 2.0,
+      "viable": false
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-17",
+      "hora": 6,
+      "demanda_hora": 299.25,
+      "demanda_p90": 382.32,
+      "buses_hora": 6,
+      "headway_min": 10.0,
+      "viable": true
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-17",
+      "hora": 7,
+      "demanda_hora": 563.04,
+      "demanda_p90": 719.33,
+      "buses_hora": 7,
+      "headway_min": 8.57,
+      "viable": true
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-17",
+      "hora": 8,
+      "demanda_hora": 1085.21,
+      "demanda_p90": 1392.95,
+      "buses_hora": 14,
+      "headway_min": 4.29,
+      "viable": false
+     }
+    ]
+   }
+  ]
+ },
+ "despues": {
+  "metodo": "optimizacion.recomendacion_franja(): hora principal de la ventana (variables.por_hora), demanda por hora y banda calibrada, igual que POST /predictions/run",
+  "corridas": [
+   {
+    "hasta": "2025-10-14",
+    "estado": "ok",
+    "duracion_ciclo_s": 8.031,
+    "segundos_peticion": 8.1,
+    "predicciones": 9,
+    "recomendaciones": 9,
+    "fallos": 0,
+    "recomendaciones_detalle": [
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-15",
+      "hora": 6,
+      "demanda_hora": 768.4,
+      "demanda_p90": 923.5,
+      "buses_hora": 7,
+      "headway_min": 8.57,
+      "viable": false
+     },
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-15",
+      "hora": 6,
+      "demanda_hora": 768.4,
+      "demanda_p90": 923.5,
+      "buses_hora": 7,
+      "headway_min": 8.57,
+      "viable": false
+     },
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-15",
+      "hora": 6,
+      "demanda_hora": 768.4,
+      "demanda_p90": 923.5,
+      "buses_hora": 7,
+      "headway_min": 8.57,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-15",
+      "hora": 6,
+      "demanda_hora": 2153.0,
+      "demanda_p90": 2523.5,
+      "buses_hora": 17,
+      "headway_min": 3.53,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-15",
+      "hora": 6,
+      "demanda_hora": 2153.0,
+      "demanda_p90": 2523.5,
+      "buses_hora": 17,
+      "headway_min": 3.53,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-15",
+      "hora": 6,
+      "demanda_hora": 2153.0,
+      "demanda_p90": 2523.5,
+      "buses_hora": 17,
+      "headway_min": 3.53,
+      "viable": false
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-15",
+      "hora": 6,
+      "demanda_hora": 549.9,
+      "demanda_p90": 687.3,
+      "buses_hora": 8,
+      "headway_min": 7.5,
+      "viable": true
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-15",
+      "hora": 6,
+      "demanda_hora": 549.9,
+      "demanda_p90": 687.3,
+      "buses_hora": 8,
+      "headway_min": 7.5,
+      "viable": true
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-15",
+      "hora": 6,
+      "demanda_hora": 549.9,
+      "demanda_p90": 687.3,
+      "buses_hora": 8,
+      "headway_min": 7.5,
+      "viable": true
+     }
+    ]
+   },
+   {
+    "hasta": "2025-10-15",
+    "estado": "ok",
+    "duracion_ciclo_s": 4.626,
+    "segundos_peticion": 4.68,
+    "predicciones": 9,
+    "recomendaciones": 9,
+    "fallos": 0,
+    "recomendaciones_detalle": [
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-16",
+      "hora": 6,
+      "demanda_hora": 844.4,
+      "demanda_p90": 1019.2,
+      "buses_hora": 7,
+      "headway_min": 8.57,
+      "viable": false
+     },
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-16",
+      "hora": 6,
+      "demanda_hora": 844.4,
+      "demanda_p90": 1019.2,
+      "buses_hora": 7,
+      "headway_min": 8.57,
+      "viable": false
+     },
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-16",
+      "hora": 6,
+      "demanda_hora": 844.4,
+      "demanda_p90": 1019.2,
+      "buses_hora": 7,
+      "headway_min": 8.57,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-16",
+      "hora": 6,
+      "demanda_hora": 2184.8,
+      "demanda_p90": 2541.8,
+      "buses_hora": 17,
+      "headway_min": 3.53,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-16",
+      "hora": 6,
+      "demanda_hora": 2184.8,
+      "demanda_p90": 2541.8,
+      "buses_hora": 17,
+      "headway_min": 3.53,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-16",
+      "hora": 6,
+      "demanda_hora": 2184.8,
+      "demanda_p90": 2541.8,
+      "buses_hora": 17,
+      "headway_min": 3.53,
+      "viable": false
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-16",
+      "hora": 6,
+      "demanda_hora": 566.1,
+      "demanda_p90": 696.2,
+      "buses_hora": 8,
+      "headway_min": 7.5,
+      "viable": true
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-16",
+      "hora": 6,
+      "demanda_hora": 566.1,
+      "demanda_p90": 696.2,
+      "buses_hora": 8,
+      "headway_min": 7.5,
+      "viable": true
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-16",
+      "hora": 6,
+      "demanda_hora": 566.1,
+      "demanda_p90": 696.2,
+      "buses_hora": 8,
+      "headway_min": 7.5,
+      "viable": true
+     }
+    ]
+   },
+   {
+    "hasta": "2025-10-16",
+    "estado": "ok",
+    "duracion_ciclo_s": 3.746,
+    "segundos_peticion": 3.79,
+    "predicciones": 9,
+    "recomendaciones": 9,
+    "fallos": 0,
+    "recomendaciones_detalle": [
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-17",
+      "hora": 6,
+      "demanda_hora": 849.9,
+      "demanda_p90": 1055.7,
+      "buses_hora": 7,
+      "headway_min": 8.57,
+      "viable": false
+     },
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-17",
+      "hora": 6,
+      "demanda_hora": 849.9,
+      "demanda_p90": 1055.7,
+      "buses_hora": 7,
+      "headway_min": 8.57,
+      "viable": false
+     },
+     {
+      "ruta": "SILENCIO",
+      "fecha": "2025-10-17",
+      "hora": 6,
+      "demanda_hora": 849.9,
+      "demanda_p90": 1055.7,
+      "buses_hora": 7,
+      "headway_min": 8.57,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-17",
+      "hora": 6,
+      "demanda_hora": 2229.5,
+      "demanda_p90": 2561.6,
+      "buses_hora": 17,
+      "headway_min": 3.53,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-17",
+      "hora": 6,
+      "demanda_hora": 2229.5,
+      "demanda_p90": 2561.6,
+      "buses_hora": 17,
+      "headway_min": 3.53,
+      "viable": false
+     },
+     {
+      "ruta": "CRA 54",
+      "fecha": "2025-10-17",
+      "hora": 6,
+      "demanda_hora": 2229.5,
+      "demanda_p90": 2561.6,
+      "buses_hora": 17,
+      "headway_min": 3.53,
+      "viable": false
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-17",
+      "hora": 6,
+      "demanda_hora": 548.3,
+      "demanda_p90": 700.5,
+      "buses_hora": 8,
+      "headway_min": 7.5,
+      "viable": true
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-17",
+      "hora": 6,
+      "demanda_hora": 548.3,
+      "demanda_p90": 700.5,
+      "buses_hora": 8,
+      "headway_min": 7.5,
+      "viable": true
+     },
+     {
+      "ruta": "CL 72",
+      "fecha": "2025-10-17",
+      "hora": 6,
+      "demanda_hora": 548.3,
+      "demanda_p90": 700.5,
+      "buses_hora": 8,
+      "headway_min": 7.5,
+      "viable": true
+     }
+    ]
+   }
+  ],
+  "motivos_por_ruta_y_dia": [
+   {
+    "ruta": "CL 72",
+    "fecha": "2025-10-15",
+    "hora": 6,
+    "buses_hora": 8,
+    "viable": true,
+    "motivo": null
+   },
+   {
+    "ruta": "CL 72",
+    "fecha": "2025-10-16",
+    "hora": 6,
+    "buses_hora": 8,
+    "viable": true,
+    "motivo": null
+   },
+   {
+    "ruta": "CL 72",
+    "fecha": "2025-10-17",
+    "hora": 6,
+    "buses_hora": 8,
+    "viable": true,
+    "motivo": null
+   },
+   {
+    "ruta": "CRA 54",
+    "fecha": "2025-10-15",
+    "hora": 6,
+    "buses_hora": 17,
+    "viable": false,
+    "motivo": "La flota disponible (79 vehículos, ciclo de 243,8 min) solo sostiene 826 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 1.473 (56,1 % de cobertura). Se informa la mejor aproximación ejecutable: 17 buses/h cada 3,53 min, que cubre el 56,1 % de la carga del nivel de servicio."
+   },
+   {
+    "ruta": "CRA 54",
+    "fecha": "2025-10-16",
+    "hora": 6,
+    "buses_hora": 17,
+    "viable": false,
+    "motivo": "La flota disponible (79 vehículos, ciclo de 243,8 min) solo sostiene 826 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 1.484 (55,7 % de cobertura). Se informa la mejor aproximación ejecutable: 17 buses/h cada 3,53 min, que cubre el 55,7 % de la carga del nivel de servicio."
+   },
+   {
+    "ruta": "CRA 54",
+    "fecha": "2025-10-17",
+    "hora": 6,
+    "buses_hora": 17,
+    "viable": false,
+    "motivo": "La flota disponible (79 vehículos, ciclo de 243,8 min) solo sostiene 826 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 1.495 (55,3 % de cobertura). Se informa la mejor aproximación ejecutable: 17 buses/h cada 3,53 min, que cubre el 55,3 % de la carga del nivel de servicio."
+   },
+   {
+    "ruta": "SILENCIO",
+    "fecha": "2025-10-15",
+    "hora": 6,
+    "buses_hora": 7,
+    "viable": false,
+    "motivo": "La flota disponible (45 vehículos, ciclo de 266,9 min) solo sostiene 350 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 447 (78,4 % de cobertura). Se informa la mejor aproximación ejecutable: 7 buses/h cada 8,57 min, que cubre el 78,4 % de la carga del nivel de servicio."
+   },
+   {
+    "ruta": "SILENCIO",
+    "fecha": "2025-10-16",
+    "hora": 6,
+    "buses_hora": 7,
+    "viable": false,
+    "motivo": "La flota disponible (45 vehículos, ciclo de 266,9 min) solo sostiene 350 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 493 (71,1 % de cobertura). Se informa la mejor aproximación ejecutable: 7 buses/h cada 8,57 min, que cubre el 71,1 % de la carga del nivel de servicio."
+   },
+   {
+    "ruta": "SILENCIO",
+    "fecha": "2025-10-17",
+    "hora": 6,
+    "buses_hora": 7,
+    "viable": false,
+    "motivo": "La flota disponible (45 vehículos, ciclo de 266,9 min) solo sostiene 350 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 510 (68,6 % de cobertura). Se informa la mejor aproximación ejecutable: 7 buses/h cada 8,57 min, que cubre el 68,6 % de la carga del nivel de servicio."
+   }
+  ]
+ },
+ "duracion_ciclo_s": {
+  "antes": [
+   6.641,
+   4.652,
+   3.656
+  ],
+  "despues": [
+   8.031,
+   4.626,
+   3.746
+  ]
+ }
+}

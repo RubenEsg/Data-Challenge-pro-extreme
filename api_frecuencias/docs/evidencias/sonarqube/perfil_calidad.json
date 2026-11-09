@@ -1,0 +1,57 @@
+{
+ "servidor": "SonarQube 26.11.0.134175 (Community Build, Docker)",
+ "proyecto": "sobusa-api-frecuencias",
+ "generado_en": "2026-11-09T12:50:34-05:00",
+ "ultimo_analisis": {
+  "key": "3ab7e497-44d9-4381-a942-d2486d5e99f9",
+  "date": "2026-11-09T17:49:56+0000",
+  "events": [
+   {
+    "key": "cb99317f-b4d8-433b-9508-b06890078632",
+    "category": "VERSION",
+    "name": "1.0.0"
+   }
+  ],
+  "projectVersion": "1.0.0",
+  "manualNewCodePeriodBaseline": false,
+  "detectedCI": "undetected"
+ },
+ "perfil": {
+  "key": "088edafc-5e63-42e8-9f64-979bd6997238",
+  "name": "Reto Sobusa v1.5",
+  "language": "py",
+  "languageName": "Python",
+  "isInherited": true,
+  "parentKey": "f79651ea-0d83-4a83-8d96-d3aa450fd247",
+  "parentName": "Sonar way comprehensive",
+  "isDefault": false,
+  "activeRuleCount": 408,
+  "activeDeprecatedRuleCount": 1,
+  "projectCount": 1,
+  "rulesUpdatedAt": "2026-11-09T08:18:28+0000",
+  "lastUsed": "2026-11-09T13:38:25+0000",
+  "userUpdatedAt": "2026-11-09T08:18:28+0000",
+  "isBuiltIn": false,
+  "actions": {
+   "edit": true,
+   "setAsDefault": true,
+   "copy": true,
+   "associateProjects": true,
+   "delete": true
+  }
+ },
+ "reglas_seguridad_activas": 62,
+ "perfil_padre": "Sonar way comprehensive",
+ "reglas_seguridad_padre": 61,
+ "reglas_seguridad_agregadas": [
+  {
+   "regla": "python:S5439",
+   "nombre": "HTML autoescape mechanism should not be globally disabled",
+   "tipo": "VULNERABILITY"
+  }
+ ],
+ "activadas_en_esta_corrida": {
+  "succeeded": 0,
+  "failed": 0
+ }
+}

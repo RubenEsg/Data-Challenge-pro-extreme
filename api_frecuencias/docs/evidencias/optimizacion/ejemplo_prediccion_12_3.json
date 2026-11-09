@@ -1,0 +1,44 @@
+{
+ "solicitud": {
+  "ruta": "CRA 54",
+  "instante": "2025-03-04T06:30:00-05:00",
+  "horizonte_min": 60
+ },
+ "claves_12_3": {
+  "predictionId": "2a2613a2-98cd-4f16-8a57-4d81e14706e2",
+  "routeId": "CRA 54",
+  "generatedAt": "2026-11-09T07:40:06-05:00",
+  "horizonMinutes": 60,
+  "predictedPassengers": 533,
+  "confidenceInterval": {
+   "lower": 479,
+   "upper": 1504
+  },
+  "modelVersion": "hgb_fv2_20250831_s42",
+  "recommendation": {
+   "headwayMinutes": 4.62,
+   "busesPerHour": 13,
+   "vehiclesRequired": 55,
+   "viable": true,
+   "reason": null
+  },
+  "explanation": [
+   "b8",
+   "nov_impacto",
+   "carnaval",
+   "nivel_7_13",
+   "dia_semana"
+  ]
+ },
+ "recomendacion_viable": true,
+ "motivo": null,
+ "franja": {
+  "fecha": "2025-03-04",
+  "hora": 7,
+  "demanda_hora": 458.4,
+  "p10_hora": 357.0,
+  "p90_hora": 1276.5,
+  "fraccion_ventana": 0.534,
+  "fuente": "variables.por_hora (hora principal de la ventana)"
+ }
+}

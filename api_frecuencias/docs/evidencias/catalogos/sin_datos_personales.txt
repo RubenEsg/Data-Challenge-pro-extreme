@@ -1,0 +1,14 @@
+Columnas que nunca salen: aseguradora, clave_interfaz_despacho, idconductor, idconductor_actual, idcontacto, iddespachador, idpropietario, latitud, longitud, modem_imei, modem_min, modem_passwd, modem_passwd_2, modem_puk, modem_puk_2, modem_user, modem_user_2, observacion, placa, poliza, tel_emergencia, url_interfaz_despacho, usuario, usuario_interfaz_despacho, xpos, ypos
+
+  replica   vehiculos?limite=500     filas  500  columnas prohibidas: ninguna  textos con forma de placa: 1
+  replica   viajes?limite=500        filas  500  columnas prohibidas: ninguna  textos con forma de placa: 0
+  replica   despachos?limite=500     filas  500  columnas prohibidas: ninguna  textos con forma de placa: 0
+  replica   procesos                 filas    1  columnas prohibidas: ninguna  textos con forma de placa: 0
+  replica   empresas                 filas    1  columnas prohibidas: ninguna  textos con forma de placa: 0
+  replica   vehiculos/export CSV cabecera: idvehiculo,idruta,ruta,tipologia,tipovehiculo,carroceria,marca,modelo,n_sentados,n_depie,capacidad_total,activo,despacho_habilitado
+  archivos  vehiculos?limite=500     filas  500  columnas prohibidas: ninguna  textos con forma de placa: 1
+  archivos  viajes?limite=500        filas  500  columnas prohibidas: ninguna  textos con forma de placa: 0
+  archivos  despachos?limite=500     filas  500  columnas prohibidas: ninguna  textos con forma de placa: 0
+  archivos  procesos                 filas    1  columnas prohibidas: ninguna  textos con forma de placa: 0
+  archivos  empresas                 filas    1  columnas prohibidas: ninguna  textos con forma de placa: 0
+  archivos  vehiculos/export CSV cabecera: idvehiculo,idruta,ruta,tipologia,tipovehiculo,carroceria,marca,modelo,n_sentados,n_depie,capacidad_total,activo,despacho_habilitado

@@ -1,0 +1,17 @@
+Costo de la lectura incremental demanda_segmentos: consulta anterior frente a la actual, medidas en el mismo proceso
+y con la misma carga del equipo (2026-11-09 06:43, America/Bogota), como lector_ia en la réplica local, sin los
+índices propuestos, EXPLAIN (ANALYZE) con marca = última marca de timbradas_segmentos − 24 h (2.757 franjas: toda la
+carga de la réplica).
+
+  actual (1.ª medición)   11.783,0 ms   2.757 filas
+  anterior                11.913,7 ms   2.757 filas
+  actual (2.ª medición)   12.143,0 ms   2.757 filas
+
+La consulta actual agrega además la definición de pasajeros del modelo (Σ numeropasajeros de los viajes válidos), la
+unión con "Procesos" y el filtro de proceso, y la estacionalidad vigente de cada franja, con el mismo costo que la
+anterior (diferencia dentro del ruido: −1,1 % y +1,9 %).
+
+Las cifras absolutas de explain_incremental.txt de esta fecha (10,6 s sin índices y 28,1 s con los índices propuestos
+para 1.262 franjas) se tomaron con el equipo compartido por varias suites de pruebas a la vez; la consulta anterior,
+medida con el equipo libre el 2026-11-09 a las 02:07, dio 5,26 s y 5,03 s para las mismas 1.262 franjas. Para
+comparar planes hay que repetir «python -m scripts.replica_explain» con el equipo libre.

@@ -1,0 +1,13 @@
+Pruebas de integración y de datos de alertas (Mon Nov  9 06:52:13 HPS 2026), con PostgreSQL real (base de pruebas propia, puerto 5433) y una copia temporal de datos/: tests/datos_ml/test_backtest_alertas.py 4, tests/integracion/test_alertas_observadas.py 2, tests/integracion/test_export_alertas.py 5; 11 aprobadas, 0 fallidas.
+
+PASSED tests/integracion/test_alertas_observadas.py::test_ejecucion_con_datos_observados_produce_alt005_a_alt009
+PASSED tests/integracion/test_alertas_observadas.py::test_la_base_rechaza_un_conductor_en_claro
+PASSED tests/integracion/test_export_alertas.py::test_exportar_alertas_csv_respeta_filtros
+PASSED tests/integracion/test_export_alertas.py::test_exportar_alertas_xlsx_y_errores
+PASSED tests/integracion/test_export_alertas.py::test_bandeja_por_prioridad_por_omision
+PASSED tests/integracion/test_export_alertas.py::test_filtro_por_idruta
+PASSED tests/integracion/test_export_alertas.py::test_historial_paginado_y_comentarios_en_bogota
+PASSED tests/datos_ml/test_backtest_alertas.py::test_backtest_reproduce_la_evidencia
+PASSED tests/datos_ml/test_backtest_alertas.py::test_backtest_de_pronostico_compara_unidades_por_hora
+PASSED tests/datos_ml/test_backtest_alertas.py::test_evidencia_de_pronostico_publicada
+PASSED tests/datos_ml/test_backtest_alertas.py::test_evidencia_observada_incluye_ocupacion_y_rupturas

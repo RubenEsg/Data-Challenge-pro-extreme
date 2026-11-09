@@ -1,0 +1,1078 @@
+{
+ "servicio": "api-frecuencias",
+ "trace_id": "7a1ab1f3971587ef025a3e74abf361bb",
+ "execution_id": "3a93ebdb-3644-4dec-bf68-de6b706f877b",
+ "correlation_id": "evid-traza-1",
+ "spans": 89,
+ "spans_sql": 77,
+ "etapas": [
+  "ejecucion.lectura_incremental",
+  "ejecucion.calidad",
+  "ejecucion.prediccion",
+  "ejecucion.alertas",
+  "ejecucion.notificaciones"
+ ],
+ "detalle": [
+  {
+   "nombre": "POST /api/v1/frequency/executions",
+   "span_id": "5c83e63f79c56897",
+   "padre": null,
+   "inicio_ms": 0.0,
+   "duracion_ms": 6.81,
+   "estado": "UNSET",
+   "atributos": {
+    "http.route": "/api/v1/frequency/executions",
+    "correlation_id": "evid-traza-1",
+    "execution_id": "3a93ebdb-3644-4dec-bf68-de6b706f877b"
+   }
+  },
+  {
+   "nombre": "connect",
+   "span_id": "8bd914c3dc1b8bf6",
+   "padre": "5c83e63f79c56897",
+   "inicio_ms": 1.25,
+   "duracion_ms": 0.91,
+   "estado": "UNSET",
+   "atributos": {
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "15a79f79b8b91b2d",
+   "padre": "5c83e63f79c56897",
+   "inicio_ms": 2.45,
+   "duracion_ms": 1.13,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.execution_log (execution_id, tipo, estado, etapa, progreso, intentos, marca_agua_anterior, marca_agua_nueva, data_cutoff, filas_leidas, filas_validas, model_id, feature_version, umbrales_version, parametros, metricas, correlation_id, mensaje, iniciado_en, terminado_en, worker_id, lease_hasta, disponible_desde, programada_para, traceparent) VALUES (%(execution_id)s::UUID, %(tipo)s::VARCHAR, %(estado)s::VARCHAR, %(etapa)s::VARCHAR, %(progreso)s, %(intentos)s::INTEGER, %(marca_agua_anterior)s::TIMESTAMP WITH TIME ZONE, %(marca_agua_nueva)s::TIMESTAMP WITH TIME ZONE, %(data_cutoff)s::TIMESTAMP WITH TIME ZONE, %(filas_leidas)s::INTEGER, %(filas_validas)s::INTEGER, %(model_id)s::VARCHAR, %(feature_version)s::VARCHAR, %(umbrales_version)s::INTEGER, %(parametros)s::JSONB, %(metricas)s::JSONB, %(correlation_id)s::VARCHAR, %(mensaje)s::VARCHAR, %(iniciado_en)s::TIMESTAMP WITH TIME ZONE, %(terminado_en)s::TIMESTAMP WITH TIME ZONE, %(worker_id)s::VARCHAR, %(lease_hasta)s::TIMESTAMP WITH TIME ZONE, %(disponible_desde)s::TIMESTAMP WITH TIME ZONE, %(programada_para)s::TIMESTAMP WITH TIME ZONE, %(traceparent)s::VARCHAR) RETURNING ai_frecuencias.execution_log.creado_en, ai_frecuencias.execution_log.actualizado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "BackgroundTask ejecutar",
+   "span_id": "32cb8a301cb86f4f",
+   "padre": "5c83e63f79c56897",
+   "inicio_ms": 6.87,
+   "duracion_ms": 1050.94,
+   "estado": "UNSET",
+   "atributos": {}
+  },
+  {
+   "nombre": "connect",
+   "span_id": "84546be76bba0c8e",
+   "padre": "32cb8a301cb86f4f",
+   "inicio_ms": 7.1,
+   "duracion_ms": 0.64,
+   "estado": "UNSET",
+   "atributos": {
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "22265c0eb6ae0ca8",
+   "padre": "32cb8a301cb86f4f",
+   "inicio_ms": 7.92,
+   "duracion_ms": 1.12,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT pg_advisory_xact_lock(%(k)s)",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "WITH ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "60a6b7e87047183f",
+   "padre": "32cb8a301cb86f4f",
+   "inicio_ms": 9.22,
+   "duracion_ms": 1.16,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "\nWITH c AS (\n    SELECT e.execution_id\n      FROM ai_frecuencias.execution_log e\n     WHERE e.estado = 'en_cola'\n       AND coalesce(e.disponible_desde, now()) <= now()\n       AND (CAST(%(id)s AS uuid) IS NULL OR e.execution_id = CAST(%(id)s AS uuid))\n       AND (e.tipo <> 'frecuencia' OR NOT EXISTS (\n             SELECT 1 FROM ai_frecuencias.execution_log x WHERE x.tipo = 'frecuencia' AND x.estado = 'corriendo'))\n       AND (e.tipo <> 'frecuencia' OR NOT EXISTS (\n             SELECT 1 FROM ai_frecuencias.execution_log y\n              WHERE y.tipo = 'frecuencia' AND y.estado = 'en_cola' AND y.creado_en < e.creado_en\n                AND y.disponible_desde > now()))\n     ORDER BY e.creado_en, e.execution_id\n     FOR UPDATE SKIP LOCKED\n     LIMIT 1\n)\nUPDATE ai_frecuencias.execution_log t\n   SET estado = 'corriendo', worker_id = %(w)s, intentos = t.intentos + 1,\n       lease_hasta = now() + make_interval(secs => %(lease)s), disponible_desde = NULL,\n       iniciado_en = coalesce(t.iniciado_en, now()), actualizado_en = now(),\n       mensaje = 'Intento ' || (t.intentos + 1) || ' en ' || %(w)s\n  FROM c\n WHERE t.execution_id = c.execution_id\nRETURNING t.execution_id, t.tipo, t.intentos\n",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "f372d338966a4429",
+   "padre": "32cb8a301cb86f4f",
+   "inicio_ms": 10.58,
+   "duracion_ms": 0.68,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.execution_attempt (execution_id, intento, worker_id) VALUES (%(id)s, %(n)s, %(w)s)",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "ejecucion.ciclo_frecuencia",
+   "span_id": "1febe21806c704a3",
+   "padre": "32cb8a301cb86f4f",
+   "inicio_ms": 13.67,
+   "duracion_ms": 1041.01,
+   "estado": "UNSET",
+   "atributos": {
+    "execution_id": "3a93ebdb-3644-4dec-bf68-de6b706f877b",
+    "tipo": "frecuencia",
+    "worker_id": "DESKTOP-RA73BA3:22356:a9050f:api",
+    "correlation_id": "evid-traza-1"
+   }
+  },
+  {
+   "nombre": "connect",
+   "span_id": "1b78d778705d3cf6",
+   "padre": "1febe21806c704a3",
+   "inicio_ms": 13.95,
+   "duracion_ms": 0.58,
+   "estado": "UNSET",
+   "atributos": {
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "67bb687c041fe004",
+   "padre": "1febe21806c704a3",
+   "inicio_ms": 14.76,
+   "duracion_ms": 1.19,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.execution_log.execution_id AS ai_frecuencias_execution_log_execution_id, ai_frecuencias.execution_log.tipo AS ai_frecuencias_execution_log_tipo, ai_frecuencias.execution_log.estado AS ai_frecuencias_execution_log_estado, ai_frecuencias.execution_log.etapa AS ai_frecuencias_execution_log_etapa, ai_frecuencias.execution_log.progreso AS ai_frecuencias_execution_log_progreso, ai_frecuencias.execution_log.intentos AS ai_frecuencias_execution_log_intentos, ai_frecuencias.execution_log.marca_agua_anterior AS ai_frecuencias_execution_log_marca_agua_anterior, ai_frecuencias.execution_log.marca_agua_nueva AS ai_frecuencias_execution_log_marca_agua_nueva, ai_frecuencias.execution_log.data_cutoff AS ai_frecuencias_execution_log_data_cutoff, ai_frecuencias.execution_log.filas_leidas AS ai_frecuencias_execution_log_filas_leidas, ai_frecuencias.execution_log.filas_validas AS ai_frecuencias_execution_log_filas_validas, ai_frecuencias.execution_log.model_id AS ai_frecuencias_execution_log_model_id, ai_frecuencias.execution_log.feature_version AS ai_frecuencias_execution_log_feature_version, ai_frecuencias.execution_log.umbrales_version AS ai_frecuencias_execution_log_umbrales_version, ai_frecuencias.execution_log.parametros AS ai_frecuencias_execution_log_parametros, ai_frecuencias.execution_log.metricas AS ai_frecuencias_execution_log_metricas, ai_frecuencias.execution_log.correlation_id AS ai_frecuencias_execution_log_correlation_id, ai_frecuencias.execution_log.mensaje AS ai_frecuencias_execution_log_mensaje, ai_frecuencias.execution_log.creado_en AS ai_frecuencias_execution_log_creado_en, ai_frecuencias.execution_log.iniciado_en AS ai_frecuencias_execution_log_iniciado_en, ai_frecuencias.execution_log.terminado_en AS ai_frecuencias_execution_log_terminado_en, ai_frecuencias.execution_log.actualizado_en AS ai_frecuencias_execution_log_actualizado_en, ai_frecuencias.execution_log.worker_id AS ai_frecuencias_execution_log_worker_id, ai_frecuencias.execution_log.lease_hasta AS ai_frecuencias_execution_log_lease_hasta, ai_frecuencias.execution_log.disponible_desde AS ai_frecuencias_execution_log_disponible_desde, ai_frecuencias.execution_log.programada_para AS ai_frecuencias_execution_log_programada_para, ai_frecuencias.execution_log.traceparent AS ai_frecuencias_execution_log_traceparent \nFROM ai_frecuencias.execution_log \nWHERE ai_frecuencias.execution_log.execution_id = %(pk_1)s::UUID",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "884ceeddc6387dbd",
+   "padre": "1febe21806c704a3",
+   "inicio_ms": 16.58,
+   "duracion_ms": 0.72,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT max(ai_frecuencias.execution_log.marca_agua_nueva) AS max_1 \nFROM ai_frecuencias.execution_log \nWHERE ai_frecuencias.execution_log.tipo = %(tipo_1)s::VARCHAR AND ai_frecuencias.execution_log.estado = %(estado_1)s::VARCHAR",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "connect",
+   "span_id": "dfb6fcda41438821",
+   "padre": "1febe21806c704a3",
+   "inicio_ms": 17.76,
+   "duracion_ms": 0.55,
+   "estado": "UNSET",
+   "atributos": {
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "UPDATE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "d88c2544ceddb89b",
+   "padre": "1febe21806c704a3",
+   "inicio_ms": 18.54,
+   "duracion_ms": 1.01,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "UPDATE ai_frecuencias.execution_log SET etapa=%(etapa)s::VARCHAR, progreso=%(progreso)s, marca_agua_anterior=%(marca_agua_anterior)s::TIMESTAMP WITH TIME ZONE, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.execution_log.execution_id = %(execution_id_1)s::UUID",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "ejecucion.lectura_incremental",
+   "span_id": "cab897ee66252502",
+   "padre": "1febe21806c704a3",
+   "inicio_ms": 21.24,
+   "duracion_ms": 9.96,
+   "estado": "UNSET",
+   "atributos": {
+    "execution_id": "3a93ebdb-3644-4dec-bf68-de6b706f877b",
+    "etapa": "lectura_incremental",
+    "progreso": 10.0
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "7aa120281f66f3f3",
+   "padre": "cab897ee66252502",
+   "inicio_ms": 21.81,
+   "duracion_ms": 0.87,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.execution_log.metricas \nFROM ai_frecuencias.execution_log \nWHERE ai_frecuencias.execution_log.tipo = %(tipo_1)s::VARCHAR AND ai_frecuencias.execution_log.estado = %(estado_1)s::VARCHAR AND ai_frecuencias.execution_log.marca_agua_nueva IS NOT NULL ORDER BY ai_frecuencias.execution_log.marca_agua_nueva DESC, ai_frecuencias.execution_log.terminado_en DESC \n LIMIT %(param_1)s::INTEGER",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "connect",
+   "span_id": "691c776334f9da64",
+   "padre": "cab897ee66252502",
+   "inicio_ms": 26.51,
+   "duracion_ms": 1.05,
+   "estado": "UNSET",
+   "atributos": {
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "UPDATE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "dc7a2a43ba28ef86",
+   "padre": "cab897ee66252502",
+   "inicio_ms": 27.93,
+   "duracion_ms": 1.45,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "UPDATE ai_frecuencias.execution_log SET etapa=%(etapa)s::VARCHAR, progreso=%(progreso)s, filas_leidas=%(filas_leidas)s::INTEGER, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.execution_log.execution_id = %(execution_id_1)s::UUID",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "ejecucion.calidad",
+   "span_id": "7cb54c0b769aae93",
+   "padre": "1febe21806c704a3",
+   "inicio_ms": 31.29,
+   "duracion_ms": 250.07,
+   "estado": "UNSET",
+   "atributos": {
+    "execution_id": "3a93ebdb-3644-4dec-bf68-de6b706f877b",
+    "etapa": "calidad",
+    "progreso": 25.0,
+    "filas_leidas": 51
+   }
+  },
+  {
+   "nombre": "ejecucion.guardar_errores_calidad",
+   "span_id": "ca6c6497b3322547",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 37.27,
+   "duracion_ms": 0.02,
+   "estado": "UNSET",
+   "atributos": {
+    "execution_id": "3a93ebdb-3644-4dec-bf68-de6b706f877b"
+   }
+  },
+  {
+   "nombre": "ejecucion.incorporar_historico",
+   "span_id": "c3fe8b17bced096e",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 37.35,
+   "duracion_ms": 9.68,
+   "estado": "UNSET",
+   "atributos": {
+    "execution_id": "3a93ebdb-3644-4dec-bf68-de6b706f877b"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "8443e1ae02299096",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 47.3,
+   "duracion_ms": 0.78,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.threshold_config.id, ai_frecuencias.threshold_config.nombre, ai_frecuencias.threshold_config.valor, ai_frecuencias.threshold_config.descripcion, ai_frecuencias.threshold_config.version, ai_frecuencias.threshold_config.vigente, ai_frecuencias.threshold_config.creado_por, ai_frecuencias.threshold_config.motivo, ai_frecuencias.threshold_config.creado_en \nFROM ai_frecuencias.threshold_config \nWHERE ai_frecuencias.threshold_config.vigente",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "46b8d627f9086384",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 48.94,
+   "duracion_ms": 0.62,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.model_registry.id, ai_frecuencias.model_registry.model_id, ai_frecuencias.model_registry.version, ai_frecuencias.model_registry.tipo, ai_frecuencias.model_registry.artefacto, ai_frecuencias.model_registry.sha256, ai_frecuencias.model_registry.feature_version, ai_frecuencias.model_registry.data_cutoff, ai_frecuencias.model_registry.metricas, ai_frecuencias.model_registry.estado, ai_frecuencias.model_registry.aprobado_por, ai_frecuencias.model_registry.activado_en, ai_frecuencias.model_registry.anterior_model_id, ai_frecuencias.model_registry.motivo, ai_frecuencias.model_registry.auditoria, ai_frecuencias.model_registry.execution_id, ai_frecuencias.model_registry.creado_en \nFROM ai_frecuencias.model_registry \nWHERE ai_frecuencias.model_registry.estado = %(estado_1)s::VARCHAR",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SAVEPOINT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "ddf48f9031ff70a4",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 259.36,
+   "duracion_ms": 0.85,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SAVEPOINT sa_savepoint_1",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "c04f53ae21e05d06",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 260.51,
+   "duracion_ms": 0.72,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT count(*) AS count_1 \nFROM ai_frecuencias.alert \nWHERE ai_frecuencias.alert.creado_en >= %(creado_en_1)s::TIMESTAMP WITH TIME ZONE",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "252a0a26a637a7f9",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 261.77,
+   "duracion_ms": 0.76,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.alert.codigo, count(distinct(ai_frecuencias.alert_history.alert_id)) AS count_1 \nFROM ai_frecuencias.alert JOIN ai_frecuencias.alert_history ON ai_frecuencias.alert_history.alert_id = ai_frecuencias.alert.alert_id \nWHERE ai_frecuencias.alert.creado_en >= %(creado_en_1)s::TIMESTAMP WITH TIME ZONE AND ai_frecuencias.alert_history.estado_nuevo = %(estado_nuevo_1)s::VARCHAR GROUP BY ai_frecuencias.alert.codigo",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "8fc664f92eff2ea2",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 262.9,
+   "duracion_ms": 0.6,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT count(*) AS count_1 \nFROM ai_frecuencias.prediction \nWHERE ai_frecuencias.prediction.fecha >= %(fecha_1)s::DATE AND ai_frecuencias.prediction.fecha <= %(fecha_2)s::DATE",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "b83ef4dcfaeb5deb",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 264.04,
+   "duracion_ms": 0.87,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.model_monitoring (execution_id, model_id, rol, fecha_corte, desde, hasta, ventana_dias, n_observaciones, n_predicciones, predicciones_ventana, wape_movil, mae_movil, sesgo_pct, cobertura_p10_p90, psi, psi_max, psi_variable_max, alertas_total, alertas_descartadas, pct_descartadas, estado, motivos, umbrales_version, detalle) VALUES (%(execution_id)s::UUID, %(model_id)s::VARCHAR, %(rol)s::VARCHAR, %(fecha_corte)s::DATE, %(desde)s::DATE, %(hasta)s::DATE, %(ventana_dias)s::INTEGER, %(n_observaciones)s::INTEGER, %(n_predicciones)s::INTEGER, %(predicciones_ventana)s::INTEGER, %(wape_movil)s, %(mae_movil)s, %(sesgo_pct)s, %(cobertura_p10_p90)s, %(psi)s::JSONB, %(psi_max)s, %(psi_variable_max)s::VARCHAR, %(alertas_total)s::INTEGER, %(alertas_descartadas)s::INTEGER, %(pct_descartadas)s, %(estado)s::VARCHAR, %(motivos)s::JSONB, %(umbrales_version)s::INTEGER, %(detalle)s::JSONB) RETURNING ai_frecuencias.model_monitoring.id, ai_frecuencias.model_monitoring.creado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "RELEASE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "9a260df2b7941cca",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 265.22,
+   "duracion_ms": 0.48,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "RELEASE SAVEPOINT sa_savepoint_1",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "8342e3bd49470a20",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 265.99,
+   "duracion_ms": 0.62,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.model_registry.id, ai_frecuencias.model_registry.model_id, ai_frecuencias.model_registry.version, ai_frecuencias.model_registry.tipo, ai_frecuencias.model_registry.artefacto, ai_frecuencias.model_registry.sha256, ai_frecuencias.model_registry.feature_version, ai_frecuencias.model_registry.data_cutoff, ai_frecuencias.model_registry.metricas, ai_frecuencias.model_registry.estado, ai_frecuencias.model_registry.aprobado_por, ai_frecuencias.model_registry.activado_en, ai_frecuencias.model_registry.anterior_model_id, ai_frecuencias.model_registry.motivo, ai_frecuencias.model_registry.auditoria, ai_frecuencias.model_registry.execution_id, ai_frecuencias.model_registry.creado_en \nFROM ai_frecuencias.model_registry \nWHERE ai_frecuencias.model_registry.estado = %(estado_1)s::VARCHAR",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "connect",
+   "span_id": "66aa5d04fb87d12b",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 267.13,
+   "duracion_ms": 0.69,
+   "estado": "UNSET",
+   "atributos": {
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "UPDATE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "642640e957966136",
+   "padre": "7cb54c0b769aae93",
+   "inicio_ms": 268.04,
+   "duracion_ms": 1.1,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "UPDATE ai_frecuencias.execution_log SET etapa=%(etapa)s::VARCHAR, progreso=%(progreso)s, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.execution_log.execution_id = %(execution_id_1)s::UUID",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "ejecucion.prediccion",
+   "span_id": "8793f29eb4619f63",
+   "padre": "1febe21806c704a3",
+   "inicio_ms": 281.47,
+   "duracion_ms": 73.05,
+   "estado": "UNSET",
+   "atributos": {
+    "execution_id": "3a93ebdb-3644-4dec-bf68-de6b706f877b",
+    "etapa": "prediccion",
+    "progreso": 45.0
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "dc747d8913a58a92",
+   "padre": "8793f29eb4619f63",
+   "inicio_ms": 317.49,
+   "duracion_ms": 1.47,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.prediction (prediction_id, execution_id, ruta, instante, horizonte_min, objetivo, fecha, hora, pasajeros, p10, p90, model_id, feature_version, data_cutoff, generated_at, latencia_ms, explicacion, variables, p10_modelo, p90_modelo, ajuste_conformal, explicacion_local) VALUES (%(prediction_id)s::UUID, %(execution_id)s::UUID, %(ruta)s::VARCHAR, %(instante)s::TIMESTAMP WITH TIME ZONE, %(horizonte_min)s::INTEGER, %(objetivo)s::TIMESTAMP WITH TIME ZONE, %(fecha)s::DATE, %(hora)s::INTEGER, %(pasajeros)s, %(p10)s, %(p90)s, %(model_id)s::VARCHAR, %(feature_version)s::VARCHAR, %(data_cutoff)s::TIMESTAMP WITH TIME ZONE, %(generated_at)s::TIMESTAMP WITH TIME ZONE, %(latencia_ms)s, %(explicacion)s::JSONB, %(variables)s::JSONB, %(p10_modelo)s, %(p90_modelo)s, %(ajuste_conformal)s, %(explicacion_local)s::JSONB) RETURNING ai_frecuencias.prediction.creado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "optimizacion.recomendar",
+   "span_id": "f103c7743b77a0dd",
+   "padre": "8793f29eb4619f63",
+   "inicio_ms": 321.44,
+   "duracion_ms": 0.06,
+   "estado": "UNSET",
+   "atributos": {
+    "execution_id": "3a93ebdb-3644-4dec-bf68-de6b706f877b"
+   }
+  },
+  {
+   "nombre": "connect",
+   "span_id": "17d2bfc57eb7f42f",
+   "padre": "8793f29eb4619f63",
+   "inicio_ms": 350.19,
+   "duracion_ms": 0.92,
+   "estado": "UNSET",
+   "atributos": {
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "UPDATE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "d6b425112c3da469",
+   "padre": "8793f29eb4619f63",
+   "inicio_ms": 351.37,
+   "duracion_ms": 1.22,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "UPDATE ai_frecuencias.execution_log SET etapa=%(etapa)s::VARCHAR, progreso=%(progreso)s, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.execution_log.execution_id = %(execution_id_1)s::UUID",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "ejecucion.alertas",
+   "span_id": "ad7f88204485d373",
+   "padre": "1febe21806c704a3",
+   "inicio_ms": 354.59,
+   "duracion_ms": 667.74,
+   "estado": "UNSET",
+   "atributos": {
+    "execution_id": "3a93ebdb-3644-4dec-bf68-de6b706f877b",
+    "etapa": "alertas",
+    "progreso": 70.0
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "e1e146f104c1e93e",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 357.74,
+   "duracion_ms": 43.35,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.recommendation (recommendation_id, execution_id, prediction_id, ruta, fecha, hora, demanda_hora, demanda_p90, buses_hora, headway_min, vehiculos_requeridos, capacidad_efectiva, ocupacion_esperada, viable, motivo, frecuencia_actual_min, diferencia_min, formula, umbrales_version, detalle) VALUES (%(recommendation_id)s::UUID, %(execution_id)s::UUID, %(prediction_id)s::UUID, %(ruta)s::VARCHAR, %(fecha)s::DATE, %(hora)s::INTEGER, %(demanda_hora)s, %(demanda_p90)s, %(buses_hora)s::INTEGER, %(headway_min)s, %(vehiculos_requeridos)s::INTEGER, %(capacidad_efectiva)s, %(ocupacion_esperada)s, %(viable)s, %(motivo)s::VARCHAR, %(frecuencia_actual_min)s, %(diferencia_min)s, %(formula)s::VARCHAR, %(umbrales_version)s::INTEGER, %(detalle)s::JSONB) RETURNING ai_frecuencias.recommendation.creado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "c8fbc79ec1f8f869",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 401.61,
+   "duracion_ms": 0.84,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT max(ai_frecuencias.demanda_observada.ultima_actualizacion) AS max_1 \nFROM ai_frecuencias.demanda_observada \nWHERE ai_frecuencias.demanda_observada.ruta = %(ruta_1)s::VARCHAR",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "9d7580b359f66b1a",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 402.89,
+   "duracion_ms": 0.67,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.demanda_observada.hora, ai_frecuencias.demanda_observada.pasajeros, ai_frecuencias.demanda_observada.salidas \nFROM ai_frecuencias.demanda_observada \nWHERE ai_frecuencias.demanda_observada.ruta = %(ruta_1)s::VARCHAR AND ai_frecuencias.demanda_observada.fecha = %(fecha_1)s::DATE ORDER BY ai_frecuencias.demanda_observada.hora",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "68d918d0d7e36d86",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 973.65,
+   "duracion_ms": 1.31,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.demanda_observada.fecha, sum(ai_frecuencias.demanda_observada.pasajeros) AS sum_1, sum(ai_frecuencias.demanda_observada.salidas) AS sum_2, count(*) AS count_1 \nFROM ai_frecuencias.demanda_observada \nWHERE ai_frecuencias.demanda_observada.ruta = %(ruta_1)s::VARCHAR AND ai_frecuencias.demanda_observada.fecha >= %(fecha_1)s::DATE AND ai_frecuencias.demanda_observada.fecha <= %(fecha_2)s::DATE AND ai_frecuencias.demanda_observada.hora IN (%(hora_1_1)s::INTEGER, %(hora_1_2)s::INTEGER, %(hora_1_3)s::INTEGER, %(hora_1_4)s::INTEGER, %(hora_1_5)s::INTEGER, %(hora_1_6)s::INTEGER, %(hora_1_7)s::INTEGER, %(hora_1_8)s::INTEGER, %(hora_1_9)s::INTEGER, %(hora_1_10)s::INTEGER, %(hora_1_11)s::INTEGER, %(hora_1_12)s::INTEGER, %(hora_1_13)s::INTEGER, %(hora_1_14)s::INTEGER, %(hora_1_15)s::INTEGER, %(hora_1_16)s::INTEGER, %(hora_1_17)s::INTEGER) GROUP BY ai_frecuencias.demanda_observada.fecha ORDER BY ai_frecuencias.demanda_observada.fecha",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "bd4258be8a0e8fdf",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 976.69,
+   "duracion_ms": 4.04,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.alert.alert_id, ai_frecuencias.alert.codigo, ai_frecuencias.alert.execution_id, ai_frecuencias.alert.empresa, ai_frecuencias.alert.ruta, ai_frecuencias.alert.sentido, ai_frecuencias.alert.viaje, ai_frecuencias.alert.conductor, ai_frecuencias.alert.vehiculo, ai_frecuencias.alert.detectada_en, ai_frecuencias.alert.ventana_inicio, ai_frecuencias.alert.ventana_fin, ai_frecuencias.alert.horizonte_min, ai_frecuencias.alert.severidad, ai_frecuencias.alert.estado, ai_frecuencias.alert.observado, ai_frecuencias.alert.esperado, ai_frecuencias.alert.umbral, ai_frecuencias.alert.puntaje, ai_frecuencias.alert.explicacion, ai_frecuencias.alert.variables, ai_frecuencias.alert.recomendacion, ai_frecuencias.alert.asignado_a, ai_frecuencias.alert.comentarios, ai_frecuencias.alert.clave_dedup, ai_frecuencias.alert.ocurrencias, ai_frecuencias.alert.ultima_deteccion, ai_frecuencias.alert.creado_en, ai_frecuencias.alert.actualizado_en, ai_frecuencias.alert.origen, ai_frecuencias.alert.tendencia, ai_frecuencias.alert.tendencia_pendiente, ai_frecuencias.alert.serie_reciente, ai_frecuencias.alert.probabilidad, ai_frecuencias.alert.metodo_puntaje, ai_frecuencias.alert.variables_influyentes, ai_frecuencias.alert.ubicacion \nFROM ai_frecuencias.alert \nWHERE ai_frecuencias.alert.clave_dedup = %(clave_dedup_1)s::VARCHAR AND (ai_frecuencias.alert.estado NOT IN (%(estado_1_1)s::VARCHAR, %(estado_1_2)s::VARCHAR))",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SAVEPOINT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "0bd6631cebd1d615",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 981.76,
+   "duracion_ms": 1.41,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SAVEPOINT sa_savepoint_2",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "2e1e42d667f382ea",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 983.54,
+   "duracion_ms": 16.54,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.alert (alert_id, codigo, execution_id, empresa, ruta, sentido, viaje, conductor, vehiculo, detectada_en, ventana_inicio, ventana_fin, horizonte_min, severidad, estado, observado, esperado, umbral, puntaje, explicacion, variables, recomendacion, asignado_a, comentarios, clave_dedup, ocurrencias, ultima_deteccion, origen, tendencia, tendencia_pendiente, serie_reciente, probabilidad, metodo_puntaje, variables_influyentes, ubicacion) VALUES (%(alert_id)s::UUID, %(codigo)s::VARCHAR, %(execution_id)s::UUID, %(empresa)s::VARCHAR, %(ruta)s::VARCHAR, %(sentido)s::VARCHAR, %(viaje)s::VARCHAR, %(conductor)s::VARCHAR, %(vehiculo)s::VARCHAR, %(detectada_en)s::TIMESTAMP WITH TIME ZONE, %(ventana_inicio)s::TIMESTAMP WITH TIME ZONE, %(ventana_fin)s::TIMESTAMP WITH TIME ZONE, %(horizonte_min)s::INTEGER, %(severidad)s::VARCHAR, %(estado)s::VARCHAR, %(observado)s, %(esperado)s, %(umbral)s, %(puntaje)s, %(explicacion)s::VARCHAR, %(variables)s::JSONB, %(recomendacion)s::VARCHAR, %(asignado_a)s::VARCHAR, %(comentarios)s::JSONB, %(clave_dedup)s::VARCHAR, %(ocurrencias)s::INTEGER, %(ultima_deteccion)s::TIMESTAMP WITH TIME ZONE, %(origen)s::VARCHAR, %(tendencia)s::VARCHAR, %(tendencia_pendiente)s, %(serie_reciente)s::JSONB, %(probabilidad)s, %(metodo_puntaje)s::VARCHAR, %(variables_influyentes)s::JSONB, %(ubicacion)s) RETURNING ai_frecuencias.alert.creado_en, ai_frecuencias.alert.actualizado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "RELEASE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "3ac114fa3cfe7795",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1000.53,
+   "duracion_ms": 0.64,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "RELEASE SAVEPOINT sa_savepoint_2",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "4c3d6a5dd9bfa4f9",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1001.77,
+   "duracion_ms": 0.9,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.alert_history (alert_id, accion, estado_anterior, estado_nuevo, usuario, comentario, asignado_a, detalle) VALUES (%(alert_id)s::UUID, %(accion)s::VARCHAR, %(estado_anterior)s::VARCHAR, %(estado_nuevo)s::VARCHAR, %(usuario)s::VARCHAR, %(comentario)s::VARCHAR, %(asignado_a)s::VARCHAR, %(detalle)s::JSONB) RETURNING ai_frecuencias.alert_history.id, ai_frecuencias.alert_history.creado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "04ea23f6ff267c3e",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1003.04,
+   "duracion_ms": 0.83,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.alert.alert_id, ai_frecuencias.alert.codigo, ai_frecuencias.alert.execution_id, ai_frecuencias.alert.empresa, ai_frecuencias.alert.ruta, ai_frecuencias.alert.sentido, ai_frecuencias.alert.viaje, ai_frecuencias.alert.conductor, ai_frecuencias.alert.vehiculo, ai_frecuencias.alert.detectada_en, ai_frecuencias.alert.ventana_inicio, ai_frecuencias.alert.ventana_fin, ai_frecuencias.alert.horizonte_min, ai_frecuencias.alert.severidad, ai_frecuencias.alert.estado, ai_frecuencias.alert.observado, ai_frecuencias.alert.esperado, ai_frecuencias.alert.umbral, ai_frecuencias.alert.puntaje, ai_frecuencias.alert.explicacion, ai_frecuencias.alert.variables, ai_frecuencias.alert.recomendacion, ai_frecuencias.alert.asignado_a, ai_frecuencias.alert.comentarios, ai_frecuencias.alert.clave_dedup, ai_frecuencias.alert.ocurrencias, ai_frecuencias.alert.ultima_deteccion, ai_frecuencias.alert.creado_en, ai_frecuencias.alert.actualizado_en, ai_frecuencias.alert.origen, ai_frecuencias.alert.tendencia, ai_frecuencias.alert.tendencia_pendiente, ai_frecuencias.alert.serie_reciente, ai_frecuencias.alert.probabilidad, ai_frecuencias.alert.metodo_puntaje, ai_frecuencias.alert.variables_influyentes, ai_frecuencias.alert.ubicacion \nFROM ai_frecuencias.alert \nWHERE ai_frecuencias.alert.clave_dedup = %(clave_dedup_1)s::VARCHAR AND (ai_frecuencias.alert.estado NOT IN (%(estado_1_1)s::VARCHAR, %(estado_1_2)s::VARCHAR))",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SAVEPOINT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "b9bd2f7aee4bc131",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1004.33,
+   "duracion_ms": 0.51,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SAVEPOINT sa_savepoint_3",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "60026451424fa23d",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1005.1,
+   "duracion_ms": 1.19,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.alert (alert_id, codigo, execution_id, empresa, ruta, sentido, viaje, conductor, vehiculo, detectada_en, ventana_inicio, ventana_fin, horizonte_min, severidad, estado, observado, esperado, umbral, puntaje, explicacion, variables, recomendacion, asignado_a, comentarios, clave_dedup, ocurrencias, ultima_deteccion, origen, tendencia, tendencia_pendiente, serie_reciente, probabilidad, metodo_puntaje, variables_influyentes, ubicacion) VALUES (%(alert_id)s::UUID, %(codigo)s::VARCHAR, %(execution_id)s::UUID, %(empresa)s::VARCHAR, %(ruta)s::VARCHAR, %(sentido)s::VARCHAR, %(viaje)s::VARCHAR, %(conductor)s::VARCHAR, %(vehiculo)s::VARCHAR, %(detectada_en)s::TIMESTAMP WITH TIME ZONE, %(ventana_inicio)s::TIMESTAMP WITH TIME ZONE, %(ventana_fin)s::TIMESTAMP WITH TIME ZONE, %(horizonte_min)s::INTEGER, %(severidad)s::VARCHAR, %(estado)s::VARCHAR, %(observado)s, %(esperado)s, %(umbral)s, %(puntaje)s, %(explicacion)s::VARCHAR, %(variables)s::JSONB, %(recomendacion)s::VARCHAR, %(asignado_a)s::VARCHAR, %(comentarios)s::JSONB, %(clave_dedup)s::VARCHAR, %(ocurrencias)s::INTEGER, %(ultima_deteccion)s::TIMESTAMP WITH TIME ZONE, %(origen)s::VARCHAR, %(tendencia)s::VARCHAR, %(tendencia_pendiente)s, %(serie_reciente)s::JSONB, %(probabilidad)s, %(metodo_puntaje)s::VARCHAR, %(variables_influyentes)s::JSONB, %(ubicacion)s) RETURNING ai_frecuencias.alert.creado_en, ai_frecuencias.alert.actualizado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "RELEASE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "953b5af683bd8460",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1006.57,
+   "duracion_ms": 0.67,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "RELEASE SAVEPOINT sa_savepoint_3",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "8c4afef118cb2de9",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1007.86,
+   "duracion_ms": 0.64,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.alert_history (alert_id, accion, estado_anterior, estado_nuevo, usuario, comentario, asignado_a, detalle) VALUES (%(alert_id)s::UUID, %(accion)s::VARCHAR, %(estado_anterior)s::VARCHAR, %(estado_nuevo)s::VARCHAR, %(usuario)s::VARCHAR, %(comentario)s::VARCHAR, %(asignado_a)s::VARCHAR, %(detalle)s::JSONB) RETURNING ai_frecuencias.alert_history.id, ai_frecuencias.alert_history.creado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "c15ceb0cf31204fc",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1008.85,
+   "duracion_ms": 0.71,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.alert.alert_id, ai_frecuencias.alert.codigo, ai_frecuencias.alert.execution_id, ai_frecuencias.alert.empresa, ai_frecuencias.alert.ruta, ai_frecuencias.alert.sentido, ai_frecuencias.alert.viaje, ai_frecuencias.alert.conductor, ai_frecuencias.alert.vehiculo, ai_frecuencias.alert.detectada_en, ai_frecuencias.alert.ventana_inicio, ai_frecuencias.alert.ventana_fin, ai_frecuencias.alert.horizonte_min, ai_frecuencias.alert.severidad, ai_frecuencias.alert.estado, ai_frecuencias.alert.observado, ai_frecuencias.alert.esperado, ai_frecuencias.alert.umbral, ai_frecuencias.alert.puntaje, ai_frecuencias.alert.explicacion, ai_frecuencias.alert.variables, ai_frecuencias.alert.recomendacion, ai_frecuencias.alert.asignado_a, ai_frecuencias.alert.comentarios, ai_frecuencias.alert.clave_dedup, ai_frecuencias.alert.ocurrencias, ai_frecuencias.alert.ultima_deteccion, ai_frecuencias.alert.creado_en, ai_frecuencias.alert.actualizado_en, ai_frecuencias.alert.origen, ai_frecuencias.alert.tendencia, ai_frecuencias.alert.tendencia_pendiente, ai_frecuencias.alert.serie_reciente, ai_frecuencias.alert.probabilidad, ai_frecuencias.alert.metodo_puntaje, ai_frecuencias.alert.variables_influyentes, ai_frecuencias.alert.ubicacion \nFROM ai_frecuencias.alert \nWHERE ai_frecuencias.alert.clave_dedup = %(clave_dedup_1)s::VARCHAR AND (ai_frecuencias.alert.estado NOT IN (%(estado_1_1)s::VARCHAR, %(estado_1_2)s::VARCHAR))",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SAVEPOINT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "10e52c06709bbbcc",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1010.01,
+   "duracion_ms": 0.45,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SAVEPOINT sa_savepoint_4",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "a5eb57f1f2c1e59a",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1010.71,
+   "duracion_ms": 0.84,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.alert (alert_id, codigo, execution_id, empresa, ruta, sentido, viaje, conductor, vehiculo, detectada_en, ventana_inicio, ventana_fin, horizonte_min, severidad, estado, observado, esperado, umbral, puntaje, explicacion, variables, recomendacion, asignado_a, comentarios, clave_dedup, ocurrencias, ultima_deteccion, origen, tendencia, tendencia_pendiente, serie_reciente, probabilidad, metodo_puntaje, variables_influyentes, ubicacion) VALUES (%(alert_id)s::UUID, %(codigo)s::VARCHAR, %(execution_id)s::UUID, %(empresa)s::VARCHAR, %(ruta)s::VARCHAR, %(sentido)s::VARCHAR, %(viaje)s::VARCHAR, %(conductor)s::VARCHAR, %(vehiculo)s::VARCHAR, %(detectada_en)s::TIMESTAMP WITH TIME ZONE, %(ventana_inicio)s::TIMESTAMP WITH TIME ZONE, %(ventana_fin)s::TIMESTAMP WITH TIME ZONE, %(horizonte_min)s::INTEGER, %(severidad)s::VARCHAR, %(estado)s::VARCHAR, %(observado)s, %(esperado)s, %(umbral)s, %(puntaje)s, %(explicacion)s::VARCHAR, %(variables)s::JSONB, %(recomendacion)s::VARCHAR, %(asignado_a)s::VARCHAR, %(comentarios)s::JSONB, %(clave_dedup)s::VARCHAR, %(ocurrencias)s::INTEGER, %(ultima_deteccion)s::TIMESTAMP WITH TIME ZONE, %(origen)s::VARCHAR, %(tendencia)s::VARCHAR, %(tendencia_pendiente)s, %(serie_reciente)s::JSONB, %(probabilidad)s, %(metodo_puntaje)s::VARCHAR, %(variables_influyentes)s::JSONB, %(ubicacion)s) RETURNING ai_frecuencias.alert.creado_en, ai_frecuencias.alert.actualizado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "RELEASE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "2c24fb16866b8e88",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1011.85,
+   "duracion_ms": 0.47,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "RELEASE SAVEPOINT sa_savepoint_4",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "20913c980087ce40",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1012.76,
+   "duracion_ms": 0.57,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.alert_history (alert_id, accion, estado_anterior, estado_nuevo, usuario, comentario, asignado_a, detalle) VALUES (%(alert_id)s::UUID, %(accion)s::VARCHAR, %(estado_anterior)s::VARCHAR, %(estado_nuevo)s::VARCHAR, %(usuario)s::VARCHAR, %(comentario)s::VARCHAR, %(asignado_a)s::VARCHAR, %(detalle)s::JSONB) RETURNING ai_frecuencias.alert_history.id, ai_frecuencias.alert_history.creado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "cea3bced4ce61162",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1013.66,
+   "duracion_ms": 0.66,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.alert.alert_id, ai_frecuencias.alert.codigo, ai_frecuencias.alert.execution_id, ai_frecuencias.alert.empresa, ai_frecuencias.alert.ruta, ai_frecuencias.alert.sentido, ai_frecuencias.alert.viaje, ai_frecuencias.alert.conductor, ai_frecuencias.alert.vehiculo, ai_frecuencias.alert.detectada_en, ai_frecuencias.alert.ventana_inicio, ai_frecuencias.alert.ventana_fin, ai_frecuencias.alert.horizonte_min, ai_frecuencias.alert.severidad, ai_frecuencias.alert.estado, ai_frecuencias.alert.observado, ai_frecuencias.alert.esperado, ai_frecuencias.alert.umbral, ai_frecuencias.alert.puntaje, ai_frecuencias.alert.explicacion, ai_frecuencias.alert.variables, ai_frecuencias.alert.recomendacion, ai_frecuencias.alert.asignado_a, ai_frecuencias.alert.comentarios, ai_frecuencias.alert.clave_dedup, ai_frecuencias.alert.ocurrencias, ai_frecuencias.alert.ultima_deteccion, ai_frecuencias.alert.creado_en, ai_frecuencias.alert.actualizado_en, ai_frecuencias.alert.origen, ai_frecuencias.alert.tendencia, ai_frecuencias.alert.tendencia_pendiente, ai_frecuencias.alert.serie_reciente, ai_frecuencias.alert.probabilidad, ai_frecuencias.alert.metodo_puntaje, ai_frecuencias.alert.variables_influyentes, ai_frecuencias.alert.ubicacion \nFROM ai_frecuencias.alert \nWHERE ai_frecuencias.alert.clave_dedup = %(clave_dedup_1)s::VARCHAR AND (ai_frecuencias.alert.estado NOT IN (%(estado_1_1)s::VARCHAR, %(estado_1_2)s::VARCHAR))",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SAVEPOINT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "a3c0cebd51b75ba6",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1014.75,
+   "duracion_ms": 0.42,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SAVEPOINT sa_savepoint_5",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "abb0f2b1b47adc06",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1015.41,
+   "duracion_ms": 0.79,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.alert (alert_id, codigo, execution_id, empresa, ruta, sentido, viaje, conductor, vehiculo, detectada_en, ventana_inicio, ventana_fin, horizonte_min, severidad, estado, observado, esperado, umbral, puntaje, explicacion, variables, recomendacion, asignado_a, comentarios, clave_dedup, ocurrencias, ultima_deteccion, origen, tendencia, tendencia_pendiente, serie_reciente, probabilidad, metodo_puntaje, variables_influyentes, ubicacion) VALUES (%(alert_id)s::UUID, %(codigo)s::VARCHAR, %(execution_id)s::UUID, %(empresa)s::VARCHAR, %(ruta)s::VARCHAR, %(sentido)s::VARCHAR, %(viaje)s::VARCHAR, %(conductor)s::VARCHAR, %(vehiculo)s::VARCHAR, %(detectada_en)s::TIMESTAMP WITH TIME ZONE, %(ventana_inicio)s::TIMESTAMP WITH TIME ZONE, %(ventana_fin)s::TIMESTAMP WITH TIME ZONE, %(horizonte_min)s::INTEGER, %(severidad)s::VARCHAR, %(estado)s::VARCHAR, %(observado)s, %(esperado)s, %(umbral)s, %(puntaje)s, %(explicacion)s::VARCHAR, %(variables)s::JSONB, %(recomendacion)s::VARCHAR, %(asignado_a)s::VARCHAR, %(comentarios)s::JSONB, %(clave_dedup)s::VARCHAR, %(ocurrencias)s::INTEGER, %(ultima_deteccion)s::TIMESTAMP WITH TIME ZONE, %(origen)s::VARCHAR, %(tendencia)s::VARCHAR, %(tendencia_pendiente)s, %(serie_reciente)s::JSONB, %(probabilidad)s, %(metodo_puntaje)s::VARCHAR, %(variables_influyentes)s::JSONB, %(ubicacion)s) RETURNING ai_frecuencias.alert.creado_en, ai_frecuencias.alert.actualizado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "RELEASE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "481ecba02781252f",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1016.46,
+   "duracion_ms": 0.47,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "RELEASE SAVEPOINT sa_savepoint_5",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "connect",
+   "span_id": "b457bfb71b3def57",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1017.41,
+   "duracion_ms": 0.66,
+   "estado": "UNSET",
+   "atributos": {
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "UPDATE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "617a6e98ab7c7cf1",
+   "padre": "ad7f88204485d373",
+   "inicio_ms": 1018.31,
+   "duracion_ms": 1.07,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "UPDATE ai_frecuencias.execution_log SET etapa=%(etapa)s::VARCHAR, progreso=%(progreso)s, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.execution_log.execution_id = %(execution_id_1)s::UUID",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "ejecucion.notificaciones",
+   "span_id": "0eb2b874017fd0ce",
+   "padre": "1febe21806c704a3",
+   "inicio_ms": 1022.43,
+   "duracion_ms": 32.23,
+   "estado": "UNSET",
+   "atributos": {
+    "execution_id": "3a93ebdb-3644-4dec-bf68-de6b706f877b",
+    "etapa": "notificaciones",
+    "progreso": 85.0
+   }
+  },
+  {
+   "nombre": "ejecucion.notificar",
+   "span_id": "4d2d56ed86a666ca",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1022.72,
+   "duracion_ms": 0.35,
+   "estado": "UNSET",
+   "atributos": {
+    "execution_id": "3a93ebdb-3644-4dec-bf68-de6b706f877b"
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "96d66468c0df613f",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1023.51,
+   "duracion_ms": 0.76,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.alert_history (alert_id, accion, estado_anterior, estado_nuevo, usuario, comentario, asignado_a, detalle) VALUES (%(alert_id)s::UUID, %(accion)s::VARCHAR, %(estado_anterior)s::VARCHAR, %(estado_nuevo)s::VARCHAR, %(usuario)s::VARCHAR, %(comentario)s::VARCHAR, %(asignado_a)s::VARCHAR, %(detalle)s::JSONB) RETURNING ai_frecuencias.alert_history.id, ai_frecuencias.alert_history.creado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "19c13b58382ef7af",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1024.6,
+   "duracion_ms": 0.74,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.prediction.prediction_id, ai_frecuencias.prediction.execution_id, ai_frecuencias.prediction.ruta, ai_frecuencias.prediction.instante, ai_frecuencias.prediction.horizonte_min, ai_frecuencias.prediction.objetivo, ai_frecuencias.prediction.fecha, ai_frecuencias.prediction.hora, ai_frecuencias.prediction.pasajeros, ai_frecuencias.prediction.p10, ai_frecuencias.prediction.p90, ai_frecuencias.prediction.model_id, ai_frecuencias.prediction.feature_version, ai_frecuencias.prediction.data_cutoff, ai_frecuencias.prediction.generated_at, ai_frecuencias.prediction.latencia_ms, ai_frecuencias.prediction.explicacion, ai_frecuencias.prediction.variables, ai_frecuencias.prediction.creado_en, ai_frecuencias.prediction.p10_modelo, ai_frecuencias.prediction.p90_modelo, ai_frecuencias.prediction.ajuste_conformal, ai_frecuencias.prediction.explicacion_local \nFROM ai_frecuencias.prediction \nWHERE ai_frecuencias.prediction.execution_id = %(execution_id_1)s::UUID",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SAVEPOINT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "4cfc1ab11fc161b0",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1025.77,
+   "duracion_ms": 0.45,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SAVEPOINT sa_savepoint_6",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "fbf14264bfdbebbb",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1026.35,
+   "duracion_ms": 0.55,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.asegurar_particion_feature_snapshot(%(t)s)",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "INSERT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "5726cc466d54bb34",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1031.9,
+   "duracion_ms": 0.98,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "INSERT INTO ai_frecuencias.feature_snapshot (ventana_inicio, execution_id, prediction_id, model_id, ruta, sentido, segmento, horizonte_min, ventana_fin, fecha, hora, features, feature_version, data_cutoff) VALUES (%(ventana_inicio)s::TIMESTAMP WITH TIME ZONE, %(execution_id)s::UUID, %(prediction_id)s::UUID, %(model_id)s::VARCHAR, %(ruta)s::VARCHAR, %(sentido)s::VARCHAR, %(segmento)s::INTEGER, %(horizonte_min)s::INTEGER, %(ventana_fin)s::TIMESTAMP WITH TIME ZONE, %(fecha)s::DATE, %(hora)s::INTEGER, %(features)s::JSONB, %(feature_version)s::VARCHAR, %(data_cutoff)s::TIMESTAMP WITH TIME ZONE) RETURNING ai_frecuencias.feature_snapshot.id, ai_frecuencias.feature_snapshot.creado_en",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "RELEASE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "44a158f376f3e837",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1033.2,
+   "duracion_ms": 0.5,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "RELEASE SAVEPOINT sa_savepoint_6",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "9e858a9523c91fe1",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1034.08,
+   "duracion_ms": 0.72,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.model_monitoring.id AS ai_frecuencias_model_monitoring_id, ai_frecuencias.model_monitoring.execution_id AS ai_frecuencias_model_monitoring_execution_id, ai_frecuencias.model_monitoring.model_id AS ai_frecuencias_model_monitoring_model_id, ai_frecuencias.model_monitoring.rol AS ai_frecuencias_model_monitoring_rol, ai_frecuencias.model_monitoring.fecha_corte AS ai_frecuencias_model_monitoring_fecha_corte, ai_frecuencias.model_monitoring.desde AS ai_frecuencias_model_monitoring_desde, ai_frecuencias.model_monitoring.hasta AS ai_frecuencias_model_monitoring_hasta, ai_frecuencias.model_monitoring.ventana_dias AS ai_frecuencias_model_monitoring_ventana_dias, ai_frecuencias.model_monitoring.n_observaciones AS ai_frecuencias_model_monitoring_n_observaciones, ai_frecuencias.model_monitoring.n_predicciones AS ai_frecuencias_model_monitoring_n_predicciones, ai_frecuencias.model_monitoring.predicciones_ventana AS ai_frecuencias_model_monitoring_predicciones_ventana, ai_frecuencias.model_monitoring.wape_movil AS ai_frecuencias_model_monitoring_wape_movil, ai_frecuencias.model_monitoring.mae_movil AS ai_frecuencias_model_monitoring_mae_movil, ai_frecuencias.model_monitoring.sesgo_pct AS ai_frecuencias_model_monitoring_sesgo_pct, ai_frecuencias.model_monitoring.cobertura_p10_p90 AS ai_frecuencias_model_monitoring_cobertura_p10_p90, ai_frecuencias.model_monitoring.psi AS ai_frecuencias_model_monitoring_psi, ai_frecuencias.model_monitoring.psi_max AS ai_frecuencias_model_monitoring_psi_max, ai_frecuencias.model_monitoring.psi_variable_max AS ai_frecuencias_model_monitoring_psi_variable_max, ai_frecuencias.model_monitoring.alertas_total AS ai_frecuencias_model_monitoring_alertas_total, ai_frecuencias.model_monitoring.alertas_descartadas AS ai_frecuencias_model_monitoring_alertas_descartadas, ai_frecuencias.model_monitoring.pct_descartadas AS ai_frecuencias_model_monitoring_pct_descartadas, ai_frecuencias.model_monitoring.estado AS ai_frecuencias_model_monitoring_estado, ai_frecuencias.model_monitoring.motivos AS ai_frecuencias_model_monitoring_motivos, ai_frecuencias.model_monitoring.umbrales_version AS ai_frecuencias_model_monitoring_umbrales_version, ai_frecuencias.model_monitoring.detalle AS ai_frecuencias_model_monitoring_detalle, ai_frecuencias.model_monitoring.creado_en AS ai_frecuencias_model_monitoring_creado_en \nFROM ai_frecuencias.model_monitoring \nWHERE ai_frecuencias.model_monitoring.id = %(pk_1)s::BIGINT",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "UPDATE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "088d73c0c2b9961c",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1035.21,
+   "duracion_ms": 0.7,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "UPDATE ai_frecuencias.model_monitoring SET n_predicciones=%(n_predicciones)s::INTEGER WHERE ai_frecuencias.model_monitoring.id = %(ai_frecuencias_model_monitoring_id)s::BIGINT",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "71bb4913cfbb4f5e",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1036.37,
+   "duracion_ms": 0.65,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT count(*) AS count_1 \nFROM ai_frecuencias.prediction \nWHERE ai_frecuencias.prediction.fecha >= %(fecha_1)s::DATE AND ai_frecuencias.prediction.fecha <= %(fecha_2)s::DATE",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "UPDATE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "dbd1f059ec64476c",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1037.29,
+   "duracion_ms": 0.65,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "UPDATE ai_frecuencias.model_monitoring SET predicciones_ventana=%(predicciones_ventana)s::INTEGER WHERE ai_frecuencias.model_monitoring.id = %(ai_frecuencias_model_monitoring_id)s::BIGINT",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SAVEPOINT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "f2388ad14baca327",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1038.28,
+   "duracion_ms": 0.45,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SAVEPOINT sa_savepoint_7",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "b1e7c9fe89e1e73b",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1038.89,
+   "duracion_ms": 0.59,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.model_registry.id, ai_frecuencias.model_registry.model_id, ai_frecuencias.model_registry.version, ai_frecuencias.model_registry.tipo, ai_frecuencias.model_registry.artefacto, ai_frecuencias.model_registry.sha256, ai_frecuencias.model_registry.feature_version, ai_frecuencias.model_registry.data_cutoff, ai_frecuencias.model_registry.metricas, ai_frecuencias.model_registry.estado, ai_frecuencias.model_registry.aprobado_por, ai_frecuencias.model_registry.activado_en, ai_frecuencias.model_registry.anterior_model_id, ai_frecuencias.model_registry.motivo, ai_frecuencias.model_registry.auditoria, ai_frecuencias.model_registry.execution_id, ai_frecuencias.model_registry.creado_en \nFROM ai_frecuencias.model_registry \nWHERE ai_frecuencias.model_registry.estado = %(estado_1)s::VARCHAR",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "e8e4a6ad181406a0",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1039.91,
+   "duracion_ms": 0.63,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.model_registry.id, ai_frecuencias.model_registry.model_id, ai_frecuencias.model_registry.version, ai_frecuencias.model_registry.tipo, ai_frecuencias.model_registry.artefacto, ai_frecuencias.model_registry.sha256, ai_frecuencias.model_registry.feature_version, ai_frecuencias.model_registry.data_cutoff, ai_frecuencias.model_registry.metricas, ai_frecuencias.model_registry.estado, ai_frecuencias.model_registry.aprobado_por, ai_frecuencias.model_registry.activado_en, ai_frecuencias.model_registry.anterior_model_id, ai_frecuencias.model_registry.motivo, ai_frecuencias.model_registry.auditoria, ai_frecuencias.model_registry.execution_id, ai_frecuencias.model_registry.creado_en \nFROM ai_frecuencias.model_registry \nWHERE ai_frecuencias.model_registry.estado = %(estado_1)s::VARCHAR",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "52fcfd1867fdd8d0",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1040.94,
+   "duracion_ms": 0.61,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.model_registry.id, ai_frecuencias.model_registry.model_id, ai_frecuencias.model_registry.version, ai_frecuencias.model_registry.tipo, ai_frecuencias.model_registry.artefacto, ai_frecuencias.model_registry.sha256, ai_frecuencias.model_registry.feature_version, ai_frecuencias.model_registry.data_cutoff, ai_frecuencias.model_registry.metricas, ai_frecuencias.model_registry.estado, ai_frecuencias.model_registry.aprobado_por, ai_frecuencias.model_registry.activado_en, ai_frecuencias.model_registry.anterior_model_id, ai_frecuencias.model_registry.motivo, ai_frecuencias.model_registry.auditoria, ai_frecuencias.model_registry.execution_id, ai_frecuencias.model_registry.creado_en \nFROM ai_frecuencias.model_registry \nWHERE ai_frecuencias.model_registry.estado = %(estado_1)s::VARCHAR",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "9823679e536cd9b0",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1041.91,
+   "duracion_ms": 0.68,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.model_registry.id, ai_frecuencias.model_registry.model_id, ai_frecuencias.model_registry.version, ai_frecuencias.model_registry.tipo, ai_frecuencias.model_registry.artefacto, ai_frecuencias.model_registry.sha256, ai_frecuencias.model_registry.feature_version, ai_frecuencias.model_registry.data_cutoff, ai_frecuencias.model_registry.metricas, ai_frecuencias.model_registry.estado, ai_frecuencias.model_registry.aprobado_por, ai_frecuencias.model_registry.activado_en, ai_frecuencias.model_registry.anterior_model_id, ai_frecuencias.model_registry.motivo, ai_frecuencias.model_registry.auditoria, ai_frecuencias.model_registry.execution_id, ai_frecuencias.model_registry.creado_en \nFROM ai_frecuencias.model_registry \nWHERE ai_frecuencias.model_registry.tipo = %(tipo_1)s::VARCHAR",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "da5c73d87a6314b5",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1043.25,
+   "duracion_ms": 0.81,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.model_monitoring.id, ai_frecuencias.model_monitoring.execution_id, ai_frecuencias.model_monitoring.model_id, ai_frecuencias.model_monitoring.rol, ai_frecuencias.model_monitoring.fecha_corte, ai_frecuencias.model_monitoring.desde, ai_frecuencias.model_monitoring.hasta, ai_frecuencias.model_monitoring.ventana_dias, ai_frecuencias.model_monitoring.n_observaciones, ai_frecuencias.model_monitoring.n_predicciones, ai_frecuencias.model_monitoring.predicciones_ventana, ai_frecuencias.model_monitoring.wape_movil, ai_frecuencias.model_monitoring.mae_movil, ai_frecuencias.model_monitoring.sesgo_pct, ai_frecuencias.model_monitoring.cobertura_p10_p90, ai_frecuencias.model_monitoring.psi, ai_frecuencias.model_monitoring.psi_max, ai_frecuencias.model_monitoring.psi_variable_max, ai_frecuencias.model_monitoring.alertas_total, ai_frecuencias.model_monitoring.alertas_descartadas, ai_frecuencias.model_monitoring.pct_descartadas, ai_frecuencias.model_monitoring.estado, ai_frecuencias.model_monitoring.motivos, ai_frecuencias.model_monitoring.umbrales_version, ai_frecuencias.model_monitoring.detalle, ai_frecuencias.model_monitoring.creado_en \nFROM ai_frecuencias.model_monitoring \nWHERE ai_frecuencias.model_monitoring.model_id = %(model_id_1)s::VARCHAR AND ai_frecuencias.model_monitoring.rol = %(rol_1)s::VARCHAR ORDER BY ai_frecuencias.model_monitoring.creado_en DESC, ai_frecuencias.model_monitoring.id DESC \n LIMIT %(param_1)s::INTEGER",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "99651cebd47d4014",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1044.72,
+   "duracion_ms": 0.65,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT count(*) AS count_1 \nFROM ai_frecuencias.execution_log \nWHERE ai_frecuencias.execution_log.tipo = %(tipo_1)s::VARCHAR AND ai_frecuencias.execution_log.estado IN (%(estado_1_1)s::VARCHAR, %(estado_1_2)s::VARCHAR)",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "fc848d6e1d644fd8",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1045.67,
+   "duracion_ms": 1.03,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.model_registry.id, ai_frecuencias.model_registry.model_id, ai_frecuencias.model_registry.version, ai_frecuencias.model_registry.tipo, ai_frecuencias.model_registry.artefacto, ai_frecuencias.model_registry.sha256, ai_frecuencias.model_registry.feature_version, ai_frecuencias.model_registry.data_cutoff, ai_frecuencias.model_registry.metricas, ai_frecuencias.model_registry.estado, ai_frecuencias.model_registry.aprobado_por, ai_frecuencias.model_registry.activado_en, ai_frecuencias.model_registry.anterior_model_id, ai_frecuencias.model_registry.motivo, ai_frecuencias.model_registry.auditoria, ai_frecuencias.model_registry.execution_id, ai_frecuencias.model_registry.creado_en \nFROM ai_frecuencias.model_registry \nWHERE ai_frecuencias.model_registry.estado = %(estado_1)s::VARCHAR",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "RELEASE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "2202aaa2fb3d0098",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1047.04,
+   "duracion_ms": 0.52,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "RELEASE SAVEPOINT sa_savepoint_7",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "b8e0bae017e48ddb",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1047.95,
+   "duracion_ms": 0.59,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT ai_frecuencias.prediction.feature_version \nFROM ai_frecuencias.prediction \nWHERE ai_frecuencias.prediction.execution_id = %(execution_id_1)s::UUID \n LIMIT %(param_1)s::INTEGER",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "UPDATE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "2e41ec71037d4251",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1049.55,
+   "duracion_ms": 1.0,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "UPDATE ai_frecuencias.execution_log SET estado=%(estado)s::VARCHAR, etapa=%(etapa)s::VARCHAR, progreso=%(progreso)s, marca_agua_anterior=%(marca_agua_anterior)s::TIMESTAMP WITH TIME ZONE, marca_agua_nueva=%(marca_agua_nueva)s::TIMESTAMP WITH TIME ZONE, data_cutoff=%(data_cutoff)s::TIMESTAMP WITH TIME ZONE, filas_leidas=%(filas_leidas)s::INTEGER, filas_validas=%(filas_validas)s::INTEGER, model_id=%(model_id)s::VARCHAR, feature_version=%(feature_version)s::VARCHAR, umbrales_version=%(umbrales_version)s::INTEGER, metricas=%(metricas)s::JSONB, mensaje=%(mensaje)s::VARCHAR, terminado_en=%(terminado_en)s::TIMESTAMP WITH TIME ZONE, actualizado_en=%(actualizado_en)s::TIMESTAMP WITH TIME ZONE, lease_hasta=%(lease_hasta)s::TIMESTAMP WITH TIME ZONE WHERE ai_frecuencias.execution_log.execution_id = %(execution_id_1)s::UUID AND ai_frecuencias.execution_log.worker_id = %(worker_id_1)s::VARCHAR AND ai_frecuencias.execution_log.estado = %(estado_1)s::VARCHAR",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "UPDATE ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "a066641a9c07d304",
+   "padre": "0eb2b874017fd0ce",
+   "inicio_ms": 1050.9,
+   "duracion_ms": 0.62,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "UPDATE ai_frecuencias.execution_attempt SET resultado = 'ok', terminado_en = now() WHERE execution_id = %(id)s AND worker_id = %(w)s AND resultado = 'corriendo'",
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "connect",
+   "span_id": "e08d7ee3d74a6aab",
+   "padre": "32cb8a301cb86f4f",
+   "inicio_ms": 1055.06,
+   "duracion_ms": 0.78,
+   "estado": "UNSET",
+   "atributos": {
+    "db.system": "postgresql"
+   }
+  },
+  {
+   "nombre": "SELECT ai_frecuencias_pruebas_ci_limpio_4",
+   "span_id": "f90684ab086c5eca",
+   "padre": "32cb8a301cb86f4f",
+   "inicio_ms": 1056.01,
+   "duracion_ms": 1.04,
+   "estado": "UNSET",
+   "atributos": {
+    "db.statement": "SELECT estado FROM ai_frecuencias.execution_log WHERE execution_id = %(id)s",
+    "db.system": "postgresql"
+   }
+  }
+ ]
+}

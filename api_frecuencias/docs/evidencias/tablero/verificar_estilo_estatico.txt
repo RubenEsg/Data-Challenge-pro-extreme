@@ -1,0 +1,37 @@
+
+== Bien (26) ==
+  [Contraste] 33 pares con su mínimo (4,5:1 texto, 3:1 texto de 24 px o más y marcas); el más justo: --tinta-inversa sobre --insight-3 3.02:1
+  [Roles] los 45 roles de ROL son tokens de :root (40 tokens distintos)
+  [CSS] 606 reglas sin colores, tamaños, pesos, interlineados, radios, sombras ni espaciados literales (salvo la lista blanca de la app); 97 var() definidas; 4 tokens retirados ausentes
+  [Python · ui.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · tokens.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · app.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · controles.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · cliente_api.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/alertas.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/despacho.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/enlaces.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/horario.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/inicio.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/modelo.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/operacion.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/pronostico.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/recomendaciones.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/resultado.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Paleta] Lo que proponemos solo (azul): cvd PASS · normal PASS · contraste PASS
+  [Paleta] Proponemos (azul) frente al plan que recorta (rosa): cvd PASS · normal PASS · contraste PASS
+  [Paleta] Proponemos (azul) frente a hoy (gris): cvd PASS · normal PASS · contraste PASS
+  [Paleta] Hoy (gris) frente al plan que recorta (rosa): cvd PASS · normal PASS · contraste PASS
+  [Paleta] Azul, rosa y gris juntos (Qué gana: hoy, reasignar, recortar): cvd PASS · normal PASS · contraste PASS
+  [Paleta] Pronóstico · real, proponemos y contexto: cvd PASS · normal PASS · contraste WARN
+  [Paleta] Horario · proponemos, hoy, real/oráculo y recorta: cvd PASS · normal PASS · contraste PASS
+  [Paleta] Rutas en su orden (solo muestras): cvd PASS · normal PASS · contraste PASS
+
+== Notas (1) ==
+  [Python · ui.py] bloque de compatibilidad en las líneas 868–929; lo usan las páginas sin migrar: figura(
+
+== Avisos (2) ==
+  [Python · paginas/modelo.py] 13 números sueltos en cadenas (revisar que salgan de datos/): l. 15 «4»; l. 16 «8»; l. 19 «14»; l. 20 «4»; l. 21 «28»; l. 21 «8»; l. 23 «28»; l. 25 «10» …
+  [Python · paginas/pronostico.py] 3 números sueltos en cadenas (revisar que salgan de datos/): l. 42 «100»; l. 77 «100»; l. 105 «100»
+
+Resultado: PASA · 26 bien · 2 avisos · 0 fallas

@@ -1,0 +1,771 @@
+{
+ "descripcion": "Duración del ciclo diario (POST /api/v1/frequency/executions) con cortes fijos: carga inicial hasta 2025-08-30 (49.623 filas), día nuevo 2025-08-31 (51 filas) y repetición del mismo corte (0 filas). Base PostgreSQL local desechable, copia temporal de datos/, fuente parquet. Script: scripts/medir_ciclo.py.",
+ "equipo": "portátil de desarrollo, Windows 11, 6 núcleos lógicos, Python 3.13.3, scikit-learn 1.5.2, PuLP 2.9.0 (CBC); con otros procesos en marcha, por eso los segundos varían entre corridas",
+ "corridas": {
+  "antes_8d4e651": {
+   "nota": "Ciclo de la versión 8d4e651 (llama a optimizacion.recomendacion_franja una vez por horizonte; cuenta los días completos con un doble recorrido del lote).",
+   "medido_el": "2026-11-09T05:00:20",
+   "con_perfilador": false,
+   "corridas": [
+    {
+     "corrida": "carga_inicial",
+     "hasta": "2025-08-30",
+     "estado": "ok",
+     "segundos_peticion": 94.45,
+     "duracion_ciclo_s": 94.352,
+     "etapas_s": {
+      "lectura_incremental": 0.27,
+      "calidad": 10.252,
+      "prediccion": 3.34,
+      "alertas": 80.185,
+      "notificaciones": 0.363
+     },
+     "filas_leidas": 49623,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 13,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "dia_nuevo",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 18.85,
+     "duracion_ciclo_s": 18.728,
+     "etapas_s": {
+      "lectura_incremental": 0.05,
+      "calidad": 4.039,
+      "prediccion": 5.762,
+      "alertas": 8.677,
+      "notificaciones": 0.218
+     },
+     "filas_leidas": 51,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 25,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "repeticion",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 0.19,
+     "duracion_ciclo_s": 0.101,
+     "etapas_s": {
+      "lectura_incremental": 0.044,
+      "calidad": 0.108
+     },
+     "filas_leidas": 0,
+     "predicciones": 0,
+     "recomendaciones": 0,
+     "alertas_nuevas": 0,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    }
+   ],
+   "conteos": {
+    "predicciones": 18,
+    "recomendaciones": 18,
+    "alertas": 38,
+    "historial_alertas": 38
+   },
+   "sha256_resultado": {
+    "predicciones": "a757f245f8da0b5d7babb3a42871455623cf594a7b92f1b6973fbdb24844a6cc",
+    "recomendaciones": "0e5b08904690c22a4c03ac92593f59137c9c2f67e6579010acc83e814ca2f9dc",
+    "alertas": "0500bf2f66d514b248160fd428c0d88e93b89e47d43ec1f4f349660761f5a6e1",
+    "historial_alertas": "6f7eab1a99b0bb7b7459edb15295ce1c8dc24a74033e2f522723208d74e2f64d",
+    "total": "7fa8b9f63d0dbe19fff60b9214d63ddcdb478617b0c3a352f3e9861c2464847d"
+   }
+  },
+  "antes": {
+   "nota": "Mismo código que «después» salvo los archivos de este cambio (app/servicios/ejecucion.py y los módulos refactorizados): sirve para aislar el efecto y comparar resultados.",
+   "medido_el": "2026-11-09T05:04:44",
+   "con_perfilador": false,
+   "corridas": [
+    {
+     "corrida": "carga_inicial",
+     "hasta": "2025-08-30",
+     "estado": "ok",
+     "segundos_peticion": 109.84,
+     "duracion_ciclo_s": 109.746,
+     "etapas_s": {
+      "lectura_incremental": 0.267,
+      "calidad": 26.809,
+      "prediccion": 7.911,
+      "alertas": 74.595,
+      "notificaciones": 0.198
+     },
+     "filas_leidas": 49623,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 5,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "dia_nuevo",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 12.18,
+     "duracion_ciclo_s": 12.106,
+     "etapas_s": {
+      "lectura_incremental": 0.048,
+      "calidad": 0.637,
+      "prediccion": 2.901,
+      "alertas": 8.37,
+      "notificaciones": 0.186
+     },
+     "filas_leidas": 51,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 11,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "repeticion",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 0.16,
+     "duracion_ciclo_s": 0.11,
+     "etapas_s": {
+      "lectura_incremental": 0.045,
+      "calidad": 0.089
+     },
+     "filas_leidas": 0,
+     "predicciones": 0,
+     "recomendaciones": 0,
+     "alertas_nuevas": 0,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    }
+   ],
+   "conteos": {
+    "predicciones": 18,
+    "recomendaciones": 18,
+    "alertas": 16,
+    "historial_alertas": 16
+   },
+   "sha256_resultado": {
+    "predicciones": "a757f245f8da0b5d7babb3a42871455623cf594a7b92f1b6973fbdb24844a6cc",
+    "recomendaciones": "0e5b08904690c22a4c03ac92593f59137c9c2f67e6579010acc83e814ca2f9dc",
+    "alertas": "3fd9d0a10b3688857afc650271f11fdb39f9104cbe5716a627024b208185072f",
+    "historial_alertas": "b62e4679079296da9221ea55bc9e03cb17a50cdc36f83e7d928d2681d90e50d7",
+    "total": "ab003a1fa8f15299501c0f79a68160c560f048e2e7ac86b30d532cacc2ee831b"
+   }
+  },
+  "despues": {
+   "nota": "Con el cambio: días completos contados en una pasada y una recomendación por ruta y franja en cada ejecución.",
+   "medido_el": "2026-11-09T05:05:27",
+   "con_perfilador": false,
+   "corridas": [
+    {
+     "corrida": "carga_inicial",
+     "hasta": "2025-08-30",
+     "estado": "ok",
+     "segundos_peticion": 27.74,
+     "duracion_ciclo_s": 27.681,
+     "etapas_s": {
+      "lectura_incremental": 0.417,
+      "calidad": 7.621,
+      "prediccion": 5.41,
+      "alertas": 13.994,
+      "notificaciones": 0.239
+     },
+     "filas_leidas": 49623,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 5,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "dia_nuevo",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 7.88,
+     "duracion_ciclo_s": 7.796,
+     "etapas_s": {
+      "lectura_incremental": 0.072,
+      "calidad": 0.864,
+      "prediccion": 1.26,
+      "alertas": 5.456,
+      "notificaciones": 0.161
+     },
+     "filas_leidas": 51,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 11,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "repeticion",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 0.11,
+     "duracion_ciclo_s": 0.07,
+     "etapas_s": {
+      "lectura_incremental": 0.045,
+      "calidad": 0.042
+     },
+     "filas_leidas": 0,
+     "predicciones": 0,
+     "recomendaciones": 0,
+     "alertas_nuevas": 0,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    }
+   ],
+   "conteos": {
+    "predicciones": 18,
+    "recomendaciones": 18,
+    "alertas": 16,
+    "historial_alertas": 16
+   },
+   "sha256_resultado": {
+    "predicciones": "a757f245f8da0b5d7babb3a42871455623cf594a7b92f1b6973fbdb24844a6cc",
+    "recomendaciones": "0e5b08904690c22a4c03ac92593f59137c9c2f67e6579010acc83e814ca2f9dc",
+    "alertas": "3fd9d0a10b3688857afc650271f11fdb39f9104cbe5716a627024b208185072f",
+    "historial_alertas": "b62e4679079296da9221ea55bc9e03cb17a50cdc36f83e7d928d2681d90e50d7",
+    "total": "ab003a1fa8f15299501c0f79a68160c560f048e2e7ac86b30d532cacc2ee831b"
+   }
+  },
+  "antes_8d4e651_con_perfilador": {
+   "nota": "Corrida de la versión 8d4e651 bajo cProfile.",
+   "medido_el": "2026-11-09T04:58:19",
+   "con_perfilador": true,
+   "corridas": [
+    {
+     "corrida": "carga_inicial",
+     "hasta": "2025-08-30",
+     "estado": "ok",
+     "segundos_peticion": 150.5,
+     "duracion_ciclo_s": 150.402,
+     "etapas_s": {
+      "lectura_incremental": 0.33,
+      "calidad": 10.739,
+      "prediccion": 10.619,
+      "alertas": 128.387,
+      "notificaciones": 0.373
+     },
+     "filas_leidas": 49623,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 13,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "dia_nuevo",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 32.63,
+     "duracion_ciclo_s": 32.442,
+     "etapas_s": {
+      "lectura_incremental": 0.057,
+      "calidad": 1.452,
+      "prediccion": 3.196,
+      "alertas": 27.534,
+      "notificaciones": 0.245
+     },
+     "filas_leidas": 51,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 25,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "repeticion",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 0.2,
+     "duracion_ciclo_s": 0.113,
+     "etapas_s": {
+      "lectura_incremental": 0.048,
+      "calidad": 0.11
+     },
+     "filas_leidas": 0,
+     "predicciones": 0,
+     "recomendaciones": 0,
+     "alertas_nuevas": 0,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    }
+   ],
+   "conteos": {
+    "predicciones": 18,
+    "recomendaciones": 18,
+    "alertas": 38,
+    "historial_alertas": 38
+   },
+   "sha256_resultado": {
+    "predicciones": "a757f245f8da0b5d7babb3a42871455623cf594a7b92f1b6973fbdb24844a6cc",
+    "recomendaciones": "0e5b08904690c22a4c03ac92593f59137c9c2f67e6579010acc83e814ca2f9dc",
+    "alertas": "0500bf2f66d514b248160fd428c0d88e93b89e47d43ec1f4f349660761f5a6e1",
+    "historial_alertas": "6f7eab1a99b0bb7b7459edb15295ce1c8dc24a74033e2f522723208d74e2f64d",
+    "total": "7fa8b9f63d0dbe19fff60b9214d63ddcdb478617b0c3a352f3e9861c2464847d"
+   }
+  },
+  "despues_con_perfilador": {
+   "nota": "Corrida con el cambio bajo cProfile.",
+   "medido_el": "2026-11-09T05:05:54",
+   "con_perfilador": true,
+   "corridas": [
+    {
+     "corrida": "carga_inicial",
+     "hasta": "2025-08-30",
+     "estado": "ok",
+     "segundos_peticion": 15.08,
+     "duracion_ciclo_s": 14.987,
+     "etapas_s": {
+      "lectura_incremental": 0.285,
+      "calidad": 7.98,
+      "prediccion": 1.967,
+      "alertas": 4.536,
+      "notificaciones": 0.255
+     },
+     "filas_leidas": 49623,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 5,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "dia_nuevo",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 6.08,
+     "duracion_ciclo_s": 5.992,
+     "etapas_s": {
+      "lectura_incremental": 0.055,
+      "calidad": 0.422,
+      "prediccion": 1.694,
+      "alertas": 3.622,
+      "notificaciones": 0.248
+     },
+     "filas_leidas": 51,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 11,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "repeticion",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 0.17,
+     "duracion_ciclo_s": 0.103,
+     "etapas_s": {
+      "lectura_incremental": 0.049,
+      "calidad": 0.098
+     },
+     "filas_leidas": 0,
+     "predicciones": 0,
+     "recomendaciones": 0,
+     "alertas_nuevas": 0,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    }
+   ],
+   "conteos": {
+    "predicciones": 18,
+    "recomendaciones": 18,
+    "alertas": 16,
+    "historial_alertas": 16
+   },
+   "sha256_resultado": {
+    "predicciones": "a757f245f8da0b5d7babb3a42871455623cf594a7b92f1b6973fbdb24844a6cc",
+    "recomendaciones": "0e5b08904690c22a4c03ac92593f59137c9c2f67e6579010acc83e814ca2f9dc",
+    "alertas": "3fd9d0a10b3688857afc650271f11fdb39f9104cbe5716a627024b208185072f",
+    "historial_alertas": "b62e4679079296da9221ea55bc9e03cb17a50cdc36f83e7d928d2681d90e50d7",
+    "total": "ab003a1fa8f15299501c0f79a68160c560f048e2e7ac86b30d532cacc2ee831b"
+   }
+  },
+  "antes_repeticion": {
+   "nota": "Segunda corrida de «antes» (mismo código y datos).",
+   "medido_el": "2026-11-09T05:11:39",
+   "con_perfilador": false,
+   "corridas": [
+    {
+     "corrida": "carga_inicial",
+     "hasta": "2025-08-30",
+     "estado": "ok",
+     "segundos_peticion": 125.44,
+     "duracion_ciclo_s": 125.121,
+     "etapas_s": {
+      "lectura_incremental": 0.378,
+      "calidad": 19.235,
+      "prediccion": 7.804,
+      "alertas": 96.822,
+      "notificaciones": 1.095
+     },
+     "filas_leidas": 49623,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 5,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "dia_nuevo",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 9.56,
+     "duracion_ciclo_s": 9.503,
+     "etapas_s": {
+      "lectura_incremental": 0.319,
+      "calidad": 1.815,
+      "prediccion": 2.751,
+      "alertas": 3.997,
+      "notificaciones": 0.641
+     },
+     "filas_leidas": 51,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 11,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "repeticion",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 0.12,
+     "duracion_ciclo_s": 0.075,
+     "etapas_s": {
+      "lectura_incremental": 0.047,
+      "calidad": 0.046
+     },
+     "filas_leidas": 0,
+     "predicciones": 0,
+     "recomendaciones": 0,
+     "alertas_nuevas": 0,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    }
+   ],
+   "conteos": {
+    "predicciones": 18,
+    "recomendaciones": 18,
+    "alertas": 16,
+    "historial_alertas": 16
+   },
+   "sha256_resultado": {
+    "predicciones": "a757f245f8da0b5d7babb3a42871455623cf594a7b92f1b6973fbdb24844a6cc",
+    "recomendaciones": "0e5b08904690c22a4c03ac92593f59137c9c2f67e6579010acc83e814ca2f9dc",
+    "alertas": "3fd9d0a10b3688857afc650271f11fdb39f9104cbe5716a627024b208185072f",
+    "historial_alertas": "b62e4679079296da9221ea55bc9e03cb17a50cdc36f83e7d928d2681d90e50d7",
+    "total": "ab003a1fa8f15299501c0f79a68160c560f048e2e7ac86b30d532cacc2ee831b"
+   }
+  },
+  "despues_repeticion": {
+   "nota": "Segunda corrida de «después» (mismo código y datos).",
+   "medido_el": "2026-11-09T05:12:02",
+   "con_perfilador": false,
+   "corridas": [
+    {
+     "corrida": "carga_inicial",
+     "hasta": "2025-08-30",
+     "estado": "ok",
+     "segundos_peticion": 10.75,
+     "duracion_ciclo_s": 10.654,
+     "etapas_s": {
+      "lectura_incremental": 0.309,
+      "calidad": 5.951,
+      "prediccion": 1.477,
+      "alertas": 2.778,
+      "notificaciones": 0.172
+     },
+     "filas_leidas": 49623,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 5,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "dia_nuevo",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 5.57,
+     "duracion_ciclo_s": 5.513,
+     "etapas_s": {
+      "lectura_incremental": 0.044,
+      "calidad": 0.269,
+      "prediccion": 1.227,
+      "alertas": 3.823,
+      "notificaciones": 0.187
+     },
+     "filas_leidas": 51,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 11,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "repeticion",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 0.16,
+     "duracion_ciclo_s": 0.09,
+     "etapas_s": {
+      "lectura_incremental": 0.051,
+      "calidad": 0.076
+     },
+     "filas_leidas": 0,
+     "predicciones": 0,
+     "recomendaciones": 0,
+     "alertas_nuevas": 0,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    }
+   ],
+   "conteos": {
+    "predicciones": 18,
+    "recomendaciones": 18,
+    "alertas": 16,
+    "historial_alertas": 16
+   },
+   "sha256_resultado": {
+    "predicciones": "a757f245f8da0b5d7babb3a42871455623cf594a7b92f1b6973fbdb24844a6cc",
+    "recomendaciones": "0e5b08904690c22a4c03ac92593f59137c9c2f67e6579010acc83e814ca2f9dc",
+    "alertas": "3fd9d0a10b3688857afc650271f11fdb39f9104cbe5716a627024b208185072f",
+    "historial_alertas": "b62e4679079296da9221ea55bc9e03cb17a50cdc36f83e7d928d2681d90e50d7",
+    "total": "ab003a1fa8f15299501c0f79a68160c560f048e2e7ac86b30d532cacc2ee831b"
+   }
+  },
+  "antes_8d4e651_repeticion": {
+   "nota": "Segunda corrida de la versión 8d4e651.",
+   "medido_el": "2026-11-09T05:15:09",
+   "con_perfilador": false,
+   "corridas": [
+    {
+     "corrida": "carga_inicial",
+     "hasta": "2025-08-30",
+     "estado": "ok",
+     "segundos_peticion": 157.2,
+     "duracion_ciclo_s": 157.118,
+     "etapas_s": {
+      "lectura_incremental": 0.269,
+      "calidad": 6.357,
+      "prediccion": 2.07,
+      "alertas": 147.99,
+      "notificaciones": 0.467
+     },
+     "filas_leidas": 49623,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 13,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "dia_nuevo",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 23.95,
+     "duracion_ciclo_s": 23.865,
+     "etapas_s": {
+      "lectura_incremental": 0.053,
+      "calidad": 9.41,
+      "prediccion": 4.686,
+      "alertas": 9.566,
+      "notificaciones": 0.168
+     },
+     "filas_leidas": 51,
+     "predicciones": 9,
+     "recomendaciones": 9,
+     "alertas_nuevas": 25,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    },
+    {
+     "corrida": "repeticion",
+     "hasta": "2025-08-31",
+     "estado": "ok",
+     "segundos_peticion": 0.15,
+     "duracion_ciclo_s": 0.088,
+     "etapas_s": {
+      "lectura_incremental": 0.043,
+      "calidad": 0.079
+     },
+     "filas_leidas": 0,
+     "predicciones": 0,
+     "recomendaciones": 0,
+     "alertas_nuevas": 0,
+     "alertas_repetidas": 0,
+     "fallos": 0
+    }
+   ],
+   "conteos": {
+    "predicciones": 18,
+    "recomendaciones": 18,
+    "alertas": 38,
+    "historial_alertas": 38
+   },
+   "sha256_resultado": {
+    "predicciones": "a757f245f8da0b5d7babb3a42871455623cf594a7b92f1b6973fbdb24844a6cc",
+    "recomendaciones": "0e5b08904690c22a4c03ac92593f59137c9c2f67e6579010acc83e814ca2f9dc",
+    "alertas": "0500bf2f66d514b248160fd428c0d88e93b89e47d43ec1f4f349660761f5a6e1",
+    "historial_alertas": "6f7eab1a99b0bb7b7459edb15295ce1c8dc24a74033e2f522723208d74e2f64d",
+    "total": "7fa8b9f63d0dbe19fff60b9214d63ddcdb478617b0c3a352f3e9861c2464847d"
+   }
+  }
+ },
+ "igualdad": {
+  "antes_vs_despues_sha256_igual": true,
+  "todas_las_corridas_comparables_iguales": true,
+  "por_corrida": {
+   "antes": true,
+   "despues": true,
+   "despues_con_perfilador": true,
+   "antes_repeticion": true,
+   "despues_repeticion": true
+  },
+  "detalle": "Mismo SHA-256 del resultado normalizado (predicciones, recomendaciones, alertas e historial de alertas, sin identificadores, marcas de tiempo del reloj ni latencias): el cambio no altera resultados. La versión 8d4e651 da otro SHA-256 porque las reglas de alertas cambiaron después de esa versión; por eso la igualdad se prueba contra «antes»."
+ },
+ "perfil": {
+  "perfil_antes.prof": {
+   "tiempo_total_s": 183.32,
+   "funciones": {
+    "calidad.py:validar_lote": {
+     "llamadas": 2,
+     "tiempo_propio_s": 0.001,
+     "tiempo_acumulado_s": 0.069
+    },
+    "ejecucion.py:<genexpr>": {
+     "llamadas": 944079,
+     "tiempo_propio_s": 87.656,
+     "tiempo_acumulado_s": 87.646
+    },
+    "ejecucion.py:_ciclo_frecuencia": {
+     "llamadas": 3,
+     "tiempo_propio_s": 0.005,
+     "tiempo_acumulado_s": 183.053
+    },
+    "ejecucion.py:alertas_observadas": {
+     "llamadas": 3,
+     "tiempo_propio_s": 0.004,
+     "tiempo_acumulado_s": 155.294
+    },
+    "ejecucion.py:contexto_observado": {
+     "llamadas": 9,
+     "tiempo_propio_s": 0.027,
+     "tiempo_acumulado_s": 49.877
+    },
+    "gradient_boosting.py:predict": {
+     "llamadas": 396,
+     "tiempo_propio_s": 0.006,
+     "tiempo_acumulado_s": 83.543
+    },
+    "inferencia.py:_predecir_filas": {
+     "llamadas": 125,
+     "tiempo_propio_s": 0.002,
+     "tiempo_acumulado_s": 80.663
+    },
+    "inferencia.py:evaluar": {
+     "llamadas": 4,
+     "tiempo_propio_s": 0.027,
+     "tiempo_acumulado_s": 9.483
+    },
+    "inferencia.py:predecir": {
+     "llamadas": 120,
+     "tiempo_propio_s": 0.016,
+     "tiempo_acumulado_s": 75.687
+    },
+    "optimizacion.py:_resolver_milp": {
+     "llamadas": 24,
+     "tiempo_propio_s": 0.017,
+     "tiempo_acumulado_s": 2.275
+    },
+    "optimizacion.py:optimizar": {
+     "llamadas": 18,
+     "tiempo_propio_s": 0.002,
+     "tiempo_acumulado_s": 2.289
+    },
+    "optimizacion.py:recomendacion_franja": {
+     "llamadas": 18,
+     "tiempo_propio_s": 0.001,
+     "tiempo_acumulado_s": 3.952
+    }
+   }
+  },
+  "perfil_despues.prof": {
+   "tiempo_total_s": 21.34,
+   "funciones": {
+    "calidad.py:validar_lote": {
+     "llamadas": 2,
+     "tiempo_propio_s": 0.001,
+     "tiempo_acumulado_s": 0.076
+    },
+    "ejecucion.py:<genexpr>": {
+     "llamadas": 102555,
+     "tiempo_propio_s": 0.028,
+     "tiempo_acumulado_s": 0.015
+    },
+    "ejecucion.py:_ciclo_frecuencia": {
+     "llamadas": 3,
+     "tiempo_propio_s": 0.0,
+     "tiempo_acumulado_s": 21.16
+    },
+    "ejecucion.py:_dias_completos": {
+     "llamadas": 6,
+     "tiempo_propio_s": 0.0,
+     "tiempo_acumulado_s": 0.025
+    },
+    "ejecucion.py:alertas_observadas": {
+     "llamadas": 3,
+     "tiempo_propio_s": 0.003,
+     "tiempo_acumulado_s": 7.901
+    },
+    "ejecucion.py:contexto_observado": {
+     "llamadas": 9,
+     "tiempo_propio_s": 0.002,
+     "tiempo_acumulado_s": 7.846
+    },
+    "gradient_boosting.py:predict": {
+     "llamadas": 396,
+     "tiempo_propio_s": 0.005,
+     "tiempo_acumulado_s": 12.235
+    },
+    "inferencia.py:_predecir_filas": {
+     "llamadas": 125,
+     "tiempo_propio_s": 0.002,
+     "tiempo_acumulado_s": 11.626
+    },
+    "inferencia.py:evaluar": {
+     "llamadas": 4,
+     "tiempo_propio_s": 0.024,
+     "tiempo_acumulado_s": 5.545
+    },
+    "inferencia.py:predecir": {
+     "llamadas": 120,
+     "tiempo_propio_s": 0.009,
+     "tiempo_acumulado_s": 9.714
+    },
+    "optimizacion.py:_resolver_milp": {
+     "llamadas": 8,
+     "tiempo_propio_s": 0.007,
+     "tiempo_acumulado_s": 0.538
+    },
+    "optimizacion.py:optimizar": {
+     "llamadas": 6,
+     "tiempo_propio_s": 0.0,
+     "tiempo_acumulado_s": 0.543
+    },
+    "optimizacion.py:recomendacion_franja": {
+     "llamadas": 6,
+     "tiempo_propio_s": 0.0,
+     "tiempo_acumulado_s": 0.593
+    }
+   }
+  }
+ }
+}

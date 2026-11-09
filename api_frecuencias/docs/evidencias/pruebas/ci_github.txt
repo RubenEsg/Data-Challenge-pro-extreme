@@ -1,0 +1,22 @@
+en verde en GitHub Actions (run 42627652053, 2026-11-09)
+
+Integración continua en GitHub Actions sobre un runner limpio de Ubuntu (sin réplica ni datos ignorados por git).
+Repositorio del proyecto: RubenEsg/Data-Challenge (privado), flujo .github/workflows/api_frecuencias.yml;
+el repositorio de entrega trae el mismo flujo con la ruta api_frecuencias/ en la raíz.
+Commit probado: 3d2acf1 (cierre del 9-nov-2026). Run: https://github.com/RubenEsg/Data-Challenge/actions/runs/42627652053
+
+Trabajos (inicio y fin en UTC):
+- ruff · bandit · migraciones · pytest (Python 3.11): success (2026-11-09T13:41:18Z → 2026-11-09T13:45:22Z)
+- ruff · bandit · migraciones · pytest (Python 3.13): success (2026-11-09T13:41:18Z → 2026-11-09T13:47:52Z)
+- Prueba de caída RNF-001 y ejecución programada §14.2 (Python 3.11): success (2026-11-09T13:47:55Z → 2026-11-09T13:54:06Z)
+- SonarQube (puerta de calidad): skipped (2026-11-09T13:47:53Z → 2026-11-09T13:47:52Z)
+
+Resultados leídos del registro de cada trabajo:
+- Python 3.11 y 3.13: ruff y bandit sin hallazgos; migraciones arriba, abajo y arriba; pytest con 832 aprobadas,
+  174 omitidas a propósito (las pruebas de réplica necesitan la réplica local cargada, que no existe en GitHub) y
+  62 subpruebas de Schemathesis aprobadas; cobertura de app/ 92,74 % (umbral 85 %); OpenAPI sin deriva (59 rutas).
+- Prueba de caída RNF-001 y ejecución programada §14.2 (Python 3.11): 2 aprobadas.
+- SonarQube: el trabajo del flujo se omite sin servidor ni token; el análisis real está en docs/evidencias/sonarqube/
+  (scripts/sonar_local.py, puerta «Reto Sobusa v1.5»).
+
+La suite completa con la réplica (1.060 casos) corre en local: docs/evidencias/pruebas/suite_final.xml.

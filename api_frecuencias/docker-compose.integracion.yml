@@ -1,0 +1,48 @@
+# Modo integrado (§8.1, §8.3, §11.2, §11.3; RF-001, RF-013, RF-014): la API corre contra la base OPERACIONAL (la
+# réplica local de Extreme, servicio «operacional») como correría en Extreme:
+#   - LEE las tablas existentes con lector_ia (solo SELECT, transacciones READ ONLY por defecto, statement_timeout);
+#   - ESCRIBE sus resultados solo en el esquema ai_frecuencias de la MISMA base con escritor_ia (dueño de ese esquema,
+#     sin permisos sobre las tablas de Extreme); Alembic deja allí también su tabla de versiones;
+#   - no usa el PostgreSQL propio («db», puerto 5433): las dependencias de api y migrar se reemplazan por operacional.
+# Las claves salen solo del .env local (LECTOR_IA_PASSWORD, ESCRITOR_IA_PASSWORD; ver .env.example), nunca del repo.
+#
+# Uso, en el MISMO proyecto compose de la réplica (comparte su red y su servicio «operacional») y con --no-deps para
+# no recrear ni reiniciar el contenedor de la réplica ni su volumen:
+#   docker compose -p sobusa_rep -f docker-compose.yml -f docker-compose.integracion.yml --profile integracion build api
+#   docker compose -p sobusa_rep -f docker-compose.yml -f docker-compose.integracion.yml --profile integracion \
+#     run --rm --no-deps migrar
+#   docker compose -p sobusa_rep -f docker-compose.yml -f docker-compose.integracion.yml --profile integracion \
+#     up -d --no-deps api
+# La API queda en http://localhost:${API_INTEGRADA_PUERTO_HOST:-8302} (no choca con la pila sobusa_api en 8000).
+# Para retirarla y dejar la réplica corriendo:  ... --profile integracion rm -s -f api migrar
+# Verificación automatizada con evidencia:  python scripts/verificar_despliegue.py --modo-integrado
+# Sin contenedores (venv), las mismas variables: ver docs/integracion_postgresql.md, «Modo integrado».
+services:
+  migrar:
+    environment:
+      DATABASE_URL: postgresql+psycopg://escritor_ia:${ESCRITOR_IA_PASSWORD:?defina ESCRITOR_IA_PASSWORD en .env}@operacional:5432/operacional
+      TZ: America/Bogota
+    depends_on: !override
+      operacional:
+        condition: service_healthy
+
+  api:
+    environment:
+      DATABASE_URL: postgresql+psycopg://escritor_ia:${ESCRITOR_IA_PASSWORD:?defina ESCRITOR_IA_PASSWORD en .env}@operacional:5432/operacional
+      FUENTE: postgres
+      FUENTE_DATABASE_URL: postgresql+psycopg://lector_ia:${LECTOR_IA_PASSWORD:?defina LECTOR_IA_PASSWORD en .env}@operacional:5432/operacional
+      FUENTE_TABLA: ${FUENTE_TABLA:-demanda_segmentos}
+      # proceso (operador) de la tabla «Procesos» de Extreme cuyas rutas se leen; * = todos los procesos
+      FUENTE_PROCESO: ${FUENTE_PROCESO:-sobusa}
+      FUENTE_STATEMENT_TIMEOUT_MS: ${FUENTE_STATEMENT_TIMEOUT_MS:-30000}
+      FUENTE_SOLAPE_MIN: ${FUENTE_SOLAPE_MIN:-15}
+      # §7.3 paso 2 «proceso programado»: el planificador encola la ejecución diaria (PLAN_EJECUCION_CRON) contra la
+      # base operacional. Encendido por omisión; PLANIFICADOR_HABILITADO_INTEGRADO=false lo apaga.
+      PLANIFICADOR_HABILITADO: ${PLANIFICADOR_HABILITADO_INTEGRADO:-true}
+    depends_on: !override
+      operacional:
+        condition: service_healthy
+      migrar:
+        condition: service_completed_successfully
+    ports: !override
+      - "${API_INTEGRADA_PUERTO_HOST:-8302}:8000"

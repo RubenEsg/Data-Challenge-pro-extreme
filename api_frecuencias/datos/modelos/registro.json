@@ -1,11 +1,11 @@
 {
-  "activo": "hgb_fv1_20250831_s42",
+  "activo": "hgb_fv2_20250831_s42",
   "modelos": {
     "hgb_fv1_20250831_s42": {
       "model_id": "hgb_fv1_20250831_s42",
       "tipo": "candidato",
       "algoritmo": "hist_gradient_boosting",
-      "estado": "activo",
+      "estado": "candidato",
       "artefacto": "modelo.joblib",
       "sha256": "fac427c003cf74d65475e3a0f37d3d90f8e6a20dc6ba6a513c41046b6498a728",
       "feature_version": "fv1-2026-11-08",
@@ -31,6 +31,21 @@
       "descripcion": "Última semana: pasajeros de la misma hora hace 7 días",
       "artefacto": null,
       "feature_version": "fv1-2026-11-08"
+    },
+    "hgb_fv2_20250831_s42": {
+      "model_id": "hgb_fv2_20250831_s42",
+      "tipo": "candidato",
+      "algoritmo": "hist_gradient_boosting",
+      "estado": "activo",
+      "artefacto": "modelo.joblib",
+      "sha256": "24c70b9ca3f6855480d7592855544b82e60e51179b30b88129ab09aa7ed92010",
+      "feature_version": "fv2-2026-11-09",
+      "data_cutoff": "2025-08-31",
+      "semilla": 42,
+      "supera_linea_base_validacion": true,
+      "creado_en": "2026-11-09T05:43:25+00:00",
+      "wape_validacion": 13.554,
+      "wape_prueba": 14.77
     }
   },
   "historial_activacion": [
@@ -40,6 +55,13 @@
       "a": "hgb_fv1_20250831_s42",
       "usuario": "entrenamiento",
       "motivo": "activado: mejora a B1 en validación"
+    },
+    {
+      "en": "2026-11-09T05:43:27+00:00",
+      "de": "hgb_fv1_20250831_s42",
+      "a": "hgb_fv2_20250831_s42",
+      "usuario": "entrenamiento (compuerta)",
+      "motivo": "activar: mejora a B1 y no empeora al modelo activo en validación"
     }
   ],
   "referencias_proyecto": {

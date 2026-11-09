@@ -87,7 +87,7 @@ def _nombre_tipo(tipo):
 
 
 def _con_modelo(m):
-    """«la regla manual», «el primer modelo (E1)», «el modelo final (E11)», «el híbrido (E12)»."""
+    """«la regla manual», «el experimento 1 (primer modelo)», «el experimento 11 (LightGBM)», «el experimento 12 (híbrido)»."""
     n = NOMBRE_MODELO[m]
     return ("la " if m == "B1" else "el ") + n[0].lower() + n[1:]
 
@@ -188,8 +188,8 @@ def layout(**_):
     controles = [
         ui.control("Ruta", selector_ruta("hv-ruta", "CRA 54")),
         ui.control("Día de 2025", selector_fecha("hv-fecha", FECHA_INICIAL)),
-        ui.control("Pronóstico de demanda", selector_modelo("hv-modelo", modelos=ORDEN_MODELOS, valor="E12",
-                                                            nombres={"E1": "E1 (plan publicado)"})),
+        ui.control("Pronóstico del informe académico", selector_modelo("hv-modelo", modelos=ORDEN_MODELOS, valor="E12",
+                                                            nombres={"E1": "Experimento 1 (plan publicado)"})),
     ]
     return ui.pantalla([
         ui.arriba(ui.cabecera("horario", "¿Cuántos buses y cada cuánto?",

@@ -1,0 +1,69 @@
+{
+ "solicitud": {
+  "ruta": "CRA 54",
+  "instante": "2025-11-19T06:00:00-05:00",
+  "horizonte_min": 60
+ },
+ "umbrales": "headway mínimo 30 min",
+ "recommendation": {
+  "headwayMinutes": null,
+  "busesPerHour": null,
+  "vehiclesRequired": null,
+  "viable": false,
+  "reason": "Ni con el headway mínimo (2 buses/h) y la tipología más grande (72 puestos) se cubre la carga del nivel de servicio: se requieren 1.744 puestos/h y el máximo es 144. La flota disponible (79 vehículos, ciclo de 243,8 min) solo sostiene 122 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 1.482 (8,3 % de cobertura). Se informa la mejor aproximación ejecutable: 2 buses/h cada 30,00 min, que cubre el 8,3 % de la carga del nivel de servicio."
+ },
+ "motivo": "Ni con el headway mínimo (2 buses/h) y la tipología más grande (72 puestos) se cubre la carga del nivel de servicio: se requieren 1.744 puestos/h y el máximo es 144. La flota disponible (79 vehículos, ciclo de 243,8 min) solo sostiene 122 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 1.482 (8,3 % de cobertura). Se informa la mejor aproximación ejecutable: 2 buses/h cada 30,00 min, que cubre el 8,3 % de la carga del nivel de servicio.",
+ "mejor_aproximacion": {
+  "aviso": "Mejor aproximación ejecutable: respeta la flota, el ciclo y el headway, pero NO cumple el nivel de servicio.",
+  "buses_hora": 2,
+  "headway_min": 30.0,
+  "vehiculos_requeridos": 9,
+  "capacidad_efectiva_pasajeros_h": 122.4,
+  "cobertura_nivel_servicio": 0.0826,
+  "componentes_cop": {
+   "costo_operativo": 439157.66,
+   "tiempo_espera": 5934724.74,
+   "sobreocupacion": 12061057.36,
+   "desviacion_frecuencia": 648090.36
+  },
+  "total_ponderado_cop": 19083030.12,
+  "asignacion": [
+   {
+    "codigo": "T1",
+    "nombre": "Bus corto",
+    "capacidad": 47,
+    "buses_hora": 0,
+    "vehiculos": 0,
+    "disponibles": 10,
+    "maximo_buses_hora": 2
+   },
+   {
+    "codigo": "T2",
+    "nombre": "Bus estándar",
+    "capacidad": 50,
+    "buses_hora": 0,
+    "vehiculos": 0,
+    "disponibles": 25,
+    "maximo_buses_hora": 2
+   },
+   {
+    "codigo": "T3",
+    "nombre": "Bus largo",
+    "capacidad": 58,
+    "buses_hora": 0,
+    "vehiculos": 0,
+    "disponibles": 24,
+    "maximo_buses_hora": 2
+   },
+   {
+    "codigo": "T4",
+    "nombre": "Bus de alta capacidad",
+    "capacidad": 72,
+    "buses_hora": 2,
+    "vehiculos": 9,
+    "disponibles": 20,
+    "maximo_buses_hora": 2
+   }
+  ]
+ }
+}

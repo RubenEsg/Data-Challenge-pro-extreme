@@ -1,0 +1,6 @@
+# Los lanzadores de Windows necesitan CRLF aunque el repositorio se clone en macOS o Linux
+*.bat text eol=crlf
+
+# Artefactos de los modelos: se verifican con su SHA-256 (manifest.json), así que viajan byte a byte, sin conversión
+# de fin de línea, en clones de Windows, macOS o Linux (si git cambiara CRLF por LF, el hash dejaría de coincidir).
+api_frecuencias/datos/modelos/** -text

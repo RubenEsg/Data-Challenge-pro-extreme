@@ -251,7 +251,7 @@ UMBRALES_INICIALES = [
 
 
 def upgrade() -> None:
-    op.execute(f"CREATE SCHEMA IF NOT EXISTS {E}")
+    op.execute(f"DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = '{E}') THEN CREATE SCHEMA {E}; END IF; END $$")  # noqa: E501  [integracion] escritor_ia sin CREATE en la base
     op.execute(DDL)
     conexion = op.get_bind()
     import sqlalchemy as sa

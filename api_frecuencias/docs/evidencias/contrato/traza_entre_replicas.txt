@@ -1,0 +1,27 @@
+RNF-006: continuidad de la traza W3C entre la petición que encola y la réplica que ejecuta (09-11-2026)
+Prueba: tests/integracion/test_traza_entre_replicas.py::test_otra_replica_continua_la_traza_desde_execution_log
+Comando: TEST_DATABASE_NAME=<base local de pruebas> pytest tests/integracion/test_traza_entre_replicas.py -q -s
+Resultado: 3 pruebas aprobadas (otra réplica desde execution_log, misma réplica desde memoria, traceparent inválido).
+
+Cómo se simula la otra réplica: la petición POST /api/v1/frequency/executions guarda el traceparent en
+execution_log y deja el trabajo en la cola; se borra el registro en memoria de la réplica que encoló y otro hilo
+(contexto vacío, worker_id «replica-b:1») lo reclama con cola.reclamar y lo corre con cola.correr_reclamo, el mismo
+camino de los trabajadores. El exportador en memoria de OpenTelemetry recoge todos los spans.
+
+Línea de evidencia impresa por la prueba:
+{'execution_id': '4853227c-9d35-4e8b-abaa-309869a49115',
+ 'correlation_id': 'rnf006-d0281dcc-7b6e-4944-9615-fbb057b34d20',
+ 'traceparent_guardado': '00-c2bf89c6de474578111d6c74fbd59ef2-18197551346c0d90-03',
+ 'trace_id_peticion': 'c2bf89c6de474578111d6c74fbd59ef2',
+ 'trace_id_trabajador': 'c2bf89c6de474578111d6c74fbd59ef2',
+ 'padre_del_ciclo': '18197551346c0d90', 'padre_remoto': True,
+ 'traza_origen': 'execution_log', 'worker_id': 'replica-b:1',
+ 'etapas_en_la_misma_traza': ['ejecucion.alertas', 'ejecucion.calidad', 'ejecucion.guardar_errores_calidad',
+                              'ejecucion.incorporar_historico', 'ejecucion.lectura_incremental',
+                              'ejecucion.notificaciones', 'ejecucion.prediccion']}
+
+Lectura: el span «ejecucion.ciclo_frecuencia» de la réplica B tiene el mismo trace_id que el span HTTP de la
+petición y su padre es exactamente el span guardado en el traceparent (padre remoto). Todas las etapas del ciclo
+quedan en la misma traza, con el mismo correlation_id. Implementación: app/observabilidad.py (ejecucion_en_curso,
+_de_la_base y contexto_w3c); el traceparent lo escribe app/servicios/ejecucion.py al crear la ejecución
+(migración 0004, columna execution_log.traceparent).

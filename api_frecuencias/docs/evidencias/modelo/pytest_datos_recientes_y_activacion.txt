@@ -1,0 +1,54 @@
+Pruebas del modelo: datos validados recientes en la inferencia, activación gobernada y prueba reservada informativa
+Fecha: 2026-11-09 (America/Bogota). Base de pruebas propia en el PostgreSQL local (puerto 5433), migrada desde cero
+(alembic downgrade base + upgrade head); copias de lectura de datos/, nada se escribe en datos/modelos.
+
+1) Integración (16 pruebas, 115,21 s)
+Comando: TEST_DATABASE_NAME=<base de pruebas> python -m pytest tests/integracion/test_monitoreo_api.py
+         "tests/integracion/test_api_integracion.py::test_activacion_controlada_y_reversion" -rA
+
+PASSED tests/integracion/test_monitoreo_api.py::test_ciclo_guarda_monitoreo_foto_y_columnas_nuevas
+PASSED tests/integracion/test_monitoreo_api.py::test_endpoints_de_monitoreo
+PASSED tests/integracion/test_monitoreo_api.py::test_politica_presenta_los_instantes_de_la_sombra_en_bogota
+PASSED tests/integracion/test_monitoreo_api.py::test_umbrales_de_la_politica_estan_versionados
+PASSED tests/integracion/test_monitoreo_api.py::test_evaluacion_e_importancia
+PASSED tests/integracion/test_monitoreo_api.py::test_pronostico_por_segmento_suma_la_ruta
+PASSED tests/integracion/test_monitoreo_api.py::test_retador_en_sombra_compuerta_y_reversion
+PASSED tests/integracion/test_monitoreo_api.py::test_entrenamiento_usa_historial_validado_y_no_pisa_el_activo
+PASSED tests/integracion/test_monitoreo_api.py::test_decision_del_planificador_usa_la_politica
+PASSED tests/integracion/test_monitoreo_api.py::test_politica_decide_por_degradacion_y_periodicidad
+PASSED tests/integracion/test_monitoreo_api.py::test_un_dia_validado_despues_del_parquet_actualiza_variables_y_se_pronostica
+PASSED tests/integracion/test_monitoreo_api.py::test_activacion_manual_rechaza_una_ventana_dentro_de_la_muestra
+PASSED tests/integracion/test_monitoreo_api.py::test_activacion_manual_aplica_los_cuatro_criterios_y_forzar_queda_auditado
+PASSED tests/integracion/test_monitoreo_api.py::test_foto_que_falla_no_tumba_el_ciclo_y_queda_en_las_metricas
+PASSED tests/integracion/test_monitoreo_api.py::test_activacion_manual_no_salta_la_sombra
+PASSED tests/integracion/test_api_integracion.py::test_activacion_controlada_y_reversion
+======================= 16 passed in 115.21s (0:01:55) ========================
+
+Qué demuestra cada prueba nueva:
+- test_un_dia_validado_despues_del_parquet_actualiza_variables_y_se_pronostica: solo con el Parquet, predecir del
+  2026-01-09 06:00 falla («Sin variables») y evaluar el 2026-01-08 dice «No hay datos reales». Al llegar el
+  2026-01-08 validado a demanda_observada: el pronóstico del día siguiente sale con banda v2 y SHAP, el lag7 del
+  2026-01-15 es el valor recibido, predecir_horas da lo mismo, el error se mide contra lo que llegó, el monitoreo
+  cubre la ventana y GET /models/{id}/evaluation evalúa ese día.
+- test_activacion_manual_rechaza_una_ventana_dentro_de_la_muestra: 422 «ventana_en_muestra» para el 2025-10-01 y el
+  2025-08-31 (corte 2025-08-31 + 61 días de validación = 2025-10-31).
+- test_activacion_manual_aplica_los_cuatro_criterios_y_forzar_queda_auditado: WAPE mejor pero cobertura 95 % → 409
+  «activacion_rechazada» por cobertura; el rechazado no vuelve sin forzar (409 «requiere_forzar»); forzar sin motivo
+  → 422 «motivo_requerido»; forzar con motivo → activo, con «activacion_forzada» y los criterios no cumplidos en la
+  auditoría; después se revierte con POST /models/rollback.
+- test_activacion_manual_no_salta_la_sombra: un candidato con la sombra en curso → 409 «requiere_forzar» sin evaluar.
+- test_foto_que_falla_no_tumba_el_ciclo_y_queda_en_las_metricas: la foto de variables falla dentro de su punto de
+  guardado; la sesión sigue usable y las métricas dicen «advertencias» y feature_snapshot_estado = «fallo».
+
+2) Unitarias completas y datos/ML del modelo (567 pruebas, 227,46 s)
+Comando: python -m pytest tests/unit tests/datos_ml/test_no_regresion.py tests/datos_ml/test_fuga_temporal.py
+         tests/datos_ml/test_distribucion.py
+567 passed in 227.46s (0:03:47); 0 fallos, 0 omitidas.
+
+Nuevas en tests/unit/test_inferencia.py: test_entrenar_no_mide_la_prueba_reservada_y_el_manifiesto_no_guarda_estado,
+test_huella_del_codigo_no_depende_del_fin_de_linea, test_preprocesamiento_es_el_del_entrenamiento_del_activo,
+test_variables_con_lo_validado_son_las_de_recalcular_toda_la_serie,
+test_sin_la_serie_validada_el_pronostico_despues_del_parquet_dice_su_rango, test_predecir_horas_es_predecir_hora_por_hora.
+Nueva en tests/datos_ml/test_no_regresion.py: test_el_entrenamiento_del_activo_no_guarda_metricas_de_la_prueba.
+
+3) Estático: ruff «All checks passed!» y bandit sin hallazgos en los archivos cambiados del modelo.

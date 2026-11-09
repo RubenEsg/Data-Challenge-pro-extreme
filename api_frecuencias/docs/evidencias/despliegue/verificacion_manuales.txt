@@ -1,0 +1,31 @@
+Comandos de los manuales verificados contra un servidor propio (E10), 9-11-2026 04:51 (America/Bogota).
+Montaje: uvicorn app.main:app en 127.0.0.1:8406; base de pruebas nueva en el PostgreSQL local (puerto 5433), migrada
+con «alembic upgrade head»; DATA_DIR y MODELOS_DIR en una copia temporal de datos/ (el repositorio no cambia);
+autenticación encendida con tres claves de prueba por rol (operador, analista y admin) creadas para la corrida, de las
+que la API solo recibe los hashes. Peticiones HTTP con httpx; cada línea es «petición -> código y lo comprobado».
+Lo que verifica, con su sección: errores 400 cuerpo_ilegible y 422 caracter_nulo / fuera_de_rango (manual_tecnico.md
+§2.4, manual_usuario.md §9), x-rol-minimo en el OpenAPI (§2.4), 401 y 403 con rol_requerido, campos nuevos de la
+alerta y filtro por lugar (manual_usuario.md §3.1 y §7), GET /api/v1/respuesta y /respuesta/export (manual_usuario.md
+§7), calibración v2 en la predicción (manual_tecnico.md §5). La demostración de §14.2 con el mismo montaje está en
+demo_ciclo_api_uvicorn.txt.
+
+alembic upgrade head (base de pruebas nueva) -> código 0
+alembic current -> 0005 (head)
+GET /health -> 200 estado=ok base=ok
+POST /recommendations/calculate con bytes no UTF-8 -> 400 codigo=cuerpo_ilegible X-Correlation-Id=True
+GET /alerts?ruta=%00 -> 422 codigo=validacion tipo=['caracter_nulo']
+GET /alerts?hasta=9999-12-31 -> 422 codigo=fuera_de_rango
+GET /openapi.json -> 57 rutas, 60 operaciones; x-rol-minimo por rol = {'analista': 4, 'operador': 50, 'admin': 4}; PUT /thresholds x-rol-minimo=admin
+GET /api/v1/models sin clave -> 401 (esperado 401)
+POST /models/rollback con operador -> 403 (esperado 403) detalle={'rol': 'operador', 'rol_requerido': 'admin'}
+POST /frequency/executions (analista, hasta 2025-09-30) -> 202
+ejecución -> estado=ok filas_leidas=51204 predicciones=9 alertas=20
+GET /alerts -> 200 total=20; campos §5.3 presentes=['metodo_puntaje', 'origen', 'probabilidad', 'serie_reciente', 'tendencia', 'tendencia_pendiente', 'ubicacion', 'variables_influyentes']; con ubicación=0
+GET /alerts?cerca_de=10.98,-74.80&radio_m=60000 -> 422 (esperado 422: máximo 50 km)
+GET /alerts?cerca_de=10.98,-74.80 (radio por omisión 1000 m) -> 200 total=0
+GET /respuesta?ruta=CRA%2054 -> 200 claves=['fecha', 'generado_en', 'limitaciones', 'pregunta', 'rutas', 'tipo_dia', 'trazabilidad']
+GET /respuesta/export?formato=csv&ruta=CRA%2054 -> 200 filas=17
+GET /respuesta?fecha=2023-01-01 -> 404 codigo=sin_datos
+POST /predictions/run -> 201 modelVersion=hgb_fv2_20250831_s42 calibracion_version_v2=True
+GET /thresholds -> 200 version=4
+

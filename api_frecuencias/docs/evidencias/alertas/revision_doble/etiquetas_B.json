@@ -1,0 +1,770 @@
+[
+  {
+    "id": "M001",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Las subidas reales (659) fueron el 207,1 % de los 318 puestos/h programados, muy por encima del 85 %, y la optimización pedía 8 buses/h frente a 6,36, con dato completo.",
+    "criterio": "2.4 · ALT-003 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M002",
+    "etiqueta": "verdadera",
+    "confianza": "media",
+    "razon": "En 16-18 h hubo 165 subidas frente a 743 esperadas y 519-724 en los 4 días laborales previos, y aunque la 16 h está en 0 pasajeros y 0 salidas, la 17 h sigue baja (165 subidas con 2 de 5,0 salidas, 82,5 por salida frente a 52-65 habituales), así que no es un hueco aislado y había que validar evento, ruta o captura.",
+    "criterio": "2.4 · ALT-005 verdadera (2.1 no aplica: el hueco tiene consecuencia)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M003",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 172,1 % (2.288 subidas ÷ 1.330 puestos/h), sobre el 90 %, con 27 salidas y dato completo, y la marca de vacaciones no bajó la demanda (1.890-2.446 en los días previos).",
+    "criterio": "2.4 · ALT-002 verdadera (2.2 no aplica)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M004",
+    "etiqueta": "falsa",
+    "confianza": "alta",
+    "razon": "En Navidad salieron 2 de 7,2 salidas en 18-20 h dentro de un servicio festivo reducido todo el día (1 a 3 salidas por hora frente a 3,4-6,5 programadas), parecido a los días previos del mismo tipo (2-3 salidas a las 18 h y 0 a las 19 h en el festivo del 8 de diciembre).",
+    "criterio": "2.2 · ALT-006 falsa (c)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M005",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 176,3 % (2.344 subidas ÷ 1.330 puestos/h), sobre el 90 %, con 24 de 26,6 salidas, dato completo y sin calendario.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M006",
+    "etiqueta": "verdadera",
+    "confianza": "media",
+    "razon": "La demanda real de 06-07 h fue 384 subidas frente a 318 puestos/h programados (120,7 %), con 4 de 6,4 salidas (96,0 subidas por salida) y sin nota de calidad en la hora, aunque queda algo bajo los 450-747 de los 4 días laborales previos, por eso la confianza es media.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M007",
+    "etiqueta": "falsa",
+    "confianza": "media",
+    "razon": "El 31 de diciembre salieron 13 de 61,9 salidas en 13-20 h, parecido al 24 de diciembre en la misma franja (15 salidas en 13-18 h), y la ventana termina con el cierre del día (19 h con 0 pasajeros y 1 salida, 20 h en cero), aunque las subidas por salida (unas 154) fueron altas, por eso la confianza es media.",
+    "criterio": "2.2 · ALT-006 falsa (c, d)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M008",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 175,2 % (864 subidas ÷ 493 puestos/h), sobre el 90 %, con 8 de 9,9 salidas, y el 24 de diciembre no bajó la demanda de esa hora (980-1.038 en los días de vacaciones previos).",
+    "criterio": "2.4 · ALT-002 verdadera (2.2 no aplica)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M009",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real del sábado fue 173,0 % (1.934 subidas ÷ 1.118 puestos/h), sobre el 90 %, con 22 de 22,4 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M010",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Las subidas reales (603) fueron el 189,5 % de los 318 puestos/h, sobre el 85 %, y aunque la diferencia de 7 frente a 6,36 buses/h es menor de 1, la ocupación está lejos de la franja dudosa de 80-90 %.",
+    "criterio": "2.4 · ALT-003 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M011",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real de 06-07 h fue 659 subidas frente a 318 puestos/h (207,1 %), con 5 de 6,4 salidas (131,8 subidas por salida), dato completo y en línea con los 464-709 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M012",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 180,9 % (892 subidas ÷ 493 puestos/h), sobre el 90 %, con 8 de 9,9 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M013",
+    "etiqueta": "falsa",
+    "confianza": "media",
+    "razon": "En un día de vacaciones salieron 7 de 16,4 salidas en 18-20 h, dentro del rango de los días de vacaciones previos a esas horas (4-12), con 57-64 subidas por salida (sin acumulación) y un déficit de 57,4 % apenas sobre la tolerancia del 50 %.",
+    "criterio": "2.2 · ALT-006 falsa (c, d)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M014",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real del sábado fue 142,6 % (441 subidas ÷ 309 puestos/h), sobre el 90 %, con 6 de 6,2 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M015",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 668 subidas frente a 318 puestos/h (209,9 %), con 7 salidas (95,4 subidas por salida), dato completo y coherente con los 385-698 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M016",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 830 subidas frente a 493 puestos/h (168,3 %), con 8 de 9,9 salidas (103,8 subidas por salida), dato completo y coherente con los 633-914 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M017",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Las subidas reales (544) fueron el 170,9 % de los 318 puestos/h, sobre el 85 %, y aunque la diferencia de 7 frente a 6,36 buses/h es menor de 1, la ocupación está lejos de la franja dudosa de 80-90 %.",
+    "criterio": "2.4 · ALT-003 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M018",
+    "etiqueta": "falsa",
+    "confianza": "alta",
+    "razon": "En el festivo las subidas reales (177) fueron el 66,1 % de los 268 puestos/h programados, por debajo del 85 %, así que la frecuencia sí cubrió la demanda.",
+    "criterio": "2.4 · ALT-003 falsa",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M019",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Un jueves normal salieron 5 de 16,4 salidas en 18-20 h (déficit 69,5 %) frente a 10-19 en los días previos, con demanda (180 y 203 subidas) y 90 subidas por salida a las 18 h frente a 37-43 habituales, y la oferta volvió a las 20 h (10 salidas).",
+    "criterio": "2.4 · ALT-006 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M020",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 173,1 % (2.301 subidas ÷ 1.330 puestos/h), sobre el 90 %, con 24 de 26,6 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M021",
+    "etiqueta": "verdadera",
+    "confianza": "media",
+    "razon": "En el festivo salieron 8 de 18,7 salidas en 17-20 h frente a 15-18 en los días previos del mismo tipo (el festivo del 17 de noviembre tuvo 15), con 733 subidas y 94-109 por salida a las 17-18 h, y la confianza es media porque todo el día tuvo pocas salidas y el déficit (57,3 %) supera poco la tolerancia.",
+    "criterio": "2.4 · ALT-006 verdadera (2.2 no aplica)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M022",
+    "etiqueta": "verdadera",
+    "confianza": "media",
+    "razon": "Las 19.024 subidas (z -3,71) caen por un corte abrupto en 16-18 h (761, 460 y 269 subidas con 11, 6 y 3 salidas frente a 17,3, 17,0 y 15,0 programadas), y la confianza es media porque los días previos también fueron bajos (19.752-20.690 frente a la mediana de 23.362).",
+    "criterio": "2.4 · ALT-008 verdadera (a)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M023",
+    "etiqueta": "verdadera",
+    "confianza": "media",
+    "razon": "En 10-13 h hubo 885 subidas frente a 1.371 esperadas, bajo el P10 (993) y bajo el mínimo de los 4 días laborales previos (1.036-1.416), con salidas registradas (4, 2 y 4) y sin calendario, aunque el margen bajo el límite (960) es solo del 7,8 %, por eso la confianza es media.",
+    "criterio": "2.4 · ALT-005 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M024",
+    "etiqueta": "falsa",
+    "confianza": "alta",
+    "razon": "Las 3.395 subidas de Navidad (z -4,38) las explica el calendario, con un perfil horario completo y plano propio de festivo (solo la 4 h en cero) y un nivel cercano al del festivo del 8 de diciembre (3.931).",
+    "criterio": "2.2 · ALT-008 falsa",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M025",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real del sábado fue 172,0 % (885 subidas ÷ 515 puestos/h), sobre el 90 %, con 8 de 10,3 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M026",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 200,1 % (637 subidas ÷ 318 puestos/h), sobre el 90 %, con 6 de 6,4 salidas, y la marca de vacaciones no bajó la demanda (592-797 en los días previos).",
+    "criterio": "2.4 · ALT-002 verdadera (2.2 no aplica)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M027",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Las subidas reales del sábado (620) fueron el 200,5 % de los 309 puestos/h, sobre el 85 %, con 7 buses/h recomendados frente a 6,19 programados y dato completo.",
+    "criterio": "2.4 · ALT-003 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M028",
+    "etiqueta": "indeterminada",
+    "confianza": "media",
+    "razon": "Las 9.349 subidas (z -3,84) vienen con un perfil completo y sin cortes, pero los días laborales previos también fueron bajos (9.381 y 9.697) y el siguiente dio 9.845, así que no se sabe si el problema es el día o la referencia (mediana de 11.568).",
+    "criterio": "2.5 · ALT-008 indeterminada",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M029",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Las subidas reales (559) fueron el 175,6 % de los 318 puestos/h, sobre el 85 %, con 8 buses/h recomendados frente a 6,36 programados y dato completo.",
+    "criterio": "2.4 · ALT-003 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M030",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real del sábado fue 183,0 % (942 subidas ÷ 515 puestos/h), sobre el 90 %, con 9 de 10,3 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M031",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real del sábado fue 1.877 subidas frente a 1.118 puestos/h (167,9 %), con 19 de 22,4 salidas (98,8 subidas por salida), dato completo y cercana a los 1.926-2.282 de los 4 sábados previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M032",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 534 subidas frente a 318 puestos/h (167,8 %), con 6 de 6,4 salidas (89,0 subidas por salida), dato completo y dentro de los 423-551 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M033",
+    "etiqueta": "verdadera",
+    "confianza": "media",
+    "razon": "En 07-09 h la demanda real (2.365) quedó bajo el P10 (2.660,5) en las dos horas, un 11,1 % más allá de la banda y bajo los 2.875-3.495 de los días previos, con dato completo, y la confianza es media porque la 08 h tuvo solo 10 de 15,7 salidas.",
+    "criterio": "2.4 · ALT-007 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M034",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 527 subidas frente a 318 puestos/h (165,6 %), con 5 de 6,4 salidas (105,4 subidas por salida), dato completo y dentro de los 462-579 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M035",
+    "etiqueta": "falsa",
+    "confianza": "media",
+    "razon": "La demanda real de 05-07 h (4.053) quedó solo un 4,0 % bajo el P10 (4.223) y la 07 h volvió a la banda (1.766 entre 1.462 y 1.903), aunque el total quedó bajo los 4.554-5.306 de los días previos, por eso la confianza es media.",
+    "criterio": "2.3 · ALT-007 falsa (b)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M036",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 175,0 % (2.327 subidas ÷ 1.330 puestos/h), sobre el 90 %, con 26 de 26,6 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M037",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 238,5 % (1.176 subidas ÷ 493 puestos/h), sobre el 90 %, con 11 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M038",
+    "etiqueta": "falsa",
+    "confianza": "media",
+    "razon": "La demanda real de 14-16 h (2.005) superó el P90 (1.886) solo en un 6,3 % y la 16 h volvió a la banda (605 entre 472 y 852), aunque el total supera los 1.064-1.722 de los días previos, por eso la confianza es media.",
+    "criterio": "2.3 · ALT-007 falsa (b)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M039",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 208,3 % (663 subidas ÷ 318 puestos/h), sobre el 90 %, con 7 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M040",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 806 subidas frente a 318 puestos/h (253,2 %), con 8 salidas (100,8 subidas por salida) y sin nota de calidad en la hora (la de la 17 h queda fuera), por encima de los 544-676 de los días previos pero sin señal de artefacto.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M041",
+    "etiqueta": "falsa",
+    "confianza": "media",
+    "razon": "El 31 de diciembre (vacaciones) hubo 1.125 subidas en 13-17 h frente a 2.168 esperadas, un nivel parecido al del 24 de diciembre en la misma franja (1.025) y explicado por el servicio reducido de la víspera de año nuevo (1 a 3 salidas por hora).",
+    "criterio": "2.2 · ALT-005 falsa (a)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M042",
+    "etiqueta": "falsa",
+    "confianza": "alta",
+    "razon": "La demanda real del domingo fue 149 subidas frente a 268 puestos/h (55,6 %, 37,2 subidas por salida), así que el riesgo de superar la capacidad no se materializó.",
+    "criterio": "2.4 · ALT-001 falsa",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M043",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 609 subidas frente a 318 puestos/h (191,3 %), con 6 de 6,4 salidas (101,5 subidas por salida), dato completo y dentro de los 609-797 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M044",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 147,2 % (1.957 subidas ÷ 1.330 puestos/h), sobre el 90 %, con 21 de 26,6 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M045",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Las subidas reales (702) fueron el 220,6 % de los 318 puestos/h, sobre el 85 %, con 7 buses/h recomendados frente a 6,36 programados y dato completo.",
+    "criterio": "2.4 · ALT-003 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M046",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 199,5 % (635 subidas ÷ 318 puestos/h), sobre el 90 %, con 5 de 6,4 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M047",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 2.231 subidas frente a 1.330 puestos/h (167,8 %), con 24 de 26,6 salidas (93,0 subidas por salida), dato completo y dentro de los 2.033-2.625 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M048",
+    "etiqueta": "indeterminada",
+    "confianza": "media",
+    "razon": "El 31 de diciembre salieron 4 de 31 salidas en 14-20 h, con horas en 0 pasajeros y 0 salidas (14, 17 y 19 h) y una salida sin pasajeros a las 18 h, y aunque 15-16 h acumulan subidas (338 y 226 con 2 y 1 salidas) como en una interrupción real, el 24 de diciembre también tuvo la 18 h en cero y solo 10 salidas en 14-19 h, así que la tarjeta no separa un cierre de víspera programado de una falla o de un hueco de registro.",
+    "criterio": "2.5 · ALT-006 indeterminada",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M049",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 980 subidas frente a 493 puestos/h (198,8 %), con 9 de 9,9 salidas, y las vacaciones no la bajaron (985-1.143 en los días de vacaciones previos).",
+    "criterio": "2.4 · ALT-001 verdadera (2.2 no aplica)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M050",
+    "etiqueta": "falsa",
+    "confianza": "media",
+    "razon": "La demanda real del domingo fue 654 subidas frente a 659 puestos/h programados (99,3 %), es decir, quedó en la capacidad sin superarla, y aunque está a menos del 2 % la hora no tiene nota de calidad, así que no aplica indeterminada.",
+    "criterio": "2.4 · ALT-001 falsa",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M051",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 179,7 % (2.390 subidas ÷ 1.330 puestos/h), sobre el 90 %, con 25 de 26,6 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M052",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 179,3 % (884 subidas ÷ 493 puestos/h), sobre el 90 %, con 8 de 9,9 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M053",
+    "etiqueta": "falsa",
+    "confianza": "media",
+    "razon": "El 31 de diciembre la ventana 12-21 h incluye cuatro horas en 0 pasajeros y 0 salidas (17-20 h) y la hora de borde 20 h, y el resto (2 a 5 salidas por hora frente a 17-19 programadas) es el cierre anticipado de la víspera de año nuevo, en línea con el 24 de diciembre (3.555 subidas frente a 2.812).",
+    "criterio": "2.1 y 2.2 · ALT-005 falsa (a, b, c)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M054",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 225,5 % (1.112 subidas ÷ 493 puestos/h), sobre el 90 %, con 10 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M055",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 182,2 % (580 subidas ÷ 318 puestos/h), sobre el 90 %, con 7 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M056",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 860 subidas frente a 493 puestos/h (174,4 %), con 7 de 9,9 salidas (122,9 subidas por salida), dato completo y dentro de los 830-926 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M057",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 2.399 subidas frente a 1.330 puestos/h (180,4 %), con 25 de 26,6 salidas, y las vacaciones no la bajaron (2.173-2.325 en los días de vacaciones previos).",
+    "criterio": "2.4 · ALT-001 verdadera (2.2 no aplica)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M058",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 678 subidas frente a 318 puestos/h (213,0 %), con 6 de 6,4 salidas (113,0 subidas por salida), dato completo y dentro de los 663-759 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M059",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real del sábado fue 186,8 % (2.088 subidas ÷ 1.118 puestos/h), sobre el 90 %, con 21 de 22,4 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M060",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 209,1 % (1.031 subidas ÷ 493 puestos/h), sobre el 90 %, con 11 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M061",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Un viernes normal salieron 9 de 31,9 salidas en 17-19 h (déficit 71,8 %) frente a 24-28 en los días previos, con 729 subidas y 90 por salida a las 18 h frente a 32-49 habituales, y la oferta se recuperó a las 19 h (8 salidas).",
+    "criterio": "2.4 · ALT-006 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M062",
+    "etiqueta": "falsa",
+    "confianza": "alta",
+    "razon": "La demanda real de 11-13 h (1.034) superó el P90 (1.022) en solo 1,2 %, cabe en el rango de los días previos (763-1.159) y la 13 h volvió a la banda (534 entre 433 y 754).",
+    "criterio": "2.3 · ALT-007 falsa (b)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M063",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 585 subidas frente a 318 puestos/h (183,8 %), con 5 de 6,4 salidas (117,0 subidas por salida), dato completo y cerca de los 603-759 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M064",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 1.969 subidas frente a 1.330 puestos/h (148,1 %), con 19 de 26,6 salidas (103,6 subidas por salida), y las vacaciones no la llevaron bajo la capacidad (2.173-2.399 en los días previos).",
+    "criterio": "2.4 · ALT-001 verdadera (2.2 no aplica)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M065",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 2.344 subidas frente a 1.330 puestos/h (176,3 %), con 24 de 26,6 salidas (97,7 subidas por salida), dato completo y cerca de los 2.412-2.589 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M066",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 174,2 % (2.316 subidas ÷ 1.330 puestos/h), sobre el 90 %, con 26 de 26,6 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M067",
+    "etiqueta": "falsa",
+    "confianza": "media",
+    "razon": "Las 15.577 subidas (z -3,51, apenas sobre el umbral) caen en un sábado de vacaciones entre Navidad y año nuevo, con perfil completo, viajes normales (227 frente a 226) y un nivel cercano al sábado de vacaciones previo (17.242), mientras la mediana de 8 semanas sale de sábados de clases.",
+    "criterio": "2.2 · ALT-008 falsa",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M068",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 955 subidas frente a 493 puestos/h (193,7 %), con 11 salidas (86,8 subidas por salida), dato completo y dentro de los 686-1.122 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M069",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 708 subidas frente a 318 puestos/h (222,5 %), con 7 salidas (101,1 subidas por salida), dato completo y dentro de los 464-709 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M070",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Las subidas reales del sábado (539) fueron el 174,3 % de los 309 puestos/h, sobre el 85 %, con 7 buses/h recomendados frente a 6,19 programados y dato completo.",
+    "criterio": "2.4 · ALT-003 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M071",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 1.024 subidas frente a 493 puestos/h (207,7 %), con 10 salidas (102,4 subidas por salida), dato completo y dentro de los 904-1.176 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M072",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 219,3 % (698 subidas ÷ 318 puestos/h), sobre el 90 %, con 6 de 6,4 salidas y dato completo (el festivo fue el día anterior y no bajó la demanda).",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M073",
+    "etiqueta": "verdadera",
+    "confianza": "media",
+    "razon": "La demanda real del sábado fue 397 subidas frente a 309 puestos/h (128,4 %), pero con solo 3 de 6,2 salidas (132,3 subidas por salida) y bajo los 447-575 de los 4 sábados previos, por eso la confianza es media.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M074",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Las 15.201 subidas (z -5,45) frente a 20.051-21.131 en los días de vacaciones previos salen de un corte en el dato: 13 h en 0 pasajeros y 0 salidas, 14 h con 1 salida y 162 subidas, y salidas casi sin subidas en 17-19 h (16, 11 y 9 salidas con 400, 139 y 190 subidas).",
+    "criterio": "2.4 · ALT-008 verdadera (a)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M075",
+    "etiqueta": "falsa",
+    "confianza": "alta",
+    "razon": "Las 0 subidas de 19-21 h en el festivo salen de la 19 h en 0 pasajeros y 0 salidas tras una 18 h normal (297 subidas, 3 salidas) y de la hora de borde 20 h, que también fue 0 en 3 de los 4 días previos, así que es un hueco o cierre del servicio y no una caída de demanda.",
+    "criterio": "2.1 · ALT-005 falsa (b, c)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M076",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Durante 4 h (11-15 h) la demanda real (3.608) superó el P90 (3.181,5) en un 13,4 %, muy por encima de los 2.583-2.738 de los domingos previos, con salidas normales (13 a 15 por hora) y dato completo.",
+    "criterio": "2.4 · ALT-007 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M077",
+    "etiqueta": "verdadera",
+    "confianza": "media",
+    "razon": "Un miércoles normal salieron 4 de 9,9 salidas en 18-20 h (déficit 59,7 %), por debajo de las 6-8 de los días previos, con 273 subidas y 76 por salida a las 19 h frente a 50-58, y a las 20 h salieron 6 (despacho tardío), con confianza media porque la tarde suele ir bajo lo programado.",
+    "criterio": "2.4 · ALT-006 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M078",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 551 subidas frente a 318 puestos/h (173,1 %), con 5 de 6,4 salidas (110,2 subidas por salida), dato completo y dentro de los 423-664 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M079",
+    "etiqueta": "falsa",
+    "confianza": "alta",
+    "razon": "La demanda real del domingo fue 160 subidas frente a 268 puestos/h (59,7 %, 32,0 subidas por salida), así que no superó la capacidad.",
+    "criterio": "2.4 · ALT-001 falsa",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M080",
+    "etiqueta": "falsa",
+    "confianza": "media",
+    "razon": "Las 14.007 subidas y 168 viajes del 24 de diciembre (z -5,26 y -5,17) los explica la víspera de Navidad: perfil completo sin horas en cero, mañana normal (0,85 a 1,40 del esperado) y servicio reducido desde la 13 h (2 a 6 salidas por hora).",
+    "criterio": "2.2 · ALT-008 falsa",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M081",
+    "etiqueta": "falsa",
+    "confianza": "alta",
+    "razon": "En vacaciones la demanda real de 10-12 h (544) quedó solo un 4,2 % bajo el P10 (568), igual al mínimo de los días de vacaciones previos (545-746), y la 12 h volvió a la banda (331 entre 285 y 515).",
+    "criterio": "2.3 · ALT-007 falsa (b)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M082",
+    "etiqueta": "verdadera",
+    "confianza": "media",
+    "razon": "En el primer día de vacaciones la demanda real de 15-17 h (556) quedó un 8,2 % bajo el P10 (605,5) y la hora siguiente siguió bajo la banda (219 frente a 225), lejos de los 807-1.026 de los días de clases previos: es un efecto de calendario que el modelo no anticipó.",
+    "criterio": "2.4 · ALT-007 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M083",
+    "etiqueta": "verdadera",
+    "confianza": "baja",
+    "razon": "El 31 de diciembre la demanda real de 06-07 h fue 1.395 subidas frente a 1.330 puestos/h (104,9 %, 60,7 subidas por salida con 23 de 26,6 salidas): el calendario la bajó frente a los 1.652-1.867 de los días de vacaciones previos, pero aun así superó la capacidad, aunque por poco.",
+    "criterio": "2.4 · ALT-001 verdadera (2.2 no la vuelve falsa)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M084",
+    "etiqueta": "verdadera",
+    "confianza": "media",
+    "razon": "En 17-19 h hubo 890 subidas frente a 1.504 esperadas y 1.205-1.817 en los días previos, con las salidas hundidas (7 y 3 frente a 17,0 y 15,0 programadas, 80 y 110 subidas por salida), y la marca de vacaciones no lo explica porque el resto del día estuvo en lo esperado o por encima.",
+    "criterio": "2.4 · ALT-005 verdadera (2.2 no aplica)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M085",
+    "etiqueta": "falsa",
+    "confianza": "alta",
+    "razon": "Las subidas reales del domingo (93) fueron el 34,7 % de los 268 puestos/h, muy por debajo del 85 %, así que la frecuencia programada cubrió la demanda.",
+    "criterio": "2.4 · ALT-003 falsa",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M086",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real fue 579 subidas frente a 318 puestos/h (181,9 %), con 6 de 6,4 salidas (96,5 subidas por salida), dato completo y en línea con los 462-574 de los días previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M087",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La demanda real del sábado fue 2.088 subidas frente a 1.118 puestos/h (186,8 %), con 21 de 22,4 salidas (99,4 subidas por salida), dato completo y dentro de los 1.822-2.289 de los sábados previos.",
+    "criterio": "2.4 · ALT-001 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M088",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 188,0 % (2.500 subidas ÷ 1.330 puestos/h), sobre el 90 %, con 27 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M089",
+    "etiqueta": "falsa",
+    "confianza": "media",
+    "razon": "La persistencia de 2 h depende de la hora de borde 20 h (90 subidas con 1 salida frente a 390 esperadas), mientras la 19 h (402 subidas) cabe en el rango de los días previos (312-654).",
+    "criterio": "2.1 · ALT-005 falsa (c)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M090",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Durante 3 h (15-18 h) la demanda real (4.704) superó el P90 (4.204,6) en un 11,9 %, por encima de los 3.341-3.984 de los días previos, con salidas normales (16 a 19 por hora) y dato completo.",
+    "criterio": "2.4 · ALT-007 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M091",
+    "etiqueta": "falsa",
+    "confianza": "alta",
+    "razon": "Las 1.776 subidas de Navidad (z -3,53) las explica el calendario, con un perfil completo de festivo (1 a 4 salidas por hora y solo las horas de borde 4 y 20 h en cero) y por debajo del festivo del 8 de diciembre (2.464).",
+    "criterio": "2.2 · ALT-008 falsa",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M092",
+    "etiqueta": "verdadera",
+    "confianza": "media",
+    "razon": "Los 134 viajes y 10.686 subidas del 31 de diciembre (z -6,91 y -6,73) muestran la causa en el dato, con cuatro horas de servicio en 0 pasajeros y 0 salidas (17-20 h) y 2 a 5 salidas por hora desde las 12 h frente a 17-19 programadas, y aunque la víspera de año nuevo puede explicar parte, el perfil no está completo y había que validar fuente y período.",
+    "criterio": "2.4 · ALT-008 verdadera (a)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M093",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real fue 213,0 % (678 subidas ÷ 318 puestos/h), sobre el 90 %, con 6 de 6,4 salidas y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M094",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "Las subidas reales del sábado (441) fueron el 142,6 % de los 309 puestos/h, sobre el 85 %, con 7 buses/h recomendados frente a 6,19 programados y dato completo.",
+    "criterio": "2.4 · ALT-003 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M095",
+    "etiqueta": "verdadera",
+    "confianza": "media",
+    "razon": "En 15-17 h hubo 924 subidas frente a 1.354 esperadas y 1.253-1.718 en los 4 días laborales previos (26 % bajo el mínimo), con 6 y 4 salidas y sin calendario, aunque queda solo un 2,5 % bajo el límite (948), por eso la confianza es media.",
+    "criterio": "2.4 · ALT-005 verdadera",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  },
+  {
+    "id": "M096",
+    "etiqueta": "verdadera",
+    "confianza": "alta",
+    "razon": "La ocupación real del domingo de vacaciones fue 116,5 % (767 subidas ÷ 659 puestos/h), sobre el 90 %, con 13 de 13,2 salidas (59,0 subidas por salida) y dato completo.",
+    "criterio": "2.4 · ALT-002 verdadera (2.2 no aplica)",
+    "revisor": "B · agente de modelo de lenguaje que sigue protocolo.md (revisión automatizada, no humana); la validación por el área de operaciones de Sobusa está pendiente"
+  }
+]

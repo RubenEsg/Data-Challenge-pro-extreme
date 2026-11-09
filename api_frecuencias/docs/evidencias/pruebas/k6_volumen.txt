@@ -1,0 +1,117 @@
+RNF-002 y §14.1 «Carga» con el VOLUMEN ACORDADO: un año de resultados (2026-11-09, portátil Windows 11, Docker Desktop, k6 grafana/k6:1.4.2)
+
+1) Dataset acordado (scripts/sembrar_volumen.py)
+   Volumen de un año de operación del ciclo diario, armado con filas REALES de la API: una base con 33 ejecuciones reales del ciclo (cortes de 2025-01-01 a 2026-01-01) se replicó 12 veces con identificadores nuevos y las fechas corridas 7 días por copia (se conserva el día de la semana y las relaciones ejecución → predicción → recomendación, alerta → historial).
+   Base local aparte ai_frecuencias_volumen_infra5 (PostgreSQL 14 + PostGIS 3.4, puerto 5433), 77 MB:
+      ejecuciones (execution_log)         396
+      intentos (execution_attempt)        396
+      predicciones (prediction)         3.348
+      recomendaciones (recommendation)  3.348
+      alertas (alert)                   8.988
+      historial de alertas              8.988
+      fotos de variables                4.464
+   Ventanas de predicción sembradas: 2024-10-16 a 2026-01-01.
+   La tasa de alertas de esa base (749 en 33 ejecuciones) es la de las reglas anteriores, más alta que la vigente: para la carga es una cota conservadora (más filas que un año real con las reglas actuales).
+
+2) API probada
+   Copia congelada del código del commit 3d6781d (git worktree), uvicorn de un solo proceso en :8507, autenticación encendida (clave de rol analista nueva en cada corrida, solo por entorno), fuente Parquet para el ciclo y la réplica operacional local (5434, usuario de solo lectura lector_ia) para /segmentos/estadisticas. El equipo corría en paralelo otros procesos pesados: son cotas conservadoras.
+
+3) Consultas paginadas concurrentes (k6/consultas.js): rampa 0 -> 25 -> 50 usuarios virtuales en 60 s, límite y desplazamiento al azar dentro del total real de cada colección
+   totales vistos por k6 al empezar: {"recommendations": 3348, "alerts": 8988, "executions": 396, "models": 6, "predictions": 3348}
+   █ THRESHOLDS
+
+       errores_funcionales
+       ✓ 'rate<0.01' rate=0.00%
+
+       http_req_duration
+       ✓ 'p(95)<2000' p(95)=627.52ms
+
+         {recurso:alerts}
+         ✓ 'p(95)<2000' p(95)=711.53ms
+
+         {recurso:executions}
+         ✓ 'p(95)<2000' p(95)=567.12ms
+
+         {recurso:models}
+         ✓ 'p(95)<2000' p(95)=504.65ms
+
+         {recurso:predictions}
+         ✓ 'p(95)<2000' p(95)=729.73ms
+
+         {recurso:recommendations}
+         ✓ 'p(95)<2000' p(95)=591.79ms
+
+       http_req_failed
+       ✓ 'rate<0.01' rate=0.00%
+
+
+     █ TOTAL RESULTS
+
+       checks_total.......: 8604    142.61179/s
+       checks_succeeded...: 100.00% 8604 out of 8604
+       checks_failed......: 0.00%   0 out of 8604
+
+       ✓ estado 200
+       ✓ página con total e items
+       ✓ correlation id devuelto
+
+       CUSTOM
+       errores_funcionales.............: 0.00%  0 out of 2868
+
+       HTTP
+       http_req_duration...............: avg=301.06ms min=10.33ms  med=287.87ms p(90)=543.56ms p(95)=627.52ms p(99)=926.96ms max=1.27s
+         { expected_response:true }....: avg=301.06ms min=10.33ms  med=287.87ms p(90)=543.56ms p(95)=627.52ms p(99)=926.96ms max=1.27s
+         { recurso:alerts }............: avg=360.86ms min=39.15ms  med=347.02ms p(90)=619.43ms p(95)=711.53ms p(99)=996.24ms max=1.27s
+         { recurso:executions }........: avg=269.16ms min=18.71ms  med=258.62ms p(90)=486.99ms p(95)=567.12ms p(99)=690.24ms max=966.51ms
+         { recurso:models }............: avg=230.82ms min=10.74ms  med=216.92ms p(90)=443.4ms  p(95)=504.65ms p(99)=645.59ms max=833.98ms
+         { recurso:predictions }.......: avg=355.23ms min=38.08ms  med=342.75ms p(90)=618.61ms p(95)=729.73ms p(99)=1.05s    max=1.26s
+         { recurso:recommendations }...: avg=297.22ms min=22.43ms  med=296.29ms p(90)=509.18ms p(95)=591.79ms p(99)=810.83ms max=1.19s
+       http_req_failed.................: 0.00%  0 out of 2873
+       http_reqs.......................: 2873   47.620139/s
+
+       EXECUTION
+       iteration_duration..............: avg=652.51ms min=217.22ms med=637.64ms p(90)=917.87ms p(95)=1s       p(99)=1.27s    max=1.73s
+       iterations......................: 2868   47.537263/s
+       vus.............................: 3      min=2         max=49
+       vus_max.........................: 50     min=50        max=50
+
+       NETWORK
+       data_received...................: 329 MB 5.5 MB/s
+       data_sent.......................: 609 kB 10 kB/s
+
+4) Peticiones EN FRÍO (k6/en_frio.js): API recién arrancada, primera petición a cada ruta sin calentamiento («frío») y una segunda pasada inmediata («caliente»); 1 usuario virtual, en serie
+   ruta                                                           estado   frío ms  caliente ms  p95 < 2 s
+   GET /api/v1/predictions?limite=50                                 200      62.4         52.2  cumple
+   GET /api/v1/recommendations?limite=50                             200      30.4         33.9  cumple
+   GET /api/v1/alerts?limite=50                                      200      56.7         48.5  cumple
+   GET /api/v1/alerts?severidad=critica                              200      41.5         48.3  cumple
+   GET /api/v1/frequency/executions                                  200      22.9         21.8  cumple
+   GET /api/v1/models                                                200      13.8         13.6  cumple
+   GET /api/v1/thresholds                                            200      10.8         10.2  cumple
+   GET /api/v1/monitoring                                            200      20.0         17.8  cumple
+   GET /api/v1/monitoring/policy                                     200      23.1         17.9  cumple
+   GET /api/v1/monitoring/feature-snapshots?ruta=CL 72               200      23.7         15.6  cumple
+   GET /api/v1/catalogos                                             200       4.4          3.4  cumple
+   GET /api/v1/catalogos/rutas                                       200      54.9         12.2  cumple
+   GET /api/v1/catalogos/empresas                                    200      13.7          7.5  cumple
+   GET /api/v1/catalogos/procesos                                    200       6.2          6.3  cumple
+   GET /api/v1/catalogos/segmentos?limite=50                         200    5004.4         65.5  NO cumple
+   GET /api/v1/catalogos/vehiculos?limite=50                         200      68.3         52.8  cumple
+   GET /api/v1/catalogos/capacidad                                   200       8.0         10.6  cumple
+   GET /api/v1/segmentos/estadisticas?limite=50                      200    8783.3      11881.5  NO cumple
+   GET /api/v1/segmentos/estadisticas?limite=50&idruta=2             200    2916.3       2279.2  NO cumple
+   GET /api/v1/segmentos/zonas?limite=50                             200      50.3         33.3  cumple
+   GET /api/v1/predictions/export?formato=csv (3.348 filas)          200    3425.0       4155.8  NO cumple
+   GET /api/v1/alerts/export?formato=csv (8.988 filas)               200    5165.2       4067.6  NO cumple
+
+5) Lectura
+   - Las consultas paginadas sobre las tablas de resultados cumplen RNF-002 con el volumen de un año: p95 627,5 ms con 50 usuarios concurrentes y 0 % de errores; en frío, la primera petición de cada colección tarda menos de 100 ms (17 de las 22 rutas medidas).
+   - GET /api/v1/segmentos/estadisticas NO cumple: agrega en cada petición la tabla timbradas_segmentos de la réplica (sin caché), 8,8 s en frío y 11,9 s en caliente; con idruta, 2,3 a 2,9 s. Arreglo propuesto: caché con tiempo de vida (como los catálogos) o una agregación materializada que el ciclo refresque.
+   - GET /api/v1/catalogos/segmentos tarda 5,0 s solo la primera vez (arma la geometría); después, la caché lo deja en 65 ms.
+   - Las exportaciones CSV completas (3.348 predicciones, 8.988 alertas) tardan 3,4 a 5,2 s: son descargas del conjunto entero, no consultas paginadas; quedan fuera de RNF-002 y se documentan aquí.
+
+Reproducir (desde EntregaFinal/api_frecuencias, con la base local arriba):
+   python scripts/sembrar_volumen.py --base-datos ai_frecuencias_volumen --plantilla <base con ejecuciones reales> --ejecuciones 365 --recrear
+   (API apuntando a esa base en :8507)   docker run --rm -e BASE=http://host.docker.internal:8507 -e SOBUSA_API_KEY -e MIN_PREDICCIONES=3300 -e MIN_ALERTAS=8000 -v "$PWD/k6:/scripts" grafana/k6:1.4.2 run /scripts/consultas.js   (los mínimos hacen que k6 se niegue a medir una base más pequeña)
+   la prueba en frío, igual con /scripts/en_frio.js, justo después de arrancar la API (INCLUIR_PLAN=1 agrega /recommendations/plan y /respuesta).
+Archivos: k6_volumen.json (siembra, resumen de k6 de la carga y tabla en frío) y k6_en_frio.json (resumen de k6 de la prueba en frío).

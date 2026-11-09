@@ -30,9 +30,13 @@ MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto
 MESES_CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
 DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
 
-# Modelos en el orden fijo (selectores, fichas, gráfica de errores y tablas); el híbrido es el recomendado
+# Modelos del informe académico en el orden fijo (selectores, fichas, gráfica de errores y tablas). Son experimentos del
+# laboratorio, no el modelo que ejecuta la API (ese es MODELO_PRODUCTO, de datos/modelo_producto.json): se nombran
+# «experimento 1/11/12» para no confundirlos con el producto ni con los entregables E11 y E12.
 ORDEN_MODELOS = ["B1", "E1", "E11", "E12"]
-NOMBRE_MODELO = {"B1": "Regla manual", "E1": "Primer modelo (E1)", "E11": "Modelo final (E11)", "E12": "Híbrido (E12)"}
+NOMBRE_MODELO = {"B1": "Regla manual", "E1": "Experimento 1 (primer modelo)", "E11": "Experimento 11 (LightGBM)",
+                 "E12": "Experimento 12 (híbrido)"}
+NOMBRE_PRODUCTO = "Modelo activo de la API"
 
 # Especificaciones fijas de las marcas (dataviz: marks-and-anatomy.md; DISENO.md §7)
 ANCHO_LINEA = 2          # px: toda línea
@@ -281,6 +285,16 @@ def referencia(fig, x=None, y=None, texto=None):
         fig.add_hline(y=y, line=linea)
         if texto:
             fig.add_annotation(x=1, xref="paper", y=y, text=texto, xanchor="right", yanchor="bottom", showarrow=False, font=fuente_svg("tinta_2"))
+    return fig
+
+
+def banda(fig, x, bajo, alto, rol="modelo"):
+    """Banda de un intervalo (P10–P90) en el lavado del color del rol, detrás de las líneas: dos trazas sin línea, la de
+    abajo rellena hasta la de arriba. Sin texto al pasar el puntero (la cifra va en la línea del pronóstico)."""
+    c = _color(rol)
+    sin_linea = {"mode": "lines", "line": {"width": 0, "color": c}, "hoverinfo": "skip"}
+    fig.add_trace(go.Scatter(x=x, y=list(alto), name="P90", **sin_linea))
+    fig.add_trace(go.Scatter(x=x, y=list(bajo), name="P10", fill="tonexty", fillcolor=alfa(c, LAVADO), **sin_linea))
     return fig
 
 

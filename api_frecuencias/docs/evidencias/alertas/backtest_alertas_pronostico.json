@@ -1,0 +1,166 @@
+{
+ "generado": "2026-11-09T06:32:29-05:00",
+ "periodo": [
+  "2025-09-15",
+  "2025-12-31"
+ ],
+ "dias_ruta": 324,
+ "instante": "6:00 de cada día (el instante por omisión del ciclo diario)",
+ "horizontes_min": [
+  30,
+  60,
+  120
+ ],
+ "umbrales": "alertas.UMBRALES_POR_DEFECTO (versión 0003)",
+ "calibracion_banda": "v2",
+ "recomendacion": "recomendacion_franja(): §10.2 (MILP) con la demanda por hora de la franja",
+ "franja_por_horizonte": {
+  "30->06 h": 324,
+  "60->06 h": 324,
+  "120->06 h": 324
+ },
+ "buses_hora_medios_por_horizonte": {
+  "30": 9.96,
+  "60": 9.96,
+  "120": 9.96
+ },
+ "recomendaciones_viables_pct": 46.0,
+ "nota_precision": "cada alerta se confirma con la demanda REAL de su hora, en las mismas unidades: carga crítica real = factor de carga × pasajeros reales; ALT-001 si superó la capacidad por hora (buses/h programados × 50 puestos), ALT-002 si la ocupación real llegó al 90 %, ALT-003 si superó la capacidad efectiva (× 85 %) y ALT-004 si la ocupación real quedó bajo el 30 %; la tasa base es la de esa condición en las horas que miran los contextos (lift = precisión / tasa base).",
+ "variantes": {
+  "ventana": {
+   "metodo": "demanda de la VENTANA de 30/60/120 min frente a la capacidad POR HORA; ventana de la alerta = hora del fin de la ventana (7 h y 8 h en 60 y 120 min, no la hora recomendada); una alerta por horizonte",
+   "por_codigo": {
+    "ALT-001": {
+     "alertas": 827,
+     "por_ruta_dia": 2.552,
+     "evaluables": 827,
+     "confirmadas": 735,
+     "precision_real": 0.8888,
+     "tasa_base_real": 0.8189,
+     "lift": 1.09
+    },
+    "ALT-002": {
+     "alertas": 764,
+     "por_ruta_dia": 2.358,
+     "evaluables": 764,
+     "confirmadas": 717,
+     "precision_real": 0.9385,
+     "tasa_base_real": 0.8714,
+     "lift": 1.08
+    },
+    "ALT-003": {
+     "alertas": 81,
+     "por_ruta_dia": 0.25,
+     "evaluables": 81,
+     "confirmadas": 61,
+     "precision_real": 0.7531,
+     "tasa_base_real": 0.8961,
+     "lift": 0.84
+    },
+    "ALT-004": {
+     "alertas": 1,
+     "por_ruta_dia": 0.003,
+     "evaluables": 1,
+     "confirmadas": 0,
+     "precision_real": 0.0,
+     "tasa_base_real": 0.0031,
+     "lift": 0.0
+    }
+   }
+  },
+  "franja": {
+   "metodo": "alertas.contexto_pronostico + evaluar_pronostico (lo que hace hoy el ciclo): carga crítica POR HORA de la franja recomendada (factor de carga del optimizador × P10/P50/P90 por hora) frente a la capacidad POR HORA ofrecida; ALT-003 por el nivel de servicio de la frecuencia actual (comparacion_actual); ventana de la alerta = la hora recomendada; los horizontes que caen en la misma franja dan una sola alerta",
+   "por_codigo": {
+    "ALT-001": {
+     "alertas": 141,
+     "por_ruta_dia": 0.435,
+     "evaluables": 141,
+     "confirmadas": 44,
+     "precision_real": 0.3121,
+     "tasa_base_real": 0.1759,
+     "lift": 1.77
+    },
+    "ALT-002": {
+     "alertas": 102,
+     "por_ruta_dia": 0.315,
+     "evaluables": 102,
+     "confirmadas": 81,
+     "precision_real": 0.7941,
+     "tasa_base_real": 0.3951,
+     "lift": 2.01
+    },
+    "ALT-003": {
+     "alertas": 123,
+     "por_ruta_dia": 0.38,
+     "evaluables": 123,
+     "confirmadas": 44,
+     "precision_real": 0.3577,
+     "tasa_base_real": 0.4784,
+     "lift": 0.75
+    },
+    "ALT-004": {
+     "alertas": 10,
+     "por_ruta_dia": 0.031,
+     "evaluables": 10,
+     "confirmadas": 4,
+     "precision_real": 0.4,
+     "tasa_base_real": 0.0525,
+     "lift": 7.62
+    }
+   }
+  }
+ },
+ "milp": {
+  "llamadas": 324,
+  "segundos_medios": 0.072
+ },
+ "antes": {
+  "generado": "2026-11-09T03:40:52-05:00",
+  "recomendar_ventana": {
+   "ALT-001": 2.744,
+   "ALT-002": 2.648,
+   "ALT-003": 2.157,
+   "ALT-004": 0.006
+  },
+  "metodo": "recomendar(): §10.3 con la demanda de la ventana de 30/60/120 min como si fuera horaria y la frecuencia del catálogo de la ruta"
+ },
+ "con_factor_carga": true,
+ "antes_sin_factor": {
+  "generado": "2026-11-09T05:03:33-05:00",
+  "recomendaciones_viables_pct": 46.0,
+  "por_codigo": {
+   "ALT-001": {
+    "alertas": 288,
+    "por_ruta_dia": 0.889,
+    "precision_real": 0.9236,
+    "lift": 1.12
+   },
+   "ALT-002": {
+    "alertas": 278,
+    "por_ruta_dia": 0.858,
+    "precision_real": 0.9676,
+    "lift": 1.14
+   },
+   "ALT-003": {
+    "alertas": 103,
+    "por_ruta_dia": 0.318,
+    "precision_real": null,
+    "lift": null
+   },
+   "ALT-004": {
+    "alertas": 0,
+    "por_ruta_dia": 0.0,
+    "precision_real": null,
+    "lift": null
+   }
+  }
+ },
+ "festivos_entre_semana": [
+  "2025-10-13",
+  "2025-11-03",
+  "2025-11-17",
+  "2025-12-08",
+  "2025-12-25"
+ ],
+ "duracion_s": 197.5
+}

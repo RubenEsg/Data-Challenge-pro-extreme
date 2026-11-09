@@ -1,0 +1,13 @@
+{
+  "_descripcion": "Decisiones revisadas a mano que scripts/sonar_local.py aplica después de cada análisis de SonarQube. Cada entrada identifica el hallazgo por regla, archivo y un texto de la línea marcada (la definición de la función), y lleva su justificación, que queda como comentario en SonarQube y en docs/evidencias/sonarqube/issues.json. Solo se acepta deuda de mantenibilidad (complejidad cognitiva, python:S3776): ningún bug, vulnerabilidad ni hallazgo de seguridad se acepta por esta vía.",
+  "_refactorizadas": "Funciones que se refactorizaron (extracción de funciones, sin cambio de comportamiento) y ya no superan la complejidad cognitiva de 15: optimizacion.resumen_plan_d5, optimizacion.parametros_objetivo, optimizacion._diagnostico, politica.revisar_sombra, catalogos.vehiculos, catalogos.historial_capacidad y planificador.estado; seguridad.cargar_claves (dividida en _objeto_api_keys, _entrada_api_keys y _claves_por_rol).",
+  "deuda_aceptada": [
+    {
+      "regla": "python:S3776",
+      "archivo": "app/servicios/motor_d5/milp.py",
+      "contiene": "def resolver_dia_dp(",
+      "justificacion": "Programación dinámica exacta del optimizador D5, copiada sin cambios del proyecto (motor_d5/PROCEDENCIA.md): se conserva igual al original para no perder la trazabilidad de los resultados de D5."
+    }
+  ],
+  "hotspots_seguros": []
+}

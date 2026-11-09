@@ -1,0 +1,146 @@
+OK    alertas: carga con la API arriba y chip de salud API en línea · versión 1.0.0
+OK    alertas: total de la página = total de la API (nuevas) Página 1 de 7 · 129 alertas con estos filtros
+OK    alertas: 20 filas por página 20
+OK    alertas: página siguiente Página 2 de 7 · 129 alertas con estos filtros
+OK    alertas: página anterior Página 1 de 7 · 129 alertas con estos filtros
+OK    alertas: filtro estado=todas Página 1 de 7 · 140 alertas con estos filtros
+OK    alertas: filtros nivel=crítica y ruta=CRA 54 Página 1 de 2 · 33 alertas con estos filtros
+OK    alertas: solo críticas en la lista ['Crítica', 'Crítica', 'Crítica']
+OK    alertas: filtro código ALT-001 Página 1 de 1 · 16 alertas con estos filtros
+OK    alertas: filtro desde=mañana deja 0 0 alertas
+OK    alertas: filtro desde=hasta=hoy Página 1 de 1 · 16 alertas con estos filtros
+OK    alertas: descarga CSV filtrada alertas_20261109_013036.csv · 16 filas
+OK    alertas: descarga XLSX alertas_20261109_013036.xlsx
+OK    alertas: el detalle trae los campos de §5.3 24 etiquetas · ALT-001 ad89f585
+OK    alertas: botones según TRANSICIONES (nueva) 
+OK    alertas: reconocer Acción registrada
+
+Reconocida por tablero.prueba · estado actual: reconocida
+OK    alertas: asignar sin persona → 422 visible La API no aplicó la acción
+
+datos_incompletos: asignar requiere asignado_a.
+OK    alertas: asignar Acción registrada
+
+Asignada por tablero.prueba · estado actual: asignada
+OK    alertas: comentar Acción registrada
+
+Comentario por tablero.prueba · estado actual: asignada
+OK    alertas: cerrar Acción registrada
+
+Cerrada por tablero.prueba · estado actual: cerrada
+OK    alertas: estado final deshabilita las acciones 
+OK    alertas: historial = bitácora de la API ['crear', 'reconocer', 'asignar', 'comentar', 'cerrar']
+OK    alertas: 409 transicion_invalida visible La API no aplicó la acción
+
+transicion_invalida: No se puede 'reconocer' una alerta en estado 'descartada'. Permitidas: ninguna (estado final).
+OK    alertas: 0 errores de consola []
+OK    recomendaciones: cifras de la hora pico 
+OK    recomendaciones: ejecución por omisión = la más reciente Datos hasta 4 sep 2025 · 36f1c376
+OK    recomendaciones: la tabla coincide con la API (buses/h y vehículos de la hora pico) 8
+OK    recomendaciones: aviso de franjas no viables con el motivo de la API 2 de 3 franjas no son viables con la flota y el headway mínimo
+
+07:00 · La flota disponible (45 vehículos) no alcanza: c
+OK    recomendaciones: ruta CRA 54 
+OK    recomendaciones: filtro no viables ['No viable', 'No viable']
+OK    recomendaciones: filtro viables ['Viable']
+OK    recomendaciones: desplegable de ejecuciones desde la API ['SILENCIO', 'CRA 54', 'CL 72', 'Todas', 'Viables', 'No viables', 'Datos hasta 4 sep 2025 · 36f1c376', 'Datos hasta 3 sep 2025 · 742c721b', 'Datos hasta 2 sep 2
+OK    recomendaciones: cambiar de ejecución cambia la fecha viernes 5 de septiembre de 2025
+OK    recomendaciones: calcular escenario (POST /recommendations/calculate) 	Vigente a las 08:00	Escenario
+Demanda (pas/h)	1.627	900
+Buses por hora	20	7
+Headway	3,00 min	8,57 min
+Vehículos requeridos	86	30
+Ocupación esperada	66,7 %	65,9
+OK    recomendaciones: escenario sin demanda avisa Faltan datos
+
+Indique la hora y la demanda por hora.
+OK    recomendaciones: descarga CSV recomendaciones_20261109_013112.csv
+OK    recomendaciones: descarga XLSX recomendaciones_20261109_013112.xlsx
+OK    recomendaciones: 0 errores de consola []
+OK    operación: ejecuciones 
+OK    operación: detalle con WAPE y cobertura P10–P90 Terminada
+Lote:
+36f1c376:2025-09-04
+Modelo:
+hgb_fv1_20250831_s42
+Umbrales:
+versión 4
+Intentos:
+1
+
+Terminada · etapa term
+OK    operación: filtro de errores por dimensión 0 errores con estos filtros
+
+Sin errores
+
+La ejecución no dejó errores de calida
+OK    operación: el job muestra progreso (Interval) Ejecución del día siguiente · En cola
+0 %
+En cola
+Ejecución:
+55764696
+OK    operación: el job termina y la tabla se refresca 2.2 s · Ejecución del día siguiente: terminada
+
+Terminada · 0,7 s · 9 predicciones, 9 recomendaciones y 25 alertas nuevas
+OK    operación: registro de modelos 
+OK    operación: comparación en la validación Ventana de validación: 5 sep 2025 a 4 nov 2025 · el WAPE más bajo va resaltado.
+
+Modelo	WAPE	Pico	Va
+OK    operación: activación auditada (aceptada o 409 con motivo) Activación de hgb_fv1_20250904_s42: hecha
+
+Modelo activo: hgb_fv1_20250904_s42 · aprobado por tablero.prueba
+OK    operación: la auditoría muestra el evento 9 nov 2026 · 01:31 activado · tablero.prueba · Prueba del tablero: activar el candidato
+9 nov 2026 · 01:23 registro
+OK    operación: revertir (hecha o 409 sin_version_anterior) Reversión al modelo anterior: hecha
+
+Modelo activo: hgb_fv1_20250831_s42 · aprobado por tablero.prueba
+OK    operación: umbral nuevo crea una versión Versión nueva guardada
+
+ocupacion_critica = 0,92 · versión 6 · por tablero.prueba
+OK    operación: historial del umbral 
+OK    operación: monitoreo (/health, /metrics, alertas por nivel, WAPE frente a tolerancia) Servicio en línea
+Base de datos: ok
+Versión:
+1.0.0
+Fuente:
+parquet
+Error del pronóstico (WAPE móvil)
+Dentro
+
+11,3 %
+
+tolerancia 20,0 % (ALT-010)
+
+Última ejecuci
+OK    operación: entrenar candidato arranca (job largo con Interval) Entrenamiento de un candidato · entrenamiento
+20 %
+Corriendo
+Ejecución:
+7eaa7da6
+OK    operación: la página responde durante el job 
+OK    operación: 0 errores de consola []
+OK    teclado /alertas: Tab recorre marca, navegación, controles y botones ['A#:Sobusa Despacho', 'A#nav-0:Inicio', 'A#nav-1:Pronóstico', 'A#nav-2:Horario', 'A#nav-3:Despacho', 'A#nav-4:Alertas', 'A#nav-5:Recomendaciones', 'A#nav-6:Ope
+OK    teclado /alertas: foco visible en cada parada (40 paradas) []
+OK    teclado /recomendaciones: Tab recorre marca, navegación, controles y botones ['A#:Sobusa Despacho', 'A#nav-0:Inicio', 'A#nav-1:Pronóstico', 'A#nav-2:Horario', 'A#nav-3:Despacho', 'A#nav-4:Alertas', 'A#nav-5:Recomendaciones', 'A#nav-6:Ope
+OK    teclado /recomendaciones: foco visible en cada parada (39 paradas) []
+OK    teclado /operacion: Tab recorre marca, navegación, controles y botones ['A#:Sobusa Despacho', 'A#nav-0:Inicio', 'A#nav-1:Pronóstico', 'A#nav-2:Horario', 'A#nav-3:Despacho', 'A#nav-4:Alertas', 'A#nav-5:Recomendaciones', 'A#nav-6:Ope
+OK    teclado /operacion: foco visible en cada parada (39 paradas) []
+OK    teclado: flecha elige otra opción del segmentado critica
+OK    teclado: Enter activa un botón (exportar) 
+OK    desborde: nada se sale a 1280 px en las 10 pantallas (y la barra cabe a 1280) []
+OK    consola: 0 errores en las 10 pantallas a 1280 px []
+OK    desborde: nada se sale a 400 px en las 10 pantallas (y la barra cabe a 1280) []
+OK    consola: 0 errores en las 10 pantallas a 400 px []
+OK    sin API /alertas: aviso «La API no responde en …» La API no responde
+
+La API no responde en http://127.0.0.1:8109. Levántela (docker compose -p sobusa_api up -d o uvicorn
+OK    sin API /recomendaciones: aviso «La API no responde en …» La API no responde
+
+La API no responde en http://127.0.0.1:8109. Levántela (docker compose -p sobusa_api up -d o uvicorn
+OK    sin API /operacion: aviso «La API no responde en …» La API no responde
+
+La API no responde en http://127.0.0.1:8109. Levántela (docker compose -p sobusa_api up -d o uvicorn
+OK    sin API: exportar avisa sin romper 
+OK    sin API: las cuatro vistas de Operación avisan 
+OK    sin API: 0 errores de consola []
+{"total": 72, "ok": 72, "fallas": []}

@@ -1,0 +1,29 @@
+{
+ "generado_en": "2026-11-09T02:08:18.299645-05:00",
+ "rol": "lector_ia (solo lectura)",
+ "tablas_leidas": {
+  "novedades_viales_fecha": 28,
+  "novedades_viales_ruta": 0,
+  "estacionalidades_anio": 231,
+  "estacionalidades": 24
+ },
+ "info": {
+  "novedades": 28,
+  "dias_con_novedad": 25,
+  "horas_con_novedad": 246,
+  "filas_novedades_viales_ruta": 0,
+  "festivos_oficiales_en_rango": 72,
+  "procesos_estacionalidades": [
+   "sobusa"
+  ]
+ },
+ "comparacion_con_datos_contexto_operacional": {
+  "filas_bd": 24837,
+  "filas_archivo": 24837,
+  "filas_comunes": 24837,
+  "filas_iguales": 24837,
+  "identico": true,
+  "horas_con_novedad_bd": 246,
+  "horas_con_novedad_archivo": 246
+ }
+}

@@ -1,13 +1,63 @@
-Mediciones de rendimiento 2026-11-08 23:04:46 (portátil Windows 11, Docker Desktop)
-RNF-002: 50 GET paginados por recurso (limite=50), secuenciales, tras 3 de calentamiento; API http://127.0.0.1:8000
-   GET /api/v1/predictions            filas en la tabla=   28  p50=    9.1 ms  p95=   12.9 ms  máx=  101.7 ms  -> cumple p95 < 2 s
-   GET /api/v1/recommendations        filas en la tabla=   29  p50=   12.4 ms  p95=   16.6 ms  máx=   28.4 ms  -> cumple p95 < 2 s
-   GET /api/v1/alerts                 filas en la tabla=   50  p50=   10.4 ms  p95=   18.6 ms  máx=   80.4 ms  -> cumple p95 < 2 s
-   GET /api/v1/frequency/executions   filas en la tabla=    4  p50=    7.1 ms  p95=    9.0 ms  máx=   21.3 ms  -> cumple p95 < 2 s
-RNF-003: lote de 111,792 filas (serie de 55,896 filas + réplica con fechas -3 años)
-   lectura incremental (Parquet, 55,896 filas):   0.86 s
-   validación de calidad (6 dimensiones, 111,792 filas):   0.40 s; válidas=111,690 errores=102
-   inserción con upsert en PostgreSQL local (lotes de 5.000, transacción revertida): 111,690 filas en 152.57 s
-   total 153.82 s (727 filas/s); memoria pico (tracemalloc) 102 MiB
-   Nota: las 102 filas apartadas son duplicados de clave (ruta, fecha, hora) creados por la réplica (29-02-2024 menos 3 años cae en 28-02-2021); la dimensión de unicidad los detecta y los pone en cuarentena.
-   Nota: la inserción corrió mientras la API reentrenaba un modelo en el mismo portátil; el cuello de botella es el upsert fila a fila en Python (lotes de 5.000). Mejora: COPY a una tabla de paso + INSERT ... ON CONFLICT.
+DATASET ACORDADO DE RNF-002 (§14.1 «Carga | k6 | Consultas e ingesta con el volumen acordado»)
+El volumen acordado es UN AÑO de operación del ciclo diario: 365 ejecuciones o más, con sus predicciones, recomendaciones y alertas.
+Se arma con scripts/sembrar_volumen.py, que replica filas reales de la API con identificadores nuevos y fechas corridas.
+Medición vigente: 2026-11-09, base local ai_frecuencias_volumen_infra5 (77 MB): 396 ejecuciones, 3.348 predicciones, 3.348 recomendaciones,
+8.988 alertas, 8.988 entradas de historial y 4.464 fotos de variables. La ingesta se mide aparte con 111.792 filas (RNF-003, más abajo).
+
+RNF-002 · k6 con el volumen acordado (docs/evidencias/pruebas/k6_volumen.txt y .json, k6_en_frio.json); API de un solo proceso en :8507, autenticación encendida
+   consultas PAGINADAS concurrentes (k6/consultas.js, rampa 0 -> 25 -> 50 usuarios en 60 s): 2.873 peticiones, 0,00 % de errores, 47,6 req/s
+   todas                              p50=  287,9 ms  p95=  627,5 ms  p99=  927,0 ms  máx= 1278,9 ms  -> cumple p95 < 2 s
+   GET predictions                    p50=  342,8 ms  p95=  729,7 ms  p99= 1058,6 ms  -> cumple p95 < 2 s
+   GET recommendations                p50=  296,3 ms  p95=  591,8 ms  p99=  810,8 ms  -> cumple p95 < 2 s
+   GET alerts                         p50=  347,0 ms  p95=  711,5 ms  p99=  996,2 ms  -> cumple p95 < 2 s
+   GET executions                     p50=  258,6 ms  p95=  567,1 ms  p99=  690,2 ms  -> cumple p95 < 2 s
+   GET models                         p50=  216,9 ms  p95=  504,7 ms  p99=  645,6 ms  -> cumple p95 < 2 s
+   EN FRÍO (k6/en_frio.js, primera petición tras arrancar la API): 17 de 22 rutas < 100 ms (predicciones 62,4 ms, alertas 56,7 ms)
+   GET /api/v1/segmentos/estadisticas (réplica, sin caché): 8.783 ms en frío y 11.882 ms en caliente; con idruta 2.279 a 2.916 ms -> NO cumple
+   GET /api/v1/catalogos/segmentos: 5.004 ms la primera vez y 65,5 ms con la caché -> no cumple en frío
+   exportaciones CSV completas (3.348 predicciones / 8.988 alertas): 3.425 a 5.165 ms; son descargas del conjunto, no consultas paginadas
+
+MEDICIONES ANTERIORES (un mes de resultados), conservadas para comparar
+Mediciones de rendimiento 2026-11-09 02:26:30 (portátil Windows 11, Docker Desktop; regeneradas con k6 y los scripts de medición del repositorio)
+API de prueba: uvicorn de un solo proceso en :8305 con autenticación encendida (clave de rol analista solo por entorno), base local ai_frecuencias_pruebas_pruebas_k6 (PostgreSQL 14 + PostGIS 3.4 en Docker) y datos en una copia temporal. Otros procesos pesados del equipo corrían en paralelo: son cotas conservadoras.
+Datos de esa prueba (un mes): histórico incremental de la serie horaria real (37.281 filas iniciales + 30 cortes diarios), 279 predicciones, 279 recomendaciones, 749 alertas y 33 ejecuciones. Es la base que sembrar_volumen.py replicó para llegar al año.
+
+RNF-002 · k6 (grafana/k6:1.4.2), consultas PAGINADAS concurrentes (k6/consultas.js): rampa 0 -> 25 -> 50 usuarios virtuales en 60 s, limite y desplazamiento al azar dentro del total real
+   peticiones=3,553  rendimiento=58.8 req/s  errores=0.00 %  comprobaciones OK=100 %
+   todas                              p50=  136.9 ms  p95=  451.3 ms  p99=  571.7 ms  máx=  791.6 ms  -> cumple p95 < 2 s
+   GET predictions                    p50=  208.9 ms  p95=  563.1 ms  p99=  669.2 ms  máx=  785.6 ms  -> cumple p95 < 2 s
+   GET recommendations                p50=  145.7 ms  p95=  427.0 ms  p99=  530.2 ms  máx=  791.6 ms  -> cumple p95 < 2 s
+   GET alerts                         p50=  155.3 ms  p95=  436.2 ms  p99=  535.4 ms  máx=  580.7 ms  -> cumple p95 < 2 s
+   GET executions                     p50=  116.3 ms  p95=  347.5 ms  p99=  462.8 ms  máx=  541.2 ms  -> cumple p95 < 2 s
+   GET models                         p50=   80.0 ms  p95=  282.4 ms  p99=  415.8 ms  máx=  489.8 ms  -> cumple p95 < 2 s
+
+RNF-002 + RNF-004 · k6, consultas DURANTE una ingesta (k6/consultas_durante_ingesta.js): 30 usuarios virtuales 60 s mientras la API procesa como job POST /frequency/executions {hasta: 2025-12-31}
+   ingesta: 15,606 filas leídas, validadas e incorporadas (COPY) + predicción, recomendación y alertas, estado ok, 40.7 s de principio a fin
+   consultas durante la ingesta=1,673  errores=0.00 %  rendimiento total=51.4 req/s
+   durante la ingesta                 p50=  242.3 ms  p95=  721.7 ms  p99= 2123.3 ms  máx= 2264.6 ms  -> cumple p95 < 2 s
+   sin ingesta                        p50=  240.4 ms  p95=  590.2 ms  p99=  782.2 ms  máx=  917.2 ms  -> cumple p95 < 2 s
+
+RNF-002 · secuencial (scripts/medir_rendimiento.py --sin-ingesta contra :8305): 50 GET paginados por recurso
+   GET /api/v1/predictions            filas en la tabla=  279  p50=   23.2 ms  p95=   46.1 ms  máx=   46.8 ms  -> cumple p95 < 2 s
+   GET /api/v1/recommendations        filas en la tabla=  279  p50=   14.0 ms  p95=   17.6 ms  máx=   19.5 ms  -> cumple p95 < 2 s
+   GET /api/v1/alerts                 filas en la tabla=  749  p50=   19.2 ms  p95=   28.1 ms  máx=   58.3 ms  -> cumple p95 < 2 s
+   GET /api/v1/frequency/executions   filas en la tabla=   33  p50=   14.0 ms  p95=   21.7 ms  máx=  117.9 ms  -> cumple p95 < 2 s
+
+RNF-003 · ingesta con COPY (scripts/medir_ingesta.py, base local ai_frecuencias_pruebas_pruebas, transacción revertida al final):
+   RNF-003 · ingesta con COPY 2026-11-09 02:25:08 (portátil Windows 11, PostgreSQL 14 local en Docker, base ai_frecuencias_pruebas_pruebas; transacción revertida al final)
+   Lote: 111,792 filas (serie de 55,896 + réplica con fechas -3 años); válidas 111,690; errores de calidad 102
+      lectura incremental (Parquet)               0.03 s
+      validación de calidad (6 dimensiones)       0.10 s
+      COPY a la tabla de paso                     0.39 s
+      INSERT … ON CONFLICT (upsert)               3.68 s   insertadas 111,333, actualizadas 0
+      ingesta (COPY + upsert)                     4.07 s   -> 27,469 filas/s
+      total del pipeline                          4.20 s
+   Recarga idéntica (misma clave, mismos valores): 2.40 s; insertadas 0, actualizadas 0, sin cambio 111,690 -> idempotente
+   Recarga con 1,116 filas cambiadas (1 %): 2.09 s; insertadas 0, actualizadas 1,116, sin cambio 110,574
+   Memoria pico: tracemalloc 53 MiB (lectura + validación + COPY); conjunto de trabajo del proceso 224 MiB (antes de empezar 121 MiB)
+   Método anterior (insert().values por lotes de 5.000), muestra de 10,000 filas: 2.19 s -> 4,573 filas/s; proyectado a 111,690 filas: 24 s (medido antes: 152,6 s en docs/evidencias/rendimiento.txt)
+   Aceleración de la ingesta: 6.0 veces (ambos medidos aquí, sin tracemalloc). Nota: los 152,6 s de rendimiento.txt se midieron con tracemalloc encendido, que frena las asignaciones de Python; por eso aquí la memoria se mide en una pasada aparte.
+   RESULTADO: CUMPLE (≥ 100.000 filas en < 10 s, recarga sin duplicar ni reescribir, recarga con cambios solo actualiza lo cambiado)
+
+Evidencias completas: docs/evidencias/pruebas/k6_consultas.txt/.json, k6_ingesta.txt/.json; el detalle de la ingesta con COPY y de la cola está en docs/evidencias/cola/ingesta.txt.
+Historia: la medición anterior (08-nov, 152,6 s para 111.690 filas, upsert por lotes de 5.000 con tracemalloc encendido) quedó reemplazada por la ingesta con COPY a tabla de paso + INSERT … ON CONFLICT.

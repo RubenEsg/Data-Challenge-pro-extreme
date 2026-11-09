@@ -2,7 +2,6 @@
   "model_id": "hgb_fv1_20250831_s42",
   "tipo": "candidato",
   "algoritmo": "hist_gradient_boosting",
-  "estado": "activo",
   "artefacto": "modelo.joblib",
   "sha256": "fac427c003cf74d65475e3a0f37d3d90f8e6a20dc6ba6a513c41046b6498a728",
   "feature_version": "fv1-2026-11-08",
@@ -186,143 +185,6 @@
       },
       "desde": "2025-09-01",
       "hasta": "2025-10-31"
-    },
-    "prueba": {
-      "candidato": {
-        "n": 3111,
-        "mae": 98.204,
-        "rmse": 146.024,
-        "wape": 15.067,
-        "sesgo_pct": 2.541,
-        "cobertura_p10_p90": 80.94,
-        "por_ruta": {
-          "CL 72": {
-            "n": 1037,
-            "mae": 68.355,
-            "rmse": 90.744,
-            "wape": 19.484,
-            "sesgo_pct": 2.551
-          },
-          "CRA 54": {
-            "n": 1037,
-            "mae": 143.515,
-            "rmse": 206.093,
-            "wape": 13.326,
-            "sesgo_pct": 2.997
-          },
-          "SILENCIO": {
-            "n": 1037,
-            "mae": 82.743,
-            "rmse": 115.153,
-            "wape": 15.682,
-            "sesgo_pct": 1.604
-          }
-        },
-        "pico": {
-          "n": 1098,
-          "mae": 92.24,
-          "rmse": 128.294,
-          "wape": 14.723,
-          "sesgo_pct": 2.824
-        },
-        "valle": {
-          "n": 2013,
-          "mae": 101.458,
-          "rmse": 154.842,
-          "wape": 15.243,
-          "sesgo_pct": 2.396
-        }
-      },
-      "b1_manual_8sem": {
-        "n": 3111,
-        "mae": 138.062,
-        "rmse": 225.994,
-        "wape": 21.182,
-        "sesgo_pct": 5.847,
-        "por_ruta": {
-          "CL 72": {
-            "n": 1037,
-            "mae": 88.639,
-            "rmse": 123.923,
-            "wape": 25.266,
-            "sesgo_pct": 4.338
-          },
-          "CRA 54": {
-            "n": 1037,
-            "mae": 213.169,
-            "rmse": 326.569,
-            "wape": 19.794,
-            "sesgo_pct": 5.944
-          },
-          "SILENCIO": {
-            "n": 1037,
-            "mae": 112.377,
-            "rmse": 176.68,
-            "wape": 21.299,
-            "sesgo_pct": 6.651
-          }
-        },
-        "pico": {
-          "n": 1098,
-          "mae": 121.359,
-          "rmse": 199.955,
-          "wape": 19.37,
-          "sesgo_pct": 3.311
-        },
-        "valle": {
-          "n": 2013,
-          "mae": 147.172,
-          "rmse": 239.005,
-          "wape": 22.112,
-          "sesgo_pct": 7.149
-        }
-      },
-      "b2_ultima_semana": {
-        "n": 3111,
-        "mae": 172.05,
-        "rmse": 279.222,
-        "wape": 26.396,
-        "sesgo_pct": 3.843,
-        "por_ruta": {
-          "CL 72": {
-            "n": 1037,
-            "mae": 116.209,
-            "rmse": 161.134,
-            "wape": 33.125,
-            "sesgo_pct": 3.199
-          },
-          "CRA 54": {
-            "n": 1037,
-            "mae": 261.8,
-            "rmse": 401.278,
-            "wape": 24.309,
-            "sesgo_pct": 3.864
-          },
-          "SILENCIO": {
-            "n": 1037,
-            "mae": 138.139,
-            "rmse": 216.582,
-            "wape": 26.182,
-            "sesgo_pct": 4.227
-          }
-        },
-        "pico": {
-          "n": 1098,
-          "mae": 156.418,
-          "rmse": 255.927,
-          "wape": 24.966,
-          "sesgo_pct": 2.932
-        },
-        "valle": {
-          "n": 2013,
-          "mae": 180.576,
-          "rmse": 291.144,
-          "wape": 27.13,
-          "sesgo_pct": 4.31
-        }
-      },
-      "desde": "2025-11-01",
-      "hasta": "2025-12-31"
     }
   },
   "supera_linea_base_validacion": true,
@@ -337,16 +199,7 @@
       "1.0": 16.136
     },
     "regla": "factor = clip(1 + peso*(obs/esp - 1), 0,8, 1,25)",
-    "calibrado_en": "validación 2025-09-01 a 2025-10-31",
-    "prueba": {
-      "peso": 0.1,
-      "wape_por_peso": {
-        "0.0": 15.688,
-        "0.1": 15.522,
-        "1.0": 16.984
-      },
-      "regla": "factor = clip(1 + peso*(obs/esp - 1), 0,8, 1,25)"
-    }
+    "calibrado_en": "validación 2025-09-01 a 2025-10-31"
   },
   "importancia_global": [
     {
@@ -443,5 +296,29 @@
   "codigo_sha256": {
     "variables.py": "9f1bc539daf75d03bd900bbdd962a063eb3f28ca12772a106342ece5af8e32c4",
     "inferencia.py": "8c052c6a9828182dfb2706018c948cbc3379d7800cf4520fdfb44d16376d577e"
-  }
+  },
+  "codigo_sin_docstring_sha256": {
+    "variables.py": null,
+    "inferencia.py": null
+  },
+  "codigo_normalizacion": "texto UTF-8 con fin de línea LF (CRLF y CR pasan a LF antes del SHA-256)",
+  "codigo_commit": null,
+  "codigo_verificacion": {
+    "variables.py": {
+      "sha256_lf_de_entrenamiento": "9f1bc539daf75d03bd900bbdd962a063eb3f28ca12772a106342ece5af8e32c4",
+      "igual_al_archivo_actual": false,
+      "sin_docstring_igual_al_actual": false,
+      "primer_commit_con_ese_contenido": null,
+      "nota": "la versión con la que se entrenó no quedó en ningún commit (copia de trabajo sin confirmar); su reproducibilidad se comprueba reentrenando y comparando el SHA-256 del artefacto"
+    },
+    "inferencia.py": {
+      "sha256_lf_de_entrenamiento": "8c052c6a9828182dfb2706018c948cbc3379d7800cf4520fdfb44d16376d577e",
+      "igual_al_archivo_actual": false,
+      "sin_docstring_igual_al_actual": false,
+      "primer_commit_con_ese_contenido": null,
+      "nota": "la versión con la que se entrenó no quedó en ningún commit (copia de trabajo sin confirmar); su reproducibilidad se comprueba reentrenando y comparando el SHA-256 del artefacto"
+    }
+  },
+  "historial_prueba_reservada": "Al entrenarse, inferencia.entrenar() también midió la prueba reservada (2025-11-01 a 2025-12-31) y esa cifra se consultó al comparar fv2 con fv1: la prueba quedó como reporte informativo, no como una muestra nunca vista (docs/evidencias/modelo/decision_fv2.md). Desde entonces entrenar() y la compuerta solo miden la validación; el informe de la prueba está en la clave «evaluacion» (scripts/evaluar_modelo.py).",
+  "nota_prueba_reservada": "la prueba reservada no se evalúa al entrenar ni en la compuerta: su informe lo escribe scripts/evaluar_modelo.py en la clave «evaluacion»"
 }

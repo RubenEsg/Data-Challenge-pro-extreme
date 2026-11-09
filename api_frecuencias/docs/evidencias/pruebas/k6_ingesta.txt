@@ -1,0 +1,62 @@
+time="2026-11-09T07:24:00Z" level=info msg="ingesta 89418530-e6f5-41b2-9745-3a3a61093ec0: estado=ok filas_leidas=15606 predicciones=9 iniciado=2026-11-09T02:23:20.777318-05:00 terminado=2026-11-09T02:24:00.035626-05:00 (40.689 s)" source=console
+
+
+  █ THRESHOLDS 
+
+    consultas_durante_ingesta
+    ✓ 'count>100' count=1673
+
+    errores_funcionales
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_duration{fase:durante_ingesta}
+    ✓ 'p(95)<2000' p(95)=721.71ms
+
+    http_req_duration{fase:sin_ingesta}
+    ✓ 'p(95)<2000' p(95)=590.17ms
+
+    http_req_failed{fase:durante_ingesta}
+    ✓ 'rate<0.01' rate=0.00%
+
+    ingesta_ok
+    ✓ 'rate==1' rate=100.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 5096    84.035193/s
+    checks_succeeded...: 100.00% 5096 out of 5096
+    checks_failed......: 0.00%   0 out of 5096
+
+    ✓ estado 200
+    ✓ correlation id devuelto
+
+    CUSTOM
+    consultas_durante_ingesta......: 1673    27.588477/s
+    errores_funcionales............: 0.00%   0 out of 2548
+    ingesta_duracion_ms............: avg=40.68s   min=40.68s   med=40.68s   p(90)=40.68s   p(95)=40.68s   p(99)=40.68s   max=40.68s  
+    ingesta_filas_leidas...........: 15606   257.349534/s
+    ingesta_ok.....................: 100.00% 1 out of 1
+
+    HTTP
+    http_req_duration..............: avg=298.08ms min=10.26ms  med=220.8ms  p(90)=476.45ms p(95)=625.06ms p(99)=2.08s    max=2.26s   
+      { expected_response:true }...: avg=298.08ms min=10.26ms  med=220.8ms  p(90)=476.45ms p(95)=625.06ms p(99)=2.08s    max=2.26s   
+      { fase:durante_ingesta }.....: avg=332.13ms min=17.68ms  med=242.28ms p(90)=493.08ms p(95)=721.71ms p(99)=2.12s    max=2.26s   
+      { fase:sin_ingesta }.........: avg=280.33ms min=17.66ms  med=240.41ms p(90)=514.07ms p(95)=590.17ms p(99)=782.18ms max=917.22ms
+    http_req_failed................: 0.00%   0 out of 3118
+      { fase:durante_ingesta }.....: 0.00%   0 out of 1673
+    http_reqs......................: 3118    51.417137/s
+
+    EXECUTION
+    iteration_duration.............: avg=726.06ms min=241.24ms med=629.66ms p(90)=969.67ms p(95)=1.15s    p(99)=2.53s    max=40.7s   
+    iterations.....................: 2549    42.034087/s
+    vus............................: 30      min=30        max=31
+    vus_max........................: 31      min=31        max=31
+
+    NETWORK
+    data_received..................: 359 MB  5.9 MB/s
+    data_sent......................: 776 kB  13 kB/s
+
+
+
+exit=0

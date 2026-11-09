@@ -1,0 +1,612 @@
+{
+ "securitySchemes": {
+  "ApiKey": {
+   "type": "apiKey",
+   "description": "Clave de API del rol (operador, analista o admin).",
+   "in": "header",
+   "name": "X-API-Key"
+  }
+ },
+ "operaciones": [
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/alerts",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/alerts/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/alerts/{alert_id}",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/alerts/{alert_id}/history",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "PATCH",
+   "ruta": "/api/v1/alerts/{alert_id}/status",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/capacidad",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "PUT",
+   "ruta": "/api/v1/catalogos/capacidad",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "admin"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/capacidad/historial",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/despachos",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/despachos/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/empresas",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/empresas/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/procesos",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/procesos/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/rutas",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/rutas/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/rutas/{idruta}",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/segmentos",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/segmentos/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/vehiculos",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/vehiculos/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/vehiculos/tipologias",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/viajes",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/viajes/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/frequency/executions",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "POST",
+   "ruta": "/api/v1/frequency/executions",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "analista"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/frequency/executions/{execution_id}",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/frequency/executions/{execution_id}/errors",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/models",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "POST",
+   "ruta": "/api/v1/models/rollback",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "admin"
+  },
+  {
+   "metodo": "POST",
+   "ruta": "/api/v1/models/train",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "analista"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/models/{model_id}",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "POST",
+   "ruta": "/api/v1/models/{model_id}/activate",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "admin"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/models/{model_id}/evaluation",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/models/{model_id}/importance",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/monitoring",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/monitoring/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/monitoring/feature-snapshots",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/monitoring/policy",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/predictions",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/predictions/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "POST",
+   "ruta": "/api/v1/predictions/run",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "analista"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/predictions/segmentos",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/predictions/{prediction_id}",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/recommendations",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "POST",
+   "ruta": "/api/v1/recommendations/calculate",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "analista"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/recommendations/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/recommendations/plan",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/respuesta",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "POST",
+   "ruta": "/api/v1/respuesta/calcular",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "analista"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/respuesta/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/scheduler",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/segmentos/estadisticas",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/segmentos/estadisticas/export",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/segmentos/zonas",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/thresholds",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "PUT",
+   "ruta": "/api/v1/thresholds",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "admin"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/thresholds/history",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "POST",
+   "ruta": "/api/v1/thresholds/{version}/aprobar",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "admin"
+  }
+ ]
+}

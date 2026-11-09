@@ -1,6 +1,8 @@
 """Modelos ORM del esquema ai_frecuencias (la DDL oficial está en alembic/versions/0001)."""
 from __future__ import annotations
 
+import re
+import struct
 import uuid
 from datetime import date, datetime
 
@@ -19,8 +21,12 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.types import UserDefinedType
 
 from app.config import ESQUEMA
+
+# acción de las claves foráneas opcionales: si se borra la fila referida, la referencia queda en NULL
+AL_BORRAR_NULO = "SET NULL"
 
 
 class Base(DeclarativeBase):
@@ -29,6 +35,55 @@ class Base(DeclarativeBase):
 
 def _ahora():
     return mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class PuntoGeografico(UserDefinedType):
+    """geography(Point,4326) de PostGIS <-> {"type": "Point", "coordinates": [lon, lat]} (GeoJSON).
+
+    Se escribe como EWKT («SRID=4326;POINT(lon lat)»), que psycopg envía sin tipo y PostgreSQL convierte a geography;
+    se lee el HEXEWKB que devuelve PostGIS. Sin PostGIS la migración 0003 deja la columna en TEXT con el mismo EWKT.
+    """
+
+    cache_ok = True
+
+    def get_col_spec(self, **kw):
+        return "geography(Point,4326)"
+
+    def bind_processor(self, dialect):
+        def procesar(valor):
+            if valor is None or isinstance(valor, str):
+                return valor
+            if isinstance(valor, dict):
+                lon, lat = (valor["coordinates"][:2] if "coordinates" in valor else (valor["lon"], valor["lat"]))
+            else:
+                lon, lat = valor
+            lon, lat = float(lon), float(lat)
+            if not (-180 <= lon <= 180 and -90 <= lat <= 90):
+                raise ValueError(f"Coordenadas fuera de rango: lon={lon}, lat={lat}")
+            return f"SRID=4326;POINT({lon!r} {lat!r})"
+        return procesar
+
+    def result_processor(self, dialect, coltype):
+        return punto_geojson
+
+
+def punto_geojson(valor):
+    """HEXEWKB (PostGIS) o EWKT/WKT de un punto -> {"type": "Point", "coordinates": [lon, lat]}."""
+    if valor is None or isinstance(valor, dict):
+        return valor
+    texto = str(valor).strip()
+    m = re.search(r"POINT\s*\(\s*([-+0-9.eE]+)\s+([-+0-9.eE]+)\s*\)", texto, re.IGNORECASE)
+    if m:
+        return {"type": "Point", "coordinates": [float(m.group(1)), float(m.group(2))]}
+    try:
+        b = bytes.fromhex(texto)
+        orden = "<" if b[0] == 1 else ">"
+        tipo = struct.unpack(orden + "I", b[1:5])[0]
+        inicio = 9 if tipo & 0x20000000 else 5
+        lon, lat = struct.unpack(orden + "dd", b[inicio:inicio + 16])
+    except (ValueError, IndexError, struct.error):
+        return None
+    return {"type": "Point", "coordinates": [lon, lat]}
 
 
 class RegistroModelo(Base):
@@ -76,6 +131,29 @@ class Ejecucion(Base):
     iniciado_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     terminado_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     actualizado_en: Mapped[datetime] = _ahora()
+    # cola de trabajos (migración 0002): reserva con vencimiento, espera de reintento y franja del planificador
+    worker_id: Mapped[str | None] = mapped_column(Text)
+    lease_hasta: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    disponible_desde: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    programada_para: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # migración 0004: contexto W3C de la traza de quien encoló (RNF-006)
+    traceparent: Mapped[str | None] = mapped_column(Text)
+
+
+class IntentoEjecucion(Base):
+    """Traza de cada intento reclamado de la cola (migración 0002): quién lo tomó y cómo terminó."""
+
+    __tablename__ = "execution_attempt"
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    execution_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete="CASCADE"), nullable=False
+    )
+    intento: Mapped[int] = mapped_column(Integer, nullable=False)
+    worker_id: Mapped[str] = mapped_column(Text, nullable=False)
+    reclamado_en: Mapped[datetime] = _ahora()
+    terminado_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    resultado: Mapped[str] = mapped_column(Text, nullable=False, default="corriendo")
+    detalle: Mapped[str | None] = mapped_column(Text)
 
 
 class ErrorCalidad(Base):
@@ -91,6 +169,10 @@ class ErrorCalidad(Base):
     dimension: Mapped[str] = mapped_column(Text, nullable=False)
     detalle: Mapped[str | None] = mapped_column(Text)
     creado_en: Mapped[datetime] = _ahora()
+    # migración 0006: llave del registro (columnas llave), valor observado y si el error bloquea la fila (§6.3)
+    llave: Mapped[dict | None] = mapped_column(JSONB)
+    valor: Mapped[str | None] = mapped_column(Text)
+    bloqueante: Mapped[bool | None] = mapped_column(Boolean)
 
 
 class DemandaObservada(Base):
@@ -104,13 +186,19 @@ class DemandaObservada(Base):
     ultima_actualizacion: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     execution_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     cargado_en: Mapped[datetime] = _ahora()
+    # migración 0006: dimensiones de §8.3 (app/servicios/dimensiones.py)
+    idruta: Mapped[int | None] = mapped_column(Integer)
+    idempresa: Mapped[int | None] = mapped_column(Integer)
+    idproceso: Mapped[str | None] = mapped_column(Text)
+    id_dia_semana: Mapped[int | None] = mapped_column(Integer)
+    id_estacionalidad: Mapped[int | None] = mapped_column(Integer)
 
 
 class Prediccion(Base):
     __tablename__ = "prediction"
     prediction_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     execution_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete=AL_BORRAR_NULO)
     )
     ruta: Mapped[str] = mapped_column(Text, nullable=False)
     instante: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -129,16 +217,27 @@ class Prediccion(Base):
     explicacion: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
     variables: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     creado_en: Mapped[datetime] = _ahora()
+    # migración 0004: banda del modelo sin calibrar, ajuste conformal y explicación local (RF-006, RF-015)
+    p10_modelo: Mapped[float | None] = mapped_column(Float)
+    p90_modelo: Mapped[float | None] = mapped_column(Float)
+    ajuste_conformal: Mapped[float | None] = mapped_column(Float)
+    explicacion_local: Mapped[dict | None] = mapped_column(JSONB)
+    # migración 0006: dimensiones de §8.3 (app/servicios/dimensiones.py)
+    idruta: Mapped[int | None] = mapped_column(Integer)
+    idempresa: Mapped[int | None] = mapped_column(Integer)
+    idproceso: Mapped[str | None] = mapped_column(Text)
+    id_dia_semana: Mapped[int | None] = mapped_column(Integer)
+    id_estacionalidad: Mapped[int | None] = mapped_column(Integer)
 
 
 class Recomendacion(Base):
     __tablename__ = "recommendation"
     recommendation_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     execution_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete=AL_BORRAR_NULO)
     )
     prediction_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.prediction.prediction_id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.prediction.prediction_id", ondelete=AL_BORRAR_NULO)
     )
     ruta: Mapped[str] = mapped_column(Text, nullable=False)
     fecha: Mapped[date] = mapped_column(Date, nullable=False)
@@ -158,6 +257,14 @@ class Recomendacion(Base):
     umbrales_version: Mapped[int | None] = mapped_column(Integer)
     detalle: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     creado_en: Mapped[datetime] = _ahora()
+    # migración 0006: franja (§10.2, de una predicción) o plan_dia (plan del día siguiente que persiste el ciclo)
+    origen: Mapped[str] = mapped_column(Text, nullable=False, default="franja", server_default="franja")
+    # dimensiones de §8.3 (app/servicios/dimensiones.py)
+    idruta: Mapped[int | None] = mapped_column(Integer)
+    idempresa: Mapped[int | None] = mapped_column(Integer)
+    idproceso: Mapped[str | None] = mapped_column(Text)
+    id_dia_semana: Mapped[int | None] = mapped_column(Integer)
+    id_estacionalidad: Mapped[int | None] = mapped_column(Integer)
 
 
 class Alerta(Base):
@@ -165,7 +272,7 @@ class Alerta(Base):
     alert_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     codigo: Mapped[str] = mapped_column(Text, nullable=False)
     execution_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete=AL_BORRAR_NULO)
     )
     empresa: Mapped[str | None] = mapped_column(Text)
     ruta: Mapped[str | None] = mapped_column(Text)
@@ -193,6 +300,21 @@ class Alerta(Base):
     ultima_deteccion: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     creado_en: Mapped[datetime] = _ahora()
     actualizado_en: Mapped[datetime] = _ahora()
+    # migración 0003: estructura completa de §5.3 y §9.4 (tendencia), ubicación §8.1 y seudónimo §18
+    origen: Mapped[str] = mapped_column(Text, nullable=False, default="pronostico")
+    tendencia: Mapped[str | None] = mapped_column(Text)
+    tendencia_pendiente: Mapped[float | None] = mapped_column(Float)
+    serie_reciente: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    probabilidad: Mapped[float | None] = mapped_column(Float)
+    metodo_puntaje: Mapped[str | None] = mapped_column(Text)
+    variables_influyentes: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    ubicacion: Mapped[dict | None] = mapped_column(PuntoGeografico())
+    # migración 0006: dimensiones de §8.3 (app/servicios/dimensiones.py)
+    idruta: Mapped[int | None] = mapped_column(Integer)
+    idempresa: Mapped[int | None] = mapped_column(Integer)
+    idproceso: Mapped[str | None] = mapped_column(Text)
+    id_dia_semana: Mapped[int | None] = mapped_column(Integer)
+    id_estacionalidad: Mapped[int | None] = mapped_column(Integer)
 
 
 class HistorialAlerta(Base):
@@ -222,16 +344,19 @@ class Umbral(Base):
     creado_por: Mapped[str] = mapped_column(Text, nullable=False)
     motivo: Mapped[str | None] = mapped_column(Text)
     creado_en: Mapped[datetime] = _ahora()
+    # migración 0006: validación del área operativa (§5.1); nulo = versión propuesta
+    aprobado_por: Mapped[str | None] = mapped_column(Text)
+    aprobado_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class Notificacion(Base):
     __tablename__ = "notification_log"
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     execution_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete=AL_BORRAR_NULO)
     )
     alert_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.alert.alert_id", ondelete="SET NULL")
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.alert.alert_id", ondelete=AL_BORRAR_NULO)
     )
     canal: Mapped[str] = mapped_column(Text, nullable=False)
     destinatario: Mapped[str | None] = mapped_column(Text)
@@ -241,3 +366,86 @@ class Notificacion(Base):
     simulado: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     detalle: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     creado_en: Mapped[datetime] = _ahora()
+
+
+# ---------------------------------------------------------------- migración 0004
+class MonitoreoModelo(Base):
+    """§9.4: deriva, error móvil, cobertura, volumen y alertas descartadas por ejecución y modelo (activo o sombra)."""
+
+    __tablename__ = "model_monitoring"
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    execution_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete="CASCADE"))
+    model_id: Mapped[str] = mapped_column(Text, nullable=False)
+    rol: Mapped[str] = mapped_column(Text, nullable=False, default="activo")
+    fecha_corte: Mapped[date | None] = mapped_column(Date)
+    desde: Mapped[date | None] = mapped_column(Date)
+    hasta: Mapped[date | None] = mapped_column(Date)
+    ventana_dias: Mapped[int] = mapped_column(Integer, nullable=False)
+    n_observaciones: Mapped[int | None] = mapped_column(Integer)
+    n_predicciones: Mapped[int | None] = mapped_column(Integer)
+    predicciones_ventana: Mapped[int | None] = mapped_column(Integer)
+    wape_movil: Mapped[float | None] = mapped_column(Float)
+    mae_movil: Mapped[float | None] = mapped_column(Float)
+    sesgo_pct: Mapped[float | None] = mapped_column(Float)
+    cobertura_p10_p90: Mapped[float | None] = mapped_column(Float)
+    psi: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    psi_max: Mapped[float | None] = mapped_column(Float)
+    psi_variable_max: Mapped[str | None] = mapped_column(Text)
+    alertas_total: Mapped[int | None] = mapped_column(Integer)
+    alertas_descartadas: Mapped[int | None] = mapped_column(Integer)
+    pct_descartadas: Mapped[float | None] = mapped_column(Float)
+    estado: Mapped[str] = mapped_column(Text, nullable=False)
+    motivos: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    umbrales_version: Mapped[int | None] = mapped_column(Integer)
+    detalle: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    creado_en: Mapped[datetime] = _ahora()
+
+
+class FotoVariables(Base):
+    """§11.2 feature snapshot: vector exacto de variables por predicción y hora (tabla particionada por mes)."""
+
+    __tablename__ = "feature_snapshot"
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    ventana_inicio: Mapped[datetime] = mapped_column(DateTime(timezone=True), primary_key=True)
+    execution_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete="CASCADE"))
+    prediction_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.prediction.prediction_id", ondelete="CASCADE"))
+    model_id: Mapped[str | None] = mapped_column(Text)
+    ruta: Mapped[str] = mapped_column(Text, nullable=False)
+    sentido: Mapped[str | None] = mapped_column(Text)
+    segmento: Mapped[int | None] = mapped_column(Integer)
+    horizonte_min: Mapped[int | None] = mapped_column(Integer)
+    ventana_fin: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    fecha: Mapped[date] = mapped_column(Date, nullable=False)
+    hora: Mapped[int] = mapped_column(Integer, nullable=False)
+    features: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    feature_version: Mapped[str] = mapped_column(Text, nullable=False)
+    data_cutoff: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    creado_en: Mapped[datetime] = _ahora()
+    # migración 0006: dimensiones de §8.3 (app/servicios/dimensiones.py)
+    idruta: Mapped[int | None] = mapped_column(Integer)
+    idempresa: Mapped[int | None] = mapped_column(Integer)
+    idproceso: Mapped[str | None] = mapped_column(Text)
+    id_dia_semana: Mapped[int | None] = mapped_column(Integer)
+    id_estacionalidad: Mapped[int | None] = mapped_column(Integer)
+
+
+# ---------------------------------------------------------------- migración 0006
+class RespuestaReto(Base):
+    """§20: foto persistida de la respuesta a la pregunta del reto por fecha y ruta (GET /respuesta solo la lee)."""
+
+    __tablename__ = "respuesta_reto"
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    fecha: Mapped[date] = mapped_column(Date, nullable=False)
+    ruta: Mapped[str] = mapped_column(Text, nullable=False)
+    idruta: Mapped[int | None] = mapped_column(Integer)
+    payload: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    model_id: Mapped[str | None] = mapped_column(Text)
+    calibracion_version: Mapped[str | None] = mapped_column(Text)
+    umbrales_version: Mapped[int | None] = mapped_column(Integer)
+    execution_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete=AL_BORRAR_NULO))
+    fuente_pronostico: Mapped[str | None] = mapped_column(Text)
+    generado_en: Mapped[datetime] = _ahora()

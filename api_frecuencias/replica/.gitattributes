@@ -1,0 +1,5 @@
+# Scripts de Extreme: copia byte a byte (con sus CRLF), verificada con SHA256SUMS. Sin conversión de fin de línea.
+extreme/** -text
+# Los .sh y .sql de inicialización corren dentro del contenedor Linux: siempre LF, también en clones de Windows.
+initdb/** text eol=lf
+errata/** text eol=lf

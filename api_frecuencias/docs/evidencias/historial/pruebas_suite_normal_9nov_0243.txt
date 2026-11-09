@@ -1,0 +1,36 @@
+Suite completa en modo normal (sin TESTCONTAINERS), 09-11-2026 02:43:28-02:49:55, base ai_frecuencias_pruebas_pruebas en el PostgreSQL local (5433); réplica arriba (5434).
+Comando: TEST_DATABASE_NAME=ai_frecuencias_pruebas_pruebas pytest tests -q -rfE -p no:logging --junitxml=docs/evidencias/pruebas/pytest_suite_normal.xml
+Resultado: 759 pruebas; 734 pasan, 2 fallan, 7 con error y 16 omitidas o xfail, en 384 s.
+- 8 omitidas de Testcontainers: así deben quedar sin TESTCONTAINERS=1.
+- 4 xfail del contrato: brechas documentadas.
+- 3 omitidas de la réplica.
+- 1 omitida de test_caida, que pide PRUEBA_CAIDA=1.
+- Los 7 errores los produjo la opción -p no:logging de esta corrida: deja sin el fixture caplog a 7 pruebas de otras áreas. Corridas otra vez sin esa opción, pasan las 7 (02:50).
+- Las 2 fallas están en tests/integracion/test_seguridad.py. Las causa la ruta nueva PUT /api/v1/catalogos/capacidad, que no está en la matriz de roles (ver hallazgos_contrato.txt, F).
+El ensayo de CI con TESTCONTAINERS=1 y cobertura está en ci_local.txt: 759 pruebas, 749 pasan, las mismas 2 fallas y cobertura del 91,6 %.
+
+tests\integracion\test_seguridad.py:70: AssertionError
+tests\integracion\test_seguridad.py:93: AssertionError
+tests/contrato/test_contrato_openapi.py::test_operaciones_nuevas_get_sin_parametros_de_ruta
+tests/contrato/test_contrato_openapi.py::test_registro_de_brechas_observadas
+tests/contrato/test_contrato_openapi.py::test_registro_de_brechas_observadas
+tests/contrato/test_contrato_openapi.py::test_registro_de_brechas_observadas
+tests/contrato/test_schemathesis.py::test_defectos_conocidos_de_rango_corregidos
+tests/contrato/test_schemathesis.py::test_defectos_conocidos_de_rango_corregidos
+tests/contrato/test_schemathesis.py::test_defectos_conocidos_de_rango_corregidos
+tests/contrato/test_schemathesis.py::test_defectos_conocidos_de_rango_corregidos
+tests/contrato/test_schemathesis.py::test_defectos_conocidos_de_rango_corregidos
+tests/contrato/test_schemathesis.py::test_defectos_conocidos_de_rango_corregidos
+tests/contrato/test_schemathesis.py::test_defectos_conocidos_de_rango_corregidos
+tests/contrato/test_schemathesis.py::test_defectos_conocidos_de_rango_corregidos
+tests/contrato/test_schemathesis.py::test_defectos_conocidos_de_rango_corregidos
+tests/integracion/test_catalogos_api.py::test_toda_la_api_presenta_los_instantes_en_bogota
+FAILED tests/integracion/test_seguridad.py::test_toda_escritura_tiene_rol_explicito
+FAILED tests/integracion/test_seguridad.py::test_matriz_401_403_2xx_de_cada_ruta_y_rol
+ERROR tests/integracion/test_seguridad.py::test_ninguna_clave_en_claro_en_el_entorno_ni_en_el_log
+ERROR tests/unit/test_notificaciones.py::test_correo_simulado_devuelve_registro_y_escribe_log
+ERROR tests/unit/test_seguridad.py::test_entradas_invalidas_se_ignoran_sin_filtrar_secretos[no es json]
+ERROR tests/unit/test_seguridad.py::test_entradas_invalidas_se_ignoran_sin_filtrar_secretos[[1, 2]]
+ERROR tests/unit/test_seguridad.py::test_entradas_invalidas_se_ignoran_sin_filtrar_secretos[{"abc": {"usuario": "x", "rol": "admin"}}]
+ERROR tests/unit/test_seguridad.py::test_entradas_invalidas_se_ignoran_sin_filtrar_secretos[crudo3]
+ERROR tests/unit/test_seguridad.py::test_entradas_invalidas_se_ignoran_sin_filtrar_secretos[crudo4]

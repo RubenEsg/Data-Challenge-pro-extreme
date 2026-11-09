@@ -1,0 +1,68 @@
+{
+  "ventana": {
+    "desde": "2025-09-01",
+    "hasta": "2025-09-14"
+  },
+  "candidato": "hgb_fv1_20250831_s42",
+  "activo": "hgb_fv2_20250831_s42",
+  "aprobado": true,
+  "criterios": [
+    {
+      "criterio": "WAPE del candidato ≤ WAPE del activo",
+      "ok": true,
+      "candidato": 0.1297,
+      "referencia": 0.13022
+    },
+    {
+      "criterio": "WAPE ≤ wape_max (20%)",
+      "ok": true,
+      "candidato": 0.1297,
+      "referencia": 0.2
+    },
+    {
+      "criterio": "cobertura P10-P90 en [75%, 90%]",
+      "ok": true,
+      "candidato": 0.8025,
+      "referencia": [
+        0.75,
+        0.9
+      ]
+    },
+    {
+      "criterio": "|sesgo| ≤ sesgo_max (5%)",
+      "ok": true,
+      "candidato": 0.0023799999999999997,
+      "referencia": 0.05
+    }
+  ],
+  "calibracion": {
+    "candidato": "v1",
+    "activo": "v2",
+    "misma_version": false
+  },
+  "metricas_candidato": {
+    "wape": 12.97,
+    "mae": 95.075,
+    "rmse": 131.478,
+    "sesgo_pct": 0.238,
+    "cobertura_p10_p90": 80.25,
+    "cobertura_p10_p90_conformal": 80.25,
+    "cobertura_p10_p90_conformal_v1": null,
+    "calibracion_version": "v1",
+    "n": 714
+  },
+  "metricas_activo": {
+    "wape": 13.022,
+    "mae": 95.456,
+    "rmse": 131.732,
+    "sesgo_pct": 0.085,
+    "cobertura_p10_p90": 80.95,
+    "cobertura_p10_p90_conformal": 78.01,
+    "cobertura_p10_p90_conformal_v1": 80.95,
+    "calibracion_version": "v2",
+    "n": 714
+  },
+  "generado_en": "2026-11-09T06:24:10-05:00",
+  "script": "scripts/evidencias_monitoreo.py (compuerta)",
+  "nota": "ventana 2025-09-01 a 2025-09-14: no toca la prueba reservada (2025-11-01 a 2025-12-31); cae en la validación de ambos modelos (2025-09-01 a 2025-10-31), así que ilustra el cálculo de los cuatro criterios y no es una evaluación fuera de muestra. La compuerta real se aplica en la ventana de sombra, posterior a todo lo que vio el candidato."
+}

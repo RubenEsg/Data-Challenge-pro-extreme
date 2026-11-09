@@ -25,5 +25,32 @@
   },
   "parametros_operativos_hora.parquet": {
     "fuente": "experimentos/D1_optimizacion/parametros_operativos.parquet + nmin/nmax de EntregaFinal/dash_app/datos/insumos_d5_2025.parquet"
+  },
+  "contexto_operacional.parquet": {
+    "fuente": "datos/novedades_viales_fecha.parquet, novedades_viales_ruta.parquet, estacionalidades_anio.parquet, estacionalidades.parquet",
+    "filas": 24837,
+    "columnas": {
+      "nov_impacto": "porcentaje_impacto de la novedad vial si la hora de salida cruza [hora_inicio, hora_fin]; 0 si no (máximo si hay varias). novedades_viales_ruta está vacía: aplica a las 3 rutas",
+      "nov_sube": "1 si potencial_efecto = SUBE (la etiqueta no siempre coincide con los datos: el modelo aprende el signo)",
+      "festivo_oficial": "FESTIVO_NACIONAL de estacionalidades_anio (respaldo del calendario; cubre 2026 para la semana siguiente)"
+    },
+    "novedades": 28,
+    "dias_con_novedad": 25,
+    "horas_con_novedad": 246,
+    "filas_novedades_viales_ruta": 0,
+    "festivos_oficiales_en_rango": 72,
+    "procesos_estacionalidades": [
+      "cootransoriente"
+    ]
+  },
+  "perfil_intrahorario.parquet": {
+    "fuente": "datos/progvehiculos.parquet (fechasalida, idruta, cancelada) + datos/conteo_viajes.parquet (subidas), viajes de 2024",
+    "filas": 150,
+    "fraccion_media": 0.5175,
+    "definicion": "media diaria de subidas de los viajes que salen entre h:00 y h:29 / subidas de los viajes que salen en la hora h, por ruta, tipo de día y hora; si falta se usa 0,5"
+  },
+  "clima_diario.parquet": {
+    "fuente": "datos/clima_diario.parquet (precipitacion_4_21h_mm)",
+    "uso": "solo como condición en la evaluación (lluvia >= 5 y >= 20 mm, seco); nunca como variable del pronóstico"
   }
 }

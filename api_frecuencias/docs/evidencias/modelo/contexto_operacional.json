@@ -1,0 +1,122 @@
+{
+ "fuente": {
+  "fuente": "datos/novedades_viales_fecha.parquet, novedades_viales_ruta.parquet, estacionalidades_anio.parquet, estacionalidades.parquet",
+  "filas": 24837,
+  "columnas": {
+   "nov_impacto": "porcentaje_impacto de la novedad vial si la hora de salida cruza [hora_inicio, hora_fin]; 0 si no (máximo si hay varias). novedades_viales_ruta está vacía: aplica a las 3 rutas",
+   "nov_sube": "1 si potencial_efecto = SUBE (la etiqueta no siempre coincide con los datos: el modelo aprende el signo)",
+   "festivo_oficial": "FESTIVO_NACIONAL de estacionalidades_anio (respaldo del calendario; cubre 2026 para la semana siguiente)"
+  },
+  "novedades": 28,
+  "dias_con_novedad": 25,
+  "horas_con_novedad": 246,
+  "filas_novedades_viales_ruta": 0,
+  "festivos_oficiales_en_rango": 72,
+  "procesos_estacionalidades": [
+   "cootransoriente"
+  ]
+ },
+ "perfil_intrahorario": {
+  "fuente": "datos/progvehiculos.parquet (fechasalida, idruta, cancelada) + datos/conteo_viajes.parquet (subidas), viajes de 2024",
+  "filas": 150,
+  "fraccion_media": 0.5175,
+  "definicion": "media diaria de subidas de los viajes que salen entre h:00 y h:29 / subidas de los viajes que salen en la hora h, por ruta, tipo de día y hora; si falta se usa 0,5"
+ },
+ "variables_fv2": [
+  "nov_impacto",
+  "nov_sube",
+  "vispera_festivo",
+  "post_festivo"
+ ],
+ "descartadas": {
+  "est_fiesta_atl": "empeora (15,03 -> 15,73 % en el prototipo de diseño)",
+  "puente": "no aporta"
+ },
+ "prueba_reservada_por_condicion_wape": {
+  "festivo": {
+   "cand": 21.11,
+   "fv1": 21.05,
+   "b1": 145.99,
+   "n": 204
+  },
+  "vispera_festivo": {
+   "cand": 30.28,
+   "fv1": 35.28,
+   "b1": 43.41,
+   "n": 255
+  },
+  "post_festivo": {
+   "cand": 11.81,
+   "fv1": 12.01,
+   "b1": 16.1,
+   "n": 204
+  },
+  "vacaciones": {
+   "cand": 19.87,
+   "fv1": 20.9,
+   "b1": 32.01,
+   "n": 816
+  },
+  "navidad": {
+   "cand": 29.8,
+   "fv1": 30.42,
+   "b1": 273.68,
+   "n": 51
+  }
+ },
+ "robustez_horas_afectadas": {
+  "2024": {
+   "todas": {
+    "n": 18564,
+    "fv1": 16.25,
+    "fv2": 16.26,
+    "b1": 21.55
+   },
+   "horas_con_novedad": {
+    "n": 246,
+    "fv1": 28.06,
+    "fv2": 25.15,
+    "b1": 58.0
+   },
+   "vispera_festivo": {
+    "n": 918,
+    "fv1": 24.12,
+    "fv2": 23.4,
+    "b1": 33.8
+   },
+   "post_festivo": {
+    "n": 918,
+    "fv1": 20.22,
+    "fv2": 20.28,
+    "b1": 29.49
+   }
+  },
+  "2025": {
+   "todas": {
+    "n": 18615,
+    "fv1": 14.53,
+    "fv2": 14.48,
+    "b1": 20.04
+   },
+   "horas_con_novedad": {
+    "n": 255,
+    "fv1": 35.11,
+    "fv2": 33.49,
+    "b1": 81.38
+   },
+   "vispera_festivo": {
+    "n": 867,
+    "fv1": 21.31,
+    "fv2": 20.18,
+    "b1": 33.4
+   },
+   "post_festivo": {
+    "n": 867,
+    "fv1": 16.2,
+    "fv2": 15.46,
+    "b1": 27.01
+   }
+  }
+ },
+ "nota": "cand = fv2 activo. El contexto no mejora el total (IC95 de fv2 - fv1 cruza 0 en 2024 y 2025) pero sí las horas afectadas."
+}

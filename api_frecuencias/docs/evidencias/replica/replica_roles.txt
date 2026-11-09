@@ -1,0 +1,57 @@
+Roles de la IA en la réplica (§11.3) (2026-11-09T06:45:17-05:00)
+
+== lector_ia: configuración de la sesión (ALTER ROLE ... SET)
+   default_transaction_read_only = on
+   statement_timeout = 30s
+   idle_in_transaction_session_timeout = 1min
+   lock_timeout = 5s
+   TimeZone = America/Bogota
+== lector_ia: SELECT count(*) FROM timbradas_consolidado -> 10731 (correcto)
+== lector_ia: SELECT count(*) FROM timbradas_segmentos -> 2769692 (correcto)
+
+== lector_ia: escrituras con sesión por defecto (solo lectura) — TODAS deben fallar
+   update                               rechazado [25006] cannot execute UPDATE in a read-only transaction
+   insert                               rechazado [25006] cannot execute INSERT in a read-only transaction
+   delete                               rechazado [25006] cannot execute DELETE in a read-only transaction
+   truncate                             rechazado [25006] cannot execute TRUNCATE TABLE in a read-only transaction
+   copy_from                            rechazado [42501] permission denied for table timbradas_consolidado
+   create_public                        rechazado [25006] cannot execute CREATE TABLE in a read-only transaction
+   create_temp                          rechazado [25006] cannot execute CREATE TABLE in a read-only transaction
+   create_ai_frecuencias                rechazado [25006] cannot execute CREATE TABLE in a read-only transaction
+   create_schema                        rechazado [25006] cannot execute CREATE SCHEMA in a read-only transaction
+   alter_table                          rechazado [25006] cannot execute ALTER TABLE in a read-only transaction
+   drop_table                           rechazado [25006] cannot execute DROP TABLE in a read-only transaction
+   lock_exclusivo                       rechazado [42501] permission denied for table timbradas_consolidado
+   nextval                              rechazado [42501] permission denied for sequence timbradas_anio_id_timbrada_anio_seq
+   fn_insert_timbradas_anio             rechazado [42501] permission denied for function fn_insert_timbradas_anio
+   fn_consolidar_timbradas_historicas   rechazado [42501] permission denied for function fn_consolidar_timbradas_historicas
+   fn_segmentar_ruta                    rechazado [42501] permission denied for function fn_segmentar_ruta
+
+== lector_ia: escrituras con después de SET default_transaction_read_only = off — TODAS deben fallar
+   update                               rechazado [42501] permission denied for table timbradas_consolidado
+   insert                               rechazado [42501] permission denied for table timbradas_consolidado
+   delete                               rechazado [42501] permission denied for table timbradas_consolidado
+   truncate                             rechazado [42501] permission denied for table timbradas_consolidado
+   copy_from                            rechazado [42501] permission denied for table timbradas_consolidado
+   create_public                        rechazado [42501] permission denied for schema public
+   create_temp                          rechazado [42501] permission denied to create temporary tables in database "operacional"
+   create_ai_frecuencias                rechazado [42501] permission denied for schema ai_frecuencias
+   create_schema                        rechazado [42501] permission denied for database operacional
+   alter_table                          rechazado [42501] must be owner of table timbradas_consolidado
+   drop_table                           rechazado [42501] must be owner of table timbradas_consolidado
+   lock_exclusivo                       rechazado [42501] permission denied for table timbradas_consolidado
+   nextval                              rechazado [42501] permission denied for sequence timbradas_anio_id_timbrada_anio_seq
+   fn_insert_timbradas_anio             rechazado [42501] permission denied for function fn_insert_timbradas_anio
+   fn_consolidar_timbradas_historicas   rechazado [42501] permission denied for function fn_consolidar_timbradas_historicas
+   fn_segmentar_ruta                    rechazado [42501] permission denied for function fn_segmentar_ruta
+
+== escritor_ia: en ai_frecuencias (debe funcionar)
+   CREATE TABLE, INSERT y SELECT en ai_frecuencias.prueba_f6186cb6: suma = 3 (correcto)
+   CREATE TEMP TABLE (staging de la ingesta): correcto
+== escritor_ia: tablas de Extreme (debe fallar)
+   SELECT count(*) FROM public.timbradas_consolidado                      rechazado [42501] permission denied for table timbradas_consolidado
+   INSERT INTO public.timbradas_consolidado (proceso) VALUES ('x')        rechazado [42501] permission denied for table timbradas_consolidado
+   CREATE TABLE public.intruso (x int)                                    rechazado [42501] permission denied for schema public
+   SELECT public.fn_consolidar_timbradas_historicas()                     rechazado [42501] permission denied for function fn_consolidar_timbradas_historicas
+
+Resultado: 0 escrituras indebidas permitidas (32 intentos de lector_ia y 4 de escritor_ia).

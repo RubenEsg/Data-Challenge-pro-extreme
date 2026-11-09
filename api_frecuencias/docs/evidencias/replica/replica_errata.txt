@@ -1,0 +1,38 @@
+Correcciones de la réplica y la prueba del fallo sin cada una (2026-11-09T06:45:03-05:00)
+Los scripts de Extreme se ejecutan SIN cambios (replica/extreme, SHA256SUMS). Las correcciones son
+archivos aparte en replica/errata. Pruebas automáticas: tests/replica/test_scripts_extreme.py
+
+== E1 — «1. tablas.sql» SIN la corrección E1 (base vacía desechable):
+   6 errores:
+   | psql:/extreme/1. tablas.sql:38: ERROR:  syntax error at or near ";"
+   | psql:/extreme/1. tablas.sql:55: ERROR:  relation "rutas_segmentos_config" does not exist
+   | psql:/extreme/1. tablas.sql:69: ERROR:  relation "rutas_segmentos" does not exist
+   | psql:/extreme/1. tablas.sql:105: ERROR:  relation "public.rutas_segmentos" does not exist
+   | psql:/extreme/1. tablas.sql:116: ERROR:  relation "timbradas_segmentos_anio" does not exist
+   | psql:/extreme/1. tablas.sql:150: ERROR:  relation "public.rutas_segmentos" does not exist
+== E1 — el mismo script CON E1 antes:
+   1 error (el de sintaxis, esperado) y 6 CREATE TABLE
+   | CREATE TABLE
+   | CREATE TABLE
+   | CREATE TABLE
+   | CREATE TABLE
+   | CREATE TABLE
+   | CREATE TABLE
+   | psql:/extreme/1. tablas.sql:38: ERROR:  syntax error at or near ";"
+   | LINE 11: ...maño_minimo_porcion_m  NUMERIC(12, 4) NOT NULL DEFAULT 0.20;
+   |                                                                        ^
+
+== E2 — SIN E2 (llave del script 1): un viaje pasa por el mismo segmento en dos bloques de 15 minutos
+   fila cruda 1 (06:05): insertada
+   fila cruda 2 (06:20): RECHAZADA — duplicate key value violates unique constraint "timbradas_segmentos_id_segmento_id_viaje_key"
+   conteo_pasajeros: 1 filas; timbradas_segmentos: 1 filas; Σ subidas 3 (Σ crudas enviadas = 5)
+== E2 — CON E2: un viaje pasa por el mismo segmento en dos bloques de 15 minutos
+   fila cruda 1 (06:05): insertada
+   fila cruda 2 (06:20): insertada
+   conteo_pasajeros: 2 filas; timbradas_segmentos: 2 filas; Σ subidas 5 (Σ crudas enviadas = 5)
+
+== H1 — fn_insert_timbradas_anio sobre viajes reservados aptos (transacciones que se deshacen):
+   viajes: [5141354, 5141355, 5141356, 5141357, 5141358, 5141359, 5141360, 5141363, 5141366, 5141367]
+   SIN H1 (estacionalidades_anio.proceso = 'cootransoriente'): [False, False, False, False, False, False, False, False, False, False]  -> TRUE en 0 de 10
+   CON H1 (proceso = 'sobusa'): [False, True, True, True, False, True, True, True, True, True]  -> TRUE en 8 de 10
+   Los FALSE con H1 no traen diagnóstico de la función: docs/hallazgos_extreme.md (H6) documenta los viajes «aptos» sin fecha de fin, que devuelven FALSE sin aviso.

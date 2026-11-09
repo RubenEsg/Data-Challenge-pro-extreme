@@ -16,12 +16,25 @@ from app.config import obtener_ajustes
 _motor: Engine | None = None
 _fabrica: sessionmaker[Session] | None = None
 
+MENSAJE_SIN_URL = (
+    "Falta DATABASE_URL: defina la URL de la base de resultados (esquema ai_frecuencias) en la variable de entorno "
+    "DATABASE_URL o en el archivo .env (vea .env.example). El código no trae una URL por omisión."
+)
+
+
+def url_resultados() -> str:
+    """URL de la base de resultados; falla con un mensaje claro si DATABASE_URL no está definida."""
+    url = obtener_ajustes().database_url.strip()
+    if not url:
+        raise RuntimeError(MENSAJE_SIN_URL)
+    return url
+
 
 def motor() -> Engine:
     global _motor, _fabrica
     if _motor is None:
         _motor = create_engine(
-            obtener_ajustes().database_url,
+            url_resultados(),
             pool_pre_ping=True,
             pool_size=5,
             max_overflow=5,

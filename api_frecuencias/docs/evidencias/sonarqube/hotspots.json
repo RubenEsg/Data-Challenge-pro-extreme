@@ -1,0 +1,21 @@
+{
+ "servidor": "SonarQube 26.11.0.134175 (Community Build, Docker)",
+ "proyecto": "sobusa-api-frecuencias",
+ "generado_en": "2026-11-09T12:50:34-05:00",
+ "ultimo_analisis": {
+  "key": "3ab7e497-44d9-4381-a942-d2486d5e99f9",
+  "date": "2026-11-09T17:49:56+0000",
+  "events": [
+   {
+    "key": "cb99317f-b4d8-433b-9508-b06890078632",
+    "category": "VERSION",
+    "name": "1.0.0"
+   }
+  ],
+  "projectVersion": "1.0.0",
+  "manualNewCodePeriodBaseline": false,
+  "detectedCI": "undetected"
+ },
+ "total": 0,
+ "hotspots": []
+}

@@ -1,0 +1,19 @@
+Actualización de la pila en vivo sobusa_api · 2026-11-09 04:34:55 -0500
+db ANTES:  dd67ca8b00ad19683ab24d651f026021629f35eb67a172d8ef3206d9805bde4c inicio=2026-11-09T04:59:57.367924934Z imagen=sha256:d803ac7dab61c5e5c36b8597e4a77d4a60be075507672e08da8aaba022dd9aaa
+api ANTES: b31df6231fed2dd28c5a2de0ac70fc75ebe2ef4dcc6db8ce21994f67d2d4c083 inicio=2026-11-09T05:00:03.27515313Z imagen=sha256:aa28eceea8344de45d50c58b1ef6bd39cd0056f2a0ea5d93bac31424af51a611
+Versión de Alembic ANTES en la base en vivo: 0001
+Respaldo de la imagen anterior: sobusa_api-api:antes_actualizacion
+1) Clave dash-local (rol analista) creada con scripts/crear_api_key.py; su hash quedó en API_KEYS y la clave en SOBUSA_API_KEY_DASH del .env local (no se muestra). Entradas en API_KEYS: 1
+2) docker compose -p sobusa_api build api migrar: 5.3 s
+3) docker compose -p sobusa_api run --rm --no-deps migrar (migraciones aditivas sobre ai_frecuencias):
+   INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+   INFO  [alembic.runtime.migration] Will assume transactional DDL.
+   INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Cola de trabajos en PostgreSQL para N réplicas (RNF-001, RNF-004, RNF-005, §7.1).
+   INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Estructura completa de la alerta (especificación v1.5, §5.3, §8.1, §9.4 y §18) y umbrales afinados (§5.1).
+   INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Monitoreo del modelo, foto de variables particionada y trazabilidad (§9.2, §9.4, §9.5, §11.2, §8.1, RNF-011).
+   INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Pesos y costos de la función objetivo de §10.2 versionados desde el inicio (§5.1 «regla de gobierno»).
+4) docker compose -p sobusa_api up -d --no-deps --build api: /health en 9.7 s -> {'estado': 'ok', 'base_datos': 'ok', 'version': '1.0.0', 'fuente': 'parquet', 'integraciones': {'fuente_postgres': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 3, 'reinicio_s': 60.0, 'reintento_en_s': None, 'ultimo_error': None}, 'notif_correo': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 5, 'reinicio_s': 120.0, 'reintento_en_s': None, 'ultimo_error': None}, 'notif_whatsapp': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 5, 'reinicio_s': 120.0, 'reintento_en_s': None, 'ultimo_error': None}}}
+5) GET /api/v1/alerts sin clave -> 401; con la clave dash-local -> 200 (total 100); modelo activo según la API: ['hgb_fv1_20250831_s42']
+db DESPUÉS:  dd67ca8b00ad19683ab24d651f026021629f35eb67a172d8ef3206d9805bde4c inicio=2026-11-09T04:59:57.367924934Z imagen=sha256:d803ac7dab61c5e5c36b8597e4a77d4a60be075507672e08da8aaba022dd9aaa  (sin cambios: True)
+api DESPUÉS: 032371eb38c382845c68a7f8bb99ef274452cb7ecdf20416835f77f87ced7f6d inicio=2026-11-09T09:35:09.882685217Z imagen=sha256:52a0c8388cec4ea74b879fe5374beafd9edf4c9afe96195d301a79bf492b8331
+Versión de Alembic en la base en vivo: 0005

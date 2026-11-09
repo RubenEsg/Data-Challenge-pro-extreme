@@ -1,0 +1,420 @@
+{
+ "modo": "archivos",
+ "generado_en": "2026-11-09T02:41:53.260425-05:00",
+ "catalogos": {
+  "procesos": {
+   "estado": 200,
+   "ms_primera": 47.9,
+   "fuente": "archivos",
+   "total": 1,
+   "muestra": {
+    "total": 1,
+    "limite": 50,
+    "desplazamiento": 0,
+    "fuente": "archivos",
+    "consultado_en": "2026-11-09T02:41:53.318301-05:00",
+    "items_muestra": [
+     {
+      "proceso": "sobusa",
+      "nombre": "SOBUSA",
+      "estado": "A",
+      "toleranciatiempo": 0,
+      "multaatraso": 0,
+      "multaadelanto": 0,
+      "penaliza": "N",
+      "maneja_capac_veh": true,
+      "maneja_hora_pico": false,
+      "id_estacionalidad": null,
+      "ultima_estacionalidad": null,
+      "rutas": 3
+     }
+    ]
+   }
+  },
+  "empresas": {
+   "estado": 200,
+   "ms_primera": 5.5,
+   "fuente": "archivos",
+   "total": 1,
+   "muestra": {
+    "total": 1,
+    "limite": 50,
+    "desplazamiento": 0,
+    "fuente": "archivos",
+    "consultado_en": "2026-11-09T02:41:53.324341-05:00",
+    "items_muestra": [
+     {
+      "idempresa": null,
+      "proceso": "sobusa",
+      "proceso_nombre": "SOBUSA",
+      "rutas": 3,
+      "idrutas": [
+       2,
+       16,
+       21
+      ]
+     }
+    ]
+   }
+  },
+  "rutas": {
+   "estado": 200,
+   "ms_primera": 11.6,
+   "fuente": "archivos",
+   "total": 3,
+   "muestra": {
+    "total": 3,
+    "limite": 50,
+    "desplazamiento": 0,
+    "fuente": "archivos",
+    "consultado_en": "2026-11-09T02:41:53.333830-05:00",
+    "items_muestra": [
+     {
+      "idruta": 2,
+      "ruta": "SILENCIO",
+      "codigo": "2",
+      "nombre": "SILENCIO",
+      "proceso": "sobusa",
+      "idempresa": null,
+      "estado_ruta": "A",
+      "frecuenciadespachos": "5",
+      "frecuenciadespachos_min": 5.0,
+      "primerdespacho": "04:40:00",
+      "tolsalida": -15,
+      "tolerancia": -5,
+      "tiempoplazosalida": 20,
+      "distancia_global": 62.9,
+      "tiempo_global": 0.0,
+      "flotadisp_prog": "41",
+      "capacidad": 50.0,
+      "cap_min_autorizada": null,
+      "cap_max_autorizada": null,
+      "capacidad_vigente": 50,
+      "capacidad_fuente": "catalogo",
+      "tiempo_ciclo_min": 255.4,
+      "flota": 45,
+      "frecuencia_actual_min": 7.2,
+      "por_tipo_dia": {
+       "Domingo/festivo": {
+        "tiempo_ciclo_min": 202.7,
+        "flota": 27,
+        "frecuencia_actual_min": 8.9
+       },
+       "Laboral": {
+        "tiempo_ciclo_min": 255.4,
+        "flota": 45,
+        "frecuencia_actual_min": 7.2
+       },
+       "Sábado": {
+        "tiempo_ciclo_min": 248.1,
+        "flota": 43,
+        "frecuencia_actual_min": 7.2
+       }
+      }
+     },
+     {
+      "idruta": 16,
+      "ruta": "CRA 54",
+      "codigo": "10",
+      "nombre": "CRA 54",
+      "proceso": "sobusa",
+      "idempresa": null,
+      "estado_ruta": "A",
+      "frecuenciadespachos": "5",
+      "frecuenciadespachos_min": 5.0,
+      "primerdespacho": "04:30:00",
+      "tolsalida": -15,
+      "tolerancia": -5,
+      "tiempoplazosalida": 20,
+      "distancia_global": 56.4,
+      "tiempo_global": 0.0,
+      "flotadisp_prog": "62",
+      "capacidad": 50.0,
+      "cap_min_autorizada": null,
+      "cap_max_autorizada": null,
+      "capacidad_vigente": 50,
+      "capacidad_fuente": "catalogo",
+      "tiempo_ciclo_min": 239.2,
+      "flota": 79,
+      "frecuencia_actual_min": 3.5,
+      "por_tipo_dia": {
+       "Domingo/festivo": {
+        "tiempo_ciclo_min": 173.0,
+        "flota": 45,
+        "frecuencia_actual_min": 4.7
+       },
+       "Laboral": {
+        "tiempo_ciclo_min": 239.2,
+        "flota": 79,
+        "frecuencia_actual_min": 3.5
+       },
+       "Sábado": {
+        "tiempo_ciclo_min": 223.7,
+        "flota": 75,
+        "frecuencia_actual_min": 3.8
+       }
+      }
+     }
+    ]
+   }
+  },
+  "segmentos?idruta=2&limite=20": {
+   "estado": 200,
+   "ms_primera": 6512.8,
+   "fuente": "archivos",
+   "total": 135,
+   "muestra": {
+    "total": 135,
+    "limite": 20,
+    "desplazamiento": 0,
+    "fuente": "archivos",
+    "consultado_en": "2026-11-09T02:41:59.847729-05:00",
+    "items_muestra": [
+     {
+      "id": 1,
+      "id_config": 1,
+      "idruta": 2,
+      "ruta": "SILENCIO",
+      "idrutageo": 3,
+      "nro_segmento": 1,
+      "activo": true,
+      "longitud_m": 500.0,
+      "vertices_original": 2515,
+      "vertices": 16,
+      "geometria": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         -74.804205,
+         10.8881388
+        ],
+        [
+         -74.8042142,
+         10.8886636
+        ],
+        [
+         "..."
+        ]
+       ]
+      }
+     },
+     {
+      "id": 2,
+      "id_config": 1,
+      "idruta": 2,
+      "ruta": "SILENCIO",
+      "idrutageo": 3,
+      "nro_segmento": 2,
+      "activo": true,
+      "longitud_m": 500.0,
+      "vertices_original": 2515,
+      "vertices": 16,
+      "geometria": {
+       "type": "LineString",
+       "coordinates": [
+        [
+         -74.8046204,
+         10.888521
+        ],
+        [
+         -74.8045763,
+         10.8881045
+        ],
+        [
+         "..."
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  },
+  "vehiculos?limite=100": {
+   "estado": 200,
+   "ms_primera": 51.5,
+   "fuente": "archivos",
+   "total": 656,
+   "muestra": {
+    "total": 656,
+    "limite": 100,
+    "desplazamiento": 0,
+    "fuente": "archivos",
+    "consultado_en": "2026-11-09T02:41:59.898138-05:00",
+    "items_muestra": [
+     {
+      "idvehiculo": "PRUEBASOBUSA",
+      "idruta": null,
+      "ruta": null,
+      "tipologia": "SIN_CLASE",
+      "tipovehiculo": null,
+      "carroceria": null,
+      "marca": null,
+      "modelo": null,
+      "n_sentados": 0,
+      "n_depie": 0,
+      "capacidad_total": null,
+      "activo": true,
+      "despacho_habilitado": true
+     },
+     {
+      "idvehiculo": "SOBUSA02",
+      "idruta": 2,
+      "ruta": "SILENCIO",
+      "tipologia": "BUS",
+      "tipovehiculo": 1,
+      "carroceria": "CERRADO",
+      "marca": "CHEVROLET B70",
+      "modelo": "2004",
+      "n_sentados": 0,
+      "n_depie": 0,
+      "capacidad_total": null,
+      "activo": false,
+      "despacho_habilitado": true
+     }
+    ]
+   }
+  },
+  "vehiculos/tipologias": {
+   "estado": 200,
+   "ms_primera": 45.9,
+   "fuente": null,
+   "total": 9,
+   "muestra": [
+    {
+     "idruta": 2,
+     "ruta": "SILENCIO",
+     "tipologia": "BUS",
+     "vehiculos": 56,
+     "capacidad_mediana": 49.5,
+     "capacidad_min": 34.0,
+     "capacidad_max": 70.0,
+     "sentados_mediana": 32.0,
+     "depie_mediana": 19.0
+    },
+    {
+     "idruta": 12,
+     "ruta": null,
+     "tipologia": "BUS",
+     "vehiculos": 61,
+     "capacidad_mediana": 50.0,
+     "capacidad_min": 39.0,
+     "capacidad_max": 70.0,
+     "sentados_mediana": 31.0,
+     "depie_mediana": 19.0
+    }
+   ]
+  },
+  "viajes?idruta=2&desde=2025-03-03&hasta=2025-03-03&limite=100": {
+   "estado": 200,
+   "ms_primera": 99.6,
+   "fuente": "archivos",
+   "total": 72,
+   "muestra": {
+    "total": 72,
+    "limite": 100,
+    "desplazamiento": 0,
+    "fuente": "archivos",
+    "consultado_en": "2026-11-09T02:42:00.044219-05:00",
+    "items_muestra": [
+     {
+      "idprogramacion": 6861782,
+      "idruta": 2,
+      "ruta": "SILENCIO",
+      "idvehiculo": "SOBUSA409",
+      "fecha": "2025-03-03",
+      "hora_programada": "2025-03-03T05:00:00-05:00",
+      "registrado_en": "2025-03-03T04:53:51.493956-05:00",
+      "estado": "finalizado",
+      "cancelada": false,
+      "finalizado": true
+     },
+     {
+      "idprogramacion": 6861786,
+      "idruta": 2,
+      "ruta": "SILENCIO",
+      "idvehiculo": "SOBUSA542",
+      "fecha": "2025-03-03",
+      "hora_programada": "2025-03-03T05:06:00-05:00",
+      "registrado_en": "2025-03-03T04:58:51.300764-05:00",
+      "estado": "finalizado",
+      "cancelada": false,
+      "finalizado": true
+     }
+    ]
+   }
+  },
+  "despachos?idruta=16&desde=2025-03-03&hasta=2025-03-07&limite=100": {
+   "estado": 200,
+   "ms_primera": 36.4,
+   "fuente": "archivos",
+   "total": 992,
+   "muestra": {
+    "total": 992,
+    "limite": 100,
+    "desplazamiento": 0,
+    "fuente": "archivos",
+    "consultado_en": "2026-11-09T02:42:00.079789-05:00",
+    "items_muestra": [
+     {
+      "idprogramacion": 6861684,
+      "idruta": 16,
+      "ruta": "CRA 54",
+      "idvehiculo": "SOBUSA153",
+      "fecha": "2025-03-03",
+      "hora_programada": "2025-03-02T15:26:00-05:00",
+      "salida_real": "2025-03-03T01:01:19-05:00",
+      "llegada": "2025-03-03T05:36:58-05:00",
+      "retraso_min": 575.3,
+      "duracion_min": 275.6,
+      "pasajeros": null,
+      "finalizado": true
+     },
+     {
+      "idprogramacion": 6861795,
+      "idruta": 16,
+      "ruta": "CRA 54",
+      "idvehiculo": "SOBUSA554",
+      "fecha": "2025-03-03",
+      "hora_programada": "2025-03-03T05:00:00-05:00",
+      "salida_real": "2025-03-03T05:03:26-05:00",
+      "llegada": "2025-03-03T07:41:29-05:00",
+      "retraso_min": 3.4,
+      "duracion_min": 158.0,
+      "pasajeros": 141,
+      "finalizado": true
+     }
+    ]
+   }
+  },
+  "capacidad": {
+   "estado": 200,
+   "ms_primera": 6.0,
+   "fuente": null,
+   "total": 3,
+   "muestra": [
+    {
+     "ruta": "SILENCIO",
+     "idruta": 2,
+     "tipologia": "TODAS",
+     "capacidad": 50,
+     "capacidad_catalogo": 50,
+     "fuente": "catalogo",
+     "clave": null,
+     "umbrales_version": 4,
+     "por_tipologia": {}
+    },
+    {
+     "ruta": "CRA 54",
+     "idruta": 16,
+     "tipologia": "TODAS",
+     "capacidad": 50,
+     "capacidad_catalogo": 50,
+     "fuente": "catalogo",
+     "clave": null,
+     "umbrales_version": 4,
+     "por_tipologia": {}
+    }
+   ]
+  }
+ }
+}

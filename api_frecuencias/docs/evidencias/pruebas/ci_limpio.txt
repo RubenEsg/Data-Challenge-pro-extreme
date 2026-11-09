@@ -1,0 +1,135 @@
+Integración continua en una máquina limpia (spec v1.5 §14.2 «las pruebas automatizadas pasan en integración
+continua», RNF-007, RNF-013, RNF-014)
+Corrida: 09-11-2026 05:33 a 05:43 (hora de Bogotá), Windows 11 con Python 3.13.3 y PostgreSQL 14 + PostGIS 3.4 local (Docker,
+puerto 5433), base de pruebas propia. Código: commit 0febf76 más los cambios del árbol de trabajo de ese momento.
+
+1. Cómo se armó la copia limpia (lo que ve GitHub Actions o un jurado al clonar)
+- Solo los archivos que git versiona: «git ls-files -co --exclude-standard» de EntregaFinal/api_frecuencias y
+  .github/workflows (471 archivos), con la misma estructura que el checkout disperso del flujo.
+- Fin de línea como en Linux: lo que git guarda normalizado llega con LF; lo marcado «-text» en .gitattributes
+  (datos/modelos/**: modelos, manifiestos y calibración, que se verifican con su SHA-256) llega byte a byte.
+- Sin .env, sin la carpeta datos/ de la raíz (las exportaciones Parquet del reto no se versionan), sin
+  insumos_sobusa/ y sin dash_app/.
+- Réplica inalcanzable a propósito: OPERACIONAL_PUERTO_HOST=5499 (puerto cerrado) y REPLICA_CONTENEDOR con un
+  contenedor que no existe, para que ninguna prueba use «docker exec» sobre la réplica real.
+- Dentro de la copia corre python scripts/ci_local.py (mismos pasos y comandos que el job «pruebas» de
+  .github/workflows/api_frecuencias.yml) y, aparte, el segundo job: PRUEBA_CAIDA=1 pytest tests/integracion/test_caida.py.
+  SCHEMATHESIS_EJEMPLOS=10 y TESTCONTAINERS=1, como en el flujo.
+- Reproducir todo (copia, entorno limpio, CI y caída) con un solo comando, desde EntregaFinal/api_frecuencias:
+  .venv\Scripts\python docs\evidencias\pruebas\ensayo_copia_limpia.py --destino <carpeta temporal> --caida
+
+2. Resultado
+Pasos (mismo orden que el job «pruebas» del flujo de GitHub Actions):
+  OK    ruff (estilo, errores y reglas S de seguridad): código 0, 0.5 s
+  OK    bandit (seguridad, severidad media o mayor): código 0, 3.6 s
+  OK    alembic upgrade head: código 0, 2.5 s
+  OK    alembic downgrade base: código 0, 1.2 s
+  OK    alembic upgrade head: código 0, 1.6 s
+  OK    pytest con cobertura ≥ 85 % y junit: código 0, 282.4 s
+  OK    OpenAPI sin deriva: código 0, 0 s
+
+pytest (su propia línea de resumen): 684 passed, 168 skipped, 60 subtests passed in 278.25s (0:04:38)
+junit: 912 casos (cada subprueba de Schemathesis cuenta como caso); 744 pasan, 0 fallan, 0 con error, 168 omitidas; 278.2 s
+  nivel           pruebas  fallas  omitidas
+  contrato            160       0         0
+  datos_ml             22       0         0
+  integracion          76       0         4
+  replica             180       0       163
+  testcontainers        8       0         0
+  unit                466       0         1
+
+Omitidas, agrupadas por motivo (el motivo lo escribe la prueba):
+   159  tests/replica: réplica no configurada: falta OPERACIONAL_PASSWORD (o REPLICA_URL) en el entorno o en el .env
+     2  tests/integracion: sin las exportaciones Parquet del reto
+     2  tests/replica: escribe en la réplica como extreme_dba: REPLICA_PRUEBAS_ESCRITURA=1
+     1  tests/integracion: prueba de caída con procesos reales: active con PRUEBA_CAIDA=1 (~2 min)
+     1  tests/integracion: réplica sin configurar (LECTOR_IA_PASSWORD)
+     1  tests/replica: exportaciones Parquet no disponibles
+     1  tests/replica: escribe en la réplica (llegada de datos y ai_frecuencias): REPLICA_PRUEBAS_ESCRITURA=1
+     1  tests/unit: sin la copia original de D5 (EntregaFinal/dash_app/motor/milp.py)
+
+Cobertura de líneas de app/ (incluido app/servicios/motor_d5): 91.94 % (8329 de 9059 líneas; umbral 85 %)
+
+OpenAPI: OpenAPI sin deriva: openapi.json coincide con el generado (57 rutas).
+
+Job «caida» (PRUEBA_CAIDA=1 pytest tests/integracion/test_caida.py): 1 passed in 261.62s (0:04:21)
+
+3. Qué fallaba en GitHub Actions y cómo se corrigió
+- Corrida del commit 5f2d4b5 (Python 3.11 y 3.13): 6 pruebas fallaban, todas por los catálogos sin réplica ni
+  exportaciones: GET /catalogos/rutas daba 500 (ResponseValidationError: el catálogo empaquetado trae flotadisp_prog
+  como número y el contrato lo declara texto) y la matriz de roles rechazaba el 503 de /catalogos/despachos.
+  Corrección: app/servicios/catalogos.py normaliza las columnas de texto de la tabla rutas (_texto) y
+  app/routers/catalogos.py aplica una sola política de degradación en todos los catálogos: 503
+  «catalogo_no_disponible» (sin fuente) o «fuente_no_disponible» (réplica configurada pero caída, también antes de
+  que se abra el circuito), declarado en el OpenAPI; nunca 500. La matriz de roles (tests/integracion/test_seguridad.py)
+  acepta un 503 solo si lleva el error uniforme con uno de esos códigos y la operación lo declara.
+- Corrida del commit 8d4e651: además, el SHA-256 de calibracion_v2.json no coincidía en Linux (git había convertido
+  CRLF a LF) y el modelo activo no cargaba (36 fallas y 64 errores en cascada). Lo corrige el commit 0febf76:
+  datos/modelos/** viaja sin conversión de fin de línea. Esta copia limpia reproduce ese checkout de Linux y el hash
+  coincide (dae6b1a6…).
+- Análisis estático: ruff pasa en todo el repositorio de la API (se corrigieron los 51 hallazgos de los guiones de
+  docs/evidencias/tablero) y bandit -ll no tiene hallazgos en app/ ni en scripts/ (los 10 B608 de
+  scripts/verificar_despliegue.py llevan «# nosec B608» con su motivo: el esquema es la constante E). El flujo y
+  scripts/ci_local.py ahora revisan todo el repositorio con ruff y app/ + scripts/ con bandit.
+- Cobertura: pyproject ya no excluye app/servicios/motor_d5 (lo ejercitan tests/unit/test_motor_d5.py y
+  test_optimizacion.py).
+
+4. Ensayo previo, sin las correcciones (copia de las 04:50, misma máquina)
+Reprodujo las fallas de pytest de GitHub Actions: las mismas pruebas de catálogos y la subprueba de Schemathesis de
+GET /catalogos/rutas, más el caso de contrato una_ruta_catalogo, que se agregó después de ese commit. El E501 de ruff
+y la deriva del OpenAPI de ese ensayo venían de cambios que estaban en curso en otros módulos a esa hora y que ya
+no están (ver la corrida del punto 2).
+Pasos (mismo orden que el job «pruebas» del flujo de GitHub Actions):
+  FALLA ruff (estilo, errores y reglas S de seguridad): código 1, 0.8 s
+  OK    bandit (seguridad, severidad media o mayor): código 0, 2.5 s
+  OK    alembic upgrade head: código 0, 4.1 s
+  OK    alembic downgrade base: código 0, 1.8 s
+  OK    alembic upgrade head: código 0, 2.0 s
+  FALLA pytest con cobertura ≥ 85 % y junit: código 1, 526.7 s
+  FALLA OpenAPI sin deriva: código 1, 0 s
+junit: 839 casos (cada subprueba de Schemathesis cuenta como caso); 664 pasan, 7 fallan, 0 con error, 168 omitidas; 520.5 s
+  nivel           pruebas  fallas  omitidas
+  contrato            160       3         0
+  datos_ml             20       0         0
+  integracion          71       4         4
+  replica             180       0       163
+  testcontainers        8       0         0
+  unit                400       0         1
+  fallas:
+    tests.contrato.test_contrato_openapi::test_operacion_valida_cumple_el_contrato[una_ruta_catalogo]
+    tests.contrato.test_contrato_openapi::test_operaciones_nuevas_get_sin_parametros_de_ruta
+    tests.contrato.test_schemathesis::test_ninguna_entrada_produce_error_5xx_y_todo_cumple_el_contrato[GET /api/v1/catalogos/rutas]
+    tests.integracion.test_catalogos_api::test_roles_en_catalogos
+    tests.integracion.test_catalogos_api::test_ajuste_de_capacidad_versionado_auditado_y_leido_por_el_optimizador
+    tests.integracion.test_catalogos_api::test_toda_la_api_presenta_los_instantes_en_bogota
+    tests.integracion.test_seguridad::test_matriz_401_403_2xx_de_cada_ruta_y_rol
+
+Omitidas, agrupadas por motivo (el motivo lo escribe la prueba):
+   159  tests/replica: réplica no configurada: falta OPERACIONAL_PASSWORD (o REPLICA_URL) en el entorno o en el .env
+     2  tests/integracion: sin las exportaciones Parquet del reto
+     2  tests/replica: escribe en la réplica como extreme_dba: REPLICA_PRUEBAS_ESCRITURA=1
+     1  tests/integracion: prueba de caída con procesos reales: active con PRUEBA_CAIDA=1 (~2 min)
+     1  tests/integracion: réplica sin configurar (LECTOR_IA_PASSWORD)
+     1  tests/replica: exportaciones Parquet no disponibles
+     1  tests/replica: escribe en la réplica (llegada de datos y ai_frecuencias): REPLICA_PRUEBAS_ESCRITURA=1
+     1  tests/unit: sin la copia original de D5 (EntregaFinal/dash_app/motor/milp.py)
+
+Cobertura de líneas de app/ (sin app/servicios/motor_d5, que entonces se excluía): 91.68 % (7483 de 8162 líneas; umbral 85 %)
+
+OpenAPI: DERIVA: openapi.json no coincide con el OpenAPI que genera el código (2 diferencias).
+   - components.schemas.FranjaDespacho: nuevo sin versionar
+   - components.schemas.ResumenDespacho: cambiado
+
+5. Omitidas en la máquina limpia
+Las pruebas de tests/replica necesitan la réplica operacional cargada con los datos del reto (puerto 5434) y se
+omiten con su motivo; corren en la suite completa local (docs/evidencias/replica/). Las demás omitidas dicen qué
+falta (exportaciones del reto, PRUEBA_CAIDA=1, escritura en la réplica a propósito o la copia original de D5 en
+dash_app/, que el checkout de la API no trae).
+
+6. Lo que solo se puede confirmar en GitHub
+Python 3.11 (aquí se ensayó 3.13.3), Ubuntu 24.04 con el servicio postgis/postgis:14-3.4 y la subida de los
+artefactos reportes-api-frecuencias-py3.11 y -py3.13. El resumen que publica el flujo sale de
+«python scripts/ci_local.py resumen reportes/pytest.xml reportes/coverage.xml».
+
+Archivos de esta corrida: ci_local.txt (log completo), ci/pytest.xml (junit), ci/coverage.xml, ci/pasos.json y
+ci/caida.txt (job de caída).

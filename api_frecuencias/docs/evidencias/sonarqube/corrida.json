@@ -1,0 +1,26 @@
+{
+ "pruebas": {
+  "codigo_salida": 0,
+  "duracion_s": 770.8,
+  "tests": 1060,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 5
+ },
+ "lint": {
+  "ruff": {
+   "hallazgos": 0,
+   "codigo_salida": 0
+  },
+  "bandit_app": {
+   "hallazgos": 0,
+   "codigo_salida": 0
+  },
+  "bandit_scripts": {
+   "hallazgos": 0,
+   "codigo_salida": 0
+  }
+ },
+ "codigo_scanner": 0,
+ "generado_en": "2026-11-09T12:50:32-05:00"
+}

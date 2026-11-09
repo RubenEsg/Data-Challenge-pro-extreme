@@ -1,0 +1,21 @@
+Suite completa de pruebas después de separar las dependencias (requirements.txt de ejecución y requirements-dev.txt
+de desarrollo), reescribir el Dockerfile y los archivos de Docker Compose.
+
+Fecha: 2026-11-09, de 03:43:26 a 03:57:55 (America/Bogota). Equipo: Windows 11, venv con Python 3.13.3 instalado con
+requirements-dev.txt (112 paquetes; coinciden uno a uno con el pip freeze del venv). Base de pruebas propia en el
+PostgreSQL local del puerto 5433 (TEST_DATABASE_NAME=ai_frecuencias_pruebas_despliegue) y la réplica operacional en el
+puerto 5434. Contrato con SCHEMATHESIS_EJEMPLOS=3.
+
+Comando:
+  .venv\Scripts\python -m pytest tests/unit tests/integracion tests/replica tests/contrato tests/datos_ml -q -rfE
+      --junitxml=<carpeta temporal>/pytest_final.xml
+
+Resultado (JUnit XML): 828 pruebas, 824 pasan, 4 omitidas, 0 fallas, 0 errores, 858,4 s.
+  unit          397 pasan
+  integracion    70 pasan, 1 omitida
+  replica       177 pasan, 3 omitidas
+  contrato      160 pasan
+  datos_ml       20 pasan
+
+Instalación de CI: «pip install --only-binary=:all: -r requirements-dev.txt» resuelve completo en python:3.11-slim
+(Linux, ruedas binarias únicamente; prueba en seco con pip --dry-run el mismo día).

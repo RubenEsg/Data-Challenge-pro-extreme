@@ -1,0 +1,76 @@
+% Estilo común de E01 y E02: la letra (Inter, SIL OFL 1.1, en fuentes/) y los colores por rol del tablero
+% (generado/colores.tex, que sale de dash_app/tokens.py). Ningún color se escribe aquí: solo roles.
+\usepackage{fontspec}
+% Sin las alternativas contextuales de Inter (calt): sus glifos de guion, dos puntos y paréntesis «de mayúscula» no
+% tienen Unicode, y el texto copiado o extraído del PDF los perdía (2025-11-01 salía 20251101).
+\defaultfontfeatures{Ligatures=TeX, RawFeature={-calt}}
+\setmainfont{Inter-Regular.ttf}[Path=fuentes/, BoldFont=Inter-SemiBold.ttf, ItalicFont=Inter-Regular.ttf,
+  ItalicFeatures={FakeSlant=0.16}, BoldItalicFont=Inter-SemiBold.ttf, BoldItalicFeatures={FakeSlant=0.16}]
+\setsansfont{Inter-Regular.ttf}[Path=fuentes/, BoldFont=Inter-SemiBold.ttf, ItalicFont=Inter-Regular.ttf,
+  ItalicFeatures={FakeSlant=0.16}]
+\newfontfamily\interligera{Inter-Regular.ttf}[Path=fuentes/]
+\newfontfamily\intermedia{Inter-Medium.ttf}[Path=fuentes/]
+\usepackage[spanish,es-noshorthands,es-tabla,es-nodecimaldot]{babel}
+\usepackage[table]{xcolor}
+\input{generado/colores.tex}
+\input{generado/cifras.tex}
+\input{generado/api_cifras.tex}
+\input{generado/respuesta_tabla.tex}
+\usepackage{graphicx}
+\graphicspath{{figuras/}{../informe/figuras/}}
+\usepackage{booktabs,array,tabularx,longtable,multirow}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds,calc}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+\color{rol-tinta}
+\hypersetup{colorlinks=true, linkcolor=rol-acento-fuerte, urlcolor=rol-acento-fuerte, citecolor=rol-acento-fuerte,
+  pdfauthor={Abrahan Basto Martínez, Rubén Esguerra Fernández, Paula Gómez}, pdflang={es-CO},
+  pdfsubject={Data Challenge 2026 - Extreme Technologies y Universidad del Norte}}
+\captionsetup{font={small,color=rol-tinta-2}, labelfont={color=rol-tinta}, justification=raggedright,
+  singlelinecheck=false}
+\setlist{nosep, leftmargin=1.2em}
+\setlength{\parskip}{3pt plus 1pt}
+\setlength{\parindent}{0pt}
+\renewcommand{\arraystretch}{1.12}
+\arrayrulecolor{rol-linea-fuerte}
+\widowpenalty=10000 \clubpenalty=10000
+\setlength{\emergencystretch}{3em}   % los identificadores largos (\texttt) bajan de línea en vez de salirse
+% Texto alineado a la izquierda, como el tablero: los identificadores largos no fuerzan espacios enormes ni se salen.
+\usepackage{ragged2e}
+\AtBeginDocument{\RaggedRight\hyphenpenalty=5000\exhyphenpenalty=5000}   % casi sin guiones, como el tablero
+
+% Títulos en peso normal (zentra: título grande en 400) y el número en gris.
+\titleformat{\section}{\interligera\Large\color{rol-tinta}}{\textcolor{rol-tinta-3}{\thesection}}{0.6em}{}
+\titleformat{\subsection}{\intermedia\normalsize\color{rol-tinta}}{\textcolor{rol-tinta-3}{\thesubsection}}{0.5em}{}
+\titleformat{\paragraph}[runin]{\intermedia\color{rol-tinta}}{}{0pt}{}[.]
+\titlespacing*{\section}{0pt}{10pt plus 2pt}{4pt}
+\titlespacing*{\subsection}{0pt}{7pt plus 2pt}{2pt}
+\titlespacing*{\paragraph}{0pt}{4pt}{0.6em}
+
+% Fuente de una cifra, tabla o figura: la ruta de la evidencia, relativa a EntregaFinal/.
+\newcommand{\fuente}[1]{{\footnotesize\color{rol-tinta-3}Fuente: \path{#1}}}
+\newcommand{\evid}[1]{{\footnotesize\color{rol-tinta-3}\path{#1}}}
+\newcommand{\evidt}[2]{{\footnotesize\color{rol-tinta-3}\path{#1}, #2}}
+\newcommand{\dato}[1]{\textcolor{rol-acento-fuerte}{#1}}
+\newcommand{\tenue}[1]{\textcolor{rol-tinta-2}{#1}}
+
+% Tarjeta zentra: superficie casi blanca, borde fino y esquinas redondeadas.
+\newtcolorbox{tarjeta}[1][]{enhanced, breakable, colback=rol-superficie, colframe=rol-linea, boxrule=0.6pt, arc=8pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt, #1}
+\newtcolorbox{respuesta}[1][]{enhanced, colback=rol-acento-suave, colframe=rol-acento-suave, boxrule=0pt, arc=8pt,
+  left=9pt, right=9pt, top=6pt, bottom=6pt, #1}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\footnotesize\color{rol-tinta-3}\piedepagina}
+\fancyfoot[R]{\footnotesize\color{rol-tinta-3}\thepage\ de \pageref*{LastPage}}

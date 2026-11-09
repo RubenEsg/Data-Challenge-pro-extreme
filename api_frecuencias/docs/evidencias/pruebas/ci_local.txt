@@ -1,0 +1,237 @@
+# Ensayo local del CI de la API de frecuencias
+Inicio: 2026-11-09T05:33:34.491495-05:00
+Python 3.13.3 en Windows-11-10.0.26200-SP0
+Flujo equivalente: .github/workflows/api_frecuencias.yml (job «pruebas»)
+
+## ruff (estilo, errores y reglas S de seguridad)
+$ .venv\Scripts\python.exe -m ruff check . --output-format concise
+All checks passed!
+
+[OK] ruff (estilo, errores y reglas S de seguridad): código de salida 0 en 0.5 s
+
+## bandit (seguridad, severidad media o mayor)
+$ .venv\Scripts\python.exe -m bandit -r app scripts -c pyproject.toml -ll -q
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:149
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:149
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:149
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:149
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:149
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:150
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:150
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:151
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:151
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:151
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:151
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:151
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:152
+[tester]	WARNING	nosec encountered (B104), but no failed test on file scripts\cola_servidor.py:153
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:70
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:79
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:89
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:103
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:104
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:106
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:107
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:108
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:108
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:110
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:112
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:114
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:114
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:116
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:225
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:250
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_caida.py:276
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:43
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:64
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:84
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:85
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:87
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:88
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:90
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:92
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:93
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:95
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:140
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:150
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:153
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:155
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:194
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\prueba_replicas.py:195
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_cargar.py:248
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_cargar.py:271
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_cargar.py:271
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_cargar.py:272
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_cargar.py:272
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_evidencias.py:184
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_evidencias.py:186
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_evidencias.py:209
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_explain.py:78
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_explain.py:82
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_explain.py:82
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_explain.py:83
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_explain.py:83
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_explain.py:232
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_simular_llegada.py:126
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_simular_llegada.py:135
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_simular_llegada.py:135
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_simular_llegada.py:142
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_simular_llegada.py:168
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_simular_llegada.py:187
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_simular_llegada.py:187
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_simular_llegada.py:187
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_simular_llegada.py:187
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\replica_simular_llegada.py:187
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\verificar_despliegue.py:215
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\verificar_despliegue.py:216
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\verificar_despliegue.py:217
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\verificar_despliegue.py:218
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\verificar_despliegue.py:219
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\verificar_despliegue.py:220
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\verificar_despliegue.py:222
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\verificar_despliegue.py:343
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\verificar_despliegue.py:371
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\verificar_despliegue.py:402
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\verificar_despliegue.py:433
+[tester]	WARNING	nosec encountered (B608), but no failed test on file scripts\verificar_despliegue.py:434
+
+[OK] bandit (seguridad, severidad media o mayor): código de salida 0 en 3.6 s
+
+## alembic upgrade head
+$ .venv\Scripts\python.exe -m alembic upgrade head
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Esquema ai_frecuencias: registro de modelos, predicciones, recomendaciones, alertas,
+bitácora de ejecuciones, errores de calidad, umbrales versionados y notificaciones.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Cola de trabajos en PostgreSQL para N réplicas (RNF-001, RNF-004, RNF-005, §7.1).
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Estructura completa de la alerta (especificación v1.5, §5.3, §8.1, §9.4 y §18) y umbrales afinados (§5.1).
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Monitoreo del modelo, foto de variables particionada y trazabilidad (§9.2, §9.4, §9.5, §11.2, §8.1, RNF-011).
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Pesos y costos de la función objetivo de §10.2 versionados desde el inicio (§5.1 «regla de gobierno»).
+
+[OK] alembic upgrade head: código de salida 0 en 2.5 s
+
+## alembic downgrade base
+$ .venv\Scripts\python.exe -m alembic downgrade base
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running downgrade 0005 -> 0004, Pesos y costos de la función objetivo de §10.2 versionados desde el inicio (§5.1 «regla de gobierno»).
+INFO  [alembic.runtime.migration] Running downgrade 0004 -> 0003, Monitoreo del modelo, foto de variables particionada y trazabilidad (§9.2, §9.4, §9.5, §11.2, §8.1, RNF-011).
+INFO  [alembic.runtime.migration] Running downgrade 0003 -> 0002, Estructura completa de la alerta (especificación v1.5, §5.3, §8.1, §9.4 y §18) y umbrales afinados (§5.1).
+INFO  [alembic.runtime.migration] Running downgrade 0002 -> 0001, Cola de trabajos en PostgreSQL para N réplicas (RNF-001, RNF-004, RNF-005, §7.1).
+INFO  [alembic.runtime.migration] Running downgrade 0001 -> , Esquema ai_frecuencias: registro de modelos, predicciones, recomendaciones, alertas,
+bitácora de ejecuciones, errores de calidad, umbrales versionados y notificaciones.
+
+[OK] alembic downgrade base: código de salida 0 en 1.2 s
+
+## alembic upgrade head
+$ .venv\Scripts\python.exe -m alembic upgrade head
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Esquema ai_frecuencias: registro de modelos, predicciones, recomendaciones, alertas,
+bitácora de ejecuciones, errores de calidad, umbrales versionados y notificaciones.
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Cola de trabajos en PostgreSQL para N réplicas (RNF-001, RNF-004, RNF-005, §7.1).
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Estructura completa de la alerta (especificación v1.5, §5.3, §8.1, §9.4 y §18) y umbrales afinados (§5.1).
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Monitoreo del modelo, foto de variables particionada y trazabilidad (§9.2, §9.4, §9.5, §11.2, §8.1, RNF-011).
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Pesos y costos de la función objetivo de §10.2 versionados desde el inicio (§5.1 «regla de gobierno»).
+
+[OK] alembic upgrade head: código de salida 0 en 1.6 s
+
+## pytest con cobertura ≥ 85 % y junit
+$ .venv\Scripts\python.exe -m pytest -p no:cacheprovider -rfE --cov=app --cov-report=xml:reportes\coverage.xml --cov-report=term:skip-covered --cov-fail-under=85 --junitxml=reportes\pytest.xml
+........................................................................ [  8%]
+...........................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu [ 15%]
+uuuuuuuuuuuuuuu.....................................sss....s............ [ 23%]
+..........................................s.........sssssssssssss......s [ 31%]
+.sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 39%]
+ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss.sssss [ 47%]
+ssssss.................................................................. [ 55%]
+........................................................................ [ 63%]
+........................................................................ [ 71%]
+........................................................................ [ 78%]
+...............................s........................................ [ 86%]
+........................................................................ [ 94%]
+................................................                         [100%]
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.13.3-final-0 _______________
+
+Name                                  Stmts   Miss  Cover   Missing
+-------------------------------------------------------------------
+app\config.py                            58      1    98%   81
+app\db.py                                45      2    96%   81-82
+app\esquemas.py                         361      6    98%   54, 62-63, 72, 75-76
+app\main.py                             112      7    94%   48-49, 54-55, 62, 142-143
+app\modelos_db.py                       298      5    98%   50, 59, 62, 84-85
+app\observabilidad.py                   308     14    95%   57-58, 127, 174, 181-182, 248, 273, 296-299, 306, 448-449
+app\openapi_doc.py                      192      3    98%   122, 287, 318
+app\routers\alertas.py                  105      8    92%   55-63, 71
+app\routers\catalogos.py                332     37    89%   234, 237, 240, 263-265, 287, 293, 299, 305, 342-347, 358-364, 373, 379, 388, 396, 403-404, 417, 427-428, 439, 448-449, 463-464
+app\routers\ejecuciones.py               44      1    98%   67
+app\routers\modelos.py                  151     14    91%   75, 105, 131, 134, 144-146, 157-158, 170, 198-199, 213-214
+app\routers\predicciones.py             162     11    93%   54-57, 68-69, 99-100, 113, 115, 201
+app\routers\pronostico_segmentos.py     108     12    89%   45, 66, 73-76, 134-137, 156, 170-171
+app\routers\respuesta.py                129      2    98%   151-152
+app\routers\segmentos.py                 44      2    95%   51-52
+app\seguridad.py                        124      2    98%   198, 200
+app\servicios\alertas.py                601     17    97%   128, 144-145, 153-154, 200, 202, 213, 223, 230-231, 309, 716, 827, 911, 966, 1076
+app\servicios\calidad.py                169      2    99%   57, 265
+app\servicios\catalogos.py              693     99    86%   110, 113, 118, 133, 198, 212-213, 235-238, 280, 282-283, 286-290, 312-315, 323, 339, 350, 363, 384, 404-421, 436-440, 443-447, 514, 527-534, 550, 555, 558-562, 568-575, 585-586, 591-606, 656, 710-711, 747, 749, 788-789, 836, 840, 842, 873, 909, 995, 1038, 1041
+app\servicios\circuito.py               144      9    94%   46, 53, 63, 70, 81, 105, 124-126
+app\servicios\cola.py                   223     20    91%   161-163, 170-172, 261-267, 322-323, 327-328, 413-415
+app\servicios\datos.py                  104      1    99%   52
+app\servicios\ejecucion.py              608    103    83%   67, 71, 81, 90-97, 105-106, 132, 138, 140, 178-180, 195-196, 199, 203, 226-227, 263-274, 307-308, 376-382, 397-410, 419, 422-424, 432, 443, 445-447, 457-459, 468-469, 551-553, 569-570, 602, 621-627, 679-681, 814-815, 856-857, 879-881, 890-892, 1001-1003, 1008-1020
+app\servicios\fuentes.py                243     32    87%   186, 188, 219, 250, 255, 280-281, 316, 342-345, 347, 397-399, 402, 405, 408, 411, 415-426, 452
+app\servicios\inferencia.py             800     52    94%   188, 337, 382, 531, 646-648, 659-661, 724-725, 782, 809-817, 843, 941, 989, 1107, 1126-1127, 1157-1159, 1244, 1290-1291, 1309-1310, 1313, 1316, 1318, 1343-1344, 1346, 1351, 1428-1432, 1438, 1502, 1652, 1675-1676
+app\servicios\ingesta.py                 73     10    86%   152-167
+app\servicios\monitoreo.py              294     31    89%   65, 99, 124, 139, 158, 170, 172, 179, 188-189, 206, 234, 267, 286, 370-373, 384-385, 406, 444-448, 471-472, 477-479
+app\servicios\motor_d5\milp.py          114     31    73%   47, 54-56, 119, 133-136, 141-163
+app\servicios\motor_d5\plan_base.py     119     18    85%   75, 81-85, 107-112, 122, 160-163, 186
+app\servicios\notificaciones.py          78      1    99%   57
+app\servicios\onnx_motor.py              56      4    93%   30-31, 85, 88
+app\servicios\optimizacion.py           951     41    96%   54, 282, 498, 589, 614-615, 617, 631-632, 634, 655, 672, 713, 747, 791, 809, 843, 977-978, 981-982, 994, 1080, 1132-1138, 1152-1154, 1160, 1388, 1502, 1592-1593, 1658-1659, 1677
+app\servicios\planificador.py           126     25    80%   93, 117-140, 150, 199, 202-203
+app\servicios\politica.py               328     36    89%   138-139, 194, 198, 200, 393-407, 416-419, 421-425, 445, 449-451, 476, 479, 484, 513, 534, 539-541
+app\servicios\respuesta.py              308     18    94%   68, 107, 124-125, 129-131, 135, 149-150, 200, 215, 297-298, 361, 372, 590-591
+app\servicios\segmentos.py               99     51    48%   125, 131-141, 145, 159-164, 168-172, 176-189, 196, 205, 212, 214-225, 241-244
+app\servicios\variables.py              111      2    98%   95-96
+-------------------------------------------------------------------
+TOTAL                                  9059    730    92%
+
+9 files skipped due to complete coverage.
+Coverage XML written to file reportes\coverage.xml
+Required test coverage of 85% reached. Total coverage: 91.94%
+684 passed, 168 skipped, 60 subtests passed in 278.25s (0:04:38)
+
+[OK] pytest con cobertura ≥ 85 % y junit: código de salida 0 en 282.4 s
+
+## OpenAPI sin deriva
+OpenAPI sin deriva: openapi.json coincide con el generado (57 rutas).
+[OK] OpenAPI sin deriva
+
+## Resumen (lo que el CI publica en GITHUB_STEP_SUMMARY)
+### Pruebas de la API de frecuencias
+
+**912 pruebas**: 744 pasan, 0 fallan, 0 con error y 168 omitidas o xfail, en 278.2 s.
+
+| Nivel (§14.1) | Pruebas | Fallas | Omitidas/xfail |
+|---|---:|---:|---:|
+| contrato | 160 | 0 | 0 |
+| datos_ml | 22 | 0 | 0 |
+| integracion | 76 | 0 | 4 |
+| replica | 180 | 0 | 163 |
+| testcontainers | 8 | 0 | 0 |
+| unit | 466 | 0 | 1 |
+
+**Cobertura de líneas de app/**: 91.9 % (umbral 85 %, 8329 de 9059 líneas).
+
+## Pasos
+| Paso | Código | Segundos | Resultado |
+|---|---:|---:|---|
+| ruff (estilo, errores y reglas S de seguridad) | 0 | 0.5 | OK |
+| bandit (seguridad, severidad media o mayor) | 0 | 3.6 | OK |
+| alembic upgrade head | 0 | 2.5 | OK |
+| alembic downgrade base | 0 | 1.2 | OK |
+| alembic upgrade head | 0 | 1.6 | OK |
+| pytest con cobertura ≥ 85 % y junit | 0 | 282.4 | OK |
+| OpenAPI sin deriva | 0 | 0 | OK |
+
+Fin: 2026-11-09T05:38:28.696393-05:00. CI EN VERDE

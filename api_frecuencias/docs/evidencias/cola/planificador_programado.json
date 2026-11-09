@@ -1,0 +1,112 @@
+{
+ "corte": "2025-11-24",
+ "franjas": [
+  {
+   "execution_id": "82e3c45f-0068-48da-9279-4ab3922c56b5",
+   "estado": "ok",
+   "programada_para": "2026-11-09 06:42:00-05:00",
+   "creado_en": "2026-11-09 06:42:00.004801-05:00",
+   "terminado_en": "2026-11-09 06:43:05.189610-05:00",
+   "filas_leidas": 54009,
+   "filas_validas": 54009,
+   "marca_agua_anterior": null,
+   "marca_agua_nueva": "2025-11-24 23:59:59-05:00",
+   "worker_id": "DESKTOP-RA73BA3:25792:206d36:t1",
+   "mensaje": "Terminada",
+   "pred": 9,
+   "rec": 60,
+   "alertas": 14
+  },
+  {
+   "execution_id": "a983c4f4-75b7-4cf3-9b36-c431f201d65f",
+   "estado": "ok",
+   "programada_para": "2026-11-09 06:43:00-05:00",
+   "creado_en": "2026-11-09 06:43:00.015239-05:00",
+   "terminado_en": "2026-11-09 06:43:06.352568-05:00",
+   "filas_leidas": 0,
+   "filas_validas": 0,
+   "marca_agua_anterior": "2025-11-24 23:59:59-05:00",
+   "marca_agua_nueva": "2025-11-24 23:59:59-05:00",
+   "worker_id": "DESKTOP-RA73BA3:25792:206d36:t1",
+   "mensaje": "Terminada",
+   "pred": 0,
+   "rec": 0,
+   "alertas": 0
+  },
+  {
+   "execution_id": "fa1ac0c0-255a-433a-a62c-6faa0d85ed11",
+   "estado": "ok",
+   "programada_para": "2026-11-09 06:44:00-05:00",
+   "creado_en": "2026-11-09 06:44:00.023043-05:00",
+   "terminado_en": "2026-11-09 06:44:21.834353-05:00",
+   "filas_leidas": 54,
+   "filas_validas": 54,
+   "marca_agua_anterior": "2025-11-24 23:59:59-05:00",
+   "marca_agua_nueva": "2025-11-25 23:59:59-05:00",
+   "worker_id": "DESKTOP-RA73BA3:25792:206d36:t1",
+   "mensaje": "Terminada",
+   "pred": 9,
+   "rec": 60,
+   "alertas": 8
+  },
+  {
+   "execution_id": "aff62b06-4af8-4679-8d6c-879b0847b921",
+   "estado": "ok",
+   "programada_para": "2026-11-09 06:45:00-05:00",
+   "creado_en": "2026-11-09 06:45:00.013732-05:00",
+   "terminado_en": "2026-11-09 06:45:00.361446-05:00",
+   "filas_leidas": 0,
+   "filas_validas": 0,
+   "marca_agua_anterior": "2025-11-25 23:59:59-05:00",
+   "marca_agua_nueva": "2025-11-25 23:59:59-05:00",
+   "worker_id": "DESKTOP-RA73BA3:25792:206d36:t1",
+   "mensaje": "Terminada",
+   "pred": 0,
+   "rec": 0,
+   "alertas": 0
+  }
+ ],
+ "llegada": {
+  "dia_nuevo": "2025-11-25",
+  "filas_nuevas": 51,
+  "filas_modificadas": [
+   {
+    "ruta": "CL 72",
+    "fecha": "2025-11-24",
+    "hora": 7,
+    "pasajeros_antes": 538.0,
+    "pasajeros_despues": 563.0
+   },
+   {
+    "ruta": "CRA 54",
+    "fecha": "2025-11-24",
+    "hora": 7,
+    "pasajeros_antes": 1497.0,
+    "pasajeros_despues": 1522.0
+   },
+   {
+    "ruta": "SILENCIO",
+    "fecha": "2025-11-24",
+    "hora": 7,
+    "pasajeros_antes": 556.0,
+    "pasajeros_despues": 581.0
+   }
+  ]
+ },
+ "totales": {
+  "prediction": 18,
+  "recommendation": 120,
+  "alert": 22,
+  "demanda_observada": 54060
+ },
+ "manuales": 0,
+ "comprobaciones": {
+  "la carga inicial la hizo una franja programada": true,
+  "tras la llegada, la franja programada leyó solo lo nuevo o modificado": true,
+  "esa franja creó predicciones, recomendaciones y alertas nuevas": true,
+  "la marca de agua avanzó": true,
+  "sin llegada, la franja siguiente leyó 0 filas": true,
+  "las filas modificadas no se duplicaron en demanda_observada": true,
+  "ninguna ejecución de frecuencia se creó con POST": true
+ }
+}

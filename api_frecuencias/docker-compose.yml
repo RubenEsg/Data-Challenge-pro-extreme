@@ -1,6 +1,27 @@
-# API de frecuencias Sobusa: PostgreSQL 14 + PostGIS (esquema ai_frecuencias) y la API FastAPI.
-# Uso:  copy .env.example .env   (y cambie POSTGRES_PASSWORD)
-#       docker compose -p sobusa_api up -d --build
+# API de frecuencias Sobusa (spec v1.5 RNF-008, E09): PostgreSQL 14 + PostGIS (esquema ai_frecuencias), la migración
+# única (servicio «migrar», Alembic) y la API FastAPI. Manual completo: docs/despliegue.md.
+#
+# Uso básico (desde esta carpeta):
+#   copy .env.example .env          # y cambie POSTGRES_PASSWORD y SEUDONIMO_SECRETO (valores propios, no se versionan)
+#   docker compose -p sobusa_api up -d --build
+#   curl http://127.0.0.1:8000/health
+#
+# Claves de API (§7.2, X-API-Key con roles operador < analista < admin). La clave en claro NUNCA va al repositorio:
+#   docker compose -p sobusa_api run --rm --no-deps api python scripts/crear_api_key.py --rol analista --usuario ana
+#   -> entregue la clave a su dueño y pegue SOLO la entrada con el hash en API_KEYS del .env, por ejemplo
+#      API_KEYS={"<sha256>": {"usuario": "ana", "rol": "analista"}}
+#   -> docker compose -p sobusa_api up -d --no-deps api     (la API lee las claves al arrancar)
+# Los clientes (tablero Dash, k6, scripts/demo_ciclo_api.py) envían la clave desde su entorno: SOBUSA_API_KEY=<clave>
+# y SOBUSA_API_URL=http://127.0.0.1:8000.
+#
+# Variantes:
+#   - pila aislada para pruebas de despliegue (otro nombre de proyecto, otros puertos y volúmenes propios):
+#       PowerShell:  $env:API_PUERTO_HOST="8010"; $env:DB_PUERTO_HOST="5440"; docker compose -p sobusa_limpio up -d --build
+#       bash:        API_PUERTO_HOST=8010 DB_PUERTO_HOST=5440 docker compose -p sobusa_limpio up -d --build
+#     o, todo automatizado y con evidencia:  python scripts/verificar_despliegue.py
+#   - dos réplicas de la API sobre la misma cola:  -f docker-compose.yml -f docker-compose.replicas.yml
+#   - modo integrado con la réplica de la base operacional de Extreme:  docker-compose.integracion.yml
+#   - trazas en Jaeger:  OTEL_EXPORTADOR=otlp docker compose -p sobusa_api --profile observabilidad up -d
 name: sobusa_api
 
 services:
@@ -12,10 +33,15 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD en el archivo .env}
       TZ: America/Bogota
       PGTZ: America/Bogota
+    # pg_stat_statements en la base de RESULTADOS (las consultas de la API sobre ai_frecuencias), como en la réplica.
+    # El script se monta como un archivo (20_…) para no tapar el 10_postgis.sh de la imagen; crea la extensión al
+    # inicializar un volumen nuevo (en uno que ya existía: ver initdb_resultados/10_pg_stat_statements.sql)
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "track_io_timing=on"]
     ports:
       - "${DB_PUERTO_HOST:-5433}:5432"
     volumes:
       - datos_pg:/var/lib/postgresql/data
+      - ./initdb_resultados/10_pg_stat_statements.sql:/docker-entrypoint-initdb.d/20_pg_stat_statements.sql:ro
     healthcheck:
       # por TCP: durante la inicialización de un volumen nuevo el servidor temporal solo escucha el socket local
       test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -26,30 +52,148 @@ services:
 
   api:
     build: .
+    # Variables adicionales de la API (ver .env.example y docs/despliegue.md). API_ENV_FILE permite usar otro archivo
+    # (lo hace scripts/verificar_despliegue.py para no depender del .env del equipo).
     env_file:
-      - path: .env
+      - path: ${API_ENV_FILE:-.env}
         required: false
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-sobusa}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-ai_frecuencias}
       DATA_DIR: /app/datos
       TZ: America/Bogota
-      # envío SIMULADO (solo deja el registro en notification_log, destinatarios enmascarados; sin credenciales)
+      ENTORNO: ${ENTORNO:-local}
+      # Seguridad (§7.2): X-API-Key con roles. Solo los hashes (API_KEYS) o una clave por rol, siempre desde el .env.
+      AUTH_HABILITADA: ${AUTH_HABILITADA:-true}
+      API_KEYS: ${API_KEYS:-}
+      API_KEY_OPERADOR: ${API_KEY_OPERADOR:-}
+      API_KEY_ANALISTA: ${API_KEY_ANALISTA:-}
+      API_KEY_ADMIN: ${API_KEY_ADMIN:-}
+      # §18 «Exposición de datos»: secreto del HMAC que seudonimiza al conductor en las alertas (vacío = conductor NULL)
+      SEUDONIMO_SECRETO: ${SEUDONIMO_SECRETO:-}
+      # Envío SIMULADO (solo deja el registro en notification_log, destinatarios enmascarados; sin credenciales)
       NOTIFICACIONES_CANALES: ${NOTIFICACIONES_CANALES:-correo,whatsapp}
       NOTIFICACIONES_SEVERIDAD: ${NOTIFICACIONES_SEVERIDAD:-critica}
-      # destinatarios de PRUEBA (dominio reservado example.com y número ficticio): no se envía nada real
+      # Destinatarios de PRUEBA (dominio reservado example.com y número ficticio): no se envía nada real
       NOTIF_CORREO_DESTINATARIOS: ${NOTIF_CORREO_DESTINATARIOS:-despacho@example.com}
       NOTIF_WHATSAPP_NUMEROS: ${NOTIF_WHATSAPP_NUMEROS:-+570000000000}
+      # RNF-006: trazas OpenTelemetry; con el perfil «observabilidad» use OTEL_EXPORTADOR=otlp (Jaeger en jaeger:4318)
+      OTEL_EXPORTADOR: ${OTEL_EXPORTADOR:-ninguno}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-api-frecuencias}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://jaeger:4318}
+      # RNF-005: cola en PostgreSQL (SKIP LOCKED + reserva que vence); N réplicas sin duplicar trabajos.
+      # La identidad de cada réplica es el nombre de su contenedor (HOSTNAME), estable entre reinicios.
+      TRABAJADORES: ${TRABAJADORES:-1}
+      LEASE_SEGUNDOS: ${LEASE_SEGUNDOS:-30}
+      SONDEO_COLA_SEGUNDOS: ${SONDEO_COLA_SEGUNDOS:-1}
+      # §7.2: planificador interno (APScheduler); una fila por franja aunque haya N réplicas
+      PLANIFICADOR_HABILITADO: ${PLANIFICADOR_HABILITADO:-true}
+      PLAN_EJECUCION_CRON: ${PLAN_EJECUCION_CRON:-15 5 * * *}
+      PLAN_REENTRENAMIENTO_CRON: ${PLAN_REENTRENAMIENTO_CRON:-0 4 * * 1}
+      MOTOR_INFERENCIA: ${MOTOR_INFERENCIA:-sklearn}   # sklearn | onnx (§9.2)
+      # RF-013 y §9.5: las variables del modelo salen de la serie VALIDADA (Parquet empaquetado con demanda_observada
+      # encima) también en las llamadas sin sesión de la base; así se pronostica después del fin del Parquet.
+      # Sin definir = validada; INFERENCIA_SERIE= (vacía) en el .env = solo la serie empaquetada.
+      INFERENCIA_SERIE: ${INFERENCIA_SERIE-validada}
+      # §20: pronóstico de la respuesta del reto: activo (modelo activo del registro) | E12 (experimento 12, 2025)
+      MODELO_PLAN: ${MODELO_PLAN:-activo}
     depends_on:
       db:
         condition: service_healthy
+      migrar:
+        condition: service_completed_successfully
     ports:
       - "${API_PUERTO_HOST:-8000}:8000"
     volumes:
       # artefactos de los modelos entrenados por POST /models/train: sobreviven a reinicios (RNF-001)
       - modelos:/app/datos/modelos
-    command: ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+    # la migración la corre UNA vez el servicio «migrar»: con varias réplicas no compiten por Alembic
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    # SIGTERM y unos segundos para cerrar; si la réplica muere a mitad de un trabajo, la cola lo retoma (RNF-001)
+    stop_grace_period: 20s
+    restart: unless-stopped
+
+  # Migración única antes de las réplicas de la API (alembic upgrade head; termina y no se reinicia)
+  migrar:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-sobusa}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-ai_frecuencias}
+      TZ: America/Bogota
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+
+  # Réplica local de la base OPERACIONAL de Extreme (PostgreSQL 14 + PostGIS): tablas existentes desde las
+  # exportaciones y los 8 scripts de Extreme copiados byte a byte (replica/extreme + SHA256SUMS), con las correcciones
+  # en archivos aparte (replica/errata). Solo arranca con el perfil «integracion», en su propio proyecto:
+  #   docker compose -p sobusa_rep --profile integracion up -d operacional      (puerto 5434 del equipo)
+  #   .venv\Scripts\python -m scripts.replica_cargar                             (carga las exportaciones Parquet)
+  operacional:
+    image: postgis/postgis:14-3.4
+    profiles: ["integracion"]
+    environment:
+      POSTGRES_DB: operacional
+      POSTGRES_USER: extreme_dba
+      POSTGRES_PASSWORD: ${OPERACIONAL_PASSWORD:-}
+      # claves de los usuarios técnicos de la IA (replica/initdb/30_roles.sh); solo en el .env local
+      LECTOR_IA_PASSWORD: ${LECTOR_IA_PASSWORD:-}
+      ESCRITOR_IA_PASSWORD: ${ESCRITOR_IA_PASSWORD:-}
+      REPLICA_ERRATA_E1: ${REPLICA_ERRATA_E1:-1}
+      REPLICA_ERRATA_E2: ${REPLICA_ERRATA_E2:-1}
+      TZ: America/Bogota
+      PGTZ: America/Bogota
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "track_io_timing=on",
+              "-c", "timezone=America/Bogota"]
+    ports:
+      - "${OPERACIONAL_PUERTO_HOST:-5434}:5432"
+    volumes:
+      - datos_operacional:/var/lib/postgresql/data
+      - ./replica/initdb:/docker-entrypoint-initdb.d:ro
+      - ./replica/extreme:/extreme:ro
+      - ./replica/errata:/errata:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U extreme_dba -d operacional"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+    restart: unless-stopped
+
+  # Carga de la réplica desde dentro de compose (misma imagen de la API; el código de la réplica se monta y
+  # los Parquet de la exportación se leen en solo lectura). Alternativa al venv:
+  #   docker compose -p sobusa_rep --profile integracion run --rm cargador_replica
+  cargador_replica:
+    image: sobusa_api-api
+    build: .
+    profiles: ["integracion"]
+    environment:
+      OPERACIONAL_PASSWORD: ${OPERACIONAL_PASSWORD:-}
+      REPLICA_HOST: operacional
+      OPERACIONAL_PUERTO_HOST: "5432"
+      REPLICA_DATOS_DIR: /datos
+      REPLICA_ARMONIZAR_ESTACIONALIDADES: ${REPLICA_ARMONIZAR_ESTACIONALIDADES:-1}
+      TZ: America/Bogota
+    volumes:
+      - ./scripts:/app/scripts:ro
+      - ./replica:/app/replica:ro
+      - ${REPLICA_DATOS_HOST:-../../datos}:/datos:ro
+      - ./docs/evidencias/replica:/app/docs/evidencias/replica
+    depends_on:
+      operacional:
+        condition: service_healthy
+    command: ["python", "-m", "scripts.replica_cargar"]
+    restart: "no"
+
+  # RNF-006: Jaeger para ver las trazas (UI en http://localhost:16686). Solo con el perfil «observabilidad»:
+  #   OTEL_EXPORTADOR=otlp docker compose -p sobusa_api --profile observabilidad up -d
+  jaeger:
+    image: jaegertracing/jaeger:2.23.0
+    profiles: ["observabilidad"]
+    ports:
+      - "${JAEGER_UI_PUERTO_HOST:-16686}:16686"
     restart: unless-stopped
 
 volumes:
   datos_pg:
   modelos:
+  datos_operacional:

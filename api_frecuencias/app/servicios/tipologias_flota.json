@@ -1,0 +1,173 @@
+{
+ "fuente": "insumos_sobusa/flota_sobusa.csv (reporte de flota de Sobusa, 2-nov-2026, sin datos personales)",
+ "sha256_fuente": "644e84f4e6a77d99733bc16a6dbfd7066692f5842650d2c2715e45428a1fa422",
+ "generado": "2026-11-09",
+ "generado_por": "scripts/preparar_tipologias.py",
+ "criterio": "capacidad = sentados + de pie; una placa por ruta (mediana de sus filas); filas de relleno y capacidad 0 descartadas; la capacidad de cada tipología es la mediana de sus vehículos. Las placas no se publican.",
+ "tipologias": [
+  {
+   "codigo": "T1",
+   "nombre": "Bus corto",
+   "capacidad_min": 1,
+   "capacidad_max": 47
+  },
+  {
+   "codigo": "T2",
+   "nombre": "Bus estándar",
+   "capacidad_min": 48,
+   "capacidad_max": 52
+  },
+  {
+   "codigo": "T3",
+   "nombre": "Bus largo",
+   "capacidad_min": 53,
+   "capacidad_max": 62
+  },
+  {
+   "codigo": "T4",
+   "nombre": "Bus de alta capacidad",
+   "capacidad_min": 63,
+   "capacidad_max": 999
+  }
+ ],
+ "rutas": {
+  "CL 72": [
+   {
+    "codigo": "T1",
+    "nombre": "Bus corto",
+    "vehiculos": 46,
+    "participacion": 0.3067,
+    "capacidad": 46,
+    "capacidad_min": 32,
+    "capacidad_max": 47,
+    "sentados": 31,
+    "de_pie": 15
+   },
+   {
+    "codigo": "T2",
+    "nombre": "Bus estándar",
+    "vehiculos": 57,
+    "participacion": 0.38,
+    "capacidad": 50,
+    "capacidad_min": 48,
+    "capacidad_max": 52,
+    "sentados": 30,
+    "de_pie": 20
+   },
+   {
+    "codigo": "T3",
+    "nombre": "Bus largo",
+    "vehiculos": 35,
+    "participacion": 0.2333,
+    "capacidad": 55,
+    "capacidad_min": 53,
+    "capacidad_max": 61,
+    "sentados": 35,
+    "de_pie": 20
+   },
+   {
+    "codigo": "T4",
+    "nombre": "Bus de alta capacidad",
+    "vehiculos": 12,
+    "participacion": 0.08,
+    "capacidad": 72,
+    "capacidad_min": 70,
+    "capacidad_max": 74,
+    "sentados": 40,
+    "de_pie": 32
+   }
+  ],
+  "CRA 54": [
+   {
+    "codigo": "T1",
+    "nombre": "Bus corto",
+    "vehiculos": 24,
+    "participacion": 0.1283,
+    "capacidad": 47,
+    "capacidad_min": 39,
+    "capacidad_max": 47,
+    "sentados": 37,
+    "de_pie": 10
+   },
+   {
+    "codigo": "T2",
+    "nombre": "Bus estándar",
+    "vehiculos": 60,
+    "participacion": 0.3209,
+    "capacidad": 50,
+    "capacidad_min": 49,
+    "capacidad_max": 52,
+    "sentados": 30,
+    "de_pie": 20
+   },
+   {
+    "codigo": "T3",
+    "nombre": "Bus largo",
+    "vehiculos": 56,
+    "participacion": 0.2995,
+    "capacidad": 58,
+    "capacidad_min": 53,
+    "capacidad_max": 62,
+    "sentados": 36,
+    "de_pie": 20
+   },
+   {
+    "codigo": "T4",
+    "nombre": "Bus de alta capacidad",
+    "vehiculos": 47,
+    "participacion": 0.2513,
+    "capacidad": 72,
+    "capacidad_min": 64,
+    "capacidad_max": 80,
+    "sentados": 40,
+    "de_pie": 32
+   }
+  ],
+  "SILENCIO": [
+   {
+    "codigo": "T1",
+    "nombre": "Bus corto",
+    "vehiculos": 25,
+    "participacion": 0.1825,
+    "capacidad": 46,
+    "capacidad_min": 34,
+    "capacidad_max": 47,
+    "sentados": 31,
+    "de_pie": 14
+   },
+   {
+    "codigo": "T2",
+    "nombre": "Bus estándar",
+    "vehiculos": 48,
+    "participacion": 0.3504,
+    "capacidad": 50,
+    "capacidad_min": 48,
+    "capacidad_max": 52,
+    "sentados": 31,
+    "de_pie": 18
+   },
+   {
+    "codigo": "T3",
+    "nombre": "Bus largo",
+    "vehiculos": 13,
+    "participacion": 0.0949,
+    "capacidad": 58,
+    "capacidad_min": 55,
+    "capacidad_max": 58,
+    "sentados": 39,
+    "de_pie": 19
+   },
+   {
+    "codigo": "T4",
+    "nombre": "Bus de alta capacidad",
+    "vehiculos": 51,
+    "participacion": 0.3723,
+    "capacidad": 72,
+    "capacidad_min": 64,
+    "capacidad_max": 82,
+    "sentados": 40,
+    "de_pie": 32
+   }
+  ]
+ }
+}

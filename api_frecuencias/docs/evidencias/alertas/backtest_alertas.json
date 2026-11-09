@@ -1,0 +1,1794 @@
+{
+  "generado": "2026-11-09T06:50:13-05:00",
+  "modelo": "modelo activo hgb_fv2_20250831_s42",
+  "model_id": "hgb_fv2_20250831_s42",
+  "data_cutoff": "2025-08-31",
+  "periodo": [
+    "2025-09-15",
+    "2025-12-31"
+  ],
+  "calibracion_version": "v2",
+  "calibracion": "conformal de Mondrian por bloque (calibracion_v2.json, SHA-256 dae6b1a616ee…)",
+  "banda_calibrada_pct_horas": 100.0,
+  "festivos_entre_semana": [
+    "2025-10-13",
+    "2025-11-03",
+    "2025-11-17",
+    "2025-12-08",
+    "2025-12-25"
+  ],
+  "tolerancia_tiempo_min": "Procesos.toleranciatiempo = 0 en la exportación: se usa tolerancia_despacho_min",
+  "nota_precision": "No hay incidentes etiquetados: la precisión se aproxima con la persistencia de la condición en la hora siguiente a la DETECCIÓN, es decir, el episodio dura más horas que las necesarias para alertar (ALT-005/006/007), o con el día marcado como especial o excluido (ALT-008); lift = precisión / tasa base de la condición en una hora cualquiera. Una alerta no confirmada se cuenta como falso positivo (§18).",
+  "umbrales_por_defecto": {
+    "ocupacion_objetivo_min": 0.65,
+    "ocupacion_objetivo_max": 0.85,
+    "ocupacion_critica": 0.9,
+    "baja_utilizacion": 0.3,
+    "espera_max_min": 5.0,
+    "error_pronostico": 0.15,
+    "periodos_atraso": 2,
+    "periodo_ingesta_min": 1440.0,
+    "salidas_minimas_ocupacion": 2,
+    "persistencia_ocupacion_horas": 2,
+    "ruptura_k": 0.5,
+    "ruptura_h": 6.0,
+    "ruptura_dias_referencia": 28,
+    "ruptura_cambio_minimo": 0.08,
+    "ruptura_dias_reinicio": 7,
+    "caida_demanda": 0.3,
+    "demanda_minima_patron": 10.0,
+    "alt005_exigir_p10": 1,
+    "persistencia_horas": 2,
+    "tolerancia_despacho_min": 5.0,
+    "tolerancia_salidas": 0.5,
+    "salidas_minimas_esperadas": 2,
+    "z_anomalia": 3.5,
+    "escala_minima_z": 0.05,
+    "semanas_referencia": 8,
+    "minimo_dias_referencia": 4,
+    "pendiente_tendencia": 0.05,
+    "wape_max": 0.2
+  },
+  "por_defecto": {
+    "por_codigo": {
+      "ALT-002": {
+        "alertas": 224,
+        "por_ruta_dia": 0.6914,
+        "por_dia_3_rutas": 2.074,
+        "horas_en_alerta": 583,
+        "pct_dias_especiales": 14.3,
+        "precision_proxy": 0.4107,
+        "evaluables": 224,
+        "tasa_base": 0.1831,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "alertas": 46,
+        "por_ruta_dia": 0.142,
+        "por_dia_3_rutas": 0.426,
+        "horas_en_alerta": 122,
+        "pct_dias_especiales": 41.3,
+        "precision_proxy": 0.359,
+        "evaluables": 39,
+        "tasa_base": 0.0766,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "alertas": 41,
+        "por_ruta_dia": 0.1265,
+        "por_dia_3_rutas": 0.38,
+        "horas_en_alerta": 116,
+        "pct_dias_especiales": 68.3,
+        "precision_proxy": 0.3902,
+        "evaluables": 41,
+        "tasa_base": 0.047,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "alertas": 66,
+        "por_ruta_dia": 0.2037,
+        "por_dia_3_rutas": 0.611,
+        "horas_en_alerta": 155,
+        "pct_dias_especiales": 27.3,
+        "precision_proxy": 0.2698,
+        "evaluables": 63,
+        "tasa_base": 0.2021,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "alertas": 4,
+        "por_ruta_dia": 0.0123,
+        "por_dia_3_rutas": 0.037,
+        "horas_en_alerta": 0,
+        "pct_dias_especiales": 75.0,
+        "precision_proxy": 0.6667,
+        "evaluables": 3,
+        "tasa_base": null,
+        "lift": null
+      },
+      "ALT-008": {
+        "alertas": 20,
+        "por_ruta_dia": 0.0617,
+        "por_dia_3_rutas": 0.185,
+        "horas_en_alerta": 0,
+        "pct_dias_especiales": 70.0,
+        "precision_proxy": 0.7,
+        "evaluables": 20,
+        "tasa_base": 0.1852,
+        "lift": 3.78
+      },
+      "ALT-009": {
+        "alertas": 0,
+        "por_ruta_dia": 0.0,
+        "por_dia_3_rutas": 0.0,
+        "horas_en_alerta": 0,
+        "pct_dias_especiales": null,
+        "precision_proxy": null,
+        "evaluables": 0,
+        "tasa_base": null,
+        "lift": null
+      }
+    },
+    "dias_ruta": 324,
+    "dias": 108,
+    "observadas_por_ruta_dia": 1.238,
+    "observadas_por_ruta_dia_005_009": 0.534,
+    "rupturas": [
+      {
+        "fecha_inicio_cambio": "2025-12-08",
+        "fecha_deteccion": "2025-12-08",
+        "sentido_desviacion": "-",
+        "cambio_medio": -0.2418,
+        "residuo_medio_tramo": -0.2391,
+        "estadistico_cusum": 8.366,
+        "ruta": "CRA 54",
+        "confirmada": true
+      },
+      {
+        "fecha_inicio_cambio": "2025-12-16",
+        "fecha_deteccion": "2025-12-17",
+        "sentido_desviacion": "+",
+        "cambio_medio": 0.1158,
+        "residuo_medio_tramo": 0.0204,
+        "estadistico_cusum": 7.49,
+        "ruta": "CRA 54",
+        "confirmada": false
+      },
+      {
+        "fecha_inicio_cambio": "2025-10-29",
+        "fecha_deteccion": "2025-11-01",
+        "sentido_desviacion": "-",
+        "cambio_medio": -0.1041,
+        "residuo_medio_tramo": -0.0253,
+        "estadistico_cusum": 6.641,
+        "ruta": "SILENCIO",
+        "confirmada": true
+      },
+      {
+        "fecha_inicio_cambio": "2025-12-30",
+        "fecha_deteccion": "2025-12-31",
+        "sentido_desviacion": "-",
+        "cambio_medio": -0.187,
+        "residuo_medio_tramo": -0.1839,
+        "estadistico_cusum": 6.761,
+        "ruta": "SILENCIO",
+        "confirmada": null
+      }
+    ]
+  },
+  "detector_rupturas": {
+    "parametros": {
+      "ruptura_k": 0.5,
+      "ruptura_h": 6.0,
+      "ruptura_dias_referencia": 28,
+      "ruptura_cambio_minimo": 0.08,
+      "ruptura_dias_reinicio": 7
+    },
+    "falsas_por_100_segun_h_y_cambio_minimo": {
+      "h=4, cambio_minimo=5%": 4.092,
+      "h=4, cambio_minimo=8%": 2.642,
+      "h=5, cambio_minimo=5%": 3.342,
+      "h=5, cambio_minimo=8%": 2.117,
+      "h=6, cambio_minimo=5%": 2.858,
+      "h=6, cambio_minimo=8%": 1.825
+    },
+    "falsas_alarmas_sin_cambio": {
+      "permutaciones_por_ruta": 200,
+      "dias_vigilados": 48000,
+      "detecciones": 789,
+      "por_100_dias_ruta": 1.644
+    },
+    "potencia_cambios_inyectados": {
+      "-10%": {
+        "casos": 9,
+        "detectadas_en_14_dias": 4,
+        "tasa": 0.444,
+        "retardo_mediano_dias": 5.5
+      },
+      "-20%": {
+        "casos": 9,
+        "detectadas_en_14_dias": 9,
+        "tasa": 1.0,
+        "retardo_mediano_dias": 6.0
+      },
+      "+15%": {
+        "casos": 9,
+        "detectadas_en_14_dias": 7,
+        "tasa": 0.778,
+        "retardo_mediano_dias": 4.0
+      }
+    }
+  },
+  "ejemplos": [
+    {
+      "id": "b5312cd8-f80a-4b87-b59f-06319c35c10f",
+      "codigo": "ALT-002",
+      "nombre": "Sobreocupación",
+      "origen": "observado",
+      "empresa": "Sobusa",
+      "ruta": "CL 72",
+      "sentido": null,
+      "viaje": null,
+      "conductor": null,
+      "vehiculo": null,
+      "detectada_en": "2025-09-16 06:00:00-05:00",
+      "ventana_inicio": "2025-09-15 13:00:00-05:00",
+      "ventana_fin": "2025-09-15 16:00:00-05:00",
+      "horizonte_min": 0,
+      "severidad": "critica",
+      "estado": "nueva",
+      "observado": 1.1379,
+      "esperado": 0.8313,
+      "umbral": 0.9,
+      "puntaje": 0.632,
+      "probabilidad": null,
+      "metodo_puntaje": "exceso relativo de la ocupación sobre el umbral crítico; ocupación = factor de carga × pasajeros por hora / (buses/h × puestos), como en el optimizador",
+      "tendencia": "sin_datos",
+      "tendencia_pendiente": null,
+      "serie_reciente": [
+        {
+          "inicio": "2025-09-15T11:00:00-05:00",
+          "ocupacion_observada": 0.6198544,
+          "pasajeros": 451.0,
+          "salidas_observadas": 5
+        },
+        {
+          "inicio": "2025-09-15T12:00:00-05:00",
+          "ocupacion_observada": 0.47852999999999996,
+          "pasajeros": 260.0,
+          "salidas_observadas": 4
+        },
+        {
+          "inicio": "2025-09-15T13:00:00-05:00",
+          "ocupacion_observada": 0.9728896,
+          "pasajeros": 578.0,
+          "salidas_observadas": 5
+        },
+        {
+          "inicio": "2025-09-15T14:00:00-05:00",
+          "ocupacion_observada": 1.1379367999999999,
+          "pasajeros": 637.0,
+          "salidas_observadas": 5
+        },
+        {
+          "inicio": "2025-09-15T15:00:00-05:00",
+          "ocupacion_observada": 1.0387709999999999,
+          "pasajeros": 487.0,
+          "salidas_observadas": 4
+        }
+      ],
+      "explicacion": "La ocupación observada (113,8 %) alcanza o supera el umbral crítico (90,0 %). Esperada: 83,1 %; observada: 113,8 % (= factor de carga 0,447 × 637 pasajeros ÷ (5 salidas × 50 puestos) en 14:00-15:00).",
+      "variables": {
+        "ocupacion_esperada": 0.8313403018713349,
+        "ocupacion_observada": 1.1379367999999999,
+        "tipo_ocupacion": "observada",
+        "demanda_prevista": null,
+        "factor_carga": 0.4466,
+        "fuente_factor_carga": "mediana 2025 de carga crítica / abordajes por ruta, tipo de día y hora",
+        "capacidad_ofrecida": 250.0,
+        "buses_hora_actual": 5,
+        "capacidad": 50.0,
+        "horas_episodio": 3,
+        "hora_pico": "2025-09-15T14:00:00-05:00",
+        "pasajeros_observados": 637.0,
+        "salidas_observadas": 5,
+        "salidas_programadas": 6.298388207742113,
+        "fuente_capacidad": "contexto (catálogo de la ruta)",
+        "ocupacion_por_hora": {
+          "13:00": 0.9729,
+          "14:00": 1.1379,
+          "15:00": 1.0388
+        },
+        "persistencia_horas": 2
+      },
+      "variables_influyentes": [
+        {
+          "variable": "ocupacion_esperada",
+          "valor": 0.8313403018713349,
+          "fuente": "regla"
+        },
+        {
+          "variable": "ocupacion_observada",
+          "valor": 1.1379367999999999,
+          "fuente": "regla"
+        },
+        {
+          "variable": "factor_carga",
+          "valor": 0.4466,
+          "fuente": "regla"
+        }
+      ],
+      "recomendacion": "Programar un despacho adicional y hacer seguimiento a la ocupación.",
+      "ubicacion": null,
+      "asignado_a": null,
+      "comentarios": [],
+      "historial": [],
+      "version_umbrales": "umbrales-v2",
+      "clave_dedup": "ALT-002|CL 72|2025-09-15T13:00:00-05:00|obs"
+    },
+    {
+      "id": "a0b04dc2-7a6e-42e0-a1a2-d8a01495d5a3",
+      "codigo": "ALT-005",
+      "nombre": "Caída anormal de demanda",
+      "origen": "observado",
+      "empresa": "Sobusa",
+      "ruta": "CL 72",
+      "sentido": null,
+      "viaje": null,
+      "conductor": null,
+      "vehiculo": null,
+      "detectada_en": "2025-10-11 06:00:00-05:00",
+      "ventana_inicio": "2025-10-10 10:00:00-05:00",
+      "ventana_fin": "2025-10-10 13:00:00-05:00",
+      "horizonte_min": 0,
+      "severidad": "preventiva",
+      "estado": "nueva",
+      "observado": 885.0,
+      "esperado": 1371.0089,
+      "umbral": 959.7063,
+      "puntaje": 0.539,
+      "probabilidad": null,
+      "metodo_puntaje": "exceso relativo sobre el umbral: 0,5 en el umbral y 1,0 con un exceso del 100 %",
+      "tendencia": "a_la_baja",
+      "tendencia_pendiente": -0.121,
+      "serie_reciente": [
+        {
+          "inicio": "2025-10-10T08:00:00-05:00",
+          "observado": 449.0,
+          "esperado": 491.0819144568473,
+          "p10": 417.5276350501695,
+          "p90": 614.3061083896933,
+          "salidas_observadas": 6,
+          "salidas_esperadas": 5.61964358590668
+        },
+        {
+          "inicio": "2025-10-10T09:00:00-05:00",
+          "observado": 518.0,
+          "esperado": 511.21076155829195,
+          "p10": 410.3838675422116,
+          "p90": 636.0962593054388,
+          "salidas_observadas": 7,
+          "salidas_esperadas": 5.5957476183901695
+        },
+        {
+          "inicio": "2025-10-10T10:00:00-05:00",
+          "observado": 301.0,
+          "esperado": 439.54644988148465,
+          "p10": 339.3414589051224,
+          "p90": 567.9924359444591,
+          "salidas_observadas": 4,
+          "salidas_esperadas": 4.846374436706268
+        },
+        {
+          "inicio": "2025-10-10T11:00:00-05:00",
+          "observado": 249.0,
+          "esperado": 423.96555569531944,
+          "p10": 306.3028448228949,
+          "p90": 537.4087744419774,
+          "salidas_observadas": 2,
+          "salidas_esperadas": 4.175088773559136
+        },
+        {
+          "inicio": "2025-10-10T12:00:00-05:00",
+          "observado": 335.0,
+          "esperado": 507.4969393617722,
+          "p10": 347.4371948105676,
+          "p90": 659.8792673546684,
+          "salidas_observadas": 4,
+          "salidas_esperadas": 4.796117813574172
+        }
+      ],
+      "explicacion": "Durante 3 hora(s) seguidas (10:00-13:00) la demanda real (885 pasajeros) cayó 35,4 % frente al patrón del modelo (1.371); el umbral de caída es 30,0 % (límite 960) y quedó bajo el P10 calibrado (993); persistencia exigida: 2 h.",
+      "variables": {
+        "pasajeros_observados": 885.0,
+        "demanda_patron": 1371.0089449385764,
+        "p10": 993.0814985385848,
+        "caida_relativa": 0.3545,
+        "horas_seguidas": 3,
+        "persistencia_horas": 2
+      },
+      "variables_influyentes": [
+        {
+          "variable": "pasajeros_observados",
+          "valor": 885.0,
+          "fuente": "regla"
+        },
+        {
+          "variable": "demanda_patron",
+          "valor": 1371.0089449385764,
+          "fuente": "regla"
+        },
+        {
+          "variable": "p10",
+          "valor": 993.0814985385848,
+          "fuente": "regla"
+        },
+        {
+          "variable": "caida_relativa",
+          "valor": 0.3545,
+          "fuente": "regla"
+        },
+        {
+          "variable": "horas_seguidas",
+          "valor": 3,
+          "fuente": "regla"
+        },
+        {
+          "variable": "persistencia_horas",
+          "valor": 2,
+          "fuente": "regla"
+        }
+      ],
+      "recomendacion": "Validar si hay un evento, un problema en la ruta o una falla de captura.",
+      "ubicacion": null,
+      "asignado_a": null,
+      "comentarios": [],
+      "historial": [],
+      "version_umbrales": "umbrales-v2",
+      "clave_dedup": "ALT-005|CL 72|2025-10-10T10:00:00-05:00|obs"
+    },
+    {
+      "id": "8f75175e-9afd-4a8f-8ce6-d63d38377e6e",
+      "codigo": "ALT-006",
+      "nombre": "Despacho ausente o tardío",
+      "origen": "observado",
+      "empresa": "Sobusa",
+      "ruta": "CL 72",
+      "sentido": null,
+      "viaje": null,
+      "conductor": null,
+      "vehiculo": null,
+      "detectada_en": "2025-09-18 06:00:00-05:00",
+      "ventana_inicio": "2025-09-17 11:00:00-05:00",
+      "ventana_fin": "2025-09-17 12:00:00-05:00",
+      "horizonte_min": 0,
+      "severidad": "critica",
+      "estado": "nueva",
+      "observado": 60.0,
+      "esperado": 14.371,
+      "umbral": 19.371,
+      "puntaje": 1.0,
+      "probabilidad": null,
+      "metodo_puntaje": "exceso relativo sobre el umbral: 0,5 en el umbral y 1,0 con un exceso del 100 %",
+      "tendencia": "a_la_baja",
+      "tendencia_pendiente": -0.7797,
+      "serie_reciente": [
+        {
+          "inicio": "2025-09-17T09:00:00-05:00",
+          "observado": 427.0,
+          "esperado": 457.8340068362829,
+          "p10": 342.1634467192036,
+          "p90": 570.4203403852416,
+          "salidas_observadas": 5,
+          "salidas_esperadas": 5.5957476183901695
+        },
+        {
+          "inicio": "2025-09-17T10:00:00-05:00",
+          "observado": 440.0,
+          "esperado": 424.2712931190485,
+          "p10": 316.091096743702,
+          "p90": 560.6786636259436,
+          "salidas_observadas": 4,
+          "salidas_esperadas": 4.846374436706268
+        },
+        {
+          "inicio": "2025-09-17T11:00:00-05:00",
+          "observado": 0.0,
+          "esperado": 426.91130769157974,
+          "p10": 300.45863067663885,
+          "p90": 567.2369279393845,
+          "salidas_observadas": 0,
+          "salidas_esperadas": 4.175088773559136
+        }
+      ],
+      "explicacion": "En 11:00-12:00 (1 h): salieron 0 de 4 despachos esperados (60 / intervalo programado). Despacho ausente o tardío: van al menos 60 min sin despacho (cota inferior: horas cerradas sin salidas), más que el headway programado (14,4 min) más la tolerancia (5 min, threshold_config.tolerancia_despacho_min); salieron 0 de 4 despachos esperados (déficit 100,0 %, tolerancia 50,0 %).",
+      "variables": {
+        "minutos_desde_ultimo_despacho": 60.0,
+        "headway_programado_min": 14.370951913640825,
+        "tolerancia_min": 5.0,
+        "fuente_tolerancia": "threshold_config.tolerancia_despacho_min",
+        "salidas_esperadas": 4.175088773559136,
+        "salidas_observadas": 0.0,
+        "horas_episodio": 1,
+        "persistencia_horas_conteo": 2,
+        "por_tiempo": true
+      },
+      "variables_influyentes": [
+        {
+          "variable": "minutos_desde_ultimo_despacho",
+          "valor": 60.0,
+          "fuente": "regla"
+        },
+        {
+          "variable": "headway_programado_min",
+          "valor": 14.370951913640825,
+          "fuente": "regla"
+        },
+        {
+          "variable": "tolerancia_min",
+          "valor": 5.0,
+          "fuente": "regla"
+        },
+        {
+          "variable": "salidas_esperadas",
+          "valor": 4.175088773559136,
+          "fuente": "regla"
+        },
+        {
+          "variable": "salidas_observadas",
+          "valor": 0.0,
+          "fuente": "regla"
+        }
+      ],
+      "recomendacion": "Verificar la disponibilidad del vehículo y la operación del despacho.",
+      "ubicacion": null,
+      "asignado_a": null,
+      "comentarios": [],
+      "historial": [],
+      "version_umbrales": "umbrales-v2",
+      "clave_dedup": "ALT-006|CL 72|2025-09-17T11:00:00-05:00|obs"
+    },
+    {
+      "id": "2cace17d-9c9f-4890-8428-4a620d3d544e",
+      "codigo": "ALT-007",
+      "nombre": "Desviación del pronóstico",
+      "origen": "observado",
+      "empresa": "Sobusa",
+      "ruta": "CL 72",
+      "sentido": null,
+      "viaje": null,
+      "conductor": null,
+      "vehiculo": null,
+      "detectada_en": "2025-09-19 06:00:00-05:00",
+      "ventana_inicio": "2025-09-18 04:00:00-05:00",
+      "ventana_fin": "2025-09-18 06:00:00-05:00",
+      "horizonte_min": 0,
+      "severidad": "preventiva",
+      "estado": "nueva",
+      "observado": 749.0,
+      "esperado": 1305.4442,
+      "umbral": 990.152,
+      "puntaje": 0.622,
+      "probabilidad": null,
+      "metodo_puntaje": "exceso relativo sobre el umbral: 0,5 en el umbral y 1,0 con un exceso del 100 %",
+      "tendencia": "al_alza",
+      "tendencia_pendiente": 2.0,
+      "serie_reciente": [
+        {
+          "inicio": "2025-09-18T04:00:00-05:00",
+          "observado": 0.0,
+          "esperado": 246.20657402610414,
+          "p10": 160.30289053925435,
+          "p90": 324.45099358481974,
+          "salidas_observadas": 1,
+          "salidas_esperadas": 6.535384615384615
+        },
+        {
+          "inicio": "2025-09-18T05:00:00-05:00",
+          "observado": 749.0,
+          "esperado": 1059.2376554779455,
+          "p10": 829.8490625749995,
+          "p90": 1251.6558199526394,
+          "salidas_observadas": 11,
+          "salidas_esperadas": 14.980798537031394
+        }
+      ],
+      "explicacion": "Durante 2 hora(s) seguidas (04:00-06:00) la demanda real (749) quedó por debajo del P10 del intervalo calibrado (990); pronóstico 1.305, error 42,6 % (umbral 15,0 %); persistencia exigida: 2 h.",
+      "variables": {
+        "pasajeros_observados": 749.0,
+        "demanda_prevista": 1305.4442295040496,
+        "p10": 990.1519531142538,
+        "p90": 1576.1068135374592,
+        "error_relativo": 0.4262,
+        "sentido_desviacion": "-",
+        "horas_seguidas": 2,
+        "persistencia_horas": 2
+      },
+      "variables_influyentes": [
+        {
+          "variable": "pasajeros_observados",
+          "valor": 749.0,
+          "fuente": "regla"
+        },
+        {
+          "variable": "demanda_prevista",
+          "valor": 1305.4442295040496,
+          "fuente": "regla"
+        },
+        {
+          "variable": "p10",
+          "valor": 990.1519531142538,
+          "fuente": "regla"
+        },
+        {
+          "variable": "p90",
+          "valor": 1576.1068135374592,
+          "fuente": "regla"
+        },
+        {
+          "variable": "error_relativo",
+          "valor": 0.4262,
+          "fuente": "regla"
+        }
+      ],
+      "recomendacion": "Revisar la frecuencia y recalibrar el escenario del pronóstico.",
+      "ubicacion": null,
+      "asignado_a": null,
+      "comentarios": [],
+      "historial": [],
+      "version_umbrales": "umbrales-v2",
+      "clave_dedup": "ALT-007|CL 72|2025-09-18T04:00:00-05:00|obs"
+    },
+    {
+      "id": "523a6dd4-2012-4fd6-b3e7-c338d81a6b63",
+      "codigo": "ALT-007",
+      "nombre": "Desviación del pronóstico",
+      "origen": "observado",
+      "empresa": "Sobusa",
+      "ruta": "CRA 54",
+      "sentido": null,
+      "viaje": null,
+      "conductor": null,
+      "vehiculo": null,
+      "detectada_en": "2025-12-09 06:00:00-05:00",
+      "ventana_inicio": "2025-12-08 00:00:00-05:00",
+      "ventana_fin": "2025-12-09 00:00:00-05:00",
+      "horizonte_min": 0,
+      "severidad": "preventiva",
+      "estado": "nueva",
+      "observado": -0.2391,
+      "esperado": 0.0027,
+      "umbral": -0.0773,
+      "puntaje": 0.697,
+      "probabilidad": null,
+      "metodo_puntaje": "CUSUM tabular de dos lados sobre el residuo diario relativo (real - pronóstico) / pronóstico, estandarizado con la mediana y 1,4826·MAD de los días de referencia: S = max(0, S + z - k); alerta cuando S supera h; 0,5 en el umbral y 1,0 con S = 2h",
+      "tendencia": "estable",
+      "tendencia_pendiente": -0.0355,
+      "serie_reciente": [
+        {
+          "fecha": "2025-11-25",
+          "observado": 21452.0,
+          "esperado": 23596.365149883743
+        },
+        {
+          "fecha": "2025-11-26",
+          "observado": 22248.0,
+          "esperado": 22607.375119596592
+        },
+        {
+          "fecha": "2025-11-27",
+          "observado": 22827.0,
+          "esperado": 22487.73854307744
+        },
+        {
+          "fecha": "2025-11-28",
+          "observado": 23397.0,
+          "esperado": 22759.284106693733
+        },
+        {
+          "fecha": "2025-11-29",
+          "observado": 20070.0,
+          "esperado": 18877.68420721737
+        },
+        {
+          "fecha": "2025-11-30",
+          "observado": 12008.0,
+          "esperado": 10113.127025309255
+        },
+        {
+          "fecha": "2025-12-01",
+          "observado": 21718.0,
+          "esperado": 21324.672889908365
+        },
+        {
+          "fecha": "2025-12-02",
+          "observado": 22678.0,
+          "esperado": 22281.973148500616
+        },
+        {
+          "fecha": "2025-12-03",
+          "observado": 20635.0,
+          "esperado": 21915.247512551112
+        },
+        {
+          "fecha": "2025-12-04",
+          "observado": 22069.0,
+          "esperado": 22104.106513817795
+        },
+        {
+          "fecha": "2025-12-05",
+          "observado": 22831.0,
+          "esperado": 22488.756745302624
+        },
+        {
+          "fecha": "2025-12-06",
+          "observado": 19324.0,
+          "esperado": 19394.397883922396
+        },
+        {
+          "fecha": "2025-12-07",
+          "observado": 11093.0,
+          "esperado": 10724.618575901908
+        },
+        {
+          "fecha": "2025-12-08",
+          "observado": 6911.0,
+          "esperado": 9083.087043188792
+        }
+      ],
+      "explicacion": "Ruptura de comportamiento: desde el 08/12/2025 la demanda real diaria quedó por debajo del pronóstico de forma sostenida (1 día hasta la detección; residuo medio -23,9 % frente a 0,3 % del nivel anterior (referencia de 28 días: -1,0 %), cambio -24,2 %). El CUSUM llegó a 8,37 con umbral h = 6,0 (k = 0,5). No es una hora aislada: cambió el nivel de la demanda frente al patrón del modelo.",
+      "variables": {
+        "variante": "ruptura_comportamiento",
+        "metodo": "CUSUM tabular de dos lados (Page, 1954)",
+        "sentido_desviacion": "-",
+        "fecha_inicio_cambio": "2025-12-08",
+        "fecha_deteccion": "2025-12-08",
+        "dias_tramo": 1,
+        "cambio_medio": -0.2418,
+        "residuo_medio_tramo": -0.2391,
+        "estadistico_cusum": 8.366,
+        "k": 0.5,
+        "h": 6.0,
+        "referencia_centro": -0.0099,
+        "referencia_escala": 0.0273,
+        "referencia_dias": 28,
+        "cambio_minimo": 0.08
+      },
+      "variables_influyentes": [
+        {
+          "variable": "dias_tramo",
+          "valor": 1,
+          "fuente": "regla"
+        }
+      ],
+      "recomendacion": "Revisar la frecuencia y recalibrar el escenario del pronóstico.",
+      "ubicacion": null,
+      "asignado_a": null,
+      "comentarios": [],
+      "historial": [],
+      "version_umbrales": "umbrales-v2",
+      "clave_dedup": "ALT-007|CRA 54|2025-12-08T00:00:00-05:00|ruptura"
+    },
+    {
+      "id": "799defc2-be1a-4b31-9a82-6c41ca441906",
+      "codigo": "ALT-008",
+      "nombre": "Consolidado anómalo",
+      "origen": "observado",
+      "empresa": "Sobusa",
+      "ruta": "CL 72",
+      "sentido": null,
+      "viaje": null,
+      "conductor": null,
+      "vehiculo": null,
+      "detectada_en": "2025-10-11 06:00:00-05:00",
+      "ventana_inicio": "2025-10-10 00:00:00-05:00",
+      "ventana_fin": "2025-10-11 00:00:00-05:00",
+      "horizonte_min": 0,
+      "severidad": "preventiva",
+      "estado": "nueva",
+      "observado": 5829.0,
+      "esperado": 7508.0,
+      "umbral": 5920.1354,
+      "puntaje": 0.529,
+      "probabilidad": null,
+      "metodo_puntaje": "|z robusto| = |x - mediana| / max(1,4826·MAD, escala mínima) del mismo tipo de día; 0,5 en el umbral",
+      "tendencia": "estable",
+      "tendencia_pendiente": -0.0378,
+      "serie_reciente": [],
+      "explicacion": "Consolidado atípico: subidas = 5.829 frente a la mediana de 7.508,0 (z = -3,70) (umbral |z| ≥ 3,5). Límite para subidas: 5.920 (mediana 7.508 - 3,5 × 453,7).",
+      "variables": {
+        "campo": "subidas",
+        "z_maximo": -3.701,
+        "subidas": 5829.0,
+        "bajadas": null,
+        "nro_viajes": 78.0,
+        "umbral_z": 3.5,
+        "z_por_campo": {
+          "subidas": -3.701,
+          "nro_viajes": -1.518
+        },
+        "referencia_mediana_escala": {
+          "subidas": [
+            7508.0,
+            453.68
+          ],
+          "nro_viajes": [
+            87.0,
+            5.93
+          ]
+        },
+        "fecha": "2025-10-10"
+      },
+      "variables_influyentes": [
+        {
+          "variable": "z_maximo",
+          "valor": -3.701,
+          "fuente": "regla"
+        },
+        {
+          "variable": "subidas",
+          "valor": 5829.0,
+          "fuente": "regla"
+        },
+        {
+          "variable": "nro_viajes",
+          "valor": 78.0,
+          "fuente": "regla"
+        }
+      ],
+      "recomendacion": "Validar la fuente, el trigger de consolidación y el período afectado.",
+      "ubicacion": null,
+      "asignado_a": null,
+      "comentarios": [],
+      "historial": [],
+      "version_umbrales": "umbrales-v2",
+      "clave_dedup": "ALT-008|CL 72|2025-10-10T00:00:00-05:00|dia"
+    }
+  ],
+  "reglas_anteriores": {
+    "umbrales": {
+      "persistencia_horas": 1,
+      "alt005_exigir_p10": 0,
+      "tolerancia_salidas": 0.2,
+      "z_anomalia": 3.0
+    },
+    "por_codigo": {
+      "ALT-002": {
+        "alertas": 224,
+        "por_ruta_dia": 0.6914,
+        "por_dia_3_rutas": 2.074,
+        "horas_en_alerta": 583,
+        "pct_dias_especiales": 14.3,
+        "precision_proxy": 0.4107,
+        "evaluables": 224,
+        "tasa_base": 0.1831,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "alertas": 420,
+        "por_ruta_dia": 1.2963,
+        "por_dia_3_rutas": 3.889,
+        "horas_en_alerta": 521,
+        "pct_dias_especiales": 26.4,
+        "precision_proxy": 0.1676,
+        "evaluables": 364,
+        "tasa_base": 0.0946,
+        "lift": 1.77
+      },
+      "ALT-006": {
+        "alertas": 923,
+        "por_ruta_dia": 2.8488,
+        "por_dia_3_rutas": 8.546,
+        "horas_en_alerta": 1550,
+        "pct_dias_especiales": 16.8,
+        "precision_proxy": 0.3694,
+        "evaluables": 923,
+        "tasa_base": 0.2814,
+        "lift": 1.31
+      },
+      "ALT-007": {
+        "alertas": 594,
+        "por_ruta_dia": 1.8333,
+        "por_dia_3_rutas": 5.5,
+        "horas_en_alerta": 713,
+        "pct_dias_especiales": 18.5,
+        "precision_proxy": 0.1571,
+        "evaluables": 560,
+        "tasa_base": 0.2021,
+        "lift": 0.78
+      },
+      "ALT-007 ruptura": {
+        "alertas": 4,
+        "por_ruta_dia": 0.0123,
+        "por_dia_3_rutas": 0.037,
+        "horas_en_alerta": 0,
+        "pct_dias_especiales": 75.0,
+        "precision_proxy": null,
+        "evaluables": 0,
+        "tasa_base": null,
+        "lift": null
+      },
+      "ALT-008": {
+        "alertas": 32,
+        "por_ruta_dia": 0.0988,
+        "por_dia_3_rutas": 0.296,
+        "horas_en_alerta": 0,
+        "pct_dias_especiales": 53.1,
+        "precision_proxy": 0.5312,
+        "evaluables": 32,
+        "tasa_base": 0.1852,
+        "lift": 2.87
+      },
+      "ALT-009": {
+        "alertas": 0,
+        "por_ruta_dia": 0.0,
+        "por_dia_3_rutas": 0.0,
+        "horas_en_alerta": 0,
+        "pct_dias_especiales": null,
+        "precision_proxy": null,
+        "evaluables": 0,
+        "tasa_base": null,
+        "lift": null
+      }
+    },
+    "dias_ruta": 324,
+    "dias": 108,
+    "observadas_por_ruta_dia": 6.781,
+    "observadas_por_ruta_dia_005_009": 6.077,
+    "rupturas": [
+      {
+        "fecha_inicio_cambio": "2025-12-08",
+        "fecha_deteccion": "2025-12-08",
+        "sentido_desviacion": "-",
+        "cambio_medio": -0.2418,
+        "residuo_medio_tramo": -0.2391,
+        "estadistico_cusum": 8.366,
+        "ruta": "CRA 54",
+        "confirmada": null
+      },
+      {
+        "fecha_inicio_cambio": "2025-12-16",
+        "fecha_deteccion": "2025-12-17",
+        "sentido_desviacion": "+",
+        "cambio_medio": 0.1158,
+        "residuo_medio_tramo": 0.0204,
+        "estadistico_cusum": 7.49,
+        "ruta": "CRA 54",
+        "confirmada": null
+      },
+      {
+        "fecha_inicio_cambio": "2025-10-29",
+        "fecha_deteccion": "2025-11-01",
+        "sentido_desviacion": "-",
+        "cambio_medio": -0.1041,
+        "residuo_medio_tramo": -0.0253,
+        "estadistico_cusum": 6.641,
+        "ruta": "SILENCIO",
+        "confirmada": null
+      },
+      {
+        "fecha_inicio_cambio": "2025-12-30",
+        "fecha_deteccion": "2025-12-31",
+        "sentido_desviacion": "-",
+        "cambio_medio": -0.187,
+        "residuo_medio_tramo": -0.1839,
+        "estadistico_cusum": 6.761,
+        "ruta": "SILENCIO",
+        "confirmada": null
+      }
+    ]
+  },
+  "sensibilidad": {
+    "persistencia_horas=1": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 1.0679,
+        "precision_proxy": 0.1508,
+        "lift": 1.97
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.5648,
+        "precision_proxy": 0.2022,
+        "lift": 4.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 1.8333,
+        "precision_proxy": 0.1571,
+        "lift": 0.78
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "persistencia_horas=2": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "persistencia_horas=3": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.0432,
+        "precision_proxy": 0.6154,
+        "lift": 8.03
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.0679,
+        "precision_proxy": 0.3182,
+        "lift": 6.77
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.0648,
+        "precision_proxy": 0.2381,
+        "lift": 1.18
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "persistencia_ocupacion_horas=1": {
+      "ALT-002": {
+        "por_ruta_dia": 1.6142,
+        "precision_proxy": 0.4283,
+        "lift": 2.34
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "persistencia_ocupacion_horas=2": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "persistencia_ocupacion_horas=3": {
+      "ALT-002": {
+        "por_ruta_dia": 0.284,
+        "precision_proxy": 0.413,
+        "lift": 2.26
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "ruptura_h=4.0": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0154,
+        "precision_proxy": 1.0,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "ruptura_h=5.0": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0154,
+        "precision_proxy": 0.5,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "ruptura_h=6.0": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "ruptura_cambio_minimo=0.05": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0216,
+        "precision_proxy": 0.6,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "ruptura_cambio_minimo=0.08": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "alt005_exigir_p10=0": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.1883,
+        "precision_proxy": 0.3673,
+        "lift": 3.88
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "alt005_exigir_p10=1": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "caida_demanda=0.2": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.2377,
+        "precision_proxy": 0.3529,
+        "lift": 3.16
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.1049,
+        "precision_proxy": 0.2727,
+        "lift": 1.35
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "caida_demanda=0.3": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "caida_demanda=0.4": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.0741,
+        "precision_proxy": 0.4737,
+        "lift": 9.96
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2747,
+        "precision_proxy": 0.3214,
+        "lift": 1.59
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "error_pronostico=0.15": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "error_pronostico=0.25": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.0926,
+        "precision_proxy": 0.2759,
+        "lift": 1.8
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "tolerancia_salidas=0.2": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 1.0617,
+        "precision_proxy": 0.3692,
+        "lift": 1.31
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "tolerancia_salidas=0.35": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.3395,
+        "precision_proxy": 0.3182,
+        "lift": 2.56
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "tolerancia_salidas=0.5": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "z_anomalia=3.0": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0988,
+        "precision_proxy": 0.5312,
+        "lift": 2.87
+      }
+    },
+    "z_anomalia=3.5": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      }
+    },
+    "z_anomalia=4.0": {
+      "ALT-002": {
+        "por_ruta_dia": 0.6914,
+        "precision_proxy": 0.4107,
+        "lift": 2.24
+      },
+      "ALT-005": {
+        "por_ruta_dia": 0.142,
+        "precision_proxy": 0.359,
+        "lift": 4.69
+      },
+      "ALT-006": {
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "por_ruta_dia": 0.2037,
+        "precision_proxy": 0.2698,
+        "lift": 1.34
+      },
+      "ALT-007 ruptura": {
+        "por_ruta_dia": 0.0123,
+        "precision_proxy": 0.6667,
+        "lift": null
+      },
+      "ALT-008": {
+        "por_ruta_dia": 0.0432,
+        "precision_proxy": 0.8571,
+        "lift": 4.63
+      }
+    }
+  },
+  "duracion_s": 10.0,
+  "antes_del_cambio": {
+    "generado": "2026-11-09T02:07:46-05:00",
+    "calibracion_version": "v1",
+    "periodo": [
+      "2025-09-15",
+      "2025-12-31"
+    ],
+    "observadas_por_ruta_dia": 0.509,
+    "por_codigo": {
+      "ALT-005": {
+        "alertas": 47,
+        "por_ruta_dia": 0.1451,
+        "precision_proxy": 0.359,
+        "lift": 4.7
+      },
+      "ALT-006": {
+        "alertas": 41,
+        "por_ruta_dia": 0.1265,
+        "precision_proxy": 0.3902,
+        "lift": 8.3
+      },
+      "ALT-007": {
+        "alertas": 57,
+        "por_ruta_dia": 0.1759,
+        "precision_proxy": 0.2545,
+        "lift": 1.28
+      },
+      "ALT-008": {
+        "alertas": 20,
+        "por_ruta_dia": 0.0617,
+        "precision_proxy": 0.7,
+        "lift": 3.78
+      },
+      "ALT-009": {
+        "alertas": 0,
+        "por_ruta_dia": 0.0,
+        "precision_proxy": null,
+        "lift": null
+      }
+    },
+    "reglas_anteriores_por_ruta_dia": 6.083
+  }
+}

@@ -1,0 +1,22 @@
+RNF-002 (p95 < 2 s) en /api/v1/catalogos
+Fuente replica: 30 peticiones por ruta, caché caliente (tras la primera), TestClient en proceso
+  procesos                                                               p50     4.5 ms   p95     6.1 ms   OK
+  empresas                                                               p50     5.1 ms   p95     5.8 ms   OK
+  rutas                                                                  p50    10.9 ms   p95    11.3 ms   OK
+  segmentos?idruta=2&limite=20                                           p50     8.0 ms   p95     8.7 ms   OK
+  vehiculos?limite=100                                                   p50    44.6 ms   p95    47.6 ms   OK
+  vehiculos/tipologias                                                   p50    45.8 ms   p95    49.3 ms   OK
+  viajes?idruta=2&desde=2025-03-03&hasta=2025-03-03&limite=100           p50    91.4 ms   p95    95.8 ms   OK
+  despachos?idruta=16&desde=2025-03-03&hasta=2025-03-07&limite=100       p50   107.5 ms   p95   128.4 ms   OK
+  capacidad                                                              p50     5.2 ms   p95     5.8 ms   OK
+
+Fuente archivos: 30 peticiones por ruta, caché caliente (tras la primera), TestClient en proceso
+  procesos                                                               p50     4.4 ms   p95     5.0 ms   OK
+  empresas                                                               p50     5.6 ms   p95     6.4 ms   OK
+  rutas                                                                  p50    10.3 ms   p95    11.3 ms   OK
+  segmentos?idruta=2&limite=20                                           p50    36.1 ms   p95    36.9 ms   OK
+  vehiculos?limite=100                                                   p50    43.8 ms   p95    45.5 ms   OK
+  vehiculos/tipologias                                                   p50    46.6 ms   p95    49.1 ms   OK
+  viajes?idruta=2&desde=2025-03-03&hasta=2025-03-03&limite=100           p50    11.8 ms   p95    12.6 ms   OK
+  despachos?idruta=16&desde=2025-03-03&hasta=2025-03-07&limite=100       p50    34.6 ms   p95    35.9 ms   OK
+  capacidad                                                              p50     5.4 ms   p95     5.8 ms   OK

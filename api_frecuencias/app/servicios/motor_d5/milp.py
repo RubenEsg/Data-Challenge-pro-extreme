@@ -1,4 +1,6 @@
-# Copia exacta de experimentos/D5_optimizacion_milp/milp.py del proyecto (solo se añadió este comentario).
+# Copia de experimentos/D5_optimizacion_milp/milp.py del proyecto. Único cambio deliberado: resolver_dia(...,
+# devolver_detalle=True) pasó a ser resolver_dia_detalle(...) para que cada función devuelva tuplas del mismo largo
+# (SonarQube python:S8495). La formulación del MILP no cambia; detalle y huellas SHA-256 en PROCEDENCIA.md.
 """D5 · núcleo del modelo de optimización (MILP) de salidas por hora.
 
 Un problema por ruta × día: para cada hora h (4-20) se elige exactamente un nivel k de salidas válidas (binaria y[h,k]).
@@ -59,8 +61,26 @@ def costos_por_nivel(entr, P, modo="estocastico"):
     return k, op, wait, over, rev
 
 
-def resolver_dia(entradas, ciclo_horas, flota, P, modo="estocastico", solver="cbc", devolver_detalle=False):
-    """Resuelve el MILP de un día. `entradas` = lista de 17 dicts (horas 4..20). Devuelve x (salidas por hora) y el estado."""
+def resolver_dia(entradas, ciclo_horas, flota, P, modo="estocastico", solver="cbc"):
+    """Resuelve el MILP de un día. `entradas` = lista de 17 dicts (horas 4..20). Devuelve (x, estado, holgura)."""
+    x, estado, holg, _ = _resolver_milp(entradas, ciclo_horas, flota, P, modo, solver)
+    return x, estado, holg
+
+
+def resolver_dia_detalle(entradas, ciclo_horas, flota, P, modo="estocastico", solver="cbc"):
+    """Igual que resolver_dia, más los cuatro componentes de costo (COP) del plan: (x, estado, holgura, componentes).
+
+    Antes era resolver_dia(..., devolver_detalle=True); se separó para que cada función devuelva siempre una tupla del
+    mismo largo (SonarQube python:S8495). El MILP y sus resultados no cambian (ver PROCEDENCIA.md)."""
+    x, estado, holg, niveles = _resolver_milp(entradas, ciclo_horas, flota, P, modo, solver)
+    comp = {}
+    for nombre, idx in [("op", 1), ("espera", 2), ("sobrecarga", 3), ("ingreso", 4)]:
+        comp[nombre] = float(sum(niveles[i][idx][list(niveles[i][0]).index(x[i])] for i in range(len(entradas))))
+    return x, estado, holg, comp
+
+
+def _resolver_milp(entradas, ciclo_horas, flota, P, modo, solver):
+    """Núcleo común: arma y resuelve el MILP; devuelve (x, estado, holgura, niveles de costo por hora)."""
     prob = pulp.LpProblem("D5", pulp.LpMinimize)
     y = {}
     obj = []
@@ -104,12 +124,7 @@ def resolver_dia(entradas, ciclo_horas, flota, P, modo="estocastico", solver="cb
     x = np.array([sum(int(kk) * (v.value() or 0) for kk, v in zip(niveles[i][0], y[i])) for i in range(len(entradas))])
     x = np.rint(x).astype(int)
     holg = float(sum((s.value() or 0) for s in holguras))
-    if not devolver_detalle:
-        return x, estado, holg
-    comp = {}
-    for nombre, idx in [("op", 1), ("espera", 2), ("sobrecarga", 3), ("ingreso", 4)]:
-        comp[nombre] = float(sum(niveles[i][idx][list(niveles[i][0]).index(x[i])] for i in range(len(entradas))))
-    return x, estado, holg, comp
+    return x, estado, holg, niveles
 
 
 def resolver_rapido(entradas, ciclo_horas, flota, P, modo="estocastico"):

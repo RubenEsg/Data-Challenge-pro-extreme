@@ -1,0 +1,77 @@
+Pruebas de la optimización de frecuencia (§5.1, §10.1-§10.3, RF-007, RF-008, RF-013, §12.3, §18).
+2026-11-09, hora de Bogotá. Python 3.13, pytest 9.2. La integración corre contra una base de pruebas aparte en el
+PostgreSQL local (puerto 5433), migrada por el conftest con alembic downgrade base + upgrade head (hasta 0007), con la
+autenticación encendida.
+
+1) Pruebas unitarias del área (07:39):
+   pytest tests/unit/test_optimizacion.py tests/unit/test_optimizacion_objetivo.py tests/unit/test_optimizacion_plan.py
+          tests/unit/test_motor_d5.py
+   81 passed, 0 failed. Por archivo: test_motor_d5.py 3, test_optimizacion.py 29, test_optimizacion_objetivo.py 34,
+   test_optimizacion_plan.py 15.
+
+   Pruebas del plan del día (tests/unit/test_optimizacion_plan.py):
+   - test_plan_dia_usa_el_pronostico_horario_del_modelo_activo: el plan del día sale del modelo activo (P10/P50/P90
+     de cada hora con h = 60, sin factor intradía; cada hora coincide con inferencia.predecir) y existe también para
+     2026-01-05; el E12 precalculado solo cubre 2025.
+   - test_plan_dia_toma_los_umbrales_gobernados_como_cotas_del_milp: nmin = ceil(minutos / headway máximo efectivo),
+     tope = floor(minutos / headway mínimo); cada parámetro dice su fuente; subir el headway mínimo a 6 min deja la
+     hora 5 limitada, no viable y con su motivo.
+   - test_una_sola_salida_no_tiene_intervalo_y_no_es_no_viable: una hora operada menos minutos que el headway mínimo
+     (SILENCIO a las 4 h del domingo 23-nov-2025 y del festivo 8-dic-2025: 0,2 min) tiene tope 1 salida, sin
+     intervalo que verificar (sin_intervalo = true): ya no es «no viable» por eso, como en la respuesta del reto. Una
+     hora sin un nivel entero de verdad (3 min con headway entre 2 y 2,5 min) sigue siendo no viable.
+   - test_vehiculos_con_el_ritmo_de_la_hora_y_su_definicion: vehículos = ceil(ciclo / headway) con headway = 60 /
+     salidas por hora. En una hora completa es la fórmula literal de §10.3. Dos salidas en 4,5 min piden 6 vehículos,
+     no 74; antes, una sola salida a las 4:59 pedía 501. El plan trae vehiculos_hora_pico y buses_en_ruta_pico, el
+     conteo de D5 cada 15 min que limita la flota, y definicion_vehiculos dice qué mide cada uno. El costo del día es
+     la suma del costo de cada hora.
+   - test_insumos_plan_es_publico_y_son_los_del_plan y test_insumos_plan_sin_pronostico_usa_el_del_modelo_activo:
+     optimizacion.insumos_plan expone, por hora, mu, s, capacidad, km del ciclo (dist), CV de los intervalos (cv_d4) y
+     el resto de los insumos del MILP. Son los mismos con que se resolvió el plan; _insumos_activo queda como alias.
+   - test_fila_plan_y_plan_desde_filas_ida_y_vuelta: lo que persiste el ciclo reconstruye el mismo plan, también con
+     el formato de construir_recomendacion; las salidas programadas, la flota, el costo y sus componentes se rehacen
+     con las horas cuando el resumen guardado no los trae.
+   - test_bajar_la_espera_maxima_cambia_el_plan, test_bajar_la_espera_maxima_cambia_la_recomendacion_de_franja,
+     test_plan_dia_marca_sobreoferta_con_su_motivo, test_sobreoferta_en_la_franja, test_plan_dia_explica_cada_hora,
+     test_plan_dia_memoria_por_modelo_calibracion_y_umbrales, test_plan_dia_errores y
+     test_lineas_base_literal_y_ajustada_con_su_nombre.
+
+2) Integración (07:39:54-07:40:07), con la evidencia regenerada a propósito:
+   GENERAR_EVIDENCIAS=1 pytest tests/integracion/test_recomendaciones.py
+   12 passed, 0 failed (9,88 s):
+   - test_calculate_por_rol_con_funcion_objetivo_y_explicacion
+   - test_calculate_inviable_se_marca_y_explica
+   - test_escenario_que_pasa_si_y_sensibilidad
+   - test_pesos_versionados_con_put_thresholds
+   - test_espera_maxima_gobernada_cambia_la_recomendacion
+   - test_plan_del_dia_se_lee_de_lo_persistido_con_cada_rol
+   - test_plan_del_dia_con_las_filas_del_ciclo_trae_programadas_flota_y_costo (las filas que guarda el ciclo diario,
+     ejecucion.guardar_plan_dia, bastan para mostrar salidas programadas, flota, costo y la definición de los
+     vehículos; SILENCIO del domingo 23-nov-2025, hora 4 con una sola salida y viable)
+   - test_listado_de_recomendaciones_documenta_el_filtro_origen (GET /recommendations y su exportación describen en
+     el OpenAPI los dos orígenes, «franja» y «plan_dia»)
+   - test_predictions_run_pronostica_con_la_serie_validada_de_la_sesion (POST /predictions/run predice dentro de
+     inferencia.con_sesion, con la serie validada de la sesión; así pronostica después del fin del Parquet)
+   - test_plan_del_dia_en_modo_sincrono_de_pruebas
+   - test_predictions_run_trae_las_claves_de_12_3
+   - test_predictions_run_con_franja_inviable_no_presenta_la_aproximacion
+   Sin GENERAR_EVIDENCIAS=1 la misma corrida escribe en un directorio temporal (tests/evidencia.guardar_evidencia) y
+   el repositorio no cambia.
+   Control de los módulos vecinos que consumen el plan: pytest tests/integracion/test_respuesta_api.py
+   tests/integracion/test_api_integracion.py -> 30 passed, 0 failed (25,44 s).
+
+3) Toda la carpeta de pruebas unitarias (07:40:14-07:41:08): pytest tests/unit -> 566 passed, 0 failed (51,59 s).
+
+4) Contrato (sin base de datos): pytest tests/contrato/test_compatibilidad_openapi.py -> 6 passed. Los campos nuevos
+   son cambios compatibles: en PlanHora, sin_intervalo, flota_disponible, costo_hora_cop y componentes_costo_cop; en
+   PlanDia, buses_en_ruta_pico y definicion_vehiculos. También lo es la descripción del filtro origen.
+
+5) Estático: ruff check «All checks passed!» en app/servicios/optimizacion.py, app/routers/predicciones.py,
+   app/esquemas.py y las tres pruebas.
+
+6) Evidencia regenerada con el código final: viabilidad.md/.json (scripts/viabilidad.py, 07:36, 244 s). La parte A no
+   cambia: 46,0 % viable, 149 de 324 franjas. En la parte B, las horas del plan de SILENCIO en domingo y festivo
+   pasan de 94,1 % a 100 % viables (64 → 68 de 68): la hora 4, con una sola salida, ya no se marca no viable.
+   ejemplo_plan_d5.json se regeneró con la corrida de integración: CRA 54 del 19-nov-2025, vehiculos_hora_pico 106
+   (fórmula de régimen de §10.3), buses_en_ruta_pico 78,55 de 79 disponibles, salidas programadas 290,2 y costo del
+   día 67.831.399,3 COP.

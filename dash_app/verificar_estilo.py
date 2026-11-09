@@ -26,7 +26,7 @@ sys.path.insert(0, str(AQUI))
 import tokens as T  # noqa: E402
 
 CSS = AQUI / "assets" / "estilos.css"
-BASE_PY = [AQUI / "ui.py", AQUI / "tokens.py", AQUI / "app.py", AQUI / "controles.py"]
+BASE_PY = [AQUI / "ui.py", AQUI / "tokens.py", AQUI / "app.py", AQUI / "controles.py", AQUI / "cliente_api.py"]
 PAGINAS_PY = sorted((AQUI / "paginas").glob("*.py"))
 # El Dash ya no copia app/tokens.css: sigue la referencia que eligió el usuario (DISENO.md §1). Tokens que deben existir:
 NUEVOS = ["--serie-modelo", "--serie-modelo-tinte", "--serie-hoy", "--serie-hoy-tinte", "--serie-real", "--serie-recorta",
@@ -243,7 +243,8 @@ PROHIBIDOS_PAGINAS = [
     (r"\bpattern\s*=|[\"']pattern[\"']\s*:|\bfillpattern\b", "rayado escrito a mano (usa ui.traza(rol, \"rayada\"), ui.barras_foco o ui.traza(rol, \"escalon_rayado\"))"),
     (r"\b(?:px|font_size)\s*=\s*\d|\bborder-?[Rr]adius\b", "medida escrita a mano (usa las clases de estilos.css)"),
 ]
-SUELTOS_PERMITIDOS = re.compile(r"^(2024|2025|2026|1|0|7|12|95|E1|E11|E12|54|72|2)$")
+# 11 y 12 nombran los experimentos del informe («experimento 11 / experimento 12»), no son cifras
+SUELTOS_PERMITIDOS = re.compile(r"^(2024|2025|2026|1|0|7|11|12|95|E1|E11|E12|54|72|2)$")
 
 
 def _textos(fuente):
@@ -387,8 +388,9 @@ def comprobar_paleta(inf):
 # (pantalla, ruta, máximo de tamaños de letra, ¿lleva cifra protagonista?). La escala de la referencia tiene más pasos
 # (título enorme, cifra, protagonista): hasta 8 por pantalla.
 PANTALLAS = [("inicio", "/", 8, True), ("pronostico", "/pronostico", 8, False), ("horario", "/horario", 8, False),
-             ("despacho", "/despacho", 8, False), ("modelo", "/modelo", 8, False), ("resultado", "/resultado", 8, True),
-             ("enlaces", "/enlaces", 7, False)]
+             ("despacho", "/despacho", 8, False), ("alertas", "/alertas", 8, False),
+             ("recomendaciones", "/recomendaciones", 8, False), ("operacion", "/operacion", 8, False), ("monitoreo", "/monitoreo", 8, False),
+             ("modelo", "/modelo", 8, False), ("resultado", "/resultado", 8, True), ("enlaces", "/enlaces", 7, False)]
 
 JS = r"""() => {
   const raiz = document.querySelector('#contenido') || document.body;
@@ -526,7 +528,7 @@ def vivo(inf, puerto, capturas=None):
 # --- Principal --------------------------------------------------------------------------------------------------------------
 def main():
     ap = argparse.ArgumentParser(description="Prueba del sistema de diseño del laboratorio Dash (DISENO.md §9).")
-    ap.add_argument("--vivo", type=int, metavar="PUERTO", help="revisa también las seis pantallas en el navegador (nunca 8050)")
+    ap.add_argument("--vivo", type=int, metavar="PUERTO", help="revisa también las once pantallas en el navegador (nunca 8050)")
     ap.add_argument("--solo-vivo", action="store_true", help="solo la parte en el navegador")
     ap.add_argument("--solo-base", action="store_true", help="en el código, solo la base (sin paginas/*.py)")
     ap.add_argument("--capturas", metavar="CARPETA", help="guarda una captura de cada pantalla a 1366 y a 400 px")

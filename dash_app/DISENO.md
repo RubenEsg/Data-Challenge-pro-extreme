@@ -10,7 +10,7 @@ El usuario descartó el estilo «Apple» (acento turquesa y barra lateral) y eli
 <https://dribbble.com/shots/26446179-Dashboard-for-payment-and-business-analytics>. De ella se toma:
 
 - página gris claro y **tarjetas casi blancas** muy redondeadas (radio 26 px), con borde fino y sombra difusa;
-- **navegación arriba**: logo + «Sobusa Despacho» a la izquierda, las siete pantallas como pestañas de texto (Inicio, Pronóstico, Horario, Despacho, Modelo, Resultado y Enlaces) (la activa en
+- **navegación arriba**: logo + «Sobusa Despacho» a la izquierda, las once pantallas como pestañas de texto (Inicio, Pronóstico, Horario, Despacho, Alertas, Recomendaciones, Operación, Monitoreo, Modelo, Resultado y Enlaces) (la activa en
   **píldora negra**), el chip «Cálculo en vivo» a la derecha; en el teléfono las pestañas se desplazan en horizontal;
 - **título enorme en peso normal** (hasta 60 px, interletrado cerrado) y, en la misma fila a la derecha, los controles de
   la pantalla, **cada uno en su píldora gris** con el segmento elegido en blanco (como «Jan 01 – July 31 · compared to ·
@@ -29,7 +29,7 @@ Tipografía: **Inter** (SIL OFL 1.1), variable, en `assets/fuentes/` (`InterVari
 
 ## 2. Colores por rol
 
-Cada entidad tiene un rol y su color es el mismo en las siete pantallas. Nunca se escribe un color en `paginas/*.py`.
+Cada entidad tiene un rol y su color es el mismo en las once pantallas. Nunca se escribe un color en `paginas/*.py`.
 
 | Rol (`ui.ROL[…]`) | Token | Hex | Dónde |
 |---|---|---|---|

@@ -1,0 +1,501 @@
+{
+ "pruebas": [
+  {
+   "prueba": "alertas: carga con la API arriba y chip de salud",
+   "ok": true,
+   "detalle": "API en línea · versión 1.0.0"
+  },
+  {
+   "prueba": "alertas: total de la página = total de la API (nuevas)",
+   "ok": true,
+   "detalle": "Página 1 de 7 · 129 alertas con estos filtros"
+  },
+  {
+   "prueba": "alertas: 20 filas por página",
+   "ok": true,
+   "detalle": "20"
+  },
+  {
+   "prueba": "alertas: página siguiente",
+   "ok": true,
+   "detalle": "Página 2 de 7 · 129 alertas con estos filtros"
+  },
+  {
+   "prueba": "alertas: página anterior",
+   "ok": true,
+   "detalle": "Página 1 de 7 · 129 alertas con estos filtros"
+  },
+  {
+   "prueba": "alertas: filtro estado=todas",
+   "ok": true,
+   "detalle": "Página 1 de 7 · 140 alertas con estos filtros"
+  },
+  {
+   "prueba": "alertas: filtros nivel=crítica y ruta=CRA 54",
+   "ok": true,
+   "detalle": "Página 1 de 2 · 33 alertas con estos filtros"
+  },
+  {
+   "prueba": "alertas: solo críticas en la lista",
+   "ok": true,
+   "detalle": "['Crítica', 'Crítica', 'Crítica']"
+  },
+  {
+   "prueba": "alertas: filtro código ALT-001",
+   "ok": true,
+   "detalle": "Página 1 de 1 · 16 alertas con estos filtros"
+  },
+  {
+   "prueba": "alertas: filtro desde=mañana deja 0",
+   "ok": true,
+   "detalle": "0 alertas"
+  },
+  {
+   "prueba": "alertas: filtro desde=hasta=hoy",
+   "ok": true,
+   "detalle": "Página 1 de 1 · 16 alertas con estos filtros"
+  },
+  {
+   "prueba": "alertas: descarga CSV filtrada",
+   "ok": true,
+   "detalle": "alertas_20261109_013036.csv · 16 filas"
+  },
+  {
+   "prueba": "alertas: descarga XLSX",
+   "ok": true,
+   "detalle": "alertas_20261109_013036.xlsx"
+  },
+  {
+   "prueba": "alertas: el detalle trae los campos de §5.3",
+   "ok": true,
+   "detalle": "24 etiquetas · ALT-001 ad89f585"
+  },
+  {
+   "prueba": "alertas: botones según TRANSICIONES (nueva)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "alertas: reconocer",
+   "ok": true,
+   "detalle": "Acción registrada\n\nReconocida por tablero.prueba · estado actual: reconocida"
+  },
+  {
+   "prueba": "alertas: asignar sin persona → 422 visible",
+   "ok": true,
+   "detalle": "La API no aplicó la acción\n\ndatos_incompletos: asignar requiere asignado_a."
+  },
+  {
+   "prueba": "alertas: asignar",
+   "ok": true,
+   "detalle": "Acción registrada\n\nAsignada por tablero.prueba · estado actual: asignada"
+  },
+  {
+   "prueba": "alertas: comentar",
+   "ok": true,
+   "detalle": "Acción registrada\n\nComentario por tablero.prueba · estado actual: asignada"
+  },
+  {
+   "prueba": "alertas: cerrar",
+   "ok": true,
+   "detalle": "Acción registrada\n\nCerrada por tablero.prueba · estado actual: cerrada"
+  },
+  {
+   "prueba": "alertas: estado final deshabilita las acciones",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "alertas: historial = bitácora de la API",
+   "ok": true,
+   "detalle": "['crear', 'reconocer', 'asignar', 'comentar', 'cerrar']"
+  },
+  {
+   "prueba": "alertas: 409 transicion_invalida visible",
+   "ok": true,
+   "detalle": "La API no aplicó la acción\n\ntransicion_invalida: No se puede 'reconocer' una alerta en estado 'descartada'. Permitidas: ninguna (estado final)."
+  },
+  {
+   "prueba": "alertas: 0 errores de consola",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "recomendaciones: cifras de la hora pico",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: ejecución por omisión = la más reciente",
+   "ok": true,
+   "detalle": "Datos hasta 4 sep 2025 · 36f1c376"
+  },
+  {
+   "prueba": "recomendaciones: la tabla coincide con la API (buses/h y vehículos de la hora pico)",
+   "ok": true,
+   "detalle": "8"
+  },
+  {
+   "prueba": "recomendaciones: aviso de franjas no viables con el motivo de la API",
+   "ok": true,
+   "detalle": "2 de 3 franjas no son viables con la flota y el headway mínimo\n\n07:00 · La flota disponible (45 vehículos) no alcanza: c"
+  },
+  {
+   "prueba": "recomendaciones: ruta CRA 54",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "recomendaciones: filtro no viables",
+   "ok": true,
+   "detalle": "['No viable', 'No viable']"
+  },
+  {
+   "prueba": "recomendaciones: filtro viables",
+   "ok": true,
+   "detalle": "['Viable']"
+  },
+  {
+   "prueba": "recomendaciones: desplegable de ejecuciones desde la API",
+   "ok": true,
+   "detalle": "['SILENCIO', 'CRA 54', 'CL 72', 'Todas', 'Viables', 'No viables', 'Datos hasta 4 sep 2025 · 36f1c376', 'Datos hasta 3 sep 2025 · 742c721b', 'Datos hasta 2 sep 2025 · 30fc76bb', 'Datos hasta 1 sep 2025 · c4f34751', 'Datos hasta 31 ago 2025 · 2101a766', 'Datos hasta 30 ago 2025 · f52bb748']"
+  },
+  {
+   "prueba": "recomendaciones: cambiar de ejecución cambia la fecha",
+   "ok": true,
+   "detalle": "viernes 5 de septiembre de 2025"
+  },
+  {
+   "prueba": "recomendaciones: calcular escenario (POST /recommendations/calculate)",
+   "ok": true,
+   "detalle": "\tVigente a las 08:00\tEscenario\nDemanda (pas/h)\t1.627\t900\nBuses por hora\t20\t7\nHeadway\t3,00 min\t8,57 min\nVehículos requeridos\t86\t30\nOcupación esperada\t66,7 %\t65,9"
+  },
+  {
+   "prueba": "recomendaciones: escenario sin demanda avisa",
+   "ok": true,
+   "detalle": "Faltan datos\n\nIndique la hora y la demanda por hora."
+  },
+  {
+   "prueba": "recomendaciones: descarga CSV",
+   "ok": true,
+   "detalle": "recomendaciones_20261109_013112.csv"
+  },
+  {
+   "prueba": "recomendaciones: descarga XLSX",
+   "ok": true,
+   "detalle": "recomendaciones_20261109_013112.xlsx"
+  },
+  {
+   "prueba": "recomendaciones: 0 errores de consola",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "operación: ejecuciones",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "operación: detalle con WAPE y cobertura P10–P90",
+   "ok": true,
+   "detalle": "Terminada\nLote:\n36f1c376:2025-09-04\nModelo:\nhgb_fv1_20250831_s42\nUmbrales:\nversión 4\nIntentos:\n1\n\nTerminada · etapa term"
+  },
+  {
+   "prueba": "operación: filtro de errores por dimensión",
+   "ok": true,
+   "detalle": "0 errores con estos filtros\n\nSin errores\n\nLa ejecución no dejó errores de calida"
+  },
+  {
+   "prueba": "operación: el job muestra progreso (Interval)",
+   "ok": true,
+   "detalle": "Ejecución del día siguiente · En cola\n0 %\nEn cola\nEjecución:\n55764696"
+  },
+  {
+   "prueba": "operación: el job termina y la tabla se refresca",
+   "ok": true,
+   "detalle": "2.2 s · Ejecución del día siguiente: terminada\n\nTerminada · 0,7 s · 9 predicciones, 9 recomendaciones y 25 alertas nuevas"
+  },
+  {
+   "prueba": "operación: registro de modelos",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "operación: comparación en la validación",
+   "ok": true,
+   "detalle": "Ventana de validación: 5 sep 2025 a 4 nov 2025 · el WAPE más bajo va resaltado.\n\nModelo\tWAPE\tPico\tVa"
+  },
+  {
+   "prueba": "operación: activación auditada (aceptada o 409 con motivo)",
+   "ok": true,
+   "detalle": "Activación de hgb_fv1_20250904_s42: hecha\n\nModelo activo: hgb_fv1_20250904_s42 · aprobado por tablero.prueba"
+  },
+  {
+   "prueba": "operación: la auditoría muestra el evento",
+   "ok": true,
+   "detalle": "9 nov 2026 · 01:31 activado · tablero.prueba · Prueba del tablero: activar el candidato\n9 nov 2026 · 01:23 registro"
+  },
+  {
+   "prueba": "operación: revertir (hecha o 409 sin_version_anterior)",
+   "ok": true,
+   "detalle": "Reversión al modelo anterior: hecha\n\nModelo activo: hgb_fv1_20250831_s42 · aprobado por tablero.prueba"
+  },
+  {
+   "prueba": "operación: umbral nuevo crea una versión",
+   "ok": true,
+   "detalle": "Versión nueva guardada\n\nocupacion_critica = 0,92 · versión 6 · por tablero.prueba"
+  },
+  {
+   "prueba": "operación: historial del umbral",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "operación: monitoreo (/health, /metrics, alertas por nivel, WAPE frente a tolerancia)",
+   "ok": true,
+   "detalle": "Servicio en línea\nBase de datos: ok\nVersión:\n1.0.0\nFuente:\nparquet\nError del pronóstico (WAPE móvil)\nDentro\n\n11,3 %\n\ntolerancia 20,0 % (ALT-010)\n\nÚltima ejecución · 5 sep 2025 a 5 sep 20251.523 petici"
+  },
+  {
+   "prueba": "operación: entrenar candidato arranca (job largo con Interval)",
+   "ok": true,
+   "detalle": "Entrenamiento de un candidato · entrenamiento\n20 %\nCorriendo\nEjecución:\n7eaa7da6"
+  },
+  {
+   "prueba": "operación: la página responde durante el job",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "operación: 0 errores de consola",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "teclado /alertas: Tab recorre marca, navegación, controles y botones",
+   "ok": true,
+   "detalle": "['A#:Sobusa Despacho', 'A#nav-0:Inicio', 'A#nav-1:Pronóstico', 'A#nav-2:Horario', 'A#nav-3:Despacho', 'A#nav-4:Alertas', 'A#nav-5:Recomendaciones', 'A#nav-6:Operación', 'A#nav-7:Modelo', 'A#nav-8:Resultado', 'A#nav-9:Enlaces', 'INPUT#:nueva', 'INPUT#:todas', 'INPUT#:todas', 'BUTTON#al-codigo:Todos',"
+  },
+  {
+   "prueba": "teclado /alertas: foco visible en cada parada (40 paradas)",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "teclado /recomendaciones: Tab recorre marca, navegación, controles y botones",
+   "ok": true,
+   "detalle": "['A#:Sobusa Despacho', 'A#nav-0:Inicio', 'A#nav-1:Pronóstico', 'A#nav-2:Horario', 'A#nav-3:Despacho', 'A#nav-4:Alertas', 'A#nav-5:Recomendaciones', 'A#nav-6:Operación', 'A#nav-7:Modelo', 'A#nav-8:Resultado', 'A#nav-9:Enlaces', 'INPUT#:SILENCIO', 'INPUT#:todas', 'BUTTON#re-ejecucion:Datos hasta 5 sep"
+  },
+  {
+   "prueba": "teclado /recomendaciones: foco visible en cada parada (39 paradas)",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "teclado /operacion: Tab recorre marca, navegación, controles y botones",
+   "ok": true,
+   "detalle": "['A#:Sobusa Despacho', 'A#nav-0:Inicio', 'A#nav-1:Pronóstico', 'A#nav-2:Horario', 'A#nav-3:Despacho', 'A#nav-4:Alertas', 'A#nav-5:Recomendaciones', 'A#nav-6:Operación', 'A#nav-7:Modelo', 'A#nav-8:Resultado', 'A#nav-9:Enlaces', 'INPUT#:ejecuciones', 'BUTTON#op-ejecutar:Ejecutar día siguiente', 'SUMMA"
+  },
+  {
+   "prueba": "teclado /operacion: foco visible en cada parada (39 paradas)",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "teclado: flecha elige otra opción del segmentado",
+   "ok": true,
+   "detalle": "critica"
+  },
+  {
+   "prueba": "teclado: Enter activa un botón (exportar)",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "desborde: nada se sale a 1280 px en las 10 pantallas (y la barra cabe a 1280)",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "consola: 0 errores en las 10 pantallas a 1280 px",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "desborde: nada se sale a 400 px en las 10 pantallas (y la barra cabe a 1280)",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "consola: 0 errores en las 10 pantallas a 400 px",
+   "ok": true,
+   "detalle": "[]"
+  },
+  {
+   "prueba": "sin API /alertas: aviso «La API no responde en …»",
+   "ok": true,
+   "detalle": "La API no responde\n\nLa API no responde en http://127.0.0.1:8109. Levántela (docker compose -p sobusa_api up -d o uvicorn"
+  },
+  {
+   "prueba": "sin API /recomendaciones: aviso «La API no responde en …»",
+   "ok": true,
+   "detalle": "La API no responde\n\nLa API no responde en http://127.0.0.1:8109. Levántela (docker compose -p sobusa_api up -d o uvicorn"
+  },
+  {
+   "prueba": "sin API /operacion: aviso «La API no responde en …»",
+   "ok": true,
+   "detalle": "La API no responde\n\nLa API no responde en http://127.0.0.1:8109. Levántela (docker compose -p sobusa_api up -d o uvicorn"
+  },
+  {
+   "prueba": "sin API: exportar avisa sin romper",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "sin API: las cuatro vistas de Operación avisan",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "sin API: 0 errores de consola",
+   "ok": true,
+   "detalle": "[]"
+  }
+ ],
+ "errores_consola": {
+  "alertas": [],
+  "recomendaciones": [],
+  "operacion": [],
+  "sin_api": []
+ },
+ "teclado": {
+  "/alertas": [
+   "A#:Sobusa Despacho",
+   "A#nav-0:Inicio",
+   "A#nav-1:Pronóstico",
+   "A#nav-2:Horario",
+   "A#nav-3:Despacho",
+   "A#nav-4:Alertas",
+   "A#nav-5:Recomendaciones",
+   "A#nav-6:Operación",
+   "A#nav-7:Modelo",
+   "A#nav-8:Resultado",
+   "A#nav-9:Enlaces",
+   "INPUT#:nueva",
+   "INPUT#:todas",
+   "INPUT#:todas",
+   "BUTTON#al-codigo:Todos",
+   "INPUT#al-desde:dd/mm/aaaa",
+   "INPUT#al-hasta:dd/mm/aaaa",
+   "BUTTON#al-csv:Exportar CSV",
+   "BUTTON#al-xlsx:Exportar XLSX",
+   "SUMMARY#:Ver los datos",
+   "BUTTON#{\"id\":\"0d04e793-dcaa-4586-b325-9dbf5c076626\",\"tipo\":\"al-fila\"}:ALT-001",
+   "BUTTON#{\"id\":\"156f7ff5-5763-438d-942e-d9b973ee183a\",\"tipo\":\"al-fila\"}:ALT-003",
+   "BUTTON#{\"id\":\"1872c3df-2462-41c2-970f-061d0836962a\",\"tipo\":\"al-fila\"}:ALT-002",
+   "BUTTON#{\"id\":\"a00c08fc-aa89-49e3-9497-c49dec59d521\",\"tipo\":\"al-fila\"}:ALT-002",
+   "BUTTON#{\"id\":\"7b7fe7f6-a6c1-461c-9eba-85120d6d6b8e\",\"tipo\":\"al-fila\"}:ALT-003",
+   "BUTTON#{\"id\":\"8a38aaed-3c73-452b-a4ab-de637dd66426\",\"tipo\":\"al-fila\"}:ALT-001",
+   "BUTTON#{\"id\":\"774337d5-08af-49eb-9b8d-4d869af50e9d\",\"tipo\":\"al-fila\"}:ALT-003",
+   "BUTTON#{\"id\":\"6396884e-f94e-4108-9809-f7b13041d926\",\"tipo\":\"al-fila\"}:ALT-002",
+   "BUTTON#{\"id\":\"0b1c7d1c-f802-4b4c-97d5-5bd782a7d0ba\",\"tipo\":\"al-fila\"}:ALT-001",
+   "BUTTON#{\"id\":\"cf28c648-6319-4157-9087-9d315181817b\",\"tipo\":\"al-fila\"}:ALT-002",
+   "BUTTON#{\"id\":\"95b93a2d-42dd-4f03-9d26-3aeb7c346649\",\"tipo\":\"al-fila\"}:ALT-003",
+   "BUTTON#{\"id\":\"d179bf74-b003-4837-9d94-bc12ef7ea2e1\",\"tipo\":\"al-fila\"}:ALT-001",
+   "BUTTON#{\"id\":\"4f23f9ea-bcb1-4cb8-87d6-e4f86555d5cf\",\"tipo\":\"al-fila\"}:ALT-002",
+   "BUTTON#{\"id\":\"85ed5931-99ca-4f6b-a134-534e37171e52\",\"tipo\":\"al-fila\"}:ALT-003",
+   "BUTTON#{\"id\":\"69631c61-9071-479c-9164-5d04f8a3e5bf\",\"tipo\":\"al-fila\"}:ALT-001",
+   "BUTTON#{\"id\":\"867db358-7776-431c-937c-aee86d4b595a\",\"tipo\":\"al-fila\"}:ALT-001",
+   "BUTTON#{\"id\":\"a9b32f37-403c-4464-add8-db2c707b176f\",\"tipo\":\"al-fila\"}:ALT-002",
+   "BUTTON#{\"id\":\"cde10e71-2219-4a14-8f5c-75ce466cb4f2\",\"tipo\":\"al-fila\"}:ALT-002",
+   "BUTTON#{\"id\":\"2fa7e286-06db-4228-ab30-9061459bdf64\",\"tipo\":\"al-fila\"}:ALT-003",
+   "BUTTON#{\"id\":\"fb00d30f-8bcc-419e-9924-10b2d916f51b\",\"tipo\":\"al-fila\"}:ALT-001"
+  ],
+  "/recomendaciones": [
+   "A#:Sobusa Despacho",
+   "A#nav-0:Inicio",
+   "A#nav-1:Pronóstico",
+   "A#nav-2:Horario",
+   "A#nav-3:Despacho",
+   "A#nav-4:Alertas",
+   "A#nav-5:Recomendaciones",
+   "A#nav-6:Operación",
+   "A#nav-7:Modelo",
+   "A#nav-8:Resultado",
+   "A#nav-9:Enlaces",
+   "INPUT#:SILENCIO",
+   "INPUT#:todas",
+   "BUTTON#re-ejecucion:Datos hasta 5 sep 2025 · 55764",
+   "BUTTON#re-fecha:sábado 6 de septiembre de 2025",
+   "BUTTON#re-csv:Exportar CSV",
+   "BUTTON#re-xlsx:Exportar XLSX",
+   "SUMMARY#:Ver los datos",
+   "SUMMARY#:Fórmula",
+   "SUMMARY#:Motivo y fórmula",
+   "SUMMARY#:Motivo y fórmula",
+   "INPUT#re-e-hora:8",
+   "BUTTON#:+",
+   "INPUT#re-e-demanda:1573",
+   "BUTTON#:+",
+   "INPUT#re-e-p90:1901",
+   "BUTTON#:+",
+   "INPUT#re-e-capacidad:",
+   "BUTTON#:+",
+   "INPUT#re-e-ocupacion:",
+   "BUTTON#:+",
+   "BUTTON#re-calcular:Calcular escenario",
+   "A#:Sobusa Despacho",
+   "A#nav-0:Inicio",
+   "A#nav-1:Pronóstico",
+   "A#nav-2:Horario",
+   "A#nav-3:Despacho",
+   "A#nav-4:Alertas",
+   "A#nav-5:Recomendaciones"
+  ],
+  "/operacion": [
+   "A#:Sobusa Despacho",
+   "A#nav-0:Inicio",
+   "A#nav-1:Pronóstico",
+   "A#nav-2:Horario",
+   "A#nav-3:Despacho",
+   "A#nav-4:Alertas",
+   "A#nav-5:Recomendaciones",
+   "A#nav-6:Operación",
+   "A#nav-7:Modelo",
+   "A#nav-8:Resultado",
+   "A#nav-9:Enlaces",
+   "INPUT#:ejecuciones",
+   "BUTTON#op-ejecutar:Ejecutar día siguiente",
+   "SUMMARY#:Ver los datos",
+   "DIV#:Ejecución\tEstado\tTipo\tProgreso",
+   "BUTTON#op-ejec:55764696 · frecuencia · termin",
+   "SUMMARY#:Ver los datos",
+   "INPUT#op-f-lote:",
+   "INPUT#op-f-dimension:",
+   "INPUT#op-f-codigo:",
+   "A#:Sobusa Despacho",
+   "A#nav-0:Inicio",
+   "A#nav-1:Pronóstico",
+   "A#nav-2:Horario",
+   "A#nav-3:Despacho",
+   "A#nav-4:Alertas",
+   "A#nav-5:Recomendaciones",
+   "A#nav-6:Operación",
+   "A#nav-7:Modelo",
+   "A#nav-8:Resultado",
+   "A#nav-9:Enlaces",
+   "INPUT#:ejecuciones",
+   "BUTTON#op-ejecutar:Ejecutar día siguiente",
+   "SUMMARY#:Ver los datos",
+   "DIV#:Ejecución\tEstado\tTipo\tProgreso",
+   "BUTTON#op-ejec:55764696 · frecuencia · termin",
+   "SUMMARY#:Ver los datos",
+   "INPUT#op-f-lote:",
+   "INPUT#op-f-dimension:"
+  ]
+ },
+ "resumen": {
+  "total": 72,
+  "ok": 72,
+  "fallas": []
+ }
+}

@@ -1,0 +1,103 @@
+{
+ "generado": "2026-11-09T05:13:55-05:00",
+ "base": "PostgreSQL local de pruebas (base temporal ai_frecuencias_pruebas_modelo_4_0005, borrada al terminar)",
+ "script": "scripts/evidencia_0005.py",
+ "get_thresholds_tras_instalar": {
+  "version": 4,
+  "valores_10_2": {
+   "peso_costo_operativo": 1.0,
+   "peso_tiempo_espera": 1.0,
+   "peso_sobreocupacion": 1.0,
+   "peso_desviacion_frecuencia": 1.0,
+   "nivel_servicio": 0.9,
+   "costo_bus_hora_cop": 26400.22,
+   "costo_km_cop": 1991.24,
+   "valor_tiempo_espera_cop_h": 7000.0,
+   "penalidad_sobreocupacion_cop": 10000.0,
+   "costo_cambio_frecuencia_cop": 26400.22
+  }
+ },
+ "valores_del_codigo": {
+  "peso_costo_operativo": 1.0,
+  "peso_tiempo_espera": 1.0,
+  "peso_sobreocupacion": 1.0,
+  "peso_desviacion_frecuencia": 1.0,
+  "nivel_servicio": 0.9,
+  "costo_bus_hora_cop": 26400.22,
+  "costo_km_cop": 1991.24,
+  "valor_tiempo_espera_cop_h": 7000.0,
+  "penalidad_sobreocupacion_cop": 10000.0,
+  "costo_cambio_frecuencia_cop": 26400.22
+ },
+ "coinciden_con_el_codigo": true,
+ "calculate_fuente_de_los_pesos": {
+  "alfa": {
+   "simbolo": "α",
+   "nombre": "peso_costo_operativo",
+   "valor": 1.0,
+   "fuente": "threshold_config v4"
+  },
+  "beta": {
+   "simbolo": "β",
+   "nombre": "peso_tiempo_espera",
+   "valor": 1.0,
+   "fuente": "threshold_config v4"
+  },
+  "gamma": {
+   "simbolo": "γ",
+   "nombre": "peso_sobreocupacion",
+   "valor": 1.0,
+   "fuente": "threshold_config v4"
+  },
+  "delta": {
+   "simbolo": "δ",
+   "nombre": "peso_desviacion_frecuencia",
+   "valor": 1.0,
+   "fuente": "threshold_config v4"
+  }
+ },
+ "calculate_umbrales_version": 4,
+ "subida": {
+  "version_vigente": [
+   4
+  ],
+  "parametros_10_2_vigentes": [
+   "costo_bus_hora_cop",
+   "costo_cambio_frecuencia_cop",
+   "costo_km_cop",
+   "nivel_servicio",
+   "penalidad_sobreocupacion_cop",
+   "peso_costo_operativo",
+   "peso_desviacion_frecuencia",
+   "peso_sobreocupacion",
+   "peso_tiempo_espera",
+   "valor_tiempo_espera_cop_h"
+  ]
+ },
+ "bajada_a_0004": {
+  "version_vigente": [
+   3
+  ],
+  "parametros_10_2_vigentes": [],
+  "creado_por": [
+   "migracion_0004"
+  ]
+ },
+ "nueva_subida": {
+  "version_vigente": [
+   4
+  ],
+  "parametros_10_2_vigentes": [
+   "costo_bus_hora_cop",
+   "costo_cambio_frecuencia_cop",
+   "costo_km_cop",
+   "nivel_servicio",
+   "penalidad_sobreocupacion_cop",
+   "peso_costo_operativo",
+   "peso_desviacion_frecuencia",
+   "peso_sobreocupacion",
+   "peso_tiempo_espera",
+   "valor_tiempo_espera_cop_h"
+  ]
+ }
+}

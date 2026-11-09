@@ -1,0 +1,398 @@
+{
+ "fecha": "2026-11-09T01:22:35-05:00",
+ "servidor": "PostgreSQL 14.13 (Debian 14.13-1.pgdg110+1) on x86_64-pc-linux-gnu",
+ "tamano_base": "983 MB",
+ "segundos_total": 74.08,
+ "segundos_preparacion": 1.46,
+ "segundos_analyze": 1.85,
+ "filas_total": 3379899,
+ "filas_por_segundo": 45625,
+ "memoria_pico_python_mb": 315.2,
+ "memoria_pico_arrow_mb": 877.2,
+ "memoria_pico_proceso_mb": 1632.8,
+ "lote_filas": 200000,
+ "viajes_reservados": 265,
+ "armonizacion_H1_filas": 231,
+ "estacionalidades_anio_por_proceso": {
+  "sobusa": 231
+ },
+ "tablas": [
+  {
+   "tabla": "Procesos",
+   "filas": 1,
+   "leidas": 1,
+   "excluidas": 0,
+   "segundos": 0.08,
+   "enmascaradas": {
+    "url_interfaz_despacho": 0,
+    "usuario_interfaz_despacho": 0,
+    "clave_interfaz_despacho": 0
+   },
+   "filas_exportadas": 1
+  },
+  {
+   "tabla": "rutas",
+   "filas": 3,
+   "leidas": 3,
+   "excluidas": 0,
+   "segundos": 0.01,
+   "enmascaradas": {},
+   "filas_exportadas": 3
+  },
+  {
+   "tabla": "dias_semana",
+   "filas": 7,
+   "leidas": 7,
+   "excluidas": 0,
+   "segundos": 0.0,
+   "enmascaradas": {},
+   "filas_exportadas": 7
+  },
+  {
+   "tabla": "estacionalidades",
+   "filas": 24,
+   "leidas": 24,
+   "excluidas": 0,
+   "segundos": 0.0,
+   "enmascaradas": {},
+   "filas_exportadas": 24
+  },
+  {
+   "tabla": "estacionalidades_anio",
+   "filas": 231,
+   "leidas": 231,
+   "excluidas": 0,
+   "segundos": 0.04,
+   "enmascaradas": {},
+   "filas_exportadas": 231
+  },
+  {
+   "tabla": "vehiculos",
+   "filas": 656,
+   "leidas": 656,
+   "excluidas": 0,
+   "segundos": 0.08,
+   "enmascaradas": {
+    "modem_user": 459,
+    "modem_passwd": 163,
+    "modem_puk": 148,
+    "modem_user_2": 0,
+    "modem_passwd_2": 0,
+    "modem_puk_2": 0
+   },
+   "filas_exportadas": 656
+  },
+  {
+   "tabla": "novedades_viales",
+   "filas": 59,
+   "leidas": 59,
+   "excluidas": 0,
+   "segundos": 0.04,
+   "enmascaradas": {},
+   "filas_exportadas": 59
+  },
+  {
+   "tabla": "novedades_viales_fecha",
+   "filas": 28,
+   "leidas": 28,
+   "excluidas": 0,
+   "segundos": 0.0,
+   "enmascaradas": {},
+   "filas_exportadas": 28
+  },
+  {
+   "tabla": "novedades_viales_ruta",
+   "filas": 0,
+   "leidas": 0,
+   "excluidas": 0,
+   "segundos": 0.0,
+   "enmascaradas": {},
+   "filas_exportadas": 0
+  },
+  {
+   "tabla": "progvehiculos",
+   "filas": 564837,
+   "leidas": 564837,
+   "excluidas": 0,
+   "segundos": 8.47,
+   "enmascaradas": {},
+   "filas_exportadas": 564837
+  },
+  {
+   "tabla": "rutas_segmentos_config",
+   "filas": 22,
+   "leidas": 22,
+   "excluidas": 0,
+   "segundos": 0.0,
+   "enmascaradas": {},
+   "filas_exportadas": 22
+  },
+  {
+   "tabla": "rutas_segmentos",
+   "filas": 2695,
+   "leidas": 2695,
+   "excluidas": 0,
+   "segundos": 22.58,
+   "enmascaradas": {},
+   "filas_exportadas": 2695
+  },
+  {
+   "tabla": "timbradas_segmentos",
+   "filas": 2769692,
+   "leidas": 2795607,
+   "excluidas": 25915,
+   "segundos": 32.63,
+   "enmascaradas": {},
+   "filas_exportadas": 2795607
+  },
+  {
+   "tabla": "timbradas_anio",
+   "filas": 30913,
+   "leidas": 30913,
+   "excluidas": 0,
+   "segundos": 0.17,
+   "enmascaradas": {},
+   "filas_exportadas": 30913
+  },
+  {
+   "tabla": "timbradas_consolidado",
+   "filas": 10731,
+   "leidas": 10731,
+   "excluidas": 0,
+   "segundos": 0.09,
+   "enmascaradas": {},
+   "filas_exportadas": 10731
+  }
+ ],
+ "rutasgeograficas": [
+  {
+   "idruta": 3,
+   "tipo": "ST_LineString",
+   "longitud_m": 67217.7,
+   "suma_longitud_segmentos_m": 67217.7,
+   "segmentos": 135
+  },
+  {
+   "idruta": 10,
+   "tipo": "ST_LineString",
+   "longitud_m": 61127.3,
+   "suma_longitud_segmentos_m": 61127.3,
+   "segmentos": 123
+  },
+  {
+   "idruta": 11,
+   "tipo": "ST_LineString",
+   "longitud_m": 63902.0,
+   "suma_longitud_segmentos_m": 63902.0,
+   "segmentos": 128
+  }
+ ],
+ "secuencias": [
+  {
+   "secuencia": "public.conteo_pasajeros_id_seq",
+   "max_id": 644349911
+  },
+  {
+   "secuencia": "public.rutas_segmentos_config_id_seq",
+   "max_id": 22
+  },
+  {
+   "secuencia": "public.rutas_segmentos_id_seq",
+   "max_id": 2695
+  },
+  {
+   "secuencia": "public.rutas_segmentos_porcion_id_seq",
+   "max_id": null
+  },
+  {
+   "secuencia": "public.timbradas_anio_id_timbrada_anio_seq",
+   "max_id": 54159
+  },
+  {
+   "secuencia": "public.timbradas_anio_trazabilidad_id_timbrada_anio_trazabilidad_seq",
+   "max_id": null
+  },
+  {
+   "secuencia": "public.timbradas_anio_zonas_id_timbrada_anio_zona_seq",
+   "max_id": null
+  },
+  {
+   "secuencia": "public.timbradas_anio_zonas_trazabilidad_id_trazabilidad_seq",
+   "max_id": null
+  },
+  {
+   "secuencia": "public.timbradas_consolidado_id_timbrada_consolidado_seq",
+   "max_id": 10731
+  },
+  {
+   "secuencia": "public.timbradas_consolidado_zonas_id_timbrada_consolidado_zona_seq",
+   "max_id": null
+  },
+  {
+   "secuencia": "public.timbradas_segmentos_anio_id_timbrada_segmento_anio_seq",
+   "max_id": null
+  },
+  {
+   "secuencia": "public.timbradas_segmentos_anio_trazabilidad_id_trazabilidad_seq",
+   "max_id": null
+  },
+  {
+   "secuencia": "public.timbradas_segmentos_consolida_id_timbrada_segmentos_consoli_seq",
+   "max_id": null
+  },
+  {
+   "secuencia": "public.timbradas_segmentos_id_timbrada_segmento_seq",
+   "max_id": 2819917
+  }
+ ],
+ "llaves_foraneas": [
+  {
+   "constraint": "rutas_segmentos_id_config_fkey",
+   "tabla": "rutas_segmentos",
+   "referencia": "rutas_segmentos_config",
+   "filas": 2695,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "timbradas_anio_trazabilidad_id_timbrada_anio_fkey",
+   "tabla": "timbradas_anio_trazabilidad",
+   "referencia": "timbradas_anio",
+   "filas": 0,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "timbradas_anio_zonas_id_timbrada_anio_fkey",
+   "tabla": "timbradas_anio_zonas",
+   "referencia": "timbradas_anio",
+   "filas": 0,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "timbradas_anio_zonas_trazabilidad_id_timbrada_anio_zona_fkey",
+   "tabla": "timbradas_anio_zonas_trazabilidad",
+   "referencia": "timbradas_anio_zonas",
+   "filas": 0,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "timbradas_consolidado_zonas_id_timbrada_consolidado_fkey",
+   "tabla": "timbradas_consolidado_zonas",
+   "referencia": "timbradas_consolidado",
+   "filas": 0,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "timbradas_segmentos_id_segmento_fkey",
+   "tabla": "timbradas_segmentos",
+   "referencia": "rutas_segmentos",
+   "filas": 2769692,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "timbradas_segmentos_id_viaje_fkey",
+   "tabla": "timbradas_segmentos",
+   "referencia": "progvehiculos",
+   "filas": 2769692,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "fk_tsa_id_dia_semana",
+   "tabla": "timbradas_segmentos_anio",
+   "referencia": "dias_semana",
+   "filas": 0,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "fk_tsa_id_estacionalidad_anio",
+   "tabla": "timbradas_segmentos_anio",
+   "referencia": "estacionalidades_anio",
+   "filas": 0,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "fk_tsa_id_segmento",
+   "tabla": "timbradas_segmentos_anio",
+   "referencia": "rutas_segmentos",
+   "filas": 0,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "timbradas_segmentos_anio_trazabi_id_timbrada_segmento_anio_fkey",
+   "tabla": "timbradas_segmentos_anio_trazabilidad",
+   "referencia": "timbradas_segmentos_anio",
+   "filas": 0,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "fk_tsc_id_dia_semana",
+   "tabla": "timbradas_segmentos_consolidado",
+   "referencia": "dias_semana",
+   "filas": 0,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "fk_tsc_id_estacionalidad",
+   "tabla": "timbradas_segmentos_consolidado",
+   "referencia": "estacionalidades",
+   "filas": 0,
+   "huerfanas": 0
+  },
+  {
+   "constraint": "fk_tsc_id_segmento",
+   "tabla": "timbradas_segmentos_consolidado",
+   "referencia": "rutas_segmentos",
+   "filas": 0,
+   "huerfanas": 0
+  }
+ ],
+ "scripts_post_carga": [
+  {
+   "script": "99. prueba de segmentacion.sql",
+   "segundos": 0.02,
+   "antes": [
+    2769692,
+    0,
+    22,
+    2695
+   ],
+   "despues": [
+    2769692,
+    0,
+    22,
+    2695
+   ]
+  },
+  {
+   "script": "5. cargue inicial timbradas_segmentos.sql",
+   "segundos": 0.01,
+   "antes": [
+    2769692,
+    0,
+    22,
+    2695
+   ],
+   "despues": [
+    2769692,
+    0,
+    22,
+    2695
+   ]
+  },
+  {
+   "script": "6. cargue inicial timbradas_segmentos_anio.sql",
+   "segundos": 0.06,
+   "antes": [
+    2769692,
+    0,
+    22,
+    2695
+   ],
+   "despues": [
+    2769692,
+    0,
+    22,
+    2695
+   ]
+  }
+ ]
+}

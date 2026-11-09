@@ -1,0 +1,323 @@
+Objetos de la réplica operacional (2026-11-09T06:45:03-05:00)
+
+                                                                                                         List of functions
+ Schema |                Name                | Result data type |                                                                    Argument data types                                                                     | Type 
+--------+------------------------------------+------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+------
+ public | fn_consolidar_timbradas_historicas | boolean          |                                                                                                                                                            | func
+ public | fn_insert_timbradas_anio           | boolean          | p_idprogramacion bigint                                                                                                                                    | func
+ public | fn_segmentar_ruta                  | void             | p_idruta bigint, p_tipo_agrupacion character varying, p_valor numeric, "p_tamaño_porcion_m" numeric DEFAULT 0.20, "p_tamaño_minimo_m" numeric DEFAULT 0.20 | func
+ public | fn_tg_timbrada_segmento            | trigger          |                                                                                                                                                            | func
+(4 rows)
+
+        tgname        |      tabla       |         funcion         | tgenabled |                                                                  definicion                                                                   
+----------------------+------------------+-------------------------+-----------+-----------------------------------------------------------------------------------------------------------------------------------------------
+ tg_timbrada_segmento | conteo_pasajeros | fn_tg_timbrada_segmento | O         | CREATE TRIGGER tg_timbrada_segmento AFTER INSERT OR UPDATE ON public.conteo_pasajeros FOR EACH ROW EXECUTE FUNCTION fn_tg_timbrada_segmento()
+(1 row)
+
+                                                       List of relations
+ Schema |                 Name                  | Type  |    Owner    | Persistence | Access method |    Size    | Description 
+--------+---------------------------------------+-------+-------------+-------------+---------------+------------+-------------
+ public | Procesos                              | table | extreme_dba | permanent   | heap          | 64 kB      | 
+ public | areascontrol                          | table | extreme_dba | permanent   | heap          | 8192 bytes | 
+ public | conteo_pasajeros                      | table | extreme_dba | permanent   | heap          | 24 kB      | 
+ public | dias_semana                           | table | extreme_dba | permanent   | heap          | 16 kB      | 
+ public | estacionalidades                      | table | extreme_dba | permanent   | heap          | 16 kB      | 
+ public | estacionalidades_anio                 | table | extreme_dba | permanent   | heap          | 80 kB      | 
+ public | novedades_viales                      | table | extreme_dba | permanent   | heap          | 24 kB      | 
+ public | novedades_viales_fecha                | table | extreme_dba | permanent   | heap          | 16 kB      | 
+ public | novedades_viales_ruta                 | table | extreme_dba | permanent   | heap          | 0 bytes    | 
+ public | progvehiculos                         | table | extreme_dba | permanent   | heap          | 214 MB     | 
+ public | rutas                                 | table | extreme_dba | permanent   | heap          | 16 kB      | 
+ public | rutas_segmentos                       | table | extreme_dba | permanent   | heap          | 138 MB     | 
+ public | rutas_segmentos_config                | table | extreme_dba | permanent   | heap          | 8192 bytes | 
+ public | rutas_segmentos_porcion               | table | extreme_dba | permanent   | heap          | 8192 bytes | 
+ public | rutasgeograficas                      | table | extreme_dba | permanent   | heap          | 54 MB      | 
+ public | spatial_ref_sys                       | table | extreme_dba | permanent   | heap          | 6936 kB    | 
+ public | timbradas_anio                        | table | extreme_dba | permanent   | heap          | 4544 kB    | 
+ public | timbradas_anio_trazabilidad           | table | extreme_dba | permanent   | heap          | 8192 bytes | 
+ public | timbradas_anio_zonas                  | table | extreme_dba | permanent   | heap          | 0 bytes    | 
+ public | timbradas_anio_zonas_trazabilidad     | table | extreme_dba | permanent   | heap          | 0 bytes    | 
+ public | timbradas_consolidado                 | table | extreme_dba | permanent   | heap          | 1528 kB    | 
+ public | timbradas_consolidado_zonas           | table | extreme_dba | permanent   | heap          | 0 bytes    | 
+ public | timbradas_segmentos                   | table | extreme_dba | permanent   | heap          | 268 MB     | 
+ public | timbradas_segmentos_anio              | table | extreme_dba | permanent   | heap          | 0 bytes    | 
+ public | timbradas_segmentos_anio_trazabilidad | table | extreme_dba | permanent   | heap          | 0 bytes    | 
+ public | timbradas_segmentos_consolidado       | table | extreme_dba | permanent   | heap          | 0 bytes    | 
+ public | vehiculos                             | table | extreme_dba | permanent   | heap          | 392 kB     | 
+(27 rows)
+
+                                                                              List of schemas
+      Name      |    Owner    |     Access privileges      |                                                  Description                                                  
+----------------+-------------+----------------------------+---------------------------------------------------------------------------------------------------------------
+ ai_frecuencias | escritor_ia | escritor_ia=UC/escritor_ia+| Esquema independiente de la IA de frecuencias (§8.1)
+                |             | lector_ia=U/escritor_ia    | 
+ public         | extreme_dba | extreme_dba=UC/extreme_dba+| standard public schema
+                |             | =U/extreme_dba            +| 
+                |             | lector_ia=U/extreme_dba    | 
+ replica_meta   | extreme_dba |                            | Metadatos de la réplica (pasos de inicialización, carga, viajes reservados). No existe en la base de Extreme.
+(3 rows)
+
+                          indice                          |         tabla          |                                                                                  pg_get_indexdef                                                                                  
+----------------------------------------------------------+------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ timbradas_anio_pkey                                      | timbradas_anio         | CREATE UNIQUE INDEX timbradas_anio_pkey ON public.timbradas_anio USING btree (id_timbrada_anio)
+ timbradas_consolidado_pkey                               | timbradas_consolidado  | CREATE UNIQUE INDEX timbradas_consolidado_pkey ON public.timbradas_consolidado USING btree (id_timbrada_consolidado)
+ uq_timbradas_consolidado_bloque                          | timbradas_consolidado  | CREATE UNIQUE INDEX uq_timbradas_consolidado_bloque ON public.timbradas_consolidado USING btree (proceso, id_ruta, id_dia_semana, id_estacionalidad, hora, hora_inicio, hora_fin)
+ conteo_pasajeros_pkey                                    | conteo_pasajeros       | CREATE UNIQUE INDEX conteo_pasajeros_pkey ON public.conteo_pasajeros USING btree (id)
+ ix_conteo_pasajeros_idprogramacion                       | conteo_pasajeros       | CREATE INDEX ix_conteo_pasajeros_idprogramacion ON public.conteo_pasajeros USING btree (idprogramacion)
+ rutas_segmentos_config_pkey                              | rutas_segmentos_config | CREATE UNIQUE INDEX rutas_segmentos_config_pkey ON public.rutas_segmentos_config USING btree (id)
+ rutas_segmentos_config_idruta_idrutageo_key              | rutas_segmentos_config | CREATE UNIQUE INDEX rutas_segmentos_config_idruta_idrutageo_key ON public.rutas_segmentos_config USING btree (idruta, idrutageo)
+ rutas_segmentos_pkey                                     | rutas_segmentos        | CREATE UNIQUE INDEX rutas_segmentos_pkey ON public.rutas_segmentos USING btree (id)
+ rutas_segmentos_id_config_nro_segmento_key               | rutas_segmentos        | CREATE UNIQUE INDEX rutas_segmentos_id_config_nro_segmento_key ON public.rutas_segmentos USING btree (id_config, nro_segmento)
+ timbradas_segmentos_pkey                                 | timbradas_segmentos    | CREATE UNIQUE INDEX timbradas_segmentos_pkey ON public.timbradas_segmentos USING btree (id_timbrada_segmento)
+ timbradas_segmentos_id_segmento_id_viaje_hora_inicio_key | timbradas_segmentos    | CREATE UNIQUE INDEX timbradas_segmentos_id_segmento_id_viaje_hora_inicio_key ON public.timbradas_segmentos USING btree (id_segmento, id_viaje, hora_inicio)
+(11 rows)
+
+   rolname   | rolsuper | rolcanlogin | rolconnlimit |                                                    rolconfig                                                     
+-------------+----------+-------------+--------------+------------------------------------------------------------------------------------------------------------------
+ escritor_ia | f        | t           |           40 | 
+ extreme_dba | t        | t           |           -1 | 
+ lector_ia   | f        | t           |           20 | {default_transaction_read_only=on,statement_timeout=30s,idle_in_transaction_session_timeout=60s,lock_timeout=5s}
+(3 rows)
+
+               Default access privileges
+    Owner    | Schema | Type  |    Access privileges    
+-------------+--------+-------+-------------------------
+ extreme_dba | public | table | lector_ia=r/extreme_dba
+(1 row)
+
+                                      List of databases
+    Name     |    Owner    | Encoding |  Collate   |   Ctype    |      Access privileges      
+-------------+-------------+----------+------------+------------+-----------------------------
+ operacional | extreme_dba | UTF8     | en_US.utf8 | en_US.utf8 | extreme_dba=CTc/extreme_dba+
+             |             |          |            |            | lector_ia=c/extreme_dba    +
+             |             |          |            |            | escritor_ia=Tc/extreme_dba
+(1 row)
+
+ esquema |                 tabla                 | lector_select | lector_escribe | escritor_algo 
+---------+---------------------------------------+---------------+----------------+---------------
+ public  | Procesos                              | t             | f              | f
+ public  | areascontrol                          | t             | f              | f
+ public  | conteo_pasajeros                      | t             | f              | f
+ public  | dias_semana                           | t             | f              | f
+ public  | estacionalidades                      | t             | f              | f
+ public  | estacionalidades_anio                 | t             | f              | f
+ public  | novedades_viales                      | t             | f              | f
+ public  | novedades_viales_fecha                | t             | f              | f
+ public  | novedades_viales_ruta                 | t             | f              | f
+ public  | progvehiculos                         | t             | f              | f
+ public  | rutas                                 | t             | f              | f
+ public  | rutas_segmentos                       | t             | f              | f
+ public  | rutas_segmentos_config                | t             | f              | f
+ public  | rutas_segmentos_porcion               | t             | f              | f
+ public  | rutasgeograficas                      | t             | f              | f
+ public  | spatial_ref_sys                       | t             | f              | t
+ public  | timbradas_anio                        | t             | f              | f
+ public  | timbradas_anio_trazabilidad           | t             | f              | f
+ public  | timbradas_anio_zonas                  | t             | f              | f
+ public  | timbradas_anio_zonas_trazabilidad     | t             | f              | f
+ public  | timbradas_consolidado                 | t             | f              | f
+ public  | timbradas_consolidado_zonas           | t             | f              | f
+ public  | timbradas_segmentos                   | t             | f              | f
+ public  | timbradas_segmentos_anio              | t             | f              | f
+ public  | timbradas_segmentos_anio_trazabilidad | t             | f              | f
+ public  | timbradas_segmentos_consolidado       | t             | f              | f
+ public  | vehiculos                             | t             | f              | f
+(27 rows)
+
+                                                                        Table "public.rutas_segmentos_config"
+         Column          |           Type           | Collation | Nullable |                      Default                       | Storage  | Compression | Stats target | Description 
+-------------------------+--------------------------+-----------+----------+----------------------------------------------------+----------+-------------+--------------+-------------
+ id                      | bigint                   |           | not null | nextval('rutas_segmentos_config_id_seq'::regclass) | plain    |             |              | 
+ idruta                  | integer                  |           | not null |                                                    | plain    |             |              | 
+ idrutageo               | integer                  |           | not null |                                                    | plain    |             |              | 
+ tipo_agrupacion         | character varying(20)    |           | not null |                                                    | extended |             |              | 
+ tamaño_segmento_m       | numeric(12,3)            |           |          |                                                    | main     |             |              | 
+ numero_segmentos        | integer                  |           |          |                                                    | plain    |             |              | 
+ fecha_creacion          | timestamp with time zone |           | not null | now()                                              | plain    |             |              | 
+ tamaño_porcion_m        | numeric(12,4)            |           | not null | 0.20                                               | main     |             |              | 
+ tamaño_minimo_porcion_m | numeric(12,4)            |           | not null | 0.20                                               | main     |             |              | 
+ activo                  | boolean                  |           | not null | true                                               | plain    |             |              | 
+Indexes:
+    "rutas_segmentos_config_pkey" PRIMARY KEY, btree (id)
+    "rutas_segmentos_config_idruta_idrutageo_key" UNIQUE CONSTRAINT, btree (idruta, idrutageo)
+Check constraints:
+    "rutas_segmentos_config_check" CHECK (tipo_agrupacion::text = 'distancia'::text AND "tamaño_segmento_m" IS NOT NULL AND numero_segmentos IS NULL OR tipo_agrupacion::text = 'cantidad'::text AND numero_segmentos IS NOT NULL AND "tamaño_segmento_m" IS NULL)
+    "rutas_segmentos_config_tipo_agrupacion_check" CHECK (tipo_agrupacion::text = ANY (ARRAY['distancia'::character varying, 'cantidad'::character varying]::text[]))
+Referenced by:
+    TABLE "rutas_segmentos" CONSTRAINT "rutas_segmentos_id_config_fkey" FOREIGN KEY (id_config) REFERENCES rutas_segmentos_config(id)
+Access method: heap
+
+                                                                      Table "public.rutas_segmentos_porcion"
+       Column       |           Type            | Collation | Nullable |                       Default                       | Storage | Compression | Stats target | Description 
+--------------------+---------------------------+-----------+----------+-----------------------------------------------------+---------+-------------+--------------+-------------
+ id                 | bigint                    |           | not null | nextval('rutas_segmentos_porcion_id_seq'::regclass) | plain   |             |              | 
+ idruta             | integer                   |           | not null |                                                     | plain   |             |              | 
+ idrutageo          | integer                   |           | not null |                                                     | plain   |             |              | 
+ nro_porcion        | integer                   |           | not null |                                                     | plain   |             |              | 
+ inicio_m           | numeric(12,3)             |           | not null |                                                     | main    |             |              | 
+ fin_m              | numeric(12,3)             |           | not null |                                                     | main    |             |              | 
+ longitud_porcion_m | numeric(12,3)             |           | not null |                                                     | main    |             |              | 
+ punto_inicio       | geometry(Point,4326)      |           |          |                                                     | main    |             |              | 
+ punto_fin          | geometry(Point,4326)      |           |          |                                                     | main    |             |              | 
+ geom_porcion       | geometry(LineString,4326) |           |          |                                                     | main    |             |              | 
+Indexes:
+    "rutas_segmentos_porcion_pkey" PRIMARY KEY, btree (id)
+    "rutas_segmentos_porcion_idruta_idrutageo_nro_porcion_key" UNIQUE CONSTRAINT, btree (idruta, idrutageo, nro_porcion)
+Access method: heap
+
+                                                                    Table "public.rutas_segmentos"
+    Column     |           Type            | Collation | Nullable |                   Default                   | Storage  | Compression | Stats target | Description 
+---------------+---------------------------+-----------+----------+---------------------------------------------+----------+-------------+--------------+-------------
+ id            | bigint                    |           | not null | nextval('rutas_segmentos_id_seq'::regclass) | plain    |             |              | 
+ id_config     | bigint                    |           | not null |                                             | plain    |             |              | 
+ idruta        | integer                   |           | not null |                                             | plain    |             |              | 
+ idrutageo     | integer                   |           | not null |                                             | plain    |             |              | 
+ nro_segmento  | integer                   |           | not null |                                             | plain    |             |              | 
+ activo        | boolean                   |           | not null | true                                        | plain    |             |              | 
+ porciones_ids | text                      |           | not null |                                             | extended |             |              | 
+ longitud_m    | numeric(12,3)             |           | not null |                                             | main     |             |              | 
+ geom_segmento | geometry(LineString,4326) |           |          |                                             | main     |             |              | 
+Indexes:
+    "rutas_segmentos_pkey" PRIMARY KEY, btree (id)
+    "rutas_segmentos_id_config_nro_segmento_key" UNIQUE CONSTRAINT, btree (id_config, nro_segmento)
+Foreign-key constraints:
+    "rutas_segmentos_id_config_fkey" FOREIGN KEY (id_config) REFERENCES rutas_segmentos_config(id)
+Referenced by:
+    TABLE "timbradas_segmentos_anio" CONSTRAINT "fk_tsa_id_segmento" FOREIGN KEY (id_segmento) REFERENCES rutas_segmentos(id)
+    TABLE "timbradas_segmentos_consolidado" CONSTRAINT "fk_tsc_id_segmento" FOREIGN KEY (id_segmento) REFERENCES rutas_segmentos(id)
+    TABLE "timbradas_segmentos" CONSTRAINT "timbradas_segmentos_id_segmento_fkey" FOREIGN KEY (id_segmento) REFERENCES rutas_segmentos(id)
+Access method: heap
+
+                                                                                 Table "public.timbradas_segmentos"
+        Column        |            Type             | Collation | Nullable |                              Default                              | Storage | Compression | Stats target | Description 
+----------------------+-----------------------------+-----------+----------+-------------------------------------------------------------------+---------+-------------+--------------+-------------
+ id_timbrada_segmento | bigint                      |           | not null | nextval('timbradas_segmentos_id_timbrada_segmento_seq'::regclass) | plain   |             |              | 
+ id_segmento          | bigint                      |           | not null |                                                                   | plain   |             |              | 
+ id_viaje             | bigint                      |           | not null |                                                                   | plain   |             |              | 
+ fecha                | date                        |           | not null |                                                                   | plain   |             |              | 
+ hora_inicio          | time without time zone      |           | not null |                                                                   | plain   |             |              | 
+ hora_fin             | time without time zone      |           | not null |                                                                   | plain   |             |              | 
+ subidas              | integer                     |           | not null | 0                                                                 | plain   |             |              | 
+ bajadas              | integer                     |           | not null | 0                                                                 | plain   |             |              | 
+ pasajeros            | integer                     |           | not null | 0                                                                 | plain   |             |              | 
+ ultimaactualizacion  | timestamp without time zone |           |          |                                                                   | plain   |             |              | 
+Indexes:
+    "timbradas_segmentos_pkey" PRIMARY KEY, btree (id_timbrada_segmento)
+    "timbradas_segmentos_id_segmento_id_viaje_hora_inicio_key" UNIQUE CONSTRAINT, btree (id_segmento, id_viaje, hora_inicio)
+Foreign-key constraints:
+    "timbradas_segmentos_id_segmento_fkey" FOREIGN KEY (id_segmento) REFERENCES rutas_segmentos(id)
+    "timbradas_segmentos_id_viaje_fkey" FOREIGN KEY (id_viaje) REFERENCES progvehiculos(idprogramacion)
+Access method: heap
+
+                                                                                      Table "public.timbradas_segmentos_anio"
+          Column           |            Type             | Collation | Nullable |                                   Default                                   | Storage  | Compression | Stats target | Description 
+---------------------------+-----------------------------+-----------+----------+-----------------------------------------------------------------------------+----------+-------------+--------------+-------------
+ id_timbrada_segmento_anio | bigint                      |           | not null | nextval('timbradas_segmentos_anio_id_timbrada_segmento_anio_seq'::regclass) | plain    |             |              | 
+ id_segmento               | bigint                      |           | not null |                                                                             | plain    |             |              | 
+ proceso                   | character varying(50)       |           | not null |                                                                             | extended |             |              | 
+ ano                       | integer                     |           | not null |                                                                             | plain    |             |              | 
+ id_ruta                   | bigint                      |           | not null |                                                                             | plain    |             |              | 
+ id_dia_semana             | integer                     |           | not null |                                                                             | plain    |             |              | 
+ id_estacionalidad_anio    | bigint                      |           | not null |                                                                             | plain    |             |              | 
+ hora                      | time without time zone      |           | not null |                                                                             | plain    |             |              | 
+ hora_inicio               | time without time zone      |           | not null |                                                                             | plain    |             |              | 
+ hora_fin                  | time without time zone      |           | not null |                                                                             | plain    |             |              | 
+ subidas                   | integer                     |           | not null |                                                                             | plain    |             |              | 
+ bajadas                   | integer                     |           | not null |                                                                             | plain    |             |              | 
+ pasajeros                 | integer                     |           | not null |                                                                             | plain    |             |              | 
+ nro_viajes                | integer                     |           | not null |                                                                             | plain    |             |              | 
+ promedio_subidas          | numeric(10,2)               |           |          |                                                                             | main     |             |              | 
+ promedio_bajadas          | numeric(10,2)               |           |          |                                                                             | main     |             |              | 
+ promedio_pasajeros        | numeric(10,2)               |           |          |                                                                             | main     |             |              | 
+ ultima_actualizacion      | timestamp without time zone |           |          |                                                                             | plain    |             |              | 
+Indexes:
+    "pk_timbradas_segmentos_anio" PRIMARY KEY, btree (id_timbrada_segmento_anio)
+    "uq_timbradas_segmentos_anio_bloque" UNIQUE CONSTRAINT, btree (id_segmento, proceso, ano, id_ruta, id_dia_semana, id_estacionalidad_anio, hora, hora_inicio, hora_fin)
+Foreign-key constraints:
+    "fk_tsa_id_dia_semana" FOREIGN KEY (id_dia_semana) REFERENCES dias_semana(id_dia_semana)
+    "fk_tsa_id_estacionalidad_anio" FOREIGN KEY (id_estacionalidad_anio) REFERENCES estacionalidades_anio(id_estacionalidad_anio)
+    "fk_tsa_id_segmento" FOREIGN KEY (id_segmento) REFERENCES rutas_segmentos(id)
+Referenced by:
+    TABLE "timbradas_segmentos_anio_trazabilidad" CONSTRAINT "timbradas_segmentos_anio_trazabi_id_timbrada_segmento_anio_fkey" FOREIGN KEY (id_timbrada_segmento_anio) REFERENCES timbradas_segmentos_anio(id_timbrada_segmento_anio)
+Access method: heap
+
+                                                                       Table "public.timbradas_segmentos_anio_trazabilidad"
+          Column           |  Type   | Collation | Nullable |                                    Default                                     | Storage | Compression | Stats target | Description 
+---------------------------+---------+-----------+----------+--------------------------------------------------------------------------------+---------+-------------+--------------+-------------
+ id_trazabilidad           | bigint  |           | not null | nextval('timbradas_segmentos_anio_trazabilidad_id_trazabilidad_seq'::regclass) | plain   |             |              | 
+ id_timbrada_segmento_anio | bigint  |           | not null |                                                                                | plain   |             |              | 
+ idprogramacion            | bigint  |           | not null |                                                                                | plain   |             |              | 
+ subidas                   | integer |           | not null | 0                                                                              | plain   |             |              | 
+ bajadas                   | integer |           | not null | 0                                                                              | plain   |             |              | 
+ pasajeros                 | integer |           | not null | 0                                                                              | plain   |             |              | 
+ vigente                   | boolean |           | not null | true                                                                           | plain   |             |              | 
+Indexes:
+    "timbradas_segmentos_anio_trazabilidad_pkey" PRIMARY KEY, btree (id_trazabilidad)
+Foreign-key constraints:
+    "timbradas_segmentos_anio_trazabi_id_timbrada_segmento_anio_fkey" FOREIGN KEY (id_timbrada_segmento_anio) REFERENCES timbradas_segmentos_anio(id_timbrada_segmento_anio)
+Access method: heap
+
+                                                                                           Table "public.timbradas_segmentos_consolidado"
+              Column               |            Type             | Collation | Nullable |                                       Default                                        | Storage  | Compression | Stats target | Description 
+-----------------------------------+-----------------------------+-----------+----------+--------------------------------------------------------------------------------------+----------+-------------+--------------+-------------
+ id_timbrada_segmentos_consolidado | bigint                      |           | not null | nextval('timbradas_segmentos_consolida_id_timbrada_segmentos_consoli_seq'::regclass) | plain    |             |              | 
+ id_segmento                       | bigint                      |           | not null |                                                                                      | plain    |             |              | 
+ proceso                           | character varying(50)       |           | not null |                                                                                      | extended |             |              | 
+ id_ruta                           | bigint                      |           | not null |                                                                                      | plain    |             |              | 
+ id_dia_semana                     | integer                     |           | not null |                                                                                      | plain    |             |              | 
+ id_estacionalidad                 | bigint                      |           | not null |                                                                                      | plain    |             |              | 
+ hora                              | time without time zone      |           | not null |                                                                                      | plain    |             |              | 
+ hora_inicio                       | time without time zone      |           | not null |                                                                                      | plain    |             |              | 
+ hora_fin                          | time without time zone      |           | not null |                                                                                      | plain    |             |              | 
+ subidas                           | integer                     |           | not null |                                                                                      | plain    |             |              | 
+ bajadas                           | integer                     |           | not null |                                                                                      | plain    |             |              | 
+ pasajeros                         | integer                     |           | not null |                                                                                      | plain    |             |              | 
+ nro_viajes                        | integer                     |           | not null |                                                                                      | plain    |             |              | 
+ promedio_subidas                  | numeric(10,2)               |           |          |                                                                                      | main     |             |              | 
+ promedio_bajadas                  | numeric(10,2)               |           |          |                                                                                      | main     |             |              | 
+ promedio_pasajeros                | numeric(10,2)               |           |          |                                                                                      | main     |             |              | 
+ ultima_actualizacion              | timestamp without time zone |           |          |                                                                                      | plain    |             |              | 
+Indexes:
+    "pk_timbradas_segmentos_consolidado" PRIMARY KEY, btree (id_timbrada_segmentos_consolidado)
+    "uk_timbradas_segmentos_consolidado_key" UNIQUE CONSTRAINT, btree (id_segmento, proceso, id_dia_semana, id_estacionalidad, hora, hora_inicio, hora_fin)
+Foreign-key constraints:
+    "fk_tsc_id_dia_semana" FOREIGN KEY (id_dia_semana) REFERENCES dias_semana(id_dia_semana)
+    "fk_tsc_id_estacionalidad" FOREIGN KEY (id_estacionalidad) REFERENCES estacionalidades(id_estacionalidad)
+    "fk_tsc_id_segmento" FOREIGN KEY (id_segmento) REFERENCES rutas_segmentos(id)
+Access method: heap
+
+                                                                           Table "public.conteo_pasajeros"
+          Column           |            Type             | Collation | Nullable |                   Default                    | Storage  | Compression | Stats target | Description 
+---------------------------+-----------------------------+-----------+----------+----------------------------------------------+----------+-------------+--------------+-------------
+ id                        | bigint                      |           | not null | nextval('conteo_pasajeros_id_seq'::regclass) | plain    |             |              | 
+ fecha                     | timestamp without time zone |           |          |                                              | plain    |             |              | 
+ idvehiculo                | text                        |           |          |                                              | extended |             |              | 
+ acumulada_subida          | bigint                      |           |          |                                              | plain    |             |              | 
+ cantidad_subida           | bigint                      |           |          |                                              | plain    |             |              | 
+ acumulada_bajada          | bigint                      |           |          |                                              | plain    |             |              | 
+ cantidad_bajada           | bigint                      |           |          |                                              | plain    |             |              | 
+ acumulada_bloqueo         | bigint                      |           |          |                                              | plain    |             |              | 
+ cantidad_bloqueo          | bigint                      |           |          |                                              | plain    |             |              | 
+ latitud                   | double precision            |           |          |                                              | plain    |             |              | 
+ longitud                  | double precision            |           |          |                                              | plain    |             |              | 
+ idprogramacion            | bigint                      |           |          |                                              | plain    |             |              | 
+ idpunto                   | double precision            |           |          |                                              | plain    |             |              | 
+ acumulada_bajada_puerta1  | bigint                      |           |          |                                              | plain    |             |              | 
+ acumulada_bloqueo_puerta1 | bigint                      |           |          |                                              | plain    |             |              | 
+ cantidad_subida_puerta1   | bigint                      |           |          |                                              | plain    |             |              | 
+ cantidad_bajada_puerta1   | bigint                      |           |          |                                              | plain    |             |              | 
+ cantidad_bloqueo_puerta1  | bigint                      |           |          |                                              | plain    |             |              | 
+ acumulada_subida_puerta2  | bigint                      |           |          |                                              | plain    |             |              | 
+ acumulada_bajada_puerta2  | bigint                      |           |          |                                              | plain    |             |              | 
+ acumulada_bloqueo_puerta2 | bigint                      |           |          |                                              | plain    |             |              | 
+ cantidad_subida_puerta2   | bigint                      |           |          |                                              | plain    |             |              | 
+ cantidad_bajada_puerta2   | bigint                      |           |          |                                              | plain    |             |              | 
+ cantidad_bloqueo_puerta2  | bigint                      |           |          |                                              | plain    |             |              | 
+ acumulada_subida_puerta1  | bigint                      |           |          |                                              | plain    |             |              | 
+Indexes:
+    "conteo_pasajeros_pkey" PRIMARY KEY, btree (id)
+    "ix_conteo_pasajeros_idprogramacion" btree (idprogramacion)
+Triggers:
+    tg_timbrada_segmento AFTER INSERT OR UPDATE ON conteo_pasajeros FOR EACH ROW EXECUTE FUNCTION fn_tg_timbrada_segmento()
+Access method: heap
+

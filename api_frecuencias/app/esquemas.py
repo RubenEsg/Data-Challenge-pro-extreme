@@ -4,15 +4,83 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 from typing import Any, Generic, Literal, TypeVar
+from zoneinfo import ZoneInfo
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_serializer
 
 T = TypeVar("T")
 Horizonte = Literal[30, 60, 120]
+# los campos de auditoría del cuerpo son opcionales: con autenticación manda el principal (RNF-011)
+AUDITORIA_OPCIONAL = "Opcional: con autenticación la auditoría registra SIEMPRE al usuario de la clave (RNF-011)"
+# §8.3: dimensiones que guardan las tablas de resultados (app/servicios/dimensiones.py)
+DESC_IDRUTA = "§8.3 rutas.idruta de Extreme"
+DESC_IDEMPRESA = "§8.3 rutas.idempresa (nulo si Extreme no lo trae)"
+DESC_IDPROCESO = "§8.3 llave de Procesos (rutas.proceso, texto en Extreme)"
+DESC_DIA_SEMANA = "§8.3 día ISO 1 = lunes … 7 = domingo de la fecha local"
+DESC_ESTACIONALIDAD = "§8.3 estacionalidades_anio vigente para el proceso (nula si no hay)"
 
 
 class Salida(BaseModel):
     model_config = ConfigDict(from_attributes=True, protected_namespaces=())
+
+    @model_serializer(mode="wrap")
+    def _instantes_en_bogota(self, siguiente):
+        """§8.1: todo instante de la respuesta (columnas y JSONB anidados: comentarios, variables, métricas,
+        detalle) sale en America/Bogota (-05:00), aunque se haya guardado o calculado en UTC."""
+        return bogota_profundo(siguiente(self))
+
+
+ZONA_PRESENTACION = ZoneInfo("America/Bogota")
+# claves JSONB que guardan horas locales de Bogotá; en filas antiguas venían sin zona («2025-10-15 14:00»)
+CLAVES_HORA_LOCAL = frozenset({"horas_faltantes"})
+
+
+def bogota_profundo(valor: Any, local: bool = False) -> Any:
+    """Recorre dict/list y presenta cada instante (datetime o texto ISO con zona) en America/Bogota. Con local=True,
+    un instante sin zona se interpreta como hora de Bogotá. Fechas, horas y prosa quedan iguales."""
+    if isinstance(valor, dict):
+        return {k: bogota_profundo(v, local or k in CLAVES_HORA_LOCAL) for k, v in valor.items()}
+    if isinstance(valor, list):
+        return [bogota_profundo(v, local) for v in valor]
+    if isinstance(valor, datetime):
+        return _datetime_bogota(valor, local)
+    if not _parece_instante(valor):
+        return valor
+    return _texto_local_bogota(valor) if local else _instante_bogota(valor)
+
+
+def _parece_instante(valor: Any) -> bool:
+    """Solo un texto con forma «AAAA-MM-DDTHH:MM…» puede ser un instante: el resto se devuelve sin intentar leerlo."""
+    return isinstance(valor, str) and len(valor) >= 16 and valor[4] == "-" and valor[10] in "T "
+
+
+def _datetime_bogota(valor: datetime, local: bool) -> datetime:
+    """datetime con zona -> el mismo instante en Bogotá; sin zona, se interpreta como hora de Bogotá si local=True."""
+    if valor.tzinfo is None:
+        return valor.replace(tzinfo=ZONA_PRESENTACION) if local else valor
+    return valor.astimezone(ZONA_PRESENTACION)
+
+
+def _texto_local_bogota(valor: str) -> str:
+    """Texto ISO de una clave de hora local: sin zona es hora de Bogotá; con zona se lleva a Bogotá."""
+    try:
+        instante = datetime.fromisoformat(valor)
+    except ValueError:
+        return valor
+    if instante.tzinfo is None:
+        return instante.replace(tzinfo=ZONA_PRESENTACION).isoformat()
+    return instante.astimezone(ZONA_PRESENTACION).isoformat()
+
+
+def _instante_bogota(valor: Any) -> Any:
+    """Texto ISO con zona -> el mismo instante en America/Bogota; cualquier otro valor queda igual."""
+    if not isinstance(valor, str):
+        return valor
+    try:
+        instante = datetime.fromisoformat(valor)
+    except ValueError:
+        return valor
+    return instante.astimezone(ZONA_PRESENTACION).isoformat() if instante.tzinfo else valor
 
 
 class ErrorDetalle(BaseModel):
@@ -42,6 +110,9 @@ class SolicitudEjecucion(BaseModel):
     horizontes: list[Horizonte] = Field(default_factory=lambda: [30, 60, 120])
     model_id: str | None = Field(None, description="Modelo a usar; por defecto el activo del registro")
     notificar: bool = True
+    plan_dia: bool = Field(True, description="Al cerrar con datos nuevos, calcular y guardar el plan del día siguiente "
+                                             "por ruta y hora (recommendation.origen = plan_dia) y la foto de la "
+                                             "respuesta del reto")
 
 
 class EjecucionSalida(Salida):
@@ -79,13 +150,20 @@ class ErrorCalidadSalida(Salida):
     dimension: str
     detalle: str | None = None
     creado_en: datetime
+    # migración 0006: el registro exacto (columnas llave), el valor observado y si bloquea la fila (§6.3, §14.2)
+    llave: dict | None = Field(None, description="Columnas llave del registro con error (ruta, fecha, hora o la llave "
+                                                 "de 7 columnas del consolidado)")
+    valor: str | None = Field(None, description="Valor observado que incumple la regla")
+    bloqueante: bool | None = Field(None, description="true: el registro no entra al histórico; false: advertencia")
 
 
 class EjecucionDetalle(EjecucionSalida):
     errores_por_dimension: dict[str, int] = Field(default_factory=dict)
     errores_muestra: list[ErrorCalidadSalida] = Field(default_factory=list)
     predicciones: int = 0
-    recomendaciones: int = 0
+    recomendaciones: int = Field(0, description="Recomendaciones de franja (§10.2), una por predicción")
+    recomendaciones_plan_dia: int = Field(0, description="Horas del plan del día siguiente guardadas por el ciclo "
+                                                         "(recommendation con origen = plan_dia)")
     alertas: int = 0
 
 
@@ -121,6 +199,14 @@ class RecomendacionSalida(Salida):
     umbrales_version: int | None = None
     detalle: dict = Field(default_factory=dict)
     creado_en: datetime
+    # migración 0006: origen de la fila y dimensiones de §8.3
+    origen: str = Field("franja", description="franja (§10.2, ligada a su predicción) o plan_dia (plan del día "
+                                              "siguiente que guarda el ciclo, sin predicción)")
+    idruta: int | None = Field(None, description=DESC_IDRUTA)
+    idempresa: int | None = Field(None, description=DESC_IDEMPRESA)
+    idproceso: str | None = Field(None, description=DESC_IDPROCESO)
+    id_dia_semana: int | None = Field(None, description=DESC_DIA_SEMANA)
+    id_estacionalidad: int | None = Field(None, description=DESC_ESTACIONALIDAD)
 
 
 class PrediccionSalida(Salida):
@@ -143,10 +229,61 @@ class PrediccionSalida(Salida):
     explicacion: list = Field(default_factory=list)
     variables: dict = Field(default_factory=dict)
     creado_en: datetime
+    # migración 0004: banda del modelo sin calibrar, ajuste conformal (q) y explicación local SHAP
+    p10_modelo: float | None = None
+    p90_modelo: float | None = None
+    ajuste_conformal: float | None = None
+    explicacion_local: dict | None = None
+    # migración 0006: dimensiones de §8.3
+    idruta: int | None = Field(None, description=DESC_IDRUTA)
+    idempresa: int | None = Field(None, description=DESC_IDEMPRESA)
+    idproceso: str | None = Field(None, description=DESC_IDPROCESO)
+    id_dia_semana: int | None = Field(None, description=DESC_DIA_SEMANA)
+    id_estacionalidad: int | None = Field(None, description=DESC_ESTACIONALIDAD)
+
+
+class IntervaloConfianza(BaseModel):
+    """§12.3 confidenceInterval: banda P10-P90 calibrada (lower redondeado hacia abajo, upper hacia arriba)."""
+    lower: int | None = None
+    upper: int | None = None
+
+
+class RecomendacionResumen(BaseModel):
+    """§12.3 recommendation: la recomendación de §10.2 de la franja. Si no es viable, viable=false con el motivo y las
+    cifras en None: la mejor aproximación ejecutable no se presenta como recomendación (va en mejor_aproximacion)."""
+    headwayMinutes: float | None = None
+    busesPerHour: int | None = None
+    vehiclesRequired: int | None = None
+    viable: bool | None = None
+    reason: str | None = Field(None, description="Motivo de la no viabilidad (§10.3, §18)")
 
 
 class PrediccionRespuesta(PrediccionSalida):
     recomendacion: RecomendacionSalida | None = None
+    # §12.3 «Ejemplo de respuesta de predicción»: las mismas claves del ejemplo, además de los campos anteriores
+    predictionId: uuid.UUID | None = None
+    routeId: str | None = None
+    generatedAt: str | None = Field(None, description="ISO-8601 con la zona de Bogotá (-05:00)")
+    horizonMinutes: int | None = None
+    predictedPassengers: int | None = None
+    confidenceInterval: IntervaloConfianza | None = None
+    modelVersion: str | None = None
+    recommendation: RecomendacionResumen | None = None
+    explanation: list[str] = Field(default_factory=list, description="Variables principales del pronóstico")
+
+
+class EscenarioRecomendacion(BaseModel):
+    """RF-008 «qué pasa si»: el mismo cálculo con la demanda, los pesos u otras restricciones cambiadas."""
+    factor_demanda: float | None = Field(None, gt=0, le=5, description="Multiplica la demanda puntual y su banda")
+    pesos: dict[str, float] | None = Field(None, description="alfa, beta, gamma, delta (o sus nombres en "
+                                                             "threshold_config) con el valor nuevo")
+    nivel_servicio: float | None = Field(None, ge=0.5, lt=1)
+    ocupacion_objetivo: float | None = Field(None, gt=0, le=1)
+    flota_disponible: int | None = Field(None, ge=0)
+    capacidad: int | None = Field(None, gt=0)
+    tiempo_ciclo_min: float | None = Field(None, gt=0)
+    headway_min: float | None = Field(None, gt=0)
+    headway_max: float | None = Field(None, gt=0)
 
 
 class SolicitudRecomendacion(BaseModel):
@@ -163,6 +300,129 @@ class SolicitudRecomendacion(BaseModel):
     headway_max: float | None = Field(None, gt=0)
     frecuencia_actual_min: float | None = Field(None, gt=0)
     prediction_id: uuid.UUID | None = None
+    # §10.2 (función objetivo), §10.1 (tipologías), RF-008 (escenarios) y §10.3 (sensibilidad); todos opcionales
+    demanda_p10: float | None = Field(None, ge=0)
+    nivel_servicio: float | None = Field(None, ge=0.5, lt=1, description="Por omisión, el de threshold_config "
+                                                                         "(0,90 = P90 calibrado)")
+    ocupacion_critica: float | None = Field(None, gt=0, le=1.5)
+    pesos: dict[str, float] | None = Field(None, description="α, β, γ, δ para esta solicitud (alfa, beta, gamma, "
+                                                             "delta); por omisión los vigentes de threshold_config")
+    tipologias: bool = Field(True, description="§10.1: asignar la capacidad por tipología con la flota de la ruta")
+    escenario: EscenarioRecomendacion | None = None
+    sensibilidad: bool = Field(False, description="Incluir el análisis de sensibilidad (unas 25 resoluciones)")
+
+
+class RecomendacionCalculada(RecomendacionSalida):
+    """Respuesta de POST /recommendations/calculate: la recomendación guardada y su explicación completa."""
+    metodo: str | None = None
+    objetivo: dict | None = None
+    demanda: dict | None = None
+    solver: dict | None = None
+    restricciones: list[dict] = Field(default_factory=list)
+    limites_activos: list[str] = Field(default_factory=list)
+    tipologias: dict | None = None
+    margen: dict | None = None
+    linea_base_10_3: dict | None = Field(None, description="§10.3 ajustada: carga crítica (factor de carga × P90)")
+    linea_base_10_3_literal: dict | None = Field(None, description="§10.3 literal: factor 1 y demanda puntual")
+    sobreoferta: bool | None = Field(None, description="Ocupación esperada menor que ocupacion_objetivo_min (§5.1)")
+    motivo_sobreoferta: str | None = None
+    mejor_aproximacion: dict | None = None
+    comparacion_actual: dict | None = None
+    escenario: dict | None = None
+    sensibilidad: dict | None = None
+    contexto_franja: dict | None = None
+    capacidad_gobernada: dict | None = None
+    explicacion: list[str] = Field(default_factory=list)
+
+
+class PlanHora(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+    hora: int
+    salidas: int
+    despachos: list[str] = Field(default_factory=list)
+    headway_min: float | None = None
+    programar: int | None = None
+    pasajeros_previstos: float | None = None
+    minutos_operados: float | None = None
+    tiempo_ciclo_min: float | None = None
+    vehiculos_requeridos: int | None = None
+    frecuencia_actual_min: float | None = None
+    salidas_programadas: float | None = None
+    diferencia_salidas: float | None = None
+    estado_solver: str | None = None
+    tipo_dia: str | None = None
+    modelo: str | None = None
+    # pronóstico del modelo activo y gobierno de la hora (§10.1-§10.3, §5.1)
+    pasajeros_p10: float | None = None
+    pasajeros_p90: float | None = None
+    fuente_pronostico: str | None = Field(None, description="modelo_activo o E12 (opción de laboratorio)")
+    model_id: str | None = None
+    calibracion_version: str | None = None
+    headway_minimo_min: float | None = None
+    headway_maximo_min: float | None = Field(None, description="Headway máximo efectivo: min(headway_maximo_min, "
+                                                               "2 × espera_max_min)")
+    minimo_salidas_headway: int | None = None
+    maximo_salidas_headway: int | None = None
+    salidas_sin_tope: int | None = None
+    limitada_por_headway_minimo: bool | None = None
+    factor_carga: float | None = None
+    demanda_diseno: float | None = Field(None, description="Carga crítica de diseño (pasajeros/h en el punto de "
+                                                           "carga máxima al nivel de servicio)")
+    capacidad_efectiva: float | None = None
+    ocupacion_esperada: float | None = None
+    buses_en_ruta_max: float | None = None
+    limites_activos: list[str] = Field(default_factory=list)
+    margen: dict | None = None
+    sin_intervalo: bool | None = Field(None, description="Una sola salida en la hora: no hay intervalo entre salidas "
+                                                         "que verificar, así que el headway mínimo no aplica")
+    flota_disponible: float | None = Field(None, description="Flota disponible del día (la misma en todas las horas)")
+    costo_hora_cop: float | None = Field(None, description="Costo de D5 de la hora sin ponderar (COP)")
+    componentes_costo_cop: dict[str, float] | None = Field(None, description="Operación, espera, sobrecarga e "
+                                                                             "ingreso perdido de la hora (COP)")
+    viable: bool | None = None
+    motivo: str | None = None
+    sobreoferta: bool | None = Field(None, description="Ocupación esperada menor que ocupacion_objetivo_min (§5.1)")
+    motivo_sobreoferta: str | None = None
+
+
+class PlanDia(BaseModel):
+    """GET /recommendations/plan: plan del día por hora (MILP de D5, pronóstico del modelo activo) y su resumen."""
+    model_config = ConfigDict(protected_namespaces=())
+    ruta: str
+    fecha: date
+    modelo: str
+    tipo_dia: str | None = None
+    estado_solver: str | None = None
+    flota_disponible: float | None = None
+    holgura_flota: float | None = None
+    salidas_dia: int
+    salidas_programadas_dia: float | None = None
+    vehiculos_hora_pico: int | None = Field(None, description="Máximo por hora de ceil(ciclo / headway) de §10.3, con "
+                                                              "headway = 60 / salidas por hora")
+    buses_en_ruta_pico: float | None = Field(None, description="Máximo de buses en ruta a la vez con el plan (conteo "
+                                                               "de D5 cada 15 min, el que limita la flota del MILP)")
+    definicion_vehiculos: str | None = Field(None, description="Qué mide vehiculos_hora_pico y qué mide "
+                                                               "buses_en_ruta_pico")
+    componentes_costo_cop: dict[str, float] = Field(default_factory=dict)
+    costo_total_cop: float | None = None
+    fuente_costos: str | None = None
+    formulacion: str | None = None
+    fuente_pronostico: str | None = None
+    model_id: str | None = None
+    calibracion_version: str | None = None
+    umbrales_version: int | None = None
+    headway_minimo_min: float | None = None
+    headway_maximo_min: float | None = None
+    horas_limitadas_por_headway_minimo: list[int] = Field(default_factory=list)
+    horas_no_viables: list[int] = Field(default_factory=list)
+    horas_sobreoferta: list[int] = Field(default_factory=list)
+    viable: bool | None = None
+    parametros: dict | None = Field(None, description="Parámetros del MILP con la fuente de cada uno")
+    insumos_operativos: str | None = None
+    execution_id: str | None = None
+    calculado_en: datetime | None = None
+    origen: str | None = None
+    horas: list[PlanHora]
 
 
 # ---------------------------------------------------------------- alertas
@@ -196,11 +456,26 @@ class AlertaSalida(Salida):
     ultima_deteccion: datetime | None = None
     creado_en: datetime
     actualizado_en: datetime
+    # migración 0003: §5.3 completa, §9.4 (nunca opaca: tendencia y método del puntaje) y §8.1 (ubicación)
+    origen: str | None = Field(None, description="pronostico, observado, calidad_datos o modelo")
+    tendencia: str | None = Field(None, description="al_alza, a_la_baja, estable o sin_datos (§9.4)")
+    tendencia_pendiente: float | None = Field(None, description="Cambio relativo por hora de la serie analizada")
+    serie_reciente: list = Field(default_factory=list, description="Valores real/esperado de las horas analizadas")
+    probabilidad: float | None = Field(None, description="Probabilidad del evento (0..1), cuando aplica (§5.3)")
+    metodo_puntaje: str | None = Field(None, description="Cómo se calcularon el puntaje y la probabilidad")
+    variables_influyentes: list = Field(default_factory=list, description="[{variable, valor, efecto}] (§5.3)")
+    ubicacion: dict | None = Field(None, description="GeoJSON Point (lon, lat) del lugar de la alerta (§8.1)")
+    # migración 0006: dimensiones de §8.3 (día y estacionalidad de la ventana analizada)
+    idruta: int | None = Field(None, description=DESC_IDRUTA)
+    idempresa: int | None = Field(None, description=DESC_IDEMPRESA)
+    idproceso: str | None = Field(None, description=DESC_IDPROCESO)
+    id_dia_semana: int | None = Field(None, description=DESC_DIA_SEMANA)
+    id_estacionalidad: int | None = Field(None, description=DESC_ESTACIONALIDAD)
 
 
 class SolicitudEstadoAlerta(BaseModel):
     accion: Literal["reconocer", "asignar", "comentar", "cerrar", "descartar"]
-    usuario: str = Field(..., min_length=1)
+    usuario: str | None = Field(None, min_length=1, description=AUDITORIA_OPCIONAL)
     comentario: str | None = None
     asignado_a: str | None = None
 
@@ -236,16 +511,23 @@ class ModeloSalida(Salida):
     auditoria: list = Field(default_factory=list)
     creado_en: datetime
 
+    @field_validator("auditoria", mode="after")
+    @classmethod
+    def _auditoria_en_bogota(cls, entradas: list) -> list:
+        """§8.1: la auditoría guarda instantes en UTC; la API los presenta en America/Bogota (-05:00)."""
+        return [{**e, "en": _instante_bogota(e["en"])} if isinstance(e, dict) and "en" in e else e
+                for e in entradas]
+
 
 class SolicitudActivacion(BaseModel):
-    aprobado_por: str = Field(..., min_length=1)
+    aprobado_por: str | None = Field(None, min_length=1, description=AUDITORIA_OPCIONAL)
     validacion_desde: date | None = None
     validacion_hasta: date | None = None
     motivo: str | None = None
 
 
 class SolicitudReversion(BaseModel):
-    usuario: str = Field(..., min_length=1)
+    usuario: str | None = Field(None, min_length=1, description=AUDITORIA_OPCIONAL)
     motivo: str | None = None
 
 
@@ -253,6 +535,9 @@ class SolicitudEntrenamiento(BaseModel):
     hasta: date
     semilla: int = 42
     solicitado_por: str | None = None
+    # con datos_hasta la serie se trunca ahí (solo datos ya validados) y el candidato pasa a sombra (§9.5)
+    datos_hasta: date | None = Field(None, description="Último día de datos validados que se usan (validación = "
+                                                       "hasta+1 .. datos_hasta); el candidato queda en sombra")
 
 
 # ---------------------------------------------------------------- umbrales
@@ -265,15 +550,28 @@ class UmbralSalida(Salida):
     creado_por: str
     motivo: str | None = None
     creado_en: datetime
+    # migración 0006: validación del área operativa (§5.1); nulo = versión propuesta, sin aprobar
+    aprobado_por: str | None = None
+    aprobado_en: datetime | None = None
 
 
-class UmbralesVigentes(BaseModel):
+class UmbralesVigentes(Salida):
     version: int
     valores: dict[str, Any]
     detalle: list[UmbralSalida]
+    estado: Literal["propuesta", "aprobada"] = Field(
+        "propuesta", description="§5.1: los valores son referencias iniciales hasta que el área operativa aprueba la "
+                                 "versión con POST /thresholds/{version}/aprobar (rol admin)")
+    aprobado_por: str | None = None
+    aprobado_en: datetime | None = None
+
+
+class SolicitudAprobacionUmbrales(BaseModel):
+    aprobado_por: str | None = Field(None, min_length=1, description=AUDITORIA_OPCIONAL)
+    comentario: str | None = Field(None, description="Constancia de la validación (acta, fecha de la reunión, etc.)")
 
 
 class SolicitudUmbrales(BaseModel):
     valores: dict[str, Any] = Field(..., min_length=1)
-    creado_por: str = Field(..., min_length=1)
+    creado_por: str | None = Field(None, min_length=1, description=AUDITORIA_OPCIONAL)
     motivo: str | None = None

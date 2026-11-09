@@ -1,0 +1,306 @@
+{
+  "model_id": "hgb_fv2_20250831_s42",
+  "ventana_dias": 28,
+  "generado_en": "2026-11-09T06:24:09-05:00",
+  "script": "scripts/evidencias_monitoreo.py",
+  "calibracion_version": "v2",
+  "origen_datos": "serie empaquetada (datos/demanda_horaria.parquet), sin base de datos",
+  "cobertura_p10_p90_rango": [
+    0.7668,
+    0.8277
+  ],
+  "nota": "monitoreo semanal posterior al corte del modelo (2025-08-31); de noviembre en adelante cae en la prueba reservada, que aquí solo se reporta (no decide nada)",
+  "filas": [
+    {
+      "hasta": "2025-09-28",
+      "wape_movil": 0.12589,
+      "mae_movil": 92.14,
+      "sesgo_pct": 0.005520000000000001,
+      "cobertura_p10_p90": 0.8137000000000001,
+      "calibracion_version": "v2",
+      "psi_max": 0.0347,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 0.5658,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.1727,
+        "CRA 54": 0.10162,
+        "SILENCIO": 0.14426
+      },
+      "estado": "ok",
+      "motivos": []
+    },
+    {
+      "hasta": "2025-10-05",
+      "wape_movil": 0.12683,
+      "mae_movil": 92.671,
+      "sesgo_pct": 0.0079,
+      "cobertura_p10_p90": 0.8277,
+      "calibracion_version": "v2",
+      "psi_max": 0.0422,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 1.134,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.17414000000000002,
+        "CRA 54": 0.10273,
+        "SILENCIO": 0.14488
+      },
+      "estado": "ok",
+      "motivos": []
+    },
+    {
+      "hasta": "2025-10-12",
+      "wape_movil": 0.14,
+      "mae_movil": 98.946,
+      "sesgo_pct": 0.04272,
+      "cobertura_p10_p90": 0.8081,
+      "calibracion_version": "v2",
+      "psi_max": 0.0643,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 1.0227,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.18844000000000002,
+        "CRA 54": 0.11417,
+        "SILENCIO": 0.161
+      },
+      "estado": "ok",
+      "motivos": []
+    },
+    {
+      "hasta": "2025-10-19",
+      "wape_movil": 0.14127,
+      "mae_movil": 97.469,
+      "sesgo_pct": 0.03659,
+      "cobertura_p10_p90": 0.8039000000000001,
+      "calibracion_version": "v2",
+      "psi_max": 0.0813,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 0.8152,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.18832000000000002,
+        "CRA 54": 0.1165,
+        "SILENCIO": 0.16042
+      },
+      "estado": "ok",
+      "motivos": []
+    },
+    {
+      "hasta": "2025-10-26",
+      "wape_movil": 0.14547000000000002,
+      "mae_movil": 100.498,
+      "sesgo_pct": 0.02061,
+      "cobertura_p10_p90": 0.7934,
+      "calibracion_version": "v2",
+      "psi_max": 0.1093,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 0.7835,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.19415,
+        "CRA 54": 0.12325,
+        "SILENCIO": 0.1583
+      },
+      "estado": "aviso",
+      "motivos": [
+        "deriva leve en sd8: PSI 0.109 > 0.100"
+      ]
+    },
+    {
+      "hasta": "2025-11-02",
+      "wape_movil": 0.14954,
+      "mae_movil": 102.955,
+      "sesgo_pct": 0.020790000000000003,
+      "cobertura_p10_p90": 0.7752,
+      "calibracion_version": "v2",
+      "psi_max": 0.1382,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 0.7811,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.20398,
+        "CRA 54": 0.12725,
+        "SILENCIO": 0.15945
+      },
+      "estado": "aviso",
+      "motivos": [
+        "deriva leve en sd8: PSI 0.138 > 0.100"
+      ]
+    },
+    {
+      "hasta": "2025-11-09",
+      "wape_movil": 0.13252,
+      "mae_movil": 92.604,
+      "sesgo_pct": -0.0168,
+      "cobertura_p10_p90": 0.8073999999999999,
+      "calibracion_version": "v2",
+      "psi_max": 0.1339,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 0.8026,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.18295000000000003,
+        "CRA 54": 0.11031,
+        "SILENCIO": 0.14498
+      },
+      "estado": "aviso",
+      "motivos": [
+        "deriva leve en sd8: PSI 0.134 > 0.100"
+      ]
+    },
+    {
+      "hasta": "2025-11-16",
+      "wape_movil": 0.13016,
+      "mae_movil": 92.587,
+      "sesgo_pct": -0.0044,
+      "cobertura_p10_p90": 0.8018000000000001,
+      "calibracion_version": "v2",
+      "psi_max": 0.1287,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 0.4256,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.17679999999999998,
+        "CRA 54": 0.10923999999999999,
+        "SILENCIO": 0.1427
+      },
+      "estado": "aviso",
+      "motivos": [
+        "deriva leve en sd8: PSI 0.129 > 0.100"
+      ]
+    },
+    {
+      "hasta": "2025-11-23",
+      "wape_movil": 0.13036,
+      "mae_movil": 90.019,
+      "sesgo_pct": 0.01509,
+      "cobertura_p10_p90": 0.8011,
+      "calibracion_version": "v2",
+      "psi_max": 0.1318,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 0.403,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.17846,
+        "CRA 54": 0.1101,
+        "SILENCIO": 0.14095000000000002
+      },
+      "estado": "aviso",
+      "motivos": [
+        "deriva leve en sd8: PSI 0.132 > 0.100"
+      ]
+    },
+    {
+      "hasta": "2025-11-30",
+      "wape_movil": 0.12638,
+      "mae_movil": 87.247,
+      "sesgo_pct": 0.013779999999999999,
+      "cobertura_p10_p90": 0.8067,
+      "calibracion_version": "v2",
+      "psi_max": 0.1265,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 0.2787,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.17165,
+        "CRA 54": 0.10612,
+        "SILENCIO": 0.13843
+      },
+      "estado": "aviso",
+      "motivos": [
+        "deriva leve en sd8: PSI 0.127 > 0.100"
+      ]
+    },
+    {
+      "hasta": "2025-12-07",
+      "wape_movil": 0.12856,
+      "mae_movil": 89.924,
+      "sesgo_pct": 0.01226,
+      "cobertura_p10_p90": 0.7955,
+      "calibracion_version": "v2",
+      "psi_max": 0.1146,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 0.3085,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.17920000000000003,
+        "CRA 54": 0.10633,
+        "SILENCIO": 0.14079
+      },
+      "estado": "aviso",
+      "motivos": [
+        "deriva leve en sd8: PSI 0.115 > 0.100"
+      ]
+    },
+    {
+      "hasta": "2025-12-14",
+      "wape_movil": 0.13351000000000002,
+      "mae_movil": 89.969,
+      "sesgo_pct": 0.02245,
+      "cobertura_p10_p90": 0.7940999999999999,
+      "calibracion_version": "v2",
+      "psi_max": 0.1143,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 0.4963,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.17911000000000002,
+        "CRA 54": 0.11388999999999999,
+        "SILENCIO": 0.14321
+      },
+      "estado": "aviso",
+      "motivos": [
+        "deriva leve en sd8: PSI 0.114 > 0.100"
+      ]
+    },
+    {
+      "hasta": "2025-12-21",
+      "wape_movil": 0.14327,
+      "mae_movil": 96.844,
+      "sesgo_pct": 0.014870000000000001,
+      "cobertura_p10_p90": 0.7766,
+      "calibracion_version": "v2",
+      "psi_max": 0.1107,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 0.5724,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.17994,
+        "CRA 54": 0.12773,
+        "SILENCIO": 0.14995
+      },
+      "estado": "aviso",
+      "motivos": [
+        "deriva leve en sd8: PSI 0.111 > 0.100"
+      ]
+    },
+    {
+      "hasta": "2025-12-28",
+      "wape_movil": 0.16036,
+      "mae_movil": 101.219,
+      "sesgo_pct": 0.02895,
+      "cobertura_p10_p90": 0.7668,
+      "calibracion_version": "v2",
+      "psi_max": 0.1026,
+      "psi_variable_max": "sd8",
+      "psi_dia_lag7": 1.1528,
+      "umbral_dia_lag7": 1.2619,
+      "wape_por_ruta": {
+        "CL 72": 0.19598,
+        "CRA 54": 0.14803,
+        "SILENCIO": 0.16114
+      },
+      "estado": "aviso",
+      "motivos": [
+        "deriva leve en sd8: PSI 0.103 > 0.100"
+      ]
+    }
+  ],
+  "estados": {
+    "ok": 4,
+    "aviso": 10,
+    "alerta": 0
+  }
+}

@@ -1,0 +1,41 @@
+Pruebas de la respuesta a la pregunta del reto (§20): unitarias e integración contra el PostgreSQL local.
+
+Comando (desde api_frecuencias/, con una base de pruebas propia en el PostgreSQL local, TEST_DATABASE_NAME, que el
+conftest migra desde cero con «alembic upgrade head», y DATA_DIR/MODELOS_DIR en una copia temporal de datos/):
+  python -m pytest tests/unit/test_respuesta.py tests/integracion/test_respuesta_api.py -rA
+Corrida del 2026-11-09 07:38 (America/Bogota).
+
+PASSED tests/unit/test_respuesta.py::test_contrato_y_pregunta_literal
+PASSED tests/unit/test_respuesta.py::test_cada_cifra_sale_del_plan_del_dia_y_de_lo_programado
+PASSED tests/unit/test_respuesta.py::test_pasajeros_con_banda_y_recaudo_con_la_tarifa_de_d5
+PASSED tests/unit/test_respuesta.py::test_pasajeros_son_los_del_modelo_activo
+PASSED tests/unit/test_respuesta.py::test_vehiculos_frente_a_la_flota
+PASSED tests/unit/test_respuesta.py::test_viabilidad_marca_y_explica
+PASSED tests/unit/test_respuesta.py::test_espera_maxima_acota_el_headway_maximo_d1
+PASSED tests/unit/test_respuesta.py::test_headway_minimo_gobernado_cambia_la_viabilidad
+PASSED tests/unit/test_respuesta.py::test_festivo_entre_semana_se_declara_en_limitaciones
+PASSED tests/unit/test_respuesta.py::test_fecha_por_omision_es_el_dia_siguiente_al_ultimo_dato
+PASSED tests/unit/test_respuesta.py::test_fecha_por_omision_considera_la_demanda_observada_de_la_base
+PASSED tests/unit/test_respuesta.py::test_todo_instante_en_bogota
+PASSED tests/unit/test_respuesta.py::test_alertas_abiertas_ahora_criticas_primero_y_en_bogota
+PASSED tests/unit/test_respuesta.py::test_alertas_de_la_fecha_usan_el_dia_de_bogota
+PASSED tests/unit/test_respuesta.py::test_tabla_plana_una_fila_por_ruta_y_hora
+PASSED tests/unit/test_respuesta.py::test_payload_de_la_foto_no_guarda_alertas
+PASSED tests/unit/test_respuesta.py::test_leer_sin_base_es_sin_calcular_con_la_pista
+PASSED tests/unit/test_respuesta.py::test_router_ruta_fuera_de_la_lista_blanca_422
+PASSED tests/unit/test_respuesta.py::test_router_sin_foto_404_sin_calcular_con_la_pista
+PASSED tests/unit/test_respuesta.py::test_hora_limitada_por_el_headway_minimo_es_no_viable_con_su_motivo
+PASSED tests/unit/test_respuesta.py::test_dia_siguiente_al_ultimo_dato_con_el_modelo_activo
+PASSED tests/unit/test_respuesta.py::test_sin_plan_dia_el_respaldo_es_e12_y_solo_2025
+PASSED tests/unit/test_respuesta.py::test_sin_carga_critica_la_sobreocupacion_queda_en_null
+PASSED tests/unit/test_respuesta.py::test_la_foto_reutiliza_el_plan_que_el_ciclo_acaba_de_calcular
+PASSED tests/unit/test_respuesta.py::test_un_plan_de_otro_modelo_o_version_no_se_reutiliza
+PASSED tests/integracion/test_respuesta_api.py::test_401_sin_clave_y_403_operador_en_el_calculo
+PASSED tests/integracion/test_respuesta_api.py::test_post_202_en_la_cola_y_get_200_desde_la_foto
+PASSED tests/integracion/test_respuesta_api.py::test_404_sin_calcular_con_la_pista
+PASSED tests/integracion/test_respuesta_api.py::test_post_fuera_de_los_dias_calculables_404_sin_encolar
+PASSED tests/integracion/test_respuesta_api.py::test_sin_fecha_calcula_y_lee_el_dia_siguiente_al_ultimo_dato
+PASSED tests/integracion/test_respuesta_api.py::test_atencion_abiertas_ahora_y_de_la_fecha
+PASSED tests/integracion/test_respuesta_api.py::test_exportacion_csv_desde_la_foto
+PASSED tests/integracion/test_respuesta_api.py::test_precalcular_reemplaza_la_foto_y_el_post_no_duplica
+33 passed, 0 failed, 0 errors (tests/unit/test_respuesta.py: 25; tests/integracion/test_respuesta_api.py: 8)

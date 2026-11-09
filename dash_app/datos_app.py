@@ -73,6 +73,28 @@ def fuentes_ahorro(*rutas):
 
 
 @lru_cache(maxsize=1)
+def modelo_producto():
+    """datos/modelo_producto.json: el modelo que ejecuta la API (id, error en la prueba de nov–dic 2025 frente a la regla
+    manual, intervalo bootstrap, cobertura de la banda con la calibración v2 y la v1) con el archivo y la clave de cada
+    cifra en «origen». Vacío si falta (la pantalla lo dice)."""
+    try:
+        return json.loads((DATOS / "modelo_producto.json").read_text(encoding="utf-8"))
+    except OSError:
+        return {}
+
+
+def fuentes_producto(*claves):
+    """Archivos de donde salen esas cifras de modelo_producto.json, sin repetir."""
+    org = modelo_producto().get("origen") or {}
+    vistos = []
+    for c in claves or org:
+        a = (org.get(c) or {}).get("archivo")
+        if a and a not in vistos:
+            vistos.append(a)
+    return vistos
+
+
+@lru_cache(maxsize=1)
 def origen():
     try:
         return json.loads((DATOS / "origen.json").read_text(encoding="utf-8"))

@@ -1,0 +1,68 @@
+{
+ "model_id": "hgb_fv2_20250831_s42",
+ "modelo_anterior": "hgb_fv1_20250831_s42",
+ "prueba": {
+  "desde": "2025-11-01",
+  "hasta": "2025-12-31",
+  "franjas": 3111,
+  "dias": 61
+ },
+ "wape_modelo": 14.77,
+ "wape_regla_manual": 21.18,
+ "wape_modelo_anterior": 15.07,
+ "ic95_modelo": [
+  13.1,
+  16.87
+ ],
+ "ic95_diferencia": [
+  -10.43,
+  -3.21
+ ],
+ "sesgo_pct": 2.75,
+ "mae": 96.27,
+ "cobertura_v2": 77.82,
+ "cobertura_v1": 77.88,
+ "cobertura_objetivo": 80.0,
+ "ancho_v2": 303.4,
+ "ancho_v1": 312.9,
+ "bootstrap": {
+  "B": 2000,
+  "bloque_dias": 7
+ },
+ "generado_evaluacion": "2026-11-09T05:06:42-05:00",
+ "generado_calibracion": "2026-11-09T03:44:19-05:00",
+ "origen": {
+  "model_id": {
+   "archivo": "EntregaFinal/api_frecuencias/datos/modelos/registro.json",
+   "clave": "activo"
+  },
+  "wape_modelo": {
+   "archivo": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.json",
+   "clave": "prueba_reservada.global.cand.wape"
+  },
+  "wape_regla_manual": {
+   "archivo": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.json",
+   "clave": "prueba_reservada.global.b1.wape"
+  },
+  "wape_modelo_anterior": {
+   "archivo": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.json",
+   "clave": "prueba_reservada.global.fv1.wape"
+  },
+  "ic95_modelo": {
+   "archivo": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.json",
+   "clave": "prueba_reservada.bootstrap.cand.ic95"
+  },
+  "ic95_diferencia": {
+   "archivo": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.json",
+   "clave": "prueba_reservada.bootstrap.cand_menos_b1.ic95"
+  },
+  "cobertura_v2": {
+   "archivo": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json",
+   "clave": "resultados.prueba.v2.global.cobertura_pct"
+  },
+  "cobertura_v1": {
+   "archivo": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json",
+   "clave": "resultados.prueba.v1.global.cobertura_pct"
+  }
+ }
+}

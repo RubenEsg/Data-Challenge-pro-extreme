@@ -1,0 +1,7 @@
+Paso «Dependencias fijadas (ruedas binarias)» del CI ensayado en Linux (imagen python:3.11-slim, 2026-11-09 02:34):
+  pip install --dry-run --only-binary=:all: -r requirements.txt -r requirements-dev.txt
+  
+  py3.11 linux: resolvería 105 paquetes, todos con rueda binaria
+  exit=0
+Acciones de GitHub confirmadas con git ls-remote (09-11-2026): actions/checkout v1-v7, actions/setup-python v1-v7, actions/upload-artifact v1-v7, actions/download-artifact v1-v8, SonarSource/sonarqube-scan-action v1-v8; el flujo usa checkout@v5, setup-python@v6, upload-artifact@v5, download-artifact@v5 y sonarqube-scan-action@v6.
+Imágenes confirmadas en Docker Hub (docker manifest inspect): postgis/postgis:14-3.4 y grafana/k6:1.4.2.

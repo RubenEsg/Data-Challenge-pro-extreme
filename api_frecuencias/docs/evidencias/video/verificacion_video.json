@@ -1,0 +1,97 @@
+{
+ "archivo": "E11_video_demostracion.mp4",
+ "tamano_mb": 19.7,
+ "ffmpeg": "ffmpeg-win-x86_64-v9.0.2.exe",
+ "ffmpeg_i": [
+  "Duration: 00:04:48.43, start: 0.000000, bitrate: 546 kb/s",
+  "Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt470bg/unknown/unknown, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 427 kb/s, 30 fps, 30 tbr, 15360 tbn (default)",
+  "Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, mono, fltp, 110 kb/s (default)"
+ ],
+ "cuadros": 8653,
+ "segundos": 288.43,
+ "audio": {
+  "mean_volume": -20.2,
+  "max_volume": -0.7
+ },
+ "cuadros_revision": [
+  {
+   "escena": "s01_problema",
+   "t_s": 17.71,
+   "png": "cuadro_s01_problema.png"
+  },
+  {
+   "escena": "s02_respuesta",
+   "t_s": 37.18,
+   "png": "cuadro_s02_respuesta.png"
+  },
+  {
+   "escena": "s03_dia_nuevo",
+   "t_s": 56.92,
+   "png": "cuadro_s03_dia_nuevo.png"
+  },
+  {
+   "escena": "s04_lectura",
+   "t_s": 74.54,
+   "png": "cuadro_s04_lectura.png"
+  },
+  {
+   "escena": "s05_modelo",
+   "t_s": 95.59,
+   "png": "cuadro_s05_modelo.png"
+  },
+  {
+   "escena": "s06_pronostico",
+   "t_s": 108.67,
+   "png": "cuadro_s06_pronostico.png"
+  },
+  {
+   "escena": "s07_despacho",
+   "t_s": 119.02,
+   "png": "cuadro_s07_despacho.png"
+  },
+  {
+   "escena": "s08_alertas",
+   "t_s": 140.11,
+   "png": "cuadro_s08_alertas.png"
+  },
+  {
+   "escena": "s09_recomendaciones",
+   "t_s": 163.65,
+   "png": "cuadro_s09_recomendaciones.png"
+  },
+  {
+   "escena": "s10_monitoreo",
+   "t_s": 182.13,
+   "png": "cuadro_s10_monitoreo.png"
+  },
+  {
+   "escena": "s11_ciclo",
+   "t_s": 220.71,
+   "png": "cuadro_s11_ciclo.png"
+  },
+  {
+   "escena": "s12_ingenieria",
+   "t_s": 262.07,
+   "png": "cuadro_s12_ingenieria.png"
+  },
+  {
+   "escena": "s13_cierre",
+   "t_s": 283.99,
+   "png": "cuadro_s13_cierre.png"
+  }
+ ],
+ "srt": {
+  "subtitulos": 72,
+  "ultimo_fin_s": 287.942,
+  "ordenados_sin_solape": true,
+  "dentro_del_video": true,
+  "max_caracteres_linea": 46
+ },
+ "claves_en_entregables": 0,
+ "cumple": {
+  "duracion_max_300_s": true,
+  "tamano_max_60_mb": true,
+  "audio_presente": true,
+  "sin_claves": true
+ }
+}

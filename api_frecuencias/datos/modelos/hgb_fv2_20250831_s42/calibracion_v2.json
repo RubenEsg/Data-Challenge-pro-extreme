@@ -1,0 +1,32 @@
+{
+ "version": "v2",
+ "nombre": "conformal de Mondrian por bloque",
+ "model_id": "hgb_fv2_20250831_s42",
+ "metodo": "CQR de Mondrian (conformal partido por grupo)",
+ "puntaje": "s = max(P10 - y, y - P90) / max(P50, 1)",
+ "aplicacion": "P10' = max(0, min(P10 - q·max(P50, 1), P50)); P90' = max(P90 + q·max(P50, 1), P50)",
+ "grupos": [
+  "bloque"
+ ],
+ "cobertura_objetivo": 0.8,
+ "minimo_por_grupo": 30,
+ "ajustado_con": "validación 2025-09-01 a 2025-10-31 (3111 horas); la prueba reservada no se usa",
+ "q": {
+  "*": -0.008879,
+  "04-05": 0.010624,
+  "06-08 pico": -0.02253,
+  "09-16 valle": -0.011991,
+  "17-19 pico": -0.01228,
+  "20": -0.010789
+ },
+ "n_por_grupo": {
+  "04-05": 366,
+  "06-08 pico": 549,
+  "09-16 valle": 1464,
+  "17-19 pico": 549,
+  "20": 183
+ },
+ "generado_en": "2026-11-09T03:26:09-05:00",
+ "script": "scripts/calibrar_por_grupo.py",
+ "evidencia": "docs/evidencias/modelo/calibracion_condicional.json"
+}

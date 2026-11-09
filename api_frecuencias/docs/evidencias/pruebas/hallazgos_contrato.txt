@@ -1,0 +1,97 @@
+Hallazgos de las pruebas de contrato (spec v1.5 §14.1 «Contrato») y su corrección, 09-11-2026
+Base local de pruebas en PostgreSQL 14 + PostGIS 3.4 (Docker, puerto 5433); autenticación encendida.
+Herramientas: pytest + TestClient (HTTPX) + jsonschema 4.26 (Draft 2020-12 = OpenAPI 3.1) y Schemathesis 4.33.1
+(10 ejemplos por operación). Estado: TODOS LOS HALLAZGOS RESUELTOS; la suite de contrato no tiene ningún xfail ni lista
+de defectos conocidos. Evidencia de la corrida final en docs/evidencias/contrato/ (README.txt, schemathesis.txt,
+operaciones_codigos.txt, pytest_contrato.txt).
+
+A. Errores 500 reales encontrados por Schemathesis
+ 1. Entero de consulta sin cota superior («bigint out of range»): desplazamiento=9223372036854775808 en las
+    colecciones paginadas (/frequency/executions, /predictions, /recommendations, /alerts, /models, /monitoring,
+    /monitoring/feature-snapshots).
+    RESUELTO: app/routers/comun.py ParametrosPagina, desplazamiento con le=DESPLAZAMIENTO_MAX (1.000.000.000), que
+    FastAPI convierte en 422 uniforme y documenta en OpenAPI (maximum).
+    Prueba: tests/contrato/test_contrato_openapi.py::test_valores_fuera_de_rango_son_422[/api/v1/alerts
+    ['desplazamiento']] y Schemathesis (not_a_server_error) en las 60 operaciones.
+ 2. GET /api/v1/predictions/export?formato=csv&horizonte_min=9223372036854775808 («integer out of range»).
+    RESUELTO: tipo común HorizonteConsulta (app/routers/comun.py): entero acotado 30..120 con enum [30, 60, 120] en
+    OpenAPI y un validador que rechaza cualquier otro valor con 422. Se usa en GET /predictions y /predictions/export;
+    /predictions/segmentos declara la misma cota. (Literal[30, 60, 120] no sirve en la consulta: pydantic no acepta el
+    texto «60» de una URL como el literal 60.)
+    Prueba: test_valores_fuera_de_rango_son_422 (/predictions/export, /predictions con 45, /predictions/segmentos).
+ 3. Byte NUL en un filtro de texto: GET /api/v1/alerts?codigo=lease&ruta=%00 («cannot contain NUL»).
+    RESUELTO: guarda única de la aplicación, app/openapi_doc.py GuardaNul (middleware ASGI, el más externo): 0x00 o
+    %00 en la ruta, la consulta, una cabecera o un cuerpo JSON responde 422 uniforme {"error": {"codigo":
+    "validacion", "detalle": [{"campo", "mensaje", "tipo": "caracter_nulo"}], "correlation_id"}} con X-Correlation-Id.
+    Pruebas: tests/contrato/test_contrato_openapi.py::test_byte_nul_es_422_uniforme (6 casos: consulta, ruta,
+    cabecera, cuerpo de PUT /thresholds y de PATCH /alerts/{id}/status) y
+    tests/contrato/test_presentacion_y_guarda.py (unidad: el cuerpo de una petición normal llega intacto).
+ 4. Nuevo en la corrida estricta: un cuerpo con bytes que no son UTF-8 en POST /models/{id}/activate y PUT
+    /thresholds respondía 400 no documentado (FastAPI no puede leer el cuerpo antes de validarlo).
+    RESUELTO: 400 documentado en toda operación con cuerpo y código uniforme «cuerpo_ilegible» (app/main.py).
+    Prueba: test_cuerpo_ilegible_es_400_uniforme_y_documentado.
+ 5. Una fecha válida pero extrema (hasta=9999-12-31) desborda la aritmética de fechas (OverflowError) en los filtros
+    de alertas y catálogos. RESUELTO: manejador común en app/openapi_doc.py -> 422 «fuera_de_rango».
+    Prueba: test_valores_fuera_de_rango_son_422[/api/v1/alerts ['hasta']].
+
+B. Rutas que Schemathesis marcó
+ - GET /api/v1/catalogos/segmentos?...&geometria=completa y GET /api/v1/catalogos/despachos/export?formato=xlsx
+   tardaron más de 10 s con el equipo cargado: la prueba espera hasta 60 s y en la corrida final ambas operaciones
+   pasaron los cinco chequeos (docs/evidencias/contrato/schemathesis.txt). Su latencia sigue siendo un tema de
+   rendimiento, no de contrato.
+ - /api/v1/segmentos/estadisticas, /estadisticas/export y /zonas responden 503 «fuente_no_configurada» sin
+   FUENTE_DATABASE_URL. RESUELTO: el 503 está documentado (con RespuestaError) en toda lectura de /api/v1/segmentos,
+   /api/v1/catalogos y /api/v1/predictions/segmentos, y Schemathesis acepta un 503 solo si la operación lo declara.
+   Prueba: test_503_documentado_donde_la_ruta_se_degrada.
+ - GET /api/v1/predictions/segmentos y /api/v1/monitoring/feature-snapshots exigen «uno de varios» filtros (OpenAPI
+   no puede marcar como obligatorio un parámetro que lo es solo si faltan los otros). RESUELTO: la descripción de la
+   operación dice «Filtro obligatorio: indique …», la extensión x-requiere-uno-de lista los grupos y el 422 está
+   documentado. Prueba: test_filtros_uno_de_documentados.
+
+C. Brechas de documentación OpenAPI (antes, 3 xfail estrictos; hoy pruebas normales)
+ Todo se resuelve en un solo lugar: app/openapi_doc.py (hook openapi() propio, instalado desde app/main.py).
+ 1. RESUELTO: cada operación declara sus errores con el esquema uniforme RespuestaError: 401 en toda /api/v1 (y en
+    /metrics cuando METRICAS_PUBLICAS=false), 403 donde el rol mínimo de app/seguridad.POLITICA supera a operador (8
+    operaciones: un operador nunca recibe 403 en una lectura), 404 con parámetro de ruta y donde se busca una ruta,
+    un modelo o un plan, 409 en activar, revertir y transiciones de alerta, 503 donde la ruta se degrada, 422 y 500 en
+    todas. Cada operación lleva además su rol mínimo (x-rol-minimo y una línea en la descripción).
+    Pruebas: test_errores_documentados_en_openapi, test_409_documentado_en_conflictos_de_estado y
+    test_codigos_que_lanza_el_codigo_estan_documentados (revisa el código de cada endpoint y de sus auxiliares: todo
+    ErrorApi(<código>) o no_encontrado(...) debe estar declarado en su operación).
+ 2. RESUELTO: el 422 se documenta con RespuestaError (ya no existe HTTPValidationError en components).
+    Prueba: test_422_documentado_con_el_formato_uniforme.
+ 3. RESUELTO: /metrics se documenta como text/plain y cada exportación (/*/export, 13 operaciones) como text/csv y
+    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet. Prueba: test_tipos_de_contenido_documentados.
+ 4. RESUELTO: 409 de POST /models/{model_id}/activate y POST /models/rollback documentado.
+ Además, test_registro_de_brechas_observadas ahora FALLA si alguna llamada real deja un código o tipo de contenido no
+ documentado, y Schemathesis corre con cuatro chequeos en TODAS las operaciones (también las nuevas, como
+ GET /api/v1/respuesta): not_a_server_error, status_code_conformance, content_type_conformance y
+ response_schema_conformance.
+
+D. Deriva del OpenAPI versionado
+ RESUELTO: docs/openapi.json regenerado desde app.openapi() con todas las rutas (incluidos el securityScheme ApiKey,
+ /scheduler, /catalogos, /monitoring, /segmentos, /recommendations/plan y /respuesta). «python scripts/ci_local.py
+ openapi» responde «OpenAPI sin deriva». Comando para regenerarlo:
+   python -c "import json; from app.main import app; open('docs/openapi.json','w',encoding='utf-8').write(json.dumps(app.openapi(), ensure_ascii=False, indent=2))"
+
+E. §8.1 (instantes ISO-8601 con la zona de America/Bogota) en toda respuesta
+ RESUELTO: el serializador de app.esquemas.Salida presenta en -05:00 cada instante de la respuesta, también dentro
+ de los JSONB (alert comentarios[].en y variables —ALT-009 horas_faltantes como ISO con -05:00—, execution
+ metricas y parametros, recommendation detalle, alert_history detalle, model_monitoring detalle). Las exportaciones
+ CSV/XLSX hacen lo mismo dentro de cada celda JSON (app/routers/comun.py). Como pide §8.1, los instantes se guardan
+ en UTC y se presentan en America/Bogota (también la respuesta de PATCH /alerts/{id}/status, cuyo actualizado_en y
+ comentarios[].en salían antes con +00:00). tests/integracion/test_catalogos_api.py quedó estricto
+ (PENDIENTES_AJENOS vacío). Pruebas: test_toda_la_api_presenta_los_instantes_en_bogota (todas las rutas GET de
+ /api/v1, JSON y CSV) y tests/contrato/test_presentacion_y_guarda.py.
+
+F. RNF-006, continuidad de la traza entre réplicas
+ RESUELTO: execution_log.traceparent (W3C) se guarda al crear la ejecución; app/observabilidad.ejecucion_en_curso lo
+ lee cuando el trabajo lo toma otra réplica (o el mismo proceso tras un reinicio) y abre el span
+ «ejecucion.ciclo_<tipo>» como hijo del span de la petición (mismo trace_id). El atributo traza_origen dice si el
+ contexto vino de memoria o de execution_log. Prueba: tests/integracion/test_traza_entre_replicas.py (exportador en
+ memoria de OpenTelemetry; la «réplica B» reclama y corre el trabajo desde otro hilo, sin el registro en memoria).
+
+G. Filtro espacial de alertas (§8.1, geography con GiST)
+ GET /api/v1/alerts y /alerts/export aceptan cerca_de=lat,lon y radio_m (≤ 50 km) con ST_DWithin sobre
+ alert.ubicacion (índice GiST ix_alert_ubicacion). Sin PostGIS, la misma respuesta con la distancia haversine sobre la
+ ubicación guardada en texto. Pruebas: test_filtro_espacial_de_alertas y test_alerta_sin_postgis_usa_haversine.

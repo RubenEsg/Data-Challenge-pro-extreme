@@ -1,0 +1,65 @@
+Carga de la réplica operacional desde las exportaciones Parquet (scripts/replica_cargar.py)
+Fecha: 2026-11-09T01:22:35-05:00   Servidor: PostgreSQL 14.13 (Debian 14.13-1.pgdg110+1) on x86_64-pc-linux-gnu   Tamaño de la base: 983 MB
+Total: 3,379,899 filas en 74.08 s (45,625 filas/s); preparación 1.46 s; ANALYZE 1.85 s; lotes de 200,000
+Memoria pico: proceso 1632.8 MB; Python (tracemalloc) 315.2 MB; Arrow 877.2 MB
+Viajes reservados para la simulación (no cargados en timbradas_segmentos): 265
+Armonización H1: 231 filas de estacionalidades_anio -> proceso='sobusa' (ahora {'sobusa': 231})
+
+tabla                            filas  exportadas  excluidas       s    filas/s  nota
+Procesos                             1           1          0    0.08         12  OK columnas sensibles en NULL: url_interfaz_despacho (0), usuario_interfaz_despacho (0), clave_interfaz_despacho (0)
+rutas                                3           3          0    0.01        300  OK 
+dias_semana                          7           7          0    0.00          0  OK 
+estacionalidades                    24          24          0    0.00          0  OK 
+estacionalidades_anio              231         231          0    0.04      5,775  OK 
+vehiculos                          656         656          0    0.08      8,200  OK columnas sensibles en NULL: modem_user (459), modem_passwd (163), modem_puk (148), modem_user_2 (0), modem_passwd_2 (0), modem_puk_2 (0)
+novedades_viales                    59          59          0    0.04      1,475  OK 
+novedades_viales_fecha              28          28          0    0.00          0  OK 
+novedades_viales_ruta                0           0          0    0.00          0  OK 
+progvehiculos                  564,837     564,837          0    8.47     66,687  OK 
+rutas_segmentos_config              22          22          0    0.00          0  OK 
+rutas_segmentos                  2,695       2,695          0   22.58        119  OK 
+timbradas_segmentos          2,769,692   2,795,607     25,915   32.63     84,882  OK sin los viajes reservados
+timbradas_anio                  30,913      30,913          0    0.17    181,841  OK 
+timbradas_consolidado           10,731      10,731          0    0.09    119,233  OK 
+
+rutasgeograficas reconstruida (ST_LineMerge de los segmentos activos, en orden):
+  idrutageo 3: ST_LineString 67,217.7 m; suma de longitud_m de 135 segmentos = 67,217.7 m
+  idrutageo 10: ST_LineString 61,127.3 m; suma de longitud_m de 123 segmentos = 61,127.3 m
+  idrutageo 11: ST_LineString 63,902.0 m; suma de longitud_m de 128 segmentos = 63,902.0 m
+
+Secuencias ajustadas (setval al máximo id cargado):
+  public.conteo_pasajeros_id_seq: 644349911
+  public.rutas_segmentos_config_id_seq: 22
+  public.rutas_segmentos_id_seq: 2695
+  public.rutas_segmentos_porcion_id_seq: None
+  public.timbradas_anio_id_timbrada_anio_seq: 54159
+  public.timbradas_anio_trazabilidad_id_timbrada_anio_trazabilidad_seq: None
+  public.timbradas_anio_zonas_id_timbrada_anio_zona_seq: None
+  public.timbradas_anio_zonas_trazabilidad_id_trazabilidad_seq: None
+  public.timbradas_consolidado_id_timbrada_consolidado_seq: 10731
+  public.timbradas_consolidado_zonas_id_timbrada_consolidado_zona_seq: None
+  public.timbradas_segmentos_anio_id_timbrada_segmento_anio_seq: None
+  public.timbradas_segmentos_anio_trazabilidad_id_trazabilidad_seq: None
+  public.timbradas_segmentos_consolida_id_timbrada_segmentos_consoli_seq: None
+  public.timbradas_segmentos_id_timbrada_segmento_seq: 2819917
+
+Integridad de las llaves foráneas (filas hijas sin madre):
+  rutas_segmentos_id_config_fkey: rutas_segmentos -> rutas_segmentos_config  2,695 filas, 0 huérfanas
+  timbradas_anio_trazabilidad_id_timbrada_anio_fkey: timbradas_anio_trazabilidad -> timbradas_anio  0 filas, 0 huérfanas
+  timbradas_anio_zonas_id_timbrada_anio_fkey: timbradas_anio_zonas -> timbradas_anio  0 filas, 0 huérfanas
+  timbradas_anio_zonas_trazabilidad_id_timbrada_anio_zona_fkey: timbradas_anio_zonas_trazabilidad -> timbradas_anio_zonas  0 filas, 0 huérfanas
+  timbradas_consolidado_zonas_id_timbrada_consolidado_fkey: timbradas_consolidado_zonas -> timbradas_consolidado  0 filas, 0 huérfanas
+  timbradas_segmentos_id_segmento_fkey: timbradas_segmentos -> rutas_segmentos  2,769,692 filas, 0 huérfanas
+  timbradas_segmentos_id_viaje_fkey: timbradas_segmentos -> progvehiculos  2,769,692 filas, 0 huérfanas
+  fk_tsa_id_dia_semana: timbradas_segmentos_anio -> dias_semana  0 filas, 0 huérfanas
+  fk_tsa_id_estacionalidad_anio: timbradas_segmentos_anio -> estacionalidades_anio  0 filas, 0 huérfanas
+  fk_tsa_id_segmento: timbradas_segmentos_anio -> rutas_segmentos  0 filas, 0 huérfanas
+  timbradas_segmentos_anio_trazabi_id_timbrada_segmento_anio_fkey: timbradas_segmentos_anio_trazabilidad -> timbradas_segmentos_anio  0 filas, 0 huérfanas
+  fk_tsc_id_dia_semana: timbradas_segmentos_consolidado -> dias_semana  0 filas, 0 huérfanas
+  fk_tsc_id_estacionalidad: timbradas_segmentos_consolidado -> estacionalidades  0 filas, 0 huérfanas
+  fk_tsc_id_segmento: timbradas_segmentos_consolidado -> rutas_segmentos  0 filas, 0 huérfanas
+
+Scripts 99, 5 y 6 de Extreme ejecutados tal cual sobre la réplica cargada:
+  99. prueba de segmentacion.sql: 0.02 s; filas antes [2769692, 0, 22, 2695] después [2769692, 0, 22, 2695]
+  5. cargue inicial timbradas_segmentos.sql: 0.01 s; filas antes [2769692, 0, 22, 2695] después [2769692, 0, 22, 2695]
+  6. cargue inicial timbradas_segmentos_anio.sql: 0.06 s; filas antes [2769692, 0, 22, 2695] después [2769692, 0, 22, 2695]

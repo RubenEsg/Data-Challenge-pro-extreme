@@ -1,0 +1,570 @@
+{
+  "generado": "2026-11-09T02:08:39-05:00",
+  "modelo": "fv2 temporal (corte 2024-12-31, semilla 42, en backtest_alertas_5e6dc3gb)",
+  "model_id": "hgb_fv2_20241231_s42",
+  "data_cutoff": "2024-12-31",
+  "periodo": [
+    "2025-01-15",
+    "2025-12-31"
+  ],
+  "banda_calibrada_pct_horas": 100.0,
+  "tolerancia_tiempo_min": "Procesos.toleranciatiempo = 0 en la exportación: se usa tolerancia_despacho_min",
+  "nota_precision": "No hay incidentes etiquetados: la precisión se aproxima con la persistencia de la condición en la hora siguiente a la DETECCIÓN, es decir, el episodio dura más horas que las necesarias para alertar (ALT-005/006/007), o con el día marcado como especial o excluido (ALT-008); lift = precisión / tasa base de la condición en una hora cualquiera. Una alerta no confirmada se cuenta como falso positivo (§18).",
+  "umbrales_por_defecto": {
+    "ocupacion_objetivo_min": 0.65,
+    "ocupacion_objetivo_max": 0.85,
+    "ocupacion_critica": 0.9,
+    "baja_utilizacion": 0.3,
+    "espera_max_min": 5.0,
+    "error_pronostico": 0.15,
+    "periodos_atraso": 2,
+    "periodo_ingesta_min": 60.0,
+    "caida_demanda": 0.3,
+    "demanda_minima_patron": 10.0,
+    "alt005_exigir_p10": 1,
+    "persistencia_horas": 2,
+    "tolerancia_despacho_min": 5.0,
+    "tolerancia_salidas": 0.5,
+    "salidas_minimas_esperadas": 2,
+    "z_anomalia": 3.5,
+    "escala_minima_z": 0.05,
+    "semanas_referencia": 8,
+    "minimo_dias_referencia": 4,
+    "pendiente_tendencia": 0.05,
+    "wape_max": 0.2
+  },
+  "por_defecto": {
+    "por_codigo": {
+      "ALT-005": {
+        "alertas": 121,
+        "por_ruta_dia": 0.1149,
+        "por_dia_3_rutas": 0.345,
+        "horas_en_alerta": 314,
+        "pct_dias_especiales": 46.3,
+        "precision_proxy": 0.3364,
+        "evaluables": 110,
+        "tasa_base": 0.0735,
+        "lift": 4.58
+      },
+      "ALT-006": {
+        "alertas": 94,
+        "por_ruta_dia": 0.0893,
+        "por_dia_3_rutas": 0.268,
+        "horas_en_alerta": 291,
+        "pct_dias_especiales": 63.8,
+        "precision_proxy": 0.3936,
+        "evaluables": 94,
+        "tasa_base": 0.0411,
+        "lift": 9.57
+      },
+      "ALT-007": {
+        "alertas": 195,
+        "por_ruta_dia": 0.1852,
+        "por_dia_3_rutas": 0.556,
+        "horas_en_alerta": 455,
+        "pct_dias_especiales": 42.1,
+        "precision_proxy": 0.2086,
+        "evaluables": 187,
+        "tasa_base": 0.1827,
+        "lift": 1.14
+      },
+      "ALT-008": {
+        "alertas": 65,
+        "por_ruta_dia": 0.0617,
+        "por_dia_3_rutas": 0.185,
+        "horas_en_alerta": 0,
+        "pct_dias_especiales": 67.7,
+        "precision_proxy": 0.6769,
+        "evaluables": 65,
+        "tasa_base": 0.3219,
+        "lift": 2.1
+      },
+      "ALT-009": {
+        "alertas": 0,
+        "por_ruta_dia": 0.0,
+        "por_dia_3_rutas": 0.0,
+        "horas_en_alerta": 0,
+        "pct_dias_especiales": null,
+        "precision_proxy": null,
+        "evaluables": 0,
+        "tasa_base": null,
+        "lift": null
+      }
+    },
+    "dias_ruta": 1053,
+    "dias": 351,
+    "observadas_por_ruta_dia": 0.451
+  },
+  "ejemplos": [
+    {
+      "id": "199b1e5e-3ef9-4f0e-b4dd-cde78ff97583",
+      "codigo": "ALT-005",
+      "nombre": "Caída anormal de demanda",
+      "origen": "observado",
+      "empresa": "Sobusa",
+      "ruta": "CL 72",
+      "sentido": null,
+      "viaje": null,
+      "conductor": null,
+      "vehiculo": null,
+      "detectada_en": "2025-01-20 06:00:00-05:00",
+      "ventana_inicio": "2025-01-19 14:00:00-05:00",
+      "ventana_fin": "2025-01-19 16:00:00-05:00",
+      "horizonte_min": 0,
+      "severidad": "preventiva",
+      "estado": "nueva",
+      "observado": 252.0,
+      "esperado": 588.9715,
+      "umbral": 412.28,
+      "puntaje": 0.694,
+      "probabilidad": null,
+      "metodo_puntaje": "exceso relativo sobre el umbral: 0,5 en el umbral y 1,0 con un exceso del 100 %",
+      "tendencia": "a_la_baja",
+      "tendencia_pendiente": -0.2331,
+      "serie_reciente": [
+        {
+          "inicio": "2025-01-19T12:00:00-05:00",
+          "observado": 167.0,
+          "esperado": 232.75024932926866,
+          "p10": 140.4099651571669,
+          "p90": 328.3053115462291,
+          "salidas_observadas": 4,
+          "salidas_esperadas": 3.772584919296555
+        },
+        {
+          "inicio": "2025-01-19T13:00:00-05:00",
+          "observado": 215.0,
+          "esperado": 225.53188736275158,
+          "p10": 103.1286576798877,
+          "p90": 310.4736067805296,
+          "salidas_observadas": 4,
+          "salidas_esperadas": 3.9706959706959704
+        },
+        {
+          "inicio": "2025-01-19T14:00:00-05:00",
+          "observado": 127.0,
+          "esperado": 258.03078587970396,
+          "p10": 136.35017860065088,
+          "p90": 378.4138777213518,
+          "salidas_observadas": 2,
+          "salidas_esperadas": 4.501863354037267
+        },
+        {
+          "inicio": "2025-01-19T15:00:00-05:00",
+          "observado": 125.0,
+          "esperado": 330.94067476535025,
+          "p10": 190.00549448716654,
+          "p90": 461.39966568171786,
+          "salidas_observadas": 2,
+          "salidas_esperadas": 4.548316783724873
+        }
+      ],
+      "explicacion": "Durante 2 hora(s) seguidas (14:00-16:00) la demanda real (252 pasajeros) cayó 57,2 % frente al patrón del modelo (589); el umbral de caída es 30,0 % (límite 412) y quedó bajo el P10 calibrado (326); persistencia exigida: 2 h.",
+      "variables": {
+        "pasajeros_observados": 252.0,
+        "demanda_patron": 588.9714606450542,
+        "p10": 326.3556730878174,
+        "caida_relativa": 0.5721,
+        "horas_seguidas": 2,
+        "persistencia_horas": 2
+      },
+      "variables_influyentes": [
+        {
+          "variable": "pasajeros_observados",
+          "valor": 252.0,
+          "fuente": "regla"
+        },
+        {
+          "variable": "demanda_patron",
+          "valor": 588.9714606450542,
+          "fuente": "regla"
+        },
+        {
+          "variable": "p10",
+          "valor": 326.3556730878174,
+          "fuente": "regla"
+        },
+        {
+          "variable": "caida_relativa",
+          "valor": 0.5721,
+          "fuente": "regla"
+        },
+        {
+          "variable": "horas_seguidas",
+          "valor": 2,
+          "fuente": "regla"
+        },
+        {
+          "variable": "persistencia_horas",
+          "valor": 2,
+          "fuente": "regla"
+        }
+      ],
+      "recomendacion": "Validar si hay un evento, un problema en la ruta o una falla de captura.",
+      "ubicacion": null,
+      "asignado_a": null,
+      "comentarios": [],
+      "historial": [],
+      "version_umbrales": "umbrales-v2",
+      "clave_dedup": "ALT-005|CL 72|2025-01-19T14:00:00-05:00|obs"
+    },
+    {
+      "id": "3a037d02-08e0-46f8-83b5-a01b63b3d504",
+      "codigo": "ALT-006",
+      "nombre": "Despacho ausente o tardío",
+      "origen": "observado",
+      "empresa": "Sobusa",
+      "ruta": "CL 72",
+      "sentido": null,
+      "viaje": null,
+      "conductor": null,
+      "vehiculo": null,
+      "detectada_en": "2025-01-20 06:00:00-05:00",
+      "ventana_inicio": "2025-01-19 14:00:00-05:00",
+      "ventana_fin": "2025-01-19 16:00:00-05:00",
+      "horizonte_min": 0,
+      "severidad": "critica",
+      "estado": "nueva",
+      "observado": 4.0,
+      "esperado": 9.0502,
+      "umbral": 4.5251,
+      "puntaje": 0.558,
+      "probabilidad": null,
+      "metodo_puntaje": "exceso relativo sobre el umbral: 0,5 en el umbral y 1,0 con un exceso del 100 %",
+      "tendencia": "a_la_baja",
+      "tendencia_pendiente": -0.3286,
+      "serie_reciente": [
+        {
+          "inicio": "2025-01-19T12:00:00-05:00",
+          "observado": 167.0,
+          "esperado": 232.75024932926866,
+          "p10": 140.4099651571669,
+          "p90": 328.3053115462291,
+          "salidas_observadas": 4,
+          "salidas_esperadas": 3.772584919296555
+        },
+        {
+          "inicio": "2025-01-19T13:00:00-05:00",
+          "observado": 215.0,
+          "esperado": 225.53188736275158,
+          "p10": 103.1286576798877,
+          "p90": 310.4736067805296,
+          "salidas_observadas": 4,
+          "salidas_esperadas": 3.9706959706959704
+        },
+        {
+          "inicio": "2025-01-19T14:00:00-05:00",
+          "observado": 127.0,
+          "esperado": 258.03078587970396,
+          "p10": 136.35017860065088,
+          "p90": 378.4138777213518,
+          "salidas_observadas": 2,
+          "salidas_esperadas": 4.501863354037267
+        },
+        {
+          "inicio": "2025-01-19T15:00:00-05:00",
+          "observado": 125.0,
+          "esperado": 330.94067476535025,
+          "p10": 190.00549448716654,
+          "p90": 461.39966568171786,
+          "salidas_observadas": 2,
+          "salidas_esperadas": 4.548316783724873
+        }
+      ],
+      "explicacion": "En 14:00-16:00 (2 h): salieron 4 de 9 despachos esperados (60 / intervalo programado). Despacho ausente o tardío: salieron 4 de 9 despachos esperados (déficit 55,8 %, tolerancia 50,0 %).",
+      "variables": {
+        "minutos_desde_ultimo_despacho": null,
+        "headway_programado_min": 13.191693290734824,
+        "tolerancia_min": 5.0,
+        "fuente_tolerancia": "threshold_config.tolerancia_despacho_min",
+        "salidas_esperadas": 9.05018013776214,
+        "salidas_observadas": 4.0,
+        "horas_episodio": 2,
+        "persistencia_horas_conteo": 2,
+        "por_tiempo": false
+      },
+      "variables_influyentes": [
+        {
+          "variable": "headway_programado_min",
+          "valor": 13.191693290734824,
+          "fuente": "regla"
+        },
+        {
+          "variable": "tolerancia_min",
+          "valor": 5.0,
+          "fuente": "regla"
+        },
+        {
+          "variable": "salidas_esperadas",
+          "valor": 9.05018013776214,
+          "fuente": "regla"
+        },
+        {
+          "variable": "salidas_observadas",
+          "valor": 4.0,
+          "fuente": "regla"
+        }
+      ],
+      "recomendacion": "Verificar la disponibilidad del vehículo y la operación del despacho.",
+      "ubicacion": null,
+      "asignado_a": null,
+      "comentarios": [],
+      "historial": [],
+      "version_umbrales": "umbrales-v2",
+      "clave_dedup": "ALT-006|CL 72|2025-01-19T14:00:00-05:00|obs"
+    },
+    {
+      "id": "4995d06d-033a-4c11-8d42-4ec96b664a09",
+      "codigo": "ALT-007",
+      "nombre": "Desviación del pronóstico",
+      "origen": "observado",
+      "empresa": "Sobusa",
+      "ruta": "CL 72",
+      "sentido": null,
+      "viaje": null,
+      "conductor": null,
+      "vehiculo": null,
+      "detectada_en": "2025-02-18 06:00:00-05:00",
+      "ventana_inicio": "2025-02-17 17:00:00-05:00",
+      "ventana_fin": "2025-02-17 19:00:00-05:00",
+      "horizonte_min": 0,
+      "severidad": "preventiva",
+      "estado": "nueva",
+      "observado": 916.0,
+      "esperado": 713.1119,
+      "umbral": 905.5546,
+      "puntaje": 0.506,
+      "probabilidad": null,
+      "metodo_puntaje": "exceso relativo sobre el umbral: 0,5 en el umbral y 1,0 con un exceso del 100 %",
+      "tendencia": "al_alza",
+      "tendencia_pendiente": 0.2168,
+      "serie_reciente": [
+        {
+          "inicio": "2025-02-17T15:00:00-05:00",
+          "observado": 378.0,
+          "esperado": 508.96758076864984,
+          "p10": 326.5842075286477,
+          "p90": 664.66674350462,
+          "salidas_observadas": 3,
+          "salidas_esperadas": 5.340358872116206
+        },
+        {
+          "inicio": "2025-02-17T16:00:00-05:00",
+          "observado": 411.0,
+          "esperado": 520.8393042154909,
+          "p10": 361.651181708529,
+          "p90": 662.3291099559063,
+          "salidas_observadas": 3,
+          "salidas_esperadas": 4.40046092320206
+        },
+        {
+          "inicio": "2025-02-17T17:00:00-05:00",
+          "observado": 525.0,
+          "esperado": 419.64254307320607,
+          "p10": 281.4099837299346,
+          "p90": 523.5979430026389,
+          "salidas_observadas": 5,
+          "salidas_esperadas": 5.042535675082327
+        },
+        {
+          "inicio": "2025-02-17T18:00:00-05:00",
+          "observado": 391.0,
+          "esperado": 293.4693488073457,
+          "p10": 216.38875904747061,
+          "p90": 381.9566088902202,
+          "salidas_observadas": 8,
+          "salidas_esperadas": 4.905814905814906
+        }
+      ],
+      "explicacion": "Durante 2 hora(s) seguidas (17:00-19:00) la demanda real (916) quedó por encima del P90 del intervalo calibrado (906); pronóstico 713, error 28,5 % (umbral 15,0 %); persistencia exigida: 2 h.",
+      "variables": {
+        "pasajeros_observados": 916.0,
+        "demanda_prevista": 713.1118918805518,
+        "p10": 497.7987427774052,
+        "p90": 905.5545518928591,
+        "error_relativo": 0.2845,
+        "sentido_desviacion": "+",
+        "horas_seguidas": 2,
+        "persistencia_horas": 2
+      },
+      "variables_influyentes": [
+        {
+          "variable": "pasajeros_observados",
+          "valor": 916.0,
+          "fuente": "regla"
+        },
+        {
+          "variable": "demanda_prevista",
+          "valor": 713.1118918805518,
+          "fuente": "regla"
+        },
+        {
+          "variable": "p10",
+          "valor": 497.7987427774052,
+          "fuente": "regla"
+        },
+        {
+          "variable": "p90",
+          "valor": 905.5545518928591,
+          "fuente": "regla"
+        },
+        {
+          "variable": "error_relativo",
+          "valor": 0.2845,
+          "fuente": "regla"
+        }
+      ],
+      "recomendacion": "Revisar la frecuencia y recalibrar el escenario del pronóstico.",
+      "ubicacion": null,
+      "asignado_a": null,
+      "comentarios": [],
+      "historial": [],
+      "version_umbrales": "umbrales-v2",
+      "clave_dedup": "ALT-007|CL 72|2025-02-17T17:00:00-05:00|obs"
+    },
+    {
+      "id": "e1507245-a3e7-4f48-b0e4-775e69f8ef74",
+      "codigo": "ALT-008",
+      "nombre": "Consolidado anómalo",
+      "origen": "observado",
+      "empresa": "Sobusa",
+      "ruta": "CL 72",
+      "sentido": null,
+      "viaje": null,
+      "conductor": null,
+      "vehiculo": null,
+      "detectada_en": "2025-03-04 06:00:00-05:00",
+      "ventana_inicio": "2025-03-03 00:00:00-05:00",
+      "ventana_fin": "2025-03-04 00:00:00-05:00",
+      "horizonte_min": 0,
+      "severidad": "preventiva",
+      "estado": "nueva",
+      "observado": 19.0,
+      "esperado": 90.0,
+      "umbral": 69.2436,
+      "puntaje": 1.0,
+      "probabilidad": null,
+      "metodo_puntaje": "|z robusto| = |x - mediana| / max(1,4826·MAD, escala mínima) del mismo tipo de día; 0,5 en el umbral",
+      "tendencia": "a_la_baja",
+      "tendencia_pendiente": -0.0868,
+      "serie_reciente": [],
+      "explicacion": "Consolidado atípico: subidas = 1.770 frente a la mediana de 7.628,0 (z = -6,15); nro_viajes = 19 frente a la mediana de 90,0 (z = -11,97) (umbral |z| ≥ 3,5). Límite para nro_viajes: 69 (mediana 90 - 3,5 × 5,9).",
+      "variables": {
+        "campo": "nro_viajes",
+        "z_maximo": -11.972,
+        "subidas": 1770.0,
+        "bajadas": null,
+        "nro_viajes": 19.0,
+        "umbral_z": 3.5,
+        "z_por_campo": {
+          "subidas": -6.154,
+          "nro_viajes": -11.972
+        },
+        "referencia_mediana_escala": {
+          "subidas": [
+            7628.0,
+            951.83
+          ],
+          "nro_viajes": [
+            90.0,
+            5.93
+          ]
+        },
+        "fecha": "2025-03-03"
+      },
+      "variables_influyentes": [
+        {
+          "variable": "z_maximo",
+          "valor": -11.972,
+          "fuente": "regla"
+        },
+        {
+          "variable": "subidas",
+          "valor": 1770.0,
+          "fuente": "regla"
+        },
+        {
+          "variable": "nro_viajes",
+          "valor": 19.0,
+          "fuente": "regla"
+        }
+      ],
+      "recomendacion": "Validar la fuente, el trigger de consolidación y el período afectado.",
+      "ubicacion": null,
+      "asignado_a": null,
+      "comentarios": [],
+      "historial": [],
+      "version_umbrales": "umbrales-v2",
+      "clave_dedup": "ALT-008|CL 72|2025-03-03T00:00:00-05:00|dia"
+    }
+  ],
+  "reglas_anteriores": {
+    "umbrales": {
+      "persistencia_horas": 1,
+      "alt005_exigir_p10": 0,
+      "tolerancia_salidas": 0.2,
+      "z_anomalia": 3.0
+    },
+    "por_codigo": {
+      "ALT-005": {
+        "alertas": 1393,
+        "por_ruta_dia": 1.3229,
+        "por_dia_3_rutas": 3.969,
+        "horas_en_alerta": 1719,
+        "pct_dias_especiales": 35.0,
+        "precision_proxy": 0.1726,
+        "evaluables": 1211,
+        "tasa_base": 0.096,
+        "lift": 1.8
+      },
+      "ALT-006": {
+        "alertas": 2838,
+        "por_ruta_dia": 2.6952,
+        "por_dia_3_rutas": 8.085,
+        "horas_en_alerta": 4570,
+        "pct_dias_especiales": 30.0,
+        "precision_proxy": 0.3302,
+        "evaluables": 2838,
+        "tasa_base": 0.2553,
+        "lift": 1.29
+      },
+      "ALT-007": {
+        "alertas": 1679,
+        "por_ruta_dia": 1.5945,
+        "por_dia_3_rutas": 4.783,
+        "horas_en_alerta": 2011,
+        "pct_dias_especiales": 33.1,
+        "precision_proxy": 0.1562,
+        "evaluables": 1581,
+        "tasa_base": 0.1827,
+        "lift": 0.85
+      },
+      "ALT-008": {
+        "alertas": 94,
+        "por_ruta_dia": 0.0893,
+        "por_dia_3_rutas": 0.268,
+        "horas_en_alerta": 0,
+        "pct_dias_especiales": 57.4,
+        "precision_proxy": 0.5745,
+        "evaluables": 94,
+        "tasa_base": 0.3219,
+        "lift": 1.78
+      },
+      "ALT-009": {
+        "alertas": 0,
+        "por_ruta_dia": 0.0,
+        "por_dia_3_rutas": 0.0,
+        "horas_en_alerta": 0,
+        "pct_dias_especiales": null,
+        "precision_proxy": null,
+        "evaluables": 0,
+        "tasa_base": null,
+        "lift": null
+      }
+    },
+    "dias_ruta": 1053,
+    "dias": 351,
+    "observadas_por_ruta_dia": 5.702
+  },
+  "duracion_s": 50.5
+}

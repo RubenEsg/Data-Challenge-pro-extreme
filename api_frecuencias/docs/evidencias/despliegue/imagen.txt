@@ -1,0 +1,58 @@
+Imagen de la API (sobusa_limpio-api) · 2026-11-09 08:32:44 -0500
+  id sha256:1a7f6212b453…, creada 2026-11-09T13:27:13.88720812Z
+  tamaño (contenido de las capas, docker image inspect .Size): 365.8 MB
+  tamaño en disco (docker images): 1.51GB
+  usuario: sobusa; puerto: ['8000/tcp']; comando: ['sh', '-c', 'alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000']
+  HEALTHCHECK: ['CMD-SHELL', 'python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen(\'http://127.0.0.1:8000/health\', timeout=4).status == 200 else 1)"']
+  variables de la imagen (ninguna secreta; se omiten PATH y las de verificación de la imagen base): ['LANG=C.UTF-8', 'PYTHON_VERSION=3.11.18', 'PYTHONDONTWRITEBYTECODE=1', 'PYTHONUNBUFFERED=1', 'PIP_DISABLE_PIP_VERSION_CHECK=1', 'TZ=America/Bogota', 'DATA_DIR=/app/datos']
+
+$ dentro de la imagen: python, usuario y tamaños
+  Python 3.11.18
+  uid=10001(sobusa) gid=10001(sobusa) groups=10001(sobusa)
+  957M	/usr/local/lib/python3.11/site-packages
+  1.2M	/app/app
+  7.6M	/app/datos
+  700K	/app/scripts
+  88K	/app/alembic
+  24 MB /usr/local/lib/python3.11/site-packages/sqlalchemy
+  27 MB /usr/local/lib/python3.11/site-packages/numpy.libs
+  29 MB /usr/local/lib/python3.11/site-packages/scipy.libs
+  35 MB /usr/local/lib/python3.11/site-packages/numba
+  38 MB /usr/local/lib/python3.11/site-packages/pulp
+  46 MB /usr/local/lib/python3.11/site-packages/numpy
+  57 MB /usr/local/lib/python3.11/site-packages/sklearn
+  67 MB /usr/local/lib/python3.11/site-packages/onnxruntime
+  78 MB /usr/local/lib/python3.11/site-packages/pandas
+  116 MB /usr/local/lib/python3.11/site-packages/scipy
+  170 MB /usr/local/lib/python3.11/site-packages/pyarrow
+  172 MB /usr/local/lib/python3.11/site-packages/llvmlite
+
+$ docker history (capas)
+  0B	CMD ["sh" "-c" "alembic upgrade head && uvic…
+  0B	HEALTHCHECK {Test:[CMD-SHELL python -c "impo…
+  0B	EXPOSE [8000/tcp]
+  0B	USER sobusa
+  7.94MB	RUN /bin/sh -c useradd --create-home --uid 1…
+  7.88MB	COPY datos ./datos # buildkit
+  725kB	COPY scripts ./scripts # buildkit
+  1.18MB	COPY app ./app # buildkit
+  98.3kB	COPY alembic ./alembic # buildkit
+  16.4kB	COPY alembic.ini pyproject.toml ./ # buildkit
+  989MB	RUN /bin/sh -c pip install --only-binary=:al…
+  12.3kB	COPY requirements.txt . # buildkit
+  8.19kB	WORKDIR /app
+  0B	ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFER…
+  0B	CMD ["python3"]
+  16.4kB	RUN /bin/sh -c set -eux;  for src in idle3 p…
+  48.8MB	RUN /bin/sh -c set -eux;   savedAptMark="$(a…
+  0B	ENV PYTHON_SHA256=9120e0a653868f6e3698d36cdd…
+  0B	ENV PYTHON_VERSION=3.11.18
+  0B	ENV GPG_KEY=A035C8C19219BA821ECEA86B64E628F8…
+  4.93MB	RUN /bin/sh -c set -eux;  apt-get update;  a…
+  0B	ENV LANG=C.UTF-8
+  0B	ENV PATH=/usr/local/bin:/usr/local/sbin:/usr…
+  87.7MB	# debian.sh --arch 'amd64' out/ 'trixie' '@1…
+
+Herramientas de desarrollo dentro de la imagen (debe ser []): []
+requisitos_congelados.txt regenerado con el pip freeze de la imagen: 72 paquetes
+pip freeze de la imagen frente a requirements.txt: 72 instalados, 72 fijados, diferencias [] (idénticos)

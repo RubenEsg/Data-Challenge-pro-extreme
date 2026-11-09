@@ -1,59 +1,97 @@
-alembic==1.14.1
-annotated-types==0.8.0
-anyio==4.16.0
-bandit==1.9.4
-certifi==2026.10.23
-click==8.5.1
-cloudpickle==3.1.2
-colorama==0.4.6
-coverage==7.17.2
-et_xmlfile==2.0.0
+# Dependencias de EJECUCIÓN de la API (lo único que instala la imagen Docker), fijadas con la versión exacta del
+# entorno de desarrollo. Las herramientas de pruebas, análisis y documentación están en requirements-dev.txt.
+# El cierre transitivo sale de los import de app/, alembic/ y de los scripts que corren dentro del contenedor
+# (crear_api_key.py, entrenar.py, replica_cargar.py). Las versiones instaladas de verdad en la imagen quedan en
+# requisitos_congelados.txt (pip freeze dentro de la imagen).
+
+# API REST (FastAPI + Pydantic) y servidor ASGI (uvicorn con httptools, watchfiles, websockets y python-dotenv)
 fastapi==0.115.14
-greenlet==3.5.6
-h11==0.16.0
-httpcore==1.0.9
-httptools==0.9.0
-httpx==0.28.1
+starlette==0.46.2
+pydantic==2.14.3
+pydantic_core==2.50.4
+pydantic-settings==2.16.2
+annotated-types==0.8.0
+typing-inspection==0.4.5
+typing_extensions==4.16.0
+anyio==4.16.0
 idna==3.20
-iniconfig==2.3.1
-joblib==1.6.0
-Mako==1.4.3
-markdown-it-py==4.2.0
-MarkupSafe==3.0.4
-mdurl==0.1.2
-numpy==2.5.4; python_version >= "3.12"
-numpy==2.3.5; python_version < "3.12"
-openpyxl==3.1.5
-packaging==26.3
-pandas==2.2.3
-pluggy==1.7.0
-prometheus_client==0.26.0
+uvicorn==0.32.1
+h11==0.16.0
+click==8.5.1
+colorama==0.4.6; sys_platform == "win32"
+httptools==0.9.0
+watchfiles==1.3.0
+websockets==17.4
+python-dotenv==1.2.4
+PyYAML==6.0.3
+
+# PostgreSQL 14 (psycopg 3 con libpq empaquetada), SQLAlchemy y migraciones Alembic
+SQLAlchemy==2.0.57
+greenlet==3.5.6
 psycopg==3.2.13
 psycopg-binary==3.2.13
-PuLP==2.9.0
-pyarrow==26.0.1
-pydantic==2.14.3
-pydantic-settings==2.16.2
-pydantic_core==2.50.4
-Pygments==2.21.0
-pytest==9.2.0
-pytest-cov==7.1.0
+alembic==1.14.1
+Mako==1.4.3
+MarkupSafe==3.0.4
+
+# Datos: pandas, Parquet (pyarrow) y exportación a Excel (openpyxl, motor de pd.ExcelWriter)
+numpy==2.5.4; python_version >= "3.12"
+numpy==2.3.5; python_version < "3.12"
+pandas==2.2.3
 python-dateutil==4.0.0
-python-dotenv==1.2.4
 pytz==2026.6
-PyYAML==6.0.3
-rich==15.0.0
-ruff==0.17.4
+tzdata==2026.6
+pyarrow==26.0.1
+openpyxl==3.1.5
+et_xmlfile==2.0.0
+
+# Modelo (scikit-learn, joblib), explicación local exacta con SHAP (RF-015) y ONNX Runtime (MOTOR_INFERENCIA=onnx)
 scikit-learn==1.5.2
 scipy==1.18.1; python_version >= "3.12"
 scipy==1.16.3; python_version < "3.12"
-SQLAlchemy==2.0.57
-starlette==0.46.2
-stevedore==5.9.1
+joblib==1.6.0
 threadpoolctl==3.8.0
-typing-inspection==0.4.5
-typing_extensions==4.16.0
-tzdata==2026.6
-uvicorn==0.32.1
-watchfiles==1.3.0
-websockets==17.4
+# shap 0.54.1 solo publica ruedas cp312-abi3; con Python 3.11 (la imagen) se usa 0.51.0, que necesita numba/llvmlite
+shap==0.54.1; python_version >= "3.12"
+shap==0.51.0; python_version < "3.12"
+numba==0.68.1; python_version < "3.12"
+llvmlite==0.50.0; python_version < "3.12"
+slicer==0.0.8
+tqdm==4.70.1
+cloudpickle==3.1.2
+packaging==26.3
+onnxruntime==1.31.1
+flatbuffers==25.12.19
+protobuf==7.36.2
+
+# Optimización (PuLP/CBC para el plan D5; SciPy para el MILP de respaldo)
+PuLP==2.9.0
+
+# Cola, planificador interno (APScheduler 3.x) y zona horaria America/Bogota
+APScheduler==3.11.3
+tzlocal==5.4.5
+
+# Observabilidad (RNF-006): métricas Prometheus, logs JSON con structlog y trazas OpenTelemetry
+# (instrumentación 0.66b2 emparejada con el SDK 1.45.2, exportador OTLP/HTTP)
+prometheus_client==0.26.0
+structlog==26.1.0
+opentelemetry-api==1.45.2
+opentelemetry-sdk==1.45.2
+opentelemetry-semantic-conventions==0.66b2
+opentelemetry-instrumentation==0.66b2
+opentelemetry-instrumentation-asgi==0.66b2
+opentelemetry-instrumentation-fastapi==0.66b2
+opentelemetry-instrumentation-sqlalchemy==0.66b2
+opentelemetry-util-http==0.66b2
+opentelemetry-exporter-otlp-proto-http==1.45.2
+opentelemetry-exporter-otlp-proto-common==1.45.2
+opentelemetry-exporter-otlp-common==0.66b2
+opentelemetry-exporter-http-transport==0.66b2
+opentelemetry-proto==1.45.2
+googleapis-common-protos==1.76.0
+asgiref==3.13.0
+wrapt==2.5.2
+requests==2.34.2
+urllib3==2.8.0
+certifi==2026.10.23
+charset-normalizer==3.5.2

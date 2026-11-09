@@ -35,7 +35,8 @@ def test_whatsapp_simulado_recorta_el_texto():
     assert r["canal"] == "whatsapp" and r["estado"] == "simulada"
     assert len(r["mensaje"]) <= N.NotificadorWhatsApp.LIMITE and r["asunto"] is None
     assert r["destinatarios"] == ["+573***67"]
-    assert N.NotificadorWhatsApp(["+573001234567"]).enviar({"alert_id": "b2", "severidad": "critica"})["alerta_id"] == "b2"
+    enviado = N.NotificadorWhatsApp(["+573001234567"]).enviar({"alert_id": "b2", "severidad": "critica"})
+    assert enviado["alerta_id"] == "b2"
 
 
 def test_filtro_por_severidad_y_sin_destinatarios():

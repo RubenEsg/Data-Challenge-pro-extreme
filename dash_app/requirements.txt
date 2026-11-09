@@ -6,3 +6,5 @@ numpy==2.5.4
 pyarrow==26.0.1
 scipy==1.18.1
 PuLP==2.9.0
+# cliente_api.py (Alertas, Recomendaciones y Operación): ya viene con Dash; se fija la versión probada
+requests==2.34.2

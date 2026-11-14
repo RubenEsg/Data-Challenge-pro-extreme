@@ -76,7 +76,8 @@ def _heroe(A, fuentes):
     el ahorro, β y el enlace. Orden del DOM: título, valor, saldos, texto, β, enlace."""
     h, r = A["planes"]["hoy"], A["planes"]["reasigna"]
     b, conv = A["convenciones"]["beta"], A["convenciones"]
-    semanas = D.valor("inicio", "inicio_piloto_resumen")["semanas"]
+    piloto = D.valor("inicio", "inicio_piloto_resumen")
+    semanas = piloto["semanas"]
     rutas = D.valor("inicio", "inicio_rutas")
     costo_op = A["contexto"]["costo_operacion_anual_Mcop"]
 
@@ -87,13 +88,21 @@ def _heroe(A, fuentes):
                        f"{con_signo(-r['ahorro_pct_costo'], 1)} % de costo"),
     ], className="heroe__valor"), className="heroe__principal")
 
+    # Los dos saldos son los bordes de un rango, no dos resultados: el piso solo, en rojo y con «saldo negativo», se leía
+    # como lo que Sobusa pierde si aplica la propuesta. Cada uno dice qué supone, y debajo va lo que de verdad se propone.
     saldos = html.Div([
-        ui.saldo("Saldo del año · contabilidad conservadora", r["saldo_conservador_Mcop"],
-                 "Solo cuenta los pasajes que se pierden donde se quitan salidas: es el piso."),
-        ui.saldo("Saldo del año · contabilidad simétrica", r["saldo_simetrico_Mcop"],
-                 "También cuenta los que se ganan donde se ponen, con la misma β (que no se ha medido), y mide los perdidos "
-                 "con una regla lineal: es el techo."),
+        ui.saldo("Peor caso del año · las salidas nuevas no atraen a nadie", r["saldo_conservador_Mcop"],
+                 "Cuenta los pasajes que se pierden donde se quitan salidas y ninguno de los que se ganan donde se ponen "
+                 "(contabilidad conservadora). Es un supuesto extremo, no lo que se espera: es el piso.", extremo="peor caso"),
+        ui.saldo("Mejor caso del año · las salidas nuevas atraen pasajeros", r["saldo_simetrico_Mcop"],
+                 "Cuenta también los que se ganan donde se ponen, con la misma β (que no se ha medido al poner salidas), y "
+                 "mide los perdidos con una regla lineal (contabilidad simétrica): es el techo.", extremo="mejor caso"),
     ], className="saldos")
+    entre = (f"El saldo del año queda entre esos dos casos, y dónde cae depende de cómo respondan los pasajeros. Por eso la "
+             f"propuesta no es cambiar el horario de una vez: es un piloto de {num(semanas)} semanas que lo mide antes. En el "
+             f"piloto se juega un saldo de entre {con_signo(piloto['saldo_min_Mcop'], 1)} y "
+             f"{con_signo(piloto['saldo_max_Mcop'], 1)} M COP, con el {num(piloto['pct_pax_anual_cra54'], 2)} % de los "
+             "pasajeros de un año de CRA 54.")
 
     texto = (f"El ahorro es lo que Sobusa deja de pagar en kilómetros ({con_signo(r['ahorro_km_Mcop'])} M COP) y en horas de "
              f"conductor ({con_signo(r['ahorro_conductor_Mcop'])}, si al conductor se le paga {conv.get('pago_conductor', 'por hora')}): "
@@ -102,7 +111,7 @@ def _heroe(A, fuentes):
              f"{num(r['ahorro_pct_costo'], 1)} % menos. No es ganancia: falta lo que se juega en pasajes.")
     beta = (f"β = {num(b['central'], 2)}: si se quitan {QUITA} de cada {CADA} salidas de una hora, se pierden "
             f"{num(b['central'] * QUITA)} de cada {CADA} pasajeros de esa hora (rango creíble: {num(b['bajo'], 2)} a "
-            f"{num(b['alto'], 2)}). Cuál de los dos saldos se acerca más a la realidad lo mediría el piloto de {num(semanas)} semanas.")
+            f"{num(b['alto'], 2)}). Se midió donde faltaron salidas; cuánto atraen las que se ponen es lo que falta medir.")
     # De qué sale el ahorro, como las barras rayadas de la referencia: partes de un total positivo (si alguna fuera
     # negativa, no se dibujan: una barra nunca lleva un saldo con signo)
     partes = [("Ahorro en kilómetros", r["ahorro_km_Mcop"]), ("Ahorro en horas de conductor", r["ahorro_conductor_Mcop"])]
@@ -111,7 +120,7 @@ def _heroe(A, fuentes):
     if total > 0 and all(v >= 0 for _, v in partes):
         rayas = [html.Div([ui.barra_rayas(et, f"{con_signo(v)} M COP", v / total, "modelo") for et, v in partes],
                           className="rayas-lista")]
-    pie = html.Div(rayas + [
+    pie = html.Div([html.P(entre, className="heroe__texto")] + rayas + [
         html.P(texto, className="heroe__texto"),
         ui.nota(beta),
         # El enlace en píldora blanca, como los botones de la referencia (sin subrayado; navega dentro de la app)

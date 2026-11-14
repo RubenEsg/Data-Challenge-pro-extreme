@@ -527,9 +527,15 @@ def cifra(etiqueta, valor, unidad=None, variacion=None, tono=None, nota=None, *,
     return html.Div(hijos, className=_clases("cifra", hoy and "cifra--hoy", mini and "cifra--mini", clase), **_kw(id=id))
 
 
-def saldo(titulo, valor, definicion=None, unidad="M COP al año", d=0, palabras=("saldo positivo", "saldo negativo")):
-    """Un saldo: cifra con su signo (--t-xl) + chip de estado con icono y palabra + definición de una línea."""
-    estado = chip(palabras[0], "bien") if valor > 0 else chip(palabras[1], "critico") if valor < 0 else chip("saldo nulo")
+def saldo(titulo, valor, definicion=None, unidad="M COP al año", d=0, palabras=("saldo positivo", "saldo negativo"),
+          extremo=None):
+    """Un saldo: cifra con su signo (--t-xl) + chip + definición de una línea. El chip dice el estado del saldo (positivo o
+    negativo, con icono y palabra). Con `extremo` («peor caso», «mejor caso») la cifra es el borde de un rango y no un
+    resultado, así que el chip va neutro y dice solo qué borde es: un piso en rojo se lee como una pérdida segura."""
+    if extremo:
+        estado = chip(extremo)
+    else:
+        estado = chip(palabras[0], "bien") if valor > 0 else chip(palabras[1], "critico") if valor < 0 else chip("saldo nulo")
     hijos = [html.P(titulo, className="saldo__titulo"),
              html.P([html.Span(con_signo(valor, d)), html.Span(unidad, className="saldo__unidad")], className="saldo__valor"),
              estado]

@@ -98,7 +98,9 @@ eje y; leyenda HTML cuando hay dos series o más; gris y rosa nunca con la misma
 ## 6. Reglas que no cambian
 
 Las cifras salen de `datos/` (342 comprobaciones en `verificar_ahorro.py`); el ahorro en operación (+501 M COP) nunca va
-sin sus dos saldos (−2.825 conservador, +1.600 simétrico) ni se llama «ganancia»; el plan que recorta muestra su canje
+sin sus dos saldos (−2.825 conservador, +1.600 simétrico) ni se llama «ganancia»; los dos saldos son los bordes de un
+rango y se presentan así («peor caso» y «mejor caso», con chip neutro y lo que supone cada uno), nunca como un resultado en
+rojo, y junto a lo que se juega en el piloto que lo mide; el plan que recorta muestra su canje
 (más caja en las dos contabilidades, −1.512 pasajeros netos por día, 530 frente a 267 pasajeros por día sobre la
 capacidad); formato
 es-CO (miles «.», decimales «,», menos «−», también en Plotly); estados solo con icono y palabra; solo modo claro.

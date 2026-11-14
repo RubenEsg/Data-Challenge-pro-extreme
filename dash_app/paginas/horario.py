@@ -489,7 +489,7 @@ def _calcular(ruta, fecha, modelo, cbh, km, tarifa, elast, pen, espera, imax, co
 
     # --- balance del día --------------------------------------------------------------------------------------------
     dec_b = 0 if float(beta * 10).is_integer() else 1
-    tabla_b = ui.tabla(["", "Conservadora", "Simétrica"], [
+    tabla_b = ui.tabla(["", "Peor caso (conservadora)", "Mejor caso (simétrica)"], [
         ["Ahorro en operación", f"{ui.con_signo(ahorro / 1e6, 2)} M COP", f"{ui.con_signo(ahorro / 1e6, 2)} M COP"],
         ["Pasajeros en riesgo donde se quitan salidas", ui.num(perdidos), ui.num(perdidos)],
         ["Pasajeros ganados donde se ponen salidas", "no cuentan", ui.num(ganados)],
@@ -501,19 +501,21 @@ def _calcular(ruta, fecha, modelo, cbh, km, tarifa, elast, pen, espera, imax, co
                   html.P([html.Span(ui.con_signo(ahorro / 1e6, 2), className="heroe__numero"),
                           html.Span("M COP", className="heroe__unidad")], className="heroe__valor"),
                   html.Div([ui.chip_valor("Pasajeros en riesgo donde se quitan salidas:", ui.num(perdidos)),
-                            ui.chip_valor("Ganados donde se ponen (solo la simétrica):", ui.num(ganados))], className="chips")],
+                            ui.chip_valor("Ganados donde se ponen (solo en el mejor caso):", ui.num(ganados))], className="chips")],
                  className="heroe__principal"),
-        html.Div([ui.saldo("Contabilidad conservadora", cons / 1e6,
-                           "Solo cuenta los pasajes que se pierden donde se quitan salidas: es el piso.", "M COP", 2),
-                  ui.saldo("Contabilidad simétrica", sim / 1e6,
-                           "También cuenta los que se ganan donde se ponen, con la misma β, que no se ha medido: es el techo.",
-                           "M COP", 2)],
+        # Los bordes del rango del día, no dos resultados: chip neutro («peor caso», «mejor caso»), como en Inicio
+        html.Div([ui.saldo("Peor caso del día · las salidas nuevas no atraen a nadie", cons / 1e6,
+                           "Solo cuenta los pasajes que se pierden donde se quitan salidas (contabilidad conservadora): es el piso.",
+                           "M COP", 2, extremo="peor caso"),
+                  ui.saldo("Mejor caso del día · las salidas nuevas atraen pasajeros", sim / 1e6,
+                           "También cuenta los que se ganan donde se ponen, con la misma β, que no se ha medido al poner salidas "
+                           "(contabilidad simétrica): es el techo.", "M COP", 2, extremo="mejor caso")],
                  className="saldos"),
         ui.nota(f"β = {beta_t}: si se quitan {ui.num(10)} de cada {ui.num(100)} salidas de una hora, se pierden "
                 f"{ui.num(beta * 10, dec_b)} de cada {ui.num(100)} pasajeros de esa hora (rango creíble: {ui.num(_BETA['bajo'], 2)} a "
                 f"{ui.num(_BETA['alto'], 2)}). Cada pasaje vale {ui.num(P['TARIFA'])} COP."),
     ]
-    titulo_b = f"Saldo del día: {cons_t} M COP con la contabilidad conservadora y {sim_t} con la simétrica"
+    titulo_b = f"Saldo del día: entre {cons_t} M COP en el peor caso y {sim_t} en el mejor"
 
     # --- horario minuto a minuto ------------------------------------------------------------------------------------
     filas_csv, bloques, texto = [], [], ["ruta\thora\tsalida\thora_salida\tintervalo_min"]

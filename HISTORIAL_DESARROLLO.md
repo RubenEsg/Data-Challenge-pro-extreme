@@ -1,17 +1,17 @@
 # Historial de desarrollo
 
-Lista cronológica de **todos los commits** (235) del repositorio de desarrollo del equipo, desde el primero hasta `e61e999`, el commit al que apuntaba `main` al generarla. Responde al «historial» del entregable E03 (fila E03.3 de `MATRIZ_CUMPLIMIENTO.md`): el repositorio de entrega se arma con `empaquetar_entrega.py` a partir de `EntregaFinal/` y solo guarda sus sincronizaciones.
+Lista cronológica de **todos los commits** (237) del repositorio de desarrollo del equipo, desde el primero hasta `bcad535`, el commit al que apuntaba `main` al generarla. Responde al «historial» del entregable E03 (fila E03.3 de `MATRIZ_CUMPLIMIENTO.md`): el repositorio de entrega se arma con `empaquetar_entrega.py` a partir de `EntregaFinal/` y solo guarda sus sincronizaciones.
 
 - **De dónde sale.** `historial_desarrollo.py` lee `git log` del repositorio de desarrollo, sin red, y escribe este archivo. Por cada commit publica la fecha y la hora del autor, el hash corto, el asunto, cuántos archivos y líneas cambia (`git log --numstat -M`) y cuántos de esos archivos están en `EntregaFinal/`, la carpeta que se convierte en el repositorio de entrega.
 - **Qué no publica.** Correos, nombres de autor (todo el historial es de un solo contribuyente), cuerpos de los mensajes ni rutas de archivos. La revisión automática de los asuntos (claves, contraseñas, tokens, credenciales en URL, cadenas largas con aspecto aleatorio) no omitió ninguno.
-- **Cómo verificarlo.** Los hashes son los del repositorio de desarrollo del equipo, que se muestra a quien evalúe si lo pide. Ahí, `git log --reverse --format="%h %aI %s" main` da la misma lista y `git show --numstat <hash>` las cifras de cada commit. Cada hash de git depende de todo lo anterior, así que el hash completo del último commit fija la cadena entera: `e61e99953adcda6817821b1cdee29df80c743e1e`. El primer commit es `6f885e83cae939c90cfc2796c13cc433dfce643a`.
-- **Generado** el 14 de noviembre de 2026 a las 08:01 (−05:00), desde `main` (`e61e999`). Al integrar commits nuevos se vuelve a correr el script.
+- **Cómo verificarlo.** Los hashes son los del repositorio de desarrollo del equipo, que se muestra a quien evalúe si lo pide. Ahí, `git log --reverse --format="%h %aI %s" main` da la misma lista y `git show --numstat <hash>` las cifras de cada commit. Cada hash de git depende de todo lo anterior, así que el hash completo del último commit fija la cadena entera: `bcad53552ff5ea40b631eb4859de5c31118dc95d`. El primer commit es `6f885e83cae939c90cfc2796c13cc433dfce643a`.
+- **Generado** el 14 de noviembre de 2026 a las 12:37 (−05:00), desde `main` (`bcad535`). Al integrar commits nuevos se vuelve a correr el script.
 
 ## Resumen
 
 | Commits | Días con commits | Primer commit | Último commit | Tocan `EntregaFinal/` | Archivos cambiados (suma) | Líneas agregadas / quitadas |
 |---|---|---|---|---|---|---|
-| 235 | 17 | 2026-10-07 | 2026-11-14 | 196 | 6.313 | +1.342.408 / −114.183 |
+| 237 | 17 | 2026-10-07 | 2026-11-14 | 198 | 6.323 | +1.342.487 / −114.227 |
 
 Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombrado cuenta una vez. Todas las horas tienen el mismo huso (−05:00). 13 commit(s) de fusión no traen cifras: git no muestra su diferencia.
 
@@ -312,7 +312,7 @@ Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombra
 | 23:46 | `b17cc6b` | Documentos: la política no encola un reentrenamiento que no se puede entrenar y los guiones de réplicas corren sobre una copia temporal | 2 | +7 / −2 | sí (2) |
 | 23:48 | `22733b0` | Documentos: E02 y LEEME dicen el contraste por segmento con filas reales y la medición vigente de la capa de segmentos | 2 | +4 / −4 | sí (2) |
 
-## 2026-11-14 · sábado · 18 commits
+## 2026-11-14 · sábado · 20 commits
 
 | Hora | Commit | Asunto | Archivos | Líneas | En `EntregaFinal/` |
 |---|---|---|---|---|---|
@@ -334,3 +334,5 @@ Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombra
 | 01:44 | `3390594` | Evidencia final en main: contrato, réplica, despliegue y rendimiento sobre el código final, cuatro arreglos con su revisión, documentos consolidados y auditoría | fusión | — | — |
 | 01:45 | `e3168d7` | Historial de desarrollo al día con la fusión de la evidencia final en main | 1 | +8 / −6 | sí (1) |
 | 08:00 | `e61e999` | Entrega pública: sin rutas de la máquina local ni menciones de otros repositorios, integración continua del 14-11 y anexo del informe con la disposición del repositorio de entrega | 31 (12 binarios) | +92 / −84 | sí (25) |
+| 08:01 | `4997dc5` | Historial de desarrollo al día con los ajustes de la entrega pública | 1 | +8 / −6 | sí (1) |
+| 11:58 | `bcad535` | Tablero y app: el saldo del año se presenta como un rango (peor y mejor caso), con chip neutro y junto a lo que se juega en el piloto que lo mide | 9 | +71 / −38 | sí (7) |

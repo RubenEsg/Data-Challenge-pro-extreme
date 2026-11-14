@@ -115,13 +115,21 @@ def _tabla_tipos(A, plan="reasigna"):
 def _heroe(A):
     h, r = A["planes"]["hoy"], A["planes"]["reasigna"]
     pct = r["ahorro_pct_costo"]
+    piloto = D.valor("inicio", "inicio_piloto_resumen")
+    # Los dos saldos son los bordes de un rango (ver Inicio): cada uno dice qué supone y el chip va neutro.
     saldos = [
-        ui.saldo("Saldo del año · contabilidad conservadora", r["saldo_conservador_Mcop"],
-                 "Solo cuenta los pasajes que se pierden donde se quitan salidas."),
-        ui.saldo("Saldo del año · contabilidad simétrica", r["saldo_simetrico_Mcop"],
-                 "También cuenta los que se ganan donde se ponen, con la misma β (que no se ha medido), y mide los perdidos con "
-                 "una regla lineal."),
+        ui.saldo("Peor caso del año · las salidas nuevas no atraen a nadie", r["saldo_conservador_Mcop"],
+                 "Cuenta los pasajes que se pierden donde se quitan salidas y ninguno de los que se ganan donde se ponen "
+                 "(contabilidad conservadora). Es un supuesto extremo, no lo que se espera: es el piso.", extremo="peor caso"),
+        ui.saldo("Mejor caso del año · las salidas nuevas atraen pasajeros", r["saldo_simetrico_Mcop"],
+                 "Cuenta también los que se ganan donde se ponen, con la misma β (que no se ha medido al poner salidas), y "
+                 "mide los perdidos con una regla lineal (contabilidad simétrica): es el techo.", extremo="mejor caso"),
     ]
+    entre = html.P(f"El saldo del año queda entre esos dos casos, y dónde cae depende de cómo respondan los pasajeros. Por eso la "
+                   f"propuesta no es cambiar el horario de una vez: es un piloto de {num(piloto['semanas'])} semanas que lo mide "
+                   f"antes. En el piloto se juega un saldo de entre {con_signo(piloto['saldo_min_Mcop'], 1)} y "
+                   f"{con_signo(piloto['saldo_max_Mcop'], 1)} M COP, con el {num(piloto['pct_pax_anual_cra54'], 2)} % de los "
+                   "pasajeros de un año de CRA 54.", className="heroe__texto")
     pie = ui.nota(f"Lo que Sobusa deja de pagar en kilómetros ({con_signo(r['ahorro_km_Mcop'])} M COP) y en horas de conductor "
                   f"({con_signo(r['ahorro_conductor_Mcop'])} M COP, si al conductor se le paga por hora): el {num(pct, 1)} % de lo "
                   f"que hoy le cuestan ({num(h['costo_km_conductor_Mcop'])} M COP al año). El plan que reasigna frente a hoy: tres "
@@ -132,12 +140,12 @@ def _heroe(A):
         html.P([html.Span(con_signo(r["ahorro_operacion_Mcop"]), className="heroe__numero"),
                 html.Span("M COP al año", className="heroe__unidad"),
                 ui.chip_cambio(-pct, f"{con_signo(-pct, 1)} % en el costo de km y conductor")], className="heroe__valor"),
-        html.P("No es ganancia: falta lo que se juega en pasajes, abajo en sus dos saldos.", className="heroe__texto"),
+        html.P("No es ganancia: falta lo que se juega en pasajes, abajo, entre su peor y su mejor caso.", className="heroe__texto"),
     ], className="heroe__principal")
     fuentes = _fuentes("planes.reasigna.ahorro_operacion_Mcop", "planes.reasigna.ahorro_km_Mcop", "planes.reasigna.ahorro_conductor_Mcop",
                        "planes.hoy.costo_km_conductor_Mcop", "planes.reasigna.ahorro_pct_costo", "planes.reasigna.saldo_conservador_Mcop",
-                       "planes.reasigna.saldo_simetrico_Mcop")
-    return ui.tarjeta([principal, html.Div(saldos, className="saldos"), html.Div(pie, className="heroe__pie")],
+                       "planes.reasigna.saldo_simetrico_Mcop", otros=[_archivo("inicio", "inicio_piloto_resumen")])
+    return ui.tarjeta([principal, html.Div(saldos, className="saldos"), html.Div([entre, pie], className="heroe__pie")],
                       titulo="Ahorro en operación · plan que reasigna", fuentes=fuentes, clase="heroe cifra--hero", id="rs-heroe")
 
 
@@ -359,8 +367,8 @@ def _comparacion(A):
         ("Pasajeros por día por encima de la capacidad", (h["pax_sobre_capacidad_dia"], r["pax_sobre_capacidad_dia"],
                                                           c["pax_sobre_capacidad_dia"]), 0, False, "min"),
         ("Espera media, min", (h["espera_min"], r["espera_min"], c["espera_min"]), 2, False, "min"),
-        ("Saldo del año, contabilidad conservadora, M COP", (None, r["saldo_conservador_Mcop"], c["saldo_conservador_Mcop"]), 0, True, "max"),
-        ("Saldo del año, contabilidad simétrica, M COP", (None, r["saldo_simetrico_Mcop"], c["saldo_simetrico_Mcop"]), 0, True, "max"),
+        ("Saldo del año en el peor caso (contabilidad conservadora), M COP", (None, r["saldo_conservador_Mcop"], c["saldo_conservador_Mcop"]), 0, True, "max"),
+        ("Saldo del año en el mejor caso (contabilidad simétrica), M COP", (None, r["saldo_simetrico_Mcop"], c["saldo_simetrico_Mcop"]), 0, True, "max"),
     ]
     cuerpo = []
     for rotulo, vals, d, signo, criterio in filas:

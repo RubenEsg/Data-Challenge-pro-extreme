@@ -64,6 +64,12 @@ De las partes nuevas o revisadas:
 
 Cada pantalla tiene además su captura de página completa (`dash_<pantalla>_completa.png`).
 
+**Nota del 14-11-2026.** Las capturas de Inicio, Horario y Resultado son anteriores a un cambio de rótulos: las dos
+tarjetas del saldo, que se llamaban «contabilidad conservadora» y «contabilidad simétrica» y llevaban un chip de estado
+(«saldo negativo» en rojo), se presentan ahora como los bordes de un rango, «peor caso» y «mejor caso», con chip neutro,
+con lo que supone cada una y con lo que se juega en el piloto que lo mide. Las cifras son las mismas (−2.825 y +1.600
+M COP al año); las comprueba `dash_app/verificar_ahorro.py`.
+
 ## Estilo, cifras y funciones
 
 | Archivo | Resultado |

@@ -538,7 +538,7 @@ def layout(**_):
         _respuesta(),
         _errores(),
         _forma(A, fuentes_forma),
-        ui.seccion("Qué puedes hacer aquí", [ui.destinos([
+        ui.seccion("Todo está en este tablero", [ui.destinos([
             ui.destino("/pronostico", "pronostico", "Pronóstico",
                        "Los pronósticos que guarda la API con su banda P10–P90 frente a lo real y por qué sale cada uno; aparte, el "
                        "laboratorio del informe académico."),
@@ -552,8 +552,11 @@ def layout(**_):
                        "experimentos del informe académico."),
             ui.destino("/resultado", "resultado", "Resultado",
                        "Cuánto se ahorra al año, dónde se mueven las salidas, qué se juega en pasajeros y qué pasaría si se recortara."),
-        ])], "Aquí el pronóstico y el optimizador corren de verdad: tú eliges la ruta, el día, el modelo y los costos, y el "
-             "horario se recalcula en un segundo.",
+            ui.destino("/anexos", "enlaces", "Anexos",
+                       "El informe técnico, el cuaderno y la app sin conexión. Son material de apoyo: no hace falta abrirlos para "
+                       "entender la propuesta."),
+        ])], "Esta es la entrada: lo importante está en sus pestañas. El pronóstico y el optimizador corren de verdad: tú "
+             "eliges la ruta, el día, el modelo y los costos, y el horario se recalcula en un segundo.",
             intro="El modelo activo de la API pronostica cuántos pasajeros habrá en cada ruta y hora, con su banda P10–P90, y "
                   "un optimizador reparte las salidas: menos en el valle, más en los picos, con casi las mismas horas de bus."),
         ui.pie([

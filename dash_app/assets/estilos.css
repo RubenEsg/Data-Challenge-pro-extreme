@@ -74,7 +74,7 @@
   --grano: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   --icono-puntos: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='5' cy='12' r='2'/%3E%3Ccircle cx='12' cy='12' r='2'/%3E%3Ccircle cx='19' cy='12' r='2'/%3E%3C/svg%3E");
   --barra-fondo: color-mix(in srgb, var(--fondo) 86%, transparent);
-  /* --- Colores con nombre (heredados): solo el logo y los cuadros de Enlaces los nombran ---------------------- */
+  /* --- Colores con nombre (heredados): solo el logo y los cuadros de Anexos los nombran ---------------------- */
   --glifo-sobre-color: #ffffff;
   --color-turquesa: #0d9488;   --color-azul: #2457f0;   --color-indigo: #4f46e5;   --color-naranja: #e8590c;
   --color-coral: #e5484d;      --color-cian: #0b8ec2;   --color-verde: #18753a;    --color-morado: #7048e8;

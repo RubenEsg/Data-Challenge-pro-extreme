@@ -283,6 +283,6 @@ FUENTE_TEXTO = TOKENS["--fuente-texto"]
 FUENTE_TITULOS = TOKENS["--fuente-titulos"]
 FUENTE_MONO = TOKENS["--fuente-mono"]
 
-# Pantallas del laboratorio (y las de la app que aparecen en Enlaces) → token de su cuadro
+# Pantallas del laboratorio (y las de la app que aparecen en Anexos) → token de su cuadro
 PANTALLAS = ["inicio", "pronostico", "horario", "modelo", "resultado", "enlaces",
              "demanda", "despacho", "ciudad", "piloto", "metodo"]

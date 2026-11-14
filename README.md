@@ -9,6 +9,12 @@
 
 ## Guía para el jurado
 
+**Empieza aquí: el tablero** (`dash_app/`; en Windows, doble clic en `dash_app/iniciar_dash.bat`, y en cualquier sistema,
+los comandos de «Cómo correr el laboratorio Dash»). Es la entrada única: Inicio trae la propuesta, lo que se ahorra, lo que
+se juega en pasajes y el piloto que lo mide, y sus pestañas llevan al pronóstico, al horario y al resultado. La app sin
+conexión (`app_sobusa/app.html`) y sus páginas sueltas muestran lo mismo con resultados ya calculados: son anexos, y el
+tablero los reúne en su pantalla «Anexos».
+
 La especificación v1.5 de Extreme Technologies se revisa en cuatro documentos:
 
 - `MATRIZ_CUMPLIMIENTO.md`: cada requisito (RF, RNF, §4–§15 y los criterios de §16) con su estado y su evidencia.
@@ -115,7 +121,7 @@ y abra http://127.0.0.1:8050. El recorrido por cada pantalla está en `api_frecu
 2. El producto: E01 y E02 (`documentos/`), la API con la demostración de arriba y el tablero (`dash_app/`).
 3. La parte académica: el informe técnico (10 minutos para el resumen, las tablas 1 y 3 y las recomendaciones) y el
    cuaderno, que es su prueba técnica: cada cifra se calcula ahí mismo o se lee de su archivo de resultados y se
-   contrasta. La app HTML recorre el proyecto entero.
+   contrasta. La app sin conexión recorre el proyecto entero con resultados ya calculados; es un anexo del tablero.
 
 ## Cómo correr el laboratorio Dash
 
@@ -143,9 +149,10 @@ solucionador CBC viene dentro de PuLP. Las pantallas del laboratorio son:
 - **Horario en vivo** (el optimizador D5 resuelto en el momento, con los costos, la elasticidad y el intervalo que usted
   elija);
 - Despacho en vivo (la repetición de un día de 2025 con el plan; no tiene mandos sobre los buses, como pide §3.2);
-- El modelo (los experimentos del informe académico, no el modelo desplegado en la API);
+- El modelo (primero el modelo activo de la API; después, los experimentos del informe académico);
 - Resultado (qué gana Sobusa);
-- Enlaces (abre el informe, el cuaderno y, si está la carpeta `app_sobusa/` del ZIP completo, la app HTML).
+- Anexos (el informe, el cuaderno y, si está la carpeta `app_sobusa/` del ZIP completo, la app sin conexión: material de
+  apoyo que no hace falta abrir para entender la propuesta).
 
 Las pantallas **Alertas, Recomendaciones, Operación y Monitoreo**, la sección «Modelo activo (API)» de Pronóstico y la
 tarjeta de Inicio con la respuesta a la pregunta del reto consumen la API del reto. Para usarlas, levante la API (abajo) y defina `SOBUSA_API_URL` y

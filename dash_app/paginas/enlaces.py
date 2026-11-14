@@ -1,7 +1,8 @@
-"""Enlaces: ¿Dónde está el resto del proyecto? Un tablero de tarjetas como la referencia (DISENO.md): la app completa
-(app.html, con la consola de despacho y la vista 3D) y la entrega final arriba; las páginas sueltas; el informe y qué hace
-cada una abajo. Solo se lista lo que se encuentra junto a esta carpeta, y los conteos salen de lo que se encuentra
-(DISENO.md §6.12)."""
+"""Anexos: ¿Qué más hay, aparte de este tablero? El tablero es la entrada única: lo importante está en sus pestañas. Aquí va
+el material de apoyo, que no hace falta abrir para entender la propuesta: arriba la entrega final (el informe técnico y el
+cuaderno) y qué es cada cosa; debajo, la misma propuesta sin conexión (app.html, con la consola de despacho y la vista 3D)
+y sus páginas sueltas; al final, los documentos del proyecto. Solo se lista lo que se encuentra junto a esta carpeta, y los
+conteos salen de lo que se encuentra (DISENO.md §6.12). La ruta antigua, /enlaces, lleva aquí."""
 import os
 from pathlib import Path
 
@@ -11,7 +12,8 @@ from dash import html
 import datos_app as D
 import ui
 
-dash.register_page(__name__, path="/enlaces", name="Enlaces", order=5, title="Enlaces · Sobusa Despacho")
+dash.register_page(__name__, path="/anexos", redirect_from=["/enlaces"], name="Anexos", order=10,
+                   title="Anexos · Sobusa Despacho")
 
 AQUI = Path(__file__).resolve().parent.parent
 
@@ -30,7 +32,7 @@ PAGINAS = [
     ("consola_despacho.html", "Consola de despacho", "despacho", "Qué hace el despachador en cada momento del día, con el plan y la reoptimización."),
     ("vista_3d.html", "Vista 3D", "ciudad", "Los buses en las calles de Barranquilla, hora a hora, con el plan y con lo que pasó."),
     ("planificador.html", "Planificador", "horario", "El horario recomendado por ruta y tipo de día, precalculado."),
-    ("simulador_ahorro.html", "Simulador de ahorro", "resultado", "Costos, conductores y saldo del plan, por mes y por día."),
+    ("simulador_ahorro.html", "Simulador de ahorro", "resultado", "Costos, conductores y el saldo del plan en sus dos casos, por mes y por día."),
 ]
 _LETRAS = ["ninguna", "una", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez"]
 
@@ -48,29 +50,31 @@ def _proyecto():
 
 
 def _subtitulo(raiz, n_paginas, entrega):
+    """Lo importante está en las pestañas de este tablero; aquí, qué material de apoyo se encontró junto a la carpeta."""
     partes = []
-    if raiz:
-        partes.append("la app completa")
-        if n_paginas:
-            partes.append(f"{_letras(n_paginas)} página{'s' if n_paginas != 1 else ''} suelta{'s' if n_paginas != 1 else ''}")
     if entrega:
-        partes.append("el informe técnico")
+        partes += ["el informe técnico", "el cuaderno"]
+    if raiz:
+        partes.append("la app sin conexión" + (f" con {_letras(n_paginas)} página{'s' if n_paginas != 1 else ''} "
+                                                 f"suelta{'s' if n_paginas != 1 else ''}" if n_paginas else ""))
+    base = "Todo lo importante está en las pestañas de este tablero."
     if not partes:
-        return "Este laboratorio muestra el modelo funcionando; el resto del proyecto no está junto a esta carpeta."
+        return f"{base} El material de apoyo no está junto a esta carpeta."
     texto = partes[0] if len(partes) == 1 else ", ".join(partes[:-1]) + " y " + partes[-1]
-    return f"En {texto}. Este laboratorio muestra el modelo funcionando; ahí está el proyecto entero."
+    return f"{base} Aquí está el material de apoyo ({texto}); no hace falta abrirlo para entender la propuesta."
 
 
 def _app_completa(raiz):
-    """Tarjeta ancha: la app completa, con la píldora negra para abrirla y la ruta del archivo en el «…»."""
+    """Tarjeta: la app sin conexión, con el botón para abrirla y la ruta del archivo. Es apoyo: el botón va en blanco."""
     rel = os.path.relpath(raiz / "app.html", AQUI).replace(os.sep, "/")
     n_pantallas = len(D.cifras_app().get("pantallas", {}))
     return ui.tarjeta([
         ui.parrafo(f"Las {_letras(n_pantallas)} pantallas del proyecto con todas las cifras y su fuente, la consola de despacho y "
-                   "la vista 3D. Muestra resultados precalculados y funciona sin internet: ábrela con doble clic sobre app.html."),
-        html.Div([ui.boton("Abrir la app completa", href="/proyecto/app.html", tipo="primario", icono="externo", externo=True),
+                   "la vista 3D, con resultados ya calculados. Funciona sin internet y sin instalar nada: se abre con doble clic "
+                   "sobre app.html. Sirve para revisar el proyecto sin correr el tablero."),
+        html.Div([ui.boton("Abrir la app sin conexión", href="/proyecto/app.html", tipo="secundario", icono="externo", externo=True),
                   ui.nota(["Archivo: ", html.Code(rel)])], className="botonera"),
-    ], titulo="La app completa", subtitulo="Sobusa Despacho (app.html): el proyecto entero, con su fuente en cada cifra.",
+    ], titulo="La app sin conexión", subtitulo="Sobusa Despacho (app.html): la misma propuesta, con la fuente de cada cifra.",
         id="enlaces-app")
 
 
@@ -84,11 +88,13 @@ def _entrega(entrega):
 
 def _que_hace():
     return ui.tarjeta([
-        ui.parrafo([html.Strong("Este laboratorio (Dash): "), "calcula en vivo. El optimizador se resuelve con CBC cada vez que "
-                    "cambia un parámetro, y el pronóstico se puede cambiar de modelo."]),
-        ui.parrafo([html.Strong("La app completa (app.html): "), "muestra los resultados ya calculados de todo el proyecto, con su "
-                    "fuente, y se abre sin instalar nada."]),
-    ], titulo="Qué hace cada una", id="enlaces-que-hace")
+        ui.parrafo([html.Strong("Este tablero: "), "es la entrada. Calcula en vivo (el optimizador se resuelve con CBC cada vez "
+                    "que cambia un parámetro) y lee la API del reto. En Inicio están la propuesta, lo que se ahorra, lo que se "
+                    "juega en pasajes y el piloto que lo mide."]),
+        ui.parrafo([html.Strong("El informe técnico y el cuaderno: "), "la versión académica, con el método y cada cifra comprobada."]),
+        ui.parrafo([html.Strong("La app sin conexión (app.html): "), "lo mismo con resultados ya calculados, para abrir con doble "
+                    "clic. No trae nada que cambie la propuesta."]),
+    ], titulo="Qué es cada cosa", id="enlaces-que-hace")
 
 
 def layout(**_):
@@ -97,36 +103,34 @@ def layout(**_):
     pags = [p for p in PAGINAS if raiz and (raiz / p[0]).is_file()]
     docs = [(r, n) for r, n in INFORMES if raiz and (raiz / r).is_file()]
 
-    # Fila 1: la app completa (o el aviso de que no está) y la entrega final
-    fila1 = [_app_completa(raiz)] if raiz else [ui.aviso(
-        ["No encontré app.html junto a esta carpeta. Si tienes el proyecto completo, ábrelo con doble clic en ",
-         html.Code("app.html"), " o indica su carpeta con la variable ", html.Code("SOBUSA_PROYECTO"), " antes de correr la app."],
-        "atencion", "La app completa no está al lado")]
-    if entrega:
-        fila1.append(_entrega(entrega))
+    # Fila 1: la entrega final (el informe técnico y el cuaderno) y qué es cada cosa
+    fila1 = ([_entrega(entrega)] if entrega else []) + [_que_hace()]
     # h2 solo para lectores de pantalla: las tarjetas llevan h3 y así no se salta de h1 a h3
-    bloques = [html.H2("La app completa y la entrega final", className="oculto"),
-               ui.rejilla(fila1, "2-1" if len(fila1) == 2 else "1-1", id="enlaces-tablero")]
+    bloques = [html.H2("La entrega final y qué es cada cosa", className="oculto"),
+               ui.rejilla(fila1, "1-1", id="enlaces-tablero")]
 
+    # La misma propuesta sin conexión: la app y sus páginas sueltas (o el aviso de que no está al lado)
+    sin_conexion = [_app_completa(raiz)] if raiz else [ui.aviso(
+        ["No encontré app.html junto a esta carpeta. Si tienes el proyecto completo, ábrelo con doble clic en ",
+         html.Code("app.html"), " o indica su carpeta con la variable ", html.Code("SOBUSA_PROYECTO"), " antes de correr el tablero."],
+        "atencion", "La app sin conexión no está al lado")]
     if pags:
         # Dos por fila (una en el teléfono): con cuatro por fila, «Consola de despacho» y «Simulador de ahorro» se partían
-        bloques.append(ui.seccion("Las páginas sueltas", [ui.rejilla([
+        sin_conexion.append(ui.rejilla([
             ui.destino(f"/proyecto/{arch}", pantalla, nombre, texto, externo=True)
-            for arch, nombre, pantalla, texto in pags], "1-1", id="enlaces-paginas")],
-            "Se abren aparte, en otra pestaña y con su propio estilo."))
+            for arch, nombre, pantalla, texto in pags], "1-1", id="enlaces-paginas"))
+    bloques.append(ui.seccion("La misma propuesta, sin conexión", sin_conexion,
+                              "Partes de la app sin conexión; se abren aparte, en otra pestaña y con su propio estilo."))
 
-    # Fila de abajo: el informe (si se encontró) y qué hace cada una
-    abajo = []
+    # Al final, los documentos del proyecto que se encontraron
     if docs:
         # Cada documento en píldora blanca (el mismo estilo de enlace que la entrega final) con su ruta al lado
-        abajo.append(ui.tarjeta(
+        bloques.append(ui.tarjeta(
             [html.Div([ui.boton(n, href=f"/proyecto/{r}", tipo="secundario", icono="externo", externo=True),
                        ui.nota(html.Code(r, className="ruta"))], className="botonera") for r, n in docs],
-            titulo="El informe", subtitulo="Documentos del proyecto que se encontraron junto a esta carpeta.", id="enlaces-informe"))
-    abajo.append(_que_hace())
-    bloques.append(ui.rejilla(abajo, "1-1") if len(abajo) == 2 else abajo[0])
+            titulo="Documentos del proyecto", subtitulo="Los que se encontraron junto a esta carpeta.", id="enlaces-informe"))
 
     return ui.pantalla([
-        ui.encabezado("¿Dónde está el resto del proyecto?", _subtitulo(raiz, len(pags), entrega), pantalla="enlaces"),
+        ui.encabezado("¿Qué más hay, aparte de este tablero?", _subtitulo(raiz, len(pags), entrega), pantalla="enlaces"),
         *bloques,
     ])

@@ -251,8 +251,8 @@ html[data-embebido] main { padding-inline: 16px; padding-block: 16px 24px; }
       <div class="selector">
         <div class="tit" id="tit-plan">Plan a comparar</div>
         <div class="seg vertical" id="seg-plan" role="group" aria-labelledby="tit-plan">
-          <button type="button" data-v="a" aria-pressed="true"><span class="clave" style="background:var(--plan-a)"></span>(a) D5 con sus supuestos: recorta</button>
-          <button type="button" data-v="b" aria-pressed="false"><span class="clave" style="background:var(--plan-b)"></span>(b) D5 con costos con fuente: reasigna</button>
+          <button type="button" data-v="a" aria-pressed="false"><span class="clave" style="background:var(--plan-a)"></span>(a) D5 con sus supuestos: recorta</button>
+          <button type="button" data-v="b" aria-pressed="true"><span class="clave" style="background:var(--plan-b)"></span>(b) D5 con costos con fuente: reasigna (el recomendado)</button>
         </div>
         <div class="ayuda" id="ayuda-plan"></div>
       </div>
@@ -383,7 +383,7 @@ html[data-embebido] main { padding-inline: 16px; padding-block: 16px 24px; }
               <input type="range" id="in-beta" min="0" max="1" step="0.01">
               <div class="ayuda">Con 10 % menos salidas en una hora se pierde β × 10 % de sus pasajeros. Medida en Sobusa: 0,70 (rango 0,55–0,90, E7); literatura 0,5.</div>
             </div>
-            <label class="check"><input type="checkbox" id="in-sim"> <span>Contar también los pasajeros que se ganarían donde el plan añade salidas (contabilidad simétrica; nadie los ha medido).</span></label>
+            <div class="campo"><div class="ayuda"><b>Pasajes en juego.</b> Cuántos pasajeros atraen las salidas nuevas nunca se ha medido, así que el saldo va siempre en sus dos casos: si no atraen a nadie (contabilidad conservadora: solo cuenta los que se pierden donde se quitan salidas) y si atraen lo mismo que se pierde al quitar (contabilidad simétrica, con la misma β). No se dice cuál es más probable.</div></div>
           </div>
           <div class="grupo" style="display:flex;gap:8px;flex-wrap:wrap">
             <button type="button" class="boton primario" id="btn-reset">Restablecer valores por defecto</button>
@@ -694,7 +694,7 @@ function crearMotor(S) {
 
   // ================= estado =================
   const DEF = {
-    plan: 'a', esquema: 'hora', simetrica: false, ruta: 'Total',
+    plan: 'b', esquema: 'hora', simetrica: false, ruta: 'Total',   // simetrica queda en false: la simétrica sale de A.simNet
     precio_acpm: PRM.precio_acpm.v, rendimiento: PRM.rendimiento.v, mant_km: PRM.mant_km.v, llantas_km: PRM.llantas_km.v, lub_km: PRM.lub_km.v,
     salario: PRM.salario.v, factor_prestacional: PRM.factor_prestacional.v, aux_transporte: PRM.aux_transporte.v, prest_aux: PRM.prest_aux.v,
     recargos: PRM.recargos.v, horas_mes: PRM.horas_mes.v, horas_pagadas: PRM.horas_pagadas.v, participacion_producido: PRM.participacion_producido.v,
@@ -760,7 +760,6 @@ function crearMotor(S) {
   function sincronizar() {
     Object.entries(CAMPOS_NUM).forEach(([k, [inp]]) => { $(inp).value = String(Number(estado[k].toFixed(DEC_INPUT[k] == null ? 4 : DEC_INPUT[k]))); });
     estado.horas_turno.forEach((h, i) => { $('in-h' + i).value = String(Math.round(h * 100) / 100); });
-    $('in-sim').checked = !!estado.simetrica;
     document.querySelectorAll('#seg-plan button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === estado.plan ? 'true' : 'false'));
     document.querySelectorAll('#seg-esquema button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === estado.esquema ? 'true' : 'false'));
     document.querySelectorAll('#seg-metodo button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.v === estado.metodo_conductores ? 'true' : 'false'));
@@ -780,8 +779,8 @@ function crearMotor(S) {
       ' <b>Antes de prometer ahorros de nómina, confirmar con Sobusa la jornada real y la forma de pago.</b>';
     $('derivado-km').innerHTML = `Costo por km: <b>${fmt(ckm, 0)}</b> COP (ACPM ${fmt(estado.precio_acpm / estado.rendimiento)} + mantenimiento, llantas y lubricantes ${fmt(estado.mant_km + estado.llantas_km + estado.lub_km)})`;
     $('ayuda-plan').innerHTML = estado.plan === 'a'
-      ? 'Salidas que eligió D5 con <b>60.000 COP por bus-hora, 1.500 COP/km y tarifa de 3.000</b> (supuestos sin fuente): recorta 10,6 % de las salidas. Mover los costos no cambia el plan, solo lo revalora.'
-      : 'D5 reoptimizado con los <b>costos con fuente</b> (26.400 COP por bus-hora, 1.991 COP/km, tarifa 3.182, e = 0,5): casi los mismos buses-hora de hoy, quitados de los valles y puestos en CL 72 y de 13 a 15 h.';
+      ? 'Salidas que eligió D5 con <b>60.000 COP por bus-hora, 1.500 COP/km y tarifa de 3.000</b> (supuestos sin fuente): recorta 10,6 % de las salidas. Mover los costos no cambia el plan, solo lo revalora. No se recomienda: quita salidas donde había pasajeros.'
+      : 'D5 reoptimizado con los <b>costos con fuente</b> (26.400 COP por bus-hora, 1.991 COP/km, tarifa 3.182, e = 0,5): casi los mismos buses-hora de hoy, quitados de los valles y puestos en CL 72 y de 13 a 15 h. Es el plan que se recomienda.';
     const part = fmt(estado.participacion_producido * 100);
     $('ayuda-esquema').innerHTML = {
       hora: `Cada hora de bus que no sale ahorra <b>${fmt(cbh)} COP</b> de conductor (salario, prestaciones y recargos ÷ horas al mes × horas pagadas por hora en ruta).`,
@@ -807,7 +806,6 @@ function crearMotor(S) {
     estado.horas_turno[i] = v; recalcular();
   }));
   $('btn-h-iguales').addEventListener('click', () => { estado.horas_turno = [0, 1, 2].map(() => PRM.horas_turno.media_tres_rutas); sincronizar(); recalcular(); });
-  $('in-sim').addEventListener('change', (ev) => { estado.simetrica = ev.target.checked; recalcular(); });
   $('btn-reset').addEventListener('click', () => {
     const keep = { tab: estado.tab, dia: estado.dia, mesCal: estado.mesCal, ruta: estado.ruta };
     Object.assign(estado, JSON.parse(JSON.stringify(DEF)), keep);
@@ -975,63 +973,49 @@ function crearMotor(S) {
   }
 
   function frasePas(n) { return `${fmt(n)} pasajero${Math.round(n) === 1 ? '' : 's'}`; }
-  // Un ahorro que se logra perdiendo pasajeros va en rojo, con cuántos: verde solo si gana dinero sin perder pasajeros.
-  const perdidosDe = (A) => estado.simetrica ? Math.max(0, -A.simNet) : A.perd;
-  const claseAhorro = (v, A) => (v < 0 || perdidosDe(A) >= 0.5) ? 'bad' : 'ok';
-  const aCosta = (v, A) => (v >= 0 && perdidosDe(A) >= 0.5) ? `a costa de ${frasePas(perdidosDe(A))}${estado.simetrica ? ' netos' : ''}` : '';
+  // Los pasajes en juego van siempre en sus dos casos: cuántos pasajeros atraen las salidas nuevas nunca se ha medido, así
+  // que el simulador no elige uno ni dice cuál es más probable. Conservadora: solo los que se pierden donde se quitan
+  // salidas, pax · (1 − (x/n0)^β). Simétrica: también los que se ganan donde se ponen, con la misma β, pax · β · (x − n0)/n0.
+  // La simulación base es la conservadora; la simétrica sale de los mismos agregados (A.simNet), igual que en simular().
+  const factorPas = () => estado.esquema === 'producido' ? 1 - estado.participacion_producido : 1;
+  const casos = (A) => { const t = estado.tarifa_neta * factorPas(); return { cons: A.oper - A.perd * t, sim: A.oper + A.simNet * t }; };
+  // Color solo cuando los dos casos dicen lo mismo: verde si los dos dejan saldo positivo, rojo si los dos lo dejan negativo
+  const claseCasos = (c) => c.cons >= 0 ? 'ok' : (c.sim < 0 ? 'bad' : '');
+  const netosTxt = (n) => n < 0 ? `${frasePas(-n)} perdidos netos` : `${frasePas(n)} ganados netos`;
   function dibujarVeredicto(D, Mm, Y, m) {
     const el = $('veredicto');
     const plan = CORTO_PLAN[estado.plan], dia = fechaCorta(estado.dia);
-    const factorTxt = estado.esquema === 'producido' ? ` (el ${fmt(100 - estado.participacion_producido * 100)} % que pierde Sobusa)` : '';
-    let cls, tit, cuerpo;
     const dSal = D.salR - D.salQ, dKm = D.kmR - D.kmQ;
     const nSal = (n) => `${fmt(Math.abs(n))} salida${Math.round(Math.abs(n)) === 1 ? '' : 's'} ${n > 0 ? 'menos' : 'más'}`;
     const nKm = (n) => `${fmt(Math.abs(n))} km ${n > 0 ? 'menos' : 'más'}`;
     const fisico = (Math.round(dSal) === 0 ? 'las mismas salidas' : nSal(dSal)) + (Math.round(dKm) === 0 ? '' : ' y ' + nKm(dKm));
     const operTxt = D.oper >= 0 ? `ahorrado <b>${mM(D.oper)} M COP</b> en operación` : `costado <b>${mM(-D.oper)} M COP</b> más en operación`;
-    const perd = perdidosDe(D);
-    const netoTxt = `<b class="${claseAhorro(D.neto, D)}">${smM(D.neto)} M COP</b>`;
-    const pctDia = `${fmt(perd / Math.max(D.pax, 1) * 100, 1)} % de los del día`;
-    const notaB = estado.plan === 'b' ? ' El plan (b) pone salidas donde los buses van llenos; los pasajeros que ganaría allí no se cuentan con la contabilidad conservadora (prueba la casilla de contabilidad simétrica).' : '';
-    if (estado.simetrica) {
-      const net = D.simNet;
-      const pasTxt = net < 0 ? `<b class="bad">${frasePas(-net)} perdidos</b> netos` : `<b class="ok">${frasePas(net)} ganados</b> netos`;
-      cls = D.neto >= 0 && net >= 0 ? 'ok' : 'bad';
-      tit = D.neto >= 0 ? (net < 0 ? `Ahorra, pero a costa de ${frasePas(-net)}` : 'Ahorra y gana pasajeros (sin medir)') : (net < 0 ? 'No paga y pierde pasajeros' : 'No paga, aunque gane pasajeros');
-      cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}). Contando también los pasajeros que se ganarían donde añade salidas (contabilidad simétrica, sin medir), quedan ${pasTxt} (${smM(-D.pas)} M COP${factorTxt}): neto ${netoTxt}.`;
-    } else if (perd >= 0.5) {
-      cls = 'bad';
-      if (D.neto >= 0) {
-        tit = `Ahorra, pero a costa de ${frasePas(perd)}`;
-        cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}) y, descontando los pasajes, ${netoTxt} netos, <b class="bad">a costa de ${frasePas(perd)} en riesgo</b> (${pctDia}; ${mM(D.pas)} M COP en pasajes${factorTxt}).`;
-      } else if (D.oper > 0) {
-        tit = 'No paga: lo que ahorra se va en pasajes';
-        cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}), pero con <b class="bad">${frasePas(perd)} en riesgo</b> (${pctDia}; ${mM(D.pas)} M COP en pasajes${factorTxt}): neto ${netoTxt}.`;
-      } else {
-        tit = 'Cuesta más y además pone pasajeros en riesgo';
-        cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}) y además pone <b class="bad">${frasePas(perd)} en riesgo</b> en las horas que recorta (${mM(D.pas)} M COP${factorTxt}): neto ${netoTxt}.${notaB}`;
-      }
-    } else if (D.oper >= 0) {
-      cls = 'ok'; tit = D.oper > 0 ? 'Ahorra sin poner pasajeros en riesgo' : 'Igual que la operación real';
-      cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}) sin quitar salidas donde había pasajeros: neto ${netoTxt}.`;
-    } else {
-      cls = 'warn'; tit = 'Cuesta más que la operación real';
-      cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}), sin pasajeros en riesgo: neto ${netoTxt}.${notaB}`;
-    }
-    const lin = (A, nombre) => {
-      const pp = perdidosDe(A);
-      return `${nombre}: neto <b class="${claseAhorro(A.neto, A)}">${smM(A.neto)} M COP</b>` +
-        (pp >= 0.5 ? ` ${A.neto >= 0 ? 'a costa de' : 'con'} <b class="bad">${frasePas(pp)} ${estado.simetrica ? 'perdidos netos' : 'en riesgo'}</b>` : (estado.simetrica && A.simNet >= 0.5 ? ` con ${frasePas(A.simNet)} ganados netos` : ''));
-    };
-    el.className = 'veredicto ' + cls;
-    el.innerHTML = `<span class="tit">${tit}</span>${cuerpo}<span class="linea2">${lin(Mm, 'En ' + MESES[m])} · ${lin(Y, 'En 2025')} · ${esc(ESQ_TXT[estado.esquema])}, β = ${fmt(estado.beta, 2)}.</span>`;
+    const c = casos(D), cls = claseCasos(c);
+    const tit = cls === 'ok' ? 'Deja saldo positivo en los dos casos'
+      : cls === 'bad' ? 'Deja saldo negativo en los dos casos'
+        : 'El saldo depende de cuántos pasajeros atraigan las salidas nuevas';
+    const cuerpo = `El ${dia} el ${plan} habría ${operTxt} (${fisico}). Con los pasajes, el saldo del día sería <b>${smM(c.cons)} M COP</b> ` +
+      `si las salidas nuevas no atraen a nadie (${frasePas(D.perd)} en riesgo donde se quitan salidas) y <b>${smM(c.sim)} M COP</b> si ` +
+      `atraen lo mismo que se pierde al quitar (${netosTxt(D.simNet)}).`;
+    const entre = (A) => { const k = casos(A); return `de <b>${smM(k.cons)}</b> a <b>${smM(k.sim)}</b> M COP`; };
+    // De dónde sale el ahorro del año: la media por día de cada tipo de día (un día laboral puede costar más y el año ahorrar)
+    const rs = rutasSel(), PLURAL = { 'Laboral': 'laborales', 'Sábado': 'sábados', 'Domingo/festivo': 'domingos y festivos' };
+    const porTipo = S.tipos.map((nombre, k) => {
+      let s = 0, n = 0;
+      for (let d = 0; d < ND; d++) if (S.tipo[d] === k) { for (const r of rs) s += ultimo.out.oper[r][d]; n++; }
+      return n ? `${PLURAL[nombre] || nombre} <b>${smM(s / n, 1)}</b>` : null;
+    }).filter(Boolean);
+    const tipos = porTipo.length > 1 ? porTipo.slice(0, -1).join(', ') + ' y ' + porTipo[porTipo.length - 1] : porTipo.join('');
+    el.className = 'veredicto' + (cls ? ' ' + cls : '');
+    el.innerHTML = `<span class="tit">${tit}</span>${cuerpo}<span class="linea2">Ahorro medio en operación por día en 2025: ${tipos} M COP. ` +
+      `Con los pasajes: en ${MESES[m]}, ${entre(Mm)}; en 2025, ${entre(Y)} · ` +
+      `${esc(ESQ_TXT[estado.esquema])}, β = ${fmt(estado.beta, 2)}. Cuántos pasajeros atraen las salidas nuevas nunca se ha medido: ` +
+      'por eso la propuesta es medirlo con un piloto antes de cambiar el horario, y no aplicar el plan si no paga.</span>';
   }
 
   function dibujarTablaAhorro(D, Mm, Y, m) {
     const cols = [D, Mm, Y];
     const decs = [2, 1, 0];
-    // Ahorro en rojo si se logra perdiendo pasajeros (con cuántos en el neto); verde solo si no se pierde ninguno.
-    const celda = (v, A, i, conSub) => { const s = conSub ? aCosta(v, A) : ''; return `<td class="num ${claseAhorro(v, A)}">${sg(v / 1e6, decs[i])}${s ? `<span class="sub bad-txt envuelve">${s}</span>` : ''}</td>`; };
     const condLbl = { hora: `Conductores<span class="sub">pago por hora: ${fmt(ultimo.costoBH)} COP por bus-hora</span>`,
       plantilla: `Conductores<span class="sub">salario fijo: ${fmt(costoConductorDia(estado))} COP por conductor-día (${legal() ? 'jornada legal' : 'horas de 2025'})</span>`,
       producido: `Conductores<span class="sub">por producido: quitar buses no ahorra conductor</span>` }[estado.esquema];
@@ -1055,15 +1039,15 @@ function crearMotor(S) {
     filas.forEach(([lbl, f, sub]) => {
       html += `<tr class="rubro"><td>${lbl}</td>${cols.map((A, i) => `<td class="num">${sg(f(A) / 1e6, decs[i])}${sub && sub(A, i) ? `<span class="sub">${sub(A, i)}</span>` : ''}</td>`).join('')}</tr>`;
     });
-    html += `<tr class="subtotal"><td>Ahorro en operación</td>${cols.map((A, i) => celda(A.oper, A, i, false)).join('')}</tr>`;
+    html += `<tr class="subtotal"><td>Ahorro en operación</td>${cols.map((A, i) => `<td class="num">${sg(A.oper / 1e6, decs[i])}</td>`).join('')}</tr>`;
     const factorTxt = estado.esquema === 'producido' ? ` × ${fmt(1 - estado.participacion_producido, 2)}` : '';
-    if (estado.simetrica) {
-      html += `<tr><td>Pasajeros perdidos o ganados<span class="sub">simétrica: ganados − perdidos, × ${fmt(estado.tarifa_neta)} COP${factorTxt}</span></td>${cols.map((A, i) => `<td class="num ${A.simNet < 0 ? 'bad' : 'ok'}">${sg(-A.pas / 1e6, decs[i])}<span class="sub envuelve">${A.simNet < 0 ? fmt(-A.simNet) + ' perdidos' : fmt(A.simNet) + ' ganados'}</span></td>`).join('')}</tr>`;
-    } else {
-      html += `<tr><td>Pasajes en riesgo<span class="sub">pasajeros perdidos con β = ${fmt(estado.beta, 2)} × ${fmt(estado.tarifa_neta)} COP${factorTxt}</span></td>${cols.map((A, i) => `<td class="num ${A.perd >= 0.5 ? 'bad' : ''}">${sg(-A.pas / 1e6, decs[i])}<span class="sub envuelve">${fmt(A.perd)} pasajeros</span></td>`).join('')}</tr>`;
-    }
-    html += `<tr class="total"><td>Ahorro neto<span class="sub">en rojo si se logra perdiendo pasajeros</span></td>${cols.map((A, i) => celda(A.neto, A, i, true)).join('')}</tr>`;
-    html += `<tr><td class="muted">Promedio por día</td>${cols.map((A) => `<td class="num muted">${sg(A.neto / A.dias / 1e6, 2)}</td>`).join('')}</tr></tbody>`;
+    // El saldo en sus dos casos, cada uno con lo que supone (no son un peor y un mejor caso que se promedian)
+    const saldo = (titulo, sub, valor, nota) => `<tr class="total"><td>${titulo}<span class="sub">${sub}</span></td>${cols.map((A, i) => `<td class="num">${sg(valor(casos(A)) / 1e6, decs[i])}<span class="sub envuelve">${nota(A)}</span></td>`).join('')}</tr>`;
+    html += saldo('Saldo si las salidas nuevas no atraen a nadie', `contabilidad conservadora: pasajeros perdidos con β = ${fmt(estado.beta, 2)} × ${fmt(estado.tarifa_neta)} COP${factorTxt}`,
+      (k) => k.cons, (A) => `${fmt(A.perd)} en riesgo`);
+    html += saldo('Saldo si atraen lo mismo que se pierde al quitar', `contabilidad simétrica: ganados − perdidos con la misma β, × ${fmt(estado.tarifa_neta)} COP${factorTxt}`,
+      (k) => k.sim, (A) => netosTxt(A.simNet));
+    html += `<tr><td class="muted">Promedio por día<span class="sub">en los dos casos</span></td>${cols.map((A) => { const k = casos(A); return `<td class="num muted">${sg(k.cons / A.dias / 1e6, 2)} a ${sg(k.sim / A.dias / 1e6, 2)}</td>`; }).join('')}</tr></tbody>`;
     $('t-ahorro').innerHTML = html;
     $('sub-ahorro').textContent = `${NOMBRE_PLAN[estado.plan]} · ${ESQ_TXT[estado.esquema]}`;
     const AN = S.analisis, JL = AN.jornada_frente_a_la_ley;
@@ -1074,12 +1058,13 @@ function crearMotor(S) {
         ' Antes de prometer ahorros de nómina hay que confirmar con Sobusa la jornada real y la forma de pago (por hora, turno o producido).';
   }
 
-  // Calendario del mes con el neto de cada día (escala divergente: rojo pierde, azul gana)
+  // Calendario del mes con el ahorro en operación de cada día (escala divergente: rojo cuesta más, azul ahorra). El saldo con
+  // los pasajes depende de un supuesto que no se ha medido, así que va en sus dos casos en la tabla de arriba y no colorea el mes.
   function dibujarCalendario() {
     if (!ultimo) return;
     const rs = rutasSel(), m = estado.mesCal;
     const netos = new Float64Array(ND);
-    for (let d = 0; d < ND; d++) { let s = 0; for (const r of rs) s += ultimo.out.neto[r][d]; netos[d] = s; }
+    for (let d = 0; d < ND; d++) { let s = 0; for (const r of rs) s += ultimo.out.oper[r][d]; netos[d] = s; }
     const abs = Array.from(netos).map(Math.abs).sort((a, b) => a - b);
     const vmax = Math.max(abs[Math.floor(abs.length * 0.95)], 1);
     $('cal-titulo').textContent = `${MESES[m].replace(/^./, (c) => c.toUpperCase())} de 2025`;
@@ -1092,23 +1077,15 @@ function crearMotor(S) {
       const v = netos[d], t = Math.pow(Math.min(1, Math.abs(v) / vmax), 0.75), p = Math.round(62 * t);
       const bg = `color-mix(in oklab, ${v >= 0 ? 'var(--div-pos)' : 'var(--div-neg)'} ${p}%, var(--div-mid))`;
       const f = S.fechas[d], cls = ['dia', S.festivos[f] ? 'festivo' : '', S.atipicos[f] ? 'atipico' : ''].filter(Boolean).join(' ');
-      const etiqueta = `${fechaLarga(d)}: neto ${smM(v, 2)} millones de pesos${S.festivos[f] ? ', festivo' : ''}${S.atipicos[f] ? ', día atípico' : ''}`;
+      const etiqueta = `${fechaLarga(d)}: ahorro en operación ${smM(v, 2)} millones de pesos${S.festivos[f] ? ', festivo' : ''}${S.atipicos[f] ? ', día atípico' : ''}`;
       html += `<button type="button" class="${cls}" data-i="${d}" aria-pressed="${d === estado.dia}" aria-label="${esc(etiqueta)}" title="${esc(etiqueta)}" style="background:${bg}"><span class="n">${fechaDe(d).getUTCDate()}</span><span class="v">${sg(v / 1e6, 1)}</span></button>`;
     }
     $('cal-grid').innerHTML = html;
     $('cal-grid').querySelectorAll('button.dia').forEach((b) => b.addEventListener('click', () => irA(Number(b.dataset.i))));
-    // Cuántos días "ganan" dinero perdiendo pasajeros (el canje que la página debe dejar claro)
-    const pp = ultimo.pp;
-    let azules = 0, azulesConPerdida = 0;
-    for (let d = 0; d < ND; d++) {
-      if (netos[d] < 0) continue;
-      azules++;
-      let per = 0;
-      for (const r of rs) per += estado.simetrica ? -pp.sim[r][d] : pp.perd[r][d];
-      if (per >= 0.5) azulesConPerdida++;
-    }
-    $('cal-ley').innerHTML = `<span>pierde</span><span class="barra" aria-hidden="true"></span><span>gana</span><span style="flex-basis:100%">Neto del día en M COP (${esc(estado.ruta === 'Total' ? 'tres rutas' : estado.ruta)}); escala hasta ±${fmt(vmax / 1e6, 1)}. ·F = festivo; subrayado = día atípico (E10).` +
-      ` En 2025 el neto es positivo ${fmt(azules)} días${azules ? `; <b class="bad">${azulesConPerdida === azules ? 'todos' : fmt(azulesConPerdida)} a costa de pasajeros${estado.simetrica ? ' (netos)' : ' en riesgo'}</b>` : ''}.</span>`;
+    let ahorra = 0;
+    for (let d = 0; d < ND; d++) if (netos[d] > 0) ahorra++;
+    $('cal-ley').innerHTML = `<span>cuesta más</span><span class="barra" aria-hidden="true"></span><span>ahorra</span><span style="flex-basis:100%">Ahorro en operación del día en M COP (${esc(estado.ruta === 'Total' ? 'tres rutas' : estado.ruta)}); escala hasta ±${fmt(vmax / 1e6, 1)}. ·F = festivo; subrayado = día atípico (E10).` +
+      ` En 2025 ahorra en operación ${fmt(ahorra)} días. El saldo de cada día con los pasajes, en sus dos casos, va en la tabla de arriba.</span>`;
   }
 
   function kpi(label, value, delta, cls) {
@@ -1128,9 +1105,7 @@ function crearMotor(S) {
       kpi('Galones de ACPM', fmt(D.galQ), `${sg(D.galQ - D.galR)} frente a ${fmt(D.galR)} · ${sg((D.galQ - D.galR) * PRM.ef_co2.v / 1000, 1)} t de CO2`, clase(D.galQ - D.galR, true)),
       kpi(legal() ? 'Conductores de turno (jornada legal)' : 'Conductores necesarios', fmt(D.condQ) + '<small>en el día</small>', `${sg(D.condQ - D.condR)} frente a ${fmt(D.condR)} con la operación real · trabajaron ${rango(obs.baja, obs.alta)} (${fmt(obs.identificados)} identificados más los del código 799)${legal() ? `, con jornadas más largas` : ''}`, clase(D.condQ - D.condR, true)),
       kpi(legal() ? 'Plantilla del mes (jornada legal)' : 'Plantilla del mes', fmt(plantQ) + '<small>conductores</small>', `${sg(plantQ - plantR)} frente a ${fmt(plantR)} con la operación real${legal() ? `, con ${fmt(estado.reserva * 100)} % de reserva` : ''}${plantObs ? ` · en ${MESES[m]} trabajaron ${fmt(plantObs)} identificados` : ` · trabajaron ${rango(obsM.baja / Math.max(Mm.dias, 1), obsM.alta / Math.max(Mm.dias, 1))} por día`}`, clase(plantQ - plantR, true)),
-      estado.simetrica
-        ? kpi('Pasajeros netos', sg(D.simNet), `simétrica: ganados − perdidos frente a ${fmt(D.pax)} del día (β = ${fmt(estado.beta, 2)}) · conservadora: ${fmt(D.perd)} en riesgo`, D.simNet < 0 ? 'bad' : 'ok')
-        : kpi('Pasajeros en riesgo', fmt(D.perd), `${fmt(D.perd / Math.max(D.pax, 1) * 100, 1)} % de los ${fmt(D.pax)} del día (β = ${fmt(estado.beta, 2)}), en las horas en que el plan pone menos salidas`, D.perd >= 0.5 ? 'bad' : 'ok'),
+      kpi('Pasajeros en juego', fmt(D.perd) + '<small>en riesgo</small>', `donde el plan pone menos salidas (β = ${fmt(estado.beta, 2)}), el ${fmt(D.perd / Math.max(D.pax, 1) * 100, 1)} % de los ${fmt(D.pax)} del día · si las salidas nuevas atraen lo mismo que se pierde al quitar: ${netosTxt(D.simNet)}`, ''),
       kpi('Sobre la capacidad', fmt(D.sobreQ) + '<small>pasajeros</small>', `${sg(D.sobreQ - D.sobreR)} frente a ${fmt(D.sobreR)} (carga del tramo crítico sobre 50 por bus) · espera ${fmt(D.espQ, 2)} min (${sg(dEsp, 2)})`, clase(D.sobreQ - D.sobreR, true)),
     ];
     $('kpis').innerHTML = tiles.join('');
@@ -1175,15 +1150,15 @@ function crearMotor(S) {
 
   function dibujarRutas(d) {
     const sim = ultimo;
-    let html = `<thead><tr><th>Ruta</th><th class="num">Salidas</th><th class="num">Buses-hora</th><th class="num">Km</th><th class="num">Conductores<span class="sub">(trabajaron)</span></th><th class="num">${estado.simetrica ? 'Pasajeros netos' : 'Pasajeros en riesgo'}</th><th class="num">Sobre la capacidad</th><th class="num">Ahorro en operación</th><th class="num">Neto</th></tr></thead><tbody>`;
+    let html = `<thead><tr><th>Ruta</th><th class="num">Salidas</th><th class="num">Buses-hora</th><th class="num">Km</th><th class="num">Conductores<span class="sub">(trabajaron)</span></th><th class="num">Pasajeros en riesgo</th><th class="num">Sobre la capacidad</th><th class="num">Ahorro en operación</th><th class="num">Saldo<span class="sub">si no atraen a nadie a si atraen como al quitar</span></th></tr></thead><tbody>`;
     const fila = (nombre, rs, total) => {
       const A = agregados(sim, rs, d, d + 1), o = observados(rs, d, d + 1);
-      const pas = estado.simetrica ? `<td class="num ${A.simNet < 0 ? 'bad' : 'ok'}">${sg(A.simNet)}</td>` : `<td class="num${A.perd >= 0.5 ? ' bad' : ''}">${fmt(A.perd)}</td>`;
+      const pas = `<td class="num">${fmt(A.perd)}</td>`, k = casos(A);
       return `<tr${total ? ' class="total"' : ''}><td class="nombre">${total ? '' : `<span class="dot" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(${VAR_RUTA[nombre]});margin-right:6px"></span>`}${esc(nombre)}</td>` +
         `<td class="num">${fmt(A.salR)} → ${fmt(A.salQ)}</td><td class="num">${fmt(A.bhR)} → ${fmt(A.bhQ)}</td><td class="num">${fmt(A.kmR)} → ${fmt(A.kmQ)}</td>` +
         `<td class="num">${fmt(A.condR)} → ${fmt(A.condQ)}<span class="sub">(${rango(o.baja, o.alta)})</span></td>` +
         `${pas}<td class="num">${fmt(A.sobreR)} → ${fmt(A.sobreQ)}</td>` +
-        `<td class="num ${claseAhorro(A.oper, A)}">${smM(A.oper, 2)} M</td><td class="num ${claseAhorro(A.neto, A)}">${smM(A.neto, 2)} M</td></tr>`;
+        `<td class="num">${smM(A.oper, 2)} M</td><td class="num ${claseCasos(k)}">${smM(k.cons, 2)} a ${smM(k.sim, 2)} M</td></tr>`;
     };
     S.rutas.forEach((r, i) => { html += fila(r, [i], false); });
     html += fila('Tres rutas', [0, 1, 2], true) + '</tbody>';
@@ -1193,35 +1168,51 @@ function crearMotor(S) {
   function dibujarMensual(rs) {
     const sim = ultimo, t = temaG();
     const meses = MESES.map((_, m) => agregados(sim, rs, MES_INI[m], MES_FIN[m]));
-    const cOp = css('--accent'), cPas = css('--bad'), cNeto = css('--fg');
+    const cs = meses.map(casos);
+    const cOp = css('--accent'), cCons = css('--muted'), cSim = css('--fg');
     const ambito = estado.ruta === 'Total' ? 'tres rutas' : estado.ruta;
-    $('sub-mensual').textContent = `${NOMBRE_PLAN[estado.plan]} · ${ESQ_TXT[estado.esquema]} · ${ambito}. Millones de COP por mes. Clic en un mes para ir a su calendario.`;
+    const NOM_CONS = 'Saldo si no atraen a nadie', NOM_SIM = 'Saldo si atraen como al quitar';
+    // Los meses en que el plan cuesta más en operación, dichos con su porqué (pone más horas de bus de las que quita)
+    const caros = meses.map((A, i) => A.oper < 0 ? MESES[i] : null).filter(Boolean);
+    const lista = (xs) => xs.length <= 1 ? xs.join('') : xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1];
+    const operAnio = agregados(sim, rs, 0, ND).oper;
+    const sigue = caros.length ? ` En ${lista(caros)} el plan pone más horas de bus de las que quita y cuesta más en operación; en el resto quita más. En el año, ${smM(operAnio, 0)} M COP en operación.` : '';
+    $('sub-mensual').textContent = `${NOMBRE_PLAN[estado.plan]} · ${ESQ_TXT[estado.esquema]} · ${ambito}. Millones de COP por mes: las barras son el ahorro en operación y los puntos, el saldo con los pasajes en sus dos casos, porque cuántos pasajeros atraen las salidas nuevas no se ha medido.${sigue} Clic en un mes para ir a su calendario.`;
     const c = chart('c-mensual', base({
+      legend: Object.assign(base().legend, { data: ['Ahorro en operación', NOM_CONS, NOM_SIM] }),
       tooltip: Object.assign(base().tooltip, {
         formatter: (ps) => {
-          const i = ps[0].dataIndex, A = meses[i];
+          const i = ps[0].dataIndex, A = meses[i], k = cs[i];
           return [`<b>${MESES[i].replace(/^./, (x) => x.toUpperCase())}</b> · ${fmt(A.dias)} días`,
             linea(cOp, `Ahorro en operación: <b>${smM(A.oper, 1)} M</b>`),
-            linea(cPas, estado.simetrica ? `Pasajeros netos: <b>${sg(A.simNet)}</b> (${smM(-A.pas, 1)} M)` : `Pasajes en riesgo: <b>${smM(-A.pas, 1)} M</b> (${fmt(A.perd)} pasajeros)`),
-            `Neto: <b>${smM(A.neto, 1)} M COP</b>`].join('<br>');
+            linea(cCons, `Saldo si las salidas nuevas no atraen a nadie: <b>${smM(k.cons, 1)} M</b> (${fmt(A.perd)} pasajeros en riesgo)`),
+            linea(cSim, `Saldo si atraen lo mismo que se pierde al quitar: <b>${smM(k.sim, 1)} M</b> (${netosTxt(A.simNet)})`)].join('<br>');
         },
       }),
       xAxis: ejeX(MES3),
       yAxis: ejeY('M COP por mes', { axisLabel: { color: t.muted, fontSize: 12, formatter: (v) => fmt(v) } }),
       series: [
-        { name: 'Ahorro en operación', type: 'bar', stack: 'm', data: meses.map((A) => A.oper / 1e6), barMaxWidth: 24, itemStyle: { color: cOp, borderRadius: [4, 4, 0, 0] } },
-        { name: estado.simetrica ? 'Pasajeros (simétrica)' : 'Pasajes en riesgo', type: 'bar', stack: 'm', data: meses.map((A) => -A.pas / 1e6), barMaxWidth: 24, itemStyle: { color: cPas, borderRadius: [0, 0, 4, 4] } },
-        { name: 'Neto', type: 'line', data: meses.map((A) => A.neto / 1e6), symbol: 'circle', symbolSize: 9, lineStyle: { width: 0 }, itemStyle: { color: cNeto, borderColor: t.fondo, borderWidth: 2 }, z: 6 },
+        { name: 'Ahorro en operación', type: 'bar', data: meses.map((A) => A.oper / 1e6), barMaxWidth: 24, itemStyle: { color: cOp, borderRadius: [4, 4, 0, 0] } },
+        // la raya que une los dos casos de cada mes: el saldo queda en algún punto de ella, según los pasajeros nuevos
+        { name: 'Entre los dos casos', type: 'custom', silent: true, z: 5, tooltip: { show: false },
+          data: cs.map((k, i) => [i, k.cons / 1e6, k.sim / 1e6]), encode: { x: 0, y: [1, 2] },
+          renderItem: (params, api) => {
+            const a = api.coord([api.value(0), api.value(1)]), b = api.coord([api.value(0), api.value(2)]);
+            return { type: 'line', shape: { x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, style: { stroke: cCons, lineWidth: 2 } };
+          } },
+        { name: NOM_CONS, type: 'line', data: cs.map((k) => k.cons / 1e6), symbol: 'circle', symbolSize: 9, lineStyle: { width: 0 }, itemStyle: { color: t.fondo, borderColor: cCons, borderWidth: 2 }, z: 6 },
+        { name: NOM_SIM, type: 'line', data: cs.map((k) => k.sim / 1e6), symbol: 'circle', symbolSize: 9, lineStyle: { width: 0 }, itemStyle: { color: cSim, borderColor: t.fondo, borderWidth: 2 }, z: 6 },
       ],
     }));
     if (c) { c.off('click'); c.on('click', (e) => { const m = e.dataIndex; const dia = Math.min(MES_INI[m] + fechaDe(estado.dia).getUTCDate() - 1, MES_FIN[m] - 1); irA(dia); }); }
-    let html = `<thead><tr><th>Mes</th><th class="num">Salidas por día<span class="sub">real → plan</span></th><th class="num">Buses-hora por día</th><th class="num">Galones ahorrados</th><th class="num">Plantilla<span class="sub">real → plan</span></th><th class="num">Ahorro en operación</th><th class="num">${estado.simetrica ? 'Pasajeros netos' : 'Pasajeros en riesgo'}</th><th class="num">Pasajes</th><th class="num">Neto</th></tr></thead><tbody>`;
+    let html = `<thead><tr><th>Mes</th><th class="num">Salidas por día<span class="sub">real → plan</span></th><th class="num">Buses-hora por día</th><th class="num">Galones ahorrados</th><th class="num">Plantilla<span class="sub">real → plan</span></th><th class="num">Ahorro en operación</th><th class="num">Pasajeros en riesgo</th><th class="num">Saldo si no atraen a nadie</th><th class="num">Saldo si atraen como al quitar</th></tr></thead><tbody>`;
     meses.forEach((A, i) => {
+      const k = cs[i];
       html += `<tr><td>${MESES[i].replace(/^./, (x) => x.toUpperCase())}</td><td class="num">${fmt(A.salR / A.dias)} → ${fmt(A.salQ / A.dias)}</td><td class="num">${fmt(A.bhR / A.dias)} → ${fmt(A.bhQ / A.dias)}</td><td class="num">${fmt(A.galR - A.galQ)}</td>` +
-        `<td class="num">${fmt(M.plantillaDe(A.condR, estado))} → ${fmt(M.plantillaDe(A.condQ, estado))}</td><td class="num">${smM(A.oper, 1)} M</td><td class="num${!estado.simetrica && A.perd >= 0.5 ? ' bad' : ''}">${estado.simetrica ? sg(A.simNet) : fmt(A.perd)}</td><td class="num">${smM(-A.pas, 1)} M</td><td class="num ${claseAhorro(A.neto, A)}">${smM(A.neto, 1)} M</td></tr>`;
+        `<td class="num">${fmt(M.plantillaDe(A.condR, estado))} → ${fmt(M.plantillaDe(A.condQ, estado))}</td><td class="num">${smM(A.oper, 1)} M</td><td class="num">${fmt(A.perd)}</td><td class="num">${smM(k.cons, 1)} M</td><td class="num">${smM(k.sim, 1)} M</td></tr>`;
     });
-    const Y = agregados(sim, rs, 0, ND);
-    html += `<tr class="total"><td>2025</td><td class="num">${fmt(Y.salR / ND)} → ${fmt(Y.salQ / ND)}</td><td class="num">${fmt(Y.bhR / ND)} → ${fmt(Y.bhQ / ND)}</td><td class="num">${fmt(Y.galR - Y.galQ)}</td><td class="num">${fmt(M.plantillaDe(Y.condR, estado) / 12)} → ${fmt(M.plantillaDe(Y.condQ, estado) / 12)}</td><td class="num">${smM(Y.oper, 0)} M</td><td class="num">${estado.simetrica ? sg(Y.simNet) : fmt(Y.perd)}</td><td class="num">${smM(-Y.pas, 0)} M</td><td class="num ${claseAhorro(Y.neto, Y)}">${smM(Y.neto, 0)} M</td></tr></tbody>`;
+    const Y = agregados(sim, rs, 0, ND), kY = casos(Y);
+    html += `<tr class="total"><td>2025</td><td class="num">${fmt(Y.salR / ND)} → ${fmt(Y.salQ / ND)}</td><td class="num">${fmt(Y.bhR / ND)} → ${fmt(Y.bhQ / ND)}</td><td class="num">${fmt(Y.galR - Y.galQ)}</td><td class="num">${fmt(M.plantillaDe(Y.condR, estado) / 12)} → ${fmt(M.plantillaDe(Y.condQ, estado) / 12)}</td><td class="num">${smM(Y.oper, 0)} M</td><td class="num">${fmt(Y.perd)}</td><td class="num">${smM(kY.cons, 0)} M</td><td class="num">${smM(kY.sim, 0)} M</td></tr></tbody>`;
     $('t-meses').innerHTML = html;
   }
 
@@ -1388,7 +1379,7 @@ function crearMotor(S) {
       `<b>Operación.</b> Buses-hora = salidas × ciclo de la ruta en esa hora ÷ 60 (D1/D5). Km = salidas × longitud de la ruta en el catálogo (SILENCIO 62,9; CRA 54 56,4; CL 72 57,0 km). Galones = km ÷ rendimiento. Combustible = galones × precio del ACPM; mantenimiento, llantas y lubricantes = km × su costo por km.`,
       `<b>Conductores.</b> Por hora o turno: buses-hora × costo por bus-hora = (salario × factor prestacional + auxilio × 1,1766) × (1 + recargos) ÷ horas al mes × horas pagadas por hora en ruta (${fmt(M.costoBH(DEF))} COP por defecto, como costos/). Salario fijo (plantilla): conductores-día × costo mensual × reserva ÷ conductor-días por sueldo completo: con (a), ${fmt(PRM.dias_por_sueldo.v, 2)} (los regulares, con ${fmt(S.analisis.salario_fijo.dias_regular)} días o más en el mes, cobran el mes completo y los ocasionales, sus días ÷ ${fmt(S.analisis.salario_fijo.dias_sueldo_completo)}), o sea ${fmt(costoConductorDia(DEF))} COP por conductor-día; con (b), ${fmt(PRM.dias_legales_mes.v)} días y la reserva (${fmt(costoConductorDia(Object.assign({}, DEF, { metodo_conductores: 'legal' })))} COP). Por producido: no se ahorra conductor y cada pasaje perdido cuesta a Sobusa (1 − parte del conductor) de la tarifa neta.`,
       `<b>Conductores necesarios</b> = ⌈máx(buses-hora ÷ horas de bus por conductor-día, buses en ruta en el pico)⌉ por ruta y día. (a) Horas observadas: horas en ruta por conductor-día de 2025 en cada ruta (${PRM.horas_turno.v.map((h) => fmt(h, 1)).join(' / ')} h), sin reserva (ya está en los datos); la plantilla (personas distintas) divide entre ${fmt(PRM.dias_trabajados.v, 2)} días trabajados por conductor al mes. (b) Jornada legal: ${fmt(PRM.horas_legales_dia.v, 0)} h pagadas ÷ ${fmt(PRM.horas_pagadas.v, 2)} = ${fmt(PRM.horas_legales_dia.v / PRM.horas_pagadas.v, 2)} h de bus por conductor-día, ${fmt(PRM.dias_legales_mes.v)} días al mes y ${fmt(PRM.reserva.v * 100)} % de reserva por ausencias.`,
-      `<b>Pasajeros en riesgo</b> (contabilidad conservadora de D1, D5 y E7): en cada hora en que el plan pone x salidas y hubo n0 &gt; x, se pierden pasajeros × (1 − (x ÷ n0)^β). Donde el plan añade salidas no se cuenta ninguno ganado. Con la casilla de contabilidad simétrica se cuentan pasajeros × β × (x − n0) ÷ n0 en todas las horas, ganados y perdidos (la fórmula lineal del objetivo de D5).`,
+      `<b>Pasajeros en riesgo</b> (contabilidad conservadora de D1, D5 y E7): en cada hora en que el plan pone x salidas y hubo n0 &gt; x, se pierden pasajeros × (1 − (x ÷ n0)^β). Donde el plan añade salidas no se cuenta ninguno ganado. La contabilidad simétrica cuenta pasajeros × β × (x − n0) ÷ n0 en todas las horas, ganados y perdidos (la fórmula lineal del objetivo de D5). El simulador muestra siempre el saldo con las dos.`,
       `<b>Ahorro neto</b> = (costo de la operación real − costo del plan) − valor de los pasajes en riesgo. Mes y año suman los días. Precios de 2026 aplicados a la operación de 2025, como el informe.`,
       `<b>Servicio.</b> Sobre la capacidad: Σ máx(carga del tramo crítico − 50 × salidas, 0) por hora, con la carga medida en 2025 (como D5). Espera: minutos operados ÷ salidas ÷ 2 × (1 + CV²), ponderada por pasajeros.`,
     ].map((x) => `<li>${x}</li>`).join('');
@@ -1396,7 +1387,7 @@ function crearMotor(S) {
       `<b>No se sabe cómo paga Sobusa a sus conductores ni cuánto trabajan de verdad.</b> Los datos muestran horas por encima de la jornada legal (${fmt(S.analisis.horas_ruta_por_conductor_dia.media, 1)} h en ruta por día de media; los regulares, unas ${fmt(S.analisis.jornada_frente_a_la_ley.mes_regulares.ruta_mediana)} h en ruta al mes frente a 182, y ${fmt(S.analisis.jornada_frente_a_la_ley.mes_regulares.jornada_mediana)} h contando las pausas entre vueltas), es decir, horas extra, turnos largos o pago por producido; tampoco se pueden descartar relevos sin registrar. Con producido el ahorro en conductor es cero y el de recortar se reduce casi a la mitad; con salario fijo depende de reducir la plantilla; si hay horas extra, las primeras horas que se ahorran son las más caras. <b>Antes de prometer ahorros de nómina hay que confirmar con Sobusa la jornada real y la forma de pago (por hora, turno o producido).</b>`,
       `<b>La plantilla no se ajusta de un día para otro.</b> El esquema de plantilla supone que se reduce (o crece) mes a mes; en la práctica se ajusta con la rotación (no reemplazar a quien se va), con preaviso y, si hay despidos, con indemnizaciones que aquí no se cuentan. El ahorro de un día con salario fijo solo existe si se acumula en menos personas al mes.`,
       `<b>Salario fijo con horas observadas.</b> La mitad de los conductor-meses de 2025 son ocasionales (menos de ${fmt(S.analisis.salario_fijo.dias_regular)} días). La página les paga sus días ÷ ${fmt(S.analisis.salario_fijo.dias_sueldo_completo)} de un sueldo y el mes completo a los regulares; si todos cobraran el mes completo (${fmt(PRM.dias_trabajados.v, 2)} conductor-días por sueldo), cada conductor-día costaría un ${fmt(pct(PRM.dias_por_sueldo.v, PRM.dias_trabajados.v), 0)} % más y el ahorro de esta columna saldría mayor en la misma proporción. El campo «Conductor-días por sueldo completo» permite probarlo.`,
-      `<b>β viene de salidas que fallaron sin aviso</b> (E7). Un recorte planificado y anunciado podría perder menos pasajeros (β de 0,4–0,5): pruébalo con el deslizador. Los pasajeros ganados donde se añaden salidas no se han medido; por eso la contabilidad conservadora es un piso.`,
+      `<b>β viene de salidas que fallaron sin aviso</b> (E7). Un recorte planificado y anunciado podría perder menos pasajeros (β de 0,4–0,5): pruébalo con el deslizador. Los pasajeros ganados donde se añaden salidas no se han medido; por eso el saldo va en sus dos casos y el simulador no dice cuál es más probable.`,
       `<b>Los pasajeros de la operación real</b> son los que subieron con la oferta real; con otra oferta la demanda se habría repartido distinto entre horas. Los días atípicos de E10 (fallas de registro, recesos) están marcados en el calendario.`,
       `<b>Km del catálogo.</b> Los viajes reales miden un poco más según el GPS (63,1 / 57,5 / 62,6 km); el ahorro en km podría ser hasta 10 % mayor en CL 72. Los buses-hora cuentan las salidas no marcadas como canceladas: no incluyen los ${fmt(S.analisis.viajes.composicion_s0.canceladas_que_corrieron)} viajes marcados como cancelados que corrieron, pero sí ${fmt(S.analisis.viajes.composicion_s0.no_canceladas_de_menos_de_20_km)} no cancelados de menos de 20 km.`,
       `<b>Conductores.</b> La regla supone que las horas productivas por conductor no cambian con el plan; un plan con más horas valle o más CL 72 podría cambiar los turnos. El código ${String(S.analisis.codigo_generico.codigo)} (${fmt(S.analisis.codigos_genericos[0].pct_viajes, 0)} % de los viajes, casi siempre el primer viaje del día del bus) impide saber cuántas personas trabajaron: entre ${fmt(S.analisis.conductores_por_dia.cota_baja.media)} y ${fmt(S.analisis.conductores_por_dia.cota_alta.media)} por día.`,

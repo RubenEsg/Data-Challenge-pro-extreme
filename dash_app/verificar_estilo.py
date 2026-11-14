@@ -391,7 +391,7 @@ def comprobar_paleta(inf):
 PANTALLAS = [("inicio", "/", 8, True), ("pronostico", "/pronostico", 8, False), ("horario", "/horario", 8, False),
              ("despacho", "/despacho", 8, False), ("alertas", "/alertas", 8, False),
              ("recomendaciones", "/recomendaciones", 8, False), ("operacion", "/operacion", 8, False), ("monitoreo", "/monitoreo", 8, False),
-             ("modelo", "/modelo", 8, False), ("resultado", "/resultado", 8, True), ("enlaces", "/enlaces", 7, False)]
+             ("modelo", "/modelo", 8, False), ("resultado", "/resultado", 8, True), ("anexos", "/anexos", 7, False)]
 
 JS = r"""() => {
   const raiz = document.querySelector('#contenido') || document.body;

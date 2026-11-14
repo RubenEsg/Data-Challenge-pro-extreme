@@ -159,7 +159,7 @@ CONTRASTE = r"""() => {
 
 PANTALLAS = [("inicio", "/"), ("pronostico", "/pronostico"), ("horario", "/horario"), ("despacho", "/despacho"),
              ("alertas", "/alertas"), ("recomendaciones", "/recomendaciones"), ("operacion", "/operacion"),
-             ("monitoreo", "/monitoreo"), ("modelo", "/modelo"), ("resultado", "/resultado"), ("enlaces", "/enlaces")]
+             ("monitoreo", "/monitoreo"), ("modelo", "/modelo"), ("resultado", "/resultado"), ("anexos", "/anexos")]
 
 
 def teclado(pg, nombre, pasos=32):

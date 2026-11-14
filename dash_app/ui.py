@@ -374,7 +374,7 @@ _COLORES = {"turquesa", "azul", "indigo", "naranja", "coral", "cian", "verde", "
 
 def cuadro(pantalla, icono=None, clase=""):
     """Cuadro de color de una pantalla (28 px; 32 px con clase «cuadro-color--cabecera»). `pantalla` es su id (inicio,
-    pronostico, horario, modelo, resultado, enlaces, o despacho, ciudad… para las páginas sueltas de Enlaces)."""
+    pronostico, horario, modelo, resultado, enlaces, o despacho, ciudad… para las páginas sueltas de Anexos)."""
     if pantalla in _COLORES:   # compatibilidad: cuadro(color, icono, clase)
         estilo = {"--cuadro": f"var(--color-{pantalla})"}
     else:

@@ -45,7 +45,7 @@ con los datos del gráfico y sus fuentes. Hay dos grupos de pantallas:
 - **Alertas, Recomendaciones, Operación y Monitoreo** consumen la API en vivo, y también la tarjeta «Respuesta a la
   pregunta del reto» de Inicio. Si la API no responde, lo dicen («La API no responde en …») y no muestran cifras
   inventadas.
-- **El resto** (Inicio, Pronóstico, Horario, Despacho, El modelo, Resultado y Enlaces) lee los datos del proyecto que
+- **El resto** (Inicio, Pronóstico, Horario, Despacho, El modelo, Resultado y Anexos) lee los datos del proyecto que
   vienen con el tablero.
 
 ### 3.1 Alertas · ¿Qué pide atención ahora?
@@ -233,7 +233,7 @@ Los estados siempre van con icono y palabra («Sin novedad», «Aviso», «Alert
 | Despacho | ¿Qué sale ahora y en qué bus? | Un día de 2025 repetido como si fuera en vivo: reloj, fichas (salidas frente al plan, buses en la calle, próximo despacho), mapa con los buses, alertas y próximos despachos. Es una repetición sin mandos: no controla ningún bus (§3.2). |
 | El modelo | ¿Qué modelo es y por qué? | El error de los modelos del informe académico (experimentos 1, 11 y 12, a 7 días y sobre todo 2025) frente a la regla manual, su ficha y las variables que más pesan. No es el modelo que corre en la API: ese es `hgb_fv2_20250831_s42`, y su error está en `evidencias/modelo/evaluacion_modelo.md`. |
 | Resultado | ¿Qué gana Sobusa? | Dónde se quitan y se ponen salidas, la cascada del ahorro al saldo, la comparación entre reasignar y recortar, y la sensibilidad a la elasticidad. |
-| Enlaces | ¿Dónde está el resto? | Accesos a la app completa y a los documentos del proyecto. |
+| Anexos | ¿Qué más hay, aparte de este tablero? | El material de apoyo: el informe técnico, el cuaderno, la app sin conexión y los documentos del proyecto. No hace falta abrirlo para entender la propuesta. |
 
 El detalle de cada tarjeta está en `../../dash_app/README.md`.
 

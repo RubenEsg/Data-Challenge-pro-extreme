@@ -78,12 +78,19 @@ comprueba `dash_app/verificar_ahorro.py`. Las capturas de la presentación nueva
 marcha, son `dash_inicio_decision.png` (su «…», en `dash_inicio_decision_datos.png`; a 400 px, en
 `dash_inicio_decision_400.png`), `dash_resultado_decision.png` y `dash_horario_balance.png`.
 
+**La entrada única (14-11-2026).** El tablero es la entrada: la pantalla «Enlaces» se llama ahora «Anexos» (ruta
+`/anexos`; `/enlaces` lleva ahí) y reúne el material de apoyo que no hace falta abrir para entender la propuesta: primero
+el informe técnico y el cuaderno, después la app sin conexión y sus páginas sueltas. Inicio cierra con «Todo está en este
+tablero». `dash_enlaces.png` y `dash_enlaces_completa.png` son de antes del cambio; la pantalla nueva está en
+`dash_anexos.png`. El simulador de ahorro de la app sin conexión abre ahora con el plan que se recomienda y da el saldo
+siempre en sus dos casos (antes, por defecto, solo con la contabilidad conservadora).
+
 ## Estilo, cifras y funciones
 
 | Archivo | Resultado |
 |---|---|
 | `verificar_estilo_estatico_once.txt` | `python verificar_estilo.py`: PASA · 27 bien · 2 avisos · 0 fallas (corrida del 14-11-2026). Los dos avisos son números sueltos en El modelo y Pronóstico, y ya estaban |
-| `verificar_estilo_vivo_once.txt` | `python verificar_estilo.py --vivo PUERTO`: PASA · 49 bien · 2 avisos · 0 fallas en las once pantallas a 1366 y 400 px (corrida del 14-11-2026, ya con la tarjeta de la decisión). Como mucho 8 tamaños de letra, solo colores de la paleta, encabezados sin saltos y nada se sale a 400 px. Antes de esta corrida, un mensaje de error de la API con una ruta larga ensanchaba «El modelo» a 400 px; ahora una palabra que no cabe en su caja se parte (`overflow-wrap` en `body`) |
+| `verificar_estilo_vivo_once.txt` | `python verificar_estilo.py --vivo PUERTO`: PASA · 49 bien · 2 avisos · 0 fallas en las once pantallas a 1366 y 400 px (corrida del 14-11-2026, ya con la tarjeta de la decisión y la pantalla Anexos; la API del reto no respondía, así que el tablero apuntó a una dirección cerrada y las pantallas que la leen se midieron con su aviso «La API no responde»). Como mucho 8 tamaños de letra, solo colores de la paleta, encabezados sin saltos y nada se sale a 400 px. Antes de esta corrida, un mensaje de error de la API con una ruta larga ensanchaba «El modelo» a 400 px; ahora una palabra que no cabe en su caja se parte (`overflow-wrap` en `body`) |
 | `verificar_ahorro_once.txt` | `python verificar_ahorro.py`: 407 OK, 0 FALLA (corrida del 14-11-2026, con las comprobaciones del umbral, de las pistas y del saldo del piloto) |
 | `funciones_tablero.py` · `.txt` | 9 de 9: el orden de prioridad, el chip «Escalada» (con y sin «escalar» en la bitácora), los nombres «experimento 11 / 12» y lo real de una ventana (una hora, dos horas y fuera de 2025) |
 | `despacho_carga_en_frio.txt` · `.py` | Cinco cargas en frío de Despacho sin errores de consola y con los buses en el mapa. La corrida anterior al arreglo quedó en `../historial/tablero_estilo_vivo_intento_despacho_en_frio.txt` |

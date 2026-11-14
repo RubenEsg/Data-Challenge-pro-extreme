@@ -60,7 +60,7 @@ NAV = [
     ("/monitoreo", "monitoreo", "Monitoreo", "¿El modelo sigue sirviendo? (API del reto)"),
     ("/modelo", "modelo", "Modelo", "¿Qué modelo es y por qué?"),
     ("/resultado", "resultado", "Resultado", "¿Qué gana Sobusa?"),
-    ("/enlaces", "enlaces", "Enlaces", "¿Dónde está el resto del proyecto?"),
+    ("/anexos", "enlaces", "Anexos", "¿Qué más hay, aparte de este tablero?"),
 ]
 
 # El nombre y el título del navegador de cada página salen de NAV, aunque la página registre otros.

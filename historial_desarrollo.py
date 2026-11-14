@@ -1,7 +1,7 @@
 """Historial verificable del desarrollo (entregable E03 «historial», fila E03.3 de la matriz de cumplimiento).
 
 El repositorio de entrega (público) se arma con empaquetar_entrega.py a partir de esta carpeta y solo guarda sus
-sincronizaciones; el historial de desarrollo está en el repositorio privado del equipo (RubenEsg/Data-Challenge). Este
+sincronizaciones; el historial de desarrollo está en el repositorio de desarrollo del equipo. Este
 script lee ese historial con git, sin red, y escribe HISTORIAL_DESARROLLO.md junto a este archivo: todos los commits en
 orden cronológico, agrupados por día, con la hora, el hash corto, el asunto, cuántos archivos y líneas cambian
 (git log --numstat) y una marca para los que tocan EntregaFinal/.
@@ -31,7 +31,6 @@ from pathlib import Path
 AQUI = Path(__file__).resolve().parent
 SALIDA = AQUI / "HISTORIAL_DESARROLLO.md"
 CARPETA = "EntregaFinal/"
-REPOSITORIO = "RubenEsg/Data-Challenge"
 SEP_COMMIT, SEP_CAMPO = "\x1e", "\x1f"
 FORMATO = "%x1e%H%x1f%h%x1f%P%x1f%aI%x1f%s"
 DIAS = ("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo")
@@ -179,18 +178,19 @@ def formatear(commits: list[Commit], omitidos: list[tuple[str, str]], generado: 
     out = [
         "# Historial de desarrollo",
         "",
-        f"Lista cronológica de **todos los commits** ({len(commits)}) del repositorio privado del equipo, "
-        f"`{REPOSITORIO}`, desde el primero hasta `{final.corto}`, el commit al que apuntaba `{ref}` al generarla. "
+        f"Lista cronológica de **todos los commits** ({len(commits)}) del repositorio de desarrollo del equipo, "
+        f"desde el primero hasta `{final.corto}`, el commit al que apuntaba `{ref}` al generarla. "
         "Responde al «historial» del entregable E03 (fila E03.3 de `MATRIZ_CUMPLIMIENTO.md`): el repositorio de "
         "entrega se arma con `empaquetar_entrega.py` a partir de `EntregaFinal/` y solo guarda sus sincronizaciones.",
         "",
-        "- **De dónde sale.** `historial_desarrollo.py` lee `git log` del repositorio privado, sin red, y escribe este "
-        "archivo. Por cada commit publica la fecha y la hora del autor, el hash corto, el asunto, cuántos archivos y "
+        "- **De dónde sale.** `historial_desarrollo.py` lee `git log` del repositorio de desarrollo, sin red, y escribe "
+        "este archivo. Por cada commit publica la fecha y la hora del autor, el hash corto, el asunto, cuántos archivos y "
         "líneas cambia (`git log --numstat -M`) y cuántos de esos archivos están en `EntregaFinal/`, la carpeta que se "
         "convierte en el repositorio de entrega.",
         "- **Qué no publica.** Correos, nombres de autor (todo el historial es de un solo contribuyente), cuerpos de "
         f"los mensajes ni rutas de archivos. {nota_omitidos}",
-        f"- **Cómo verificarlo.** Los hashes son los del repositorio privado `{REPOSITORIO}`. Con acceso de lectura, "
+        "- **Cómo verificarlo.** Los hashes son los del repositorio de desarrollo del equipo, que se muestra a quien "
+        "evalúe si lo pide. Ahí, "
         f"`git log --reverse --format=\"%h %aI %s\" {ref}` da la misma lista y `git show --numstat <hash>` las cifras "
         "de cada commit. Cada hash de git depende de todo lo anterior, así que el hash completo del último commit fija "
         f"la cadena entera: `{final.hash}`. El primer commit es `{primero.hash}`.",
@@ -247,7 +247,7 @@ def leer_git(repo: Path, ref: str) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--repo", type=Path, default=AQUI, help="carpeta dentro del repositorio privado del proyecto")
+    ap.add_argument("--repo", type=Path, default=AQUI, help="carpeta dentro del repositorio de desarrollo del proyecto")
     ap.add_argument("--ref", default="HEAD", help="rama o commit hasta el que se lista (por defecto HEAD)")
     ap.add_argument("--salida", type=Path, default=SALIDA, help="archivo Markdown que se escribe")
     args = ap.parse_args(argv)
@@ -255,7 +255,7 @@ def main(argv: list[str] | None = None) -> int:
         raiz = Path(git(args.repo, "rev-parse", "--show-toplevel").strip())
         if not (raiz / CARPETA).is_dir():
             raise RuntimeError(f"{raiz} no tiene la carpeta {CARPETA}: el historial se genera en el repositorio "
-                               f"privado del proyecto ({REPOSITORIO}); en el de entrega este archivo ya viene hecho")
+                               "de desarrollo del proyecto; en el de entrega este archivo ya viene hecho")
         punta = git(raiz, "rev-parse", "--verify", f"{args.ref}^{{commit}}").strip()
         commits = parsear_log(leer_git(raiz, args.ref))
     except (RuntimeError, ValueError) as e:

@@ -50,7 +50,7 @@
        --color-X-texto  texto: ≥ 4,5:1 sobre #ffffff y sobre --fondo
        --color-X-suave  tinte para fondos (el tono de texto se lee sobre él ≥ 4,5:1)
      En cada línea: glifo blanco · texto sobre blanco / sobre --fondo · texto sobre su tinte.
-     Contrastes comprobados con scratchpad/diseno/claro/contrastes_paleta.py
+     Contrastes comprobados con un script de trabajo (contrastes_paleta.py), fuera del repositorio
      y escritos en app/paleta.html. ------------------------------------------ */
   --glifo-sobre-color: #ffffff;
   --color-turquesa: #0a9396;   --color-turquesa-texto: #0e7974; --color-turquesa-suave: #e5f3f2; /* glifo 3,73 · texto 5,24 / 4,81 · sobre tinte 4,60 (cuadro más vivo que el acento) */

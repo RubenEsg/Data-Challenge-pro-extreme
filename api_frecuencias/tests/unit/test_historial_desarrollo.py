@@ -99,7 +99,8 @@ def test_omite_secretos_sin_falsos_positivos_comunes():
 def test_formato_agrupado_por_dia_con_tabla_y_encabezado():
     _, _, texto = _historial()
     assert texto.startswith("# Historial de desarrollo\n")
-    assert "`RubenEsg/Data-Challenge`" in texto and "Cómo verificarlo" in texto
+    assert "repositorio de desarrollo del equipo" in texto and "Cómo verificarlo" in texto
+    assert "RubenEsg/" not in texto and "privado" not in texto          # la entrega no nombra otro repositorio
     assert "Generado** el 9 de noviembre de 2026 a las 20:30 (−05:00), desde `main` (`ddddddd`)" in texto
     assert f"`{'d' * 40}`" in texto and f"`{'a' * 40}`" in texto          # hashes completos de la punta y el primero
     dias = re.findall(r"^## (\d{4}-\d{2}-\d{2}) · (\w+) · (\d+) commits?$", texto, flags=re.M)

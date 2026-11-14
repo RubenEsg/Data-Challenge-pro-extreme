@@ -316,7 +316,7 @@ Todas se calculan contra **lo que de verdad subió** (objetivo corregido), que e
 Desde la carpeta del proyecto, con el Python del entorno aislado de E12 (Chronos-2 y pandas 2.3.3):
 
 ```bash
-PY="C:/Users/Usuario/AppData/Local/Temp/claude/d--Ruben-universidad-machine-learning-DATA-CHALLENGE/74e3ac63-631e-4b5a-85a3-594592559f62/scratchpad/venv_e12/Scripts/python.exe"
+PY="<carpeta_temporal>/venv_e12/Scripts/python.exe"
 cd "D:/Ruben/universidad/machine_learning/DATA CHALLENGE"
 PYTHONIOENCODING=utf-8 MPLBACKEND=Agg PYTHONDONTWRITEBYTECODE=1 "$PY" experimentos/E13_limpieza_datos/run.py
 # por fases: --fase base | variantes | chronos | hibridos | informe ; --rehacer ignora las cachés
@@ -354,7 +354,7 @@ PYTHONIOENCODING=utf-8 MPLBACKEND=Agg PYTHONDONTWRITEBYTECODE=1 "$PY" experiment
 
 ## Verificación
 
-Revisión independiente y adversarial (08-10-2026), con scripts propios fuera del proyecto (`verif_e13/v1_objetivo.py` a `v7_dow_hibrido.py`, en el scratchpad de la sesión).
+Revisión independiente y adversarial (08-10-2026), con scripts propios fuera del proyecto (`verif_e13/v1_objetivo.py` a `v7_dow_hibrido.py`, fuera del repositorio).
 - Las cifras clave se recalcularon desde `datos/progvehiculos.parquet`, `datos/conteo_viajes.parquet`, el CSV de E10 y los Parquet individuales de `predicciones/`, sin importar las funciones de evaluación de E13.
 - Para las pruebas de fugas sí se usaron las funciones de E13 que construyen variables, porque son lo que se prueba.
 - No se tocó código ni resultados. Solo se corrigieron tres frases (al final).

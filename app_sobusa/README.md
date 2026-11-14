@@ -70,7 +70,7 @@ Los HTML son exportaciones de Jupyter y se abren en cualquier navegador: sin int
 | `Diccionario de Variables.csv` | Diccionario de las tablas de la base de datos (esquema PostgreSQL). |
 | `posible_solucion.txt`, `visita_sobusa.txt` | Planteamiento del problema y notas de la visita a Sobusa. |
 
-Presentación (borrador): 17 diapositivas con notas del orador, en una página privada de claude.ai: https://claude.ai/artifact/N27iEuwaCWbmhSL6vZpaFz (se descarga como PowerPoint o PDF; completar los nombres del equipo).
+Presentación final: `EntregaFinal/documentos/presentacion_final.pdf` y `presentacion_final.pptx`, con notas del orador.
 
 ## Bitácoras (`bitacoras/`)
 
@@ -94,7 +94,7 @@ Presentación (borrador): 17 diapositivas con notas del orador, en una página p
 
 ## Repositorio (respaldo en GitHub)
 
-El proyecto se respalda en un repositorio privado de GitHub. Por seguridad y tamaño, `.gitignore` deja fuera:
+Por seguridad y tamaño, `.gitignore` deja fuera del repositorio:
 - **Credenciales:** `info.txt` y `credenciales.py`. Los scripts que leen la base importan `credenciales.py` desde la raíz; en otro equipo se copia `credenciales_ejemplo.py` como `credenciales.py` y se completan los datos.
 - **Datos crudos del reto:** `datos/` (unos 742 MB, con archivos de más de 100 MB). Se regeneran desde la base con los scripts de abajo, o se pueden respaldar aparte (por ejemplo con Git LFS o en una nube personal).
 - **Datos personales:** `simulacion_ahorro/resultados/horas_por_conductor_mes.csv` y `conductor_dia_2025.parquet` (identificadores de conductores; se regeneran con `simulacion_ahorro/analisis_conductores.py`) y `insumos_sobusa/rptVehiculos338.xls` (nombres, cédulas y teléfonos; de él solo se deriva `flota_sobusa.csv`).

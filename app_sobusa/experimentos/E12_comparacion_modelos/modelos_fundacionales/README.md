@@ -19,7 +19,7 @@
 ## 1. Qué se corrió
 
 **Modelos.** Todos tienen pesos abiertos con licencia Apache-2.0.
-- Los pesos se descargaron de Hugging Face a `scratchpad\hf_cache`, sin credenciales.
+- Los pesos se descargaron de Hugging Face a una carpeta `hf_cache` fuera del proyecto, sin credenciales.
 - La inferencia es local, en la RTX 3050, en float32. Ningún dato salió de la máquina.
 - Ningún modelo se reentrenó ni se ajustó con los datos de Sobusa.
 
@@ -331,7 +331,7 @@ Desde la carpeta del proyecto, con el Python del entorno aislado (`venv_e12`):
 PYTHONIOENCODING=utf-8 MPLBACKEND=Agg PYTHONDONTWRITEBYTECODE=1 <venv_e12>/Scripts/python.exe experimentos/E12_comparacion_modelos/modelos_fundacionales/<script> <opciones>
 ```
 - `--meses 1,2` corre una prueba rápida: evaluación parcial que no guarda nada.
-- Las corridas de GPU se hicieron de a una por vez, con una cola en el scratchpad.
+- Las corridas de GPU se hicieron de a una por vez, con una cola de trabajos.
 
 | Archivo | Contenido |
 |---|---|

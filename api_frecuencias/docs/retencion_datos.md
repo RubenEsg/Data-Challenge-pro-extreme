@@ -8,7 +8,7 @@ puede correr bajo demanda y deja una bitácora.
 
 ## La política
 
-La documentada en `EntregaFinal/PLAN_EVOLUCION.md` (§2, «Particionamiento»: 13 meses en caliente; las particiones
+La documentada en `PLAN_EVOLUCION.md` (§2, «Particionamiento»: 13 meses en caliente; las particiones
 viejas se separan con `DETACH PARTITION`) y en la especificación técnica E02 («Retención: particiones mensuales con
 DETACH/DROP en la tabla de mayor volumen»), extendida a las demás tablas que crecen. El corte de cada grupo es el
 instante de la corrida menos N meses del calendario de Bogotá; lo anterior al corte se borra.

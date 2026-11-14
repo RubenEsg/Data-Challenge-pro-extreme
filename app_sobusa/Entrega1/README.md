@@ -195,4 +195,4 @@ Observaciones de la verificación interna que no se resolvieron en esta ronda (e
 
 ## Repositorio
 
-El proyecto se respalda en un repositorio privado de GitHub (esta carpeta va en `Entrega1/`). El `.gitignore` del proyecto excluye `info.txt`, `credenciales.py` y `datos/`; todo lo demás de esta carpeta se versiona.
+Esta carpeta va en `Entrega1/` del proyecto. El `.gitignore` del proyecto excluye `info.txt`, `credenciales.py` y `datos/`; todo lo demás de esta carpeta se versiona.

@@ -28,7 +28,7 @@ La especificación v1.5 de Extreme Technologies se revisa en cuatro documentos:
 |---|---|---|
 | E01 | Documento ejecutivo | `documentos/E01_documento_ejecutivo.pdf` |
 | E02 | Especificación técnica | `documentos/E02_especificacion_tecnica.pdf` |
-| E03 | Código fuente | `api_frecuencias/`: código en `app/`, dependencias en `pyproject.toml`, `requirements.txt` y `requisitos_congelados.txt`, pruebas en `tests/` y reporte de SonarQube en `docs/evidencias/sonarqube/` (`resumen.md`: puerta de calidad condición por condición; se repite con `scripts/sonar_local.py`). El historial de desarrollo, commit por commit, está en `HISTORIAL_DESARROLLO.md`, que genera `historial_desarrollo.py` desde el repositorio privado del equipo. |
+| E03 | Código fuente | `api_frecuencias/`: código en `app/`, dependencias en `pyproject.toml`, `requirements.txt` y `requisitos_congelados.txt`, pruebas en `tests/` y reporte de SonarQube en `docs/evidencias/sonarqube/` (`resumen.md`: puerta de calidad condición por condición; se repite con `scripts/sonar_local.py`). El historial de desarrollo, commit por commit, está en `HISTORIAL_DESARROLLO.md`, que genera `historial_desarrollo.py` desde el repositorio de desarrollo del equipo. |
 | E04 | Base de datos | `api_frecuencias/alembic/versions/` (DDL del esquema `ai_frecuencias`, índices y datos semilla de umbrales). El registro de modelos se siembra desde `api_frecuencias/datos/modelos/registro.json`. |
 | E05 | Modelo IA | `api_frecuencias/datos/modelos/hgb_fv2_20250831_s42/` (artefacto y manifiesto con SHA-256). Entrenamiento reproducible con `api_frecuencias/scripts/entrenar.py`; métricas en `api_frecuencias/docs/evidencias/modelo/`. Por segmento y sentido, `api_frecuencias/datos/modelos/segmentos/` (modelo activo `seg_hgb_jerarquico_20230227_s42`), entrenado con `api_frecuencias/scripts/entrenar_segmentos.py` según el protocolo de `api_frecuencias/docs/evidencias/modelo/segmentos_protocolo.md`. |
 | E06 | Prototipo | API (`api_frecuencias/`) y tablero (`dash_app/`: las pantallas Alertas, Recomendaciones, Operación y Monitoreo, la sección «Modelo activo (API)» de Pronóstico y la tarjeta de Inicio con la respuesta del reto consumen la API). Capturas y recorrido en `api_frecuencias/docs/evidencias/tablero/`. |
@@ -98,7 +98,7 @@ y abra http://127.0.0.1:8050. El recorrido por cada pantalla está en `api_frecu
 
 | Archivo o carpeta | Qué es | Cómo se abre |
 |---|---|---|
-| `Informe_tecnico_Sobusa.pdf` | **Informe técnico** (22 páginas): datos, metodología, resultados, limitaciones, recomendaciones y referencias. | Cualquier lector de PDF. |
+| `Informe_tecnico_Sobusa.pdf` | **Informe técnico** (23 páginas): datos, metodología, resultados, limitaciones, recomendaciones y referencias. | Cualquier lector de PDF. |
 | `entrega_final.html` | **Cuaderno final ejecutado**, en HTML: entrena el modelo, lo evalúa, resuelve el despacho de un día y comprueba 151 cifras. | Doble clic (navegador). |
 | `entrega_final.ipynb` | El mismo cuaderno, con sus salidas. | Jupyter o VS Code. Para volver a ejecutarlo hace falta el proyecto completo (abajo). |
 | `dash_app/` | **Laboratorio del modelo** (Dash, Python): el pronóstico y el optimizador corren en vivo. | En Windows, doble clic en `dash_app/iniciar_dash.bat`; en cualquier sistema, `python app.py` (abajo). |
@@ -290,7 +290,7 @@ Parquet.
 - los documentos de entrega, con `python documentos/compilar.py`, y el informe, con `python informe/compilar.py` (los dos
   usan Tectonic).
 
-**Solo en el proyecto completo** (el repositorio privado del equipo, que trae los experimentos y los datos exportados):
+**Solo en el proyecto completo** (la carpeta de trabajo del equipo, que trae los experimentos y los datos exportados):
 
 - volver a ejecutar el cuaderno (`python -m nbconvert --to notebook --execute --inplace entrega_final.ipynb`, con
   `requirements_cuaderno.txt`), porque lee los resultados de los experimentos;

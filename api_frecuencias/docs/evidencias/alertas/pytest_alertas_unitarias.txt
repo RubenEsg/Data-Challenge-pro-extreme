@@ -2,7 +2,7 @@ $ python -m pytest tests/unit/test_alertas.py tests/unit/test_alertas_alt003.py 
 ============================= test session starts =============================
 platform win32 -- Python 3.13.3, pytest-9.2.0, pluggy-1.7.0 -- D:\Ruben\universidad\machine_learning\DATA CHALLENGE\EntregaFinal\api_frecuencias\.venv\Scripts\python.exe
 hypothesis profile 'default'
-rootdir: D:\Ruben\universidad\machine_learning\DATA CHALLENGE\.claude\worktrees\cierre-lectura\EntregaFinal\api_frecuencias
+rootdir: D:\Ruben\universidad\machine_learning\DATA CHALLENGE\EntregaFinal\api_frecuencias
 configfile: pyproject.toml
 plugins: anyio-4.16.0, hypothesis-6.170.15, cov-7.1.0, schemathesis-4.33.1
 collecting ... collected 208 items
@@ -216,4 +216,4 @@ tests/unit/test_variantes_alt003.py::test_protocolo_sin_senal_baja_a_informativa
 tests/unit/test_variantes_alt003.py::test_diagnostico_separa_las_franjas_de_alt001 PASSED [ 99%]
 tests/unit/test_variantes_alt003.py::test_la_tasa_base_elegible_del_backtest_excluye_las_franjas_con_alt001 PASSED [100%]
 
-============================= 208 passed in 5.25s =============================
+============================ 208 passed in 20.73s =============================

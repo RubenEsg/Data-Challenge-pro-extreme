@@ -1,24 +1,28 @@
-% Anexo A. Fuentes: README.md del proyecto, documentos/informe_resultados.md (sección 9, «Archivos entregados» y
-% «Cómo volver a ejecutar»), app/DATOS.md (encabezado) y EntregaFinal/dash_app/app.py (docstring).
+% Anexo A. Fuentes: README.md de la entrega, app_sobusa/app/DATOS.md (encabezado) y dash_app/app.py (docstring).
+\clearpage  % el título, la leyenda y la tabla van juntos en la misma página
 \section{Productos entregados}
 \label{sec:anexo}
 
 {\centering\footnotesize
-  \captionof{table}{Productos de la entrega final (rutas desde la carpeta del proyecto).}
+  \captionof{table}{Productos de la entrega final (rutas desde la raíz del repositorio de entrega).}
   \label{tab:productos}
   \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.19\linewidth} >{\raggedright\arraybackslash}p{0.38\linewidth} >{\raggedright\arraybackslash}p{0.37\linewidth}@{}}
     \toprule
     Producto & Dónde & Qué es \\
     \midrule
-    Este informe & \path{EntregaFinal/Informe_tecnico_Sobusa.pdf} & PDF; fuentes en \path{EntregaFinal/informe/} \\
-    Cuaderno final & \path{EntregaFinal/entrega_final.ipynb} (y su copia \path{.html}) & reentrena el modelo, evalúa, resuelve un día y comprueba 151 cifras \\
-    \comi{Laboratorio del modelo} & \path{EntregaFinal/dash_app/} (Dash) & pronóstico y optimizador D5 en vivo, con costos y $\beta$ ajustables \\
-    App \comi{Sobusa Despacho} & \path{app.html} y \path{app/} & nueve pantallas con planificador, consola, vista 3D y simulador; sin internet \\
-    Experimentos & \path{experimentos/}, \path{costos/}, \path{simulacion_ahorro/}, \path{sistema_tiempo_real/} & \path{run.py}, \path{README.md} con su verificación y \path{resultados.json} \\
-    Repositorio & GitHub privado (\texttt{Data-Challenge-pro} y un respaldo) & código, documentos y resultados; sin datos crudos ni credenciales \\
+    Este informe & \path{Informe_tecnico_Sobusa.pdf} & PDF; fuentes en \path{informe/} \\
+    Cuaderno final & \path{entrega_final.ipynb} (y su copia \path{.html}) & reentrena el modelo, evalúa, resuelve un día y comprueba 151 cifras \\
+    API del reto & \path{api_frecuencias/} & \emph{backend} en FastAPI y PostgreSQL con el pronóstico, el optimizador, las alertas, sus pruebas y su despliegue; guía en \path{README.md} y \path{MATRIZ_CUMPLIMIENTO.md} \\
+    \comi{Laboratorio del modelo} & \path{dash_app/} (Dash) & pronóstico y optimizador D5 en vivo, con costos y $\beta$ ajustables \\
+    App \comi{Sobusa Despacho} & \path{app_sobusa/app.html} y \path{app_sobusa/app/} & nueve pantallas con planificador, consola, vista 3D y simulador; sin internet \\
+    Experimentos & \path{app_sobusa/experimentos/} y, junto a ella, \path{costos/}, \path{simulacion_ahorro/} y \path{sistema_tiempo_real/} & \path{README.md} con su verificación y \path{resultados.json} de cada experimento \\
+    Repositorio & GitHub público, \texttt{RubenEsg/Data-Challenge-pro-extreme} & código, documentos y resultados; sin datos crudos ni credenciales \\
     \bottomrule
   \end{tabular}\par}
 
-\paragraph{Trazabilidad.} Ninguna cifra está escrita a mano: \path{app/generar_datos_app.py} lee 202 cifras, cada
-una con su archivo y su clave (\path{app/DATOS.md}), y \path{app/verificar_datos_app.py} las comprueba. Todo se
-reproduce sin la base con el \path{run.py} de cada experimento (semilla 42).
+\paragraph{Trazabilidad.} Ninguna cifra está escrita a mano: \path{app_sobusa/app/generar_datos_app.py} lee 202
+cifras, cada una con su archivo y su clave (\path{app_sobusa/app/DATOS.md}), y
+\path{app_sobusa/app/verificar_datos_app.py} las comprueba. Los experimentos se reproducen sin la base con su
+\path{run.py} (semilla 42), que está en la carpeta de trabajo del equipo; el repositorio de entrega trae sus
+resultados y su verificación. El modelo del producto se entrena de nuevo con los datos derivados que viajan en
+\path{api_frecuencias/datos/} (\path{api_frecuencias/docs/manual_tecnico.md}, sección 13).

@@ -13,11 +13,11 @@ import argparse
 import ast
 import io
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
-import tempfile
 import tokenize
 from pathlib import Path
 
@@ -356,15 +356,16 @@ CONTROLES = {"banda": "Lightness band", "croma": "Chroma floor", "cvd": "CVD sep
 
 
 def _validador():
-    raiz = Path(tempfile.gettempdir()) / "claude" / "bundled-skills"
-    return next(iter(sorted(raiz.glob("*/*/dataviz/scripts/validate_palette.js"))), None) if raiz.is_dir() else None
+    """El validador de paletas es externo y no viaja en el repositorio: su ruta va en VALIDADOR_PALETA."""
+    ruta = os.environ.get("VALIDADOR_PALETA", "").strip()
+    return Path(ruta) if ruta and Path(ruta).is_file() else None
 
 
 def comprobar_paleta(inf):
     g = "Paleta"
     node, script = shutil.which("node"), _validador()
     if not node or not script:
-        inf.nota(g, "no están node o el validador de dataviz (validate_palette.js): se omite la validación de la paleta")
+        inf.nota(g, "no están node o el validador de paletas (VALIDADOR_PALETA con la ruta de validate_palette.js): se omite la validación de la paleta")
         return
     superficie = T.color("--superficie")
     mal = 0

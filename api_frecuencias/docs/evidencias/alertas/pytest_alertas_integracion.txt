@@ -2,7 +2,7 @@ $ python -m pytest tests/datos_ml/test_alt003_protocolo.py tests/datos_ml/test_b
 ============================= test session starts =============================
 platform win32 -- Python 3.13.3, pytest-9.2.0, pluggy-1.7.0 -- D:\Ruben\universidad\machine_learning\DATA CHALLENGE\EntregaFinal\api_frecuencias\.venv\Scripts\python.exe
 hypothesis profile 'default'
-rootdir: D:\Ruben\universidad\machine_learning\DATA CHALLENGE\.claude\worktrees\cierre-lectura\EntregaFinal\api_frecuencias
+rootdir: D:\Ruben\universidad\machine_learning\DATA CHALLENGE\EntregaFinal\api_frecuencias
 configfile: pyproject.toml
 plugins: anyio-4.16.0, hypothesis-6.170.15, cov-7.1.0, schemathesis-4.33.1
 collecting ... collected 19 items
@@ -27,4 +27,4 @@ tests/integracion/test_export_alertas.py::test_historial_paginado_y_comentarios_
 tests/integracion/test_gobierno_alt003.py::test_migracion_0014_versiona_el_minimo_de_alt003_como_propuesta_y_baja PASSED [ 94%]
 tests/integracion/test_gobierno_alt003.py::test_ejecucion_partida_usa_el_minimo_de_alt003_de_su_version PASSED [100%]
 
-======================== 19 passed in 71.23s (0:01:11) ========================
+======================= 19 passed in 103.08s (0:01:43) ========================

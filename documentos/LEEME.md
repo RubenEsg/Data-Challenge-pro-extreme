@@ -9,12 +9,12 @@
 
 ## Compilar
 
-El entorno virtual va fuera del repositorio (por ejemplo, en la carpeta temporal):
+El entorno virtual va fuera del repositorio (por ejemplo, en la carpeta temporal). Desde la raíz de la entrega:
 
 ```
 python -m venv %TEMP%\venv_documentos
-%TEMP%\venv_documentos\Scripts\python -m pip install -r EntregaFinal/documentos/requisitos_documentos.txt
-%TEMP%\venv_documentos\Scripts\python EntregaFinal/documentos/compilar.py
+%TEMP%\venv_documentos\Scripts\python -m pip install -r documentos/requisitos_documentos.txt
+%TEMP%\venv_documentos\Scripts\python documentos/compilar.py
 ```
 
 `compilar.py` regenera las cifras, las figuras y la tabla de endpoints; compila los tres documentos con Tectonic; revisa

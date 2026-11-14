@@ -1,29 +1,30 @@
-en verde en GitHub Actions (run 42676559408, 2026-11-09)
+en verde en GitHub Actions (run 43568125975, 2026-11-14)
 
 Integración continua en GitHub Actions sobre runners limpios de Ubuntu (sin la réplica ni los datos que git ignora).
 
-1) Repositorio de entrega (público): RubenEsg/Data-Challenge-pro-extreme, flujo .github/workflows/api_frecuencias.yml
-   (copia de api_frecuencias/ci/github_actions_entrega.yml). Commit probado: ec6af9f.
-   Run: https://github.com/RubenEsg/Data-Challenge-pro-extreme/actions/runs/42676559408
-   Trabajos (UTC):
-   - ruff · bandit · migraciones · pytest (Python 3.11): success (2026-11-09T18:43:44Z → 18:49:44Z)
-   - ruff · bandit · migraciones · pytest (Python 3.13): success (2026-11-09T18:43:44Z → 18:49:45Z)
-   - Prueba de caída RNF-001 y ejecución programada §14.2 (Python 3.11): success (18:49:48Z → 18:55:05Z)
-   - SonarQube (puerta de calidad): omitido; el flujo lo salta sin servidor ni token. El análisis real está en
-     docs/evidencias/sonarqube/ (scripts/sonar_local.py, puerta «Reto Sobusa v1.5»).
-   Resultados leídos del registro de cada trabajo:
-   - Python 3.11 y 3.13: ruff y bandit sin hallazgos; migraciones arriba, abajo y arriba; pytest con 832 aprobadas,
-     174 omitidas a propósito (las pruebas de réplica necesitan la réplica local cargada, que no existe en GitHub) y
-     62 subpruebas de Schemathesis aprobadas; cobertura de app/ 92,75 % (umbral 85 %); OpenAPI sin deriva (59 rutas).
-   - Prueba de caída y ejecución programada: 2 aprobadas.
-   Nota: las tres corridas anteriores de ese commit (runs 42670239772 y 42672054975) terminaron con «Internal server
-   error» de GitHub durante el incidente de GitHub Actions del 9-11-2026 (githubstatus.com: «Incident with Actions»,
-   desde las 18:12 UTC). En esas corridas los trabajos de pruebas que alcanzaron a crearse pasaron; la corrida de
-   arriba se lanzó cuando GitHub informó Actions operativo de nuevo.
+Repositorio de entrega (público): RubenEsg/Data-Challenge-pro-extreme, flujo .github/workflows/api_frecuencias.yml
+(copia de api_frecuencias/ci/github_actions_entrega.yml). Commit probado: 5dc7abd, el que publicó el código final.
+Run: https://github.com/RubenEsg/Data-Challenge-pro-extreme/actions/runs/43568125975
+Trabajos (UTC):
+- ruff · bandit · migraciones · pytest (Python 3.11): success (2026-11-14T06:48:36Z → 06:59:32Z)
+- ruff · bandit · migraciones · pytest (Python 3.13): success (2026-11-14T06:48:37Z → 06:59:15Z)
+- Prueba de caída RNF-001 y ejecución programada §14.2 (Python 3.11): success (06:59:35Z → 07:09:06Z)
+- SonarQube (puerta de calidad): omitido; el flujo lo salta sin servidor ni token. El análisis real está en
+  docs/evidencias/sonarqube/ (scripts/sonar_local.py, puerta «Reto Sobusa v1.5»).
+Resultados leídos del registro de cada trabajo:
+- Python 3.11 y 3.13: ruff y bandit sin hallazgos; migraciones arriba, abajo y arriba (0001 a 0014); pytest con 1.503
+  aprobadas, 206 omitidas a propósito (las pruebas de réplica necesitan la réplica local cargada, que no existe en
+  GitHub) y 69 subpruebas de Schemathesis aprobadas; cobertura de app/ 95,15 % (umbral 85 %); OpenAPI sin deriva
+  (65 rutas).
+- Prueba de caída y ejecución programada: 3 aprobadas (la caída, la franja diaria programada y el ciclo intradía
+  programado).
+Cada push al repositorio vuelve a correr el flujo: el estado del último commit se ve en la pestaña Actions. Los
+commits posteriores a 5dc7abd no cambian el código de la API (api_frecuencias/app).
 
-2) Repositorio del proyecto (privado): RubenEsg/Data-Challenge, flujo .github/workflows/api_frecuencias.yml.
-   Commit 3d2acf1: run 42627652053, en verde (los mismos trabajos y resultados: 832 aprobadas, 174 omitidas,
-   cobertura 92,74 %, caída y ejecución programada aprobadas).
+Corrida anterior, del 9-11-2026 (run 42676559408, commit ec6af9f, anterior al código final): en verde, con 832
+aprobadas, 174 omitidas, cobertura de 92,75 % y 59 rutas. Las dos corridas previas de ese commit (runs 42670239772 y
+42672054975) terminaron con «Internal server error» de GitHub durante el incidente de GitHub Actions del 9-11-2026
+(githubstatus.com: «Incident with Actions», desde las 18:12 UTC).
 
-La suite completa con la réplica corre en local: docs/evidencias/pruebas/suite_final.xml. El 9-11-2026 tenía 1.060
-casos; la cifra vigente está en la tabla «Cifras vigentes» de docs/evidencias/README.md.
+La suite completa con la réplica corre en local: docs/evidencias/pruebas/suite_final.xml. La cifra vigente está en la
+tabla «Cifras vigentes» de docs/evidencias/README.md.

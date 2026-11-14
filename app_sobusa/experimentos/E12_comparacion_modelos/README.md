@@ -448,16 +448,16 @@ Los pesos NNLS además corrigen el sesgo al alza de las redes y los fundacionale
 
 ## 11. Cómo reproducir y archivos
 
-Desde la carpeta del proyecto, con el Python del entorno aislado (`venv_e12`). Para que Lightning no escriba en el proyecto, `run_2024.py` se corre desde `scratchpad\trabajo_e12`.
+Desde la carpeta del proyecto, con el Python del entorno aislado (`venv_e12`). Para que Lightning no escriba en el proyecto, `run_2024.py` se corre desde una carpeta de trabajo temporal fuera del proyecto (`trabajo_e12`).
 ```bash
-PY="C:/Users/Usuario/AppData/Local/Temp/claude/d--Ruben-universidad-machine-learning-DATA-CHALLENGE/74e3ac63-631e-4b5a-85a3-594592559f62/scratchpad/venv_e12/Scripts/python.exe"
+PY="<carpeta_temporal>/venv_e12/Scripts/python.exe"
 E12="D:/Ruben/universidad/machine_learning/DATA CHALLENGE/experimentos/E12_comparacion_modelos"
 export PYTHONIOENCODING=utf-8 MPLBACKEND=Agg PYTHONDONTWRITEBYTECODE=1
 "$PY" "$E12/run_ensamble.py" --fase registrar     # 8 ensambles nuevos -> predicciones/, resultados/   (~5 s)
 "$PY" "$E12/run_ensamble.py" --fase ranking       # ranking.csv, tabla_modelos.csv, corrección múltiple (~5 s)
 "$PY" "$E12/run_ensamble.py" --fase robustez      # segmentos, β, sin enero, parejas (~5 s)
 # prueba en 2024 (en paralelo; TFT y TimesFM usan la GPU), desde una carpeta de trabajo fuera del proyecto:
-cd "C:/Users/Usuario/AppData/Local/Temp/claude/d--Ruben-universidad-machine-learning-DATA-CHALLENGE/74e3ac63-631e-4b5a-85a3-594592559f62/scratchpad/trabajo_e12"
+cd "<carpeta_temporal>/trabajo_e12"
 "$PY" "$E12/run_2024.py" --fase predecir --modelo chronos2_cov
 "$PY" "$E12/run_2024.py" --fase predecir --modelo arboles            # V4, híbrido, Tweedie, CatBoost
 "$PY" "$E12/run_2024.py" --fase predecir --modelo tft --semilla 42   # ídem 43 y 44; la última junta las 3
@@ -486,7 +486,7 @@ CUDA_VISIBLE_DEVICES="" "$PY" "$E12/medir_chronos2_cpu.py"   # costo del híbrid
 
 ## Verificación
 
-**Veredicto: confiable con reservas.** Verificación independiente del 07-10-2026, sin conexión a la base de datos y sin modificar código ni resultados. Todas las cifras clave se recalcularon con código propio, sin importar las funciones de evaluación del arnés: se leyeron los Parquet de `predicciones/` y `validacion_2024/pred/`, el objetivo de 2025 de `E11_modelo_mejorado/predicciones_2025.parquet` y el de 2024 de `cache/panel_v4.parquet`. Scripts y salidas: `scratchpad\verif_e12\` (`verif_2025.py`, `verif_ensambles.py`, `verif_ens_familia.py`, `verif_2024.py`, `verif_extra.py`, `verif_chronos.py`).
+**Veredicto: confiable con reservas.** Verificación independiente del 07-10-2026, sin conexión a la base de datos y sin modificar código ni resultados. Todas las cifras clave se recalcularon con código propio, sin importar las funciones de evaluación del arnés: se leyeron los Parquet de `predicciones/` y `validacion_2024/pred/`, el objetivo de 2025 de `E11_modelo_mejorado/predicciones_2025.parquet` y el de 2024 de `cache/panel_v4.parquet`. Scripts y salidas, fuera del repositorio: `verif_e12\` (`verif_2025.py`, `verif_ensambles.py`, `verif_ens_familia.py`, `verif_2024.py`, `verif_extra.py`, `verif_chronos.py`).
 
 **Cobertura y cortes.**
 - Los 55 Parquet de 2025 tienen exactamente las mismas 18.615 franjas de E11, sin duplicados, NaN ni infinitos, y el mismo `real`.
@@ -607,7 +607,7 @@ Es el equivalente de `E11_modelo_mejorado/modelo_final.py` para el híbrido reco
 
 **Cómo correrlo cada semana** (desde la carpeta del proyecto, con el Python del entorno aislado):
 ```bash
-PY="C:/Users/Usuario/AppData/Local/Temp/claude/d--Ruben-universidad-machine-learning-DATA-CHALLENGE/74e3ac63-631e-4b5a-85a3-594592559f62/scratchpad/venv_e12/Scripts/python.exe"
+PY="<carpeta_temporal>/venv_e12/Scripts/python.exe"
 export PYTHONIOENCODING=utf-8 PYTHONDONTWRITEBYTECODE=1
 # 4 primeras semanas de 2026 con datos hasta el 31-12-2025 (lo que se corrió aquí)
 "$PY" experimentos/E12_comparacion_modelos/modelo_final_hibrido.py
@@ -625,7 +625,7 @@ export PYTHONIOENCODING=utf-8 PYTHONDONTWRITEBYTECODE=1
 
 **Requisitos.**
 - **Python.** El entorno aislado (`requisitos_e12.txt`): `chronos-forecasting` 2.3.2 (con torch 2.11; basta la versión de CPU), `lightgbm` 4.7.0, `pandas` 2.3.3, `holidays` y `pyarrow`.
-- **Pesos.** Los de `amazon/chronos-2` en la caché local de Hugging Face. `comun_e12` apunta `HF_HOME` a `scratchpad/hf_cache`; en otra máquina hay que copiar esa carpeta o fijar `HF_HOME`.
+- **Pesos.** Los de `amazon/chronos-2` en la caché local de Hugging Face. `comun_e12` apunta `HF_HOME` a una carpeta `hf_cache` fuera del proyecto; en otra máquina hay que copiar esa carpeta o fijar `HF_HOME`.
 - **Sin GPU.** `--dispositivo cpu` es el valor por defecto y usa 2 hilos (`comun_e12`). La GPU solo sirvió para precalcular la historia una vez.
 - **Versiones fijas.** Hay que fijar la de `chronos-forecasting` y la revisión de los pesos (sección 7), y también la de pandas: con otra versión cambian en 10⁻¹⁴ algunas variables, y eso basta para mover unos pasajeros el pronóstico de LightGBM (comprobación a).
 
@@ -667,7 +667,7 @@ export PYTHONIOENCODING=utf-8 PYTHONDONTWRITEBYTECODE=1
 - se pronostican desde ahí los 28 días siguientes, cada uno con su H;
 - el resultado se compara con lo real.
 
-**2025: 11 orígenes, del 31-01 al 30-11.** Son 44 semanas y 15.708 franjas (`modelos_hibrido/emulacion_produccion_2025.json`; script en `scratchpad/hibrido_prod/emulacion_2025.py`, 73-87 s por origen en CPU).
+**2025: 11 orígenes, del 31-01 al 30-11.** Son 44 semanas y 15.708 franjas (`modelos_hibrido/emulacion_produccion_2025.json`; script de trabajo `hibrido_prod/emulacion_2025.py`, fuera del repositorio, 73-87 s por origen en CPU).
 
 | Antelación | WAPE híbrido | WAPE V4 | Chronos-2 solo | Dif. | Semanas en que gana | Sesgo híbrido / V4 |
 |---|---|---|---|---|---|---|
@@ -681,7 +681,7 @@ export PYTHONIOENCODING=utf-8 PYTHONDONTWRITEBYTECODE=1
 - **La ganancia del modo producción (−0,30)** es la misma que la del protocolo de E12 con H = 7 (−0,32) y se mantiene en H = 14-28.
 - **Dos orígenes pierden:** 28-02 (+0,21) y 30-11 (+0,24). Este último es el análogo más cercano a enero de 2026: diciembre, con fiestas, donde el híbrido pierde con H = 14 y 21 (+0,84 y +0,59). Conviene vigilar las semanas con fiestas.
 
-**2024: 3 orígenes** (`scratchpad/hibrido_prod/evaluar_emulacion.py`):
+**2024: 3 orígenes** (`hibrido_prod/evaluar_emulacion.py`, script de trabajo fuera del repositorio):
 
 | Origen | Fechas | WAPE híbrido | WAPE V4 | Chronos-2 solo | Semanas en que gana el híbrido (H = 7 / 14 / 21 / 28) |
 |---|---|---|---|---|---|

@@ -1,0 +1,289 @@
+{
+ "prueba": "tests/replica/test_consolidados_segmentos.py::test_con_filas_reales_de_la_liquidacion_el_contraste_del_ciclo_no_da_groseras_falsas_h10",
+ "generado": "2026-11-13T21:18:03-05:00",
+ "metodo": "una transacción de extreme_dba que se revierte: llegada por el trigger, fn_insert_timbradas_anio por viaje y fn_consolidar_timbradas_historicas; calidad de §6.3 y el contraste del ciclo (consolidados._contraste_de) con las consultas del ciclo sobre esa transacción y, como agregación propia, segmento_estadistica_dia de la base local con el grano diario de las mismas filas de timbradas_segmentos (segmentos_refresco.SQL_FUENTE_DIA y copiar_dia, en otra transacción que se revierte); contraste_viajes_minimos = 1",
+ "tablas": {
+  "timbradas_segmentos_anio": {
+   "filas_de_sobusa": 162,
+   "validas": 162,
+   "errores_de_calidad": 0,
+   "segmentos": 90,
+   "bloques_hora_inicio": [
+    "06:45:00",
+    "07:00:00"
+   ],
+   "horas_de_paso_propias": [
+    5,
+    6,
+    7
+   ],
+   "viajes_segmento": {
+    "extreme": 223.0,
+    "propia": 224.0
+   },
+   "subidas": {
+    "extreme": 200.0,
+    "propia": 201.0
+   },
+   "contraste_del_ciclo": {
+    "grano": [
+     "id_segmento",
+     "ano",
+     "id_dia_semana",
+     "id_estacionalidad"
+    ],
+    "llaves": 90,
+    "comparadas": 90,
+    "sin_agregacion_propia": 0,
+    "pocos_viajes": 0,
+    "diferencias": 5,
+    "groseras": 0,
+    "llaves_bloqueadas": 0,
+    "por_campo": {
+     "promedio_subidas": 1,
+     "promedio_bajadas": 2,
+     "promedio_pasajeros": 1,
+     "viajes_por_dia": 1
+    },
+    "agregacion_propia": "segmento_estadistica_dia (agregación materializada del trabajo «segmentos»)",
+    "periodo": null,
+    "ids": 90,
+    "dias_viajes_por_dia": "los de la agregación propia de la misma llave (los dos lados salen de timbradas_segmentos); el año abierto de la anual no se compara",
+    "nota": "por segmento × día ISO × estacionalidad (y año en la anual) y no por hora: fn_insert_timbradas_anio pone todos los segmentos de un viaje en el bloque de 15 minutos de su fin (hallazgo H10) y la agregación propia, en la hora en que el bus pasó por cada segmento",
+    "por_hora": {
+     "grano": [
+      "id_segmento",
+      "ano",
+      "id_dia_semana",
+      "id_estacionalidad",
+      "hora"
+     ],
+     "llaves": 162,
+     "comparadas": 62,
+     "sin_agregacion_propia": 100,
+     "pocos_viajes": 0,
+     "fuera_de_rango": 44,
+     "por_campo": {
+      "promedio_subidas": 10,
+      "promedio_bajadas": 14,
+      "promedio_pasajeros": 20
+     },
+     "nota": "CONTR-003 por hora, no bloqueante: el bloque de 15 minutos de Extreme puede ser otro que la hora de paso de la agregación propia (hallazgo H10)"
+    }
+   },
+   "incidencias_por_codigo": {
+    "CONTR-002": {
+     "bloqueantes": 0,
+     "no_bloqueantes": 5
+    },
+    "CONTR-003": {
+     "bloqueantes": 0,
+     "no_bloqueantes": 44
+    }
+   },
+   "segmentos_con_diferencias": [
+    100,
+    112
+   ],
+   "con_las_tolerancias_por_defecto": {
+    "llaves": 90,
+    "comparadas": 0,
+    "pocos_viajes": 90,
+    "diferencias": 0,
+    "groseras": 0
+   },
+   "con_la_hora_en_el_grano": {
+    "grano": [
+     "id_segmento",
+     "ano",
+     "id_dia_semana",
+     "id_estacionalidad",
+     "hora"
+    ],
+    "llaves": 162,
+    "comparadas": 62,
+    "sin_agregacion_propia": 100,
+    "pocos_viajes": 0,
+    "diferencias": 174,
+    "groseras": 129,
+    "llaves_bloqueadas": 56,
+    "por_campo": {
+     "promedio_subidas": 30,
+     "promedio_bajadas": 42,
+     "promedio_pasajeros": 56,
+     "viajes_por_dia": 46
+    }
+   },
+   "diferencia_sembrada": {
+    "segmento": 130,
+    "cambio": "subidas = 3 × subidas + 10 × nro_viajes",
+    "groseras": 1,
+    "llaves_bloqueadas": 1,
+    "segmentos_bloqueados": [
+     130
+    ],
+    "campos": [
+     "promedio_subidas"
+    ],
+    "codigos": [
+     "CONTR-002"
+    ],
+    "llave_con_hora": false
+   }
+  },
+  "timbradas_segmentos_consolidado": {
+   "filas_de_sobusa": 162,
+   "validas": 162,
+   "errores_de_calidad": 0,
+   "segmentos": 90,
+   "bloques_hora_inicio": [
+    "06:45:00",
+    "07:00:00"
+   ],
+   "horas_de_paso_propias": [
+    5,
+    6,
+    7
+   ],
+   "viajes_segmento": {
+    "extreme": 223.0,
+    "propia": 224.0
+   },
+   "subidas": {
+    "extreme": 200.0,
+    "propia": 201.0
+   },
+   "contraste_del_ciclo": {
+    "grano": [
+     "id_segmento",
+     "id_dia_semana",
+     "id_estacionalidad"
+    ],
+    "llaves": 90,
+    "comparadas": 90,
+    "sin_agregacion_propia": 0,
+    "pocos_viajes": 0,
+    "diferencias": 5,
+    "groseras": 0,
+    "llaves_bloqueadas": 0,
+    "por_campo": {
+     "promedio_subidas": 1,
+     "promedio_bajadas": 2,
+     "promedio_pasajeros": 1,
+     "viajes_por_dia": 1
+    },
+    "agregacion_propia": "segmento_estadistica_dia (agregación materializada del trabajo «segmentos»)",
+    "periodo": [
+     "2023-01-01T00:00:00",
+     "2025-12-31T00:00:00"
+    ],
+    "ids": 90,
+    "dias_viajes_por_dia": "los de la agregación propia de la misma llave (los dos lados salen de timbradas_segmentos); el año abierto de la anual no se compara",
+    "nota": "por segmento × día ISO × estacionalidad (y año en la anual) y no por hora: fn_insert_timbradas_anio pone todos los segmentos de un viaje en el bloque de 15 minutos de su fin (hallazgo H10) y la agregación propia, en la hora en que el bus pasó por cada segmento",
+    "por_hora": {
+     "grano": [
+      "id_segmento",
+      "id_dia_semana",
+      "id_estacionalidad",
+      "hora"
+     ],
+     "llaves": 162,
+     "comparadas": 62,
+     "sin_agregacion_propia": 100,
+     "pocos_viajes": 0,
+     "fuera_de_rango": 44,
+     "por_campo": {
+      "promedio_subidas": 10,
+      "promedio_bajadas": 14,
+      "promedio_pasajeros": 20
+     },
+     "nota": "CONTR-003 por hora, no bloqueante: el bloque de 15 minutos de Extreme puede ser otro que la hora de paso de la agregación propia (hallazgo H10)"
+    }
+   },
+   "incidencias_por_codigo": {
+    "CONTR-002": {
+     "bloqueantes": 0,
+     "no_bloqueantes": 5
+    },
+    "CONTR-003": {
+     "bloqueantes": 0,
+     "no_bloqueantes": 44
+    }
+   },
+   "segmentos_con_diferencias": [
+    100,
+    112
+   ],
+   "con_las_tolerancias_por_defecto": {
+    "llaves": 90,
+    "comparadas": 0,
+    "pocos_viajes": 90,
+    "diferencias": 0,
+    "groseras": 0
+   },
+   "con_la_hora_en_el_grano": {
+    "grano": [
+     "id_segmento",
+     "id_dia_semana",
+     "id_estacionalidad",
+     "hora"
+    ],
+    "llaves": 162,
+    "comparadas": 62,
+    "sin_agregacion_propia": 100,
+    "pocos_viajes": 0,
+    "diferencias": 174,
+    "groseras": 129,
+    "llaves_bloqueadas": 56,
+    "por_campo": {
+     "promedio_subidas": 30,
+     "promedio_bajadas": 42,
+     "promedio_pasajeros": 56,
+     "viajes_por_dia": 46
+    }
+   },
+   "diferencia_sembrada": {
+    "segmento": 130,
+    "cambio": "subidas = 3 × subidas + 10 × nro_viajes",
+    "groseras": 1,
+    "llaves_bloqueadas": 1,
+    "segmentos_bloqueados": [
+     130
+    ],
+    "campos": [
+     "promedio_subidas"
+    ],
+    "codigos": [
+     "CONTR-002"
+    ],
+    "llave_con_hora": false
+   }
+  }
+ },
+ "viajes": [
+  5141355,
+  5141356,
+  5141357
+ ],
+ "filas_crudas": 584,
+ "fin_de_los_viajes": [
+  "5141355: 2023-02-07 06:51:55",
+  "5141356: 2023-02-07 07:00:10",
+  "5141357: 2023-02-07 07:13:48"
+ ],
+ "bloques_del_fin": [
+  "06:45:00",
+  "07:00:00"
+ ],
+ "segmentos_con_un_viaje_en_dos_bloques": {
+  "segmentos": [
+   73,
+   87,
+   100,
+   106,
+   112
+  ],
+  "pares_segmento_viaje": 5,
+  "nota": "un viaje con dos filas en timbradas_segmentos para el mismo segmento (dos bloques de 15 minutos): la liquidación de Extreme deja los conteos de una sola de las dos filas; la agregación propia suma las dos y, si caen en horas distintas, cuenta el viaje en cada hora. Las diferencias no bloqueantes del contraste salen solo en estos segmentos"
+ }
+}

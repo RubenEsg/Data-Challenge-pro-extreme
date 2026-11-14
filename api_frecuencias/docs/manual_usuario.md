@@ -24,8 +24,8 @@ rol, y la API registra en la bitácora al usuario de la clave:
 | Rol | Qué puede hacer |
 |---|---|
 | `operador` | Ver todo y gestionar alertas (reconocer, asignar, comentar, cerrar o descartar). |
-| `analista` | Lo anterior, y además lanzar ejecuciones, pedir pronósticos y recomendaciones y entrenar candidatos. |
-| `admin` | Lo anterior, y además activar o revertir modelos y cambiar umbrales y capacidad. |
+| `analista` | Lo anterior, y además lanzar ejecuciones, pedir pronósticos y recomendaciones, entrenar candidatos y pedir el refresco de las estadísticas por segmento. |
+| `admin` | Lo anterior, y además activar o revertir modelos, cambiar umbrales, capacidad, flota disponible y tiempo de ciclo (`PUT /api/v1/catalogos/flota`) y correr la retención de datos (`POST /api/v1/retencion/aplicar`). |
 
 El tablero lee la clave de la variable `SOBUSA_API_KEY` y la URL de la API de `SOBUSA_API_URL`. Por ejemplo, en
 PowerShell, desde `dash_app/`:
@@ -56,11 +56,22 @@ con los datos del gráfico y sus fuentes. Hay dos grupos de pantallas:
   filtran por estado, nivel, ruta, código y fechas. El nivel y el estado aparecen como chips con icono y palabra, para
   que no dependan solo del color.
 - **Detalle.** Clic en una fila. Muestra todos los campos de §5.3, agrupados:
-  - identificación y contexto: origen (pronóstico, observado, calidad de datos o modelo), ruta, sentido, viaje y
-    vehículo;
+  - identificación y contexto: origen (pronóstico, observado, calidad de datos o modelo), empresa, ruta, sentido,
+    viaje, conductor (solo su seudónimo) y vehículo. En ALT-006 (despacho ausente o tardío), el viaje, el vehículo y el
+    conductor son los del despacho cancelado, tardío o sin finalizar de la ventana; en ALT-009 (datos incompletos), los
+    del viaje con datos faltantes. Salen de los viajes programados (`progvehiculos`) cuando la fuente los trae. En una
+    ALT-002 observada medida en el segmento crítico (con la base operacional), el sentido (aproximado), el viaje, el
+    vehículo y el conductor son los del viaje más cargado en ese segmento, y sus variables dicen el segmento y el método
+    (`metodo_ocupacion`). Las demás reglas son de la ruta y no tienen un viaje. Cuando un campo está vacío y la
+    regla no mira un viaje, el detalle muestra «— no aplica en el nivel ruta-hora». Si la regla sí lo mira (ALT-006,
+    ALT-009 y la ALT-002 del segmento crítico) y no se pudo identificar, muestra «— sin identificar» con el motivo; por
+    ejemplo, que la fuente de datos no expone los viajes. El detalle está en la variable `identificacion_5_3` (grupo
+    «Variables»): qué campos aplican a esa regla, por qué y qué se encontró (por ejemplo, `fuente_sin_viajes`);
   - tiempo: detección, ventana y horizonte;
   - evidencia: observado, esperado, umbral, puntaje y probabilidad con su método (nunca una cifra opaca, §9.4), y la
-    tendencia (al alza, a la baja o estable) con su pendiente, como chip con icono y palabra;
+    tendencia (al alza, a la baja o estable) con su pendiente, como chip con icono y palabra. En ALT-003 (frecuencia
+    insuficiente), la probabilidad es la de que la carga del tramo más cargado supere la capacidad efectiva de la
+    frecuencia de hoy; la alerta sale solo si llega al mínimo gobernado (`alt003_probabilidad_minima`);
   - serie reciente: un gráfico pequeño con lo real frente a lo esperado de las horas analizadas; su tabla está en el «…»;
   - lectura: explicación en lenguaje operativo, variables influyentes del modelo (SHAP) ordenadas por su efecto en
     pasajeros y recomendación;
@@ -97,6 +108,19 @@ con los datos del gráfico y sus fuentes. Hay dos grupos de pantallas:
 
   En el ejemplo de CRA 54 del 19-11-2025 son 106 y 78,55, con 79 buses disponibles
   (`evidencias/optimizacion/ejemplo_plan_d5.json`).
+- **Ocupación por segmento en el plan (§10.1; por ahora solo en la API, el tablero no la muestra).** El ejemplo
+  guardado es anterior y no trae estos campos:
+  - `ocupacion_historica` en cada hora: el segmento crítico histórico de esa hora y ese día de la semana (el tramo
+    donde el bus suele ir más lleno), con su sentido aproximado, su carga a bordo y su ocupación. Sale de los viajes
+    de ene.–feb. 2023 y sirve para saber dónde se llena el bus; no cambia el número de salidas.
+  - `ocupacion_actual` en el día: si la restricción reactiva aplicó y en qué hora, o por qué no (vacía si el plan se
+    calculó sin ocupación medida). Con la base operacional, el sistema mide la ocupación real de cada segmento con las
+    subidas y bajadas de cada viaje; si el segmento crítico de la última hora cerrada llegó a la ocupación crítica
+    (90 % con los umbrales vigentes), la siguiente hora que todavía se puede programar no baja de las salidas que pide
+    esa carga. La hora en que actúa trae `restriccion_reactiva` con el piso y la fórmula.
+  - La restricción reactiva solo actúa en una ejecución pedida dentro del día, con un `instante` del día en curso (rol
+    analista; sección 7). En la ejecución programada de la madrugada no actúa: el plan es del día siguiente y, con la
+    base operacional, `ocupacion_actual` dice por qué no aplicó.
 - **«Calcular escenario».** Llama a `POST /api/v1/recommendations/calculate` (rol analista) con la demanda, la capacidad
   y, si quiere cambiarlos, el nivel de servicio y los pesos α, β, γ y δ. Pone el resultado al lado de la recomendación
   vigente, con todo lo que explica la API:
@@ -137,6 +161,12 @@ cada vista es el mismo.
     Cada error dice qué registro lo tuvo (la llave: ruta, fecha y hora), el valor que llegó, la causa y si bloqueó la
     fila (las filas bloqueadas no entran al histórico; los errores de oportunidad solo informan). Un ejemplo con un
     error de cada regla está en `evidencias/datos/errores_lote.txt`.
+  - Con la base operacional, los errores traen también las diferencias entre los consolidados de Extreme y lo que el
+    sistema calculó con sus propios datos (códigos CONTR-001 a CONTR-003, en el lote
+    `<8 caracteres del execution_id>:<tabla>`). No se corrige nada: una diferencia «bloqueante» deja esa llave del
+    consolidado fuera del análisis, y la pregunta queda para el responsable del consolidado (H17 de
+    `hallazgos_extreme.md`). El resumen de cada tabla está en `metricas.calidad.consolidados` de la ejecución
+    (`GET /api/v1/frequency/executions/{execution_id}`).
   - «Ejecutar día siguiente» lanza el job (rol analista) y el tablero sigue su progreso cada 2 segundos.
 - **Modelos.** ![Modelos](evidencias/tablero/operacion_modelos_1366x768.png)
   - El registro: estado, corte, variables, SHA-256, WAPE de validación, quién lo aprobó y cuál era el anterior.
@@ -146,11 +176,29 @@ cada vista es el mismo.
 - **Umbrales.** La versión vigente y el historial de cada umbral. Una versión nueva se crea con su motivo (rol
   admin) y queda como propuesta hasta que el área operativa la aprueba (`POST /api/v1/thresholds/{version}/aprobar`,
   rol admin), que registra quién y cuándo. `GET /api/v1/thresholds` dice si la versión vigente está aprobada.
+  Entre los umbrales están la tarifa, la elasticidad y la suavidad del plan del día, los seis parámetros de la
+  retención de datos (`retencion_*`; ver «Retención de datos», abajo), las tolerancias con que se comparan los
+  consolidados de Extreme (`contraste_tolerancia`, `contraste_tolerancia_grosera` y `contraste_viajes_minimos`) y el
+  mínimo de probabilidad de ALT-003 (`alt003_probabilidad_minima`). La versión que siembra ese mínimo (0,30) queda como
+  propuesta hasta que el área operativa la apruebe. Un valor fuera de rango no se guarda: la API responde 422. Un
+  cambio rige desde el cálculo siguiente, sin reiniciar, y el plan dice con qué versión y con qué fuente se calculó cada
+  parámetro (`parametros` de `GET /api/v1/recommendations/plan`). La flota disponible y el tiempo de ciclo de cada ruta
+  se ajustan solo por la API (`PUT /api/v1/catalogos/flota`, rol admin; sección 7), con el mismo versionado.
   ![Umbrales](evidencias/tablero/operacion_umbrales_1366x768.png)
 - **Salud del servicio.** `/health`, las métricas (peticiones, errores y p95 aproximado por ruta), las alertas nuevas
   por nivel y el WAPE frente a su tolerancia. El monitoreo del modelo (deriva, error móvil, reentrenamiento y retador en
   sombra) tiene su propia pantalla, Monitoreo (sección 3.4), y esta vista enlaza a ella.
   ![Salud del servicio (captura de la versión anterior)](evidencias/tablero/operacion_monitoreo_1366x768.png)
+- **Retención de datos (§18; solo en la API, el tablero no la muestra).** Por omisión, el sistema guarda 13 meses de
+  resultados y borra lo anterior, solo en su propio esquema: las fotos de variables por mes, las predicciones y
+  recomendaciones, las alertas cerradas o descartadas, las notificaciones y las ejecuciones que ya no sostienen nada.
+  Nunca borra una alerta abierta, el histórico validado ni la ocupación por segmento.
+  - `GET /api/v1/retencion` (cualquier rol) dice qué hace con cada tabla, el corte de hoy y lo que hizo la última
+    corrida.
+  - Con el planificador encendido (como en Docker), la corrida programada de los domingos a las 03:30 borra de
+    verdad. Un administrador puede dejarla solo en simulación con una versión nueva de umbrales con
+    `retencion_aplicar_programada` = 0, o correrla cuando quiera con `POST /api/v1/retencion/aplicar`, que por
+    omisión solo simula (sección 7).
 
 Con una clave de operador, las acciones de analista o de administrador quedan bloqueadas y el tablero dice qué rol
 hace falta (`evidencias/tablero/operacion_403_operador_1366x768.png`).
@@ -244,7 +292,10 @@ pasajeros por hora esperados (P90 = 1.180), la respuesta trae:
 - `tipologias`: cuántos buses de cada tipología usa la recomendación frente a los disponibles (§10.1);
 - `linea_base_10_3`: la cuenta simple de §10.3, para contrastar;
 - `comparacion_actual`: costo, espera, sobreocupación esperada y vehículos de la frecuencia programada frente a los de
-  la recomendada.
+  la recomendada;
+- `ocupacion_historica` (el ejemplo guardado es anterior y no lo trae): el segmento crítico histórico de la franja, el
+  tramo donde el bus suele ir más lleno a esa hora y ese día de la semana, con su sentido aproximado, su carga a bordo
+  y su ocupación con los puestos de la recomendación. También va como una frase al final de la `explicacion`.
 
 **Viabilidad.** Si la flota o el headway mínimo no alcanzan para la demanda, la recomendación sale `viable = false` con
 un `motivo` en cifras, en lugar de forzar un número. En `evidencias/optimizacion/ejemplo_calculate_no_viable.json`,
@@ -289,6 +340,33 @@ curl -X POST http://localhost:8000/api/v1/frequency/executions -H "X-API-Key: %C
      -H "Content-Type: application/json" -d "{\"hasta\": \"2025-09-30\"}"
 curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/frequency/executions/<execution_id>
 curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/frequency/executions/<execution_id>/errors
+rem Las diferencias con el consolidado de Extreme por ruta de esa ejecución (con la base operacional)
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/frequency/executions/<execution_id>/errors?codigo=CONTR-001"
+rem El día siguiente, partido en un trabajo por ruta (la respuesta trae «trabajos»), y la marca de agua de cada ruta
+curl -X POST http://localhost:8000/api/v1/frequency/executions -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"hasta\": \"2025-10-01\", \"particion\": \"ruta\"}"
+curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/frequency/watermarks
+rem Ejecución dentro del día (rol analista): con un «instante» del día en curso, el plan es de ese día y, con la base
+rem operacional, la restricción reactiva de la ocupación por segmento puede actuar en la hora siguiente
+curl -X POST http://localhost:8000/api/v1/frequency/executions -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"instante\": \"<AAAA-MM-DD>T09:05:00-05:00\"}"
+
+rem Flota disponible y tiempo de ciclo vigentes de una ruta (rol operador), un ajuste de flota (rol admin) y su historial
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/catalogos/flota?idruta=16&tipo_dia=Laboral"
+curl -X PUT http://localhost:8000/api/v1/catalogos/flota -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" ^
+     -d "{\"idruta\": 16, \"tipo_dia\": \"Laboral\", \"flota\": 40, \"motivo\": \"Flota informada por la operación\"}"
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/catalogos/flota/historial?idruta=16"
+
+rem Pedir el refresco de las estadísticas por segmento (rol analista; necesita la base operacional)
+curl -X POST http://localhost:8000/api/v1/segmentos/estadisticas/refrescar -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"modo\": \"auto\"}"
+
+rem Política de retención y su última corrida (rol operador), y una corrida bajo demanda (rol admin): por omisión
+rem solo simula; con "simular": false borra lo anterior al corte. Responde 202 con el execution_id
+curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/retencion
+curl -X POST http://localhost:8000/api/v1/retencion/aplicar -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"simular\": true, \"motivo\": \"Revisión antes de aplicar\"}"
 
 rem Pronóstico de una ruta a 60 minutos (rol analista)
 curl -X POST http://localhost:8000/api/v1/predictions/run -H "X-API-Key: %CLAVE%" ^
@@ -303,6 +381,8 @@ curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/recommendations/plan?
 rem Alertas nuevas y críticas de una ruta, alertas a 500 m de un punto, y gestión de una alerta (rol operador)
 curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/alerts?estado=nueva&severidad=critica&ruta=CL%2072"
 curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/alerts?cerca_de=10.981,-74.801&radio_m=500"
+rem Despachos ausentes o tardíos (ALT-006) de una ruta, con el viaje, el vehículo y el seudónimo del conductor
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/alerts?codigo=ALT-006&ruta=CRA%2054"
 curl -X PATCH http://localhost:8000/api/v1/alerts/<alert_id>/status -H "X-API-Key: %CLAVE%" ^
      -H "Content-Type: application/json" -d "{\"accion\": \"reconocer\", \"comentario\": \"Se envía un bus de refuerzo\"}"
 curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/alerts/<alert_id>/history
@@ -359,6 +439,11 @@ hacen lo mismo. Hay archivos de ejemplo en `evidencias/tablero/export_alertas_da
 `evidencias/tablero/export_respuesta_dash.csv`. La exportación de alertas acepta también el filtro por lugar
 (`cerca_de` y `radio_m`).
 
+Las estadísticas por segmento salen de una agregación que la API calcula aparte, como un trabajo de la cola: la
+consulta dice de cuándo es (`actualizado_en`). Mientras la agregación se calcula por primera vez, la exportación
+responde 503 `agregacion_pendiente` y el refresco ya queda en la cola. Un analista puede pedir otro con
+`POST /api/v1/segmentos/estadisticas/refrescar` y seguir su avance en `GET /api/v1/frequency/executions/{execution_id}`.
+
 ## 9. Preguntas frecuentes
 
 | Pregunta o síntoma | Respuesta |
@@ -373,9 +458,17 @@ hacen lo mismo. Hay archivos de ejemplo en `evidencias/tablero/export_alertas_da
 | La ejecución terminó con 0 filas | No llegaron datos nuevos desde la marca de agua. Es lo esperado y no se reprocesa el histórico. |
 | La API responde 404 `sin_calcular` en el plan o en la respuesta del reto | El plan de esa fecha todavía no está calculado (la ejecución diaria lo calcula para el día siguiente). Un analista lo pide con `POST /api/v1/respuesta/calcular`; la tarjeta de Inicio lo pide sola y muestra «Calculando…» mientras tanto. |
 | Una alerta cambió de severidad sin que nadie la tocara | La situación empeoró y el sistema la escaló: la bitácora tiene la entrada «escalar» con la severidad anterior y la nueva (sección 4). |
-| La ejecución quedó en `error` | `GET /api/v1/frequency/executions/{id}` dice la etapa y la causa. La marca de agua no avanzó, así que se puede relanzar. |
+| La ejecución quedó en `error` | `GET /api/v1/frequency/executions/{execution_id}` dice la etapa y la causa. La marca de agua no avanzó, así que se puede relanzar. En una ejecución partida por ruta, el detalle de la madre trae el estado de cada trabajo (`trabajos`): solo la ruta que falló no movió su marca, y la ejecución siguiente la vuelve a leer. |
+| La exportación de estadísticas por segmento responde 503 `agregacion_pendiente` | La agregación se está calculando por primera vez y el refresco ya está en la cola. Siga su avance en `GET /api/v1/frequency/executions/{execution_id}` y repita la descarga cuando termine (sección 8). |
 | ¿Por qué el sistema recomendó esto? | Cada pronóstico trae su explicación (las variables que más pesaron) y su versión de modelo y de datos. Cada recomendación trae la fórmula, los límites que mandan y la versión de umbrales. Cada alerta trae el observado, el esperado, el umbral y la explicación. |
 | ¿El sistema despacha buses solo? | No. Recomienda y alerta; el despachador decide (§3.2). |
+| ¿El sistema borra datos viejos? | Sí: por omisión, lo de más de 13 meses y solo en su propio esquema; nunca una alerta abierta ni el histórico validado. `GET /api/v1/retencion` dice qué borra, el corte de hoy y qué hizo la última corrida (sección 3.3, «Retención de datos»). |
+| El plan dice que la restricción reactiva no aplicó | Solo actúa dentro del día, en una ejecución con un `instante` del día en curso y con la base operacional. La ejecución programada calcula el plan del día siguiente, así que ahí no aplica (sección 3.2). |
+| Una ALT-006 o una ALT-009 no trae viaje ni vehículo | El viaje sale de los viajes programados (`progvehiculos`) de la base operacional, de la réplica o de su exportación. Sin ninguna de ellas, la alerta sale igual y su variable `identificacion_5_3` lo dice (`resultado` = `fuente_sin_viajes`). En una ALT-006 en la que todos los despachos salieron a tiempo, el faltante es de programación y la alerta no inventa un viaje. |
+| Una ALT-009 no cuenta una hora sin datos | Si en esa hora no había ningún viaje programado sin cancelar, no faltaba ningún dato: la alerta la deja en la variable `horas_sin_viajes_programados`. Solo pasa cuando la fuente trae los viajes de ese día; sin ellos, toda hora sin datos cuenta. |
+| El conductor de una alerta aparece como «cnd_…» | Es su seudónimo (§18): el sistema nunca guarda ni muestra el dato en claro. Sin `SEUDONIMO_SECRETO` el campo queda vacío. |
+| Una ejecución trae errores CONTR-001, CONTR-002 o CONTR-003 | Son diferencias entre los consolidados de Extreme y lo que el sistema calculó con sus propios datos. No se corrigen: una diferencia «bloqueante» deja esa llave fuera del análisis, y la pregunta es para el responsable del consolidado (sección 3.3, «Ejecuciones»). |
+| Una ejecución trae `reporte_unicidad` en sus métricas | El lote trajo llaves duplicadas (UNI-001). No se corrigieron: esas filas se rechazaron, y el reporte se mandó al responsable del consolidado, o quedó `pendiente_destinatario` si todavía no hay destinatario (lo define Extreme). El detalle está en `GET /api/v1/frequency/executions/{execution_id}/errors?codigo=UNI-001`. |
 
 ## 10. Glosario
 
@@ -387,7 +480,11 @@ hacen lo mismo. Hay archivos de ejemplo en `evidencias/tablero/export_alertas_da
 | Banda P10–P90 | El rango de pasajeros en que debería caer la demanda 8 de cada 10 veces: por debajo del P10, una de cada diez, y por encima del P90, otra de cada diez. |
 | Nivel de servicio | Qué parte de la demanda posible se cubre al recomendar. Con 0,90, la capacidad alcanza para el P90. |
 | Viable | La recomendación cabe en la flota, en el ciclo y en los límites de headway. Si no, sale `viable = false` con el motivo. |
-| Marca de agua | La fecha y hora del último dato leído. La ejecución siguiente solo lee lo posterior, así que nada se procesa dos veces. |
+| Marca de agua | La fecha y hora del último dato leído, una por ruta. La ejecución siguiente solo lee lo posterior, así que nada se procesa dos veces (`GET /api/v1/frequency/watermarks`). |
+| Consolidado de Extreme | Las tablas en que Extreme resume subidas, bajadas y viajes por ruta o por segmento, día de la semana, estacionalidad y bloque de 15 minutos (`timbradas_consolidado` y las dos por segmento). El sistema las lee con su propia marca de agua y las compara con lo que calculó; no las usa para pronosticar. |
 | WAPE | Error del pronóstico: la suma de los errores absolutos dividida por la suma de los pasajeros reales. 15 % quiere decir que, en conjunto, el pronóstico se equivoca en 15 de cada 100 pasajeros. |
 | Episodio | Horas seguidas con la misma situación en la misma ruta. Generan una sola alerta, que se actualiza mientras dure. |
+| Segmento crítico | El tramo de la ruta donde los buses que salen en una hora van más cargados en promedio. |
+| Restricción reactiva | Un mínimo de salidas para la hora siguiente cuando la ocupación medida en el segmento crítico ya pasó la ocupación crítica. Es una regla de seguridad, no un pronóstico nuevo. |
+| Retención | Cuánto tiempo guarda el sistema sus resultados antes de borrarlos (por omisión, 13 meses). |
 | Modelo activo, candidato y sombra | El activo es el que hace los pronósticos. Un candidato es un modelo reentrenado que todavía no se usa. En sombra, el candidato predice en paralelo para compararlo antes de activarlo. |

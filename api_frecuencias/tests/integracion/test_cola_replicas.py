@@ -305,5 +305,6 @@ def test_endpoint_scheduler(cliente):
     r = cliente.get("/api/v1/scheduler")
     assert r.status_code == 200, r.text
     cuerpo = r.json()
-    assert {t["id"] for t in cuerpo["trabajos"]} == {"ejecucion_diaria", "reentrenamiento"}
+    # la retención (§18) se programa siempre que PLAN_RETENCION_CRON tenga valor (por omisión, los domingos 03:30)
+    assert {t["id"] for t in cuerpo["trabajos"]} == {"ejecucion_diaria", "reentrenamiento", "retencion"}
     assert "por_estado" in cuerpo["cola"] and cuerpo["zona"] == "America/Bogota"

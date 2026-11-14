@@ -233,12 +233,23 @@ def metricas(y, yhat, horas=None, rutas=None, p10=None, p90=None) -> dict:
     return out
 
 
+def variables_de(serie: pd.DataFrame, contexto: pd.DataFrame | None = None) -> pd.DataFrame:
+    """La tabla de variables de `serie` (variables.construir_variables con el contexto de todas las rutas) con las
+    novedades viales de rutas dadas encima (§11.2, novedades.aplicar_por_ruta y datos/novedades_por_ruta.parquet). Es
+    el mismo paso al entrenar y al inferir; sin novedades por ruta (Sobusa) la tabla es exactamente la de siempre."""
+    from app.servicios import novedades
+
+    return novedades.aplicar_por_ruta(variables.construir_variables(serie, contexto=contexto),
+                                      datos.novedades_por_ruta())
+
+
 @lru_cache(maxsize=2)
-def _tabla_bundled(ruta_archivo: str, mtime: float, mtime_contexto: float) -> pd.DataFrame:
-    tabla = variables.construir_variables(datos.demanda_horaria(), contexto=datos.contexto_operacional())
+def _tabla_bundled(ruta_archivo: str, mtime: float, mtime_contexto: float, mtime_novedades: float = -1.0
+                   ) -> pd.DataFrame:
+    tabla = variables_de(datos.demanda_horaria(), contexto=datos.contexto_operacional())
     tabla = tabla.set_index(["ruta", "fecha", "hora"]).sort_index()
     tabla.attrs["origen"] = "serie empaquetada (datos/demanda_horaria.parquet)"
-    tabla.attrs["huella"] = ("empaquetada", ruta_archivo, mtime, mtime_contexto)
+    tabla.attrs["huella"] = ("empaquetada", ruta_archivo, mtime, mtime_contexto, mtime_novedades)
     return tabla
 
 
@@ -267,7 +278,8 @@ def con_sesion(sesion) -> Iterator:
 
 def _tabla_empaquetada() -> pd.DataFrame:
     archivo = datos.carpeta_datos() / "demanda_horaria.parquet"
-    return _tabla_bundled(str(archivo), archivo.stat().st_mtime, datos.huella_archivo("contexto_operacional.parquet"))
+    return _tabla_bundled(str(archivo), archivo.stat().st_mtime, datos.huella_archivo("contexto_operacional.parquet"),
+                          datos.huella_archivo("novedades_por_ruta.parquet"))
 
 
 def tabla_variables(sesion=None) -> pd.DataFrame:
@@ -321,7 +333,7 @@ def _tabla_validada(s, base: pd.DataFrame) -> pd.DataFrame:
 def tabla_con_observados(base: pd.DataFrame, serie_base: pd.DataFrame, obs: pd.DataFrame) -> pd.DataFrame:
     """Tabla de variables de la serie validada sin recalcular lo que no cambió: las filas anteriores al primer día
     tocado salen de `base` (la tabla de `serie_base`) y desde ese día se recalculan con la serie unida (función pura;
-    da lo mismo que variables.construir_variables sobre toda la serie unida)."""
+    da lo mismo que variables_de sobre toda la serie unida)."""
     from . import politica
 
     serie, info = politica.superponer_observados(serie_base, obs)
@@ -332,7 +344,7 @@ def tabla_con_observados(base: pd.DataFrame, serie_base: pd.DataFrame, obs: pd.D
         return tabla
     d_min = tocadas[0]
     sub = serie[serie["fecha"] >= d_min - timedelta(days=VENTANA_REZAGOS_DIAS)]
-    nuevo = variables.construir_variables(sub, contexto=datos.contexto_operacional())
+    nuevo = variables_de(sub, contexto=datos.contexto_operacional())
     nuevo = nuevo[nuevo["fecha"] >= d_min].set_index(["ruta", "fecha", "hora"])
     previo = base[np.asarray([f < d_min for f in base.index.get_level_values("fecha")], dtype=bool)]
     tabla = pd.concat([previo, nuevo[base.columns]]).sort_index()
@@ -602,6 +614,7 @@ def entrenar(
         **huellas_codigo(),
         "version_contexto": {
             "contexto_operacional_mtime": datos.huella_archivo("contexto_operacional.parquet"),
+            "novedades_por_ruta_mtime": datos.huella_archivo("novedades_por_ruta.parquet"),
             "perfil_intrahorario_mtime": datos.huella_archivo(ARCHIVO_PERFIL),
         },
     }
@@ -654,17 +667,42 @@ CLAVES_REGISTRO = (
 )
 
 
+class CorteSinDatos(ValueError):
+    """El corte pedido no deja filas útiles para entrenar (<= corte) o para validar (los 61 días siguientes)."""
+
+    def __init__(self, hasta: date, entrenamiento: int, validacion: int) -> None:
+        super().__init__("No hay datos suficientes para entrenar y validar con ese corte")
+        self.hasta, self.entrenamiento, self.validacion = hasta, entrenamiento, validacion
+
+
 def _particion_cronologica(
     serie: pd.DataFrame, contexto: pd.DataFrame | None, hasta: date
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """División cronológica (§9.3): entrenamiento <= hasta, validación los 61 días siguientes y prueba el resto."""
-    t = _filas_utiles(variables.construir_variables(serie, contexto=contexto))
+    """División cronológica (§9.3): entrenamiento <= hasta, validación los 61 días siguientes y prueba el resto. Una
+    serie sin filas no deja nada para entrenar ni para validar: es el mismo CorteSinDatos (con ella las variables no se
+    pueden armar)."""
+    if serie.empty:
+        raise CorteSinDatos(hasta, 0, 0)
+    t = _filas_utiles(variables_de(serie, contexto=contexto))
     t = t[t["fecha"] <= serie["fecha"].max()]
     fin_val = hasta + timedelta(days=DIAS_VALIDACION)
     tr, va, te = t[t["fecha"] <= hasta], t[(t["fecha"] > hasta) & (t["fecha"] <= fin_val)], t[t["fecha"] > fin_val]
     if len(tr) == 0 or len(va) == 0:
-        raise ValueError("No hay datos suficientes para entrenar y validar con ese corte")
+        raise CorteSinDatos(hasta, len(tr), len(va))
     return tr, va, te
+
+
+def corte_sin_datos(serie: pd.DataFrame, hasta: date, contexto: pd.DataFrame | None = None) -> dict | None:
+    """¿Se puede entrenar y validar con `serie` y el corte `hasta`? None si sí; si no, el motivo con el que entrenar()
+    fallaría y las filas útiles que deja cada parte. Corre la partición del entrenamiento (_particion_cronologica, la
+    misma que usa entrenar), no una copia de su regla: quien decide pedir un entrenamiento lo sabe antes de
+    encolarlo."""
+    try:
+        _particion_cronologica(serie, contexto, hasta)
+    except CorteSinDatos as exc:
+        return {"motivo": str(exc), "corte": exc.hasta, "filas_entrenamiento": exc.entrenamiento,
+                "filas_validacion": exc.validacion}
+    return None
 
 
 def _particion_texto(tr: pd.DataFrame, te: pd.DataFrame, hasta: date) -> dict:
@@ -1909,17 +1947,21 @@ def evaluacion_registrada(model_id: str | None = None, dir_modelos: Path | None 
 
 
 def evaluar(model_id: str | None, desde: date, hasta: date, dir_modelos: Path | None = None, *,
-            sesion=None) -> dict:
+            sesion=None, rutas: list[str] | None = None) -> dict:
     """Métricas del modelo (o de una línea base) sobre los datos reales entre desde y hasta. Con `sesion` (o dentro
-    de con_sesion) los valores reales y las variables son los de la serie validada (lo que llegó y pasó la calidad)."""
+    de con_sesion) los valores reales y las variables son los de la serie validada (lo que llegó y pasó la calidad).
+    Con `rutas`, solo las filas de esas rutas (el trabajo de una ruta de una ejecución partida, RNF-005): cada fila se
+    pronostica sola, así que las métricas de una ruta son las mismas que en la evaluación de todas."""
     if sesion is not None:
         with con_sesion(sesion):
-            return evaluar(model_id, desde, hasta, dir_modelos)
+            return evaluar(model_id, desde, hasta, dir_modelos, rutas=rutas)
     modelo = cargar(model_id, dir_modelos)
     desde, hasta = pd.Timestamp(desde).date(), pd.Timestamp(hasta).date()
     tabla = tabla_variables()
     t = _filas_utiles(tabla)
     t = t[(t["fecha"] >= desde) & (t["fecha"] <= hasta)]
+    if rutas:
+        t = t[t["ruta"].isin(list(rutas))]
     if t.empty:
         raise ValueError(f"No hay datos reales entre {desde} y {hasta}")
     p, lo, hi = _predecir_filas(modelo, t)

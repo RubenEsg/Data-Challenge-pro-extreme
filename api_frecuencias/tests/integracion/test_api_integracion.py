@@ -11,7 +11,9 @@ from sqlalchemy import func, inspect, select, text
 from app.modelos_db import Alerta, DemandaObservada, Ejecucion, RegistroModelo, Umbral
 
 TABLAS = {"model_registry", "prediction", "recommendation", "alert", "alert_history", "execution_log",
-          "data_quality_error", "threshold_config", "notification_log", "demanda_observada"}
+          "data_quality_error", "threshold_config", "notification_log", "demanda_observada", "marca_agua_ruta",
+          "segmento_estadistica_dia", "segmento_estadistica", "segmento_estadistica_refresco", "ocupacion_segmento",
+          "retencion_registro", "marca_agua_tabla"}
 
 
 # ---------------------------------------------------------------- migraciones
@@ -132,8 +134,10 @@ def test_migracion_0005_pesos_objetivo_sube_y_baja(migrada, sesion):
         _alembic("upgrade", "head")
     despues = vigentes()
     assert set(PARAMETROS_OBJETIVO) <= set(despues) and len({f.version for f in despues.values()}) == 1
-    # al volver a head, la última versión del conjunto completo es la de la 0007 (umbrales de las reglas nuevas)
-    assert {f.creado_por for f in despues.values()} == {"migracion_0007"}
+    # al volver a head, la última versión del conjunto completo es la de la última migración que versiona umbrales
+    # (la 0007, umbrales de las reglas nuevas, o una posterior como la 0010, parámetros del plan)
+    creadores = {f.creado_por for f in despues.values()}
+    assert len(creadores) == 1 and min(creadores).startswith("migracion_") and min(creadores) >= "migracion_0007"
     assert max(f.version for f in despues.values()) == sesion.scalar(select(func.max(Umbral.version)))
     assert sesion.scalar(select(func.count()).select_from(Umbral).where(Umbral.creado_por == "migracion_0005"))
 
@@ -179,7 +183,9 @@ def test_migracion_0007_umbrales_de_las_reglas_nuevas_sube_y_baja(migrada, sesio
     assert len({f.version for f in despues.values()}) == 1 and set(antes) | set(nuevos) <= set(despues)
     assert {n: despues[n].valor for n in nuevos} == nuevos
     assert max(f.version for f in despues.values()) == sesion.scalar(select(func.max(Umbral.version)))
-    assert de_la_0007() == len(despues)
+    # la 0007 crea UNA versión del conjunto completo: lo que había más sus umbrales (las migraciones posteriores, como
+    # la 0010, agregan después sus propios parámetros en otra versión)
+    assert de_la_0007() == len(set(antes) | set(nuevos))
 
 
 # ---------------------------------------------------------------- ejecución incremental
@@ -246,25 +252,23 @@ def _resultados_con_dimensiones_y_plan(cliente, sesion, ejecucion_ok: dict) -> N
 
 @pytest.fixture
 def marca_de_agua_propia(monkeypatch, sesion):
-    """La marca de agua (y las huellas de la fuente) se leen solo de las ejecuciones que crea esta prueba: otras
-    pruebas de la misma base pudieron dejar ejecuciones «ok» con cortes posteriores (la prueba no depende del orden)."""
+    """La marca de agua (y las huellas de la fuente) son solo las que dejan las ejecuciones de esta prueba: otras
+    pruebas de la misma base pudieron dejar marcas posteriores (la prueba no depende del orden). Desde la migración
+    0009 la marca es por proceso y ruta (marca_agua_ruta): la fuente de esta prueba lee un proceso propio, así que sus
+    marcas no se mezclan con las de las demás y la prueba ejercita el mecanismo real, sin reemplazarlo."""
     from app.servicios import ejecucion
 
     desde = sesion.scalar(text("SELECT clock_timestamp()"))
     sesion.commit()
-    propias = (Ejecucion.tipo == "frecuencia", Ejecucion.estado == "ok", Ejecucion.creado_en >= desde)
+    proceso = f"prueba-marca-{uuid.uuid4().hex[:8]}"
+    obtener = ejecucion.obtener_fuente
 
-    def ultima_marca_agua(s):
-        return s.scalar(select(func.max(Ejecucion.marca_agua_nueva)).where(*propias))
+    def obtener_fuente():
+        fuente = obtener()
+        fuente.proceso = proceso
+        return fuente
 
-    def estado_fuente_anterior(s):
-        metricas = s.scalar(select(Ejecucion.metricas).where(*propias, Ejecucion.marca_agua_nueva.is_not(None))
-                            .order_by(Ejecucion.marca_agua_nueva.desc(), Ejecucion.terminado_en.desc()).limit(1))
-        estado = (metricas or {}).get("fuente_estado")
-        return estado if isinstance(estado, dict) else None
-
-    monkeypatch.setattr(ejecucion, "ultima_marca_agua", ultima_marca_agua)
-    monkeypatch.setattr(ejecucion, "estado_fuente_anterior", estado_fuente_anterior)
+    monkeypatch.setattr(ejecucion, "obtener_fuente", obtener_fuente)
     return desde
 
 
@@ -309,22 +313,22 @@ def test_catalogos_de_la_calidad_salen_de_la_fuente():
     assert set(ejecucion.catalogos_calidad(object())) == {"rutas", "idrutas"}     # Parquet: solo el catálogo
 
 
-def test_dias_completos_cuenta_en_una_pasada_los_mismos_dias():
-    """Rendimiento del ciclo: los días completos del lote se cuentan en una pasada y son los mismos que con la
-    definición directa (cada fecha cuyas horas de servicio están todas en el lote)."""
-    from app.servicios import datos, ejecucion
+def test_dias_observados_son_los_del_lote_en_la_ventana_que_ya_empezaron():
+    """§5.2, RF-009: las alertas observadas evalúan cada día del lote con horas nuevas de los últimos
+    VENTANA_OBSERVADA_DIAS días del lote (no la carga inicial día por día) que ya empezó frente a la referencia; con la
+    captura en vivo, el ciclo de la madrugada evalúa el día anterior y el día en curso."""
+    from app.servicios import ejecucion
 
-    servicio = sorted(datos.HORAS_SERVICIO)
-    completos = 0
-    for k in range(1, 26):     # lotes deterministas: en un día de cada tres faltan algunas horas, distintas por lote
-        nuevas = {(date(2025, 8, 1) + timedelta(days=d), h) for d in range(6) for h in range(24)
-                  if (d + k) % 3 or (h * 7 + k) % 11 or h in servicio[:3]}
-        directa = sorted({f for f, _ in nuevas if sum(1 for g, h in nuevas if g == f and h in datos.HORAS_SERVICIO)
-                          >= len(datos.HORAS_SERVICIO)})
-        assert ejecucion._dias_completos(nuevas) == directa
-        completos += len(directa)
-    assert 0 < completos < 25 * 6          # hay lotes con días completos y con días incompletos
-    assert ejecucion._dias_completos(set()) == []
+    zona = ejecucion.ZONA
+    dias = [date(2025, 8, 1) + timedelta(days=d) for d in range(30)]        # el último, el 30 de agosto
+    carga_inicial = {(f, h) for f in dias for h in range(24)}
+    referencia = datetime(2025, 8, 30, 5, 15, tzinfo=zona)                  # el ciclo de la madrugada del día 30
+    assert ejecucion.dias_observados(carga_inicial, referencia) == dias[-ejecucion.VENTANA_OBSERVADA_DIAS:]
+    madrugada = {(dias[-2], h) for h in range(4, 21)} | {(dias[-1], 4)}
+    assert ejecucion.dias_observados(madrugada, referencia) == dias[-2:]
+    # el día en curso entra cuando termina su primera hora de servicio (4 h): a las 4:30 todavía no
+    assert ejecucion.dias_observados(madrugada, datetime(2025, 8, 30, 4, 30, tzinfo=zona)) == [dias[-2]]
+    assert ejecucion.dias_observados(set(), referencia) == []
 
 
 def test_una_recomendacion_por_ruta_y_franja_en_la_ejecucion(monkeypatch):
@@ -487,7 +491,7 @@ def test_activacion_controlada_y_reversion(cliente, sesion, monkeypatch):
 
 
 # ---------------------------------------------------------------- umbrales, exportación, contrato
-def test_umbrales_versionados(cliente):
+def test_umbrales_versionados(cliente, umbrales_restituidos):
     antes = cliente.get("/api/v1/thresholds").json()
     r = cliente.put("/api/v1/thresholds", json={"valores": {"ocupacion_critica": 0.92}, "creado_por": "operacion"})
     assert r.status_code == 200 and r.json()["version"] == antes["version"] + 1
@@ -649,7 +653,7 @@ def test_trabajo_respuesta_de_un_dia_sin_datos_no_se_reintenta(sesion):
     assert final.estado == "error" and final.intentos == 1
 
 
-def test_umbrales_se_aprueban_por_version(cliente):
+def test_umbrales_se_aprueban_por_version(cliente, umbrales_restituidos):
     """§5.1: una versión nace «propuesta»; el área operativa la aprueba (rol admin) y la firma queda en cada fila."""
     vigente = cliente.get("/api/v1/thresholds").json()
     nueva = cliente.put("/api/v1/thresholds", json={"valores": {"baja_utilizacion": vigente["valores"]

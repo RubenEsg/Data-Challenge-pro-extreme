@@ -38,6 +38,11 @@ PREFIJO = "/api/v1"
 # Rutas que aparecen en varias tablas de este módulo (errores, códigos y filtros obligatorios por operación)
 RUTA_PRONOSTICO_SEGMENTOS = "/api/v1/predictions/segmentos"
 RUTA_CAPACIDAD = "/api/v1/catalogos/capacidad"
+RUTA_REFRESCO_SEGMENTOS = "/api/v1/segmentos/estadisticas/refrescar"
+RUTA_FLOTA = "/api/v1/catalogos/flota"
+# Ajustes locales versionados (capacidad, flota y ciclo): leen el catálogo empaquetado y threshold_config, no la
+# réplica, así que no llevan los códigos de error de los catálogos de Extreme.
+RUTAS_AJUSTE_LOCAL = (RUTA_CAPACIDAD, RUTA_FLOTA)
 XLSX ="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 REF_ERROR = {"$ref": "#/components/schemas/RespuestaError"}
 log = logging.getLogger("api_frecuencias.http")
@@ -72,9 +77,12 @@ ERRORES_POR_OPERACION: dict[tuple[str, str], set[int]] = {
     ("patch", "/api/v1/alerts/{alert_id}/status"): {409},
     ("get", RUTA_CAPACIDAD): {404},
     ("put", RUTA_CAPACIDAD): {404},
+    ("get", RUTA_FLOTA): {404},
+    ("put", RUTA_FLOTA): {404},
     ("get", "/api/v1/respuesta"): {404},
     ("post", "/api/v1/respuesta/calcular"): {404},
     ("get", "/api/v1/respuesta/export"): {404},
+    ("post", RUTA_REFRESCO_SEGMENTOS): {503},
 }
 # Valores del campo «codigo» del error uniforme. Los GENERALES valen donde la operación declara su estado (el 404
 # «no_encontrado», donde hay parámetro de ruta; «orden_invalido», donde hay parámetro «orden»); los PROPIOS salen del
@@ -89,6 +97,7 @@ _CODIGOS_CATALOGOS = {422: ("filtro_invalido",), 500: ("operacion_no_permitida",
 _CODIGOS_SEGMENTOS = {422: ("parametro_invalido",), 503: ("fuente_no_disponible",)}
 CODIGOS_POR_OPERACION: dict[tuple[str, str], dict[int, tuple[str, ...]]] = {
     ("get", "/api/v1/frequency/executions"): {422: ("rango_invalido",)},
+    ("post", "/api/v1/frequency/executions"): {422: ("ruta_desconocida",)},     # RNF-005: partición por ruta
     ("post", "/api/v1/predictions/run"): {404: ("ruta_desconocida", "modelo_no_encontrado"),
                                           422: ("parametros_invalidos", "prediccion_invalida")},
     ("get", RUTA_PRONOSTICO_SEGMENTOS): {
@@ -110,10 +119,15 @@ CODIGOS_POR_OPERACION: dict[tuple[str, str], dict[int, tuple[str, ...]]] = {
     ("get", RUTA_CAPACIDAD): {404: ("no_encontrado",), 422: ("tipologia_invalida",)},
     ("put", RUTA_CAPACIDAD): {404: ("no_encontrado", "ajuste_inexistente"),
                               422: ("ruta_desconocida", "capacidad_invalida")},
+    ("get", RUTA_FLOTA): {404: ("no_encontrado",)},
+    ("put", RUTA_FLOTA): {404: ("ajuste_inexistente",), 422: ("ruta_desconocida", "ajuste_invalido")},
     ("get", "/api/v1/monitoring/feature-snapshots"): {422: ("filtro_requerido",)},
     ("get", "/api/v1/respuesta"): {404: ("sin_calcular",)},
     ("post", "/api/v1/respuesta/calcular"): {404: ("sin_datos",)},
     ("get", "/api/v1/respuesta/export"): {404: ("sin_calcular",)},
+    ("get", "/api/v1/segmentos/estadisticas/export"): {503: ("agregacion_pendiente",)},
+    ("post", RUTA_REFRESCO_SEGMENTOS): {422: ("parametro_invalido",),
+                                        503: ("fuente_no_configurada", "fuente_no_disponible")},
 }
 # Lecturas que dependen de una fuente externa que puede degradarse (réplica de Extreme o base operacional): 503.
 DEGRADABLES = ("/api/v1/catalogos", "/api/v1/segmentos")
@@ -141,9 +155,11 @@ ETIQUETAS = {
     "umbrales": "Umbrales y pesos versionados (threshold_config)",
     "monitoreo del modelo": "Monitoreo (§9.4), foto de variables y política de aprendizaje continuo",
     "planificador": "Planificador interno y estado de la cola",
-    "catálogos": "Catálogos operacionales de solo lectura (§3.1) y ajuste local de capacidad",
+    "catálogos": "Catálogos operacionales de solo lectura (§3.1) y ajustes locales versionados de capacidad, flota "
+                 "y tiempo de ciclo",
     "segmentos": "Capa analítica por segmento y zona (§6.1, §6.2)",
     "respuesta del reto": "Respuesta a la pregunta final del reto con la trazabilidad de cada cifra",
+    "retención": "Política de retención de datos (§18): parámetros gobernados, tarea automática y su bitácora",
     "sistema": "Salud del servicio y métricas Prometheus",
 }
 DESCRIPCION_GENERAL = (
@@ -172,7 +188,7 @@ def codigos_de(metodo: str, ruta: str, estado: int, op: dict | None = None) -> t
     if estado == 422 and any(p.get("name") == "orden" for p in (op or {}).get("parameters", [])):
         generales.append("orden_invalido")
     grupo: dict[int, tuple[str, ...]] = {}
-    if metodo == "get" and ruta.startswith("/api/v1/catalogos") and not ruta.startswith(RUTA_CAPACIDAD):
+    if metodo == "get" and ruta.startswith("/api/v1/catalogos") and not ruta.startswith(RUTAS_AJUSTE_LOCAL):
         grupo = _CODIGOS_CATALOGOS
     elif metodo == "get" and ruta.startswith("/api/v1/segmentos"):
         grupo = _CODIGOS_SEGMENTOS

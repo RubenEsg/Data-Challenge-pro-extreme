@@ -241,8 +241,9 @@ El balance que propone el sistema:
 - **Balance del día laboral en las tres rutas:** 191,1 vehículos-hora y 11,30 millones COP menos de costo operativo
   (108,10 frente a 119,40 millones), con 0,9 min más de espera en SILENCIO, 0,5 en CRA 54 y 0,9 menos en CL 72.
 - **Recaudo.** Extreme no suministró la tarifa (§19). La respuesta usa la tarifa pública 2026 del Área Metropolitana
-  (3.700 COP) por 0,86 que retiene el operador: 3.182 COP netos por pasajero, la misma que usa el MILP de D5
-  (`param_d5(fuente=True)`). Con ella, el recaudo esperado es de 132,99 millones COP el laboral 19-nov, 108,90 el sábado
+  (3.700 COP) por 0,86 que retiene el operador: 3.182 COP netos por pasajero, la misma que usa el MILP del plan. Desde la
+  migración 0010 esa tarifa se versiona en `threshold_config` como `tarifa_cop`, sembrada con la de
+  `param_d5(fuente=True)`. Con ella, el recaudo esperado es de 132,99 millones COP el laboral 19-nov, 108,90 el sábado
   22-nov, 60,42 el domingo 23-nov y 48,13 el festivo 1-ene-2026. El MILP estima además el ingreso que se pierde o se
   gana al cambiar la oferta (campo `ingreso_perdido_cop`). Elasticidad: β estimada ≈ 0,70 por observación, sin validar
   en campo; el plan usa 0,5 por prudencia; la sensibilidad está en
@@ -254,7 +255,7 @@ La respuesta trae dos listas por ruta, rotuladas:
 
 - `atencion_inmediata`: las alertas **abiertas ahora**, es decir, en estado nueva, reconocida o asignada en el instante
   de la consulta (`atencion_resumen.consultado_en`), de cualquier fecha, las críticas primero y luego las más
-  recientes. Es lo que hay que atender ya; cada alerta se gestiona con `PATCH /api/v1/alerts/{id}/status`;
+  recientes. Es lo que hay que atender ya; cada alerta se gestiona con `PATCH /api/v1/alerts/{alert_id}/status`;
 - `alertas_de_la_fecha`: las detectadas en la fecha consultada (día de Bogotá), en cualquier estado.
 
 `atencion_resumen` da los conteos completos por severidad. En la evidencia, después de una corrida del ciclo diario
@@ -263,21 +264,22 @@ en CL 72 (2 y 5): 21 en total, 7 críticas. Para el 1-ene-2026 hay una alerta cr
 CL 72 (`respuesta_2026-01-01.json`).
 
 Situaciones que vigila el sistema, con sus umbrales vigentes (`app/servicios/alertas.py`, versionados en
-`threshold_config`; la migración 0007 agrega los de la ALT-002 observada y de la ruptura), y cuántas alertas se esperan
-por ruta y día con la banda calibrada `v2` en el backtest del 15-sep al 31-dic-2025 (324 días-ruta):
+`threshold_config`; la migración 0007 agrega los de la ALT-002 observada y de la ruptura, y la 0014, el mínimo de
+probabilidad de ALT-003), y cuántas alertas se esperan por ruta y día con la banda calibrada `v2` en el backtest del
+15-sep al 31-dic-2025 (324 días-ruta):
 
 | Familia | Código | Situación | Nivel | Se activa cuando | Por ruta y día |
 |---|---|---|---|---|---|
-| Pronóstico | ALT-001 | Alta demanda prevista | Preventiva o crítica | La carga crítica P90 de la hora (factor de carga del optimizador × P90 de la demanda de la franja recomendada) supera la capacidad programada por hora (buses/h × capacidad); crítica si también la supera el pronóstico puntual | 0,435 |
-| Pronóstico | ALT-002 | Sobreocupación | Crítica | La ocupación esperada en el punto de carga máxima, con el mismo factor de carga del optimizador, llega al 90 % | 0,315 |
-| Pronóstico | ALT-003 | Frecuencia insuficiente | Preventiva | La frecuencia programada no cumple el nivel de servicio de la hora (la carga crítica P90 no cabe en la capacidad efectiva); va dentro de ALT-001 si las dos salen en la misma franja | 0,380 |
+| Pronóstico | ALT-001 | Alta demanda prevista | Preventiva o crítica | La carga crítica P90 de la hora (factor de carga del optimizador × P90 de la demanda de la franja recomendada) supera la capacidad programada por hora (buses/h × capacidad); crítica si también la supera el pronóstico puntual | 0,438 |
+| Pronóstico | ALT-002 | Sobreocupación | Crítica | La ocupación esperada en el punto de carga máxima, con el mismo factor de carga del optimizador, llega al 90 % | 0,306 |
+| Pronóstico | ALT-003 | Frecuencia insuficiente | Preventiva | La frecuencia programada no cumple el nivel de servicio de la hora (la carga crítica P90 no cabe en la capacidad efectiva) y la probabilidad de que la carga crítica supere la capacidad efectiva llega al 30 % (`alt003_probabilidad_minima`); va dentro de ALT-001 si las dos salen en la misma franja | 0,164 |
 | Pronóstico | ALT-004 | Frecuencia excesiva | Informativa | La ocupación esperada en el punto de carga máxima queda bajo el 30 % y hay más buses que los recomendados | 0,031 |
-| Observada | ALT-002 | Sobreocupación observada | Crítica | La ocupación observada (factor de carga × pasajeros / puestos ofrecidos) llega al 90 % en horas con al menos 2 salidas, 2 horas seguidas | 0,691 |
+| Observada | ALT-002 | Sobreocupación observada | Crítica | La ocupación observada llega al 90 % en horas con al menos 2 salidas, 2 horas seguidas. Se mide en el segmento crítico cuando el ciclo trae la ocupación por segmento (fuente PostgreSQL); si no, se estima como en el backtest: factor de carga × pasajeros / puestos ofrecidos | 0,710 |
 | Observada | ALT-005 | Caída anormal de demanda | Preventiva | La demanda real cae más del 30 % frente al patrón del modelo y bajo el P10, 2 horas seguidas | 0,142 |
 | Observada | ALT-006 | Despacho ausente o tardío | Crítica | No hay despacho dentro del headway programado más la tolerancia (5 min), o faltan más del 50 % de las salidas esperadas | 0,127 |
 | Observada | ALT-007 | Desviación del pronóstico | Preventiva | La demanda real sale de la banda P10–P90 con un error de al menos 15 %, 2 horas seguidas | 0,204 |
 | Observada | ALT-007 (ruptura) | Ruptura de comportamiento (RF-009) | Preventiva | CUSUM de dos lados sobre el residuo diario relativo (real frente al pronóstico) de los últimos 56 días, con k = 0,5, h = 6, 28 días de referencia y un cambio medio de al menos 8 % | 0,012 |
-| Observada | ALT-008 | Consolidado anómalo | Preventiva | Subidas, bajadas o viajes con un z robusto de 3,5 o más frente a las 8 semanas previas del mismo tipo de día | 0,062 |
+| Observada | ALT-008 | Consolidado anómalo | Preventiva | Subidas, bajadas o viajes con un z robusto de 3,5 o más frente a las 8 semanas previas del mismo tipo de día | 0,071 |
 | Observada | ALT-009 | Datos incompletos | Crítica | Falta información obligatoria o llega con 2 períodos de ingesta de atraso | 0,000 |
 | Monitoreo | ALT-010 | Modelo degradado | Crítica | El WAPE móvil supera la tolerancia de 20 % (el WAPE de la regla manual) | se evalúa en cada ciclo con el monitoreo |
 
@@ -285,15 +287,16 @@ Fuentes: `api_frecuencias/docs/evidencias/alertas/backtest_alertas_pronostico.md
 6:00) y `api_frecuencias/docs/evidencias/alertas/backtest_alertas.md` (ALT-002 observada, ALT-005 a ALT-009 y la
 ruptura). Las cifras vigentes se comprueban con `api_frecuencias/scripts/cifras_vigentes.py`.
 
-**Total: 2,399 alertas por ruta y día, unas 7,2 por día en las tres rutas.** Por familia:
+**Total: 2,203 alertas por ruta y día, unas 6,6 por día en las tres rutas.** Por familia:
 
-- **de pronóstico, 1,161 por ruta y día:** ALT-001 0,435, ALT-002 0,315, ALT-003 0,380 y ALT-004 0,031. Antes de
+- **de pronóstico, 0,938 por ruta y día:** ALT-001 0,438, ALT-002 0,306, ALT-003 0,164 y ALT-004 0,031. Antes de
   medir la carga con el factor de carga del optimizador eran 2,065 (0,889, 0,858, 0,318 y 0). El lift de ALT-001 sube
-  de 1,12 a 1,77 y el de ALT-002 de 1,14 a 2,01: ahora la alerta y la recomendación usan la misma ocupación. ALT-003
-  queda con lift 0,75 porque es una alerta de riesgo sobre el P90 y, cuando la recomendación no es viable, se cumple
-  por definición;
-- **observadas, 1,238 por ruta y día:** ALT-002 observada 0,691, ALT-005 0,142, ALT-006 0,127, ALT-007 0,204, ruptura
-  0,012, ALT-008 0,062 y ALT-009 0. Sin las dos familias nuevas, ALT-005 a ALT-009 suman 0,534, frente a 6,077 con las
+  de 1,12 a 1,81 y el de ALT-002 de 1,14 a 2,03: ahora la alerta y la recomendación usan la misma ocupación. ALT-003
+  exige además un mínimo de probabilidad, elegido en una validación anterior a la evaluación: donde puede emitirse (sin
+  ALT-001) supera la tasa base, y contra la tasa base de todas las franjas su intervalo en la evaluación incluye 1
+  (`backtest_alertas_pronostico.md`, sección de ALT-003);
+- **observadas, 1,265 por ruta y día:** ALT-002 observada 0,710, ALT-005 0,142, ALT-006 0,127, ALT-007 0,204, ruptura
+  0,012, ALT-008 0,071 y ALT-009 0. Sin las dos familias nuevas, ALT-005 a ALT-009 suman 0,543, frente a 6,083 con las
   reglas anteriores. Después de una ALT-006, el problema de despacho sigue en la hora siguiente 8,3 veces más a menudo
   que en una hora cualquiera (lift 8,30). La ruptura detectó 4 cambios en el periodo, con 1,644 falsas alarmas por cada
   100 días-ruta sin cambio; desde esta versión corre también en el ciclo diario de producción;

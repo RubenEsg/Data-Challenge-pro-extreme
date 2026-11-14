@@ -316,3 +316,100 @@ def test_filtrar_paginar_y_exportar():
     assert "2025-01-02T06:00:00-05:00" in csv.decode("utf-8-sig")
     xlsx, media, _ = C.exportar(con_hora, ["idprogramacion", "hora_programada"], "xlsx", "viajes")
     assert xlsx[:2] == b"PK" and "spreadsheetml" in media
+
+
+# ---------------------------------------------------------------- segmentos: geometría solo de la página (RNF-002)
+def _segmentos_parquet(carpeta):
+    """Tres segmentos con WKT: el 1 y el 2 de la ruta 2 (un zigzag que se simplifica) y el 3 de la ruta 16 sin
+    geometría."""
+    zigzag = "LINESTRING(" + ", ".join(f"{-74.8 + i * 1e-4} {10.9 + (i % 2) * 1e-7}" for i in range(40)) + ")"
+    pd.DataFrame({"id": [1, 2, 3], "id_config": [1, 1, 2], "idruta": [2, 2, 16], "idrutageo": [1, 1, 2],
+                  "nro_segmento": [1, 2, 1], "activo": [True, True, False], "longitud_m": [120.5, 99.0, 300.0],
+                  "geom_segmento": [zigzag, "LINESTRING(-74.8 10.9, -74.7 10.9)", None]}).to_parquet(
+        carpeta / "rutas_segmentos.parquet")
+
+
+def test_listado_de_segmentos_sin_geometria_y_geometria_de_la_pagina_offline(tmp_path):
+    _segmentos_parquet(tmp_path / "exportaciones")
+    d, fuente = C.segmentos_listado()
+    assert fuente == "archivos" and "geom_segmento" not in d.columns
+    assert list(d["ruta"]) == ["SILENCIO", "SILENCIO", "CRA 54"]
+    simplificada = C.geometria_de_pagina([1, 2, 3], "simplificada")
+    assert simplificada[1]["vertices_original"] == 40 and 2 <= simplificada[1]["vertices"] < 40
+    assert simplificada[2] == {"geometria": {"type": "LineString", "coordinates": [[-74.8, 10.9], [-74.7, 10.9]]},
+                               "vertices": 2, "vertices_original": 2}
+    assert simplificada[3] == {"geometria": None, "vertices": 0, "vertices_original": 0}
+    assert C.geometria_de_pagina([1], "ninguna") == {1: {"geometria": None, "vertices": 0, "vertices_original": 40}}
+    completa = C.geometria_de_pagina([1, 2], "completa")
+    assert completa[1]["vertices"] == completa[1]["vertices_original"] == 40 and 3 not in completa
+    assert C.geometria_de_pagina([], "simplificada") == {}
+    with pytest.raises(C.FiltroInvalido):
+        C.geometria_de_pagina([1], "otra")
+
+
+class _ReplicaDeSegmentos(C.FuenteReplica):
+    """FuenteReplica con su caché real sobre una réplica falsa de n segmentos: consultar responde solo los ids
+    pedidos (como el WHERE id = ANY) y guarda cada SQL validado como SELECT."""
+
+    def __init__(self, n: int):
+        super().__init__(motor=object())                  # nunca se conecta: consultar está sustituida
+        self.n, self.sql = n, []
+
+    def consultar(self, sql, parametros=None):
+        from app.servicios.fuentes import validar_solo_select
+
+        validar_solo_select(sql)
+        self.sql.append((sql, dict(parametros or {})))
+        ids = [i for i in (parametros or {}).get("ids", []) if 1 <= i <= self.n]
+        geo = '{"type": "LineString", "coordinates": [[-74.8, 10.9], [-74.7, 10.9]]}'
+        return pd.DataFrame({"id": ids, "vertices_original": [2500] * len(ids), "geojson": [geo] * len(ids)})
+
+
+def test_la_geometria_de_las_paginas_se_guarda_por_segmento_con_memoria_acotada(monkeypatch):
+    """Mil páginas distintas (desplazamientos y tamaños al azar) de 40 segmentos: la memoria guarda a lo sumo un
+    registro por segmento y modo, nunca uno por página (antes cada página nueva era una entrada que no se borraba), y
+    a la réplica solo se le piden los segmentos que faltan."""
+    import random
+
+    f, rng = _ReplicaDeSegmentos(40), random.Random(7)
+    for _ in range(1000):
+        inicio = rng.randint(1, 40)
+        ids = list(range(inicio, min(41, inicio + rng.randint(1, 15))))
+        pagina = C.geometria_de_pagina(ids, rng.choice(["simplificada", "ninguna"]), f)
+        assert sorted(pagina) == ids and all(pagina[i]["vertices_original"] == 2500 for i in ids)
+    assert len(C._geometrias) <= 2 * 40 and len(C._cache) == 0
+    pedidos = len(f.sql)
+    assert C.geometria_de_pagina([3, 4, 5], "simplificada", f)[4]["vertices"] == 2 and len(f.sql) == pedidos
+    monkeypatch.setenv("CATALOGOS_CACHE_S", "0")                # vencida: se vuelve a leer, y solo esos ids
+    C.geometria_de_pagina([3, 4, 5], "simplificada", f)
+    assert len(f.sql) == pedidos + 1 and f.sql[-1][1]["ids"] == [3, 4, 5]
+
+
+def test_la_geometria_del_parquet_no_se_relee_para_los_segmentos_ya_vistos(tmp_path, monkeypatch):
+    _segmentos_parquet(tmp_path / "exportaciones")
+    lecturas = []
+    original = C._wkt_de
+    monkeypatch.setattr(C, "_wkt_de", lambda ids: lecturas.append(list(ids)) or original(ids))
+    primera = C.geometria_de_pagina([1, 2], "simplificada")
+    assert C.geometria_de_pagina([2, 1], "simplificada") == primera and lecturas == [[1, 2]]
+    C.geometria_de_pagina([2, 3], "simplificada")
+    assert lecturas == [[1, 2], [3]]                            # del archivo, solo el segmento que faltaba
+
+
+def test_geometria_de_la_pagina_desde_la_replica_solo_pide_esos_ids():
+    geo = '{"type": "LineString", "coordinates": [[-74.8, 10.9], [-74.7, 10.9]]}'
+    f = FuenteFalsa({"ST_AsGeoJSON(ST_Simplify": pd.DataFrame({"id": [7], "vertices_original": [2503],
+                                                                "geojson": [geo]}),
+                     "AS vertices_original FROM": pd.DataFrame({"id": [7], "vertices_original": [2503]}),
+                     "SELECT id, id_config": pd.DataFrame({"id": [7], "id_config": [1], "idruta": [2],
+                                                           "idrutageo": [1], "nro_segmento": [1], "activo": [True],
+                                                           "longitud_m": ["10.5"]})})
+    d, fuente = C.segmentos_listado(f, idruta=2)
+    assert fuente == "replica" and d["longitud_m"].tolist() == [10.5] and "ST_" not in f.sql[-1][0]
+    assert f.sql[-1][1] == {"idruta": 2}
+    pagina = C.geometria_de_pagina([7], "simplificada", f)
+    assert pagina == {7: {"geometria": {"type": "LineString", "coordinates": [[-74.8, 10.9], [-74.7, 10.9]]},
+                          "vertices": 2, "vertices_original": 2503}}
+    assert f.sql[-1][1] == {"ids": [7], "tol": C.TOLERANCIA_SIMPLIFICACION}
+    assert C.geometria_de_pagina([7], "ninguna", f) == {7: {"geometria": None, "vertices": 0,
+                                                            "vertices_original": 2503}}

@@ -1,0 +1,328 @@
+{
+ "generado": "2026-11-10T20:10:50-05:00",
+ "periodo": [
+  "2025-09-15",
+  "2025-12-31"
+ ],
+ "horas_instante": [
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19
+ ],
+ "horizontes_min": [
+  30,
+  60,
+  120
+ ],
+ "alt003": {
+  "corte_validacion": "2025-10-31",
+  "candidatos": [
+   0.1,
+   0.15,
+   0.2,
+   0.25,
+   0.3,
+   0.35,
+   0.4,
+   0.5
+  ],
+  "anterior": 0.1,
+  "adoptada": 0.3,
+  "n_min_validacion": 20,
+  "remuestreos": 2000,
+  "semilla": 20251101,
+  "ventanas": {
+   "validacion": [
+    "2025-09-15",
+    "2025-10-31"
+   ],
+   "evaluacion": [
+    "2025-11-01",
+    "2025-12-31"
+   ]
+  },
+  "variantes": {
+   "0.10": {
+    "validacion": {
+     "alertas": 502,
+     "confirmadas": 115,
+     "precision": 0.2291,
+     "tasa_base": 0.1404,
+     "lift": 1.631,
+     "tasa_base_elegible": 0.0711,
+     "lift_elegible": 3.223,
+     "franjas": 2115,
+     "franjas_elegibles": 1815
+    },
+    "evaluacion": {
+     "alertas": 492,
+     "confirmadas": 109,
+     "precision": 0.2215,
+     "tasa_base": 0.1067,
+     "lift": 2.076,
+     "tasa_base_elegible": 0.0535,
+     "lift_elegible": 4.14,
+     "franjas": 2745,
+     "franjas_elegibles": 2448
+    }
+   },
+   "0.15": {
+    "validacion": {
+     "alertas": 378,
+     "confirmadas": 101,
+     "precision": 0.2672,
+     "tasa_base": 0.1404,
+     "lift": 1.903,
+     "tasa_base_elegible": 0.0711,
+     "lift_elegible": 3.759,
+     "franjas": 2115,
+     "franjas_elegibles": 1815
+    },
+    "evaluacion": {
+     "alertas": 347,
+     "confirmadas": 92,
+     "precision": 0.2651,
+     "tasa_base": 0.1067,
+     "lift": 2.484,
+     "tasa_base_elegible": 0.0535,
+     "lift_elegible": 4.954,
+     "franjas": 2745,
+     "franjas_elegibles": 2448
+    }
+   },
+   "0.20": {
+    "validacion": {
+     "alertas": 277,
+     "confirmadas": 83,
+     "precision": 0.2996,
+     "tasa_base": 0.1404,
+     "lift": 2.134,
+     "tasa_base_elegible": 0.0711,
+     "lift_elegible": 4.216,
+     "franjas": 2115,
+     "franjas_elegibles": 1815
+    },
+    "evaluacion": {
+     "alertas": 248,
+     "confirmadas": 73,
+     "precision": 0.2944,
+     "tasa_base": 0.1067,
+     "lift": 2.758,
+     "tasa_base_elegible": 0.0535,
+     "lift_elegible": 5.501,
+     "franjas": 2745,
+     "franjas_elegibles": 2448
+    }
+   },
+   "0.25": {
+    "validacion": {
+     "alertas": 184,
+     "confirmadas": 59,
+     "precision": 0.3207,
+     "tasa_base": 0.1404,
+     "lift": 2.283,
+     "tasa_base_elegible": 0.0711,
+     "lift_elegible": 4.512,
+     "franjas": 2115,
+     "franjas_elegibles": 1815
+    },
+    "evaluacion": {
+     "alertas": 172,
+     "confirmadas": 57,
+     "precision": 0.3314,
+     "tasa_base": 0.1067,
+     "lift": 3.105,
+     "tasa_base_elegible": 0.0535,
+     "lift_elegible": 6.193,
+     "franjas": 2745,
+     "franjas_elegibles": 2448
+    }
+   },
+   "0.30": {
+    "validacion": {
+     "alertas": 119,
+     "confirmadas": 41,
+     "precision": 0.3445,
+     "tasa_base": 0.1404,
+     "lift": 2.454,
+     "tasa_base_elegible": 0.0711,
+     "lift_elegible": 4.848,
+     "franjas": 2115,
+     "franjas_elegibles": 1815
+    },
+    "evaluacion": {
+     "alertas": 103,
+     "confirmadas": 37,
+     "precision": 0.3592,
+     "tasa_base": 0.1067,
+     "lift": 3.365,
+     "tasa_base_elegible": 0.0535,
+     "lift_elegible": 6.713,
+     "franjas": 2745,
+     "franjas_elegibles": 2448
+    }
+   },
+   "0.35": {
+    "validacion": {
+     "alertas": 64,
+     "confirmadas": 25,
+     "precision": 0.3906,
+     "tasa_base": 0.1404,
+     "lift": 2.782,
+     "tasa_base_elegible": 0.0711,
+     "lift_elegible": 5.496,
+     "franjas": 2115,
+     "franjas_elegibles": 1815
+    },
+    "evaluacion": {
+     "alertas": 63,
+     "confirmadas": 26,
+     "precision": 0.4127,
+     "tasa_base": 0.1067,
+     "lift": 3.866,
+     "tasa_base_elegible": 0.0535,
+     "lift_elegible": 7.712,
+     "franjas": 2745,
+     "franjas_elegibles": 2448
+    }
+   },
+   "0.40": {
+    "validacion": {
+     "alertas": 27,
+     "confirmadas": 12,
+     "precision": 0.4444,
+     "tasa_base": 0.1404,
+     "lift": 3.165,
+     "tasa_base_elegible": 0.0711,
+     "lift_elegible": 6.253,
+     "franjas": 2115,
+     "franjas_elegibles": 1815
+    },
+    "evaluacion": {
+     "alertas": 44,
+     "confirmadas": 20,
+     "precision": 0.4545,
+     "tasa_base": 0.1067,
+     "lift": 4.258,
+     "tasa_base_elegible": 0.0535,
+     "lift_elegible": 8.494,
+     "franjas": 2745,
+     "franjas_elegibles": 2448
+    }
+   },
+   "0.50": {
+    "validacion": {
+     "alertas": 5,
+     "confirmadas": 3,
+     "precision": 0.6,
+     "tasa_base": 0.1404,
+     "lift": 4.273,
+     "tasa_base_elegible": 0.0711,
+     "lift_elegible": 8.442,
+     "franjas": 2115,
+     "franjas_elegibles": 1815
+    },
+    "evaluacion": {
+     "alertas": 18,
+     "confirmadas": 8,
+     "precision": 0.4444,
+     "tasa_base": 0.1067,
+     "lift": 4.164,
+     "tasa_base_elegible": 0.0535,
+     "lift_elegible": 8.305,
+     "franjas": 2745,
+     "franjas_elegibles": 2448
+    }
+   }
+  },
+  "elegida": 0.4,
+  "decision": "adoptar",
+  "intervalos_elegida": {
+   "lift": [
+    2.863,
+    5.806
+   ],
+   "lift_elegible": [
+    5.787,
+    11.703
+   ]
+  },
+  "intervalos_anterior": {
+   "lift": [
+    1.737,
+    2.529
+   ],
+   "lift_elegible": [
+    3.547,
+    5.025
+   ]
+  },
+  "intervalos_adoptada": {
+   "lift": [
+    2.503,
+    4.436
+   ],
+   "lift_elegible": [
+    5.126,
+    8.794
+   ]
+  },
+  "diagnostico": {
+   "franjas": 4860,
+   "tasa_base": 0.1214,
+   "con_alt001": {
+    "franjas": 597,
+    "positivas": 0.5528
+   },
+   "alt003_anterior": {
+    "franjas": 994,
+    "positivas": 0.2254
+   },
+   "sin_alerta": {
+    "franjas": 3269,
+    "positivas": 0.011
+   },
+   "senal_frecuencia_insuficiente": {
+    "franjas": 1591,
+    "positivas": 0.3482,
+    "nota": "ALT-003 sola o incluida en ALT-001 (variables.incluye_alt003): lo que ve el operador"
+   },
+   "por_ruta": {
+    "CL 72": {
+     "franjas": 1620,
+     "tasa_base": 0.0963,
+     "con_alt001": 230,
+     "alt003_anterior": 367,
+     "positivas_alt003_anterior": 0.1962
+    },
+    "CRA 54": {
+     "franjas": 1620,
+     "tasa_base": 0.1827,
+     "con_alt001": 285,
+     "alt003_anterior": 293,
+     "positivas_alt003_anterior": 0.2526
+    },
+    "SILENCIO": {
+     "franjas": 1620,
+     "tasa_base": 0.0852,
+     "con_alt001": 82,
+     "alt003_anterior": 334,
+     "positivas_alt003_anterior": 0.2335
+    }
+   }
+  }
+ },
+ "duracion_s": 919.0
+}

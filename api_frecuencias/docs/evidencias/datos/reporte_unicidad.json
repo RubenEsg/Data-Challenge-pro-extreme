@@ -1,0 +1,43 @@
+{
+ "prueba": "tests/integracion/test_errores_lote.py::test_el_lote_con_duplicados_se_reporta_al_responsable_sin_corregir",
+ "sin_destinatario": {
+  "estado": "pendiente_destinatario",
+  "canal": "correo",
+  "destinatario": null,
+  "asunto": "[CALIDAD §6.3] 1 llave duplicada en el lote 40bbb2c1:2024-06-12",
+  "mensaje": "Lote 40bbb2c1:2024-06-12: 1 llave duplicada (llave natural) en 2 filas (UNI-001, §6.3).\nNo se corrigió nada: las filas de cada llave duplicada se rechazaron del análisis y del histórico; corrija el consolidado en la fuente y la ejecución siguiente las leerá de nuevo.\n\n- ruta=SILENCIO, fecha=2024-06-12, hora=13: filas 145, 153 del lote\n\nDetalle por fila y causa: /api/v1/frequency/executions/40bbb2c1-1236-4c43-9b5c-3b821d22c55b/errors?codigo=UNI-001",
+  "reporte": {
+   "lote": "40bbb2c1:2024-06-12",
+   "tipo": "reporte_unicidad",
+   "asunto": "[CALIDAD §6.3] 1 llave duplicada en el lote 40bbb2c1:2024-06-12",
+   "codigo": "UNI-001",
+   "cuerpo": "Lote 40bbb2c1:2024-06-12: 1 llave duplicada (llave natural) en 2 filas (UNI-001, §6.3).\nNo se corrigió nada: las filas de cada llave duplicada se rechazaron del análisis y del histórico; corrija el consolidado en la fuente y la ejecución siguiente las leerá de nuevo.\n\n- ruta=SILENCIO, fecha=2024-06-12, hora=13: filas 145, 153 del lote\n\nDetalle por fila y causa: /api/v1/frequency/executions/40bbb2c1-1236-4c43-9b5c-3b821d22c55b/errors?codigo=UNI-001",
+   "consulta": "/api/v1/frequency/executions/40bbb2c1-1236-4c43-9b5c-3b821d22c55b/errors?codigo=UNI-001",
+   "truncado": false,
+   "corregido": false,
+   "severidad": "informativa",
+   "duplicados": [
+    {
+     "filas": [
+      145,
+      153
+     ],
+     "llave": {
+      "hora": 13,
+      "ruta": "SILENCIO",
+      "fecha": "2024-06-12"
+     }
+    }
+   ],
+   "responsable": "responsable del consolidado",
+   "filas_duplicadas": 2,
+   "llaves_duplicadas": 1
+  }
+ },
+ "con_destinatario": {
+  "estado": "simulada",
+  "destinatario": "co***@extreme.example",
+  "asunto": "[CALIDAD §6.3] 1 llave duplicada en el lote 8b5a2431:2024-06-12"
+ },
+ "historico": "las dos filas de la llave duplicada no entraron a demanda_observada (no se corrige)"
+}

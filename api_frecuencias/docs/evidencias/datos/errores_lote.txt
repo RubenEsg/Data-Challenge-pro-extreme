@@ -1,12 +1,12 @@
-Ejecución 0ed166db-6843-4d61-8730-9bdf73e9c93b · lote 0ed166db:2024-06-12 · 8 errores devueltos por GET /api/v1/frequency/executions/{id}/errors
+Ejecución 3c685f6e-3ead-48f6-904e-723e82c74630 · lote 3c685f6e:2024-06-12 · 8 errores devueltos por GET /api/v1/frequency/executions/{id}/errors
 codigo | dimension | lote | fila | llave | campo | valor | bloqueante | causa
-COMP-001 | completitud | 0ed166db:2024-06-12 | 122 | {'hora': 7, 'ruta': 'CRA 54', 'fecha': '2024-06-12'} | pasajeros | None | True | 'pasajeros' es obligatorio y llegó vacío.
-CONS-002 | consistencia | 0ed166db:2024-06-12 | 143 | {'hora': 11, 'ruta': 'SILENCIO', 'fecha': '2024-06-12'} | salidas | 0 | True | Hay pasajeros en una hora sin salidas.
-OPOR-002 | oportunidad | 0ed166db:2024-06-12 | 144 | {'hora': 12, 'ruta': 'SILENCIO', 'fecha': '2024-06-12'} | ultima_actualizacion | 2099-01-01T00:00:00-05:00 | False | ultima_actualizacion está en el futuro frente al instante de la ejecución.
-REL-001 | relacional | 0ed166db:2024-06-12 | 108 | {'hora': 10, 'ruta': 'RUTA FANTASMA', 'fecha': '2024-06-12'} | ruta | RUTA FANTASMA | True | ruta 'RUTA FANTASMA' no existe en rutas.
-UNI-001 | unicidad | 0ed166db:2024-06-12 | 145 | {'hora': 13, 'ruta': 'SILENCIO', 'fecha': '2024-06-12'} | ruta | SILENCIO | True | Llave duplicada (ruta=SILENCIO, fecha=2024-06-12, hora=13); se reporta al responsable del consolidado, no se corrige.
-UNI-001 | unicidad | 0ed166db:2024-06-12 | 153 | {'hora': 13, 'ruta': 'SILENCIO', 'fecha': '2024-06-12'} | ruta | SILENCIO | True | Llave duplicada (ruta=SILENCIO, fecha=2024-06-12, hora=13); se reporta al responsable del consolidado, no se corrige.
-VAL-001 | validez | 0ed166db:2024-06-12 | 123 | {'hora': 8, 'ruta': 'CRA 54', 'fecha': '2024-06-12'} | pasajeros | -5 | True | 'pasajeros' es negativo.
-VAL-002 | validez | 0ed166db:2024-06-12 | 107 | {'hora': 25, 'ruta': 'CL 72', 'fecha': '2024-06-12'} | hora | 25 | True | La hora debe ser un entero entre 0 y 23.
+COMP-001 | completitud | 3c685f6e:2024-06-12 | 122 | {'hora': 7, 'ruta': 'CRA 54', 'fecha': '2024-06-12'} | pasajeros | None | True | 'pasajeros' es obligatorio y llegó vacío.
+CONS-002 | consistencia | 3c685f6e:2024-06-12 | 143 | {'hora': 11, 'ruta': 'SILENCIO', 'fecha': '2024-06-12'} | salidas | 0 | True | Hay pasajeros en una hora sin salidas.
+OPOR-002 | oportunidad | 3c685f6e:2024-06-12 | 144 | {'hora': 12, 'ruta': 'SILENCIO', 'fecha': '2024-06-12'} | ultima_actualizacion | 2099-01-01T00:00:00-05:00 | False | ultima_actualizacion está en el futuro frente al instante de la ejecución.
+REL-001 | relacional | 3c685f6e:2024-06-12 | 108 | {'hora': 10, 'ruta': 'RUTA FANTASMA', 'fecha': '2024-06-12'} | ruta | RUTA FANTASMA | True | ruta 'RUTA FANTASMA' no existe en rutas.
+UNI-001 | unicidad | 3c685f6e:2024-06-12 | 145 | {'hora': 13, 'ruta': 'SILENCIO', 'fecha': '2024-06-12'} | ruta | SILENCIO | True | Llave duplicada (ruta=SILENCIO, fecha=2024-06-12, hora=13); se reporta al responsable del consolidado, no se corrige.
+UNI-001 | unicidad | 3c685f6e:2024-06-12 | 153 | {'hora': 13, 'ruta': 'SILENCIO', 'fecha': '2024-06-12'} | ruta | SILENCIO | True | Llave duplicada (ruta=SILENCIO, fecha=2024-06-12, hora=13); se reporta al responsable del consolidado, no se corrige.
+VAL-001 | validez | 3c685f6e:2024-06-12 | 123 | {'hora': 8, 'ruta': 'CRA 54', 'fecha': '2024-06-12'} | pasajeros | -5 | True | 'pasajeros' es negativo.
+VAL-002 | validez | 3c685f6e:2024-06-12 | 107 | {'hora': 25, 'ruta': 'CL 72', 'fecha': '2024-06-12'} | hora | 25 | True | La hora debe ser un entero entre 0 y 23.
 
 Bloqueadas fuera del histórico: CRA 54 7 h y 8 h, SILENCIO 13 h (×2), CL 72 hora 25, RUTA FANTASMA 10 h y SILENCIO 11 h; la fila con marca futura (OPOR-002, no bloqueante) sí entró. Errores por dimensión: {'completitud': 1, 'consistencia': 1, 'oportunidad': 1, 'relacional': 1, 'unicidad': 2, 'validez': 2}.

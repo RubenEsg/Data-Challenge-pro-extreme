@@ -1,0 +1,50 @@
+Capa de segmentos y carga con el volumen acordado · 2026-11-09T21:54:39-05:00 (portátil Windows 11, Docker Desktop, k6 grafana/k6:1.4.2); API propia de este checkout en 127.0.0.1:8311, modo integrado (réplica 5434 con lector_ia), base propia en 5433, autenticación encendida con una clave analista nueva
+   volumen de la base al empezar: {"execution_log": 401, "prediction": 3357, "recommendation": 3408, "alert": 8998, "alert_history": 8998, "segmento_estadistica_dia": 358091, "segmento_estadistica": 129801}
+1) Refresco completo de la agregación (trabajo de la cola e8beee6b-67bb-4870-9131-eab43b416e66): ok en 23.2 s; 2 tramos de hasta 31 días leídos de la réplica con lector_ia (358091 filas del grano diario), 129801 filas en el grano de la respuesta, período 2023-01-01 a 2023-02-27
+
+2) Peticiones EN FRÍO (k6/en_frio.js): API recién arrancada (2.4 s hasta /health), primera petición a cada ruta sin calentamiento («frío») y segunda pasada inmediata («caliente»); 1 usuario, en serie
+   ruta                             estado   frío ms  caliente ms  p95 < 2 s
+   predictions                         200      68.6         41.8  cumple
+   recommendations                     200     105.4         39.7  cumple
+   alerts                              200      74.3         55.6  cumple
+   alerts_filtradas                    200      64.5         44.1  cumple
+   executions                          200      28.2         21.7  cumple
+   models                              200      12.9         11.3  cumple
+   thresholds                          200      12.1         10.5  cumple
+   monitoring                          200      25.9         14.0  cumple
+   monitoring_policy                   200      22.7         16.5  cumple
+   feature_snapshots                   200      53.9         20.8  cumple
+   catalogos                           200       4.6          2.6  cumple
+   catalogos_rutas                     200      41.0         11.4  cumple
+   catalogos_empresas                  200      13.3          6.6  cumple
+   catalogos_procesos                  200       6.3          5.2  cumple
+   catalogos_segmentos                 200     250.3         43.4  cumple
+   catalogos_vehiculos                 200      65.0         44.8  cumple
+   catalogos_capacidad                 200       8.6          7.2  cumple
+   segmentos_estadisticas              200     186.7         68.5  cumple
+   segmentos_estadisticas_ruta         200      47.2         28.1  cumple
+   segmentos_zonas                     200      33.6         15.9  cumple
+   predictions_export                  200    4207.5       3359.5  descarga, fuera de RNF-002
+   alerts_export                       200    4778.8       5098.2  descarga, fuera de RNF-002
+   p95 de las consultas paginadas: en frío 189.9 ms, en caliente 56.3 ms (código de salida de k6: 0; 0 = los umbrales cumplen)
+
+3) Carga sobre la capa de segmentos MIENTRAS corre un refresco completo (k6/segmentos.js): rampa 0 -> 25 -> 50 usuarios en 60 s, consultas al azar con desplazamiento dentro del total de cada una
+   refresco a2ca30c0-78cd-4239-9152-5e31ccfc4b2c: estado=ok modo=completo tramos=2 fechas=58 filas_leidas=358091 filas=129801 duracion_trabajo_s=54.179 (55.493 s desde el POST)
+   errores_funcionales                                        rate<0.01    cumple     (valor 0.0)
+   http_req_duration{consulta:catalogo_segmentos}             p(95)<2000   cumple     (valor 771.46)
+   http_req_duration{consulta:estadisticas_estacionalidad}    p(95)<2000   cumple     (valor 1144.91)
+   http_req_duration{consulta:estadisticas_hora_orden}        p(95)<2000   cumple     (valor 1057.64)
+   http_req_duration{consulta:estadisticas_ruta_dia}          p(95)<2000   cumple     (valor 1022.51)
+   http_req_duration{consulta:estadisticas_ruta}              p(95)<2000   cumple     (valor 1052.41)
+   http_req_duration{consulta:estadisticas_segmento}          p(95)<2000   cumple     (valor 826.62)
+   http_req_duration{consulta:estadisticas_semana_ruta}       p(95)<2000   cumple     (valor 1487.06)
+   http_req_duration{consulta:estadisticas_un_dia}            p(95)<2000   cumple     (valor 1025.92)
+   http_req_duration{consulta:estadisticas}                   p(95)<2000   cumple     (valor 1563.02)
+   http_req_duration{fase:durante_refresco}                   p(95)<2000   cumple     (valor 1190.99)
+   http_req_duration{fase:sin_refresco}                       p(95)<2000   cumple     (valor 349.02)
+   http_req_duration{tipo:consulta}                           p(95)<2000   cumple     (valor 1163.1)
+   http_req_failed                                            rate<0.01    cumple     (valor 0.0)
+   refresco_ok                                                rate==1      cumple     (valor 1.0)
+   (código de salida de k6: 0; 0 = todos los umbrales cumplen)
+
+   volumen de la base al terminar: {"execution_log": 403, "prediction": 3357, "recommendation": 3408, "alert": 8998, "alert_history": 8998, "segmento_estadistica_dia": 358091, "segmento_estadistica": 129801}

@@ -1,5 +1,5 @@
 {
-  "origen": "tests/integracion/test_alertas_observadas.py en la base local ai_frecuencias_pruebas_alertas",
+  "origen": "tests/integracion/test_alertas_observadas.py en la base local ai_frecuencias_pruebas_ev_contrato",
   "columna_ubicacion": "geography(Point,4326)",
   "indice_ubicacion": "CREATE INDEX ix_alert_ubicacion ON ai_frecuencias.alert USING gist (ubicacion)",
   "check_conductor": "CHECK (((conductor IS NULL) OR (conductor ~ '^cnd_[0-9a-f]{24}$'::text)))",
@@ -61,16 +61,16 @@
   ],
   "alertas": [
     {
-      "alert_id": "e2f58844-7a92-4b6f-90fc-9429b1a5fe58",
+      "alert_id": "697966d9-bae1-4211-b787-e2ed79bfeb72",
       "codigo": "ALT-005",
-      "execution_id": "3a2177d0-6c42-4f95-94b1-beef8dedee12",
-      "empresa": "Sobusa",
+      "execution_id": "b358fb74-1aff-4407-a7aa-b2d707005ec3",
+      "empresa": "SOBUSA",
       "ruta": "CRA 54",
       "sentido": null,
       "viaje": null,
       "conductor": null,
       "vehiculo": null,
-      "detectada_en": "2026-11-09T02:50:21.252270-05:00",
+      "detectada_en": "2026-11-11T05:05:43.767303-05:00",
       "ventana_inicio": "2025-10-15T08:00:00-05:00",
       "ventana_fin": "2025-10-15T10:00:00-05:00",
       "horizonte_min": 0,
@@ -80,13 +80,18 @@
       "esperado": 2765.87,
       "umbral": 1936.109,
       "puntaje": 0.714,
-      "explicacion": "Durante 2 hora(s) seguidas (08:00-10:00) la demanda real (1.106 pasajeros) cayó 60,0 % frente al patrón del modelo (2.766); el umbral de caída es 30,0 % (límite 1.936) y quedó bajo el P10 calibrado (2.400); persistencia exigida: 2 h.",
+      "explicacion": "Durante 2 hora(s) seguidas (08:00-10:00) la demanda real (1.106 pasajeros) cayó 60,0 % frente al patrón del modelo (2.766); el umbral de caída es 30,0 % (límite 1.936) y quedó bajo el P10 calibrado (2.431); persistencia exigida: 2 h.",
       "variables": {
-        "p10": 2400.32,
+        "p10": 2430.9399999999996,
         "caida_relativa": 0.6,
         "demanda_patron": 2765.87,
         "horas_seguidas": 2,
-        "umbrales_version": 3,
+        "umbrales_version": 9,
+        "identificacion_5_3": {
+          "aplica": [],
+          "motivo": "la regla mide la demanda agregada de la ruta en la ventana (todos sus viajes), no un viaje",
+          "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+        },
         "persistencia_horas": 2,
         "pasajeros_observados": 1106.4
       },
@@ -95,16 +100,16 @@
       "comentarios": [],
       "clave_dedup": "ALT-005|CRA 54|2025-10-15T08:00:00-05:00|obs",
       "ocurrencias": 2,
-      "ultima_deteccion": "2026-11-09T02:50:24.569904-05:00",
-      "creado_en": "2026-11-09T02:50:19.467424-05:00",
-      "actualizado_en": "2026-11-09T02:50:24.569907-05:00",
+      "ultima_deteccion": "2026-11-11T05:06:02.671382-05:00",
+      "creado_en": "2026-11-11T05:05:35.567844-05:00",
+      "actualizado_en": "2026-11-11T05:06:02.671385-05:00",
       "origen": "observado",
       "tendencia": "a_la_baja",
       "tendencia_pendiente": -0.343,
       "serie_reciente": [
         {
-          "p10": 1924.3,
-          "p90": 2523.52,
+          "p10": 1958.84,
+          "p90": 2488.98,
           "inicio": "2025-10-15T06:00:00-05:00",
           "esperado": 2152.99,
           "observado": 2175.0,
@@ -112,8 +117,8 @@
           "salidas_observadas": 24
         },
         {
-          "p10": 1314.87,
-          "p90": 1833.57,
+          "p10": 1340.6,
+          "p90": 1807.85,
           "inicio": "2025-10-15T07:00:00-05:00",
           "esperado": 1603.29,
           "observado": 1371.0,
@@ -121,8 +126,8 @@
           "salidas_observadas": 14
         },
         {
-          "p10": 1262.9,
-          "p90": 1655.84,
+          "p10": 1286.33,
+          "p90": 1632.41,
           "inicio": "2025-10-15T08:00:00-05:00",
           "esperado": 1460.4,
           "observado": 584.2,
@@ -130,8 +135,8 @@
           "salidas_observadas": 14
         },
         {
-          "p10": 1137.42,
-          "p90": 1559.41,
+          "p10": 1144.61,
+          "p90": 1552.22,
           "inicio": "2025-10-15T09:00:00-05:00",
           "esperado": 1305.47,
           "observado": 522.2,
@@ -193,7 +198,7 @@
           "variable": "demanda_patron"
         },
         {
-          "valor": 2400.32,
+          "valor": 2430.9399999999996,
           "fuente": "regla",
           "variable": "p10"
         },
@@ -214,27 +219,32 @@
         }
       ],
       "ubicacion": null,
+      "idruta": 16,
+      "idempresa": null,
+      "idproceso": "sobusa",
+      "id_dia_semana": 3,
+      "id_estacionalidad": null,
       "bitacora": [
         {
           "accion": "crear",
           "estado_nuevo": "nueva",
           "usuario": "sistema",
-          "comentario": "Detectada por la ejecución 3a2177d0-6c42-4f95-94b1-beef8dedee12",
-          "creado_en": "2026-11-09T02:50:19.467424-05:00"
+          "comentario": "Detectada por la ejecución b358fb74-1aff-4407-a7aa-b2d707005ec3",
+          "creado_en": "2026-11-11T05:05:35.567844-05:00"
         }
       ]
     },
     {
-      "alert_id": "73294b20-f867-4625-8e1c-1680cb7a067c",
+      "alert_id": "4fcff952-4744-49a7-a88b-46e03c8f9a75",
       "codigo": "ALT-006",
-      "execution_id": "3a2177d0-6c42-4f95-94b1-beef8dedee12",
-      "empresa": "Sobusa",
+      "execution_id": "b358fb74-1aff-4407-a7aa-b2d707005ec3",
+      "empresa": "SOBUSA",
       "ruta": "CRA 54",
       "sentido": null,
-      "viaje": null,
-      "conductor": null,
-      "vehiculo": null,
-      "detectada_en": "2026-11-09T02:50:21.252270-05:00",
+      "viaje": "8002",
+      "conductor": "cnd_1fbf49d9cf9255b871fb1c1a",
+      "vehiculo": "SOBUSA52",
+      "detectada_en": "2026-11-11T05:05:43.767303-05:00",
       "ventana_inicio": "2025-10-15T12:00:00-05:00",
       "ventana_fin": "2025-10-15T13:00:00-05:00",
       "horizonte_min": 0,
@@ -244,16 +254,64 @@
       "esperado": 3.4236,
       "umbral": 8.4236,
       "puntaje": 1.0,
-      "explicacion": "En 12:00-13:00 (1 h): salieron 0 de 18 despachos esperados (60 / intervalo programado). Despacho ausente o tardío: van al menos 60 min sin despacho (cota inferior: horas cerradas sin salidas), más que el headway programado (3,4 min) más la tolerancia (5 min, threshold_config.tolerancia_despacho_min); salieron 0 de 18 despachos esperados (déficit 100,0 %, tolerancia 50,0 %).",
+      "explicacion": "En 12:00-13:00 (1 h): salieron 0 de 18 despachos esperados (60 / intervalo programado). Despacho ausente o tardío: van al menos 60 min sin despacho (cota inferior: horas cerradas sin salidas), más que el headway programado (3,4 min) más la tolerancia (5 min, threshold_config.tolerancia_despacho_min); salieron 0 de 18 despachos esperados (déficit 100,0 %, tolerancia 50,0 %). Viaje 8002 (vehículo SOBUSA52), salida programada 12:15: programado y cancelado (despacho ausente).",
       "variables": {
         "por_tiempo": true,
         "horas_episodio": 1,
         "tolerancia_min": 5.0,
-        "umbrales_version": 3,
+        "viajes_ventana": {
+          "lista": [
+            {
+              "viaje": "8002",
+              "estado": "cancelado",
+              "salida": "2025-10-15T12:15:00-05:00",
+              "vehiculo": "SOBUSA52",
+              "conductor": "cnd_1fbf49d9cf9255b871fb1c1a",
+              "retraso_min": 1.0,
+              "excede_plazo": false
+            },
+            {
+              "viaje": "8003",
+              "estado": "cancelado",
+              "salida": "2025-10-15T12:45:00-05:00",
+              "vehiculo": "SOBUSA53",
+              "conductor": "cnd_37caba2775635fc461ed0454",
+              "retraso_min": 1.0,
+              "excede_plazo": false
+            }
+          ],
+          "total": 2,
+          "valido": 0,
+          "tardios": 0,
+          "cancelado": 2,
+          "sin_finalizar": 0
+        },
+        "umbrales_version": 9,
         "fuente_tolerancia": "threshold_config.tolerancia_despacho_min",
         "salidas_esperadas": 17.525396180414464,
+        "identificacion_5_3": {
+          "aplica": [
+            "viaje",
+            "vehiculo",
+            "conductor"
+          ],
+          "motivo": "el despacho de la ventana que no salió o salió tarde (progvehiculos): su viaje, su vehículo y el seudónimo de su conductor",
+          "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)",
+          "resultado": "identificado",
+          "rol_viaje": "cancelado",
+          "tolerancia_retraso_min": 5.0
+        },
         "salidas_observadas": 0.0,
         "headway_programado_min": 3.423603060514723,
+        "ultimo_despacho_previo": {
+          "viaje": "8001",
+          "estado": "valido",
+          "salida": "2025-10-15T11:52:00-05:00",
+          "vehiculo": "SOBUSA21",
+          "conductor": "cnd_f857095aaaf89b6bcd2275f9",
+          "retraso_min": 1.0,
+          "excede_plazo": false
+        },
         "persistencia_horas_conteo": 2,
         "minutos_desde_ultimo_despacho": 60.0
       },
@@ -262,16 +320,16 @@
       "comentarios": [],
       "clave_dedup": "ALT-006|CRA 54|2025-10-15T12:00:00-05:00|obs",
       "ocurrencias": 2,
-      "ultima_deteccion": "2026-11-09T02:50:24.574008-05:00",
-      "creado_en": "2026-11-09T02:50:19.467424-05:00",
-      "actualizado_en": "2026-11-09T02:50:24.574011-05:00",
+      "ultima_deteccion": "2026-11-11T05:06:02.679518-05:00",
+      "creado_en": "2026-11-11T05:05:35.567844-05:00",
+      "actualizado_en": "2026-11-11T05:06:02.679521-05:00",
       "origen": "observado",
       "tendencia": "a_la_baja",
       "tendencia_pendiente": -0.6378,
       "serie_reciente": [
         {
-          "p10": 929.58,
-          "p90": 1371.39,
+          "p10": 935.9,
+          "p90": 1365.08,
           "inicio": "2025-10-15T10:00:00-05:00",
           "esperado": 1146.56,
           "observado": 1053.0,
@@ -279,8 +337,8 @@
           "salidas_observadas": 11
         },
         {
-          "p10": 995.49,
-          "p90": 1426.73,
+          "p10": 1002.09,
+          "p90": 1420.13,
           "inicio": "2025-10-15T11:00:00-05:00",
           "esperado": 1198.36,
           "observado": 1351.0,
@@ -288,8 +346,8 @@
           "salidas_observadas": 16
         },
         {
-          "p10": 1251.77,
-          "p90": 1831.95,
+          "p10": 1260.28,
+          "p90": 1823.43,
           "inicio": "2025-10-15T12:00:00-05:00",
           "esperado": 1547.23,
           "observado": 0.0,
@@ -333,63 +391,73 @@
           10.98
         ]
       },
+      "idruta": 16,
+      "idempresa": null,
+      "idproceso": "sobusa",
+      "id_dia_semana": 3,
+      "id_estacionalidad": null,
       "bitacora": [
         {
           "accion": "crear",
           "estado_nuevo": "nueva",
           "usuario": "sistema",
-          "comentario": "Detectada por la ejecución 3a2177d0-6c42-4f95-94b1-beef8dedee12",
-          "creado_en": "2026-11-09T02:50:19.467424-05:00"
+          "comentario": "Detectada por la ejecución b358fb74-1aff-4407-a7aa-b2d707005ec3",
+          "creado_en": "2026-11-11T05:05:35.567844-05:00"
         }
       ]
     },
     {
-      "alert_id": "86e50e30-0859-409a-9984-8d4ba9bdbd7e",
+      "alert_id": "5affb1d8-0d70-40b6-93ce-90d623d35ddb",
       "codigo": "ALT-007",
-      "execution_id": "3a2177d0-6c42-4f95-94b1-beef8dedee12",
-      "empresa": "Sobusa",
+      "execution_id": "b358fb74-1aff-4407-a7aa-b2d707005ec3",
+      "empresa": "SOBUSA",
       "ruta": "CRA 54",
       "sentido": null,
       "viaje": null,
       "conductor": null,
       "vehiculo": null,
-      "detectada_en": "2026-11-09T02:50:21.252270-05:00",
+      "detectada_en": "2026-11-11T05:05:43.767303-05:00",
       "ventana_inicio": "2025-10-15T15:00:00-05:00",
       "ventana_fin": "2025-10-15T17:00:00-05:00",
       "horizonte_min": 0,
       "severidad": "preventiva",
       "estado": "nueva",
-      "observado": 4756.2,
+      "observado": 4748.4,
       "esperado": 2967.73,
-      "umbral": 3646.52,
-      "puntaje": 0.652,
-      "explicacion": "Durante 2 hora(s) seguidas (15:00-17:00) la demanda real (4.756) quedó por encima del P90 del intervalo calibrado (3.647); pronóstico 2.968, error 60,3 % (umbral 15,0 %); persistencia exigida: 2 h.",
+      "umbral": 3630.18,
+      "puntaje": 0.654,
+      "explicacion": "Durante 2 hora(s) seguidas (15:00-17:00) la demanda real (4.748) quedó por encima del P90 del intervalo calibrado (3.630); pronóstico 2.968, error 60,0 % (umbral 15,0 %); persistencia exigida: 2 h.",
       "variables": {
-        "p10": 2338.02,
-        "p90": 3646.52,
-        "error_relativo": 0.6026,
+        "p10": 2354.37,
+        "p90": 3630.1800000000003,
+        "error_relativo": 0.6,
         "horas_seguidas": 2,
         "demanda_prevista": 2967.73,
-        "umbrales_version": 3,
+        "umbrales_version": 9,
+        "identificacion_5_3": {
+          "aplica": [],
+          "motivo": "la regla mide la demanda agregada de la ruta en la ventana (todos sus viajes), no un viaje",
+          "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+        },
         "persistencia_horas": 2,
         "sentido_desviacion": "+",
-        "pasajeros_observados": 4756.2
+        "pasajeros_observados": 4748.4
       },
       "recomendacion": "Revisar la frecuencia y recalibrar el escenario del pronóstico.",
       "asignado_a": null,
       "comentarios": [],
       "clave_dedup": "ALT-007|CRA 54|2025-10-15T15:00:00-05:00|obs",
       "ocurrencias": 2,
-      "ultima_deteccion": "2026-11-09T02:50:24.572061-05:00",
-      "creado_en": "2026-11-09T02:50:19.467424-05:00",
-      "actualizado_en": "2026-11-09T02:50:24.572064-05:00",
+      "ultima_deteccion": "2026-11-11T05:06:02.675531-05:00",
+      "creado_en": "2026-11-11T05:05:35.567844-05:00",
+      "actualizado_en": "2026-11-11T05:06:02.675534-05:00",
       "origen": "observado",
       "tendencia": "al_alza",
-      "tendencia_pendiente": 0.1935,
+      "tendencia_pendiente": 0.1924,
       "serie_reciente": [
         {
-          "p10": 1364.25,
-          "p90": 2040.73,
+          "p10": 1373.46,
+          "p90": 2031.52,
           "inicio": "2025-10-15T13:00:00-05:00",
           "esperado": 1672.72,
           "observado": 1537.0,
@@ -397,8 +465,8 @@
           "salidas_observadas": 15
         },
         {
-          "p10": 1371.82,
-          "p90": 2095.79,
+          "p10": 1381.55,
+          "p90": 2086.07,
           "inicio": "2025-10-15T14:00:00-05:00",
           "esperado": 1765.65,
           "observado": 1982.0,
@@ -406,8 +474,8 @@
           "salidas_observadas": 18
         },
         {
-          "p10": 1241.91,
-          "p90": 1918.65,
+          "p10": 1250.55,
+          "p90": 1910.01,
           "inicio": "2025-10-15T15:00:00-05:00",
           "esperado": 1568.76,
           "observado": 2510.0,
@@ -415,11 +483,11 @@
           "salidas_observadas": 12
         },
         {
-          "p10": 1096.11,
-          "p90": 1727.87,
+          "p10": 1103.82,
+          "p90": 1720.17,
           "inicio": "2025-10-15T16:00:00-05:00",
           "esperado": 1398.97,
-          "observado": 2246.2,
+          "observado": 2238.4,
           "salidas_esperadas": 17.33868226014823,
           "salidas_observadas": 14
         }
@@ -468,7 +536,7 @@
           "efecto_pasajeros": 45.7
         },
         {
-          "valor": 4756.2,
+          "valor": 4748.4,
           "fuente": "regla",
           "variable": "pasajeros_observados"
         },
@@ -478,43 +546,48 @@
           "variable": "demanda_prevista"
         },
         {
-          "valor": 2338.02,
+          "valor": 2354.37,
           "fuente": "regla",
           "variable": "p10"
         },
         {
-          "valor": 3646.52,
+          "valor": 3630.1800000000003,
           "fuente": "regla",
           "variable": "p90"
         },
         {
-          "valor": 0.6026,
+          "valor": 0.6,
           "fuente": "regla",
           "variable": "error_relativo"
         }
       ],
       "ubicacion": null,
+      "idruta": 16,
+      "idempresa": null,
+      "idproceso": "sobusa",
+      "id_dia_semana": 3,
+      "id_estacionalidad": null,
       "bitacora": [
         {
           "accion": "crear",
           "estado_nuevo": "nueva",
           "usuario": "sistema",
-          "comentario": "Detectada por la ejecución 3a2177d0-6c42-4f95-94b1-beef8dedee12",
-          "creado_en": "2026-11-09T02:50:19.467424-05:00"
+          "comentario": "Detectada por la ejecución b358fb74-1aff-4407-a7aa-b2d707005ec3",
+          "creado_en": "2026-11-11T05:05:35.567844-05:00"
         }
       ]
     },
     {
-      "alert_id": "7ec7fd8e-9cad-4d21-ac1a-f6438794e6e8",
+      "alert_id": "7cd64ce8-ae81-4d50-b344-02283d63864f",
       "codigo": "ALT-008",
-      "execution_id": "3a2177d0-6c42-4f95-94b1-beef8dedee12",
-      "empresa": "Sobusa",
+      "execution_id": "b358fb74-1aff-4407-a7aa-b2d707005ec3",
+      "empresa": "SOBUSA",
       "ruta": "SILENCIO",
       "sentido": null,
       "viaje": null,
       "conductor": null,
       "vehiculo": null,
-      "detectada_en": "2026-11-09T02:50:20.747140-05:00",
+      "detectada_en": "2026-11-11T05:05:37.344351-05:00",
       "ventana_inicio": "2025-10-15T00:00:00-05:00",
       "ventana_fin": "2025-10-16T00:00:00-05:00",
       "horizonte_min": 0,
@@ -537,7 +610,12 @@
           "subidas": -0.24,
           "nro_viajes": 38.273
         },
-        "umbrales_version": 3,
+        "umbrales_version": 9,
+        "identificacion_5_3": {
+          "aplica": [],
+          "motivo": "consolidado diario de la ruta (subidas, bajadas y número de viajes del día), no un viaje",
+          "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+        },
         "referencia_mediana_escala": {
           "subidas": [
             11487.0,
@@ -554,45 +632,52 @@
       "comentarios": [],
       "clave_dedup": "ALT-008|SILENCIO|2025-10-15T00:00:00-05:00|dia",
       "ocurrencias": 2,
-      "ultima_deteccion": "2026-11-09T02:50:23.964963-05:00",
-      "creado_en": "2026-11-09T02:50:19.467424-05:00",
-      "actualizado_en": "2026-11-09T02:50:23.964967-05:00",
+      "ultima_deteccion": "2026-11-11T05:06:01.710671-05:00",
+      "creado_en": "2026-11-11T05:05:35.567844-05:00",
+      "actualizado_en": "2026-11-11T05:06:01.710675-05:00",
       "origen": "observado",
       "tendencia": "estable",
       "tendencia_pendiente": 0.0297,
       "serie_reciente": [
         {
           "fecha": "2025-10-06",
+          "bajadas": null,
           "subidas": 9697.0,
           "nro_viajes": 159.0
         },
         {
           "fecha": "2025-10-07",
+          "bajadas": null,
           "subidas": 9381.0,
           "nro_viajes": 148.0
         },
         {
           "fecha": "2025-10-08",
+          "bajadas": null,
           "subidas": 9349.0,
           "nro_viajes": 153.0
         },
         {
           "fecha": "2025-10-09",
+          "bajadas": null,
           "subidas": 9845.0,
           "nro_viajes": 161.0
         },
         {
           "fecha": "2025-10-10",
+          "bajadas": null,
           "subidas": 8665.0,
           "nro_viajes": 131.0
         },
         {
           "fecha": "2025-10-14",
+          "bajadas": null,
           "subidas": 11383.0,
           "nro_viajes": 135.0
         },
         {
           "fecha": "2025-10-15",
+          "bajadas": null,
           "subidas": 11349.0,
           "nro_viajes": 405.0
         }
@@ -617,27 +702,32 @@
         }
       ],
       "ubicacion": null,
+      "idruta": 2,
+      "idempresa": null,
+      "idproceso": "sobusa",
+      "id_dia_semana": 3,
+      "id_estacionalidad": null,
       "bitacora": [
         {
           "accion": "crear",
           "estado_nuevo": "nueva",
           "usuario": "sistema",
-          "comentario": "Detectada por la ejecución 3a2177d0-6c42-4f95-94b1-beef8dedee12",
-          "creado_en": "2026-11-09T02:50:19.467424-05:00"
+          "comentario": "Detectada por la ejecución b358fb74-1aff-4407-a7aa-b2d707005ec3",
+          "creado_en": "2026-11-11T05:05:35.567844-05:00"
         }
       ]
     },
     {
-      "alert_id": "3e27217c-87fd-4538-afdf-3afaaaa80324",
+      "alert_id": "8c1eb195-f425-486c-8b66-8d348ddfe488",
       "codigo": "ALT-009",
-      "execution_id": "3a2177d0-6c42-4f95-94b1-beef8dedee12",
-      "empresa": "Sobusa",
+      "execution_id": "b358fb74-1aff-4407-a7aa-b2d707005ec3",
+      "empresa": "SOBUSA",
       "ruta": "CL 72",
       "sentido": null,
-      "viaje": null,
-      "conductor": null,
-      "vehiculo": null,
-      "detectada_en": "2026-11-09T02:50:21.806114-05:00",
+      "viaje": "8101",
+      "conductor": "cnd_0e6ce8a20700aa9332470007",
+      "vehiculo": "SOBUSA17",
+      "detectada_en": "2026-11-11T05:05:50.304942-05:00",
       "ventana_inicio": "2025-10-15T23:59:59-05:00",
       "ventana_fin": "2025-10-16T06:00:00-05:00",
       "horizonte_min": 0,
@@ -647,7 +737,7 @@
       "esperado": 0.0,
       "umbral": 0.0,
       "puntaje": 1.0,
-      "explicacion": "Datos incompletos o retrasados: faltan 1 hora(s) de servicio sin registro: 15/10/2025 14:00.",
+      "explicacion": "Datos incompletos o retrasados: faltan 1 hora(s) de servicio sin registro: 15/10/2025 14:00. Viajes con datos faltantes: 1 (el primero, viaje 8101 del vehículo SOBUSA17 a las 14:20: sin numeropasajeros, sin timbradas de segmento (no llegó a timbradas_segmentos)).",
       "variables": {
         "ultima_llegada": "2025-10-15T23:59:59-05:00",
         "horas_faltantes": [
@@ -655,18 +745,49 @@
         ],
         "periodos_atraso": 2,
         "campos_faltantes": [],
-        "umbrales_version": 3,
+        "umbrales_version": 9,
         "minutos_sin_datos": 360.0,
-        "periodo_ingesta_min": 1440.0
+        "identificacion_5_3": {
+          "aplica": [
+            "viaje",
+            "vehiculo",
+            "conductor"
+          ],
+          "motivo": "el viaje de la ventana con datos faltantes (progvehiculos): su viaje, su vehículo y el seudónimo de su conductor",
+          "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)",
+          "resultado": "identificado"
+        },
+        "periodo_ingesta_min": 1440.0,
+        "viajes_con_datos_faltantes": {
+          "lista": [
+            {
+              "viaje": "8101",
+              "estado": "valido",
+              "salida": "2025-10-15T14:20:00-05:00",
+              "vehiculo": "SOBUSA17",
+              "conductor": "cnd_0e6ce8a20700aa9332470007",
+              "faltantes": [
+                "sin_numeropasajeros",
+                "sin_timbradas_segmento"
+              ],
+              "retraso_min": 1.0,
+              "excede_plazo": false
+            }
+          ],
+          "total": 1,
+          "en_horas_faltantes": 1,
+          "programados_en_horas_faltantes": 1
+        },
+        "horas_sin_viajes_programados": []
       },
       "recomendacion": "Reprocesar el lote o restablecer la fuente de datos.",
       "asignado_a": null,
       "comentarios": [],
       "clave_dedup": "ALT-009|CL 72|2025-10-15|faltantes",
       "ocurrencias": 2,
-      "ultima_deteccion": "2026-11-09T02:50:24.980404-05:00",
-      "creado_en": "2026-11-09T02:50:19.467424-05:00",
-      "actualizado_en": "2026-11-09T02:50:24.980408-05:00",
+      "ultima_deteccion": "2026-11-11T05:06:03.647705-05:00",
+      "creado_en": "2026-11-11T05:05:35.567844-05:00",
+      "actualizado_en": "2026-11-11T05:06:03.647708-05:00",
       "origen": "calidad_datos",
       "tendencia": "sin_datos",
       "tendencia_pendiente": null,
@@ -691,13 +812,18 @@
         }
       ],
       "ubicacion": null,
+      "idruta": 21,
+      "idempresa": null,
+      "idproceso": "sobusa",
+      "id_dia_semana": 3,
+      "id_estacionalidad": null,
       "bitacora": [
         {
           "accion": "crear",
           "estado_nuevo": "nueva",
           "usuario": "sistema",
-          "comentario": "Detectada por la ejecución 3a2177d0-6c42-4f95-94b1-beef8dedee12",
-          "creado_en": "2026-11-09T02:50:19.467424-05:00"
+          "comentario": "Detectada por la ejecución b358fb74-1aff-4407-a7aa-b2d707005ec3",
+          "creado_en": "2026-11-11T05:05:35.567844-05:00"
         }
       ]
     }

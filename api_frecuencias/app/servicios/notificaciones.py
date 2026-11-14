@@ -1,4 +1,5 @@
-"""Notificación de alertas por correo y WhatsApp (envío SIMULADO: solo registro en el log).
+"""Notificación de alertas por correo y WhatsApp y reporte de calidad al responsable del consolidado (envío
+SIMULADO: solo registro en el log y en notification_log).
 
 Configuración por variables de entorno (ninguna es secreta; no hay credenciales de envío en el repositorio):
   NOTIFICACIONES_CANALES      canales activos separados por coma: correo,whatsapp (vacío = ninguno)
@@ -6,11 +7,20 @@ Configuración por variables de entorno (ninguna es secreta; no hay credenciales
   NOTIF_CORREO_DESTINATARIOS  correos separados por coma
   NOTIF_CORREO_REMITENTE      remitente (por defecto alertas@ai-frecuencias.local)
   NOTIF_WHATSAPP_NUMEROS      números E.164 separados por coma
+  NOTIF_UNICIDAD_DESTINATARIOS  correos del responsable del consolidado para el reporte de duplicados del lote (§6.3).
+                              Vacío por omisión: el responsable lo define Extreme (§19, responsables técnicos); sin él,
+                              el reporte queda registrado en notification_log con estado «pendiente_destinatario».
 El modo es siempre «simulado»: se arma el mensaje, se escribe en el log (con los destinatarios enmascarados) y se
 devuelve un registro para guardar en la bitácora de la ejecución. Un envío real se conectaría aquí con el proveedor.
+
+§6.3 «Unicidad: reportar al responsable del consolidado; no corregir directamente»: reporte_unicidad arma, con los
+errores UNI-001 de un lote, el reporte de las llaves duplicadas (cada llave con sus filas del lote) y
+enviar_reporte_unicidad lo manda por el canal de correo existente (NotificadorReporteCalidad). La calidad no corrige
+nada: las filas del grupo duplicado se rechazan del análisis y del histórico, y el reporte lo dice.
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 from datetime import UTC, datetime
@@ -18,6 +28,10 @@ from datetime import UTC, datetime
 log = logging.getLogger("ai_frecuencias.notificaciones")
 
 ORDEN_SEVERIDAD = {"informativa": 0, "preventiva": 1, "critica": 2}
+CODIGO_UNICIDAD = "UNI-001"
+ESTADO_PENDIENTE_DESTINATARIO = "pendiente_destinatario"
+RESPONSABLE_CONSOLIDADO = "responsable del consolidado"
+LIMITE_LLAVES_REPORTE = 200          # llaves listadas en el reporte (el total siempre va completo)
 
 
 def _lista(valor):
@@ -143,3 +157,78 @@ def notificadores_desde_entorno(env=None):
 def notificar(alerta, notificadores):
     """Envía (simulado) la alerta por cada notificador y devuelve los registros."""
     return [n.enviar(alerta) for n in notificadores]
+
+
+# ---------------------------------------------------------------- §6.3 reporte de unicidad del lote
+class NotificadorReporteCalidad(NotificadorCorreo):
+    """Correo (simulado) de un reporte de calidad al responsable del consolidado. Sin destinatario el reporte no se
+    pierde: queda registrado en notification_log con estado «pendiente_destinatario» (consultable, con el reporte
+    completo en el detalle). No se reenvía solo: los reportes de los lotes siguientes salen al destinatario cuando
+    Extreme lo defina (NOTIF_UNICIDAD_DESTINATARIOS)."""
+
+    def __init__(self, destinatarios=None, remitente=None):
+        super().__init__(destinatarios, remitente, severidad_minima="informativa")
+
+    def _mensaje(self, reporte):
+        return {"de": self.remitente, "asunto": reporte["asunto"], "cuerpo": reporte["cuerpo"]}
+
+    def enviar(self, reporte):
+        registro = super().enviar(reporte)
+        if not self.destinatarios:
+            registro["estado"] = ESTADO_PENDIENTE_DESTINATARIO
+        registro.update(tipo=reporte["tipo"], responsable=RESPONSABLE_CONSOLIDADO, lote=reporte["lote"])
+        return registro
+
+
+def _grupos_duplicados(errores) -> list[dict]:
+    """Llaves duplicadas (UNI-001) con las filas del lote de cada una, en orden de primera aparición."""
+    grupos: dict[str, dict] = {}
+    for e in errores:
+        if e.get("codigo") != CODIGO_UNICIDAD:
+            continue
+        llave = e.get("llave") or {}
+        grupo = grupos.setdefault(json.dumps(llave, sort_keys=True, default=str), {"llave": llave, "filas": []})
+        grupo["filas"].append(e.get("fila"))
+    return list(grupos.values())
+
+
+def _llaves(n: int) -> str:
+    return f"{n} llave duplicada" if n == 1 else f"{n} llaves duplicadas"
+
+
+def _texto_reporte(lote: str, grupos: list[dict], filas: int) -> str:
+    lineas = [f"Lote {lote}: {_llaves(len(grupos))} (llave natural) en {filas} filas (UNI-001, §6.3).",
+              "No se corrigió nada: las filas de cada llave duplicada se rechazaron del análisis y del histórico; "
+              "corrija el consolidado en la fuente y la ejecución siguiente las leerá de nuevo.", ""]
+    for g in grupos[:LIMITE_LLAVES_REPORTE]:
+        llave = ", ".join(f"{k}={v}" for k, v in g["llave"].items())
+        lineas.append(f"- {llave}: filas {', '.join(str(f) for f in g['filas'])} del lote")
+    if len(grupos) > LIMITE_LLAVES_REPORTE:
+        lineas.append(f"… y {len(grupos) - LIMITE_LLAVES_REPORTE} llaves más (consulte el lote en la API).")
+    return "\n".join(lineas)
+
+
+def reporte_unicidad(errores, lote: str, consulta: str | None = None) -> dict | None:
+    """§6.3: el reporte de las llaves duplicadas del lote para el responsable del consolidado; None si el lote no tiene
+    errores UNI-001. Cada llave va con sus filas del lote; `consulta` es la ruta de la API que lista los errores."""
+    grupos = _grupos_duplicados(errores or [])
+    if not grupos:
+        return None
+    filas = sum(len(g["filas"]) for g in grupos)
+    cuerpo = _texto_reporte(lote, grupos, filas)
+    if consulta:
+        cuerpo += f"\n\nDetalle por fila y causa: {consulta}"
+    return {"tipo": "reporte_unicidad", "codigo": CODIGO_UNICIDAD, "severidad": "informativa", "lote": lote,
+            "responsable": RESPONSABLE_CONSOLIDADO, "llaves_duplicadas": len(grupos), "filas_duplicadas": filas,
+            "duplicados": grupos[:LIMITE_LLAVES_REPORTE], "truncado": len(grupos) > LIMITE_LLAVES_REPORTE,
+            "corregido": False, "consulta": consulta,
+            "asunto": f"[CALIDAD §6.3] {_llaves(len(grupos))} en el lote {lote}", "cuerpo": cuerpo}
+
+
+def enviar_reporte_unicidad(reporte: dict, env=None) -> dict:
+    """Envía (simulado) el reporte por correo a NOTIF_UNICIDAD_DESTINATARIOS; sin destinatario, el registro queda
+    «pendiente_destinatario». Devuelve el registro para notification_log."""
+    env = os.environ if env is None else env
+    notificador = NotificadorReporteCalidad(_lista(env.get("NOTIF_UNICIDAD_DESTINATARIOS")),
+                                            env.get("NOTIF_CORREO_REMITENTE") or None)
+    return notificador.enviar(reporte)

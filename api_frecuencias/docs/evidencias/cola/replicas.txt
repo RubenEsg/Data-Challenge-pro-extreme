@@ -1,30 +1,30 @@
-RNF-005 · dos réplicas comparten la cola 2026-11-09 00:52:36 (base local ai_frecuencias_pruebas_cola_demo)
+RNF-005 · dos réplicas comparten la cola 2026-11-13 19:54:25 (base local ai_frecuencias_pruebas_ev_arreglos_cola)
 Filas pendientes limpiadas antes de empezar: 0
-Réplica A (:8103) arrancó en 4.9 s; réplica B (:8104) en 2.4 s; 1 trabajador por réplica, reserva 30 s, sondeo 0,5 s
-20 ejecuciones enviadas en 0.8 s (POST alternado: 10 a :8103, 10 a :8104); días 2023-02-16 … 2023-03-07
-Lote terminado en 36.1 s
+Réplica A (:8350) arrancó en 6.3 s; réplica B (:8351) en 3.4 s; 1 trabajador por réplica, reserva 30 s, sondeo 0,5 s
+20 ejecuciones enviadas en 0.7 s (POST alternado: 10 a :8350, 10 a :8351); días 2023-01-07 … 2023-01-26
+Lote terminado en 198.4 s
 
  hasta       réplica        estado intentos filas_leídas predicciones  marca anterior -> marca nueva
- 2023-02-16  replica-8104   ok            1           51            9  2023-02-15 23:59 -> 2023-02-16 23:59
- 2023-02-17  replica-8103   ok            1           51            9  2023-02-16 23:59 -> 2023-02-17 23:59
- 2023-02-18  replica-8104   ok            1           51            9  2023-02-17 23:59 -> 2023-02-18 23:59
- 2023-02-19  replica-8103   ok            1           51            9  2023-02-18 23:59 -> 2023-02-19 23:59
- 2023-02-20  replica-8104   ok            1           51            9  2023-02-19 23:59 -> 2023-02-20 23:59
- 2023-02-21  replica-8103   ok            1           51            9  2023-02-20 23:59 -> 2023-02-21 23:59
- 2023-02-22  replica-8104   ok            1           51            9  2023-02-21 23:59 -> 2023-02-22 23:59
- 2023-02-23  replica-8103   ok            1           51            9  2023-02-22 23:59 -> 2023-02-23 23:59
- 2023-02-24  replica-8104   ok            1           51            9  2023-02-23 23:59 -> 2023-02-24 23:59
- 2023-02-25  replica-8103   ok            1           51            9  2023-02-24 23:59 -> 2023-02-25 23:59
- 2023-02-26  replica-8104   ok            1           51            9  2023-02-25 23:59 -> 2023-02-26 23:59
- 2023-02-27  replica-8103   ok            1           51            9  2023-02-26 23:59 -> 2023-02-27 23:59
- 2023-02-28  replica-8104   ok            1           51            9  2023-02-27 23:59 -> 2023-02-28 23:59
- 2023-03-01  replica-8103   ok            1           51            9  2023-02-28 23:59 -> 2023-03-01 23:59
- 2023-03-02  replica-8104   ok            1           51            9  2023-03-01 23:59 -> 2023-03-02 23:59
- 2023-03-03  replica-8103   ok            1           51            9  2023-03-02 23:59 -> 2023-03-03 23:59
- 2023-03-04  replica-8104   ok            1           51            9  2023-03-03 23:59 -> 2023-03-04 23:59
- 2023-03-05  replica-8103   ok            1           51            9  2023-03-04 23:59 -> 2023-03-05 23:59
- 2023-03-06  replica-8104   ok            1           51            9  2023-03-05 23:59 -> 2023-03-06 23:59
- 2023-03-07  replica-8103   ok            1           51            9  2023-03-06 23:59 -> 2023-03-07 23:59
+ 2023-01-07  replica-8104   ok            1          357            9  (sin marca)       -> 2023-01-07 23:59
+ 2023-01-08  replica-8103   ok            1           51            9  2023-01-07 23:59 -> 2023-01-08 23:59
+ 2023-01-09  replica-8104   ok            1           51            9  2023-01-08 23:59 -> 2023-01-09 23:59
+ 2023-01-10  replica-8103   ok            1           51            9  2023-01-09 23:59 -> 2023-01-10 23:59
+ 2023-01-11  replica-8104   ok            1           51            9  2023-01-10 23:59 -> 2023-01-11 23:59
+ 2023-01-12  replica-8103   ok            1           51            9  2023-01-11 23:59 -> 2023-01-12 23:59
+ 2023-01-13  replica-8104   ok            1           51            9  2023-01-12 23:59 -> 2023-01-13 23:59
+ 2023-01-14  replica-8103   ok            1           51            9  2023-01-13 23:59 -> 2023-01-14 23:59
+ 2023-01-15  replica-8104   ok            1           51            9  2023-01-14 23:59 -> 2023-01-15 23:59
+ 2023-01-16  replica-8103   ok            1           51            9  2023-01-15 23:59 -> 2023-01-16 23:59
+ 2023-01-17  replica-8104   ok            1           51            9  2023-01-16 23:59 -> 2023-01-17 23:59
+ 2023-01-18  replica-8103   ok            1           51            9  2023-01-17 23:59 -> 2023-01-18 23:59
+ 2023-01-19  replica-8104   ok            1           51            9  2023-01-18 23:59 -> 2023-01-19 23:59
+ 2023-01-20  replica-8103   ok            1           51            9  2023-01-19 23:59 -> 2023-01-20 23:59
+ 2023-01-21  replica-8104   ok            1           51            9  2023-01-20 23:59 -> 2023-01-21 23:59
+ 2023-01-22  replica-8103   ok            1           51            9  2023-01-21 23:59 -> 2023-01-22 23:59
+ 2023-01-23  replica-8104   ok            1           51            9  2023-01-22 23:59 -> 2023-01-23 23:59
+ 2023-01-24  replica-8103   ok            1           51            9  2023-01-23 23:59 -> 2023-01-24 23:59
+ 2023-01-25  replica-8104   ok            1           51            9  2023-01-24 23:59 -> 2023-01-25 23:59
+ 2023-01-26  replica-8103   ok            1           51            9  2023-01-25 23:59 -> 2023-01-26 23:59
 
 Reparto por réplica (intento 'ok'): {'replica-8104': 10, 'replica-8103': 10}
 Total de intentos: 20; ejecuciones: 20; duplicados: 0
@@ -35,6 +35,7 @@ Total de intentos: 20; ejecuciones: 20; duplicados: 0
    [OK] predicciones sin duplicados en cada ejecución
    [OK] marca de agua contigua: ningún lote perdido ni leído dos veces
    [OK] se procesaron en el orden de llegada de los datos
-   [OK] demanda_observada: 3366 filas = 3366 claves distintas
+   [OK] demanda_observada: 1326 filas = 1326 claves distintas
+   [OK] política de aprendizaje: ningún entrenamiento en error (encolados: ninguno; ciclos que omitieron el reentrenamiento por datos insuficientes antes del corte: 19)
 
 RESULTADO: TODO OK

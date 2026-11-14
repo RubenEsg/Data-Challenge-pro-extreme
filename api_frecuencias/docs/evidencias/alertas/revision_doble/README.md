@@ -19,6 +19,7 @@ Esta carpeta es la evidencia de la mitigación «Muestra manual revisada dos vec
 | `conciliar.py` | Script de conciliación. Calcula el acuerdo y la kappa, aplica las decisiones del conciliador a los desacuerdos (`DECISIONES`, con su motivo), la precisión por código con IC de Wilson, la tasa de falsas, la precisión reponderada y la comparación con el backtest. |
 | `conciliacion.json` | Salida de `conciliar.py`: acuerdo antes de conciliar (global, por familia y por código, con la matriz A × B), desacuerdos con su motivo, etiqueta final de las 96 alertas, precisión por código y global, y cifras del backtest usadas. |
 | `resumen.md` | Resumen para el jurado: método, muestra, kappa, tabla de precisión, causas de las falsas alertas con ejemplos, recomendaciones de umbrales y limitaciones. |
+| `kit_humano/` | El kit para que dos revisores del área operativa de Sobusa repitan la revisión a mano y a ciegas sobre las mismas 96 tarjetas: `revisar.html` (un solo archivo, sin red), `conciliar_humanos.py` (acuerdo, kappa, desacuerdos y, con las decisiones de la reunión, la precisión), `generar_kit.py` y `plantilla/` (de donde sale la página) e `INSTRUCCIONES.md`. Lo prueba `api_frecuencias/tests/unit/test_kit_revision_humana.py`. Todavía no hay etiquetas humanas. |
 
 ## Cifras clave
 
@@ -48,6 +49,7 @@ Esta carpeta es la evidencia de la mitigación «Muestra manual revisada dos vec
 ## Pendiente
 
 - Validación humana por el área de operaciones de Sobusa, sobre estas mismas 96 tarjetas, para estimar el error de
-  las etiquetas automatizadas.
+  las etiquetas automatizadas. El kit está listo en `kit_humano/` (`kit_humano/INSTRUCCIONES.md`): dos revisiones
+  independientes y a ciegas, una reunión de conciliación con motivo y la comparación con la revisión automatizada.
 - Resolver M048 con el plan de operación del 31 de diciembre.
 - Probar en el backtest las recomendaciones de umbral de `resumen.md` §6 antes de cambiar `threshold_config`.

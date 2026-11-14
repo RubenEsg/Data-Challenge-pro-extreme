@@ -129,8 +129,8 @@ def markdown(res: dict) -> str:
     L = ["# Sensibilidad de la recomendación de frecuencia (§10.2, §10.3, RF-008)", "",
          f"Generado por `scripts/sensibilidad.py` el {res['generado']} ({res['segundos_total']} s). Datos: pronóstico "
          "por hora y banda P10-P90 calibrada del modelo activo; ciclo, flota e intervalo programado de la hora (D1); "
-         "factor de carga crítica por ruta, tipo de día y hora (mediana 2025 de los insumos de D5); tipologías de "
-         "`tipologias_flota.json`; umbrales de la versión 1 y pesos por omisión del código.", "",
+         "factor de carga crítica por ruta, día de la semana y hora (mediana 2025 de los insumos de D5); tipologías "
+         "de `tipologias_flota.json`; umbrales de la versión 1 y pesos por omisión del código.", "",
          "## Formulación", "",
          "min α·costo_operativo + β·tiempo_espera + γ·penalización_sobreocupación + δ·desviación_frecuencia, con "
          "(montos en COP por hora):", "",

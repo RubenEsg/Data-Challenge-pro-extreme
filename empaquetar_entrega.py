@@ -27,7 +27,8 @@ NOMBRE = "Entrega_final_Sobusa"
 
 # Lo que va de EntregaFinal/
 ARCHIVOS_ENTREGA = ["README.md", "Informe_tecnico_Sobusa.pdf", "entrega_final.ipynb", "entrega_final.html",
-                    "requirements_cuaderno.txt", "empaquetar_entrega.py", "MATRIZ_CUMPLIMIENTO.md", "PLAN_EVOLUCION.md"]
+                    "requirements_cuaderno.txt", "empaquetar_entrega.py", "MATRIZ_CUMPLIMIENTO.md", "PLAN_EVOLUCION.md",
+                    "HISTORIAL_DESARROLLO.md", "historial_desarrollo.py"]
 CARPETAS_ENTREGA = ["documentos", "dash_app", "informe", "api_frecuencias"]
 # Entornos, cachés y datos locales de PostgreSQL nunca viajan; .env (con secretos) tampoco: solo .env.example
 EXCLUIR_PARTES = {".venv", "venv", "__pycache__", ".ipynb_checkpoints", "paquete", ".pytest_cache", ".ruff_cache",

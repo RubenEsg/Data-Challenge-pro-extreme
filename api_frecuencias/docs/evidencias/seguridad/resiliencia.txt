@@ -1,29 +1,29 @@
 RNF-010 · circuit breaker de la fuente PostgreSQL (fallos_max=3, reinicio 1,5 s en esta prueba)
 1) cerrado al inicio: /health -> {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 3, 'reinicio_s': 1.5, 'reintento_en_s': None, 'ultimo_error': None}
-   fallo de conexión 1: OperationalError en 2.035 s
-   fallo de conexión 2: OperationalError en 2.058 s
-   fallo de conexión 3: OperationalError en 2.042 s
-2) abierto: la 4.ª llamada falla rápido con CircuitoAbierto en 0.06 ms sin conectar
+   fallo de conexión 1: OperationalError en 2.033 s
+   fallo de conexión 2: OperationalError en 2.041 s
+   fallo de conexión 3: OperationalError en 2.039 s
+2) abierto: la 4.ª llamada falla rápido con CircuitoAbierto en 0.08 ms sin conectar
    /health -> estado=degradado fuente_postgres={'estado': 'abierto', 'fallos_seguidos': 3, 'fallos_max': 3, 'reinicio_s': 1.5, 'reintento_en_s': 1.5, 'ultimo_error': 'OperationalError'}
    /metrics:
     api_circuito_estado{integracion="fuente_postgres"} 2.0
-    api_circuito_rechazos_total{integracion="fuente_postgres"} 2.0
-    api_circuito_rechazos_created{integracion="fuente_postgres"} 1.7942210564079897e+09
-    api_circuito_fallos_total{integracion="fuente_postgres"} 8.0
-    api_circuito_fallos_created{integracion="fuente_postgres"} 1.7942210564077053e+09
-    api_circuito_transiciones_total{hacia="abierto",integracion="fuente_postgres"} 2.0
-    api_circuito_transiciones_created{hacia="abierto",integracion="fuente_postgres"} 1.7942210564079134e+09
+    api_circuito_rechazos_total{integracion="fuente_postgres"} 1.0
+    api_circuito_rechazos_created{integracion="fuente_postgres"} 1.7943922502699168e+09
+    api_circuito_fallos_total{integracion="fuente_postgres"} 3.0
+    api_circuito_fallos_created{integracion="fuente_postgres"} 1.794392246185404e+09
+    api_circuito_transiciones_total{hacia="abierto",integracion="fuente_postgres"} 1.0
+    api_circuito_transiciones_created{hacia="abierto",integracion="fuente_postgres"} 1.7943922502652214e+09
 3) tras el reinicio: /health -> fuente_postgres={'estado': 'semiabierto', 'fallos_seguidos': 3, 'fallos_max': 3, 'reinicio_s': 1.5, 'reintento_en_s': 0.0, 'ultimo_error': 'OperationalError'}
 4) ensayo bien (SELECT 1 local) -> cerrado: /health -> estado=ok fuente_postgres={'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 3, 'reinicio_s': 1.5, 'reintento_en_s': None, 'ultimo_error': 'OperationalError'}
    /metrics:
     api_circuito_estado{integracion="fuente_postgres"} 0.0
-    api_circuito_rechazos_total{integracion="fuente_postgres"} 2.0
-    api_circuito_rechazos_created{integracion="fuente_postgres"} 1.7942210564079897e+09
-    api_circuito_fallos_total{integracion="fuente_postgres"} 8.0
-    api_circuito_fallos_created{integracion="fuente_postgres"} 1.7942210564077053e+09
-    api_circuito_transiciones_total{hacia="abierto",integracion="fuente_postgres"} 2.0
+    api_circuito_rechazos_total{integracion="fuente_postgres"} 1.0
+    api_circuito_rechazos_created{integracion="fuente_postgres"} 1.7943922502699168e+09
+    api_circuito_fallos_total{integracion="fuente_postgres"} 3.0
+    api_circuito_fallos_created{integracion="fuente_postgres"} 1.794392246185404e+09
+    api_circuito_transiciones_total{hacia="abierto",integracion="fuente_postgres"} 1.0
     api_circuito_transiciones_total{hacia="semiabierto",integracion="fuente_postgres"} 1.0
     api_circuito_transiciones_total{hacia="cerrado",integracion="fuente_postgres"} 1.0
-    api_circuito_transiciones_created{hacia="abierto",integracion="fuente_postgres"} 1.7942210564079134e+09
-    api_circuito_transiciones_created{hacia="semiabierto",integracion="fuente_postgres"} 1.7942211354206896e+09
-    api_circuito_transiciones_created{hacia="cerrado",integracion="fuente_postgres"} 1.794221135451078e+09
+    api_circuito_transiciones_created{hacia="abierto",integracion="fuente_postgres"} 1.7943922502652214e+09
+    api_circuito_transiciones_created{hacia="semiabierto",integracion="fuente_postgres"} 1.7943922518821957e+09
+    api_circuito_transiciones_created{hacia="cerrado",integracion="fuente_postgres"} 1.794392251926287e+09

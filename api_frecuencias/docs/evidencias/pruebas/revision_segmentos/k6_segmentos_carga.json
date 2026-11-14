@@ -1,0 +1,345 @@
+{
+    "metrics": {
+        "http_req_duration{tipo:consulta}": {
+            "avg": 523.5493926597139,
+            "min": 13.287688,
+            "med": 450.89666850000003,
+            "p(90)": 954.6246648,
+            "p(95)": 1163.1003909499996,
+            "p(99)": 2514.56116593,
+            "max": 3172.983991,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "vus": {
+            "value": 5,
+            "min": 2,
+            "max": 51
+        },
+        "http_req_duration{consulta:estadisticas_segmento}": {
+            "med": 349.172654,
+            "p(90)": 701.2871882000004,
+            "p(95)": 826.6175261999991,
+            "p(99)": 2181.1428013600043,
+            "max": 2429.921107,
+            "avg": 386.8232791111113,
+            "min": 13.287688,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "checks": {
+            "passes": 7288,
+            "fails": 0,
+            "value": 1
+        },
+        "http_req_sending": {
+            "p(95)": 0.073578,
+            "p(99)": 0.591030400000004,
+            "max": 67.563662,
+            "avg": 0.0937180381584404,
+            "min": 0.00527,
+            "med": 0.021861,
+            "p(90)": 0.049302
+        },
+        "http_req_duration{consulta:estadisticas_un_dia}": {
+            "max": 1204.198859,
+            "avg": 485.2633899724773,
+            "min": 54.565635,
+            "med": 460.733224,
+            "p(90)": 961.4255919999999,
+            "p(95)": 1025.9153717999998,
+            "p(99)": 1182.4009596800001,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_duration": {
+            "min": 10.491114,
+            "med": 448.778491,
+            "p(90)": 915.219717,
+            "p(95)": 1144.5545045,
+            "p(99)": 2488.2790099999997,
+            "max": 3172.983991,
+            "avg": 519.1411695313149
+        },
+        "http_req_duration{consulta:catalogo_segmentos}": {
+            "avg": 312.22577785051544,
+            "min": 49.291195,
+            "med": 218.0764315,
+            "p(90)": 671.2719553,
+            "p(95)": 771.4590071999997,
+            "p(99)": 1057.1605914099982,
+            "max": 1890.369978,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_duration{consulta:estadisticas_ruta}": {
+            "min": 33.169585,
+            "med": 438.55363,
+            "p(90)": 876.2380903999999,
+            "p(95)": 1052.4080696,
+            "p(99)": 2465.49747756,
+            "max": 2536.792201,
+            "avg": 498.93762943839516,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 2411,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_blocked": {
+            "p(95)": 0.018820499999999997,
+            "p(99)": 8.074666000000041,
+            "max": 84.467297,
+            "avg": 0.35777235545416786,
+            "min": 0.00103,
+            "med": 0.00588,
+            "p(90)": 0.008381
+        },
+        "http_req_duration{consulta:estadisticas_semana_ruta}": {
+            "max": 2732.561842,
+            "avg": 727.9632965258621,
+            "min": 83.033154,
+            "med": 667.640063,
+            "p(90)": 1300.2830079999999,
+            "p(95)": 1487.0635379999999,
+            "p(99)": 2524.08023705,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_connecting": {
+            "min": 0,
+            "med": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 7.508545900000031,
+            "max": 71.024404,
+            "avg": 0.28969687308170894
+        },
+        "data_received": {
+            "count": 37078181,
+            "rate": 610643.2444204792
+        },
+        "iteration_duration": {
+            "max": 55497.239156,
+            "avg": 1062.1525408809669,
+            "min": 218.954725,
+            "med": 911.843129,
+            "p(90)": 1633.0762802,
+            "p(95)": 2042.6860359999991,
+            "p(99)": 3407.78381112
+        },
+        "http_req_duration{consulta:estadisticas_estacionalidad}": {
+            "med": 501.421034,
+            "p(90)": 911.853519,
+            "p(95)": 1144.913906799999,
+            "p(99)": 2328.6617706499956,
+            "max": 2581.792256,
+            "avg": 562.3820202822582,
+            "min": 50.724424,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "vus_max": {
+            "value": 51,
+            "min": 51,
+            "max": 51
+        },
+        "data_sent": {
+            "count": 656475,
+            "rate": 10811.53425193469
+        },
+        "refresco_ok": {
+            "passes": 1,
+            "fails": 0,
+            "thresholds": {
+                "rate==1": false
+            },
+            "value": 1
+        },
+        "http_req_duration{consulta:estadisticas}": {
+            "avg": 724.9728702740114,
+            "min": 106.39275,
+            "med": 624.0410205000001,
+            "p(90)": 1189.2990556,
+            "p(95)": 1563.0158539999995,
+            "p(99)": 2867.4227759999976,
+            "max": 3172.983991,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "refresco_duracion_ms": {
+            "avg": 55478,
+            "min": 55478,
+            "med": 55478,
+            "p(90)": 55478,
+            "p(95)": 55478,
+            "p(99)": 55478,
+            "max": 55478
+        },
+        "http_req_duration{consulta:estadisticas_ruta_dia}": {
+            "avg": 438.8556247863246,
+            "min": 17.1388,
+            "med": 377.090373,
+            "p(90)": 783.9627782000002,
+            "p(95)": 1022.5119312499999,
+            "p(99)": 2041.528241249985,
+            "max": 2512.791513,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_reqs": {
+            "count": 2411,
+            "rate": 39.70693336595383
+        },
+        "http_req_duration{consulta:estadisticas_hora_orden}": {
+            "avg": 477.9653399866666,
+            "min": 43.596218,
+            "med": 422.695897,
+            "p(90)": 860.765816,
+            "p(95)": 1057.6434947999994,
+            "p(99)": 1258.9912631599998,
+            "max": 2574.066602,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "errores_funcionales": {
+            "passes": 0,
+            "fails": 1822,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_duration{fase:sin_refresco}": {
+            "avg": 146.83797041322313,
+            "min": 13.287688,
+            "med": 113.43513,
+            "p(90)": 277.884782,
+            "p(95)": 349.022469,
+            "p(99)": 466.5242293999998,
+            "max": 535.145907,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "iterations": {
+            "count": 1823,
+            "rate": 30.02311884120026
+        },
+        "http_req_duration{fase:durante_refresco}": {
+            "avg": 550.3466190511461,
+            "min": 13.394194,
+            "med": 478.03077,
+            "p(90)": 970.812223,
+            "p(95)": 1190.990671,
+            "p(99)": 2523.705699,
+            "max": 3172.983991,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_tls_handshaking": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 0,
+            "max": 0
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 519.1411695313149,
+            "min": 10.491114,
+            "med": 448.778491,
+            "p(90)": 915.219717,
+            "p(95)": 1144.5545045,
+            "p(99)": 2488.2790099999997,
+            "max": 3172.983991
+        },
+        "http_req_waiting": {
+            "p(95)": 1124.5462149999998,
+            "p(99)": 2484.469293900002,
+            "max": 3149.760402,
+            "avg": 507.1677127183743,
+            "min": 10.290613,
+            "med": 435.915304,
+            "p(90)": 903.067503
+        },
+        "http_req_receiving": {
+            "p(90)": 31.600874,
+            "p(95)": 45.452102,
+            "p(99)": 86.38817910000002,
+            "max": 196.321374,
+            "avg": 11.879738774782231,
+            "min": 0.01405,
+            "med": 4.775522
+        }
+    },
+    "setup_data": {
+        "id": "a2ca30c0-78cd-4239-9152-5e31ccfc4b2c",
+        "inicio": 1794279331004,
+        "seg": 1,
+        "totales": {
+            "estadisticas": 129801,
+            "estadisticas_estacionalidad": 50366,
+            "estadisticas_hora_orden": 6749,
+            "estadisticas_ruta": 45502,
+            "estadisticas_ruta_dia": 6109,
+            "catalogo_segmentos": 2695,
+            "estadisticas_segmento": 320,
+            "estadisticas_semana_ruta": 13569,
+            "estadisticas_un_dia": 6626
+        }
+    },
+    "root_group": {
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "estado 200": {
+                    "path": "::estado 200",
+                    "id": "188e815b6e6374ff2b2dfda559ffcad9",
+                    "passes": 1822,
+                    "fails": 0,
+                    "name": "estado 200"
+                },
+                "página con total e items": {
+                    "id": "ac5b15b0306e8cd954d3716ee8cdf76a",
+                    "passes": 1822,
+                    "fails": 0,
+                    "name": "página con total e items",
+                    "path": "::página con total e items"
+                },
+                "agregación disponible": {
+                    "path": "::agregación disponible",
+                    "id": "9d2c1a8c02ebb2ed24e86c6213e65be3",
+                    "passes": 1822,
+                    "fails": 0,
+                    "name": "agregación disponible"
+                },
+                "correlation id devuelto": {
+                    "fails": 0,
+                    "name": "correlation id devuelto",
+                    "path": "::correlation id devuelto",
+                    "id": "db9850b59ca2e6621587077719e7013f",
+                    "passes": 1822
+                }
+            },
+        "name": "",
+        "path": ""
+    }
+}

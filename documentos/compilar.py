@@ -163,8 +163,9 @@ ALT_GRAFICOS = {
     "¿Cada cuánto": "Portada sobre fondo gris claro, con una tarjeta blanca que destaca tres cifras.",
     "El problema y lo que entregamos": "Tres tarjetas en columnas: la situación de hoy, la pregunta del reto (en azul) y "
                                        "lo que entregamos.",
-    "Datos validados": "Tarjetas con las seis dimensiones de calidad de §6.3, la lectura incremental, la carga "
-                       "idempotente y la prueba de no fuga.",
+    "Datos validados": "Tarjetas con las seis dimensiones de calidad de §6.3, la lectura y el contraste de los "
+                       "consolidados de Extreme, la lectura incremental, la carga idempotente y la prueba de no "
+                       "fuga.",
     "El modelo le gana": "Gráfico de puntos con el WAPE y su intervalo del 95 % del modelo activo, el modelo anterior y "
                          "las líneas base B1 y B2, y una tabla de robustez por ruta, año y horizonte.",
     "Incertidumbre y ciclo de vida": "Tarjetas de cobertura, explicabilidad y ciclo de vida del modelo, y la captura de "

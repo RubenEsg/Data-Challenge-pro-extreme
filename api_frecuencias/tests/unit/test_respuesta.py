@@ -446,6 +446,87 @@ def test_la_foto_reutiliza_el_plan_que_el_ciclo_acaba_de_calcular(monkeypatch):
     assert [f["headway_min"] for f in filas] == [h["headway_min"] for h in del_ciclo["horas"]]
 
 
+def test_la_foto_del_ciclo_queda_con_la_version_de_umbrales_del_ciclo(monkeypatch):
+    """§5.1 con RNF-005: el ciclo pasa a precalcular la versión de umbrales de su ejecución (en una ejecución partida
+    por ruta, la fijada al crearla). La foto queda con esa versión y reutiliza el plan del ciclo aunque la vigente sea
+    otra (aquí, sin base, no hay vigente)."""
+    from app.servicios import optimizacion
+
+    model_id = respuesta.modelo_vigente(None)["model_id"]
+    del_ciclo = optimizacion.plan_dia(FECHA, "CRA 54", umbrales={}, umbrales_version=7, model_id=model_id)
+
+    def no_resolver(*_a, **_k):
+        raise AssertionError("la foto no debe volver a resolver el plan que trae el ciclo")
+
+    monkeypatch.setattr(optimizacion, "plan_dia", no_resolver)
+    r = respuesta.componer(None, "CRA 54", FECHA, planes={"CRA 54": del_ciclo}, umbrales=(7, {}))
+    assert r["trazabilidad"]["umbrales_version"] == 7
+    filas = r["rutas"][0]["cada_cuanto_despachar"]
+    assert [f["buses_hora"] for f in filas] == [h["salidas"] for h in del_ciclo["horas"]]
+
+
+def test_la_foto_dice_que_planes_reutilizo_y_cuales_volvio_a_resolver():
+    """C2: el plan de otro modelo (el modelo activo cambió entre el plan del ciclo y la foto) se vuelve a resolver con
+    el modelo de la foto y lo reemplaza; la respuesta lo dice en «planes», con el motivo. Uno que sirve se reutiliza y
+    una ruta sin plan se calcula aquí."""
+    from app.servicios import optimizacion
+
+    model_id = respuesta.modelo_vigente(None)["model_id"]
+    del_ciclo = optimizacion.plan_dia(FECHA, "CRA 54", umbrales={}, umbrales_version=None, model_id=model_id)
+    planes = {"CRA 54": dict(del_ciclo, model_id="modelo_anterior")}
+    r = respuesta.componer(None, fecha=FECHA, rutas=["CRA 54", "CL 72"], planes=planes)
+    uso = r["planes"]
+    assert (uso["reutilizados"], uso["recalculados"], uso["calculados"]) == ([], ["CRA 54"], ["CL 72"])
+    assert "modelo_anterior" in uso["motivos"]["CRA 54"] and model_id in uso["motivos"]["CRA 54"]
+    assert set(uso["motivos"]) == {"CRA 54"}
+    assert planes["CRA 54"]["model_id"] == model_id and set(planes) == {"CRA 54", "CL 72"}   # el nuevo lo reemplaza
+    otra = respuesta.componer(None, fecha=FECHA, rutas=["CRA 54"], planes={"CRA 54": del_ciclo})
+    assert otra["planes"] == {"reutilizados": ["CRA 54"], "recalculados": [], "calculados": [], "motivos": {}}
+    assert "planes" not in respuesta._payload_ruta(r, r["rutas"][0])       # no va en la foto guardada
+
+
+def test_el_plan_vuelto_a_resolver_conserva_la_restriccion_reactiva_del_ciclo():
+    """§10.1 con C2: el plan de un ciclo intradía trae el piso de la ocupación actual (ocupacion_actual). Si la foto lo
+    vuelve a resolver porque el modelo activo cambió, lo hace con la misma restricción: la hora en que actúa no baja
+    del piso y el plan nuevo lo dice."""
+    from app.servicios import ocupacion, optimizacion
+
+    model_id = respuesta.modelo_vigente(None)["model_id"]
+    reactiva = {"aplica": True, "hora_aplica": 9, "hora_cerrada": 8, "segmento": 34, "ocupacion_observada": 0.97,
+                "carga_critica_pax_h": 2400.0, "umbral_critico": 0.9, "fecha_plan": FECHA.isoformat(),
+                "motivo": "En la última hora cerrada la ocupación observada fue 97 %.",
+                "naturaleza": ocupacion.NATURALEZA_REACTIVA}
+    optimizacion.limpiar_cache_plan()
+    sin_piso = optimizacion.plan_dia(FECHA, "CRA 54", umbrales={}, umbrales_version=None, model_id=model_id)
+    del_ciclo = optimizacion.plan_dia(FECHA, "CRA 54", umbrales={}, umbrales_version=None, model_id=model_id,
+                                      ocupacion_actual=reactiva)
+    piso = del_ciclo["ocupacion_actual"]["salidas_minimas"]
+    nueve = {h["hora"]: h["salidas"] for h in sin_piso["horas"]}[9]
+    assert del_ciclo["ocupacion_actual"]["aplica"] is True and piso > nueve         # el piso sí cambia la hora
+    planes = {"CRA 54": dict(del_ciclo, model_id="modelo_anterior")}
+    r = respuesta.componer(None, fecha=FECHA, rutas=["CRA 54"], planes=planes)
+    assert r["planes"]["recalculados"] == ["CRA 54"]
+    nuevo = planes["CRA 54"]
+    assert nuevo["model_id"] == model_id and nuevo["ocupacion_actual"]["aplica"] is True
+    assert {h["hora"]: h["salidas"] for h in nuevo["horas"]}[9] >= piso
+    filas = {f["hora"]: f["buses_hora"] for f in r["rutas"][0]["cada_cuanto_despachar"]}
+    assert filas[9] >= piso                                                          # la foto dice lo mismo
+    assert respuesta._reactiva_del_plan(sin_piso) is None and respuesta._reactiva_del_plan(None) is None
+
+
+def test_el_motivo_de_volver_a_resolver_el_plan():
+    plan = {"horas": [{"hora": 4}], "fuente_pronostico": "modelo_activo", "model_id": "m1", "umbrales_version": 3}
+    assert respuesta._motivo_no_reutilizable(plan, "m1", 3, "activo") is None
+    assert "m1" in respuesta._motivo_no_reutilizable(plan, "m2", 3, "activo")
+    assert "versión de umbrales" in respuesta._motivo_no_reutilizable(plan, "m1", 4, "activo")
+    assert "pronóstico" in respuesta._motivo_no_reutilizable(plan, "m1", 3, "E12")
+    assert "horas" in respuesta._motivo_no_reutilizable({"horas": []}, "m1", 3, "activo")
+    assert respuesta.reutilizacion_del_plan(None, plan, "m1", 3, "activo") == {"estado": "calculado", "motivo": None}
+    assert respuesta.reutilizacion_del_plan(plan, plan, "m1", 3, "activo")["estado"] == "reutilizado"
+    otro = dict(plan)
+    assert respuesta.reutilizacion_del_plan(plan, otro, "m1", 3, "activo")["motivo"].startswith("el plan del día")
+
+
 def test_un_plan_de_otro_modelo_o_version_no_se_reutiliza():
     plan = {"horas": [{"hora": 4}], "fuente_pronostico": "modelo_activo", "model_id": "m1", "umbrales_version": 3}
     assert respuesta._plan_reutilizable(plan, "m1", 3, "activo")

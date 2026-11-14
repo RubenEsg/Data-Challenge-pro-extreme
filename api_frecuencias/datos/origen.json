@@ -52,5 +52,16 @@
   "clima_diario.parquet": {
     "fuente": "datos/clima_diario.parquet (precipitacion_4_21h_mm)",
     "uso": "solo como condición en la evaluación (lluvia >= 5 y >= 20 mm, seco); nunca como variable del pronóstico"
+  },
+  "bajadas_horaria.parquet": {
+    "fuente": "datos/progvehiculos.parquet (exportación de la tabla progvehiculos) y la grilla de demanda_horaria.parquet",
+    "filas": 55896,
+    "desde": "2023-01-01",
+    "hasta": "2025-12-31",
+    "total_bajadas_viajes": 41416280.0,
+    "sha256": "ffba8d2ae3e135931817b0fdde8bf7adf3c55ca232b405dba8af7d209a181f63",
+    "columnas": {
+      "bajadas_viajes": "suma de numerobajadas de los viajes válidos que salen en esa hora (finalizado S, cancelada N, dato no nulo y <= 300, ceros incluidos): la definición de pasajeros aplicada a los descensos (§6.1 Bajadas)"
+    }
   }
 }

@@ -15,20 +15,35 @@ qué tiene que mostrar esa corrida y deja la salida de referencia contra la API 
 
 ## Montaje de la corrida de referencia
 
-- **Fecha:** 9-11-2026, 07:30 (America/Bogota).
-- **API:** `uvicorn app.main:app` en 127.0.0.1:8604, con un trabajador de cola (`TRABAJADORES=1`, el valor por omisión).
+- **Fecha:** 13-11-2026, 22:13 (America/Bogota).
+- **API:** `uvicorn app.main:app` en 127.0.0.1:8362, con un trabajador de cola (`TRABAJADORES=1`, el valor por omisión).
 - **Base de datos:** una base de pruebas nueva en el PostgreSQL local (puerto 5433), migrada con
-  `alembic upgrade head` (0007, head). No había ejecuciones previas.
+  `alembic upgrade head` (0014, head). No había ejecuciones previas.
 - **Datos:** `DATA_DIR` y `MODELOS_DIR` apuntan a una copia temporal de `datos/`. El registro del repositorio no
   cambia: el activo sigue siendo `hgb_fv2_20250831_s42`.
 - **Autenticación:** encendida, con claves de prueba por rol creadas para la corrida. La clave admin llega solo por
   el entorno (`SOBUSA_API_KEY`) y no se imprime.
+- **Notificaciones:** simuladas, con los destinatarios de prueba de `docker-compose.yml` (`despacho@example.com` y
+  `+570000000000`), como en la pila aislada.
 - **Comando:** `.venv\Scripts\python scripts\demo_ciclo_api.py --hasta 2025-08-30 --corte 2025-09-30 --revertir`.
-- **Resultado:** código de salida 0 en 139 s (58 s en una corrida anterior con la máquina libre). Imprime los pasos
-  (1) a (6).
-- **Confirmación:** una segunda corrida a las 07:40, otra vez sobre una base nueva, dio la misma salida: las mismas
-  filas, marcas de agua, métricas, criterios, decisión, alertas y notificaciones (simuladas 0, omitidas 56). Solo
-  cambiaron los tiempos y los identificadores de las ejecuciones. Terminó con código 0 en 125 s.
+- **Resultado:** código de salida 0 en 120 s. Imprime los pasos (1) a (6).
+- **Confirmación:** una segunda corrida a las 22:16, otra vez sobre una base nueva (es
+  `../cola/demo_ciclo_api_cola.txt`), dio la misma salida: las mismas filas, marcas de agua, métricas, criterios,
+  decisión, alertas y notificaciones (simuladas 116, omitidas 72). Solo cambiaron los tiempos y los identificadores de
+  las ejecuciones. Terminó con código 0 en 120 s. La corrida en la pila aislada de `verificar_despliegue.py` (23:07,
+  `demo_ciclo_api.txt`) dio también la misma salida, salvo los tiempos, los identificadores y el sha256 del candidato
+  (ver el paso 4).
+- **Frente a la corrida de referencia del 11-11-2026 (06:48):** la salida es la misma línea por línea, salvo los
+  tiempos y los identificadores. Entre las dos corridas cambió el código (el contraste por segmento, la lectura
+  `demanda_segmentos` de la fuente y la política de reentrenamiento sin datos suficientes). Esta demostración usa la
+  serie empaquetada y tiene histórico suficiente, así que la política encola el entrenamiento como antes.
+- **Por qué cambiaron las cifras frente a la corrida de referencia del 9-11-2026 (07:30, base hasta la 0007):**
+  las alertas observadas evalúan ahora hasta 7 días del lote (`VENTANA_OBSERVADA_DIAS`, paquete de cierre). La carga
+  inicial pasa de 4 a 27 alertas, los días nuevos de 8 a 25 y la sombra de 6 a 33. El día nuevo pasa de 10 a 9: como en
+  `../rendimiento/ciclo_final.md`, ya no sale la ALT-003 de pronóstico de CL 72, que desde la migración 0014 exige una
+  probabilidad mínima. Las notificaciones cambian con las alertas y con los destinatarios de prueba (antes, simuladas 0
+  y omitidas 56). Los umbrales son la versión 9. Las filas, las marcas de agua, los WAPE, el candidato y la decisión no
+  cambian.
 
 ## La línea de tiempo y por qué esas fechas
 
@@ -51,16 +66,19 @@ usa la ventana de la sombra.
 
 Hay tres ejecuciones `POST /api/v1/frequency/executions`:
 
-| Ejecución | Hasta | Filas leídas |
-|---|---|---|
-| Carga inicial | 2025-08-30 | 49.623 |
-| Un día nuevo | 2025-08-31 | 51 |
-| Los días hasta M | 2025-11-30 | 4.641 |
+| Ejecución | Hasta | Filas leídas | Alertas |
+|---|---|---|---|
+| Carga inicial | 2025-08-30 | 49.623 | 27 |
+| Un día nuevo | 2025-08-31 | 51 | 9 |
+| Los días hasta M | 2025-11-30 | 4.641 | 25 |
+
+Las alertas observadas evalúan hasta los 7 últimos días del lote (`VENTANA_OBSERVADA_DIAS`), cada uno con sus horas
+cerradas. Por eso la carga inicial y los días hasta M abren más alertas que el día nuevo, cuyo lote es de un día.
 
 Cada ejecución imprime sus predicciones, recomendaciones y alertas, y también «notificaciones simuladas N,
-omitidas M», que sale de `metricas.notificaciones_por_estado`. En esta corrida las notificaciones fueron simuladas 0
-y omitidas 56: con `NOTIFICACIONES_SEVERIDAD=critica` solo se envían las alertas críticas, y las demás quedan
-registradas como omitidas.
+omitidas M», que sale de `metricas.notificaciones_por_estado`. En esta corrida las notificaciones fueron simuladas 116
+y omitidas 72, una por alerta y canal (correo y WhatsApp): con `NOTIFICACIONES_SEVERIDAD=critica` solo se envían al
+canal simulado las alertas críticas, y las demás quedan registradas como omitidas.
 
 ### (2) Lectura incremental
 
@@ -94,8 +112,11 @@ entrenamientos con el mismo identificador competirían por el mismo artefacto. S
 el script hace el `POST /api/v1/models/train` con esos dos parámetros.
 
 El resultado:
-- `hgb_fv2_20250930_s42`, entrenado en 27,7 s por el trabajador de la cola;
-- sha256 `1c280ae7910b…`, el mismo en todas las corridas;
+- `hgb_fv2_20250930_s42`, entrenado en 13,6 s por el trabajador de la cola;
+- sha256 `1c280ae7910b…` en las dos corridas con el venv, el mismo de las corridas del 9-11 y del 11-11-2026. El
+  sha256 es el del archivo del artefacto. En la imagen Docker (Python 3.11) no se repite de una corrida a otra:
+  `8caa080bb0c4…` el 13-11-2026 a las 23:07 (y otro distinto en cada una de las tres corridas anteriores de ese día),
+  `d92ba337c6bf…` el 11-11-2026 y `6a898a553dcd…` el 9-11-2026. La causa no está investigada. Las métricas del candidato y la decisión son las mismas en todas;
 - su propia calibración v2 de la banda, ajustada con su validación 2025-10-01 .. 2025-11-30 (3.111 horas);
 - queda «en_sombra» del 2025-12-01 al 2025-12-14.
 
@@ -135,14 +156,15 @@ corrida no hay nada que revertir, y el script lo dice.
 
 **No cambia**, porque la fuente es la serie empaquetada y el entrenamiento usa la semilla 42:
 - las filas leídas, las marcas de agua y los WAPE de los pasos 3 y 5;
-- el identificador y el sha256 del candidato;
+- el identificador del candidato, y su sha256 en las corridas con el venv (en la imagen Docker cambia, ver el
+  paso 4);
 - los criterios de la compuerta y la decisión.
 
 **Puede cambiar:**
 - los tiempos;
 - los identificadores de las ejecuciones;
 - el número de alertas, que depende de la hora de la corrida para la frescura (ALT-009);
-- el número de notificaciones omitidas.
+- el número de notificaciones simuladas y omitidas, que depende además de los canales y destinatarios configurados.
 
 `scripts/verificar_despliegue.py` exige código 0 y los pasos (1) a (6) impresos. Después, la prueba de reinicios
 (RNF-001) sigue desde la última marca de agua de la demostración (2025-12-14) con un día nuevo por escenario
@@ -161,8 +183,10 @@ exportación y las notificaciones. Su paso 8 sigue la misma regla que esta demos
 - el día de las notificaciones es el siguiente a la última marca de agua (2025-11-19);
 - cada ejecución imprime «notificaciones simuladas N, omitidas M».
 
-En la corrida del 9-11-2026 a las 07:37, contra la misma API, con una base nueva y una copia temporal de `datos/`:
-- código 0 y «RESULTADO: OK, todos los pasos cumplidos»;
+En la corrida del 13-11-2026 a las 22:18, con el mismo montaje de la corrida de referencia (API en 127.0.0.1:8364,
+base nueva hasta la 0014 y copia temporal de `datos/`), igual que en las del 11-11-2026 a las 06:54 y del 9-11-2026
+a las 07:37:
+- código 0 en 118 s y «RESULTADO: OK, todos los pasos cumplidos»;
 - el candidato `hgb_fv2_20250904_s42` se rechaza: WAPE 12,195 % frente a 12,111 % del activo; los otros tres
   criterios se cumplen;
 - la línea base `b1_manual_8sem` se rechaza con 409 `activacion_rechazada`.
@@ -170,10 +194,10 @@ En la corrida del 9-11-2026 a las 07:37, contra la misma API, con una base nueva
 ## Salida de la corrida de referencia
 
 ```text
-=== Ciclo completo de la especificación v1.5 §14.2 «Demostración» · API http://127.0.0.1:8604 · 2026-11-09 07:30:45 -0500 (America/Bogota) ===
+=== Ciclo completo de la especificación v1.5 §14.2 «Demostración» · API http://127.0.0.1:8362 · 2026-11-13 22:13:59 -0500 (America/Bogota) ===
 Estado: GET /health -> {'estado': 'ok', 'base_datos': 'ok', 'version': '1.0.0', 'fuente': 'parquet', 'integraciones': {'fuente_postgres': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 3, 'reinicio_s': 60.0, 'reintento_en_s': None, 'ultimo_error': None}, 'notif_correo': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 5, 'reinicio_s': 120.0, 'reintento_en_s': None, 'ultimo_error': None}, 'notif_whatsapp': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 5, 'reinicio_s': 120.0, 'reintento_en_s': None, 'ultimo_error': None}}}
 Modelo activo al empezar: hgb_fv2_20250831_s42 (variables fv2-2026-11-09, corte 2025-08-31; vio datos hasta 2025-10-31: corte + 61 días de validación, con los que se calibró su banda P10-P90)
-Umbrales v5 (propuesta): sombra_dias 14, activacion_automatica 1, reentreno_en_ciclo 1, reentreno_periodicidad_dias 28, wape_max 0.2
+Umbrales v9 (propuesta): sombra_dias 14, activacion_automatica 1, reentreno_en_ciclo 1, reentreno_periodicidad_dias 28, wape_max 0.2
 Línea de tiempo: carga inicial hasta 2025-08-30; la información nueva llega hasta 2025-11-30 (corte del candidato 2025-09-30 + 61 días); sombra y comparación 2025-12-01 .. 2025-12-14.
 
 (1) Llegada de información nueva
@@ -183,24 +207,24 @@ Línea de tiempo: carga inicial hasta 2025-08-30; la información nueva llega ha
     ... prediccion 45 %
     ... alertas 70 %
     ... plan_dia 92 %
-    ejecución fed15d42-9af0-48ad-ba3a-f787ae1b7144 (carga-inicial, hasta 2025-08-30): ok en 28.0 s; filas leídas 49623, válidas 49623
-    predicciones 9, recomendaciones 9, alertas 4; notificaciones simuladas 0, omitidas 8
+    ejecución eccd45b0-03b8-4b81-a4f7-901f9e0f4ec5 (carga-inicial, hasta 2025-08-30): ok en 29.0 s; filas leídas 49623, válidas 49623
+    predicciones 9, recomendaciones 9, alertas 27; notificaciones simuladas 42, omitidas 12
     Llega un día nuevo: 2025-08-31 queda disponible en la fuente.
     ... en_cola 0 %
     ... calidad 25 %
     ... prediccion 45 %
     ... alertas 70 %
     ... plan_dia 92 %
-    ejecución 75d87ebe-2e6c-42cf-b9e7-dd621547b756 (dia-nuevo, hasta 2025-08-31): ok en 24.1 s; filas leídas 51, válidas 51
-    predicciones 9, recomendaciones 9, alertas 10; notificaciones simuladas 0, omitidas 20
+    ejecución b3a19670-f62d-4964-80e8-bbf954e2589a (dia-nuevo, hasta 2025-08-31): ok en 21.8 s; filas leídas 51, válidas 51
+    predicciones 9, recomendaciones 9, alertas 9; notificaciones simuladas 10, omitidas 8
     Siguen llegando días: 2025-09-01 .. 2025-11-30, hasta la marca de agua con la que se entrenará el candidato (su corte 2025-09-30 más 61 días de validación).
     ... en_cola 0 %
     ... calidad 25 %
     ... prediccion 45 %
     ... alertas 70 %
     ... plan_dia 92 %
-    ejecución f3f10b7e-a43c-41e5-9d66-91bc7d086797 (dias-nuevos, hasta 2025-11-30): ok en 24.8 s; filas leídas 4641, válidas 4641
-    predicciones 9, recomendaciones 9, alertas 8; notificaciones simuladas 0, omitidas 16
+    ejecución 7349c22b-d2ec-4998-a875-4c59ddddb11a (dias-nuevos, hasta 2025-11-30): ok en 25.4 s; filas leídas 4641, válidas 4641
+    predicciones 9, recomendaciones 9, alertas 25; notificaciones simuladas 28, omitidas 22
 
 (2) Lectura incremental
     POST /api/v1/frequency/executions lee SOLO lo posterior a la marca de agua (solo lectura de la fuente):
@@ -209,7 +233,8 @@ Línea de tiempo: carga inicial hasta 2025-08-30; la información nueva llega ha
     días nuevos   marca de agua 2025-08-31T23:59:59-05:00 -> 2025-11-30T23:59:59-05:00: filas leídas 4641, válidas 4641
     Repetición sin datos nuevos (la misma fecha): no relee ni duplica nada
     ... en_cola 0 %
-    ejecución df5562b8-c0bb-4df3-b6aa-0e865f4d4f6c (repeticion, hasta 2025-11-30): ok en 29.7 s; filas leídas 0, válidas 0
+    ... lectura_incremental 10 %
+    ejecución 1a7673c4-a921-4301-bf33-5d850c141656 (repeticion, hasta 2025-11-30): ok en 15.9 s; filas leídas 0, válidas 0
     predicciones 0, recomendaciones 0, alertas 0; notificaciones simuladas 0, omitidas 0
     repetición    marca de agua 2025-11-30T23:59:59-05:00 -> 2025-11-30T23:59:59-05:00: filas leídas 0, predicciones 0
     (la repetición esperó en la cola detrás del entrenamiento que encoló la política, ver (3) y (4))
@@ -224,8 +249,8 @@ Línea de tiempo: carga inicial hasta 2025-08-30; la información nueva llega ha
     política de aprendizaje continuo al cerrar la ejecución hasta 2025-11-30: reentrenar True, motivos ['periodicidad: 30 días de datos nuevos desde 2025-10-31 (cada 28)'], bloqueos []
 
 (4) Modelo candidato
-    La política ya encoló el entrenamiento al cerrar la ejecución (job 9f19e896-bd50-4f65-b759-8f6ed1de9176, hasta 2025-09-30, datos_hasta 2025-11-30): es el mismo trabajo que POST /api/v1/models/train con esos parámetros, así que se espera ese job en vez de duplicarlo.
-    entrenamiento ok en 27.7 s (trabajador de la cola): Candidato hgb_fv2_20250930_s42 registrado
+    La política ya encoló el entrenamiento al cerrar la ejecución (job 15b514da-feec-4a81-9511-3f442ebc5fa3, hasta 2025-09-30, datos_hasta 2025-11-30): es el mismo trabajo que POST /api/v1/models/train con esos parámetros, así que se espera ese job en vez de duplicarlo.
+    entrenamiento ok en 13.6 s (trabajador de la cola): Candidato hgb_fv2_20250930_s42 registrado
     candidato hgb_fv2_20250930_s42: estado candidato, variables fv2-2026-11-09, corte 2025-09-30, datos hasta 2025-11-30, sha256 1c280ae7910b…
     sombra: en_sombra del 2025-12-01 al 2025-12-14 (14 días); banda P10-P90 con su propia calibración v2 por ['bloque'], validación 2025-10-01 a 2025-11-30 (3111 horas); la prueba reservada no se usa
 
@@ -233,18 +258,19 @@ Línea de tiempo: carga inicial hasta 2025-08-30; la información nueva llega ha
     Misma ventana para los dos: 2025-12-01 .. 2025-12-14. Por qué estas fechas: el candidato vio datos hasta 2025-11-30 (corte 2025-09-30 + 61 días) y el activo hasta 2025-10-31; la ventana empieza después de los dos (fuera de la muestra de ambos) y termina antes del 2025-12-31, el último día de la serie empaquetada, así que hay datos reales para medirlos.
     Llegan los 14 días de la sombra: en ese ciclo el candidato predice lo mismo que el activo (sin decidir nada) y, al completarse la ventana, la compuerta compara a los dos en ella.
     ... en_cola 0 %
+    ... lectura_incremental 10 %
     ... calidad 25 %
     ... prediccion 45 %
     ... alertas 70 %
     ... plan_dia 92 %
-    ejecución c2b7784b-49b8-4783-9cd2-aaca0ddc2f9b (sombra, hasta 2025-12-14): ok en 30.8 s; filas leídas 714, válidas 714
-    predicciones 9, recomendaciones 9, alertas 6; notificaciones simuladas 0, omitidas 12
+    ejecución 064fbcfe-2b14-4e55-973d-fccbf8a70591 (sombra, hasta 2025-12-14): ok en 26.3 s; filas leídas 714, válidas 714
+    predicciones 9, recomendaciones 9, alertas 33; notificaciones simuladas 36, omitidas 30
     candidato hgb_fv2_20250930_s42: WAPE 14.108 %, MAE 93.003, sesgo 3.163 %, cobertura P10-P90 79.41 %, n = 714
     activo    hgb_fv2_20250831_s42: WAPE 13.982 %, MAE 92.176, sesgo 3.282 %, cobertura P10-P90 78.85 %, n = 714
     compuerta de sombra de hgb_fv2_20250930_s42: rechazado
 
 (6) Decisión de activarlo o rechazarlo
-    Compuerta de cuatro criterios (politica.compuerta) en 2025-12-01 .. 2025-12-14, umbrales v5, banda calibrada v2 del candidato frente a v2 del activo:
+    Compuerta de cuatro criterios (politica.compuerta) en 2025-12-01 .. 2025-12-14, umbrales v9, banda calibrada v2 del candidato frente a v2 del activo:
     [NO cumple] WAPE del candidato ≤ WAPE del activo: candidato 14.11 %, referencia 13.98 %
     [cumple] WAPE ≤ wape_max (20%): candidato 14.11 %, referencia 20.00 %
     [cumple] cobertura P10-P90 en [75%, 90%]: candidato 79.41 %, referencia [75.00 %, 90.00 %]
@@ -254,6 +280,6 @@ Línea de tiempo: carga inicial hasta 2025-08-30; la información nueva llega ha
     --revertir: no hay nada que revertir, el candidato no llegó a activarse.
     registro de modelos: [('hgb_fv2_20250930_s42', 'rechazado'), ('hgb_fv1_20250831_s42', 'candidato'), ('b1_manual_8sem', 'candidato'), ('b2_ultima_semana', 'candidato'), ('hgb_fv2_20250831_s42', 'activo')]
 
-Notificaciones de las ejecuciones (metricas.notificaciones_por_estado): simuladas 0, omitidas 56.
-Ciclo completo en 139 s.
+Notificaciones de las ejecuciones (metricas.notificaciones_por_estado): simuladas 116, omitidas 72.
+Ciclo completo en 119 s.
 ```

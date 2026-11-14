@@ -5,9 +5,9 @@
   "horizonte_min": 60
  },
  "claves_12_3": {
-  "predictionId": "2a2613a2-98cd-4f16-8a57-4d81e14706e2",
+  "predictionId": "d6dd8cc4-9a25-432b-b97e-772459e553f3",
   "routeId": "CRA 54",
-  "generatedAt": "2026-11-09T07:40:06-05:00",
+  "generatedAt": "2026-11-11T05:03:06-05:00",
   "horizonMinutes": 60,
   "predictedPassengers": 533,
   "confidenceInterval": {

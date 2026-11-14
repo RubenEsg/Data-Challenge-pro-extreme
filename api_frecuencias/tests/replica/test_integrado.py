@@ -152,6 +152,39 @@ def test_procesos_con_comillas_y_contexto_operacional(cargada):
     p._engine().dispose()
 
 
+def test_novedades_viales_ruta_vacia_en_la_replica_cada_novedad_es_de_todas_las_rutas(cargada):
+    """§11.2 con la réplica real, en solo lectura (lector_ia): novedades_viales_ruta no tiene filas, así que cada
+    novedad es de todas las rutas (supuesto declarado), no hay contexto por ruta y el contexto general es idéntico al
+    empaquetado (datos/contexto_operacional.parquet): las variables del modelo activo no cambian."""
+    import pandas as pd
+
+    from app.servicios import novedades
+    from scripts import replica_contexto
+    from scripts.preparar_datos_api import contexto_y_novedades_por_ruta
+
+    tablas = replica_contexto.leer_tablas(_url_sa("lector_ia"))
+    assert tablas["novedades_viales_ruta"].empty and len(tablas["novedades_viales_fecha"]) == 28
+    ea = tablas["estacionalidades_anio"][["id_estacionalidad_anio", "proceso", "id_estacionalidad", "ano",
+                                          "fecha_inicio", "fecha_fin"]]
+    ctx, por_ruta, info = contexto_y_novedades_por_ruta(tablas["novedades_viales_fecha"],
+                                                        tablas["novedades_viales_ruta"], ea,
+                                                        tablas["estacionalidades"])
+    assert por_ruta.empty and info["filas_novedades_viales_ruta"] == 0 and info["novedades_por_ruta"] == 0
+    assert info["novedades_todas_las_rutas"] == 28
+    comparacion = replica_contexto.comparar(ctx, rc.RAIZ / "datos" / "contexto_operacional.parquet")
+    assert comparacion["identico"], comparacion
+    from tests.evidencia import guardar_evidencia
+
+    guardar_evidencia("replica/novedades_por_ruta_replica.json", {
+        "prueba": "tests/replica/test_integrado.py::"
+                  "test_novedades_viales_ruta_vacia_en_la_replica_cada_novedad_es_de_todas_las_rutas",
+        "rol": "lector_ia (solo lectura)", "resumen": info, "filas_contexto_por_ruta": len(por_ruta),
+        "comparacion_con_datos_contexto_operacional": comparacion})
+    tabla = pd.DataFrame({"ruta": ["CL 72"], "fecha": [date(2024, 2, 10)], "hora": [7], "nov_impacto": [1.0],
+                          "nov_sube": [0.0]})
+    assert novedades.aplicar_por_ruta(tabla, por_ruta) is tabla
+
+
 def test_marca_sin_zona_se_compara_en_hora_de_bogota(cargada, lector):
     """H10: ultimaactualizacion es timestamp SIN zona (NOW() del servidor en Bogotá). La fuente fija TimeZone y lee
     exactamente las filas posteriores a la marca; con la sesión en UTC la misma marca se correría 5 horas."""
@@ -235,9 +268,16 @@ def test_demanda_segmentos_usa_la_definicion_del_modelo_con_proceso_y_estacional
 
     f = FuentePostgresSoloLectura(url=_url_sa("lector_ia"), tabla="demanda_segmentos")
     d, _ = f.leer_incremental(None)
+    rutas = f.leer_contexto("rutas")
     f._engine().dispose()
     assert len(d) > 2000 and set(d["proceso"]) == {"sobusa"} and set(d["tipo_llegada"]) == {"carga_inicial"}
     assert d["id_estacionalidad"].notna().all()
+    # el nombre y la empresa de cada franja son los de su ruta en la tabla rutas (viajan desde el CTE franjas: la
+    # consulta final ya no vuelve a unir rutas) y cada franja sale una sola vez
+    de_la_tabla = d[["idruta"]].merge(rutas[["idruta", "nombre", "idempresa"]], on="idruta", how="left")
+    assert (d["ruta"].to_numpy() == de_la_tabla["nombre"].to_numpy()).all() and set(d["idruta"]) == {2, 16, 21}
+    assert d["idempresa"].isna().to_numpy().tolist() == de_la_tabla["idempresa"].isna().to_numpy().tolist()
+    assert not d.duplicated(["ruta", "fecha", "hora"]).any()
     servicio = d[d["hora"].between(4, 20)]
     emp = datos.demanda_horaria(desde=date(2023, 1, 1), hasta=date(2023, 2, 27))
     m = servicio.merge(emp, on=["ruta", "fecha", "hora"], suffixes=("", "_empaquetado"))
@@ -296,9 +336,12 @@ def test_la_ia_no_puede_apagar_triggers_por_sesion_y_su_unico_privilegio_de_base
 
 
 def test_linaje_el_historico_empaquetado_se_reconstruye_identico_desde_la_replica(cargada):
-    """Trazabilidad y reproducibilidad (§16): datos/demanda_horaria.parquet (pasajeros y salidas) y
-    datos/contexto_operacional.parquet salen de las tablas de Extreme con contenido idéntico (mismo SHA-256 del
-    contenido normalizado). Es lo que escribe «python -m scripts.reconstruir_desde_replica --linaje»."""
+    """Trazabilidad y reproducibilidad (§16): datos/demanda_horaria.parquet (pasajeros y salidas),
+    datos/contexto_operacional.parquet y datos/bajadas_horaria.parquet salen de las tablas de Extreme con contenido
+    idéntico (mismo SHA-256 del contenido normalizado), y datos/subidas_segmento_hora.parquet, armado con las mismas
+    funciones de scripts/preparar_segmentos.py sobre la réplica, también, salvo el día de los viajes que la réplica
+    reserva para simular su llegada (que solo está en lo empaquetado). Es lo que escribe
+    «python -m scripts.reconstruir_desde_replica --linaje»."""
     from scripts import reconstruir_desde_replica as R
 
     f = R._fuente()
@@ -309,3 +352,10 @@ def test_linaje_el_historico_empaquetado_se_reconstruye_identico_desde_la_replic
     assert dh["comparacion"]["pasajeros"]["distintas"] == 0 and dh["comparacion"]["salidas"]["distintas"] == 0
     assert dh["comparacion"]["filas_empaquetadas"] == dh["comparacion"]["filas_reconstruidas"] == 55896
     assert r["entradas"]["progvehiculos"]["filas_2023_2025"] == 564837
+    bajadas, subidas = r["bajadas_horaria"], r["subidas_segmento_hora"]
+    assert bajadas["contenido_identico"] and bajadas["comparacion"]["bajadas_viajes"]["distintas"] == 0
+    reservado = subidas["sin_el_dia_reservado"]
+    assert reservado["contenido_identico"] and reservado["filas_del_dia_reconstruidas"] == 0
+    assert subidas["comparacion"]["solo_empaquetado"] == reservado["filas_del_dia_empaquetadas"] > 0
+    assert subidas["comparacion"]["solo_replica"] == 0 and subidas["comparacion"]["subidas"]["distintas"] == 0
+    assert set(r["sin_reconstruir"]) == set(R.SIN_RECONSTRUIR)

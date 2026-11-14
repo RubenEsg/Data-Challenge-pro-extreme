@@ -138,6 +138,28 @@ class Ejecucion(Base):
     programada_para: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # migración 0004: contexto W3C de la traza de quien encoló (RNF-006)
     traceparent: Mapped[str | None] = mapped_column(Text)
+    # migración 0009 (RNF-005): ruta del trabajo (NULL = todas), ejecución partida a la que pertenece y, en la madre,
+    # cómo se partió
+    ruta: Mapped[str | None] = mapped_column(Text)
+    padre_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete="CASCADE"))
+    particion: Mapped[str | None] = mapped_column(Text)
+
+
+class MarcaAguaRuta(Base):
+    """Marca de agua de la lectura incremental por proceso y ruta (migración 0009, RNF-005). ruta = '*' es la
+    frontera de las lecturas de todas las rutas del proceso; estado_fuente, las huellas de la ventana de solape."""
+
+    __tablename__ = "marca_agua_ruta"
+    proceso: Mapped[str] = mapped_column(Text, primary_key=True)
+    ruta: Mapped[str] = mapped_column(Text, primary_key=True)
+    marca_agua: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    estado_fuente: Mapped[dict | None] = mapped_column(JSONB)
+    # §9.5: el trabajo que movió la marca a este valor; si se borra, la marca se borra con él
+    execution_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete="CASCADE"))
+    origen: Mapped[str] = mapped_column(Text, nullable=False, default="ejecucion")
+    actualizado_en: Mapped[datetime] = _ahora()
 
 
 class IntentoEjecucion(Base):
@@ -192,6 +214,28 @@ class DemandaObservada(Base):
     idproceso: Mapped[str | None] = mapped_column(Text)
     id_dia_semana: Mapped[int | None] = mapped_column(Integer)
     id_estacionalidad: Mapped[int | None] = mapped_column(Integer)
+    # migración 0013 (§6.1, §9.5): bajadas de los viajes válidos (Σ numerobajadas, la definición de pasajeros) y las
+    # subidas y bajadas de timbradas_segmentos de la franja con su cobertura (viajes con timbradas)
+    bajadas_viajes: Mapped[float | None] = mapped_column(Float)
+    subidas: Mapped[float | None] = mapped_column(Float)
+    bajadas: Mapped[float | None] = mapped_column(Float)
+    viajes_con_timbradas: Mapped[int | None] = mapped_column(Integer)
+
+
+class MarcaAguaTabla(Base):
+    """Marca de agua de la lectura incremental de cada tabla consolidada de Extreme por proceso (migración 0013, §6.1
+    «ultima_actualizacion»): timbradas_consolidado, timbradas_segmentos_anio y timbradas_segmentos_consolidado, con las
+    huellas de la ventana de solape. La deja el ciclo en la transacción de sus resultados."""
+
+    __tablename__ = "marca_agua_tabla"
+    proceso: Mapped[str] = mapped_column(Text, primary_key=True)
+    tabla: Mapped[str] = mapped_column(Text, primary_key=True)
+    marca_agua: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    estado_fuente: Mapped[dict | None] = mapped_column(JSONB)
+    execution_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete="CASCADE"))
+    filas_leidas: Mapped[int | None] = mapped_column(Integer)
+    actualizado_en: Mapped[datetime] = _ahora()
 
 
 class Prediccion(Base):
@@ -265,6 +309,9 @@ class Recomendacion(Base):
     idproceso: Mapped[str | None] = mapped_column(Text)
     id_dia_semana: Mapped[int | None] = mapped_column(Integer)
     id_estacionalidad: Mapped[int | None] = mapped_column(Integer)
+    # migración 0010 (§6.1 y §6.2): headway vigente de rutas.frecuenciadespachos y recomendado − vigente
+    frecuenciadespachos_min: Mapped[float | None] = mapped_column(Float)
+    diferencia_frecuenciadespachos_min: Mapped[float | None] = mapped_column(Float)
 
 
 class Alerta(Base):
@@ -449,3 +496,52 @@ class RespuestaReto(Base):
         UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete=AL_BORRAR_NULO))
     fuente_pronostico: Mapped[str | None] = mapped_column(Text)
     generado_en: Mapped[datetime] = _ahora()
+
+
+# ---------------------------------------------------------------- migración 0011
+class OcupacionSegmento(Base):
+    """§10.1 ocupación actual por segmento: carga a bordo de los viajes de una franja (ruta, fecha, hora de salida) al
+    salir de cada segmento, derivada de sus subidas y bajadas (app/servicios/ocupacion.py; hallazgo H9). critico marca
+    el segmento con la mayor carga media de la franja."""
+
+    __tablename__ = "ocupacion_segmento"
+    ruta: Mapped[str] = mapped_column(Text, primary_key=True)
+    fecha: Mapped[date] = mapped_column(Date, primary_key=True)
+    hora: Mapped[int] = mapped_column(Integer, primary_key=True)
+    nro_segmento: Mapped[int] = mapped_column(Integer, primary_key=True)
+    idruta: Mapped[int] = mapped_column(Integer, nullable=False)
+    id_segmento: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    sentido: Mapped[str | None] = mapped_column(Text)
+    id_dia_semana: Mapped[int | None] = mapped_column(Integer)
+    id_estacionalidad: Mapped[int | None] = mapped_column(BigInteger)
+    nro_viajes: Mapped[int] = mapped_column(Integer, nullable=False)
+    carga_media: Mapped[float] = mapped_column(Float, nullable=False)
+    carga_max: Mapped[float] = mapped_column(Float, nullable=False)
+    capacidad: Mapped[float] = mapped_column(Float, nullable=False)
+    ocupacion_media: Mapped[float] = mapped_column(Float, nullable=False)
+    ocupacion_max: Mapped[float] = mapped_column(Float, nullable=False)
+    id_viaje_max: Mapped[int | None] = mapped_column(BigInteger)
+    critico: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    execution_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    actualizado_en: Mapped[datetime] = _ahora()
+
+
+# ---------------------------------------------------------------- migración 0012
+class RegistroRetencion(Base):
+    """§18 retención: bitácora de la tarea de retención (app/servicios/retencion.py), una fila por acción de cada
+    corrida, simulada o aplicada. execution_id sin llave foránea: la bitácora sobrevive a la retención de
+    execution_log."""
+
+    __tablename__ = "retencion_registro"
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    execution_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    simulado: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    grupo: Mapped[str] = mapped_column(Text, nullable=False)
+    objeto: Mapped[str] = mapped_column(Text, nullable=False)
+    accion: Mapped[str] = mapped_column(Text, nullable=False)
+    corte: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    filas: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
+    bytes: Mapped[int | None] = mapped_column(BigInteger)
+    umbrales_version: Mapped[int | None] = mapped_column(Integer)
+    detalle: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    creado_en: Mapped[datetime] = _ahora()

@@ -25,4 +25,5 @@ Integración continua en GitHub Actions sobre runners limpios de Ubuntu (sin la 
    Commit 3d2acf1: run 42627652053, en verde (los mismos trabajos y resultados: 832 aprobadas, 174 omitidas,
    cobertura 92,74 %, caída y ejecución programada aprobadas).
 
-La suite completa con la réplica (1.060 casos) corre en local: docs/evidencias/pruebas/suite_final.xml.
+La suite completa con la réplica corre en local: docs/evidencias/pruebas/suite_final.xml. El 9-11-2026 tenía 1.060
+casos; la cifra vigente está en la tabla «Cifras vigentes» de docs/evidencias/README.md.

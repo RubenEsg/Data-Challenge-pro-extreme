@@ -1,0 +1,689 @@
+{
+ "generado": "2026-11-13T18:54:21-05:00",
+ "ruta": {
+  "filas": 10731,
+  "marca": "2026-08-14 11:29:05.057003-05:00",
+  "lectura": {
+   "leidas": 10731,
+   "entregadas": 10731,
+   "nuevas": 10731,
+   "modificadas": 0,
+   "truncada": false
+  },
+  "segunda_lectura_con_huellas": {
+   "leidas": 10731,
+   "entregadas": 0,
+   "repetidas_solape": 10731
+  },
+  "calidad": {
+   "validas": 10731,
+   "errores_por_codigo": {},
+   "catalogos": [
+    "capacidades",
+    "dias_estacionalidad",
+    "dias_estacionalidad_anio",
+    "dias_semana",
+    "estacionalidades",
+    "idrutas",
+    "novedades",
+    "procesos",
+    "rutas",
+    "segmentos",
+    "segmentos_ruta"
+   ]
+  },
+  "periodo": [
+   "2023-01-01",
+   "2025-12-31"
+  ],
+  "contraste": {
+   "grano": [
+    "id_ruta",
+    "id_dia_semana",
+    "id_estacionalidad"
+   ],
+   "llaves": 174,
+   "comparadas": 160,
+   "sin_agregacion_propia": 6,
+   "pocos_viajes": 8,
+   "diferencias": 31,
+   "groseras": 11,
+   "llaves_bloqueadas": 11,
+   "por_campo": {
+    "promedio_subidas": 1,
+    "promedio_bajadas": 7,
+    "viajes_por_dia": 23
+   },
+   "tolerancias": {
+    "contraste_tolerancia": 0.15,
+    "contraste_tolerancia_grosera": 0.5,
+    "contraste_viajes_minimos": 30.0
+   }
+  },
+  "distribucion_diferencias": {
+   "promedio_subidas": {
+    "llaves": 160,
+    "mediana": 0.0139,
+    "p90": 0.0447,
+    "maximo": 0.1556
+   },
+   "promedio_bajadas": {
+    "llaves": 160,
+    "mediana": 0.0132,
+    "p90": 0.062,
+    "maximo": 1.8907
+   },
+   "viajes_por_dia": {
+    "llaves": 160,
+    "mediana": 0.0167,
+    "p90": 0.3182,
+    "maximo": 1.1176
+   }
+  },
+  "incidencias": [
+   {
+    "llave": {
+     "id_ruta": 16,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 3
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 242.0,
+    "bloqueante": true,
+    "detalle": "viajes_por_dia = 242.00 en timbradas_consolidado frente a 120.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 101.7% (tolerancia 15%; grosera desde 50%: la llave queda fuera del análisis)"
+   },
+   {
+    "llave": {
+     "id_ruta": 16,
+     "id_dia_semana": 4,
+     "id_estacionalidad": 4
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 190.0,
+    "bloqueante": true,
+    "detalle": "viajes_por_dia = 190.00 en timbradas_consolidado frente a 100.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 90.0% (tolerancia 15%; grosera desde 50%: la llave queda fuera del análisis)"
+   },
+   {
+    "llave": {
+     "id_ruta": 2,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 20
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 126.0,
+    "bloqueante": true,
+    "detalle": "viajes_por_dia = 126.00 en timbradas_consolidado frente a 83.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 51.8% (tolerancia 15%; grosera desde 50%: la llave queda fuera del análisis)"
+   },
+   {
+    "llave": {
+     "id_ruta": 2,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 3
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 138.0,
+    "bloqueante": true,
+    "detalle": "viajes_por_dia = 138.00 en timbradas_consolidado frente a 68.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 102.9% (tolerancia 15%; grosera desde 50%: la llave queda fuera del análisis)"
+   },
+   {
+    "llave": {
+     "id_ruta": 2,
+     "id_dia_semana": 4,
+     "id_estacionalidad": 4
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 132.0,
+    "bloqueante": true,
+    "detalle": "viajes_por_dia = 132.00 en timbradas_consolidado frente a 68.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 94.1% (tolerancia 15%; grosera desde 50%: la llave queda fuera del análisis)"
+   },
+   {
+    "llave": {
+     "id_ruta": 21,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 20
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 78.5,
+    "bloqueante": true,
+    "detalle": "viajes_por_dia = 78.50 en timbradas_consolidado frente a 50.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 57.0% (tolerancia 15%; grosera desde 50%: la llave queda fuera del análisis)"
+   },
+   {
+    "llave": {
+     "id_ruta": 21,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 3
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 108.0,
+    "bloqueante": true,
+    "detalle": "viajes_por_dia = 108.00 en timbradas_consolidado frente a 51.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 111.8% (tolerancia 15%; grosera desde 50%: la llave queda fuera del análisis)"
+   },
+   {
+    "llave": {
+     "id_ruta": 21,
+     "id_dia_semana": 3,
+     "id_estacionalidad": 25
+    },
+    "campo": "promedio_bajadas",
+    "valor_extreme": 137.5351,
+    "bloqueante": true,
+    "detalle": "promedio_bajadas = 137.54 en timbradas_consolidado frente a 85.64 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 60.6% (tolerancia 15%; grosera desde 50%: la llave queda fuera del análisis)"
+   },
+   {
+    "llave": {
+     "id_ruta": 21,
+     "id_dia_semana": 4,
+     "id_estacionalidad": 25
+    },
+    "campo": "promedio_bajadas",
+    "valor_extreme": 137.2232,
+    "bloqueante": true,
+    "detalle": "promedio_bajadas = 137.22 en timbradas_consolidado frente a 84.97 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 61.5% (tolerancia 15%; grosera desde 50%: la llave queda fuera del análisis)"
+   },
+   {
+    "llave": {
+     "id_ruta": 21,
+     "id_dia_semana": 4,
+     "id_estacionalidad": 4
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 62.0,
+    "bloqueante": true,
+    "detalle": "viajes_por_dia = 62.00 en timbradas_consolidado frente a 31.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 100.0% (tolerancia 15%; grosera desde 50%: la llave queda fuera del análisis)"
+   },
+   {
+    "llave": {
+     "id_ruta": 21,
+     "id_dia_semana": 5,
+     "id_estacionalidad": 25
+    },
+    "campo": "promedio_bajadas",
+    "valor_extreme": 247.5551,
+    "bloqueante": true,
+    "detalle": "promedio_bajadas = 247.56 en timbradas_consolidado frente a 85.64 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 189.1% (tolerancia 15%; grosera desde 50%: la llave queda fuera del análisis)"
+   },
+   {
+    "llave": {
+     "id_ruta": 16,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 1
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 229.3333,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 229.33 en timbradas_consolidado frente a 174.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 31.8% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 16,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 10
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 377.5,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 377.50 en timbradas_consolidado frente a 288.50 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 30.8% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 16,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 2
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 226.0,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 226.00 en timbradas_consolidado frente a 167.33 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 35.1% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 16,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 20
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 216.5,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 216.50 en timbradas_consolidado frente a 148.50 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 45.8% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 16,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 25
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 335.6609,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 335.66 en timbradas_consolidado frente a 285.76 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 17.5% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 16,
+     "id_dia_semana": 3,
+     "id_estacionalidad": 25
+    },
+    "campo": "promedio_bajadas",
+    "valor_extreme": 98.2429,
+    "bloqueante": false,
+    "detalle": "promedio_bajadas = 98.24 en timbradas_consolidado frente a 84.76 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 15.9% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 16,
+     "id_dia_semana": 7,
+     "id_estacionalidad": 10
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 134.5,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 134.50 en timbradas_consolidado frente a 162.83 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 17.4% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 16,
+     "id_dia_semana": 7,
+     "id_estacionalidad": 25
+    },
+    "campo": "promedio_bajadas",
+    "valor_extreme": 88.3721,
+    "bloqueante": false,
+    "detalle": "promedio_bajadas = 88.37 en timbradas_consolidado frente a 59.53 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 48.4% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 2,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 1
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 122.3333,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 122.33 en timbradas_consolidado frente a 92.67 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 32.0% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 2,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 10
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 212.0,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 212.00 en timbradas_consolidado frente a 153.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 38.6% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 2,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 2
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 123.6667,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 123.67 en timbradas_consolidado frente a 90.33 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 36.9% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 2,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 25
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 173.0957,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 173.10 en timbradas_consolidado frente a 145.21 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 19.2% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 2,
+     "id_dia_semana": 4,
+     "id_estacionalidad": 4
+    },
+    "campo": "promedio_bajadas",
+    "valor_extreme": 58.197,
+    "bloqueante": false,
+    "detalle": "promedio_bajadas = 58.20 en timbradas_consolidado frente a 50.22 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 15.9% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 2,
+     "id_dia_semana": 4,
+     "id_estacionalidad": 4
+    },
+    "campo": "promedio_subidas",
+    "valor_extreme": 57.697,
+    "bloqueante": false,
+    "detalle": "promedio_subidas = 57.70 en timbradas_consolidado frente a 49.93 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 15.6% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 2,
+     "id_dia_semana": 7,
+     "id_estacionalidad": 10
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 73.6667,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 73.67 en timbradas_consolidado frente a 89.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 17.2% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 21,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 1
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 80.6667,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 80.67 en timbradas_consolidado frente a 57.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 41.5% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 21,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 10
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 125.0,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 125.00 en timbradas_consolidado frente a 91.50 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 36.6% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 21,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 2
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 64.0,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 64.00 en timbradas_consolidado frente a 48.00 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 33.3% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 21,
+     "id_dia_semana": 1,
+     "id_estacionalidad": 25
+    },
+    "campo": "viajes_por_dia",
+    "valor_extreme": 105.6174,
+    "bloqueante": false,
+    "detalle": "viajes_por_dia = 105.62 en timbradas_consolidado frente a 89.75 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 17.7% (tolerancia 15%)"
+   },
+   {
+    "llave": {
+     "id_ruta": 21,
+     "id_dia_semana": 6,
+     "id_estacionalidad": 25
+    },
+    "campo": "promedio_bajadas",
+    "valor_extreme": 104.4663,
+    "bloqueante": false,
+    "detalle": "promedio_bajadas = 104.47 en timbradas_consolidado frente a 72.45 de la agregación propia (demanda_observada (pasajeros, bajadas_viajes y salidas)): diferencia 44.2% (tolerancia 15%)"
+   }
+  ],
+  "totales_por_ruta": {
+   "2": {
+    "subidas_extreme": 11745383.0,
+    "bajadas_extreme": 11466959.0,
+    "n_extreme": 152379.0,
+    "subidas_propia": 11335063.0,
+    "bajadas_propia": 11064990.0,
+    "n_propia": 146416.0
+   },
+   "16": {
+    "subidas_extreme": 24319445.0,
+    "bajadas_extreme": 25311039.0,
+    "n_extreme": 293054.0,
+    "subidas_propia": 23379495.0,
+    "bajadas_propia": 22948117.0,
+    "n_propia": 282685.0
+   },
+   "21": {
+    "subidas_extreme": 7730303.0,
+    "bajadas_extreme": 11710210.0,
+    "n_extreme": 95156.0,
+    "subidas_propia": 7451721.0,
+    "bajadas_propia": 7403174.0,
+    "n_propia": 91537.0
+   }
+  }
+ },
+ "segmentos": {
+  "timbradas_segmentos_anio": {
+   "filas_del_proceso": 0,
+   "resultado_del_ciclo": "sin_filas_fuente",
+   "motivo": "hallazgo H4: los scripts 5 y 6 de Extreme filtran el proceso «cootransoriente» y no llenan las tablas por segmento de Sobusa",
+   "grano_del_contraste": [
+    "id_segmento",
+    "ano",
+    "id_dia_semana",
+    "id_estacionalidad"
+   ],
+   "grano_del_rango": [
+    "id_segmento",
+    "ano",
+    "id_dia_semana",
+    "id_estacionalidad",
+    "hora"
+   ],
+   "nota_del_grano": "por segmento × día ISO × estacionalidad (y año en la anual) y no por hora: fn_insert_timbradas_anio pone todos los segmentos de un viaje en el bloque de 15 minutos de su fin (hallazgo H10) y la agregación propia, en la hora en que el bus pasó por cada segmento"
+  },
+  "timbradas_segmentos_consolidado": {
+   "filas_del_proceso": 0,
+   "resultado_del_ciclo": "sin_filas_fuente",
+   "motivo": "hallazgo H4: los scripts 5 y 6 de Extreme filtran el proceso «cootransoriente» y no llenan las tablas por segmento de Sobusa",
+   "grano_del_contraste": [
+    "id_segmento",
+    "id_dia_semana",
+    "id_estacionalidad"
+   ],
+   "grano_del_rango": [
+    "id_segmento",
+    "id_dia_semana",
+    "id_estacionalidad",
+    "hora"
+   ],
+   "nota_del_grano": "por segmento × día ISO × estacionalidad (y año en la anual) y no por hora: fn_insert_timbradas_anio pone todos los segmentos de un viaje en el bloque de 15 minutos de su fin (hallazgo H10) y la agregación propia, en la hora en que el bus pasó por cada segmento"
+  }
+ },
+ "h10": {
+  "por_hora_de_salida": {
+   "celdas": 348,
+   "promedio_subidas": {
+    "mediana": 0.206,
+    "p90": 0.8707
+   },
+   "promedio_bajadas": {
+    "mediana": 0.214,
+    "p90": 0.98
+   }
+  },
+  "por_hora_de_fin": {
+   "celdas": 432,
+   "promedio_subidas": {
+    "mediana": 0.013,
+    "p90": 0.0947
+   },
+   "promedio_bajadas": {
+    "mediana": 0.0125,
+    "p90": 0.1068
+   }
+  }
+ },
+ "h17": {
+  "festivos_repetidos": [
+   {
+    "fecha": "2019-07-01",
+    "ids": [
+     57,
+     218
+    ],
+    "estacionalidades": [
+     20,
+     19
+    ],
+    "viajes_timbradas_anio": {
+     "57": 0,
+     "218": 0
+    },
+    "aptos_fecha_de_fin": 0
+   },
+   {
+    "fecha": "2025-06-30",
+    "ids": [
+     164,
+     225
+    ],
+    "estacionalidades": [
+     20,
+     19
+    ],
+    "viajes_timbradas_anio": {
+     "164": 282,
+     "225": 282
+    },
+    "aptos_fecha_de_fin": 299
+   },
+   {
+    "fecha": "2025-11-03",
+    "ids": [
+     1,
+     169
+    ],
+    "estacionalidades": [
+     1,
+     1
+    ],
+    "viajes_timbradas_anio": {
+     "1": 317,
+     "169": 317
+    },
+    "aptos_fecha_de_fin": 321
+   },
+   {
+    "fecha": "2025-11-17",
+    "ids": [
+     2,
+     170
+    ],
+    "estacionalidades": [
+     2,
+     2
+    ],
+    "viajes_timbradas_anio": {
+     "2": 318,
+     "170": 318
+    },
+    "aptos_fecha_de_fin": 321
+   },
+   {
+    "fecha": "2025-12-08",
+    "ids": [
+     3,
+     171
+    ],
+    "estacionalidades": [
+     3,
+     3
+    ],
+    "viajes_timbradas_anio": {
+     "3": 244,
+     "171": 244
+    },
+    "aptos_fecha_de_fin": 244
+   },
+   {
+    "fecha": "2025-12-25",
+    "ids": [
+     4,
+     172
+    ],
+    "estacionalidades": [
+     4,
+     4
+    ],
+    "viajes_timbradas_anio": {
+     "4": 192,
+     "172": 192
+    },
+    "aptos_fecha_de_fin": 200
+   }
+  ],
+  "anio_frente_a_aptos": [
+   {
+    "idruta": 2,
+    "ano": 2023,
+    "viajes": 52179,
+    "viajes_corrientes": 48358,
+    "aptos": 50268,
+    "aptos_corrientes": 46608
+   },
+   {
+    "idruta": 2,
+    "ano": 2024,
+    "viajes": 49856,
+    "viajes_corrientes": 45933,
+    "aptos": 47930,
+    "aptos_corrientes": 44192
+   },
+   {
+    "idruta": 2,
+    "ano": 2025,
+    "viajes": 50344,
+    "viajes_corrientes": 46364,
+    "aptos": 48202,
+    "aptos_corrientes": 44742
+   },
+   {
+    "idruta": 16,
+    "ano": 2023,
+    "viajes": 102784,
+    "viajes_corrientes": 95538,
+    "aptos": 99393,
+    "aptos_corrientes": 92396
+   },
+   {
+    "idruta": 16,
+    "ano": 2024,
+    "viajes": 96186,
+    "viajes_corrientes": 89135,
+    "aptos": 93136,
+    "aptos_corrientes": 86386
+   },
+   {
+    "idruta": 16,
+    "ano": 2025,
+    "viajes": 94084,
+    "viajes_corrientes": 86682,
+    "aptos": 90140,
+    "aptos_corrientes": 83663
+   },
+   {
+    "idruta": 21,
+    "ano": 2023,
+    "viajes": 32053,
+    "viajes_corrientes": 29851,
+    "aptos": 30997,
+    "aptos_corrientes": 28866
+   },
+   {
+    "idruta": 21,
+    "ano": 2024,
+    "viajes": 32096,
+    "viajes_corrientes": 29747,
+    "aptos": 31033,
+    "aptos_corrientes": 28803
+   },
+   {
+    "idruta": 21,
+    "ano": 2025,
+    "viajes": 31007,
+    "viajes_corrientes": 28439,
+    "aptos": 29498,
+    "aptos_corrientes": 27285
+   }
+  ]
+ }
+}

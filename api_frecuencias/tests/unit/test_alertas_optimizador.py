@@ -169,16 +169,17 @@ def test_alt003_no_sale_si_la_actual_cumple_aunque_se_recomienden_mas_buses():
 
 
 def test_alt003_sale_si_la_actual_no_cumple_aunque_se_recomienden_menos_buses():
+    # P(0,453 × L > 867) = 34 % ≥ alt003_probabilidad_minima (30 %), con L de mediana 1.850 y P90 2.050
     rec = rec_sintetica(factor=0.453, cap_ofrecida=1_020.0, ocupacion=0.8, cumple=False, carga_diseno=900.0,
                         viable=True, buses=24)
-    a = una(A.contexto_pronostico("CRA 54", 60, franja(1_800.0, 1_990.0), prediccion(1_800.0), ENT_CRA, rec),
+    a = una(A.contexto_pronostico("CRA 54", 60, franja(1_850.0, 2_050.0), prediccion(1_850.0), ENT_CRA, rec),
             "ALT-003")
     assert "se recomiendan 24 buses/h" in a["explicacion"]
 
 
 def test_alt003_sin_optimizador_calcula_el_nivel_de_servicio_con_el_p90():
-    # contexto plano: 8 buses/h × 50 × 0,85 = 340 < P90 350 (factor 1) -> no cumple
-    base = {"ruta": "X", "buses_hora_actual": 8, "capacidad": 50, "demanda_prevista": 300.0, "p90": 350.0}
+    # contexto plano: 7 buses/h × 50 × 0,85 = 297,5 < P90 350 (factor 1) -> no cumple, y P(carga > 297,5) = 53 %
+    base = {"ruta": "X", "buses_hora_actual": 7, "capacidad": 50, "demanda_prevista": 300.0, "p90": 350.0}
     assert "ALT-003" in codigos(base)
     assert "ALT-003" not in codigos(dict(base, buses_hora_actual=9))     # 382,5 ≥ 350
 

@@ -1,0 +1,56 @@
+{
+ "periodo": [
+  "2023-01-01",
+  "2023-02-27"
+ ],
+ "por_ruta": [
+  {
+   "idruta": 2,
+   "viajes_validos": 7880,
+   "viajes_con_timbradas": 7369,
+   "viajes_sin_numerobajadas": 61,
+   "bajadas_segmentos": 580964,
+   "bajadas_viajes_mismos_viajes": 580384,
+   "bajadas_segmentos_mismos_viajes": 580964,
+   "bajadas_viajes_todos": 622730,
+   "diferencia_mismos_viajes": 0.001,
+   "diferencia_total": -0.06707
+  },
+  {
+   "idruta": 16,
+   "viajes_validos": 15553,
+   "viajes_con_timbradas": 14857,
+   "viajes_sin_numerobajadas": 127,
+   "bajadas_segmentos": 1255587,
+   "bajadas_viajes_mismos_viajes": 1253762,
+   "bajadas_segmentos_mismos_viajes": 1255587,
+   "bajadas_viajes_todos": 1309586,
+   "diferencia_mismos_viajes": 0.00146,
+   "diferencia_total": -0.04123
+  },
+  {
+   "idruta": 21,
+   "viajes_validos": 4876,
+   "viajes_con_timbradas": 4554,
+   "viajes_sin_numerobajadas": 27,
+   "bajadas_segmentos": 365776,
+   "bajadas_viajes_mismos_viajes": 365700,
+   "bajadas_segmentos_mismos_viajes": 365776,
+   "bajadas_viajes_todos": 393129,
+   "diferencia_mismos_viajes": 0.00021,
+   "diferencia_total": -0.06958
+  }
+ ],
+ "total": {
+  "viajes_validos": 28309,
+  "viajes_con_timbradas": 26780,
+  "viajes_sin_numerobajadas": 215,
+  "bajadas_segmentos": 2202327,
+  "bajadas_viajes_mismos_viajes": 2199846,
+  "bajadas_segmentos_mismos_viajes": 2202327,
+  "bajadas_viajes_todos": 2325445,
+  "diferencia_mismos_viajes": 0.00113,
+  "diferencia_total": -0.05294
+ },
+ "generado": "2026-11-13T18:54:21-05:00"
+}

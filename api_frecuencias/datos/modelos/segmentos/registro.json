@@ -1,0 +1,64 @@
+{
+  "activo": "seg_hgb_jerarquico_20230227_s42",
+  "modelos": {
+    "seg_reparto_fijo_20230227": {
+      "model_id": "seg_reparto_fijo_20230227",
+      "tipo": "reparto_fijo",
+      "estado": "linea_base",
+      "artefacto": "modelo.joblib",
+      "sha256": "ba87bf110a1ed37dc493b4b2689b6da34583eac9782a4420ae441c33b7e97969",
+      "feature_version": "sv1-2026-11-09",
+      "periodo_datos": "2023-01-01 a 2023-02-27",
+      "semilla": 42,
+      "metricas_validacion": {
+        "wape_segmento_hora": 38.06,
+        "wape_sentido_hora": 8.47,
+        "mae_segmento_hora": 2.872,
+        "sesgo_pct": 0.0,
+        "sesgo_abs_mediano_pct": 8.74
+      },
+      "metricas_prueba": {
+        "wape_segmento_hora": 43.06,
+        "wape_sentido_hora": 8.2,
+        "mae_segmento_hora": 2.549,
+        "sesgo_pct": 0.0,
+        "sesgo_abs_mediano_pct": 7.98
+      },
+      "creado_en": "2026-11-10T01:23:23+00:00"
+    },
+    "seg_hgb_jerarquico_20230227_s42": {
+      "model_id": "seg_hgb_jerarquico_20230227_s42",
+      "tipo": "hgb_jerarquico",
+      "estado": "activo",
+      "artefacto": "modelo.joblib",
+      "sha256": "b71b4d61e22176e2ccac42985d0ea6f236df8e7b48dba8c366e56fee6867e354",
+      "feature_version": "sv1-2026-11-09",
+      "periodo_datos": "2023-01-01 a 2023-02-27",
+      "semilla": 42,
+      "metricas_validacion": {
+        "wape_segmento_hora": 36.8,
+        "wape_sentido_hora": 8.34,
+        "mae_segmento_hora": 2.777,
+        "sesgo_pct": 0.0,
+        "sesgo_abs_mediano_pct": 7.5
+      },
+      "metricas_prueba": {
+        "wape_segmento_hora": 42.09,
+        "wape_sentido_hora": 8.19,
+        "mae_segmento_hora": 2.492,
+        "sesgo_pct": 0.0,
+        "sesgo_abs_mediano_pct": 7.57
+      },
+      "creado_en": "2026-11-10T01:23:34+00:00"
+    }
+  },
+  "historial_activacion": [
+    {
+      "en": "2026-11-10T01:23:34+00:00",
+      "de": null,
+      "a": "seg_hgb_jerarquico_20230227_s42",
+      "usuario": "entrenamiento",
+      "motivo": "M4 cumple la regla en la validación y no empeora a B0 en la prueba"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+Ciclo de demostración (§14.2) con la foto por segmento y sentido (§7.3 paso 4) — 2026-11-09, America/Bogota
+
+Cómo se corrió: scripts/demo_ciclo.py contra una API propia (uvicorn, 127.0.0.1:8340) sobre la base LOCAL de pruebas
+ai_frecuencias_pruebas_modelo_segmentos recién migrada (alembic downgrade base + upgrade head), con DATA_DIR y
+MODELOS_DIR en una copia temporal de datos/ (el reentrenamiento de la demo no escribe en el repositorio),
+AUTH_HABILITADA=false y PLANIFICADOR_HABILITADO=false. La API se detuvo al terminar.
+
+Resultado de scripts/demo_ciclo.py: «RESULTADO: OK, todos los pasos cumplidos» (código de salida 0): registro de
+modelos, ejecución incremental, predicciones 30/60/120 con P10/P90, recomendaciones, alertas y su ciclo de vida, datos
+nuevos con evaluación del error, reentrenamiento con sombra y compuerta (candidato rechazado, el activo sigue),
+exportación CSV/XLSX, umbrales y notificaciones simuladas.
+
+Foto por segmento de cada ejecución de frecuencia (metricas.monitoreo.feature_snapshot_segmentos y conteo en
+ai_frecuencias.feature_snapshot con segmento no nulo):
+
+| Ejecución | Estado | Datos hasta | Filas por segmento | Estado de la foto por segmento | Modelo de segmentos |
+|---|---|---|---|---|---|
+| 76df5d4c | ok | 2025-11-03 (carga inicial) | 1158 | ok | seg_hgb_jerarquico_20230227_s42 |
+| e29b6da2 | ok | 2025-11-03, instante 2025-11-04 06:00 (deduplicación de alertas, sin filas nuevas) | 1158 | ok | seg_hgb_jerarquico_20230227_s42 |
+| 622323bd | ok | 2025-11-04 (solo las filas nuevas) | 1158 | ok | seg_hgb_jerarquico_20230227_s42 |
+| 194df61a | ok | 2025-11-18 (días de la sombra del candidato) | 1158 | ok | seg_hgb_jerarquico_20230227_s42 |
+| 1cddac51 | ok | 2025-11-19 (notificaciones simuladas) | 1158 | ok | seg_hgb_jerarquico_20230227_s42 |
+
+1158 = 3 horizontes × (128 + 123 + 135) segmentos de CL 72, CRA 54 y SILENCIO: una fila por segmento y ventana de cada
+una de las 9 predicciones de la ejecución.
+
+Ejecución PROGRAMADA real (§7.3 paso 4 «un proceso programado genera las variables»): PRUEBA_PLANIFICADOR=1 pytest
+tests/integracion/test_planificador_programado.py (1 passed en 259 s; APScheduler con cron cada minuto, sin POST
+manual, base desechable ai_frecuencias_pruebas_modelo_segmentos_plan y copia temporal de datos/). Franjas encoladas
+por el planificador y filas de la foto con segmento y sentido no nulos:
+
+| Ejecución | correlation_id | Estado | Foto por segmento | Filas por segmento |
+|---|---|---|---|---|
+| ebe7c9c1 | planificador-frecuencia-20261109T2052 | ok | ok | 1158 |
+| 282b4d70 | planificador-frecuencia-20261109T2053 | ok | — (sin datos nuevos: no hay predicciones ni foto) | 0 |
+| 8ab6b5ed | planificador-frecuencia-20261109T2054 | ok | ok (con datos nuevos) | 1158 |
+| b394290f | planificador-frecuencia-20261109T2055 | ok | — (sin datos nuevos) | 0 |

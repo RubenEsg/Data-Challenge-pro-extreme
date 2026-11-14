@@ -1,0 +1,32 @@
+{
+ "lote": "tramo empaquetado 10 a 12-06-2024; CRA 54 del 12-06-2024 a las 7 h llegó 36 h después del cierre",
+ "con_la_version_sembrada": {
+  "umbrales_version": 9,
+  "periodos_atraso": 2,
+  "periodo_ingesta_min": 1440.0,
+  "OPOR-001": []
+ },
+ "put_thresholds": {
+  "valores": {
+   "periodos_atraso": 1
+  },
+  "version_nueva": 10,
+  "estado": "propuesta"
+ },
+ "con_la_version_nueva": {
+  "OPOR-001": [
+   {
+    "codigo": "OPOR-001",
+    "dimension": "oportunidad",
+    "llave": {
+     "hora": 7,
+     "ruta": "CRA 54",
+     "fecha": "2024-06-12"
+    },
+    "campo": "ultima_actualizacion",
+    "bloqueante": false,
+    "detalle": "Dato tardío: llegó 1 days 11:59:59 después del cierre del día (tolerancia 1 day, 0:00:00)."
+   }
+  ]
+ }
+}

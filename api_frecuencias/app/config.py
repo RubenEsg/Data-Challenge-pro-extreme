@@ -71,8 +71,36 @@ class Ajustes(BaseSettings):
     planificador_habilitado: bool = False
     plan_ejecucion_cron: str = "15 5 * * *"
     plan_reentrenamiento_cron: str = "0 4 * * 1"   # qué decide la revisión: politica.decidir_reentreno
+    # §10.1 ocupación actual en la operación programada (planificador.tarea_ciclo_intradia): ciclos intradía con
+    # instante = la franja, para que la restricción reactiva por ocupación actúe en el plan del día en curso y en las
+    # recomendaciones de 30, 60 y 120 min. Vacío = apagados. Valor por omisión y medición: docs/ocupacion_segmentos.md.
+    plan_intradia_cron: str = "5 6-20 * * *"
+    # Agregación materializada de segmentos (§6.1, RNF-002, RNF-004; app/servicios/segmentos_refresco.py): cron del
+    # refresco programado (solo con FUENTE_DATABASE_URL), días de timbradas_segmentos por lectura (cada una cabe en
+    # FUENTE_STATEMENT_TIMEOUT_MS; si no, se parte sola) y días máximos entre dos refrescos completos.
+    plan_segmentos_cron: str = "45 5 * * *"
+    segmentos_dias_por_lote: int = Field(31, ge=1, le=366)
+    segmentos_completo_dias: int = Field(7, ge=1, le=366)
+    # §18 retención (app/servicios/retencion.py): cron de la corrida programada de la política (vacío = no se programa;
+    # los meses y si aplica o solo simula son parámetros gobernados de threshold_config, migración 0012).
+    plan_retencion_cron: str = "30 3 * * 0"
+    # RNF-005: «ruta» parte la ejecución programada en un trabajo por ruta del catálogo (las réplicas los reparten);
+    # «ninguna» (por omisión) la deja en un solo trabajo de todas las rutas, como hasta ahora.
+    plan_particion: str = "ninguna"
+
+    @field_validator("plan_particion")
+    @classmethod
+    def _plan_particion_valida(cls, valor: str) -> str:
+        valor = (valor or "ninguna").strip().lower()
+        if valor not in ("ninguna", "ruta"):
+            raise ValueError("PLAN_PARTICION debe ser «ninguna» o «ruta»")
+        return valor
+
     # motor de inferencia (§9.2): sklearn (joblib) u onnx (onnxruntime, exige scripts/exportar_onnx.py)
     motor_inferencia: str = "sklearn"
+    # §7.3 paso 4: la foto de variables (§11.2) guarda también una fila por segmento y sentido de cada predicción
+    # (modelo de segmentos activo; unas 130 filas por ruta y horizonte). FOTO_SEGMENTOS=false la apaga.
+    foto_segmentos: bool = True
 
     @property
     def trabajadores_efectivos(self) -> int:

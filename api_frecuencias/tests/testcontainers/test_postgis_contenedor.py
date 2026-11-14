@@ -16,7 +16,9 @@ from tests.testcontainers.conftest import alembic, revision_head
 pytestmark = [pytest.mark.testcontainers, pytest.mark.integracion]
 
 TABLAS = {"model_registry", "prediction", "recommendation", "alert", "alert_history", "execution_log",
-          "data_quality_error", "threshold_config", "notification_log", "demanda_observada", "execution_attempt"}
+          "data_quality_error", "threshold_config", "notification_log", "demanda_observada", "execution_attempt",
+          "marca_agua_ruta", "segmento_estadistica_dia", "segmento_estadistica", "segmento_estadistica_refresco",
+          "ocupacion_segmento", "retencion_registro", "marca_agua_tabla"}
 
 
 def _inspeccion(url: str):

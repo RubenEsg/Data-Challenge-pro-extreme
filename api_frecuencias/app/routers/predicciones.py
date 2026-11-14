@@ -43,7 +43,7 @@ def _info_ruta(ruta: str) -> dict:
 @router.post("/predictions/run", response_model=PrediccionRespuesta, status_code=201,
              summary="Inferencia para una ruta y un horizonte (incluye la recomendación derivada)")
 def correr_prediccion(solicitud: SolicitudPrediccion, sesion: Session = Depends(obtener_sesion)):
-    from app.servicios import inferencia, optimizacion
+    from app.servicios import inferencia, ocupacion
 
     info = _info_ruta(solicitud.ruta)
     ruta = info["ruta"]
@@ -63,10 +63,11 @@ def correr_prediccion(solicitud: SolicitudPrediccion, sesion: Session = Depends(
     if solicitud.incluir_recomendacion:
         version_u, umbrales = servicio.umbrales_vigentes(sesion)
         franja = _franja_de_la_prediccion(pred)
+        # §10.1: la ocupación actual que ya midieron los ciclos antes del instante, la misma restricción reactiva que
+        # reciben el plan del día y las recomendaciones del ciclo intradía (ninguna medición posterior al instante)
+        reactiva = ocupacion.reactiva_guardada(sesion, ruta, franja["fecha"], instante, umbrales)
         try:   # §10.2 con la banda calibrada de la franja (P90 = nivel de servicio por omisión)
-            rec_d, entradas = optimizacion.recomendacion_franja(
-                info, umbrales, version_u, hora=franja["hora"], fecha=franja["fecha"],
-                demanda_hora=franja["demanda_hora"], demanda_p90=franja["p90_hora"], demanda_p10=franja["p10_hora"])
+            rec_d, entradas = servicio.recomendacion_con_ocupacion(info, franja, umbrales, version_u, reactiva)
         except ValueError as exc:
             raise ErrorApi(422, "parametros_invalidos", str(exc)) from exc
         rec_d["franja_prediccion"] = franja
@@ -246,7 +247,8 @@ def calcular(solicitud: SolicitudRecomendacion, sesion: Session = Depends(obtene
     salida = RecomendacionCalculada.model_validate(rec)
     for campo in ("metodo", "objetivo", "demanda", "solver", "tipologias", "margen", "linea_base_10_3",
                   "linea_base_10_3_literal", "sobreoferta", "motivo_sobreoferta", "mejor_aproximacion",
-                  "comparacion_actual", "escenario", "sensibilidad", "contexto_franja", "capacidad_gobernada"):
+                  "comparacion_actual", "escenario", "sensibilidad", "contexto_franja", "capacidad_gobernada",
+                  "cambio_frecuenciadespachos", "fuente_frecuenciadespachos", "ocupacion_historica"):
         setattr(salida, campo, servicio.json_seguro(r.get(campo)))
     salida.restricciones = servicio.json_seguro(r.get("restricciones") or [])
     salida.limites_activos = list(r.get("limites_activos") or [])

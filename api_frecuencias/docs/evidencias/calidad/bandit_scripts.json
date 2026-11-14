@@ -1,19 +1,19 @@
 {
  "errors": [],
- "generated_at": "2026-11-09T17:49:42Z",
+ "generated_at": "2026-11-14T05:55:10Z",
  "metrics": {
   "_totals": {
-   "CONFIDENCE.HIGH": 41,
+   "CONFIDENCE.HIGH": 46,
    "CONFIDENCE.LOW": 0,
    "CONFIDENCE.MEDIUM": 0,
    "CONFIDENCE.UNDEFINED": 0,
    "SEVERITY.HIGH": 0,
-   "SEVERITY.LOW": 41,
+   "SEVERITY.LOW": 46,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 9868,
+   "loc": 15695,
    "nosec": 0,
-   "skipped_tests": 63
+   "skipped_tests": 83
   },
   "scripts/backtest_alertas.py": {
    "CONFIDENCE.HIGH": 0,
@@ -24,7 +24,20 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 801,
+   "loc": 1004,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "scripts/backtest_ocupacion_reactiva.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 315,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -63,9 +76,22 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 129,
+   "loc": 467,
    "nosec": 0,
-   "skipped_tests": 3
+   "skipped_tests": 4
+  },
+  "scripts/cliente_http.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 61,
+   "nosec": 0,
+   "skipped_tests": 0
   },
   "scripts/cola_servidor.py": {
    "CONFIDENCE.HIGH": 15,
@@ -76,9 +102,22 @@
    "SEVERITY.LOW": 15,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 191,
+   "loc": 251,
    "nosec": 0,
    "skipped_tests": 3
+  },
+  "scripts/contraste_consolidados.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 440,
+   "nosec": 0,
+   "skipped_tests": 0
   },
   "scripts/crear_api_key.py": {
    "CONFIDENCE.HIGH": 0,
@@ -102,7 +141,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 347,
+   "loc": 350,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -115,7 +154,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 342,
+   "loc": 345,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -129,6 +168,32 @@
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
    "loc": 114,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "scripts/entrenar_segmentos.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 545,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "scripts/evaluar_banda_ventanas_segmentos.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 91,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -197,6 +262,45 @@
    "nosec": 0,
    "skipped_tests": 0
   },
+  "scripts/evidencia_identificacion_alertas.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 413,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "scripts/evidencia_planificador_intradia.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 386,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "scripts/evidencia_pytest.py": {
+   "CONFIDENCE.HIGH": 2,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 2,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 77,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
   "scripts/evidencias_monitoreo.py": {
    "CONFIDENCE.HIGH": 0,
    "CONFIDENCE.LOW": 0,
@@ -236,6 +340,19 @@
    "nosec": 0,
    "skipped_tests": 0
   },
+  "scripts/medir_ciclo_intradia.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 205,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
   "scripts/medir_ingesta.py": {
    "CONFIDENCE.HIGH": 0,
    "CONFIDENCE.LOW": 0,
@@ -262,6 +379,19 @@
    "nosec": 0,
    "skipped_tests": 0
   },
+  "scripts/medir_segmentos.py": {
+   "CONFIDENCE.HIGH": 3,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 3,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 272,
+   "nosec": 0,
+   "skipped_tests": 3
+  },
   "scripts/preparar_datos_api.py": {
    "CONFIDENCE.HIGH": 0,
    "CONFIDENCE.LOW": 0,
@@ -271,7 +401,20 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 342,
+   "loc": 435,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "scripts/preparar_ocupacion_segmentos.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 352,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -284,7 +427,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 162,
+   "loc": 184,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -310,7 +453,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 264,
+   "loc": 278,
    "nosec": 0,
    "skipped_tests": 8
   },
@@ -323,9 +466,22 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 198,
+   "loc": 213,
    "nosec": 0,
    "skipped_tests": 8
+  },
+  "scripts/prueba_replicas_por_ruta.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 370,
+   "nosec": 0,
+   "skipped_tests": 16
   },
   "scripts/reconstruir_desde_replica.py": {
    "CONFIDENCE.HIGH": 0,
@@ -336,7 +492,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 346,
+   "loc": 523,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -401,7 +557,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 252,
+   "loc": 276,
    "nosec": 0,
    "skipped_tests": 3
   },
@@ -418,6 +574,45 @@
    "nosec": 0,
    "skipped_tests": 0
   },
+  "scripts/replica_indices_candidatos.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 686,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "scripts/replica_lectura_consolidados.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 313,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "scripts/replica_lectura_por_ruta.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 137,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
   "scripts/replica_simular_llegada.py": {
    "CONFIDENCE.HIGH": 2,
    "CONFIDENCE.LOW": 0,
@@ -427,7 +622,7 @@
    "SEVERITY.LOW": 2,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 457,
+   "loc": 461,
    "nosec": 0,
    "skipped_tests": 5
   },
@@ -483,6 +678,19 @@
    "nosec": 0,
    "skipped_tests": 4
   },
+  "scripts/variantes_alt003.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 203,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
   "scripts/verificar_despliegue.py": {
    "CONFIDENCE.HIGH": 7,
    "CONFIDENCE.LOW": 0,
@@ -492,7 +700,7 @@
    "SEVERITY.LOW": 7,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 702,
+   "loc": 707,
    "nosec": 0,
    "skipped_tests": 10
   },

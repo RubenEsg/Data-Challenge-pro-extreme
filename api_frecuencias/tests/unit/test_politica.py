@@ -182,3 +182,96 @@ def test_el_candidato_se_calibra_con_los_grupos_del_activo(monkeypatch):
     assert politica.grupos_calibracion_del_activo(None) == inferencia.CALIBRACION_GRUPOS_DEFECTO
     monkeypatch.setattr(ejecucion, "modelo_activo", lambda s: None)
     assert politica.grupos_calibracion_del_activo(None) == inferencia.CALIBRACION_GRUPOS_DEFECTO
+
+
+# ---------------------------------------------------------------- un corte que no se puede entrenar no se encola
+def test_corte_sin_datos_es_la_particion_del_entrenamiento(tmp_path):
+    """La política pregunta con la misma función que usa entrenar, no con una copia de su regla. Al comienzo de la
+    serie, el corte 61 días antes cae antes de los datos: no hay filas útiles para entrenar, y entrenar() falla con
+    ese mismo motivo antes de escribir nada."""
+    serie = datos.demanda_horaria(hasta=date(2023, 1, 26))
+    falta = inferencia.corte_sin_datos(serie, date(2022, 11, 26))
+    assert falta["motivo"] == "No hay datos suficientes para entrenar y validar con ese corte"
+    assert falta["corte"] == date(2022, 11, 26) and falta["filas_entrenamiento"] == 0 and falta["filas_validacion"] > 0
+    with pytest.raises(inferencia.CorteSinDatos, match=falta["motivo"]) as fallo:
+        inferencia.entrenar(date(2022, 11, 26), serie=serie, dir_modelos=tmp_path)
+    assert isinstance(fallo.value, ValueError) and (fallo.value.entrenamiento, fallo.value.validacion) == (
+        0, falta["filas_validacion"])
+    assert list(tmp_path.iterdir()) == []                       # no dejó ni la carpeta del candidato
+    # con filas útiles a los dos lados del corte se puede; con el corte en el último día no queda validación
+    assert inferencia.corte_sin_datos(serie, date(2023, 1, 15)) is None
+    sin_validar = inferencia.corte_sin_datos(serie, date(2023, 1, 26))
+    assert sin_validar["filas_validacion"] == 0 and sin_validar["filas_entrenamiento"] > 0
+
+
+def test_una_serie_vacia_es_un_corte_sin_datos_y_no_otro_error():
+    """Sin ninguna fila hasta datos_hasta (antes del comienzo de la serie empaquetada y sin días validados), armar las
+    variables fallaba con «cannot convert float NaN to integer». Ese error salía de la decisión de la política, que
+    ahora consulta la partición en cada ciclo con motivo, en GET /monitoring/policy y en la revisión del planificador.
+    Una serie vacía es el mismo caso: cero filas para entrenar y cero para validar."""
+    vacia = datos.demanda_horaria(hasta=date(2022, 12, 1))
+    assert vacia.empty
+    falta = inferencia.corte_sin_datos(vacia, date(2022, 10, 1))
+    assert falta == {"motivo": "No hay datos suficientes para entrenar y validar con ese corte",
+                     "corte": date(2022, 10, 1), "filas_entrenamiento": 0, "filas_validacion": 0}
+    with pytest.raises(inferencia.CorteSinDatos, match=falta["motivo"]):
+        inferencia.entrenar(date(2022, 10, 1), serie=vacia)
+
+
+def _politica_con(monkeypatch, motivos: list[str], bloqueos: list[str], falta: dict | None) -> list:
+    """decidir_reentreno con el monitoreo y los bloqueos dados y la partición del entrenamiento respondiendo `falta`;
+    devuelve la lista de las veces que se consultó la partición (serie, corte)."""
+    from app.servicios import ejecucion
+
+    consultas: list = []
+    monkeypatch.setattr(ejecucion, "modelo_activo", lambda s: SimpleNamespace(model_id="hgb_activo"))
+    monkeypatch.setattr(politica, "antiguedad_de_datos", lambda s, activo, hasta: {})
+    monkeypatch.setattr(politica, "_motivos_monitoreo", lambda s, model_id, u: list(motivos))
+    monkeypatch.setattr(politica, "_bloqueos_reentreno", lambda s: list(bloqueos))
+    monkeypatch.setattr(politica, "serie_validada", lambda s, datos_hasta: (("serie hasta", datos_hasta), {}))
+
+    def corte_sin_datos(serie, corte):
+        consultas.append((serie, corte))
+        return falta
+
+    monkeypatch.setattr(inferencia, "corte_sin_datos", corte_sin_datos)
+    return consultas
+
+
+DERIVA = "deriva: lag7 PSI 0.412"
+SIN_DATOS = {"motivo": "No hay datos suficientes para entrenar y validar con ese corte", "corte": date(2022, 11, 8),
+             "filas_entrenamiento": 0, "filas_validacion": 51}
+
+
+def test_la_politica_no_pide_un_reentrenamiento_cuyo_corte_no_se_puede_entrenar(monkeypatch):
+    """El defecto: al comienzo de la serie cada ciclo veía deriva y encolaba un entrenamiento con el corte 61 días
+    antes, anterior a los datos, que siempre fallaba. Ahora no se pide: la decisión lo dice en sus bloqueos, con el
+    motivo, y encolar_entrenamiento no crea el trabajo."""
+    consultas = _politica_con(monkeypatch, [DERIVA], [], SIN_DATOS)
+    d = politica.decidir_reentreno(None, {}, date(2023, 1, 8))
+    assert d["motivos"] == [DERIVA] and d["reentrenar"] is False
+    assert d["hasta"] == "2022-11-08" and d["datos_hasta"] == "2023-01-08"
+    assert d["bloqueos"] == ["reentrenamiento omitido: datos insuficientes antes del corte 2022-11-08 (la serie "
+                             "validada hasta 2023-01-08 deja 0 filas útiles para entrenar y 51 para validar)"]
+    assert d["bloqueos"][0].startswith(politica.OMITIDO_SIN_DATOS)
+    # la partición se consultó con la serie validada hasta datos_hasta (la que usaría el entrenamiento) y el corte
+    assert consultas == [(("serie hasta", date(2023, 1, 8)), date(2022, 11, 8))]
+    assert politica.encolar_entrenamiento(None, d, "ciclo_diario") is None       # sin sesión: no llega a usarla
+
+
+def test_con_historico_suficiente_la_politica_pide_el_reentrenamiento_como_antes(monkeypatch):
+    consultas = _politica_con(monkeypatch, [DERIVA], [], None)
+    d = politica.decidir_reentreno(None, {}, date(2025, 9, 20))
+    assert d["reentrenar"] is True and d["bloqueos"] == [] and d["motivos"] == [DERIVA]
+    assert d["hasta"] == "2025-07-21" and d["datos_hasta"] == "2025-09-20"
+    assert consultas == [(("serie hasta", date(2025, 9, 20)), date(2025, 7, 21))]
+
+
+@pytest.mark.parametrize("motivos, bloqueos", [([], []), ([DERIVA], ["1 entrenamiento(s) en cola o corriendo"]),
+                                               ([DERIVA], ["retador en sombra: hgb_candidato"])])
+def test_la_particion_solo_se_consulta_si_la_politica_iba_a_pedir_el_reentrenamiento(monkeypatch, motivos, bloqueos):
+    """Sin motivos, o con otro bloqueo (un entrenamiento en cola o un retador en sombra), la decisión es la de antes y
+    no se recorre la serie."""
+    consultas = _politica_con(monkeypatch, motivos, bloqueos, SIN_DATOS)
+    d = politica.decidir_reentreno(None, {}, date(2023, 1, 8))
+    assert consultas == [] and d["reentrenar"] is False and d["bloqueos"] == bloqueos and d["motivos"] == motivos

@@ -1,0 +1,134 @@
+{
+ "antes": {
+  "umbrales_version": 9,
+  "parametros": {
+   "tarifa_cop": {
+    "valor": 3182.0,
+    "fuente": "threshold_config v9"
+   },
+   "elasticidad": {
+    "valor": 0.5,
+    "fuente": "threshold_config v9"
+   },
+   "delta_suavidad": {
+    "valor": 6.0,
+    "fuente": "threshold_config v9"
+   },
+   "hora_inicio_suavidad": {
+    "valor": 7.0,
+    "fuente": "threshold_config v9"
+   }
+  },
+  "salidas_por_hora": [
+   8,
+   30,
+   26,
+   20,
+   14,
+   12,
+   10,
+   10,
+   15,
+   18,
+   21,
+   18,
+   14,
+   9,
+   8,
+   7,
+   6
+  ],
+  "componentes_costo_cop": {
+   "op": 52637310.67,
+   "espera": 8033466.51,
+   "ingreso": 4264439.16,
+   "sobrecarga": 1647888.12
+  }
+ },
+ "put_thresholds": {
+  "valores": {
+   "tarifa_cop": 2800,
+   "elasticidad": 0.3,
+   "delta_suavidad": 2
+  },
+  "version_nueva": 10,
+  "estado": "propuesta"
+ },
+ "despues": {
+  "umbrales_version": 10,
+  "parametros": {
+   "tarifa_cop": {
+    "valor": 2800.0,
+    "fuente": "threshold_config v10"
+   },
+   "elasticidad": {
+    "valor": 0.3,
+    "fuente": "threshold_config v10"
+   },
+   "delta_suavidad": {
+    "valor": 2.0,
+    "fuente": "threshold_config v10"
+   },
+   "hora_inicio_suavidad": {
+    "valor": 7.0,
+    "fuente": "threshold_config v10"
+   }
+  },
+  "salidas_por_hora": [
+   7,
+   30,
+   20,
+   18,
+   16,
+   14,
+   12,
+   12,
+   14,
+   16,
+   17,
+   15,
+   13,
+   11,
+   10,
+   8,
+   6
+  ],
+  "componentes_costo_cop": {
+   "op": 50944255.57,
+   "espera": 7995574.04,
+   "ingreso": 2955416.58,
+   "sobrecarga": 5241281.59
+  }
+ },
+ "respuesta_reto": {
+  "tarifa_neta_cop": 2800.0,
+  "recaudo_esperado_cop": 62961920.0,
+  "nota": "Recaudo = pasajeros esperados × tarifa neta de 2.800 COP por pasajero (threshold_config v10; por omisión, la tarifa pública del Área Metropolitana 2026 (3.700 COP) × 0,86 que retiene el operador, datos/costos_fuente.json, versionada en threshold_config como tarifa_cop); Extreme no suministró la tarifa (§19), así que es una cifra de referencia. Costo operativo = bus-hora (26.400 COP) + km (1.991 COP) del plan; con lo programado hoy sería 61.754.798 COP. vehiculos_hora_ahorrados > 0: el plan usa menos vehículos-hora que lo programado; < 0: usa más."
+ },
+ "historial_delta_suavidad": [
+  {
+   "nombre": "delta_suavidad",
+   "valor": 2,
+   "descripcion": "Suavidad del plan del día: cambio máximo de salidas por hora entre dos horas seguidas, |x_h / f_h - x_(h-1) / f_(h-1)| <= delta_suavidad",
+   "version": 10,
+   "vigente": true,
+   "creado_por": "prueba_admin",
+   "motivo": "§5.1: parámetros del plan sin recompilar",
+   "creado_en": "2026-11-11T04:59:23.722975-05:00",
+   "aprobado_por": null,
+   "aprobado_en": null
+  },
+  {
+   "nombre": "delta_suavidad",
+   "valor": 6,
+   "descripcion": "Suavidad del plan del día: cambio máximo de salidas por hora entre dos horas seguidas, |x_h / f_h - x_(h-1) / f_(h-1)| <= delta_suavidad",
+   "version": 9,
+   "vigente": false,
+   "creado_por": "migracion_0014",
+   "motivo": "ALT-003 de pronóstico: mínimo de probabilidad de superar la capacidad efectiva elegido sin fuga (validación 15/09-31/10/2025, evaluación 11-12/2025; docs/evidencias/alertas/backtest_alertas_pronostico.md)",
+   "creado_en": "2026-11-11T04:59:20.778277-05:00",
+   "aprobado_por": null,
+   "aprobado_en": null
+  }
+ ]
+}

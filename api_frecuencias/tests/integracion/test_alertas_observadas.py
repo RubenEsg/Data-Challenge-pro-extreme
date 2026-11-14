@@ -6,10 +6,16 @@ Lote: 8 semanas reales (referencia del consolidado) + el 15/10/2025 alterado a p
   (ALT-006, con el punto de despacho);
 - SILENCIO: número de viajes del día triplicado (ALT-008);
 - CL 72: falta la hora 14 (ALT-009).
-La fuente es de prueba (FuenteFija) y no escribe nada fuera de la base local de pruebas.
+La fuente expone además los viajes del día de progvehiculos (§5.3), con el conductor seudonimizado como en las fuentes
+reales: ALT-006 y ALT-009 llevan el viaje, el vehículo y el seudónimo del conductor; las demás, el motivo por el que no
+aplican (variables.identificacion_5_3).
+La fuente es de prueba (FuenteFija) y no escribe nada fuera de la base local de pruebas. Con GENERAR_EVIDENCIAS=1 la
+prueba reescribe docs/evidencias/alertas/alertas_observadas_ejemplo.json (cinco alertas guardadas con su bitácora).
 """
 from __future__ import annotations
 
+import json
+import os
 import uuid
 from datetime import UTC, date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
@@ -19,9 +25,12 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
+from tests.evidencia import guardar_evidencia
+
 Z = ZoneInfo("America/Bogota")
 DIA = date(2025, 10, 15)
 PUNTO = {"type": "Point", "coordinates": [-74.8, 10.98]}
+SECRETO = "secreto-integracion-alertas-observadas"   # seudónimos de prueba, solo de conductores sintéticos
 EJECUCIONES: list = []   # ejecuciones que crea este módulo; al final se borra lo que guardaron
 
 
@@ -41,9 +50,26 @@ def _limpiar(sesion, ids: list) -> None:
     ids.clear()
 
 
+def _viajes_del_dia() -> pd.DataFrame:
+    """Viajes de progvehiculos de DIA como los devuelve el SELECT de la fuente (idconductor en claro, antes de
+    seudonimizar): CRA 54 con dos despachos cancelados a las 12 h (la hora sin salidas); CL 72 con un viaje sin
+    numeropasajeros y sin timbradas de segmento a las 14 h (la hora que no llegó)."""
+    def v(viaje, ruta, hora, minuto, vehiculo, conductor, cancelada="N", pasajeros=30, segmentos=40):
+        salida = datetime.combine(DIA, time(hora, minuto))
+        return {"ruta": ruta, "viaje": viaje, "vehiculo": vehiculo, "idconductor": conductor, "salida": salida,
+                "salida_real": salida + timedelta(minutes=1), "finalizado": "N" if cancelada == "S" else "S",
+                "cancelada": cancelada, "excedeplazosalida": None, "numeropasajeros": pasajeros,
+                "filas_segmento": segmentos}
+    return pd.DataFrame([v(8001, "CRA 54", 11, 52, "SOBUSA21", 5101), v(8002, "CRA 54", 12, 15, "SOBUSA52", 5252, "S"),
+                         v(8003, "CRA 54", 12, 45, "SOBUSA53", 5353, "S"), v(8004, "CRA 54", 13, 5, "SOBUSA54", 5454),
+                         v(8100, "CL 72", 13, 40, "SOBUSA16", 6161),
+                         v(8101, "CL 72", 14, 20, "SOBUSA17", 7171, pasajeros=None, segmentos=0)])
+
+
 class FuenteFija:
     """Fuente operacional de prueba: entrega siempre el mismo lote (como una relectura de datos tardíos) y NO mueve
-    la marca de agua (devuelve la anterior), para no alterar a las demás pruebas de la sesión."""
+    la marca de agua (devuelve la anterior), para no alterar a las demás pruebas de la sesión. Los viajes del día
+    salen de _viajes_del_dia, seudonimizados con la misma función que las fuentes reales."""
 
     def __init__(self, df):
         self.df = df
@@ -57,11 +83,21 @@ class FuenteFija:
     def ubicacion_despacho(self, ruta):
         return PUNTO if ruta == "CRA 54" else None
 
+    def viajes(self, ruta, desde, hasta):
+        from app.servicios import fuentes
+
+        d = _viajes_del_dia()
+        salida = pd.to_datetime(d["salida"])
+        ini, fin = desde.astimezone(Z).replace(tzinfo=None), hasta.astimezone(Z).replace(tzinfo=None)
+        return fuentes.seudonimizar_viajes(d[(d["ruta"] == ruta) & (salida >= ini) & (salida < fin)]
+                                           .drop(columns=["ruta"]))
+
 
 @pytest.fixture
 def lote_observado(monkeypatch, sesion):
     from app.servicios import datos, ejecucion, inferencia
 
+    monkeypatch.setenv("SEUDONIMO_SECRETO", SECRETO)
     modelo = inferencia.modelo_activo()
     d = datos.demanda_horaria(desde=DIA - timedelta(weeks=8), hasta=DIA).copy()   # ultima_actualizacion: fin del día
 
@@ -223,6 +259,62 @@ def test_ejecucion_con_datos_observados_produce_alt005_a_alt009(cliente, lote_ob
         assert len(claves) == len(set(claves))
         a = next(x for x in al if x["clave_dedup"] == vistas[codigo]["clave_dedup"])
         assert a["ocurrencias"] >= 2 and a["alert_id"] == vistas[codigo]["alert_id"]
+
+    # §5.3 «viaje, conductor y vehículo, cuando aplique»: ALT-006 y ALT-009 llevan el viaje, el vehículo y el
+    # seudónimo del conductor (nunca el id en claro); ALT-005, ALT-007 y ALT-008 dicen por qué no aplican
+    a9 = vistas["ALT-009"]
+    assert (a6["viaje"], a6["vehiculo"]) == ("8002", "SOBUSA52") and a6["conductor"].startswith("cnd_")
+    assert (a9["viaje"], a9["vehiculo"]) == ("8101", "SOBUSA17") and a9["conductor"].startswith("cnd_")
+    for a in (a6, a9):
+        assert a["variables"]["identificacion_5_3"]["resultado"] == "identificado"
+    for codigo in ("ALT-005", "ALT-007", "ALT-008"):
+        ident = vistas[codigo]["variables"]["identificacion_5_3"]
+        assert ident["aplica"] == [] and ident["motivo"] and vistas[codigo]["viaje"] is None, codigo
+    _guardar_ejemplo(cliente, sesion, vistas, tipo)
+
+
+def _valor_umbral(valor):
+    numero = float(valor)
+    return int(numero) if numero.is_integer() else numero
+
+
+def _guardar_ejemplo(cliente, sesion, vistas: dict, columna: str) -> None:
+    """alertas/alertas_observadas_ejemplo.json (en docs/evidencias solo con GENERAR_EVIDENCIAS=1): cinco alertas
+    observadas como las guarda PostgreSQL y las devuelve GET /alerts/{id}, con la identificación de §5.3 (el viaje,
+    el vehículo y el seudónimo del conductor, o en variables.identificacion_5_3 el motivo por el que no aplica) y su
+    bitácora; además la columna de la ubicación, su índice GiST, el CHECK del seudónimo y los umbrales de las alertas
+    que agregó la migración 0003 (UMBRALES_0003; su versión copia también los anteriores)."""
+    import importlib.util
+
+    from tests.integracion.conftest import RAIZ
+
+    spec = importlib.util.spec_from_file_location("m0003", RAIZ / "alembic" / "versions" / "0003_alertas_estructura.py")
+    m0003 = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m0003)
+    indice = sesion.execute(text("SELECT indexdef FROM pg_indexes WHERE schemaname = 'ai_frecuencias' "
+                                 "AND indexname = 'ix_alert_ubicacion'")).scalar()
+    check = sesion.execute(text("SELECT pg_get_constraintdef(c.oid) FROM pg_constraint c WHERE c.conrelid = "
+                                "'ai_frecuencias.alert'::regclass AND c.contype = 'c' AND "
+                                "pg_get_constraintdef(c.oid) LIKE '%conductor%'")).scalar()
+    umbrales = sesion.execute(text("SELECT version, nombre, valor, creado_por FROM ai_frecuencias.threshold_config "
+                                   "WHERE creado_por = 'migracion_0003' AND nombre = ANY(:n) ORDER BY nombre"),
+                              {"n": [n for n, _v, _d in m0003.UMBRALES_0003]}).all()
+    sesion.rollback()
+    alertas = []
+    for codigo in ("ALT-005", "ALT-006", "ALT-007", "ALT-008", "ALT-009"):
+        a = cliente.get(f"/api/v1/alerts/{vistas[codigo]['alert_id']}").json()
+        historia = cliente.get(f"/api/v1/alerts/{a['alert_id']}/history").json()
+        a["bitacora"] = [{k: h.get(k) for k in ("accion", "estado_nuevo", "usuario", "comentario", "creado_en")}
+                         for h in historia]
+        alertas.append(a)
+    base = os.environ.get("TEST_DATABASE_NAME", "ai_frecuencias_pruebas")
+    contenido = {"origen": f"tests/integracion/test_alertas_observadas.py en la base local {base}",
+                 "columna_ubicacion": columna, "indice_ubicacion": indice, "check_conductor": check,
+                 "umbrales_migracion_0003": [{"version": f.version, "nombre": f.nombre, "valor": _valor_umbral(f.valor),
+                                              "creado_por": f.creado_por} for f in umbrales],
+                 "alertas": alertas}
+    guardar_evidencia("alertas/alertas_observadas_ejemplo.json",
+                      json.dumps(contenido, ensure_ascii=False, indent=2, default=str))
 
 
 def test_la_base_rechaza_un_conductor_en_claro(sesion, migrada):

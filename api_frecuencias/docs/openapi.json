@@ -34,7 +34,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EjecucionSalida"
+                  "$ref": "#/components/schemas/EjecucionCreada"
                 }
               }
             },
@@ -49,7 +49,7 @@
             }
           },
           "422": {
-            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico).",
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico). Códigos propios de esta operación: «ruta_desconocida».",
             "content": {
               "application/json": {
                 "schema": {
@@ -59,7 +59,8 @@
             },
             "x-codigos-error": [
               "validacion",
-              "fuera_de_rango"
+              "fuera_de_rango",
+              "ruta_desconocida"
             ],
             "headers": {
               "X-Correlation-Id": {
@@ -269,6 +270,43 @@
               "title": "Model Id"
             },
             "description": "Modelo con el que corrió la ejecución"
+          },
+          {
+            "name": "ruta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "RNF-005: solo los trabajos de esta ruta",
+              "title": "Ruta"
+            },
+            "description": "RNF-005: solo los trabajos de esta ruta"
+          },
+          {
+            "name": "padre_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "RNF-005: solo los trabajos de esta ejecución partida",
+              "title": "Padre Id"
+            },
+            "description": "RNF-005: solo los trabajos de esta ejecución partida"
           },
           {
             "name": "limite",
@@ -846,7 +884,7 @@
         "tags": [
           "predicciones y recomendaciones"
         ],
-        "summary": "Pronóstico por segmento y sentido (desagregación documentada del pronóstico de la ruta)",
+        "summary": "Pronóstico por segmento y sentido (modelo de segmentos versionado sobre el pronóstico de la ruta, con banda P10-P90)",
         "operationId": "por_segmento_api_v1_predictions_segmentos_get",
         "security": [
           {
@@ -972,6 +1010,25 @@
               "default": "segmento",
               "title": "Nivel"
             }
+          },
+          {
+            "name": "modelo_segmentos",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 120
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "model_id del registro de segmentos (datos/modelos/segmentos/registro.json); por omisión el activo. seg_reparto_fijo_20230227 es el reparto fijo B0, la línea base",
+              "title": "Modelo Segmentos"
+            },
+            "description": "model_id del registro de segmentos (datos/modelos/segmentos/registro.json); por omisión el activo. seg_reparto_fijo_20230227 es el reparto fijo B0, la línea base"
           }
         ],
         "responses": {
@@ -10690,6 +10747,579 @@
         "x-rol-minimo": "operador"
       }
     },
+    "/api/v1/catalogos/flota": {
+      "get": {
+        "tags": [
+          "catálogos"
+        ],
+        "summary": "Flota disponible y tiempo de ciclo vigentes por ruta, tipo de día y hora (catálogo o ajuste local)",
+        "description": "§3.1 «Gestión operacional» y §10.2: flota disponible por ruta y tipo de día y tiempo de ciclo por ruta, tipo de día y hora de salida. Sin ajuste rige el dato empaquetado (datos/parametros_operativos_hora.parquet, mediana 2025 de D1); el ajuste local vive en threshold_config (flota_override y ciclo_override), se versiona y se audita como los umbrales, y lo usan la recomendación de la franja y el plan del día desde la versión siguiente, sin reiniciar.\n\nRol mínimo: **operador** (cabecera X-API-Key).",
+        "operationId": "flota_y_ciclo_api_v1_catalogos_flota_get",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "idruta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2147483647,
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "idruta de la tabla rutas",
+              "title": "Idruta"
+            },
+            "description": "idruta de la tabla rutas"
+          },
+          {
+            "name": "tipo_dia",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "Laboral",
+                    "Sábado",
+                    "Domingo/festivo",
+                    "TODOS"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Un tipo de día; sin él, los tres",
+              "title": "Tipo Dia"
+            },
+            "description": "Un tipo de día; sin él, los tres"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FlotaCicloSalida"
+                  },
+                  "title": "Response Flota Y Ciclo Api V1 Catalogos Flota Get"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No encontrado: el recurso indicado no existe (código «no_encontrado» u otro más específico). Códigos propios de esta operación: «no_encontrado».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_encontrado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependencia no disponible o no configurada (réplica, base operacional o archivo de insumos): degradación prevista con el error uniforme (RNF-010).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-rol-minimo": "operador"
+      },
+      "put": {
+        "tags": [
+          "catálogos"
+        ],
+        "summary": "Registrar una versión nueva de la flota o del tiempo de ciclo de una ruta (admin; versión nueva y auditada)",
+        "description": "§3.1 «Gestión operacional» y §10.2: flota disponible por ruta y tipo de día y tiempo de ciclo por ruta, tipo de día y hora de salida. Sin ajuste rige el dato empaquetado (datos/parametros_operativos_hora.parquet, mediana 2025 de D1); el ajuste local vive en threshold_config (flota_override y ciclo_override), se versiona y se audita como los umbrales, y lo usan la recomendación de la franja y el plan del día desde la versión siguiente, sin reiniciar. El cuerpo trae flota, tiempo_ciclo_min o ambos (null retira el ajuste; un campo que no viene no cambia); hora acota el ajuste de ciclo a una hora de salida. Firma el usuario autenticado y el motivo es obligatorio. Responde la flota y el ciclo vigentes de la ruta con la versión nueva.\n\nRol mínimo: **admin** (cabecera X-API-Key).",
+        "operationId": "ajustar_flota_y_ciclo_api_v1_catalogos_flota_put",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SolicitudFlotaCiclo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlotaCicloSalida"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico). Códigos propios de esta operación: «ruta_desconocida», «ajuste_invalido».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango",
+              "ruta_desconocida",
+              "ajuste_invalido"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuerpo ilegible: no se pudo decodificar el cuerpo de la solicitud (p. ej. bytes que no son UTF-8); código «cuerpo_ilegible».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "cuerpo_ilegible"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Prohibido: el rol de la clave está por debajo del rol mínimo de la operación (código «prohibido»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "prohibido"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No encontrado: el recurso indicado no existe (código «no_encontrado» u otro más específico). Códigos propios de esta operación: «ajuste_inexistente».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "ajuste_inexistente"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-rol-minimo": "admin"
+      }
+    },
+    "/api/v1/catalogos/flota/historial": {
+      "get": {
+        "tags": [
+          "catálogos"
+        ],
+        "summary": "Historial de la flota y del tiempo de ciclo (versión, acción, valor anterior y nuevo, quién y por qué)",
+        "description": "Del más reciente al más antiguo, paginado con limite y desplazamiento; el total de eventos va en la cabecera X-Total-Count.\n\nRol mínimo: **operador** (cabecera X-API-Key).",
+        "operationId": "historial_flota_y_ciclo_api_v1_catalogos_flota_historial_get",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "idruta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2147483647,
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "idruta de la tabla rutas",
+              "title": "Idruta"
+            },
+            "description": "idruta de la tabla rutas"
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "description": "Tamaño de página",
+              "default": 100,
+              "title": "Limite"
+            },
+            "description": "Tamaño de página"
+          },
+          {
+            "name": "desplazamiento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000000,
+              "minimum": 0,
+              "description": "Eventos a saltar",
+              "default": 0,
+              "title": "Desplazamiento"
+            },
+            "description": "Eventos a saltar"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventoFlotaCiclo"
+                  },
+                  "title": "Response Historial Flota Y Ciclo Api V1 Catalogos Flota Historial Get"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependencia no disponible o no configurada (réplica, base operacional o archivo de insumos): degradación prevista con el error uniforme (RNF-010).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-rol-minimo": "operador"
+      }
+    },
     "/api/v1/monitoring": {
       "get": {
         "tags": [
@@ -11616,12 +12246,148 @@
         ]
       }
     },
+    "/api/v1/frequency/watermarks": {
+      "get": {
+        "tags": [
+          "ejecuciones"
+        ],
+        "summary": "Marca de agua de la lectura incremental por proceso y ruta (RNF-005)",
+        "description": "Desde dónde leerá cada ruta la próxima ejecución. La fila con ruta «*» es la frontera de las lecturas de todas\nlas rutas del proceso (la usa una ruta sin marca propia); las de origen «migracion_0009» heredaron la marca\nglobal de antes.\n\nRol mínimo: **operador** (cabecera X-API-Key).",
+        "operationId": "marcas_de_agua_api_v1_frequency_watermarks_get",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "proceso",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Solo este proceso (FUENTE_PROCESO)",
+              "title": "Proceso"
+            },
+            "description": "Solo este proceso (FUENTE_PROCESO)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarcaAguaSalida"
+                  },
+                  "title": "Response Marcas De Agua Api V1 Frequency Watermarks Get"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-rol-minimo": "operador"
+      }
+    },
     "/api/v1/segmentos/estadisticas": {
       "get": {
         "tags": [
           "segmentos"
         ],
         "summary": "Promedio, máximo y mínimo de subidas, bajadas y pasajeros por segmento, estacionalidad, día, hora",
+        "description": "Promedio, máximo y mínimo de subidas, bajadas y pasajeros por segmento × estacionalidad × día ISO × hora (§6.1), desde la agregación materializada que calcula el trabajo «segmentos» de la cola (nunca se agrega timbradas_segmentos dentro de la petición, §7.1). `actualizado_en` dice de cuándo es; `materializacion` trae el período cubierto y la ejecución que la calculó. Con `desde`/`hasta` se vuelve a agregar solo ese rango desde el grano diario, con el mismo resultado que la agregación directa. Si la agregación todavía no existe responde 200 con `disponible: false` y el refresco encolado en `refresco`.\n\nRol mínimo: **operador** (cabecera X-API-Key).",
         "operationId": "estadisticas_api_v1_segmentos_estadisticas_get",
         "security": [
           {
@@ -11935,7 +12701,6 @@
             }
           }
         },
-        "description": "Rol mínimo: **operador** (cabecera X-API-Key).",
         "x-rol-minimo": "operador"
       }
     },
@@ -12230,7 +12995,7 @@
             }
           },
           "503": {
-            "description": "Dependencia no disponible o no configurada (réplica, base operacional o archivo de insumos): degradación prevista con el error uniforme (RNF-010). Códigos propios de esta operación: «fuente_no_disponible».",
+            "description": "Dependencia no disponible o no configurada (réplica, base operacional o archivo de insumos): degradación prevista con el error uniforme (RNF-010). Códigos propios de esta operación: «fuente_no_disponible», «agregacion_pendiente».",
             "content": {
               "application/json": {
                 "schema": {
@@ -12239,7 +13004,8 @@
               }
             },
             "x-codigos-error": [
-              "fuente_no_disponible"
+              "fuente_no_disponible",
+              "agregacion_pendiente"
             ],
             "headers": {
               "X-Correlation-Id": {
@@ -12254,6 +13020,202 @@
         },
         "description": "Rol mínimo: **operador** (cabecera X-API-Key).",
         "x-rol-minimo": "operador"
+      }
+    },
+    "/api/v1/segmentos/estadisticas/refrescar": {
+      "post": {
+        "tags": [
+          "segmentos"
+        ],
+        "summary": "Refrescar la agregación de segmentos (job en la cola, rol analista)",
+        "description": "Encola un trabajo «segmentos» que relee timbradas_segmentos con el usuario de solo lectura (por tramos de fechas que caben en el statement_timeout) y reemplaza la agregación materializada que sirve GET /api/v1/segmentos/estadisticas. Responde 202 con el execution_id; el progreso y el resultado se ven en GET /api/v1/frequency/executions/{id}. Si ya hay un refresco igual en cola, devuelve ese. 503 «fuente_no_configurada» sin la base operacional (FUENTE_DATABASE_URL).\n\nRol mínimo: **analista** (cabecera X-API-Key).",
+        "operationId": "refrescar_api_v1_segmentos_estadisticas_refrescar_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/SolicitudRefresco"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Solicitud"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefrescoEnCola"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico). Códigos propios de esta operación: «parametro_invalido».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango",
+              "parametro_invalido"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuerpo ilegible: no se pudo decodificar el cuerpo de la solicitud (p. ej. bytes que no son UTF-8); código «cuerpo_ilegible».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "cuerpo_ilegible"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Prohibido: el rol de la clave está por debajo del rol mínimo de la operación (código «prohibido»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "prohibido"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependencia no disponible o no configurada (réplica, base operacional o archivo de insumos): degradación prevista con el error uniforme (RNF-010). Códigos propios de esta operación: «fuente_no_configurada», «fuente_no_disponible».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "fuente_no_configurada",
+              "fuente_no_disponible"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "x-rol-minimo": "analista"
       }
     },
     "/api/v1/segmentos/zonas": {
@@ -13063,6 +14025,289 @@
           }
         },
         "x-rol-minimo": "operador"
+      }
+    },
+    "/api/v1/retencion": {
+      "get": {
+        "tags": [
+          "retención"
+        ],
+        "summary": "Política de retención vigente (§18) y bitácora de la última corrida",
+        "description": "Qué hace la retención con cada tabla del esquema ai_frecuencias: meses en caliente (parámetros gobernados de threshold_config; PUT /api/v1/thresholds los cambia), el corte de hoy y la acción (separar y borrar las particiones mensuales viejas de feature_snapshot, borrar filas o conservar). Trae la bitácora de la corrida más reciente (retencion_registro).\n\nRol mínimo: **operador** (cabecera X-API-Key).",
+        "operationId": "politica_api_v1_retencion_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PoliticaRetencion"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "x-rol-minimo": "operador"
+      }
+    },
+    "/api/v1/retencion/aplicar": {
+      "post": {
+        "tags": [
+          "retención"
+        ],
+        "summary": "Correr la retención bajo demanda (job en la cola, rol admin)",
+        "description": "Encola un trabajo «retencion» que aplica la política de §18 con los parámetros vigentes y responde 202 con el execution_id; el progreso y el resumen se ven en GET /api/v1/frequency/executions/{id} y la bitácora en GET /api/v1/retencion. Por omisión SIMULA («simular»: true): calcula las filas y las particiones que se borrarían sin borrar nada. Con «simular»: false las borra. Si ya hay una corrida en cola o corriendo, devuelve esa.\n\nRol mínimo: **admin** (cabecera X-API-Key).",
+        "operationId": "aplicar_api_v1_retencion_aplicar_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/SolicitudRetencion"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Solicitud"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetencionEnCola"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuerpo ilegible: no se pudo decodificar el cuerpo de la solicitud (p. ej. bytes que no son UTF-8); código «cuerpo_ilegible».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "cuerpo_ilegible"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Prohibido: el rol de la clave está por debajo del rol mínimo de la operación (código «prohibido»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "prohibido"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "x-rol-minimo": "admin"
       }
     },
     "/health": {
@@ -13926,6 +15171,62 @@
         ],
         "title": "CapacidadSalida"
       },
+      "CicloHora": {
+        "properties": {
+          "hora": {
+            "type": "integer",
+            "title": "Hora",
+            "description": "Hora de salida (4 a 20)"
+          },
+          "tiempo_ciclo_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tiempo Ciclo Min",
+            "description": "Vigente: el ajuste local o, si no hay, el del catálogo"
+          },
+          "tiempo_ciclo_catalogo_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tiempo Ciclo Catalogo Min",
+            "description": "Dato empaquetado (mediana 2025 de D1)"
+          },
+          "fuente": {
+            "type": "string",
+            "title": "Fuente",
+            "description": "catalogo o ajuste_local"
+          },
+          "clave": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clave",
+            "description": "Parámetro de threshold_config que manda (ciclo_override…)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hora",
+          "fuente"
+        ],
+        "title": "CicloHora"
+      },
       "DespachoSalida": {
         "properties": {
           "idprogramacion": {
@@ -14058,6 +15359,255 @@
           "salida_real"
         ],
         "title": "DespachoSalida"
+      },
+      "EjecucionCreada": {
+        "properties": {
+          "execution_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Execution Id"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "etapa": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etapa"
+          },
+          "progreso": {
+            "type": "number",
+            "title": "Progreso"
+          },
+          "intentos": {
+            "type": "integer",
+            "title": "Intentos"
+          },
+          "marca_agua_anterior": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marca Agua Anterior"
+          },
+          "marca_agua_nueva": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marca Agua Nueva"
+          },
+          "data_cutoff": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Cutoff"
+          },
+          "filas_leidas": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filas Leidas"
+          },
+          "filas_validas": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filas Validas"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "feature_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feature Version"
+          },
+          "umbrales_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Umbrales Version"
+          },
+          "parametros": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Parametros"
+          },
+          "metricas": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metricas"
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation Id"
+          },
+          "mensaje": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mensaje"
+          },
+          "creado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creado En"
+          },
+          "iniciado_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iniciado En"
+          },
+          "terminado_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terminado En"
+          },
+          "actualizado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Actualizado En"
+          },
+          "ruta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ruta",
+            "description": "Ruta del trabajo: la única que lee, procesa y bloquea; null = todas las rutas (ejecución sin partir) o la ejecución madre"
+          },
+          "padre_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Padre Id",
+            "description": "Ejecución partida (madre) a la que pertenece este trabajo"
+          },
+          "particion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Particion",
+            "description": "En la ejecución madre, cómo se partió («ruta»); null en los trabajos y en las ejecuciones sin partir"
+          },
+          "trabajos": {
+            "items": {
+              "$ref": "#/components/schemas/TrabajoEjecucion"
+            },
+            "type": "array",
+            "title": "Trabajos",
+            "description": "RNF-005: los trabajos por ruta de una ejecución partida (vacío si no se partió). La madre termina cuando terminan todos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "execution_id",
+          "tipo",
+          "estado",
+          "progreso",
+          "intentos",
+          "creado_en",
+          "actualizado_en"
+        ],
+        "title": "EjecucionCreada"
       },
       "EjecucionDetalle": {
         "properties": {
@@ -14250,6 +15800,51 @@
             "format": "date-time",
             "title": "Actualizado En"
           },
+          "ruta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ruta",
+            "description": "Ruta del trabajo: la única que lee, procesa y bloquea; null = todas las rutas (ejecución sin partir) o la ejecución madre"
+          },
+          "padre_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Padre Id",
+            "description": "Ejecución partida (madre) a la que pertenece este trabajo"
+          },
+          "particion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Particion",
+            "description": "En la ejecución madre, cómo se partió («ruta»); null en los trabajos y en las ejecuciones sin partir"
+          },
+          "trabajos": {
+            "items": {
+              "$ref": "#/components/schemas/TrabajoEjecucion"
+            },
+            "type": "array",
+            "title": "Trabajos",
+            "description": "RNF-005: los trabajos por ruta de una ejecución partida (vacío si no se partió). La madre termina cuando terminan todos"
+          },
           "errores_por_dimension": {
             "additionalProperties": {
               "type": "integer"
@@ -14297,7 +15892,8 @@
           "creado_en",
           "actualizado_en"
         ],
-        "title": "EjecucionDetalle"
+        "title": "EjecucionDetalle",
+        "description": "Detalle de una ejecución; en una ejecución partida, los conteos suman los de la madre y sus trabajos."
       },
       "EjecucionSalida": {
         "properties": {
@@ -14489,6 +16085,43 @@
             "type": "string",
             "format": "date-time",
             "title": "Actualizado En"
+          },
+          "ruta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ruta",
+            "description": "Ruta del trabajo: la única que lee, procesa y bloquea; null = todas las rutas (ejecución sin partir) o la ejecución madre"
+          },
+          "padre_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Padre Id",
+            "description": "Ejecución partida (madre) a la que pertenece este trabajo"
+          },
+          "particion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Particion",
+            "description": "En la ejecución madre, cómo se partió («ruta»); null en los trabajos y en las ejecuciones sin partir"
           }
         },
         "type": "object",
@@ -14862,6 +16495,163 @@
         ],
         "title": "EventoCapacidad"
       },
+      "EventoFlotaCiclo": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "idruta": {
+            "type": "integer",
+            "title": "Idruta"
+          },
+          "ruta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ruta"
+          },
+          "parametro": {
+            "type": "string",
+            "enum": [
+              "flota",
+              "tiempo_ciclo_min"
+            ],
+            "title": "Parametro"
+          },
+          "tipo_dia": {
+            "type": "string",
+            "title": "Tipo Dia"
+          },
+          "hora": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hora",
+            "description": "Hora del ajuste de ciclo; null = todas las horas (o la flota)"
+          },
+          "accion": {
+            "type": "string",
+            "title": "Accion",
+            "description": "creado, cambiado o retirado"
+          },
+          "valor_anterior": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valor Anterior"
+          },
+          "valor_nuevo": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valor Nuevo"
+          },
+          "creado_por": {
+            "type": "string",
+            "title": "Creado Por"
+          },
+          "motivo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motivo"
+          },
+          "creado_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Creado En"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "idruta",
+          "parametro",
+          "tipo_dia",
+          "accion",
+          "creado_por"
+        ],
+        "title": "EventoFlotaCiclo"
+      },
+      "FlotaCicloSalida": {
+        "properties": {
+          "ruta": {
+            "type": "string",
+            "title": "Ruta"
+          },
+          "idruta": {
+            "type": "integer",
+            "title": "Idruta"
+          },
+          "umbrales_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Umbrales Version",
+            "description": "Versión de threshold_config con la que se leyó"
+          },
+          "por_tipo_dia": {
+            "items": {
+              "$ref": "#/components/schemas/FlotaTipoDia"
+            },
+            "type": "array",
+            "title": "Por Tipo Dia"
+          },
+          "ajustes": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Ajustes",
+            "description": "Ajustes locales vigentes de la ruta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ruta",
+          "idruta",
+          "por_tipo_dia"
+        ],
+        "title": "FlotaCicloSalida"
+      },
       "FlotaRecaudo": {
         "properties": {
           "recaudo_esperado_cop": {
@@ -15010,6 +16800,68 @@
           "nota"
         ],
         "title": "FlotaRecaudo"
+      },
+      "FlotaTipoDia": {
+        "properties": {
+          "tipo_dia": {
+            "type": "string",
+            "title": "Tipo Dia"
+          },
+          "flota": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flota",
+            "description": "Flota disponible vigente (vehículos)"
+          },
+          "flota_catalogo": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flota Catalogo",
+            "description": "Dato empaquetado (mediana 2025 de D1)"
+          },
+          "flota_fuente": {
+            "type": "string",
+            "title": "Flota Fuente",
+            "description": "catalogo o ajuste_local"
+          },
+          "flota_clave": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flota Clave",
+            "description": "Parámetro de threshold_config que manda (flota_override…)"
+          },
+          "horas": {
+            "items": {
+              "$ref": "#/components/schemas/CicloHora"
+            },
+            "type": "array",
+            "title": "Horas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tipo_dia",
+          "flota_fuente"
+        ],
+        "title": "FlotaTipoDia"
       },
       "FotoSalida": {
         "properties": {
@@ -15447,6 +17299,64 @@
         "type": "object",
         "title": "IntervaloConfianza",
         "description": "§12.3 confidenceInterval: banda P10-P90 calibrada (lower redondeado hacia abajo, upper hacia arriba)."
+      },
+      "MarcaAguaSalida": {
+        "properties": {
+          "proceso": {
+            "type": "string",
+            "title": "Proceso",
+            "description": "Proceso (operador) que se lee: FUENTE_PROCESO, «*» = todos"
+          },
+          "ruta": {
+            "type": "string",
+            "title": "Ruta",
+            "description": "Ruta; «*» es la frontera de las lecturas de todas las rutas del proceso"
+          },
+          "marca_agua": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Marca Agua"
+          },
+          "execution_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id",
+            "description": "Trabajo que dejó la marca (null si vino de la migración)"
+          },
+          "origen": {
+            "type": "string",
+            "title": "Origen",
+            "description": "ejecucion o migracion_0009 (marca global de antes, sembrada por ruta)"
+          },
+          "huellas": {
+            "type": "integer",
+            "title": "Huellas",
+            "description": "Huellas de la ventana de solape guardadas para la ruta",
+            "default": 0
+          },
+          "actualizado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Actualizado En"
+          }
+        },
+        "type": "object",
+        "required": [
+          "proceso",
+          "ruta",
+          "marca_agua",
+          "origen",
+          "actualizado_en"
+        ],
+        "title": "MarcaAguaSalida",
+        "description": "Marca de agua de la lectura incremental por proceso y ruta (RNF-005, migración 0009)."
       },
       "ModeloSalida": {
         "properties": {
@@ -16681,7 +18591,56 @@
               }
             ],
             "title": "Parametros",
-            "description": "Parámetros del MILP con la fuente de cada uno"
+            "description": "Parámetros del MILP con la fuente de cada uno (threshold_config vN o el código): límites de headway, costos y pesos de §10.2, tarifa, elasticidad y suavidad"
+          },
+          "flota_y_ciclo": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flota Y Ciclo",
+            "description": "De dónde salen la flota disponible, el ciclo de cada hora y la capacidad por bus: el ajuste local versionado (PUT /catalogos/flota y PUT /catalogos/capacidad) o el dato empaquetado"
+          },
+          "frecuenciadespachos_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frecuenciadespachos Min",
+            "description": "§6.2 headway vigente tomado de la frecuencia de despachos: rutas.frecuenciadespachos de la ruta, en minutos (§6.1). La comparación con el intervalo programado observado sigue en frecuencia_actual_min y diferencia_min"
+          },
+          "fuente_frecuenciadespachos": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fuente Frecuenciadespachos"
+          },
+          "ocupacion_actual": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ocupacion Actual",
+            "description": "§10.1 ocupación actual: la restricción reactiva que evaluó el ciclo con la ocupación observada por segmento (si aplicó, en qué hora y con qué salidas mínimas, o por qué no); nula si el plan se calculó sin ocupación observada"
           },
           "insumos_operativos": {
             "anyOf": [
@@ -17189,6 +19148,68 @@
               }
             ],
             "title": "Motivo Sobreoferta"
+          },
+          "frecuenciadespachos_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frecuenciadespachos Min",
+            "description": "§6.2 headway vigente tomado de la frecuencia de despachos: rutas.frecuenciadespachos de la ruta, en minutos (§6.1). La comparación con el intervalo programado observado sigue en frecuencia_actual_min y diferencia_min"
+          },
+          "diferencia_frecuenciadespachos_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diferencia Frecuenciadespachos Min",
+            "description": "§6.2 headway recomendado − headway vigente de rutas.frecuenciadespachos, en minutos (negativo: despachar más seguido); nula si no hay headway recomendado (no viable o sin salidas)"
+          },
+          "cambio_frecuenciadespachos": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cambio Frecuenciadespachos",
+            "description": "Sentido del cambio frente a rutas.frecuenciadespachos: reducir_intervalo, ampliar_intervalo o mantener (±0,05 min)"
+          },
+          "ocupacion_historica": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ocupacion Historica",
+            "description": "§10.1 ocupación histórica: el segmento crítico de la ruta (mayor carga media a bordo) en el día de la semana de operación y la hora, con su sentido aproximado, su carga media, P50, P90 y máxima y su ocupación con los puestos de la recomendación (subidas y bajadas por segmento de cada viaje, 2023-01-01 a 2023-02-27; texto = la frase de la explicación)"
+          },
+          "restriccion_reactiva": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restriccion Reactiva",
+            "description": "§10.1 ocupación actual, solo en la hora en que actúa: la ocupación observada del segmento crítico en la última hora cerrada superó el umbral crítico y estas salidas no bajan de las que exige esa carga (piso del MILP; activa = el piso manda). Es una restricción de seguridad, no un re-pronóstico"
           }
         },
         "type": "object",
@@ -17197,6 +19218,58 @@
           "salidas"
         ],
         "title": "PlanHora"
+      },
+      "PoliticaRetencion": {
+        "properties": {
+          "umbrales_version": {
+            "type": "integer",
+            "title": "Umbrales Version",
+            "description": "Versión de threshold_config de los parámetros"
+          },
+          "ahora": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Ahora"
+          },
+          "parametros": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Parametros",
+            "description": "Parámetros gobernados de la política (PUT /thresholds los cambia)"
+          },
+          "aplicar_programada": {
+            "type": "boolean",
+            "title": "Aplicar Programada",
+            "description": "Si la corrida del planificador aplica (true) o solo simula"
+          },
+          "reglas": {
+            "items": {
+              "$ref": "#/components/schemas/ReglaRetencion"
+            },
+            "type": "array",
+            "title": "Reglas"
+          },
+          "ultima_corrida": {
+            "items": {
+              "$ref": "#/components/schemas/RegistroRetencionSalida"
+            },
+            "type": "array",
+            "title": "Ultima Corrida",
+            "description": "Bitácora de la corrida más reciente"
+          }
+        },
+        "type": "object",
+        "required": [
+          "umbrales_version",
+          "ahora",
+          "parametros",
+          "aplicar_programada",
+          "reglas",
+          "ultima_corrida"
+        ],
+        "title": "PoliticaRetencion"
       },
       "PrediccionRespuesta": {
         "properties": {
@@ -18193,6 +20266,30 @@
             "title": "Id Estacionalidad",
             "description": "§8.3 estacionalidades_anio vigente para el proceso (nula si no hay)"
           },
+          "frecuenciadespachos_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frecuenciadespachos Min",
+            "description": "§6.2 headway vigente tomado de la frecuencia de despachos: rutas.frecuenciadespachos de la ruta, en minutos (§6.1). La comparación con el intervalo programado observado sigue en frecuencia_actual_min y diferencia_min"
+          },
+          "diferencia_frecuenciadespachos_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diferencia Frecuenciadespachos Min",
+            "description": "§6.2 headway recomendado − headway vigente de rutas.frecuenciadespachos, en minutos (negativo: despachar más seguido); nula si no hay headway recomendado (no viable o sin salidas)"
+          },
           "metodo": {
             "anyOf": [
               {
@@ -18386,7 +20483,8 @@
                 "type": "null"
               }
             ],
-            "title": "Contexto Franja"
+            "title": "Contexto Franja",
+            "description": "Ciclo, flota e intervalo programado de la franja con su fuente; ajuste_operativo dice si la flota o el ciclo vienen del ajuste local versionado (PUT /catalogos/flota)"
           },
           "capacidad_gobernada": {
             "anyOf": [
@@ -18399,6 +20497,43 @@
               }
             ],
             "title": "Capacidad Gobernada"
+          },
+          "cambio_frecuenciadespachos": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cambio Frecuenciadespachos",
+            "description": "Sentido del cambio frente a rutas.frecuenciadespachos: reducir_intervalo, ampliar_intervalo o mantener (±0,05 min)"
+          },
+          "fuente_frecuenciadespachos": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fuente Frecuenciadespachos",
+            "description": "De dónde sale el headway vigente (§6.1)"
+          },
+          "ocupacion_historica": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ocupacion Historica",
+            "description": "§10.1 ocupación histórica: el segmento crítico de la ruta (mayor carga media a bordo) en el día de la semana de operación y la hora, con su sentido aproximado, su carga media, P50, P90 y máxima y su ocupación con los puestos de la recomendación (subidas y bajadas por segmento de cada viaje, 2023-01-01 a 2023-02-27; texto = la frase de la explicación)"
           },
           "explicacion": {
             "items": {
@@ -18738,6 +20873,30 @@
             ],
             "title": "Id Estacionalidad",
             "description": "§8.3 estacionalidades_anio vigente para el proceso (nula si no hay)"
+          },
+          "frecuenciadespachos_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frecuenciadespachos Min",
+            "description": "§6.2 headway vigente tomado de la frecuencia de despachos: rutas.frecuenciadespachos de la ruta, en minutos (§6.1). La comparación con el intervalo programado observado sigue en frecuencia_actual_min y diferencia_min"
+          },
+          "diferencia_frecuenciadespachos_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diferencia Frecuenciadespachos Min",
+            "description": "§6.2 headway recomendado − headway vigente de rutas.frecuenciadespachos, en minutos (negativo: despachar más seguido); nula si no hay headway recomendado (no viable o sin salidas)"
           }
         },
         "type": "object",
@@ -18750,6 +20909,251 @@
           "creado_en"
         ],
         "title": "RecomendacionSalida"
+      },
+      "RefrescoEnCola": {
+        "properties": {
+          "execution_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Execution Id"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "nueva": {
+            "type": "boolean",
+            "title": "Nueva",
+            "description": "false si ya había un refresco igual en cola (no se duplica)"
+          },
+          "modo": {
+            "type": "string",
+            "title": "Modo"
+          },
+          "desde": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Desde"
+          },
+          "hasta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hasta"
+          },
+          "creado_en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Creado En",
+            "description": "Instante en que se encoló (-05:00)"
+          },
+          "consultar_estado": {
+            "type": "string",
+            "title": "Consultar Estado",
+            "description": "Ruta para seguir el progreso y el resultado del trabajo"
+          },
+          "consultar_estadisticas": {
+            "type": "string",
+            "title": "Consultar Estadisticas",
+            "description": "Ruta que sirve la agregación cuando termine"
+          }
+        },
+        "type": "object",
+        "required": [
+          "execution_id",
+          "tipo",
+          "estado",
+          "nueva",
+          "modo",
+          "consultar_estado",
+          "consultar_estadisticas"
+        ],
+        "title": "RefrescoEnCola"
+      },
+      "RegistroRetencionSalida": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "execution_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id"
+          },
+          "simulado": {
+            "type": "boolean",
+            "title": "Simulado"
+          },
+          "grupo": {
+            "type": "string",
+            "title": "Grupo"
+          },
+          "objeto": {
+            "type": "string",
+            "title": "Objeto",
+            "description": "Tabla o partición"
+          },
+          "accion": {
+            "type": "string",
+            "title": "Accion",
+            "description": "separar_y_borrar, separar_y_archivar, borrar_filas, conservar o pospuesta"
+          },
+          "corte": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corte"
+          },
+          "filas": {
+            "type": "integer",
+            "title": "Filas"
+          },
+          "bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bytes"
+          },
+          "umbrales_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Umbrales Version"
+          },
+          "detalle": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Detalle"
+          },
+          "creado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creado En"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "simulado",
+          "grupo",
+          "objeto",
+          "accion",
+          "filas",
+          "creado_en"
+        ],
+        "title": "RegistroRetencionSalida"
+      },
+      "ReglaRetencion": {
+        "properties": {
+          "grupo": {
+            "type": "string",
+            "title": "Grupo",
+            "description": "foto, resultados, alertas, ejecuciones, derivada o conservada"
+          },
+          "tabla": {
+            "type": "string",
+            "title": "Tabla"
+          },
+          "accion": {
+            "type": "string",
+            "title": "Accion",
+            "description": "separar_y_borrar, separar_y_archivar, borrar_filas o conservar"
+          },
+          "parametro": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parametro",
+            "description": "Parámetro de threshold_config con los meses en caliente"
+          },
+          "meses": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meses",
+            "description": "Meses en caliente (0 = no se recorta)"
+          },
+          "corte": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corte",
+            "description": "Lo anterior a este instante se borra (-05:00)"
+          },
+          "descripcion": {
+            "type": "string",
+            "title": "Descripcion"
+          }
+        },
+        "type": "object",
+        "required": [
+          "grupo",
+          "tabla",
+          "accion",
+          "descripcion"
+        ],
+        "title": "ReglaRetencion"
       },
       "RespuestaReto": {
         "properties": {
@@ -19007,6 +21411,72 @@
         ],
         "title": "ResumenDespacho"
       },
+      "RetencionEnCola": {
+        "properties": {
+          "execution_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Execution Id"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "nueva": {
+            "type": "boolean",
+            "title": "Nueva",
+            "description": "false si ya había una corrida en cola o corriendo (no se duplica; trae su propio «simular»)"
+          },
+          "simular": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simular",
+            "description": "Si esa corrida simula (null: la programada, que decide retencion_aplicar_programada al correr)"
+          },
+          "creado_en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Creado En",
+            "description": "Instante en que se encoló (-05:00)"
+          },
+          "consultar_estado": {
+            "type": "string",
+            "title": "Consultar Estado",
+            "description": "Ruta para seguir el progreso y el resumen de la corrida"
+          },
+          "consultar_politica": {
+            "type": "string",
+            "title": "Consultar Politica",
+            "description": "Ruta con la política y la bitácora de la última corrida"
+          }
+        },
+        "type": "object",
+        "required": [
+          "execution_id",
+          "tipo",
+          "estado",
+          "nueva",
+          "consultar_estado",
+          "consultar_politica"
+        ],
+        "title": "RetencionEnCola"
+      },
       "RutaDetalle": {
         "properties": {
           "idruta": {
@@ -19225,7 +21695,8 @@
                 "type": "null"
               }
             ],
-            "title": "Tiempo Ciclo Min"
+            "title": "Tiempo Ciclo Min",
+            "description": "Referencia del catálogo empaquetado (mediana de día laboral de D1); el ciclo vigente por tipo de día y hora, con el ajuste local, está en GET /catalogos/flota"
           },
           "flota": {
             "anyOf": [
@@ -19236,7 +21707,8 @@
                 "type": "null"
               }
             ],
-            "title": "Flota"
+            "title": "Flota",
+            "description": "Referencia del catálogo empaquetado (día laboral de D1); la flota vigente por tipo de día, con el ajuste local, está en GET /catalogos/flota"
           },
           "frecuencia_actual_min": {
             "anyOf": [
@@ -19266,6 +21738,12 @@
             "additionalProperties": true,
             "type": "object",
             "title": "Capacidad Detalle"
+          },
+          "flota_y_ciclo": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Flota Y Ciclo",
+            "description": "Flota disponible y tiempo de ciclo vigentes por tipo de día y hora, con su fuente (catálogo o ajuste local; ver GET /catalogos/flota)"
           }
         },
         "type": "object",
@@ -19495,7 +21973,8 @@
                 "type": "null"
               }
             ],
-            "title": "Tiempo Ciclo Min"
+            "title": "Tiempo Ciclo Min",
+            "description": "Referencia del catálogo empaquetado (mediana de día laboral de D1); el ciclo vigente por tipo de día y hora, con el ajuste local, está en GET /catalogos/flota"
           },
           "flota": {
             "anyOf": [
@@ -19506,7 +21985,8 @@
                 "type": "null"
               }
             ],
-            "title": "Flota"
+            "title": "Flota",
+            "description": "Referencia del catálogo empaquetado (día laboral de D1); la flota vigente por tipo de día, con el ajuste local, está en GET /catalogos/flota"
           },
           "frecuencia_actual_min": {
             "anyOf": [
@@ -19901,6 +22381,16 @@
             "title": "Plan Dia",
             "description": "Al cerrar con datos nuevos, calcular y guardar el plan del día siguiente por ruta y hora (recommendation.origen = plan_dia) y la foto de la respuesta del reto",
             "default": true
+          },
+          "particion": {
+            "type": "string",
+            "enum": [
+              "ninguna",
+              "ruta"
+            ],
+            "title": "Particion",
+            "description": "RNF-005. «ruta»: la ejecución se parte en un trabajo por ruta (las de `rutas` o, sin `rutas`, todas las del catálogo) de la fecha `hasta`; cada trabajo lee solo su ruta desde la marca de agua de esa ruta, las réplicas procesan rutas distintas a la vez y dos trabajos de la misma ruta nunca corren a la vez. «ninguna»: un solo trabajo de todas las rutas (`rutas` limita entonces la predicción, no la lectura)",
+            "default": "ninguna"
           }
         },
         "type": "object",
@@ -20003,6 +22493,94 @@
           "accion"
         ],
         "title": "SolicitudEstadoAlerta"
+      },
+      "SolicitudFlotaCiclo": {
+        "properties": {
+          "idruta": {
+            "type": "integer",
+            "maximum": 2147483647.0,
+            "minimum": 0.0,
+            "title": "Idruta",
+            "description": "idruta de la tabla rutas (llave sin cambiar su semántica)"
+          },
+          "tipo_dia": {
+            "type": "string",
+            "enum": [
+              "Laboral",
+              "Sábado",
+              "Domingo/festivo",
+              "TODOS"
+            ],
+            "title": "Tipo Dia",
+            "description": "Tipo de día del ajuste; TODOS vale para los tres",
+            "default": "TODOS"
+          },
+          "flota": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1000.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flota",
+            "description": "Vehículos disponibles. null retira el ajuste de flota; si el campo no viene, la flota no cambia"
+          },
+          "tiempo_ciclo_min": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 720.0,
+                "minimum": 10.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tiempo Ciclo Min",
+            "description": "Minutos de vuelta completa. null retira el ajuste de ciclo; si el campo no viene, el ciclo no cambia"
+          },
+          "hora": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 20.0,
+                "minimum": 4.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hora",
+            "description": "Hora de salida del ajuste de ciclo (4 a 20); sin hora, todas las horas de servicio"
+          },
+          "motivo": {
+            "type": "string",
+            "minLength": 3,
+            "title": "Motivo"
+          },
+          "creado_por": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Creado Por",
+            "description": "Se ignora con autenticación: firma el principal"
+          }
+        },
+        "type": "object",
+        "required": [
+          "idruta",
+          "motivo"
+        ],
+        "title": "SolicitudFlotaCiclo"
       },
       "SolicitudPrediccion": {
         "properties": {
@@ -20272,6 +22850,75 @@
         ],
         "title": "SolicitudRecomendacion"
       },
+      "SolicitudRefresco": {
+        "properties": {
+          "modo": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "completo",
+              "incremental",
+              "rango"
+            ],
+            "title": "Modo",
+            "description": "auto (incremental, o completo si cambiaron los catálogos o pasó el plazo), completo, incremental o rango (desde y hasta obligatorios)",
+            "default": "auto"
+          },
+          "desde": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Desde",
+            "description": "Solo con modo rango: primera fecha a releer"
+          },
+          "hasta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hasta",
+            "description": "Solo con modo rango: última fecha a releer"
+          }
+        },
+        "type": "object",
+        "title": "SolicitudRefresco"
+      },
+      "SolicitudRetencion": {
+        "properties": {
+          "simular": {
+            "type": "boolean",
+            "title": "Simular",
+            "description": "true (por omisión): solo calcula lo que se borraría y lo deja en la bitácora con simulado = true; false: aplica la política",
+            "default": true
+          },
+          "motivo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motivo",
+            "description": "Constancia de por qué se corre a mano"
+          }
+        },
+        "type": "object",
+        "title": "SolicitudRetencion"
+      },
       "SolicitudReversion": {
         "properties": {
           "usuario": {
@@ -20417,6 +23064,156 @@
           "capacidad_max"
         ],
         "title": "TipologiaSalida"
+      },
+      "TrabajoEjecucion": {
+        "properties": {
+          "execution_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Execution Id"
+          },
+          "ruta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ruta"
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "etapa": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etapa"
+          },
+          "progreso": {
+            "type": "number",
+            "title": "Progreso"
+          },
+          "intentos": {
+            "type": "integer",
+            "title": "Intentos"
+          },
+          "marca_agua_anterior": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marca Agua Anterior"
+          },
+          "marca_agua_nueva": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marca Agua Nueva"
+          },
+          "filas_leidas": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filas Leidas"
+          },
+          "filas_validas": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filas Validas"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "mensaje": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mensaje"
+          },
+          "creado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creado En"
+          },
+          "iniciado_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iniciado En"
+          },
+          "terminado_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terminado En"
+          }
+        },
+        "type": "object",
+        "required": [
+          "execution_id",
+          "estado",
+          "progreso",
+          "intentos",
+          "creado_en"
+        ],
+        "title": "TrabajoEjecucion",
+        "description": "Un trabajo por ruta de una ejecución partida (RNF-005)."
       },
       "Trazabilidad": {
         "properties": {
@@ -21122,7 +23919,7 @@
     },
     {
       "name": "catálogos",
-      "description": "Catálogos operacionales de solo lectura (§3.1) y ajuste local de capacidad"
+      "description": "Catálogos operacionales de solo lectura (§3.1) y ajustes locales versionados de capacidad, flota y tiempo de ciclo"
     },
     {
       "name": "segmentos",
@@ -21131,6 +23928,10 @@
     {
       "name": "respuesta del reto",
       "description": "Respuesta a la pregunta final del reto con la trazabilidad de cada cifra"
+    },
+    {
+      "name": "retención",
+      "description": "Política de retención de datos (§18): parámetros gobernados, tarea automática y su bitácora"
     },
     {
       "name": "sistema",

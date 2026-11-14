@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Revisión de alertas</title>
+<!-- Kit de revisión doble HUMANA de alertas (§18 de la especificación v1.5, fila 18-R2 de la matriz).
+     Generado por generar_kit.py a partir de plantilla/pagina.html; no se edita a mano. No trae etiquetas de ningún revisor.
+     Fuentes: muestra.json (sha256 @@SHA_MUESTRA@@), muestra/<id>.md (sha256 @@SHA_TARJETAS@@),
+     protocolo.md (sha256 @@SHA_PROTOCOLO@@). Tokens: dash_app/assets/estilos.css.
+     Fuente tipográfica: Inter (SIL Open Font License 1.1; licencia en dash_app/assets/fuentes/OFL.txt). -->
+<style>
+@@FUENTE@@
+@@TOKENS@@
+@@CSS@@
+</style>
+</head>
+<body>
+<noscript><p class="noscript">Esta página necesita JavaScript para mostrar las tarjetas, guardar y descargar las etiquetas.</p></noscript>
+<div class="app">
+<header class="barra">
+  <div class="barra__dentro">
+    <div class="marca"><span class="marca__logo">@@ICONO_BUS@@</span><span class="marca__nombre">Revisión de alertas</span></div>
+    <nav class="nav" id="nav" aria-label="Pantallas" hidden>
+      <button type="button" class="nav__boton" data-vista="protocolo">Protocolo</button>
+      <button type="button" class="nav__boton" data-vista="revisar">Revisar</button>
+      <button type="button" class="nav__boton" data-vista="lista">Lista</button>
+      <button type="button" class="nav__boton" data-vista="descargar">Descargar</button>
+    </nav>
+    <div class="barra__derecha" id="barra-derecha" hidden>
+      <div class="avance" aria-live="polite">
+        <span class="avance__texto"><strong id="avance-n">0</strong> de @@TOTAL@@ terminadas</span>
+        <span class="avance__pista" aria-hidden="true"><span class="avance__relleno" id="avance-relleno"></span></span>
+      </div>
+      <span class="chip"><span class="chip__rotulo">Revisor</span> <span id="chip-revisor"></span></span>
+      <button type="button" class="boton boton--fantasma boton--pequeno" id="salir">Salir</button>
+    </div>
+  </div>
+</header>
+
+<main class="contenido">
+
+<section class="vista pantalla" id="vista-inicio" aria-labelledby="titulo-inicio">
+  <div class="cabecera">
+    <h1 class="cabecera__titulo" id="titulo-inicio">Revisión doble de alertas</h1>
+    <p class="cabecera__sub">@@TOTAL@@ alertas del backtest 2025, una tarjeta por alerta. Con el protocolo decides si cada
+    alerta era verdadera, falsa o indeterminada. Revisan dos personas del área operativa de Sobusa, cada una por separado
+    y a ciegas, y después concilian los desacuerdos (§18 de la especificación v1.5: «muestra manual revisada dos veces y
+    conciliación»).</p>
+  </div>
+  <div class="rejilla rejilla--2">
+    <section class="tarjeta" aria-labelledby="t-reglas">
+      <h2 class="tarjeta__titulo" id="t-reglas">Antes de empezar</h2>
+      <ol class="lista-pasos">
+        <li><strong>A ciegas y por separado.</strong> No hables de las alertas con el otro revisor hasta que los dos hayan
+        descargado su archivo.</li>
+        <li><strong>Solo la tarjeta y el protocolo.</strong> No abras la base del reto, el backtest ni los archivos de la
+        revisión automatizada (<code>etiquetas_A.json</code>, <code>etiquetas_B.json</code>, <code>conciliacion.json</code>,
+        <code>resumen.md</code>). Esta página no los trae.</li>
+        <li><strong>Tu propio navegador.</strong> El avance se guarda en este navegador con tu nombre. Si comparten
+        computador, cada uno usa su propio perfil del navegador, y al terminar borra sus datos desde «Descargar».</li>
+        <li><strong>Unos 45 minutos</strong>, unos 30 segundos por alerta. Puedes parar y seguir después escribiendo el
+        mismo nombre.</li>
+      </ol>
+    </section>
+    <section class="tarjeta" aria-labelledby="t-nombre">
+      <h2 class="tarjeta__titulo" id="t-nombre">¿Quién revisa?</h2>
+      <form class="formulario" id="form-inicio" novalidate>
+        <div class="campo">
+          <label class="campo__rotulo" for="nombre">Tu nombre (va en el archivo que descargas)</label>
+          <input class="entrada" id="nombre" name="nombre" type="text" autocomplete="name" maxlength="80" required>
+          <p class="campo__error" id="error-nombre" role="alert" hidden></p>
+        </div>
+        <div class="botonera"><button type="submit" class="boton boton--primario">Empezar</button></div>
+      </form>
+      <div class="aviso aviso--atencion" id="aviso-almacen" hidden>@@ICONO_ALERTA@@<div class="aviso__cuerpo">
+        <p class="aviso__titulo">Este navegador no deja guardar el avance</p>
+        <p>Puedes revisar igual, pero descarga tus etiquetas antes de cerrar la página. Para seguir otro día, cárgalas
+        desde «Descargar».</p></div></div>
+      <p class="nota">Si ya empezaste, escribe el mismo nombre y sigues donde ibas.</p>
+    </section>
+  </div>
+</section>
+
+<section class="vista pantalla" id="vista-protocolo" aria-labelledby="titulo-protocolo" hidden>
+  <div class="cabecera">
+    <h1 class="cabecera__titulo" id="titulo-protocolo">Protocolo</h1>
+    <p class="cabecera__sub">Resumen de <code>protocolo.md</code>: cómo se decide y qué cuenta como verdadera, falsa o
+    indeterminada en cada código. Junto a cada alerta vuelves a ver la definición de su código.</p>
+  </div>
+  <section class="tarjeta" aria-labelledby="t-como">
+    <h2 class="tarjeta__titulo" id="t-como">Cómo se revisa</h2>
+    <div class="md">@@PROTOCOLO_COMO@@</div>
+  </section>
+  <section class="tarjeta" aria-labelledby="t-convenciones">
+    <h2 class="tarjeta__titulo" id="t-convenciones">Convenciones de las cifras</h2>
+    <div class="md">@@PROTOCOLO_CONVENCIONES@@</div>
+  </section>
+  <div class="rejilla rejilla--2">
+@@PROTOCOLO_CODIGOS@@
+  </div>
+  <p class="nota">@@NOTA_SIN_CASOS@@</p>
+  <div class="botonera">
+    <button type="button" class="boton boton--primario" id="empezar-revision">Empezar a revisar</button>
+  </div>
+</section>
+
+<section class="vista" id="vista-revisar" aria-label="Revisar alertas" hidden>
+  <div class="revision">
+    <div class="revision__tarjetas">
+@@TARJETAS@@
+    </div>
+    <aside class="panel" id="panel" aria-labelledby="panel-titulo">
+      <div class="panel__cab">
+        <p class="alerta__id" id="panel-pos"></p>
+        <h2 class="panel__titulo" id="panel-titulo">Tu decisión sobre <span id="panel-id"></span></h2>
+      </div>
+      <div class="grupo" role="group" aria-labelledby="rotulo-etiqueta">
+        <p class="grupo__rotulo"><span id="rotulo-etiqueta">Etiqueta</span> <span class="atajos">· teclas
+          <kbd class="tecla">V</kbd> <kbd class="tecla">F</kbd> <kbd class="tecla">I</kbd></span></p>
+        <div class="segmentado">@@OPCIONES_ETIQUETA@@</div>
+      </div>
+      <div class="grupo" role="group" aria-labelledby="rotulo-confianza">
+        <p class="grupo__rotulo"><span id="rotulo-confianza">Confianza</span> <span class="atajos">· teclas
+          <kbd class="tecla">A</kbd> <kbd class="tecla">M</kbd> <kbd class="tecla">B</kbd></span></p>
+        <div class="segmentado">@@OPCIONES_CONFIANZA@@</div>
+      </div>
+      <div class="campo">
+        <label class="campo__rotulo" for="razon">Justificación corta</label>
+        <textarea class="entrada" id="razon" rows="3" maxlength="600"
+          placeholder="Paso que decidió y cifras de la tarjeta. Ej.: «2.4: 420 subidas frente a 318 puestos/h, sin calendario»"></textarea>
+        <p class="campo__ayuda">Una o dos frases; sirve para la reunión de conciliación.</p>
+      </div>
+      <p class="estado-alerta" id="estado-alerta" aria-live="polite"></p>
+      <div class="botonera">
+        <button type="button" class="boton boton--secundario" id="anterior">@@CHEVRON_IZQ@@Anterior</button>
+        <button type="button" class="boton boton--primario" id="siguiente">Siguiente@@CHEVRON_DER@@</button>
+        <button type="button" class="boton boton--fantasma" id="pendiente">Siguiente sin terminar</button>
+      </div>
+      <p class="atajos">Teclas: <kbd class="tecla">J</kbd> escribe la justificación (<kbd class="tecla">Esc</kbd> sale) ·
+      <kbd class="tecla">←</kbd> <kbd class="tecla">→</kbd> anterior y siguiente.</p>
+      <p class="estado-guardado" id="estado-guardado" aria-live="polite"></p>
+      <div class="aviso aviso--bien" id="aviso-terminado" hidden>@@ICONO_BIEN@@<div class="aviso__cuerpo">
+        <p class="aviso__titulo">Terminaste las @@TOTAL@@ alertas</p>
+        <p>Ve a «Descargar» y envía tu archivo a quien modera la conciliación.</p></div></div>
+      <details class="desplegable" open>
+        <summary>@@CHEVRON_DER@@Qué cuenta en <span id="def-codigo"></span></summary>
+        <div class="desplegable__cuerpo">
+@@DEFINICIONES_PANEL@@
+        </div>
+      </details>
+      <details class="desplegable">
+        <summary>@@CHEVRON_DER@@Orden de decisión (protocolo §2)</summary>
+        <div class="desplegable__cuerpo md">@@ORDEN_DECISION@@</div>
+      </details>
+    </aside>
+  </div>
+</section>
+
+<section class="vista pantalla" id="vista-lista" aria-labelledby="titulo-lista" hidden>
+  <div class="cabecera">
+    <h1 class="cabecera__titulo" id="titulo-lista">Lista de alertas</h1>
+    <p class="cabecera__sub">Tus etiquetas, en el orden de revisión. Toca un id para ir a esa alerta.</p>
+  </div>
+  <div class="segmentado segmentado--filtro" role="group" aria-label="Qué alertas mostrar">
+    <button type="button" class="opcion opcion-filtro" data-filtro="todas" aria-pressed="true">Todas</button>
+    <button type="button" class="opcion opcion-filtro" data-filtro="pendientes" aria-pressed="false">Sin terminar</button>
+    <button type="button" class="opcion opcion-filtro" data-filtro="terminadas" aria-pressed="false">Terminadas</button>
+  </div>
+  <div class="tabla-marco">
+    <table class="tabla tabla--lista">
+      <thead><tr><th scope="col" class="num">#</th><th scope="col">Id</th><th scope="col">Código</th>
+      <th scope="col">Ruta</th><th scope="col">Fecha</th><th scope="col">Ventana</th><th scope="col">Etiqueta</th>
+      <th scope="col">Confianza</th><th scope="col">Justificación</th></tr></thead>
+      <tbody id="cuerpo-lista"></tbody>
+    </table>
+  </div>
+  <p class="nota" id="lista-vacia" hidden>No hay alertas con este filtro.</p>
+</section>
+
+<section class="vista pantalla" id="vista-descargar" aria-labelledby="titulo-descargar" hidden>
+  <div class="cabecera">
+    <h1 class="cabecera__titulo" id="titulo-descargar">Descargar mis etiquetas</h1>
+    <p class="cabecera__sub" id="descarga-resumen"></p>
+  </div>
+  <div class="rejilla rejilla--2">
+    <section class="tarjeta" aria-labelledby="t-archivo">
+      <h2 class="tarjeta__titulo" id="t-archivo">Tu archivo</h2>
+      <p>Se descarga como <code id="descarga-nombre"></code>: una línea por alerta con la etiqueta, la confianza y la
+      justificación (el formato de las etiquetas de la revisión), más tu nombre, la fecha de cada etiqueta y el origen
+      «humano».</p>
+      <div class="aviso aviso--atencion" id="aviso-pendientes" hidden>@@ICONO_ALERTA@@<div class="aviso__cuerpo">
+        <p class="aviso__titulo">Te faltan <span id="n-pendientes"></span> alertas</p>
+        <p>Puedes descargar el avance para seguir en otro navegador, pero la conciliación necesita las @@TOTAL@@.</p>
+        <div class="chips" id="lista-pendientes"></div></div></div>
+      <div class="botonera">
+        <button type="button" class="boton boton--primario" id="descargar">@@ICONO_DESCARGAR@@Descargar mis etiquetas</button>
+      </div>
+      <p class="mensaje" id="mensaje-descarga" role="status"></p>
+      <p>Envía el archivo a quien modera la conciliación, <strong>no al otro revisor</strong>.</p>
+      <details class="desplegable" id="detalle-json">
+        <summary>@@CHEVRON_DER@@Ver el contenido del archivo</summary>
+        <div class="desplegable__cuerpo">
+          <label class="oculto" for="vista-json">Contenido del archivo de etiquetas</label>
+          <textarea class="entrada entrada--codigo" id="vista-json" rows="10" readonly></textarea>
+          <div class="botonera"><button type="button" class="boton boton--secundario" id="copiar">Copiar</button></div>
+        </div>
+      </details>
+    </section>
+    <section class="tarjeta" aria-labelledby="t-seguir">
+      <h2 class="tarjeta__titulo" id="t-seguir">Seguir en otro navegador o borrar</h2>
+      <p>Si el guardado automático no funciona o cambias de equipo, carga aquí el archivo que descargaste y sigues donde
+      ibas. Solo se carga un archivo con tu nombre.</p>
+      <div class="botonera"><label class="boton boton--secundario" for="cargar">Cargar un archivo guardado</label>
+        <input class="oculto" id="cargar" type="file" accept=".json,application/json"></div>
+      <p class="mensaje" id="mensaje-carga" role="status"></p>
+      <div class="aviso">@@ICONO_INFO@@<div class="aviso__cuerpo"><p>Cuando hayas descargado y enviado tu archivo, borra
+        tus datos de este navegador, sobre todo si el computador es compartido.</p></div></div>
+      <div class="botonera">
+        <button type="button" class="boton boton--secundario" id="borrar">Borrar mis datos de este navegador</button>
+      </div>
+    </section>
+  </div>
+</section>
+
+</main>
+<footer class="pie">Kit de revisión humana · muestra de @@TOTAL@@ alertas (<code>@@KIT@@</code>) · página generada con
+<code>generar_kit.py</code> a partir de <code>muestra.json</code>, las tarjetas <code>muestra/&lt;id&gt;.md</code> y
+<code>protocolo.md</code>. No trae etiquetas de ningún revisor.</footer>
+</div>
+<script type="application/json" id="datos-kit">@@DATOS@@</script>
+<script>
+@@JS@@
+</script>
+</body>
+</html>

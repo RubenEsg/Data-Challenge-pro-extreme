@@ -22,6 +22,9 @@ cada `.log` (referencias o citas sin resolver, cajas desbordadas de más de 10 p
 páginas y falla si se sale de un presupuesto; busca en el texto cadenas de conexión o claves y cifras sin dato
 («s. d.»), y arma el `.pptx` con las notas de `notas_orador.txt`. Sale con código 1 si algo falla.
 
+Tectonic se busca en la variable `TECTONIC`, en el `PATH` y en una ruta por omisión que se calcula desde la carpeta del
+repositorio. Desde un worktree de git esa ruta no existe: hay que fijar `TECTONIC` con la ruta de `tectonic.exe`.
+
 ## De dónde sale cada cifra
 
 - `datos_documentos.py` lee las evidencias de `api_frecuencias/docs/evidencias/` y escribe `generado/cifras.tex`: una
@@ -37,6 +40,21 @@ páginas y falla si se sale de un presupuesto; busca en el texto cadenas de cone
 - El calendario (conexión en las semanas 1 a 4, modo sombra en las 5 a 8 y piloto en las 9 a 16), los costos de
   infraestructura y el criterio para salir del modo sombra, por horizonte, salen de `../PLAN_EVOLUCION.md` (secciones
   1.1, 3.1 y 6.3), que es la única fuente.
+- El p95 de las consultas paginadas con k6 y el de las consultas durante una ingesta salen de la corrida vigente, con
+  el volumen de un año (`pruebas/k6_segmentos_consultas.json` y `pruebas/k6_segmentos_ingesta.json`, 13-11-2026). La
+  corrida anterior, con un mes de resultados (`pruebas/k6_consultas.json`, 9-11-2026), ya no se cita.
+- La carga de la capa de segmentos (`GET /segmentos/estadisticas`) sale de la medición vigente,
+  `api_frecuencias/docs/evidencias/pruebas/k6_segmentos_*.json` (13-11-2026), la misma que citan la matriz y el README; el «antes»
+  sale de `pruebas/k6_volumen.txt`. El kappa de la revisión doble de alertas es el global antes de conciliar
+  (`alertas/revision_doble/conciliacion.json`).
+- La ocupación por segmento (§10.1) sale de `ocupacion/perfil_ocupacion_segmentos.json` (validación del método frente
+  al dispositivo) y de `ocupacion/backtest_restriccion_reactiva.json` (efecto de la restricción reactiva); los meses en
+  caliente de la retención, de `retencion/corrida_aplicada.json`, y el refresco de segmentos sin cambios, de
+  `pruebas/segmentos_sin_cambios.json`.
+- Los consolidados de Extreme en el ciclo (lectura, calidad y contraste de `timbradas_consolidado` con la agregación
+  propia en la réplica, y las tablas por segmento sin filas de Sobusa) salen de
+  `consolidados/contraste_consolidados.json`, y la diferencia entre las dos bajadas, de
+  `consolidados/definicion_bajadas.json`.
 - El modelo de los documentos es el del producto, `hgb_fv2_20250831_s42`. Las cifras de los experimentos 11 y 12 del
   informe académico (13,94 % y 13,62 %) usan otro protocolo; cuando aparecen, se dice por qué difieren
   (`../README.md`, «Las cifras principales»).

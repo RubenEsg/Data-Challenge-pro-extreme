@@ -1,0 +1,30 @@
+{
+ "prueba": "tests/integracion/test_retencion.py::test_la_foto_de_una_prediccion_que_se_conserva_conserva_su_particion",
+ "particion": "feature_snapshot_201908",
+ "con_recomendacion_posterior_al_corte": {
+  "grupo": "foto",
+  "objeto": "feature_snapshot_201908",
+  "accion": "conservar",
+  "corte": "2025-10-11 05:16:31.653986-05:00",
+  "filas": 2,
+  "bytes": 98304,
+  "detalle": {
+   "desde": "2019-07-31 19:00:00-05:00",
+   "hasta": "2019-08-31 19:00:00-05:00",
+   "fotos_de_predicciones_conservadas": 1,
+   "motivo": "tiene fotos de predicciones que la regla de resultados conserva (creadas desde su corte, o viejas pero con una recomendación que se conserva; con retencion_meses_resultados = 0, todas): una foto vive lo que vive su predicción"
+  }
+ },
+ "sin_ella": {
+  "grupo": "foto",
+  "objeto": "feature_snapshot_201908",
+  "accion": "separar_y_borrar",
+  "corte": "2025-10-11 05:16:31.653986-05:00",
+  "filas": 2,
+  "bytes": 98304,
+  "detalle": {
+   "desde": "2019-07-31 19:00:00-05:00",
+   "hasta": "2019-08-31 19:00:00-05:00"
+  }
+ }
+}

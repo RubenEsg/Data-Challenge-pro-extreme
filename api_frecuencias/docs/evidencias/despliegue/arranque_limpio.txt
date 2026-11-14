@@ -1,24 +1,24 @@
-RNF-008 · arranque limpio con Docker Compose · 2026-11-09 08:27:06 -0500 (America/Bogota)
+RNF-008 · arranque limpio con Docker Compose · 2026-11-13 23:07:03 -0500 (America/Bogota)
 Proyecto compose aislado «sobusa_limpio»: API en 127.0.0.1:8010, PostgreSQL en 127.0.0.1:5440, volúmenes sobusa_limpio_datos_pg y sobusa_limpio_modelos (nuevos).
 Docker Engine 29.7.2; Docker Compose 5.5.1; equipo Windows 11 (Docker Desktop, contenedores Linux).
 Configuración: un archivo de entorno temporal generado al azar (POSTGRES_PASSWORD, SEUDONIMO_SECRETO) a partir de .env.example; no se usa el .env del equipo. PLANIFICADOR_HABILITADO=false para que la demostración sea determinista (el planificador se prueba aparte en docs/evidencias/cola/).
 
-0) Limpieza previa del proyecto aislado (down -v): 0.4 s
-1) docker compose -p sobusa_limpio build: 9.0 s (reutiliza las capas en caché de BuildKit si ya existen; con --sin-cache se reconstruye todo)
-2) docker compose -p sobusa_limpio up -d --build: retorna en 17.7 s (db sano -> migrar termina con 0 -> api)
+0) Limpieza previa del proyecto aislado (down -v): 0.3 s
+1) docker compose -p sobusa_limpio build: 3.1 s (reutiliza las capas en caché de BuildKit si ya existen; con --sin-cache se reconstruye todo)
+2) docker compose -p sobusa_limpio up -d --build: retorna en 13.5 s (db sano -> migrar termina con 0 -> api)
    db healthy; migrar terminó con código 0
-3) GET /health = ok a los 24.3 s del «up»; HEALTHCHECK de la imagen = healthy a los 28.5 s
+3) GET /health = ok a los 16.3 s del «up»; HEALTHCHECK de la imagen = healthy a los 19.1 s
    /health -> {'estado': 'ok', 'base_datos': 'ok', 'version': '1.0.0', 'fuente': 'parquet', 'integraciones': {'fuente_postgres': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 3, 'reinicio_s': 60.0, 'reintento_en_s': None, 'ultimo_error': None}, 'notif_correo': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 5, 'reinicio_s': 120.0, 'reintento_en_s': None, 'ultimo_error': None}, 'notif_whatsapp': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 5, 'reinicio_s': 120.0, 'reintento_en_s': None, 'ultimo_error': None}}}
    migraciones: ver migraciones.txt (OK)
-4) Claves de API: 2 creadas con scripts/crear_api_key.py dentro del contenedor (roles admin y operador); la API se recreó con sus hashes en API_KEYS y respondió /health en 4.6 s (salud 2.6 s). Las claves no se imprimen ni se guardan.
+4) Claves de API: 2 creadas con scripts/crear_api_key.py dentro del contenedor (roles admin y operador); la API se recreó con sus hashes en API_KEYS y respondió /health en 4.1 s (salud 2.6 s). Las claves no se imprimen ni se guardan.
    GET /api/v1/alerts sin clave -> 401 (esperado 401); con la clave operador -> 200 (esperado 200); POST /api/v1/models/rollback con la clave operador -> 403 (esperado 403, exige admin); GET /metrics -> 200; SEUDONIMO_SECRETO llega al contenedor con 64 caracteres (no se muestra)
-5) Demostración §14.2 (scripts/demo_ciclo_api.py --revertir) -> código 0 en 190.9 s; salida en docs/evidencias/despliegue/demo_ciclo_api.txt
+5) Demostración §14.2 (scripts/demo_ciclo_api.py --revertir) -> código 0 en 133.5 s; salida en docs/evidencias/despliegue/demo_ciclo_api.txt
    pasos impresos: [1, 2, 3, 4, 5, 6] (se esperan 1 a 6)
 6) RNF-001: ver reinicio.txt (OK)
 7) Imagen: ver imagen.txt (tamaño, usuario sin privilegios, capas, pip freeze)
-8) docker compose -p sobusa_limpio down -v: 2.4 s; contenedores restantes [], volúmenes restantes []
+8) docker compose -p sobusa_limpio down -v: 1.9 s; contenedores restantes [], volúmenes restantes []
 
-Resumen (5.7 min en total):
+Resumen (4.0 min en total):
   [OK] arranque desde cero y /health
   [OK] migraciones 0001…head
   [OK] claves de API por rol y autenticación

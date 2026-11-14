@@ -51,6 +51,8 @@ class ParametrosPagina:
 
 
 def ordenar(consulta: Select, modelo, orden: str | None, por_defecto: str) -> Select:
+    """Orden pedido (o el de por omisión) con la llave primaria como desempate: con LIMIT/OFFSET, un orden con empates
+    repite o salta filas entre páginas (las ~1.170 filas de la foto de una ejecución comparten ventana_inicio)."""
     campo = orden or por_defecto
     desc = campo.startswith("-")
     nombre = campo.lstrip("-+")
@@ -58,7 +60,8 @@ def ordenar(consulta: Select, modelo, orden: str | None, por_defecto: str) -> Se
     if columna is None:
         raise ErrorApi(422, "orden_invalido", f"No se puede ordenar por '{nombre}'",
                        {"campos": sorted(modelo.__table__.columns.keys())})
-    return consulta.order_by(columna.desc() if desc else columna.asc())
+    desempate = [c for c in modelo.__table__.primary_key.columns if c is not columna]
+    return consulta.order_by(columna.desc() if desc else columna.asc(), *desempate)
 
 
 def paginar(sesion: Session, consulta: Select, modelo, pagina: ParametrosPagina, por_defecto: str) -> dict:

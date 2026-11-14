@@ -1,4 +1,4 @@
-Roles de la IA en la réplica (§11.3) (2026-11-09T06:45:17-05:00)
+Roles de la IA en la réplica (§11.3) (2026-11-11T05:47:24-05:00)
 
 == lector_ia: configuración de la sesión (ALTER ROLE ... SET)
    default_transaction_read_only = on
@@ -46,7 +46,7 @@ Roles de la IA en la réplica (§11.3) (2026-11-09T06:45:17-05:00)
    fn_segmentar_ruta                    rechazado [42501] permission denied for function fn_segmentar_ruta
 
 == escritor_ia: en ai_frecuencias (debe funcionar)
-   CREATE TABLE, INSERT y SELECT en ai_frecuencias.prueba_f6186cb6: suma = 3 (correcto)
+   CREATE TABLE, INSERT y SELECT en ai_frecuencias.prueba_1823e72a: suma = 3 (correcto)
    CREATE TEMP TABLE (staging de la ingesta): correcto
 == escritor_ia: tablas de Extreme (debe fallar)
    SELECT count(*) FROM public.timbradas_consolidado                      rechazado [42501] permission denied for table timbradas_consolidado

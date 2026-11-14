@@ -1,0 +1,139 @@
+{
+ "requisito": "§3.1 pronóstico e intervalo de confianza por sentido, segmento y franja horaria; §9.3",
+ "script": "scripts/evaluar_banda_ventanas_segmentos.py",
+ "particion": {
+  "entrenamiento": "2023-01-01 a 2023-02-08",
+  "validacion": "2023-02-09 a 2023-02-17",
+  "prueba": "2023-02-18 a 2023-02-27"
+ },
+ "activo": "seg_hgb_jerarquico_20230227_s42",
+ "activo_candidato": "M4",
+ "cobertura_objetivo": 0.8,
+ "metodo": "modelos ajustados solo con el entrenamiento, banda de la validación aplicada como en la API (μ = fracción de la ventana × total real de la ruta en la ventana) a ventanas de horas consecutivas de la prueba que empiezan en cada hora de servicio",
+ "bandas_iguales_a_segmentos_modelo": true,
+ "ic95_prueba_wape_segmento_hora_vs_B0": {
+  "diferencia_pp": -0.967,
+  "ic95_pp": [
+   -1.596,
+   -0.015
+  ],
+  "dias": 10,
+  "replicas": 1000,
+  "semilla": 42
+ },
+ "cobertura": {
+  "B0": {
+   "1h": {
+    "segmento": {
+     "n": 63166,
+     "cobertura_pct": 78.48,
+     "bajo_p10_pct": 10.63,
+     "sobre_p90_pct": 10.89,
+     "ancho_medio": 7.219,
+     "y_medio": 5.92
+    },
+    "sentido": {
+     "n": 982,
+     "cobertura_pct": 80.75,
+     "bajo_p10_pct": 10.29,
+     "sobre_p90_pct": 8.96,
+     "ancho_medio": 108.038,
+     "y_medio": 380.8
+    }
+   },
+   "2h": {
+    "segmento": {
+     "n": 59178,
+     "cobertura_pct": 76.94,
+     "bajo_p10_pct": 11.16,
+     "sobre_p90_pct": 11.89,
+     "ancho_medio": 11.39,
+     "y_medio": 12.319
+    },
+    "sentido": {
+     "n": 920,
+     "cobertura_pct": 79.67,
+     "bajo_p10_pct": 9.67,
+     "sobre_p90_pct": 10.65,
+     "ancho_medio": 180.072,
+     "y_medio": 792.391
+    }
+   },
+   "3h": {
+    "segmento": {
+     "n": 55190,
+     "cobertura_pct": 76.15,
+     "bajo_p10_pct": 11.04,
+     "sobre_p90_pct": 12.81,
+     "ancho_medio": 14.713,
+     "y_medio": 18.719
+    },
+    "sentido": {
+     "n": 858,
+     "cobertura_pct": 79.37,
+     "bajo_p10_pct": 8.16,
+     "sobre_p90_pct": 12.47,
+     "ancho_medio": 234.996,
+     "y_medio": 1204.1
+    }
+   }
+  },
+  "M4": {
+   "1h": {
+    "segmento": {
+     "n": 63166,
+     "cobertura_pct": 78.31,
+     "bajo_p10_pct": 10.65,
+     "sobre_p90_pct": 11.03,
+     "ancho_medio": 7.045,
+     "y_medio": 5.92
+    },
+    "sentido": {
+     "n": 982,
+     "cobertura_pct": 83.4,
+     "bajo_p10_pct": 9.06,
+     "sobre_p90_pct": 7.54,
+     "ancho_medio": 111.411,
+     "y_medio": 380.8
+    }
+   },
+   "2h": {
+    "segmento": {
+     "n": 59178,
+     "cobertura_pct": 76.75,
+     "bajo_p10_pct": 11.85,
+     "sobre_p90_pct": 11.4,
+     "ancho_medio": 11.205,
+     "y_medio": 12.319
+    },
+    "sentido": {
+     "n": 920,
+     "cobertura_pct": 80.22,
+     "bajo_p10_pct": 9.89,
+     "sobre_p90_pct": 9.89,
+     "ancho_medio": 186.644,
+     "y_medio": 792.391
+    }
+   },
+   "3h": {
+    "segmento": {
+     "n": 55190,
+     "cobertura_pct": 76.02,
+     "bajo_p10_pct": 12.29,
+     "sobre_p90_pct": 11.69,
+     "ancho_medio": 14.499,
+     "y_medio": 18.719
+    },
+    "sentido": {
+     "n": 858,
+     "cobertura_pct": 80.54,
+     "bajo_p10_pct": 8.28,
+     "sobre_p90_pct": 11.19,
+     "ancho_medio": 245.969,
+     "y_medio": 1204.1
+    }
+   }
+  }
+ },
+ "nota": "análisis posterior a la prueba (revisión): no cambia la elección, la activación ni la banda; las ventanas de 30 min no se pueden medir porque las subidas por segmento son por hora de salida"
+}

@@ -4,8 +4,9 @@
 1. Compila el SQL EXACTO que genera FuentePostgresSoloLectura.consulta_incremental (y la capa analítica de segmentos)
    y lo explica en la misma sesión que usa la API: READ ONLY, statement_timeout y TimeZone America/Bogota, con una
    marca real (la de una lectura diaria: la marca máxima de la tabla menos 24 h, o la de la carga).
-2. Aplica la PROPUESTA de índices (docs/evidencias/replica/propuesta_indices.sql) SOLO EN LA RÉPLICA y como
-   extreme_dba, el dueño de la base: §8.3 dice que los índices los aplica el responsable de la base de datos.
+2. Aplica la PROPUESTA de índices (docs/evidencias/replica/propuesta_indices.sql, decidida con la medición de cada
+   candidato de scripts/replica_indices_candidatos.py) SOLO EN LA RÉPLICA y como extreme_dba, el dueño de la base:
+   §8.3 dice que los índices los aplica el responsable de la base de datos.
 3. Vuelve a medir con los índices.
 4. Los borra (la réplica vuelve a ser fiel a Extreme), salvo --conservar-indices.
 Guarda docs/evidencias/replica/explain_incremental.txt y .json con planes, tiempos, buffers y el argumento de volumen.
@@ -21,6 +22,7 @@ import time
 from datetime import datetime
 
 from scripts import replica_comun as rc
+from scripts.replica_indices_candidatos import TABLAS_DE_LA_PROPUESTA, propuesta_sql
 
 RAIZ = rc.RAIZ
 SALIDA = RAIZ / "docs" / "evidencias" / "replica"
@@ -30,34 +32,28 @@ TABLAS = ("demanda_segmentos", "timbradas_segmentos", "timbradas_consolidado", "
 MARCA_DE = {"demanda_segmentos": ("timbradas_segmentos", "ultimaactualizacion"),
             "timbradas_segmentos": ("timbradas_segmentos", "ultimaactualizacion")}
 
-PROPUESTA_SQL = """-- Propuesta de índices para el DBA de Extreme Technologies (§8.3: se piden después de revisar
--- EXPLAIN (ANALYZE, BUFFERS) y los aplica el responsable de la base). Generada por scripts/replica_explain.py y medida
--- SOLO en la réplica local. En producción, CONCURRENTLY no bloquea las escrituras de la captura ni de los triggers.
--- Ninguno cambia tablas, triggers, funciones ni scripts: solo acelera las lecturas incrementales del módulo de IA.
-
--- 1) Lectura incremental de timbradas_segmentos (lo que escribe tg_timbrada_segmento) por marca de agua.
-CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_ia_timbradas_segmentos_ultimaactualizacion
-    ON public.timbradas_segmentos (ultimaactualizacion);
--- 2) Re-agregación de las franjas tocadas: segmentos de un viaje (la llave foránea id_viaje no tiene índice).
-CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_ia_timbradas_segmentos_id_viaje
-    ON public.timbradas_segmentos (id_viaje);
--- 3) Viajes de una ruta en una hora de salida (franja de la demanda horaria).
-CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_ia_progvehiculos_ruta_hora_salida
-    ON public.progvehiculos (idruta, (date_trunc('hour', fechasalida)));
--- 4) Marca de agua de los consolidados (§8.3: «consultar los incrementos por ultima_actualizacion»).
-CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_ia_timbradas_consolidado_ultima_actualizacion
-    ON public.timbradas_consolidado (ultima_actualizacion);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_ia_timbradas_anio_ultima_actualizacion
-    ON public.timbradas_anio (ultima_actualizacion);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_ia_timbradas_segmentos_anio_ultima_actualizacion
-    ON public.timbradas_segmentos_anio (ultima_actualizacion);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS ix_ia_timbradas_segmentos_consolidado_ultima_actualizacion
-    ON public.timbradas_segmentos_consolidado (ultima_actualizacion);
-"""
+# La propuesta para el DBA sale de la medición de cada candidato en una transacción que se revierte
+# (scripts/replica_indices_candidatos.py, docs/evidencias/replica/indices_candidatos.md): una sola fuente para el
+# archivo propuesta_indices.sql, este script y sus pruebas.
+PROPUESTA_SQL = propuesta_sql()
 
 
 def _indices_propuestos() -> list[str]:
     return re.findall(r"IF NOT EXISTS (\w+)", PROPUESTA_SQL)
+
+
+def _tabla_y_columnas() -> dict[str, str]:
+    """Nombre de cada índice de la propuesta -> «tabla (columnas)», para que el informe diga qué se aplicó."""
+    return {n: f"{t} ({c})" for n, t, c in re.findall(r"IF NOT EXISTS (\w+)\s+ON public\.(\w+) \((.+)\);",
+                                                      PROPUESTA_SQL)}
+
+
+def sesiones_ajenas(cur) -> int:
+    """Sesiones de otros clientes en el servidor de la réplica (sin contar la de este script): la réplica debe estar
+    libre para que la medición no compita con otra carga."""
+    cur.execute("SELECT count(*) FROM pg_stat_activity WHERE backend_type = 'client backend' "
+                "AND pid <> pg_backend_pid()")
+    return int(cur.fetchone()[0])
 
 
 def _url_lector() -> str:
@@ -101,10 +97,39 @@ def _con_zona(m: datetime) -> datetime:
 
 
 def sql_compilado(fuente, motor):
-    """(sql con marcadores del driver, parámetros) de la consulta incremental de la fuente."""
+    """(sql con marcadores del driver, parámetros) de la consulta incremental de la fuente. Las tablas con proceso lo
+    filtran en el SQL (fuentes.TABLAS_CON_PROCESO): el parámetro sale con el proceso de la fuente."""
     sentencia = fuente.consulta_incremental()
     compilado = sentencia.compile(dialect=motor.dialect)
-    return str(compilado), dict(compilado.params)
+    params = dict(compilado.params)
+    if "proceso" in params:
+        params["proceso"] = fuente.proceso
+    return str(compilado), params
+
+
+def resumir_plan(plan: list) -> dict:
+    """Lo que se compara de un EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON): tiempos del servidor, filas, buffers de las
+    hojas, escaneos (tipo, tabla e índice) y filas descartadas por filtro y por el filtro de una unión (un ciclo
+    anidado que compara todas las parejas: la señal de un plan elegido con una mala estimación)."""
+    raiz = plan[0]
+    nodo = raiz["Plan"]
+    nodos = []
+
+    def recorrer(n):
+        nodos.append(n)
+        for h in n.get("Plans", []):
+            recorrer(h)
+
+    recorrer(nodo)
+    escaneos = [f"{n['Node Type']} {n.get('Relation Name', '')} {n.get('Index Name', '')}".strip()
+                for n in nodos if "Scan" in n["Node Type"]]
+    return {"ms_ejecucion": round(raiz.get("Execution Time", 0.0), 2),
+            "ms_planificacion": round(raiz.get("Planning Time", 0.0), 2), "filas": nodo.get("Actual Rows"),
+            "buffers_hit": sum(n.get("Shared Hit Blocks", 0) for n in nodos if "Plans" not in n),
+            "buffers_read": sum(n.get("Shared Read Blocks", 0) for n in nodos if "Plans" not in n),
+            "escaneos": escaneos, "filas_descartadas_por_filtro": sum(n.get("Rows Removed by Filter", 0)
+                                                                      for n in nodos),
+            "filas_descartadas_por_union": sum(n.get("Rows Removed by Join Filter", 0) for n in nodos)}
 
 
 def explicar(motor, sql: str, params: dict) -> dict:
@@ -121,24 +146,7 @@ def explicar(motor, sql: str, params: dict) -> dict:
             plan = conn.exec_driver_sql("EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) " + sql, params).scalar()
         finally:
             conn.rollback()
-    raiz = plan[0]
-    nodo = raiz["Plan"]
-    nodos = []
-
-    def recorrer(n):
-        nodos.append(n)
-        for h in n.get("Plans", []):
-            recorrer(h)
-
-    recorrer(nodo)
-    escaneos = [f"{n['Node Type']} {n.get('Relation Name', '')} {n.get('Index Name', '')}".strip()
-                for n in nodos if "Scan" in n["Node Type"]]
-    salida.update(
-        texto="\n".join(texto), ms_ejecucion=round(raiz.get("Execution Time", 0.0), 2),
-        ms_planificacion=round(raiz.get("Planning Time", 0.0), 2), filas=nodo.get("Actual Rows"),
-        buffers_hit=sum(n.get("Shared Hit Blocks", 0) for n in nodos if "Plans" not in n),
-        buffers_read=sum(n.get("Shared Read Blocks", 0) for n in nodos if "Plans" not in n),
-        escaneos=escaneos, filas_descartadas_por_filtro=sum(n.get("Rows Removed by Filter", 0) for n in nodos))
+    salida.update(texto="\n".join(texto), **resumir_plan(plan))
     return salida
 
 
@@ -177,8 +185,7 @@ def aplicar_indices(cx) -> dict:
         t0 = time.perf_counter()
         cx.execute(cuerpo)
         tiempos[nombre] = round(time.perf_counter() - t0, 2)
-    for t in ("timbradas_segmentos", "progvehiculos", "timbradas_consolidado", "timbradas_anio",
-              "timbradas_segmentos_anio", "timbradas_segmentos_consolidado"):
+    for t in TABLAS_DE_LA_PROPUESTA:
         cx.execute(f"ANALYZE public.{t}")
     return tiempos
 
@@ -211,6 +218,8 @@ def volumen(cur) -> dict:
 def main(argv: list[str] | None = None) -> dict:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--conservar-indices", action="store_true")
+    p.add_argument("--nota", default="", help="condiciones de la medición (por ejemplo, la carga del equipo); va al "
+                                              "encabezado del informe")
     a = p.parse_args(argv)
     from sqlalchemy import create_engine
 
@@ -221,10 +230,13 @@ def main(argv: list[str] | None = None) -> dict:
     motor = create_engine(_url_lector(), pool_size=1, max_overflow=0)
     informe: dict = {"generado_en": datetime.now().astimezone().isoformat(), "rol_medicion": "lector_ia",
                      "rol_indices": "extreme_dba (dueño de la base, §8.3)"}
+    if a.nota:
+        informe["nota_medicion"] = a.nota
     dba = conectar("extreme_dba", autocommit=True)
     try:
         with candado(dba):
             with dba.cursor() as cur:
+                informe["sesiones_ajenas_al_empezar"] = sesiones_ajenas(cur)
                 informe["volumen"] = volumen(cur)
                 marcas = {t: marca_de_lectura(cur, t, informe["volumen"]["filas_por_dia"]) for t in TABLAS}
                 # escenario de régimen: la ejecución siguiente a una lectura completa (marca = la mayor; nada nuevo)
@@ -255,12 +267,33 @@ def main(argv: list[str] | None = None) -> dict:
     return informe
 
 
+def _propuesta_aplicada(inf: dict) -> list[str]:
+    """Qué índices de la propuesta se aplicaron (tabla, columnas y segundos de creación), si se borraron y en qué
+    condiciones se midió."""
+    aplicados = inf.get("indices_aplicados_s") or {}
+    if not aplicados:
+        return []
+    columnas = _tabla_y_columnas()
+    borrados = inf.get("indices_borrados") or []
+    lineas = ["", "== Propuesta aplicada (docs/evidencias/replica/propuesta_indices.sql, CREATE INDEX CONCURRENTLY "
+                  "como extreme_dba)"]
+    lineas += [f"   {n} · {columnas.get(n, '-')} · {s} s" for n, s in aplicados.items()]
+    lineas.append(f"   Índices ix_ia_* antes de medir: {', '.join(inf.get('indices_previos') or []) or 'ninguno'} · "
+                  f"borrados al terminar: {len(borrados)} de {len(aplicados)}")
+    if inf.get("sesiones_ajenas_al_empezar") is not None:
+        lineas.append(f"   Sesiones de otros clientes en la réplica al empezar: {inf['sesiones_ajenas_al_empezar']}")
+    if inf.get("nota_medicion"):
+        lineas.append(f"   Condiciones de la medición: {inf['nota_medicion']}")
+    return lineas
+
+
 def _texto(inf: dict) -> str:
     v = inf["volumen"]
     lineas = [
         "EXPLAIN (ANALYZE, BUFFERS) de las consultas incrementales de la API, como lector_ia (READ ONLY, "
         "statement_timeout, TimeZone America/Bogota)",
         f"Generado: {inf['generado_en']} · índices aplicados por {inf['rol_indices']} y borrados al terminar",
+        *_propuesta_aplicada(inf),
         "", "== Argumento de volumen",
         f"timbradas_segmentos en la réplica: {v['timbradas_segmentos_filas']:,} filas ({v['tamano_mb']} MB), "
         f"{v['viajes_con_segmentos']:,} viajes, {v['filas_por_viaje']} filas por viaje, {v['dias_con_datos']} días.",
@@ -287,7 +320,8 @@ def _texto(inf: dict) -> str:
         for t, r in inf[fase].items():
             lineas += [f"-- {t} (marca {r.get('marca', '-')}): {r.get('ms_ejecucion')} ms, filas={r.get('filas')}, "
                        f"buffers hit={r.get('buffers_hit')} read={r.get('buffers_read')}, "
-                       f"descartadas por filtro={r.get('filas_descartadas_por_filtro')}", r.get("texto") or
+                       f"descartadas por filtro={r.get('filas_descartadas_por_filtro')}, "
+                       f"por el filtro de una unión={r.get('filas_descartadas_por_union')}", r.get("texto") or
                        r.get("error", ""), ""]
     return "\n".join(lineas) + "\n"
 

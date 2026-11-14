@@ -1,13 +1,13 @@
 {
  "servidor": "SonarQube 26.11.0.134175 (Community Build, Docker)",
  "proyecto": "sobusa-api-frecuencias",
- "generado_en": "2026-11-09T12:50:34-05:00",
+ "generado_en": "2026-11-14T00:56:02-05:00",
  "ultimo_analisis": {
-  "key": "3ab7e497-44d9-4381-a942-d2486d5e99f9",
-  "date": "2026-11-09T17:49:56+0000",
+  "key": "9c2e3897-468f-4a2c-a614-0ae5f006698b",
+  "date": "2026-11-14T05:55:19+0000",
   "events": [
    {
-    "key": "cb99317f-b4d8-433b-9508-b06890078632",
+    "key": "75d1b5f5-52d3-461e-a700-0222fe2ff41f",
     "category": "VERSION",
     "name": "1.0.0"
    }
@@ -18,50 +18,50 @@
  },
  "medidas": {
   "duplicated_lines_density": "0.0",
-  "functions": "1063",
+  "functions": "1571",
   "sqale_rating": "1.0",
   "blocker_violations": "0",
   "test_failures": "0",
-  "major_violations": "711",
+  "major_violations": "1635",
   "software_quality_info_issues": "0",
-  "line_coverage": "94.3",
-  "software_quality_medium_issues": "713",
+  "line_coverage": "95.7",
+  "software_quality_medium_issues": "1637",
   "test_errors": "0",
   "security_rating": "1.0",
-  "violations": "736",
+  "violations": "1666",
   "critical_violations": "0",
   "alert_status": "OK",
   "info_violations": "0",
-  "tests": "1055",
-  "uncovered_lines": "642",
-  "software_quality_maintainability_issues": "736",
-  "files": "47",
-  "skipped_tests": "5",
-  "complexity": "4082",
-  "minor_violations": "25",
+  "tests": "1770",
+  "uncovered_lines": "658",
+  "software_quality_maintainability_issues": "1665",
+  "files": "55",
+  "skipped_tests": "0",
+  "complexity": "5765",
+  "minor_violations": "31",
   "duplicated_lines": "0",
   "software_quality_security_rating": "1.0",
-  "classes": "111",
+  "classes": "150",
   "software_quality_security_issues": "0",
-  "statements": "10682",
+  "statements": "14884",
   "software_quality_high_issues": "0",
   "accepted_issues": "1",
-  "sqale_index": "3676",
+  "sqale_index": "8314",
   "bugs": "0",
-  "lines_to_cover": "11221",
-  "software_quality_reliability_issues": "2",
-  "software_quality_low_issues": "25",
-  "ncloc": "14530",
+  "lines_to_cover": "15314",
+  "software_quality_reliability_issues": "4",
+  "software_quality_low_issues": "32",
+  "ncloc": "19843",
   "software_quality_blocker_issues": "0",
   "software_quality_reliability_rating": "2.0",
-  "coverage": "94.3",
+  "coverage": "95.7",
   "reliability_rating": "1.0",
-  "code_smells": "736",
-  "sqale_debt_ratio": "0.8",
+  "code_smells": "1666",
+  "sqale_debt_ratio": "1.4",
   "security_hotspots": "0",
   "security_review_rating": "1.0",
   "test_success_density": "100.0",
-  "cognitive_complexity": "3515",
+  "cognitive_complexity": "4705",
   "duplicated_blocks": "0",
   "vulnerabilities": "0",
   "software_quality_maintainability_rating": "1.0"
@@ -79,7 +79,7 @@
     },
     {
      "metric": "functions",
-     "value": "1063"
+     "value": "1571"
     },
     {
      "metric": "sqale_rating",
@@ -98,7 +98,7 @@
     },
     {
      "metric": "major_violations",
-     "value": "711",
+     "value": "1635",
      "bestValue": false
     },
     {
@@ -108,12 +108,12 @@
     },
     {
      "metric": "line_coverage",
-     "value": "94.3",
+     "value": "95.7",
      "bestValue": false
     },
     {
      "metric": "software_quality_medium_issues",
-     "value": "713",
+     "value": "1637",
      "bestValue": false
     },
     {
@@ -128,7 +128,7 @@
     },
     {
      "metric": "violations",
-     "value": "736",
+     "value": "1666",
      "bestValue": false
     },
     {
@@ -147,34 +147,34 @@
     },
     {
      "metric": "tests",
-     "value": "1055"
+     "value": "1770"
     },
     {
      "metric": "uncovered_lines",
-     "value": "642",
+     "value": "658",
      "bestValue": false
     },
     {
      "metric": "software_quality_maintainability_issues",
-     "value": "736",
+     "value": "1665",
      "bestValue": false
     },
     {
      "metric": "files",
-     "value": "47"
+     "value": "55"
     },
     {
      "metric": "skipped_tests",
-     "value": "5",
-     "bestValue": false
+     "value": "0",
+     "bestValue": true
     },
     {
      "metric": "complexity",
-     "value": "4082"
+     "value": "5765"
     },
     {
      "metric": "minor_violations",
-     "value": "25",
+     "value": "31",
      "bestValue": false
     },
     {
@@ -189,7 +189,7 @@
     },
     {
      "metric": "classes",
-     "value": "111"
+     "value": "150"
     },
     {
      "metric": "software_quality_security_issues",
@@ -198,7 +198,7 @@
     },
     {
      "metric": "statements",
-     "value": "10682"
+     "value": "14884"
     },
     {
      "metric": "software_quality_high_issues",
@@ -212,7 +212,7 @@
     },
     {
      "metric": "sqale_index",
-     "value": "3676",
+     "value": "8314",
      "bestValue": false
     },
     {
@@ -222,21 +222,21 @@
     },
     {
      "metric": "lines_to_cover",
-     "value": "11221"
+     "value": "15314"
     },
     {
      "metric": "software_quality_reliability_issues",
-     "value": "2",
+     "value": "4",
      "bestValue": false
     },
     {
      "metric": "software_quality_low_issues",
-     "value": "25",
+     "value": "32",
      "bestValue": false
     },
     {
      "metric": "ncloc",
-     "value": "14530"
+     "value": "19843"
     },
     {
      "metric": "software_quality_blocker_issues",
@@ -250,7 +250,7 @@
     },
     {
      "metric": "coverage",
-     "value": "94.3",
+     "value": "95.7",
      "bestValue": false
     },
     {
@@ -260,12 +260,12 @@
     },
     {
      "metric": "code_smells",
-     "value": "736",
+     "value": "1666",
      "bestValue": false
     },
     {
      "metric": "sqale_debt_ratio",
-     "value": "0.8",
+     "value": "1.4",
      "bestValue": false
     },
     {
@@ -285,7 +285,7 @@
     },
     {
      "metric": "cognitive_complexity",
-     "value": "3515",
+     "value": "4705",
      "bestValue": false
     },
     {

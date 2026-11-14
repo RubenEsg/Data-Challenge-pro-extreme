@@ -1,77 +1,151 @@
-Pruebas de la optimización de frecuencia (§5.1, §10.1-§10.3, RF-007, RF-008, RF-013, §12.3, §18).
-2026-11-09, hora de Bogotá. Python 3.13, pytest 9.2. La integración corre contra una base de pruebas aparte en el
-PostgreSQL local (puerto 5433), migrada por el conftest con alembic downgrade base + upgrade head (hasta 0007), con la
-autenticación encendida.
+Pruebas de la optimización de frecuencia (§5.1, §10.1-§10.3, RF-007, RF-008, RF-013, §12.3, §18): unitarias del área, integración de las recomendaciones, los módulos vecinos que consumen el plan y la compatibilidad del contrato.
 
-1) Pruebas unitarias del área (07:39):
-   pytest tests/unit/test_optimizacion.py tests/unit/test_optimizacion_objetivo.py tests/unit/test_optimizacion_plan.py
-          tests/unit/test_motor_d5.py
-   81 passed, 0 failed. Por archivo: test_motor_d5.py 3, test_optimizacion.py 29, test_optimizacion_objetivo.py 34,
-   test_optimizacion_plan.py 15.
+Comando (desde api_frecuencias/, escrito por scripts/evidencia_pytest.py):
+  TEST_DATABASE_NAME=ai_frecuencias_pruebas_ev_despliegue_pytest python -m pytest tests/unit/test_optimizacion.py tests/unit/test_optimizacion_objetivo.py tests/unit/test_optimizacion_ocupacion.py tests/unit/test_optimizacion_plan.py tests/unit/test_motor_d5.py tests/integracion/test_recomendaciones.py tests/integracion/test_respuesta_api.py tests/integracion/test_api_integracion.py tests/contrato/test_compatibilidad_openapi.py -rA
+Corrida del 2026-11-13, de 22:31:04 a 22:31:54 (America/Bogota); 50 s.
+Resultado: 142 casos; 142 PASSED, 0 FAILED (código de salida de pytest: 0).
+Por archivo: tests/contrato/test_compatibilidad_openapi.py: 6; tests/integracion/test_api_integracion.py: 22; tests/integracion/test_recomendaciones.py: 12; tests/integracion/test_respuesta_api.py: 8; tests/unit/test_motor_d5.py: 3; tests/unit/test_optimizacion.py: 29; tests/unit/test_optimizacion_objetivo.py: 34; tests/unit/test_optimizacion_ocupacion.py: 13; tests/unit/test_optimizacion_plan.py: 15.
+Nota: la corrida no lleva GENERAR_EVIDENCIAS: ejemplo_calculate.json y ejemplo_plan_d5.json los escribe tests/integracion/test_recomendaciones.py con GENERAR_EVIDENCIAS=1. La carpeta tests/unit completa está en la suite final (pruebas/suite_final.xml).
 
-   Pruebas del plan del día (tests/unit/test_optimizacion_plan.py):
-   - test_plan_dia_usa_el_pronostico_horario_del_modelo_activo: el plan del día sale del modelo activo (P10/P50/P90
-     de cada hora con h = 60, sin factor intradía; cada hora coincide con inferencia.predecir) y existe también para
-     2026-01-05; el E12 precalculado solo cubre 2025.
-   - test_plan_dia_toma_los_umbrales_gobernados_como_cotas_del_milp: nmin = ceil(minutos / headway máximo efectivo),
-     tope = floor(minutos / headway mínimo); cada parámetro dice su fuente; subir el headway mínimo a 6 min deja la
-     hora 5 limitada, no viable y con su motivo.
-   - test_una_sola_salida_no_tiene_intervalo_y_no_es_no_viable: una hora operada menos minutos que el headway mínimo
-     (SILENCIO a las 4 h del domingo 23-nov-2025 y del festivo 8-dic-2025: 0,2 min) tiene tope 1 salida, sin
-     intervalo que verificar (sin_intervalo = true): ya no es «no viable» por eso, como en la respuesta del reto. Una
-     hora sin un nivel entero de verdad (3 min con headway entre 2 y 2,5 min) sigue siendo no viable.
-   - test_vehiculos_con_el_ritmo_de_la_hora_y_su_definicion: vehículos = ceil(ciclo / headway) con headway = 60 /
-     salidas por hora. En una hora completa es la fórmula literal de §10.3. Dos salidas en 4,5 min piden 6 vehículos,
-     no 74; antes, una sola salida a las 4:59 pedía 501. El plan trae vehiculos_hora_pico y buses_en_ruta_pico, el
-     conteo de D5 cada 15 min que limita la flota, y definicion_vehiculos dice qué mide cada uno. El costo del día es
-     la suma del costo de cada hora.
-   - test_insumos_plan_es_publico_y_son_los_del_plan y test_insumos_plan_sin_pronostico_usa_el_del_modelo_activo:
-     optimizacion.insumos_plan expone, por hora, mu, s, capacidad, km del ciclo (dist), CV de los intervalos (cv_d4) y
-     el resto de los insumos del MILP. Son los mismos con que se resolvió el plan; _insumos_activo queda como alias.
-   - test_fila_plan_y_plan_desde_filas_ida_y_vuelta: lo que persiste el ciclo reconstruye el mismo plan, también con
-     el formato de construir_recomendacion; las salidas programadas, la flota, el costo y sus componentes se rehacen
-     con las horas cuando el resumen guardado no los trae.
-   - test_bajar_la_espera_maxima_cambia_el_plan, test_bajar_la_espera_maxima_cambia_la_recomendacion_de_franja,
-     test_plan_dia_marca_sobreoferta_con_su_motivo, test_sobreoferta_en_la_franja, test_plan_dia_explica_cada_hora,
-     test_plan_dia_memoria_por_modelo_calibracion_y_umbrales, test_plan_dia_errores y
-     test_lineas_base_literal_y_ajustada_con_su_nombre.
-
-2) Integración (07:39:54-07:40:07), con la evidencia regenerada a propósito:
-   GENERAR_EVIDENCIAS=1 pytest tests/integracion/test_recomendaciones.py
-   12 passed, 0 failed (9,88 s):
-   - test_calculate_por_rol_con_funcion_objetivo_y_explicacion
-   - test_calculate_inviable_se_marca_y_explica
-   - test_escenario_que_pasa_si_y_sensibilidad
-   - test_pesos_versionados_con_put_thresholds
-   - test_espera_maxima_gobernada_cambia_la_recomendacion
-   - test_plan_del_dia_se_lee_de_lo_persistido_con_cada_rol
-   - test_plan_del_dia_con_las_filas_del_ciclo_trae_programadas_flota_y_costo (las filas que guarda el ciclo diario,
-     ejecucion.guardar_plan_dia, bastan para mostrar salidas programadas, flota, costo y la definición de los
-     vehículos; SILENCIO del domingo 23-nov-2025, hora 4 con una sola salida y viable)
-   - test_listado_de_recomendaciones_documenta_el_filtro_origen (GET /recommendations y su exportación describen en
-     el OpenAPI los dos orígenes, «franja» y «plan_dia»)
-   - test_predictions_run_pronostica_con_la_serie_validada_de_la_sesion (POST /predictions/run predice dentro de
-     inferencia.con_sesion, con la serie validada de la sesión; así pronostica después del fin del Parquet)
-   - test_plan_del_dia_en_modo_sincrono_de_pruebas
-   - test_predictions_run_trae_las_claves_de_12_3
-   - test_predictions_run_con_franja_inviable_no_presenta_la_aproximacion
-   Sin GENERAR_EVIDENCIAS=1 la misma corrida escribe en un directorio temporal (tests/evidencia.guardar_evidencia) y
-   el repositorio no cambia.
-   Control de los módulos vecinos que consumen el plan: pytest tests/integracion/test_respuesta_api.py
-   tests/integracion/test_api_integracion.py -> 30 passed, 0 failed (25,44 s).
-
-3) Toda la carpeta de pruebas unitarias (07:40:14-07:41:08): pytest tests/unit -> 566 passed, 0 failed (51,59 s).
-
-4) Contrato (sin base de datos): pytest tests/contrato/test_compatibilidad_openapi.py -> 6 passed. Los campos nuevos
-   son cambios compatibles: en PlanHora, sin_intervalo, flota_disponible, costo_hora_cop y componentes_costo_cop; en
-   PlanDia, buses_en_ruta_pico y definicion_vehiculos. También lo es la descripción del filtro origen.
-
-5) Estático: ruff check «All checks passed!» en app/servicios/optimizacion.py, app/routers/predicciones.py,
-   app/esquemas.py y las tres pruebas.
-
-6) Evidencia regenerada con el código final: viabilidad.md/.json (scripts/viabilidad.py, 07:36, 244 s). La parte A no
-   cambia: 46,0 % viable, 149 de 324 franjas. En la parte B, las horas del plan de SILENCIO en domingo y festivo
-   pasan de 94,1 % a 100 % viables (64 → 68 de 68): la hora 4, con una sola salida, ya no se marca no viable.
-   ejemplo_plan_d5.json se regeneró con la corrida de integración: CRA 54 del 19-nov-2025, vehiculos_hora_pico 106
-   (fórmula de régimen de §10.3), buses_en_ruta_pico 78,55 de 79 disponibles, salidas programadas 290,2 y costo del
-   día 67.831.399,3 COP.
+PASSED tests/unit/test_optimizacion.py::test_factor_de_carga_critica_por_ruta
+PASSED tests/unit/test_optimizacion.py::test_formulas_basicas_de_la_especificacion
+PASSED tests/unit/test_optimizacion.py::test_usa_el_p90_para_absorber_la_incertidumbre
+PASSED tests/unit/test_optimizacion.py::test_p90_menor_que_la_puntual_no_reduce_la_oferta
+PASSED tests/unit/test_optimizacion.py::test_demanda_baja_respeta_el_headway_maximo
+PASSED tests/unit/test_optimizacion.py::test_demanda_cero_da_el_servicio_minimo
+PASSED tests/unit/test_optimizacion.py::test_headway_minimo_inalcanzable_es_inviable_sin_forzar
+PASSED tests/unit/test_optimizacion.py::test_flota_insuficiente_es_inviable_con_motivo
+PASSED tests/unit/test_optimizacion.py::test_flota_justa_es_viable
+PASSED tests/unit/test_optimizacion.py::test_comparacion_con_la_frecuencia_actual_rf008
+PASSED tests/unit/test_optimizacion.py::test_sin_ciclo_no_calcula_vehiculos
+PASSED tests/unit/test_optimizacion.py::test_entradas_invalidas_lanzan_error[capacidad-0]
+PASSED tests/unit/test_optimizacion.py::test_entradas_invalidas_lanzan_error[capacidad--5]
+PASSED tests/unit/test_optimizacion.py::test_entradas_invalidas_lanzan_error[ocupacion_objetivo-0]
+PASSED tests/unit/test_optimizacion.py::test_entradas_invalidas_lanzan_error[ocupacion_objetivo-1.2]
+PASSED tests/unit/test_optimizacion.py::test_entradas_invalidas_lanzan_error[demanda_hora--1]
+PASSED tests/unit/test_optimizacion.py::test_entradas_invalidas_lanzan_error[headway_min-0]
+PASSED tests/unit/test_optimizacion.py::test_entradas_invalidas_lanzan_error[headway_max-1]
+PASSED tests/unit/test_optimizacion.py::test_entradas_invalidas_lanzan_error[demanda_hora-abc]
+PASSED tests/unit/test_optimizacion.py::test_entradas_invalidas_lanzan_error[demanda_hora-nan]
+PASSED tests/unit/test_optimizacion.py::test_entradas_invalidas_lanzan_error[headway_min-90]
+PASSED tests/unit/test_optimizacion.py::test_entradas_invalidas_lanzan_error[frecuencia_actual_min-0]
+PASSED tests/unit/test_optimizacion.py::test_flota_que_ni_siquiera_cumple_el_headway_maximo
+PASSED tests/unit/test_optimizacion.py::test_escenarios_de_sensibilidad
+PASSED tests/unit/test_optimizacion.py::test_plan_dia_d5_devuelve_headways_por_hora
+PASSED tests/unit/test_optimizacion.py::test_plan_dia_d5_reutiliza_el_milp
+PASSED tests/unit/test_optimizacion.py::test_plan_dia_d5_errores
+PASSED tests/unit/test_optimizacion.py::test_festivo_entre_semana_usa_la_programacion_de_domingo_o_festivo
+PASSED tests/unit/test_optimizacion.py::test_plan_d5_respeta_el_headway_minimo_gobernado
+PASSED tests/unit/test_optimizacion_objetivo.py::test_parametros_por_omision_threshold_config_y_solicitud
+PASSED tests/unit/test_optimizacion_objetivo.py::test_parametros_invalidos[valores0]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_parametros_invalidos[valores1]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_parametros_invalidos[valores2]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_parametros_invalidos[valores3]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_parametros_invalidos[valores4]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_costos_por_omision_son_los_de_d5_con_fuente
+PASSED tests/unit/test_optimizacion_objetivo.py::test_datos_de_ruta_coinciden_con_insumos_d5
+PASSED tests/unit/test_optimizacion_objetivo.py::test_componentes_de_la_funcion_objetivo
+PASSED tests/unit/test_optimizacion_objetivo.py::test_milp_coincide_con_la_enumeracion_exacta[caso0]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_milp_coincide_con_la_enumeracion_exacta[caso1]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_milp_coincide_con_la_enumeracion_exacta[caso2]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_milp_coincide_con_la_enumeracion_exacta[caso3]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_milp_coincide_con_la_enumeracion_exacta[caso4]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_milp_coincide_con_la_enumeracion_exacta[caso5]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_milp_coincide_con_la_enumeracion_exacta[caso6]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_milp_coincide_con_la_enumeracion_exacta[caso7]
+PASSED tests/unit/test_optimizacion_objetivo.py::test_pesos_mueven_la_solucion_en_la_direccion_esperada
+PASSED tests/unit/test_optimizacion_objetivo.py::test_nivel_de_servicio_usa_el_p90_calibrado
+PASSED tests/unit/test_optimizacion_objetivo.py::test_linea_base_10_3_intacta_al_lado
+PASSED tests/unit/test_optimizacion_objetivo.py::test_inviable_por_headway_minimo_sin_cifra_forzada
+PASSED tests/unit/test_optimizacion_objetivo.py::test_inviable_porque_la_flota_no_alcanza_ni_el_headway_maximo
+PASSED tests/unit/test_optimizacion_objetivo.py::test_inviable_porque_la_flota_no_cubre_el_nivel_de_servicio
+PASSED tests/unit/test_optimizacion_objetivo.py::test_limites_de_headway_sin_un_entero_posible
+PASSED tests/unit/test_optimizacion_objetivo.py::test_demanda_nula_da_el_servicio_minimo
+PASSED tests/unit/test_optimizacion_objetivo.py::test_restricciones_activas_y_margen
+PASSED tests/unit/test_optimizacion_objetivo.py::test_tipologias_sin_placas_y_reparto_de_la_flota
+PASSED tests/unit/test_optimizacion_objetivo.py::test_tipologias_grandes_en_el_pico_y_pequenas_en_el_valle
+PASSED tests/unit/test_optimizacion_objetivo.py::test_comparacion_con_la_frecuencia_actual_programada
+PASSED tests/unit/test_optimizacion_objetivo.py::test_que_pasa_si_con_mas_demanda_y_otros_pesos
+PASSED tests/unit/test_optimizacion_objetivo.py::test_sensibilidad_cubre_pesos_nivel_de_servicio_y_demanda
+PASSED tests/unit/test_optimizacion_objetivo.py::test_resumen_plan_d5_por_hora
+PASSED tests/unit/test_optimizacion_objetivo.py::test_recomendacion_franja_usa_la_hora_el_tipo_de_dia_y_la_capacidad_gobernada
+PASSED tests/unit/test_optimizacion_objetivo.py::test_memoria_del_milp_reutiliza_la_solucion_sin_cambiar_el_resultado
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_el_factor_de_carga_es_por_dia_de_la_semana_con_el_tipo_de_dia_de_respaldo
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_el_dia_de_operacion_de_un_festivo_es_7
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_la_franja_explica_cual_es_el_segmento_critico_y_su_ocupacion_historica
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_sin_perfil_la_franja_no_cambia_su_explicacion
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_cada_hora_del_plan_trae_su_segmento_critico_historico
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_sin_ocupacion_observada_o_si_no_aplica_el_plan_es_el_mismo
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_sin_piso_el_milp_recibe_la_misma_tabla_y_el_plan_e12_no_cambia
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_la_restriccion_reactiva_sube_las_salidas_de_la_hora_siguiente
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_la_restriccion_reactiva_se_acota_por_el_headway_minimo
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_la_sobreoferta_que_impone_el_piso_reactivo_lo_dice
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_si_con_el_piso_no_hay_solucion_el_plan_se_resuelve_sin_el
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_una_hora_sin_operacion_no_recibe_el_piso
+PASSED tests/unit/test_optimizacion_ocupacion.py::test_el_plan_persistido_conserva_la_ocupacion_historica_y_la_actual
+PASSED tests/unit/test_optimizacion_plan.py::test_plan_dia_usa_el_pronostico_horario_del_modelo_activo
+PASSED tests/unit/test_optimizacion_plan.py::test_plan_dia_toma_los_umbrales_gobernados_como_cotas_del_milp
+PASSED tests/unit/test_optimizacion_plan.py::test_bajar_la_espera_maxima_cambia_el_plan
+PASSED tests/unit/test_optimizacion_plan.py::test_plan_dia_marca_sobreoferta_con_su_motivo
+PASSED tests/unit/test_optimizacion_plan.py::test_plan_dia_explica_cada_hora
+PASSED tests/unit/test_optimizacion_plan.py::test_plan_dia_memoria_por_modelo_calibracion_y_umbrales
+PASSED tests/unit/test_optimizacion_plan.py::test_plan_dia_errores
+PASSED tests/unit/test_optimizacion_plan.py::test_fila_plan_y_plan_desde_filas_ida_y_vuelta
+PASSED tests/unit/test_optimizacion_plan.py::test_una_sola_salida_no_tiene_intervalo_y_no_es_no_viable
+PASSED tests/unit/test_optimizacion_plan.py::test_vehiculos_con_el_ritmo_de_la_hora_y_su_definicion
+PASSED tests/unit/test_optimizacion_plan.py::test_insumos_plan_es_publico_y_son_los_del_plan
+PASSED tests/unit/test_optimizacion_plan.py::test_insumos_plan_sin_pronostico_usa_el_del_modelo_activo
+PASSED tests/unit/test_optimizacion_plan.py::test_bajar_la_espera_maxima_cambia_la_recomendacion_de_franja
+PASSED tests/unit/test_optimizacion_plan.py::test_sobreoferta_en_la_franja
+PASSED tests/unit/test_optimizacion_plan.py::test_lineas_base_literal_y_ajustada_con_su_nombre
+PASSED tests/unit/test_motor_d5.py::test_resolver_dia_devuelve_siempre_tres_valores
+PASSED tests/unit/test_motor_d5.py::test_resolver_dia_detalle_agrega_los_componentes_del_costo
+PASSED tests/unit/test_motor_d5.py::test_mismo_plan_que_la_version_original_de_d5
+PASSED tests/integracion/test_recomendaciones.py::test_calculate_por_rol_con_funcion_objetivo_y_explicacion
+PASSED tests/integracion/test_recomendaciones.py::test_calculate_inviable_se_marca_y_explica
+PASSED tests/integracion/test_recomendaciones.py::test_escenario_que_pasa_si_y_sensibilidad
+PASSED tests/integracion/test_recomendaciones.py::test_pesos_versionados_con_put_thresholds
+PASSED tests/integracion/test_recomendaciones.py::test_espera_maxima_gobernada_cambia_la_recomendacion
+PASSED tests/integracion/test_recomendaciones.py::test_plan_del_dia_se_lee_de_lo_persistido_con_cada_rol
+PASSED tests/integracion/test_recomendaciones.py::test_plan_del_dia_con_las_filas_del_ciclo_trae_programadas_flota_y_costo
+PASSED tests/integracion/test_recomendaciones.py::test_listado_de_recomendaciones_documenta_el_filtro_origen
+PASSED tests/integracion/test_recomendaciones.py::test_predictions_run_pronostica_con_la_serie_validada_de_la_sesion
+PASSED tests/integracion/test_recomendaciones.py::test_plan_del_dia_en_modo_sincrono_de_pruebas
+PASSED tests/integracion/test_recomendaciones.py::test_predictions_run_trae_las_claves_de_12_3
+PASSED tests/integracion/test_recomendaciones.py::test_predictions_run_con_franja_inviable_no_presenta_la_aproximacion
+PASSED tests/integracion/test_respuesta_api.py::test_401_sin_clave_y_403_operador_en_el_calculo
+PASSED tests/integracion/test_respuesta_api.py::test_post_202_en_la_cola_y_get_200_desde_la_foto
+PASSED tests/integracion/test_respuesta_api.py::test_404_sin_calcular_con_la_pista
+PASSED tests/integracion/test_respuesta_api.py::test_post_fuera_de_los_dias_calculables_404_sin_encolar
+PASSED tests/integracion/test_respuesta_api.py::test_sin_fecha_calcula_y_lee_el_dia_siguiente_al_ultimo_dato
+PASSED tests/integracion/test_respuesta_api.py::test_atencion_abiertas_ahora_y_de_la_fecha
+PASSED tests/integracion/test_respuesta_api.py::test_exportacion_csv_desde_la_foto
+PASSED tests/integracion/test_respuesta_api.py::test_precalcular_reemplaza_la_foto_y_el_post_no_duplica
+PASSED tests/integracion/test_api_integracion.py::test_migracion_crea_esquema_y_siembra_umbrales
+PASSED tests/integracion/test_api_integracion.py::test_migracion_0006_dimensiones_sube_baja_y_rellena
+PASSED tests/integracion/test_api_integracion.py::test_migracion_0005_pesos_objetivo_sube_y_baja
+PASSED tests/integracion/test_api_integracion.py::test_migracion_0007_umbrales_de_las_reglas_nuevas_sube_y_baja
+PASSED tests/integracion/test_api_integracion.py::test_ejecucion_incremental_respeta_marca_de_agua
+PASSED tests/integracion/test_api_integracion.py::test_catalogos_de_la_calidad_salen_de_la_fuente
+PASSED tests/integracion/test_api_integracion.py::test_dias_observados_son_los_del_lote_en_la_ventana_que_ya_empezaron
+PASSED tests/integracion/test_api_integracion.py::test_una_recomendacion_por_ruta_y_franja_en_la_ejecucion
+PASSED tests/integracion/test_api_integracion.py::test_carga_repetida_no_duplica
+PASSED tests/integracion/test_api_integracion.py::test_reinicio_reencola_ejecuciones_corriendo
+PASSED tests/integracion/test_api_integracion.py::test_alertas_deduplicadas_y_bitacora
+PASSED tests/integracion/test_api_integracion.py::test_activacion_controlada_y_reversion
+PASSED tests/integracion/test_api_integracion.py::test_umbrales_versionados
+PASSED tests/integracion/test_api_integracion.py::test_exportaciones_csv_y_xlsx
+PASSED tests/integracion/test_api_integracion.py::test_contrato_errores_paginacion_y_observabilidad
+PASSED tests/integracion/test_api_integracion.py::test_redeteccion_mas_grave_escala_y_notifica
+PASSED tests/integracion/test_api_integracion.py::test_errores_de_calidad_con_llave_valor_y_filtro_por_idruta
+PASSED tests/integracion/test_api_integracion.py::test_trabajo_respuesta_en_la_cola
+PASSED tests/integracion/test_api_integracion.py::test_trabajo_respuesta_de_un_dia_sin_datos_no_se_reintenta
+PASSED tests/integracion/test_api_integracion.py::test_umbrales_se_aprueban_por_version
+PASSED tests/integracion/test_api_integracion.py::test_exportacion_avisa_el_tope_de_filas
+PASSED tests/integracion/test_api_integracion.py::test_listado_de_ejecuciones_por_fecha_y_modelo
+PASSED tests/contrato/test_compatibilidad_openapi.py::test_versionado_es_openapi_3_y_misma_version_mayor
+PASSED tests/contrato/test_compatibilidad_openapi.py::test_no_se_quitan_operaciones
+PASSED tests/contrato/test_compatibilidad_openapi.py::test_no_cambian_los_codigos_de_exito
+PASSED tests/contrato/test_compatibilidad_openapi.py::test_no_aparecen_parametros_obligatorios_nuevos
+PASSED tests/contrato/test_compatibilidad_openapi.py::test_entradas_no_exigen_campos_nuevos
+PASSED tests/contrato/test_compatibilidad_openapi.py::test_respuestas_conservan_campos_y_tipos

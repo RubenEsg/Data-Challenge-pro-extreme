@@ -81,3 +81,26 @@ def test_archivos_opcionales_faltantes_dan_tablas_vacias(tmp_path, monkeypatch):
     assert list(datos.contexto_operacional().columns) == datos.COLUMNAS_CONTEXTO
     assert len(datos.perfil_intrahorario()) == 0
     assert datos.clima_diario() is None
+
+
+def test_bajadas_empaquetadas_con_la_grilla_de_la_serie():
+    """§6.1 Bajadas: datos/bajadas_horaria.parquet tiene una fila por (ruta, fecha, hora) de la serie y con_bajadas
+    la agrega sin cambiar las demás columnas; una serie que ya la trae no se toca."""
+    b = datos.bajadas_horaria()
+    if b is None:
+        pytest.skip("sin datos/bajadas_horaria.parquet")
+    serie = datos.demanda_horaria()
+    assert len(b) == len(serie) and not b.duplicated(["ruta", "fecha", "hora"]).any()
+    assert (b["bajadas_viajes"] >= 0).all() and b["bajadas_viajes"].sum() > 0
+    tramo = datos.demanda_horaria(desde=date(2025, 3, 3), hasta=date(2025, 3, 3))
+    con = datos.con_bajadas(tramo)
+    assert len(con) == len(tramo) and con["bajadas_viajes"].notna().all()
+    assert con.drop(columns=["bajadas_viajes"]).reset_index(drop=True).equals(tramo.reset_index(drop=True))
+    assert datos.con_bajadas(con) is con and datos.con_bajadas(tramo.iloc[:0]).empty
+
+
+def test_sin_el_archivo_de_bajadas_la_serie_queda_igual(tmp_path, monkeypatch):
+    monkeypatch.setenv("DATA_DIR", str(tmp_path))
+    assert datos.bajadas_horaria() is None
+    serie = pd.DataFrame({"ruta": ["CL 72"], "fecha": [date(2025, 1, 1)], "hora": [6], "pasajeros": [1.0]})
+    assert datos.con_bajadas(serie) is serie

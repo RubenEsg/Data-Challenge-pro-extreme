@@ -1,0 +1,452 @@
+{
+ "generado": "2026-11-10T10:50:06-05:00",
+ "fuente": "réplica local, lector_ia",
+ "reglas": [
+  {
+   "codigo": "ALT-001",
+   "nombre": "Alta demanda prevista",
+   "aplica": [],
+   "motivo": "pronóstico de la ruta para una franja futura: todavía no hay un viaje, un vehículo ni un conductor que atribuirle",
+   "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+  },
+  {
+   "codigo": "ALT-002",
+   "nombre": "Sobreocupación",
+   "aplica": [],
+   "motivo": "la ocupación es de la ruta en la franja (pronóstico) o en la hora con el factor de carga (observada sin la ocupación por segmento), con varios buses: no es de un viaje",
+   "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+  },
+  {
+   "codigo": "ALT-003",
+   "nombre": "Frecuencia insuficiente",
+   "aplica": [],
+   "motivo": "pronóstico de la ruta para una franja futura: todavía no hay un viaje, un vehículo ni un conductor que atribuirle",
+   "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+  },
+  {
+   "codigo": "ALT-004",
+   "nombre": "Frecuencia excesiva",
+   "aplica": [],
+   "motivo": "pronóstico de la ruta para una franja futura: todavía no hay un viaje, un vehículo ni un conductor que atribuirle",
+   "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+  },
+  {
+   "codigo": "ALT-005",
+   "nombre": "Caída anormal de demanda",
+   "aplica": [],
+   "motivo": "la regla mide la demanda agregada de la ruta en la ventana (todos sus viajes), no un viaje",
+   "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+  },
+  {
+   "codigo": "ALT-006",
+   "nombre": "Despacho ausente o tardío",
+   "aplica": [
+    "viaje",
+    "vehiculo",
+    "conductor"
+   ],
+   "motivo": "el despacho de la ventana que no salió o salió tarde (progvehiculos): su viaje, su vehículo y el seudónimo de su conductor",
+   "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+  },
+  {
+   "codigo": "ALT-007",
+   "nombre": "Desviación del pronóstico",
+   "aplica": [],
+   "motivo": "la regla mide la demanda agregada de la ruta en la ventana (todos sus viajes), no un viaje",
+   "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+  },
+  {
+   "codigo": "ALT-008",
+   "nombre": "Consolidado anómalo",
+   "aplica": [],
+   "motivo": "consolidado diario de la ruta (subidas, bajadas y número de viajes del día), no un viaje",
+   "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+  },
+  {
+   "codigo": "ALT-009",
+   "nombre": "Datos incompletos",
+   "aplica": [
+    "viaje",
+    "vehiculo",
+    "conductor"
+   ],
+   "motivo": "el viaje de la ventana con datos faltantes (progvehiculos): su viaje, su vehículo y el seudónimo de su conductor",
+   "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+  },
+  {
+   "codigo": "ALT-010",
+   "nombre": "Modelo degradado",
+   "aplica": [],
+   "motivo": "degradación del modelo de la ruta, no de un viaje",
+   "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+  }
+ ],
+ "variantes": [
+  {
+   "codigo": "ALT-002",
+   "variante": "segmento_critico",
+   "nombre": "Sobreocupación",
+   "aplica": [
+    "sentido",
+    "viaje",
+    "vehiculo",
+    "conductor"
+   ],
+   "motivo": "la ocupación observada medida en el segmento crítico de la hora pico (§10.1): el sentido aproximado de ese segmento y el viaje más cargado en él, con su vehículo y el seudónimo de su conductor",
+   "sentido": "aproximado: el del segmento crítico donde se midió la ocupación (§10.1); el sentido solo existe por segmento (supuesto S9)"
+  }
+ ],
+ "periodo_2025": [
+  "2025-09-15",
+  "2025-12-31"
+ ],
+ "alt006": {
+  "alertas": 41,
+  "con_viaje": 40,
+  "con_conductor": 40,
+  "salidas_iguales": 41,
+  "con_ultimo_despacho": 41,
+  "resultado": {
+   "cancelado": 36,
+   "tardio": 4,
+   "sin_viaje_cancelado_ni_tardio": 1
+  },
+  "ejemplos": [
+   {
+    "codigo": "ALT-006",
+    "ruta": "CL 72",
+    "clave_dedup": "ALT-006|CL 72|2025-09-17T11:00:00-05:00|obs",
+    "ventana_inicio": "2025-09-17T11:00:00-05:00",
+    "ventana_fin": "2025-09-17T12:00:00-05:00",
+    "viaje": "7313342",
+    "vehiculo": "SOBUSA180",
+    "conductor_seudonimizado": true,
+    "identificacion_5_3": {
+     "aplica": [
+      "viaje",
+      "vehiculo",
+      "conductor"
+     ],
+     "motivo": "el despacho de la ventana que no salió o salió tarde (progvehiculos): su viaje, su vehículo y el seudónimo de su conductor",
+     "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)",
+     "resultado": "identificado",
+     "rol_viaje": "cancelado",
+     "tolerancia_retraso_min": 5.0
+    },
+    "explicacion": "En 11:00-12:00 (1 h): salieron 0 de 4 despachos esperados (60 / intervalo programado). Despacho ausente o tardío: van al menos 60 min sin despacho (cota inferior: horas cerradas sin salidas), más que el headway programado (14,4 min) más la tolerancia (5 min, threshold_config.tolerancia_despacho_min); salieron 0 de 4 despachos esperados (déficit 100,0 %, tolerancia 50,0 %). Viaje 7313342 (vehículo SOBUSA180), salida programada 11:12: programado y cancelado (despacho ausente)."
+   },
+   {
+    "codigo": "ALT-006",
+    "ruta": "CL 72",
+    "clave_dedup": "ALT-006|CL 72|2025-09-17T18:00:00-05:00|obs",
+    "ventana_inicio": "2025-09-17T18:00:00-05:00",
+    "ventana_fin": "2025-09-17T20:00:00-05:00",
+    "viaje": "7314467",
+    "vehiculo": "SOBUSA368",
+    "conductor_seudonimizado": true,
+    "identificacion_5_3": {
+     "aplica": [
+      "viaje",
+      "vehiculo",
+      "conductor"
+     ],
+     "motivo": "el despacho de la ventana que no salió o salió tarde (progvehiculos): su viaje, su vehículo y el seudónimo de su conductor",
+     "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)",
+     "resultado": "identificado",
+     "rol_viaje": "cancelado",
+     "tolerancia_retraso_min": 5.0
+    },
+    "explicacion": "En 18:00-20:00 (2 h): salieron 4 de 10 despachos esperados (60 / intervalo programado). Despacho ausente o tardío: salieron 4 de 10 despachos esperados (déficit 59,7 %, tolerancia 50,0 %). Viaje 7314467 (vehículo SOBUSA368), salida programada 19:24: programado y cancelado (despacho ausente)."
+   },
+   {
+    "codigo": "ALT-006",
+    "ruta": "CL 72",
+    "clave_dedup": "ALT-006|CL 72|2025-09-28T16:00:00-05:00|obs",
+    "ventana_inicio": "2025-09-28T16:00:00-05:00",
+    "ventana_fin": "2025-09-28T17:00:00-05:00",
+    "viaje": "7339360",
+    "vehiculo": "SOBUSA486",
+    "conductor_seudonimizado": true,
+    "identificacion_5_3": {
+     "aplica": [
+      "viaje",
+      "vehiculo",
+      "conductor"
+     ],
+     "motivo": "el despacho de la ventana que no salió o salió tarde (progvehiculos): su viaje, su vehículo y el seudónimo de su conductor",
+     "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)",
+     "resultado": "identificado",
+     "rol_viaje": "cancelado",
+     "tolerancia_retraso_min": 5.0
+    },
+    "explicacion": "En 16:00-17:00 (1 h): salieron 0 de 4 despachos esperados (60 / intervalo programado). Despacho ausente o tardío: van al menos 60 min sin despacho (cota inferior: horas cerradas sin salidas), más que el headway programado (15,2 min) más la tolerancia (5 min, threshold_config.tolerancia_despacho_min); salieron 0 de 4 despachos esperados (déficit 100,0 %, tolerancia 50,0 %). Viaje 7339360 (vehículo SOBUSA486), salida programada 16:28: programado y cancelado (despacho ausente)."
+   },
+   {
+    "codigo": "ALT-006",
+    "ruta": "CL 72",
+    "clave_dedup": "ALT-006|CL 72|2025-10-03T18:00:00-05:00|obs",
+    "ventana_inicio": "2025-10-03T18:00:00-05:00",
+    "ventana_fin": "2025-10-03T20:00:00-05:00",
+    "viaje": "7351613",
+    "vehiculo": "SOBUSA480",
+    "conductor_seudonimizado": true,
+    "identificacion_5_3": {
+     "aplica": [
+      "viaje",
+      "vehiculo",
+      "conductor"
+     ],
+     "motivo": "el despacho de la ventana que no salió o salió tarde (progvehiculos): su viaje, su vehículo y el seudónimo de su conductor",
+     "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)",
+     "resultado": "identificado",
+     "rol_viaje": "tardio",
+     "tolerancia_retraso_min": 5.0
+    },
+    "explicacion": "En 18:00-20:00 (2 h): salieron 4 de 10 despachos esperados (60 / intervalo programado). Despacho ausente o tardío: salieron 4 de 10 despachos esperados (déficit 59,7 %, tolerancia 50,0 %). Viaje 7351613 (vehículo SOBUSA480), salida programada 18:56: salió fuera del plazo o de la tolerancia (despacho tardío)."
+   },
+   {
+    "codigo": "ALT-006",
+    "ruta": "CL 72",
+    "clave_dedup": "ALT-006|CL 72|2025-10-10T16:00:00-05:00|obs",
+    "ventana_inicio": "2025-10-10T16:00:00-05:00",
+    "ventana_fin": "2025-10-10T19:00:00-05:00",
+    "viaje": "7367429",
+    "vehiculo": "SOBUSA450",
+    "conductor_seudonimizado": true,
+    "identificacion_5_3": {
+     "aplica": [
+      "viaje",
+      "vehiculo",
+      "conductor"
+     ],
+     "motivo": "el despacho de la ventana que no salió o salió tarde (progvehiculos): su viaje, su vehículo y el seudónimo de su conductor",
+     "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)",
+     "resultado": "identificado",
+     "rol_viaje": "cancelado",
+     "tolerancia_retraso_min": 5.0
+    },
+    "explicacion": "En 16:00-19:00 (3 h): salieron 4 de 14 despachos esperados (60 / intervalo programado). Despacho ausente o tardío: van al menos 60 min sin despacho (cota inferior: horas cerradas sin salidas), más que el headway programado (13,6 min) más la tolerancia (5 min, threshold_config.tolerancia_despacho_min); salieron 4 de 14 despachos esperados (déficit 72,1 %, tolerancia 50,0 %). Viaje 7367429 (vehículo SOBUSA450), salida programada 16:04: programado y cancelado (despacho ausente)."
+   }
+  ],
+  "dias_ruta_leidos": 36,
+  "duracion_s": 8.6
+ },
+ "alt009": {
+  "filas_leidas": 2757,
+  "dias_ruta": 166,
+  "dias_ruta_con_horas_faltantes": 36,
+  "horas_faltantes": 44,
+  "periodo": [
+   "2023-01-01",
+   "2023-02-27"
+  ],
+  "alertas": 1,
+  "con_viaje": 1,
+  "con_conductor": 1,
+  "viajes_incompletos": 2,
+  "incompletos_en_horas_faltantes": 1,
+  "programados_en_horas_faltantes": 3,
+  "dias_ruta_sin_alerta": 35,
+  "horas_sin_viajes_programados": 43,
+  "resultado": {
+   "identificado": 1
+  },
+  "motivos": {
+   "sin_numeropasajeros": 2,
+   "sin_timbradas_segmento": 2
+  },
+  "ejemplos": [
+   {
+    "codigo": "ALT-009",
+    "ruta": "SILENCIO",
+    "clave_dedup": "ALT-009|SILENCIO|2023-01-01|faltantes",
+    "ventana_inicio": null,
+    "ventana_fin": null,
+    "viaje": "5061806",
+    "vehiculo": "SOBUSA468",
+    "conductor_seudonimizado": true,
+    "identificacion_5_3": {
+     "aplica": [
+      "viaje",
+      "vehiculo",
+      "conductor"
+     ],
+     "motivo": "el viaje de la ventana con datos faltantes (progvehiculos): su viaje, su vehículo y el seudónimo de su conductor",
+     "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)",
+     "resultado": "identificado"
+    },
+    "explicacion": "Datos incompletos o retrasados: faltan 1 hora(s) de servicio sin registro: 01/01/2023 06:00. Viajes con datos faltantes: 2 (el primero, viaje 5061806 del vehículo SOBUSA468 a las 06:00: sin numeropasajeros, sin timbradas de segmento (no llegó a timbradas_segmentos))."
+   }
+  ],
+  "duracion_s": 26.3
+ },
+ "circuito": {
+  "por_ruta": [
+   {
+    "ruta": "CL 72",
+    "viajes": 4554,
+    "segmentos_ruta": 128,
+    "p10": 0.766,
+    "mediana": 0.867,
+    "mas_de_medio_circuito": 0.9451
+   },
+   {
+    "ruta": "CRA 54",
+    "viajes": 14857,
+    "segmentos_ruta": 123,
+    "p10": 0.78,
+    "mediana": 0.846,
+    "mas_de_medio_circuito": 0.9673
+   },
+   {
+    "ruta": "SILENCIO",
+    "viajes": 7369,
+    "segmentos_ruta": 135,
+    "p10": 0.719,
+    "mediana": 0.822,
+    "mas_de_medio_circuito": 0.9612
+   }
+  ],
+  "duracion_s": 2.0
+ },
+ "alt002_segmento": {
+  "dias": 56,
+  "franjas": 2757,
+  "horas_con_segmento_critico": 2757,
+  "con_sentido": 2757,
+  "con_viaje_mas_cargado": 2757,
+  "con_vehiculo": 2757,
+  "con_conductor_seudonimizado": 2757,
+  "ocupacion_media_maxima": 1.84,
+  "alt002_por_metodo": {
+   "segmento_critico": 31
+  },
+  "alt002_segmento_critico": 31,
+  "alt002_con_sentido": 31,
+  "alt002_con_viaje": 31,
+  "alt002_con_conductor": 31,
+  "ejemplos": [
+   {
+    "codigo": "ALT-002",
+    "ruta": "CRA 54",
+    "clave_dedup": "ALT-002|CRA 54|2023-01-01T16:00:00-05:00|obs",
+    "ventana_inicio": "2023-01-01T16:00:00-05:00",
+    "ventana_fin": "2023-01-01T18:00:00-05:00",
+    "viaje": "5062055",
+    "vehiculo": "SOBUSA231",
+    "conductor_seudonimizado": true,
+    "identificacion_5_3": {
+     "aplica": [
+      "sentido",
+      "viaje",
+      "vehiculo",
+      "conductor"
+     ],
+     "motivo": "la ocupación observada medida en el segmento crítico de la hora pico (§10.1): el sentido aproximado de ese segmento y el viaje más cargado en él, con su vehículo y el seudónimo de su conductor",
+     "sentido": "aproximado: el del segmento crítico donde se midió la ocupación (§10.1); el sentido solo existe por segmento (supuesto S9)",
+     "variante": "segmento_critico",
+     "resultado": "identificado"
+    },
+    "explicacion": "La ocupación observada (96,7 %) alcanza o supera el umbral crítico (90,0 %). Esperada: —; observada: 96,7 % (= 48,3 pasajeros a bordo en promedio al salir del segmento crítico 85 (regreso) en 3 viajes ÷ 50 puestos en 17:00-18:00, medida con las subidas y bajadas por segmento).",
+    "sentido": "regreso"
+   },
+   {
+    "codigo": "ALT-002",
+    "ruta": "CRA 54",
+    "clave_dedup": "ALT-002|CRA 54|2023-01-16T14:00:00-05:00|obs",
+    "ventana_inicio": "2023-01-16T14:00:00-05:00",
+    "ventana_fin": "2023-01-16T16:00:00-05:00",
+    "viaje": "5093236",
+    "vehiculo": "SOBUSA495",
+    "conductor_seudonimizado": true,
+    "identificacion_5_3": {
+     "aplica": [
+      "sentido",
+      "viaje",
+      "vehiculo",
+      "conductor"
+     ],
+     "motivo": "la ocupación observada medida en el segmento crítico de la hora pico (§10.1): el sentido aproximado de ese segmento y el viaje más cargado en él, con su vehículo y el seudónimo de su conductor",
+     "sentido": "aproximado: el del segmento crítico donde se midió la ocupación (§10.1); el sentido solo existe por segmento (supuesto S9)",
+     "variante": "segmento_critico",
+     "resultado": "identificado"
+    },
+    "explicacion": "La ocupación observada (98,9 %) alcanza o supera el umbral crítico (90,0 %). Esperada: —; observada: 98,9 % (= 49,4 pasajeros a bordo en promedio al salir del segmento crítico 91 (regreso) en 18 viajes ÷ 50 puestos en 15:00-16:00, medida con las subidas y bajadas por segmento).",
+    "sentido": "regreso"
+   },
+   {
+    "codigo": "ALT-002",
+    "ruta": "CRA 54",
+    "clave_dedup": "ALT-002|CRA 54|2023-01-24T14:00:00-05:00|obs",
+    "ventana_inicio": "2023-01-24T14:00:00-05:00",
+    "ventana_fin": "2023-01-24T16:00:00-05:00",
+    "viaje": "5111209",
+    "vehiculo": "SOBUSA202",
+    "conductor_seudonimizado": true,
+    "identificacion_5_3": {
+     "aplica": [
+      "sentido",
+      "viaje",
+      "vehiculo",
+      "conductor"
+     ],
+     "motivo": "la ocupación observada medida en el segmento crítico de la hora pico (§10.1): el sentido aproximado de ese segmento y el viaje más cargado en él, con su vehículo y el seudónimo de su conductor",
+     "sentido": "aproximado: el del segmento crítico donde se midió la ocupación (§10.1); el sentido solo existe por segmento (supuesto S9)",
+     "variante": "segmento_critico",
+     "resultado": "identificado"
+    },
+    "explicacion": "La ocupación observada (114,4 %) alcanza o supera el umbral crítico (90,0 %). Esperada: —; observada: 114,4 % (= 57,2 pasajeros a bordo en promedio al salir del segmento crítico 93 (regreso) en 15 viajes ÷ 50 puestos en 15:00-16:00, medida con las subidas y bajadas por segmento).",
+    "sentido": "regreso"
+   },
+   {
+    "codigo": "ALT-002",
+    "ruta": "CRA 54",
+    "clave_dedup": "ALT-002|CRA 54|2023-01-25T14:00:00-05:00|obs",
+    "ventana_inicio": "2023-01-25T14:00:00-05:00",
+    "ventana_fin": "2023-01-25T16:00:00-05:00",
+    "viaje": "5113703",
+    "vehiculo": "SOBUSA239",
+    "conductor_seudonimizado": true,
+    "identificacion_5_3": {
+     "aplica": [
+      "sentido",
+      "viaje",
+      "vehiculo",
+      "conductor"
+     ],
+     "motivo": "la ocupación observada medida en el segmento crítico de la hora pico (§10.1): el sentido aproximado de ese segmento y el viaje más cargado en él, con su vehículo y el seudónimo de su conductor",
+     "sentido": "aproximado: el del segmento crítico donde se midió la ocupación (§10.1); el sentido solo existe por segmento (supuesto S9)",
+     "variante": "segmento_critico",
+     "resultado": "identificado"
+    },
+    "explicacion": "La ocupación observada (106,2 %) alcanza o supera el umbral crítico (90,0 %). Esperada: —; observada: 106,2 % (= 53,1 pasajeros a bordo en promedio al salir del segmento crítico 91 (regreso) en 16 viajes ÷ 50 puestos en 15:00-16:00, medida con las subidas y bajadas por segmento).",
+    "sentido": "regreso"
+   },
+   {
+    "codigo": "ALT-002",
+    "ruta": "CRA 54",
+    "clave_dedup": "ALT-002|CRA 54|2023-01-26T14:00:00-05:00|obs",
+    "ventana_inicio": "2023-01-26T14:00:00-05:00",
+    "ventana_fin": "2023-01-26T16:00:00-05:00",
+    "viaje": "5116043",
+    "vehiculo": "SOBUSA203",
+    "conductor_seudonimizado": true,
+    "identificacion_5_3": {
+     "aplica": [
+      "sentido",
+      "viaje",
+      "vehiculo",
+      "conductor"
+     ],
+     "motivo": "la ocupación observada medida en el segmento crítico de la hora pico (§10.1): el sentido aproximado de ese segmento y el viaje más cargado en él, con su vehículo y el seudónimo de su conductor",
+     "sentido": "aproximado: el del segmento crítico donde se midió la ocupación (§10.1); el sentido solo existe por segmento (supuesto S9)",
+     "variante": "segmento_critico",
+     "resultado": "identificado"
+    },
+    "explicacion": "La ocupación observada (106,5 %) alcanza o supera el umbral crítico (90,0 %). Esperada: —; observada: 106,5 % (= 53,2 pasajeros a bordo en promedio al salir del segmento crítico 93 (regreso) en 17 viajes ÷ 50 puestos en 15:00-16:00, medida con las subidas y bajadas por segmento).",
+    "sentido": "regreso"
+   }
+  ],
+  "duracion_s": 75.5
+ }
+}

@@ -1,29 +1,29 @@
 {
- "version": 6,
+ "version": 10,
  "pesos_vigentes": {
   "alfa": {
    "simbolo": "α",
    "nombre": "peso_costo_operativo",
    "valor": 1.0,
-   "fuente": "threshold_config v6"
+   "fuente": "threshold_config v10"
   },
   "beta": {
    "simbolo": "β",
    "nombre": "peso_tiempo_espera",
    "valor": 30.0,
-   "fuente": "threshold_config v6"
+   "fuente": "threshold_config v10"
   },
   "gamma": {
    "simbolo": "γ",
    "nombre": "peso_sobreocupacion",
    "valor": 1.0,
-   "fuente": "threshold_config v6"
+   "fuente": "threshold_config v10"
   },
   "delta": {
    "simbolo": "δ",
    "nombre": "peso_desviacion_frecuencia",
    "valor": 1.0,
-   "fuente": "threshold_config v6"
+   "fuente": "threshold_config v10"
   }
  },
  "con_beta_30_y_nivel_0_95": {
@@ -32,7 +32,7 @@
   "componentes_cop": {
    "costo_operativo": 3772484.44,
    "tiempo_espera": 306189.06,
-   "sobreocupacion": 1.13,
+   "sobreocupacion": 1.23,
    "desviacion_frecuencia": 89976.26
   }
  },
@@ -42,7 +42,7 @@
   "componentes_cop": {
    "costo_operativo": 2662930.19,
    "tiempo_espera": 433767.83,
-   "sobreocupacion": 4403.0,
+   "sobreocupacion": 4644.69,
    "desviacion_frecuencia": 221977.36
   }
  }

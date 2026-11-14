@@ -1,4 +1,4 @@
-% Generado por documentos/tabla_api.py desde la aplicación FastAPI (app.main): 62 operaciones. No editar a mano.
+% Generado por documentos/tabla_api.py desde la aplicación FastAPI (app.main): 69 operaciones. No editar a mano.
 \begin{longtable}{@{}l>{\raggedright\arraybackslash}p{5.3cm}l>{\raggedright\arraybackslash}p{7.2cm}@{}}
 \toprule Método & Ruta (bajo \texttt{/api/v1}) & Rol mínimo & Finalidad \\ \midrule \endhead
 \bottomrule \endfoot
@@ -6,7 +6,7 @@
 \texttt{GET} & \path{/frequency/executions} & operador & Listar ejecuciones \\
 \texttt{GET} & \path{/frequency/executions/{execution_id}} & operador & Corte, estado, métricas y errores \\
 \texttt{GET} & \path{/frequency/executions/{execution_id}/errors} & operador & Errores de calidad de la ejecución por lote, fila, llave y causa \\
-\texttt{GET} & \path{/predictions/segmentos} & operador & Pronóstico por segmento y sentido (desagregación documentada del pronóstico de la ruta) \\
+\texttt{GET} & \path{/predictions/segmentos} & operador & Pronóstico por segmento y sentido (modelo de segmentos versionado sobre el pronóstico de… \\
 \texttt{POST} & \path{/predictions/run} & analista & Inferencia para una ruta y un horizonte (incluye la recomendación derivada) \\
 \texttt{GET} & \path{/predictions} & operador & Consultar pronósticos por filtros \\
 \texttt{GET} & \path{/predictions/export} & operador & Exportar pronósticos filtrados (CSV o XLSX) \\
@@ -52,16 +52,23 @@
 \texttt{GET} & \path{/catalogos/capacidad} & operador & Capacidad vigente por ruta (catálogo o ajuste local) y ajustes por tipología \\
 \texttt{PUT} & \path{/catalogos/capacidad} & admin & Ajustar la capacidad operativa de una ruta o tipología (admin; versión nueva y auditada) \\
 \texttt{GET} & \path{/catalogos/capacidad/historial} & operador & Historial de ajustes de capacidad (versión, acción, valor anterior y nuevo, quién y por qué) \\
+\texttt{GET} & \path{/catalogos/flota} & operador & Flota disponible y tiempo de ciclo vigentes por ruta, tipo de día y hora (catálogo o… \\
+\texttt{PUT} & \path{/catalogos/flota} & admin & Registrar una versión nueva de la flota o del tiempo de ciclo de una ruta (admin; versión… \\
+\texttt{GET} & \path{/catalogos/flota/historial} & operador & Historial de la flota y del tiempo de ciclo (versión, acción, valor anterior y nuevo,… \\
 \texttt{GET} & \path{/monitoring} & operador & Monitoreo por ejecución: deriva (PSI), error móvil, cobertura, volumen y alertas descartadas \\
 \texttt{GET} & \path{/monitoring/export} & operador & Exportar el monitoreo filtrado (CSV o XLSX) \\
 \texttt{GET} & \path{/monitoring/policy} & operador & Política de aprendizaje continuo: ¿reentrenar?, retadores en sombra y umbrales \\
 \texttt{GET} & \path{/monitoring/feature-snapshots} & operador & Foto de variables (§11.2) por ejecución, predicción o ruta, con fecha de corte y versión \\
+\texttt{GET} & \path{/frequency/watermarks} & operador & Marca de agua de la lectura incremental por proceso y ruta (RNF-005) \\
 \texttt{GET} & \path{/segmentos/estadisticas} & operador & Promedio, máximo y mínimo de subidas, bajadas y pasajeros por segmento, estacionalidad,… \\
 \texttt{GET} & \path{/segmentos/estadisticas/export} & operador & Exportar las estadísticas por segmento (CSV o XLSX) \\
+\texttt{POST} & \path{/segmentos/estadisticas/refrescar} & analista & Refrescar la agregación de segmentos (job en la cola, rol analista) \\
 \texttt{GET} & \path{/segmentos/zonas} & operador & Demanda por zona tarifaria (timbradas\_anio\_zonas / timbradas\_consolidado\_zonas) \\
 \texttt{GET} & \path{/respuesta} & operador & Respuesta a la pregunta final del reto (§20) \\
 \texttt{POST} & \path{/respuesta/calcular} & analista & Calcular la respuesta del reto para una fecha (job en la cola, rol analista) \\
 \texttt{GET} & \path{/respuesta/export} & operador & Exportar la respuesta del reto por ruta y hora (CSV o XLSX) \\
+\texttt{GET} & \path{/retencion} & operador & Política de retención vigente (§18) y bitácora de la última corrida \\
+\texttt{POST} & \path{/retencion/aplicar} & admin & Correr la retención bajo demanda (job en la cola, rol admin) \\
 \midrule
 \multicolumn{4}{@{}l}{\emph{En la raíz del servidor, fuera de \texttt{/api/v1} (ruta absoluta)}} \\
 \texttt{GET} & \path{/health} & pública & Estado del servicio y de la base \\

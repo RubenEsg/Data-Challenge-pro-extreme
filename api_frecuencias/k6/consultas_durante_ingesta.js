@@ -18,6 +18,10 @@ import { Counter, Rate, Trend } from 'k6/metrics';
 const BASE = __ENV.BASE || 'http://host.docker.internal:8305';
 const CLAVE = __ENV.SOBUSA_API_KEY || '';
 const HASTA = __ENV.HASTA || '2025-12-31';
+// Duración de la carga y espera máxima de la ingesta (s). En modo integrado la ingesta lee la réplica y tarda más:
+// DURACION_S=240 LIMITE_INGESTA_S=230 cubren la ingesta completa (por omisión, 60 y 85 como antes).
+const DURACION_S = Number(__ENV.DURACION_S || 60);
+const LIMITE_INGESTA_S = Number(__ENV.LIMITE_INGESTA_S || 85);
 const errores = new Rate('errores_funcionales');
 const duracionIngesta = new Trend('ingesta_duracion_ms', true);
 const ingestaOk = new Rate('ingesta_ok');
@@ -26,8 +30,9 @@ const consultasDurante = new Counter('consultas_durante_ingesta');
 
 export const options = {
   scenarios: {
-    consultas: { executor: 'constant-vus', vus: 30, duration: '60s', exec: 'consultas' },
-    ingesta: { executor: 'per-vu-iterations', vus: 1, iterations: 1, maxDuration: '90s', exec: 'ingesta' },
+    consultas: { executor: 'constant-vus', vus: 30, duration: `${DURACION_S}s`, exec: 'consultas' },
+    ingesta: { executor: 'per-vu-iterations', vus: 1, iterations: 1, maxDuration: `${LIMITE_INGESTA_S + 5}s`,
+      exec: 'ingesta' },
   },
   thresholds: {
     'http_req_failed{fase:durante_ingesta}': ['rate<0.01'],
@@ -46,6 +51,11 @@ const RECURSOS = [
   ['alerts', '/api/v1/alerts?limite=50'],
   ['executions', '/api/v1/frequency/executions?limite=20'],
 ];
+// INCLUIR_SEGMENTOS=1 (modo integrado): también la capa de segmentos, que el ciclo con datos nuevos manda refrescar
+if (__ENV.INCLUIR_SEGMENTOS === '1') {
+  RECURSOS.push(['segmentos', '/api/v1/segmentos/estadisticas?limite=50']);
+  RECURSOS.push(['segmentos_ruta', '/api/v1/segmentos/estadisticas?limite=50&idruta=2']);
+}
 
 function cabeceras(cid) {
   return { 'X-API-Key': CLAVE, 'X-Correlation-Id': cid, 'Content-Type': 'application/json' };
@@ -95,7 +105,7 @@ export function consultas(datos) {
 export function ingesta(datos) {
   let detalle = null;
   let estado = 'en_cola';
-  while (Date.now() - datos.inicio < 85000 && estado !== 'ok' && estado !== 'error') {
+  while (Date.now() - datos.inicio < LIMITE_INGESTA_S * 1000 && estado !== 'ok' && estado !== 'error') {
     sleep(1);
     const d = http.get(`${BASE}/api/v1/frequency/executions/${datos.id}`,
       { headers: cabeceras('k6-ingesta-sondeo'), tags: { recurso: 'executions_get', fase: 'sondeo' } });

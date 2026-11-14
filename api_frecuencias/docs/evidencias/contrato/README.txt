@@ -1,20 +1,34 @@
 Evidencias del contrato de la API (spec v1.5 §12.1, §12.2, §8.1, RNF-006, RNF-009 y §14.1 «Contrato»)
-Fecha: 09-11-2026. Base local de pruebas: PostgreSQL 14 + PostGIS 3.4 en Docker (puerto 5433), autenticación encendida.
+Fecha: 11-11-2026. Base local de pruebas: PostgreSQL 14 + PostGIS 3.4 en Docker (puerto 5433), autenticación encendida.
+
+Vigencia: operaciones_codigos.txt, schemathesis.txt, schemathesis_junit.xml y pytest_contrato.txt son del 11-11-2026,
+con el código final (commit bb7a612) y el contrato vigente (../../openapi.json, sin deriva): 65 rutas y 69
+operaciones (67 de /api/v1, más /health y /metrics). Frente a las corridas del 09-11-2026 (59 rutas y 62
+operaciones), entran GET y PUT /api/v1/catalogos/flota, GET /api/v1/catalogos/flota/historial, GET
+/api/v1/frequency/watermarks, POST /api/v1/segmentos/estadisticas/refrescar, GET /api/v1/retencion y POST
+/api/v1/retencion/aplicar, y los cambios de GET y POST /api/v1/frequency/executions (filtros ruta y padre_id;
+particion y trabajos), GET /api/v1/predictions/segmentos (parámetro modelo_segmentos), POST
+/api/v1/recommendations/calculate (ocupacion_historica) y GET /api/v1/recommendations/plan (ocupacion_historica,
+restriccion_reactiva y ocupacion_actual). Resultado: Schemathesis, 69 de 69 operaciones sin fallas; tests/contrato,
+197 casos (128 pruebas y 69 subpruebas), 0 fallas, 0 errores y 0 omitidas. traza_entre_replicas.txt (con la etapa
+plan_dia en la misma traza) y en_vivo_uvicorn.txt también son del 11-11-2026, con el código final;
+suite_completa_junit.xml es histórico: una corrida intermedia del 09-11-2026 (828 pruebas). La suite vigente es
+../pruebas/suite_final.xml.
 
 Archivos
 - operaciones_codigos.txt   Todas las operaciones del OpenAPI con su rol mínimo, los estados que declaran, los tipos
                             de contenido del éxito y los valores de «codigo» propios de cada error (x-codigos-error);
-                            generado desde app.openapi(). Los conteos están en su encabezado: 59 rutas y 62
+                            generado desde app.openapi(). Los conteos están en su encabezado: 65 rutas y 69
                             operaciones.
 - schemathesis.txt          Resumen de la última corrida de Schemathesis con cinco chequeos en TODAS las operaciones
                             (not_a_server_error, status_code_conformance, content_type_conformance,
                             response_schema_conformance, response_headers_conformance); la hora, la versión y los
-                            ejemplos por operación están en su encabezado. Resultado: 62 de 62 operaciones sin fallas.
+                            ejemplos por operación están en su encabezado. Resultado: 69 de 69 operaciones sin fallas.
 - schemathesis_junit.xml    Reporte junit de esa corrida (una subprueba por operación).
 - generar_evidencia_contrato.py  Regenera los tres archivos anteriores (corre tests/contrato/test_schemathesis.py con la
                             base local de pruebas): python docs/evidencias/contrato/generar_evidencia_contrato.py
 - pytest_contrato.txt       Corrida de tests/contrato completa (OpenAPI, compatibilidad, presentación y guarda NUL,
-                            Schemathesis) con los conteos exactos: 178 casos (116 pruebas y 62 subpruebas de
+                            Schemathesis) con los conteos exactos: 197 casos (128 pruebas y 69 subpruebas de
                             Schemathesis), 0 fallas, 0 errores, 0 omitidas y sin xfail.
 - traza_entre_replicas.txt  RNF-006: la réplica que toma un trabajo de la cola continúa la traza W3C de la petición
                             que lo encoló (mismo trace_id, padre remoto = span guardado en execution_log.traceparent).
@@ -39,6 +53,9 @@ Qué garantiza el contrato (y qué prueba lo demuestra)
   403 con operador y 404 «sin_datos» para 2030-01-01 sin encolar nada; POST /api/v1/thresholds/{version}/aprobar es
   solo de admin, idempotente (conserva la primera firma), 403 con analista, 404 con una versión inexistente:
   test_calcular_respuesta_202_analista_403_operador_404_sin_datos y test_aprobar_umbrales_admin_idempotente_403_404_422.
+  POST /api/v1/segmentos/estadisticas/refrescar responde 202 con analista (el trabajo «segmentos» queda en la cola), el
+  mismo trabajo si se repite el pedido, 403 con operador y 422 uniforme con un rango mal formado:
+  test_refrescar_segmentos_202_analista_403_operador_y_sin_duplicar.
 - Lo que el código lanza está declarado: test_codigos_que_lanza_el_codigo_estan_documentados revisa cada endpoint y
   sus auxiliares (ErrorApi(<código>) y no_encontrado).
 - Degradación declarada (RNF-010): sin réplica ni exportaciones (una máquina limpia o GitHub Actions) los catálogos

@@ -130,6 +130,42 @@ def test_fuente_postgres_pasa_por_el_circuito_y_falla_rapido():
     assert C.estados()["fuente_postgres"]["estado"] == C.ABIERTO
 
 
+def _motor_que_agota_el_tiempo():
+    import psycopg.errors
+
+    motor = mock.MagicMock()
+    conexion = motor.connect.return_value.__enter__.return_value
+
+    def ejecutar(sentencia, parametros=None):
+        if "timbradas_segmentos" in str(sentencia):
+            raise OperationalError("SELECT", {}, psycopg.errors.QueryCanceled("canceling statement due to statement "
+                                                                              "timeout"))
+        return mock.MagicMock()
+
+    conexion.execute.side_effect = ejecutar
+    return motor
+
+
+def test_tiempo_agotado_abre_el_circuito_salvo_con_cancelacion_responde():
+    """Por omisión un statement_timeout (QueryCanceled, SQLSTATE 57014) cuenta como falla de infraestructura, como
+    siempre. Con cancelacion_responde=True (la fuente de la capa de segmentos, que parte la lectura) sube como
+    SentenciaCancelada, con la excepción original en __cause__, y el circuito sigue cerrado."""
+    sql = "SELECT 1 FROM timbradas_segmentos"
+    partidora = F.FuentePostgresSoloLectura(url="postgresql+psycopg://l@h/db", motor=_motor_que_agota_el_tiempo(),
+                                            tabla="timbradas_segmentos", cancelacion_responde=True)
+    for _ in range(5):
+        with pytest.raises(F.SentenciaCancelada) as error:
+            partidora.consultar(sql)
+        assert isinstance(error.value.__cause__, OperationalError) and "statement timeout" in str(error.value)
+    assert C.estados()["fuente_postgres"]["estado"] == C.CERRADO
+    normal = F.FuentePostgresSoloLectura(url="postgresql+psycopg://l@h/db", motor=_motor_que_agota_el_tiempo(),
+                                         tabla="timbradas_segmentos")
+    for _ in range(3):
+        with pytest.raises(OperationalError):
+            normal.consultar(sql)
+    assert C.estados()["fuente_postgres"]["estado"] == C.ABIERTO
+
+
 class _CorreoCaido(N.NotificadorCorreo):
     intentos = 0
 

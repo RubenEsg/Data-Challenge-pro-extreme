@@ -1,4 +1,4 @@
-RNF-006: continuidad de la traza W3C entre la petición que encola y la réplica que ejecuta (09-11-2026)
+RNF-006: continuidad de la traza W3C entre la petición que encola y la réplica que ejecuta (11-11-2026)
 Prueba: tests/integracion/test_traza_entre_replicas.py::test_otra_replica_continua_la_traza_desde_execution_log
 Comando: TEST_DATABASE_NAME=<base local de pruebas> pytest tests/integracion/test_traza_entre_replicas.py -q -s
 Resultado: 3 pruebas aprobadas (otra réplica desde execution_log, misma réplica desde memoria, traceparent inválido).
@@ -9,16 +9,23 @@ execution_log y deja el trabajo en la cola; se borra el registro en memoria de l
 camino de los trabajadores. El exportador en memoria de OpenTelemetry recoge todos los spans.
 
 Línea de evidencia impresa por la prueba:
-{'execution_id': '4853227c-9d35-4e8b-abaa-309869a49115',
- 'correlation_id': 'rnf006-d0281dcc-7b6e-4944-9615-fbb057b34d20',
- 'traceparent_guardado': '00-c2bf89c6de474578111d6c74fbd59ef2-18197551346c0d90-03',
- 'trace_id_peticion': 'c2bf89c6de474578111d6c74fbd59ef2',
- 'trace_id_trabajador': 'c2bf89c6de474578111d6c74fbd59ef2',
- 'padre_del_ciclo': '18197551346c0d90', 'padre_remoto': True,
- 'traza_origen': 'execution_log', 'worker_id': 'replica-b:1',
- 'etapas_en_la_misma_traza': ['ejecucion.alertas', 'ejecucion.calidad', 'ejecucion.guardar_errores_calidad',
-                              'ejecucion.incorporar_historico', 'ejecucion.lectura_incremental',
-                              'ejecucion.notificaciones', 'ejecucion.prediccion']}
+{'execution_id': '35b218a7-793d-462e-933b-f852970ca7e4',
+ 'correlation_id': 'rnf006-f300b3dc-e9bc-488e-a50f-ae0928032190',
+ 'traceparent_guardado': '00-c10fce0dcf3c1c5309f253f59663687c-08be6f79639d586e-03',
+ 'trace_id_peticion': 'c10fce0dcf3c1c5309f253f59663687c',
+ 'trace_id_trabajador': 'c10fce0dcf3c1c5309f253f59663687c',
+ 'padre_del_ciclo': '08be6f79639d586e',
+ 'padre_remoto': True,
+ 'traza_origen': 'execution_log',
+ 'worker_id': 'replica-b:1',
+ 'etapas_en_la_misma_traza': ['ejecucion.alertas',
+                              'ejecucion.calidad',
+                              'ejecucion.guardar_errores_calidad',
+                              'ejecucion.incorporar_historico',
+                              'ejecucion.lectura_incremental',
+                              'ejecucion.notificaciones',
+                              'ejecucion.plan_dia',
+                              'ejecucion.prediccion']}
 
 Lectura: el span «ejecucion.ciclo_frecuencia» de la réplica B tiene el mismo trace_id que el span HTTP de la
 petición y su padre es exactamente el span guardado en el traceparent (padre remoto). Todas las etapas del ciclo

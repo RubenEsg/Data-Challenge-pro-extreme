@@ -4,13 +4,24 @@ Todo sale de archivos del propio proyecto generados por scripts/preparar_datos_a
 - demanda_horaria.parquet: pasajeros y salidas por ruta, fecha y hora de salida (4-20 h), 2023-2025.
 - catalogo_rutas.json: capacidad (50), tiempo de ciclo, flota y frecuencia actual por ruta.
 - parametros_operativos_hora.parquet: los mismos parámetros por ruta, tipo de día y hora.
-- contexto_operacional.parquet: novedades viales por hora y festivos oficiales (variables fv2, se conocen antes).
+- contexto_operacional.parquet: novedades viales de todas las rutas por hora y festivos oficiales (variables fv2, se
+  conocen antes).
+- novedades_por_ruta.parquet: novedades viales de rutas dadas por ruta, fecha y hora (§11.2); solo existe si
+  novedades_viales_ruta trae filas (en Sobusa no: cada novedad es de todas las rutas).
 - perfil_intrahorario.parquet: reparto de las subidas entre la primera y la segunda media hora (ventanas 30/60/120).
 - clima_diario.parquet: lluvia diaria observada, solo para evaluar por condición.
-Los tres últimos son opcionales: si faltan, las variables de contexto valen 0 y el reparto intrahorario es 0,5.
+- ocupacion_segmentos_hora.parquet: ocupación histórica por segmento, día de operación y hora (§10.1), la que arma
+  scripts/preparar_ocupacion_segmentos.py con las subidas y bajadas por segmento de cada viaje (2023-01-01 a
+  2023-02-27).
+- bajadas_horaria.parquet: bajadas_viajes (Σ numerobajadas de los viajes válidos) por ruta, fecha y hora de salida,
+  2023-2025 (§6.1 Bajadas; la fuente offline la entrega con la serie y ALT-008 la usa).
+Los seis últimos son opcionales: si faltan, las variables de contexto valen 0, el reparto intrahorario es 0,5, la
+recomendación no nombra el segmento crítico histórico y el lote offline llega sin bajadas.
 
 La carpeta se puede cambiar con la variable de entorno DATA_DIR (la misma de app/config.py).
-No hay conexión a ninguna base de datos aquí: es la fuente offline y reproducible por defecto.
+No hay conexión a ninguna base de datos aquí: es la fuente offline y reproducible por defecto. La única excepción es
+la frecuencia vigente de la ruta (ruta_info, frecuencia_vigente): en modo integrado la lee la capa de fuentes de la
+tabla rutas de Extreme en solo lectura, con el catálogo empaquetado como respaldo.
 """
 
 from __future__ import annotations
@@ -95,10 +106,55 @@ def catalogo_rutas() -> list[dict]:
 
 
 def ruta_info(ruta: str) -> dict:
+    """La ruta del catálogo empaquetado (por nombre o por idruta) con su frecuencia vigente de rutas.frecuenciadespachos
+    (frecuenciadespachos_tabla_rutas) y de dónde salió (frecuencia_vigente). KeyError si no existe."""
     for r in catalogo_rutas():
         if r["ruta"] == ruta or str(r["idruta"]) == str(ruta):
-            return r
+            return frecuencia_vigente(r)
     raise KeyError(f"Ruta desconocida: {ruta!r}. Rutas válidas: {[r['ruta'] for r in catalogo_rutas()]}")
+
+
+FRECUENCIA_EMPAQUETADA = "catalogo_empaquetado"
+FRECUENCIA_DE_LA_FUENTE = "fuente"
+
+
+def _sin_valor(valor) -> bool:
+    """Nulo, NaN, pd.NA o texto vacío (lo que trae una celda sin dato)."""
+    return not valor.strip() if isinstance(valor, str) else bool(pd.isna(valor))
+
+
+def _frecuencias_integradas() -> tuple[dict | None, str]:
+    """({idruta: frecuenciadespachos}, detalle) de la fuente en modo integrado (FUENTE_DATABASE_URL, la de la capa
+    analítica: app.servicios.fuentes.frecuencias_despacho, solo lectura); (None, motivo) en modo offline o si falla."""
+    try:
+        from app.servicios import fuentes, segmentos
+
+        if not segmentos.fuente_configurada():
+            return None, "modo offline (sin FUENTE_DATABASE_URL)"
+        return fuentes.frecuencias_despacho(segmentos.fuente())
+    except Exception as exc:  # noqa: BLE001 - sin la fuente rige el catálogo empaquetado
+        return None, f"la fuente no se pudo abrir ({type(exc).__name__})"
+
+
+def frecuencia_vigente(info: dict) -> dict:
+    """§6.1 «frecuenciadespachos» y §6.2 «headway vigente» (su unidad es el supuesto S14, hallazgo H15). En modo
+    integrado la frecuencia de la ruta es la de la tabla rutas de la base de Extreme, leída en solo lectura con la
+    lista blanca de app/servicios/fuentes.py; si la fuente no responde, no trae la columna o no trae un valor para la
+    ruta, rige la del catálogo empaquetado (datos/catalogo_rutas.json). Devuelve una copia de la ruta que dice de
+    dónde salió: frecuencia_fuente («fuente» o «catalogo_empaquetado») y frecuencia_fuente_detalle (el motivo)."""
+    valores, detalle = _frecuencias_integradas()
+    salida = dict(info, frecuencia_fuente=FRECUENCIA_EMPAQUETADA)
+    if valores is None:
+        return dict(salida, frecuencia_fuente_detalle=f"{detalle}: rige el catálogo empaquetado")
+    try:
+        valor = valores.get(int(info["idruta"]))
+    except (KeyError, TypeError, ValueError):
+        valor = None
+    if _sin_valor(valor):
+        return dict(salida, frecuencia_fuente_detalle=f"{detalle}: sin valor para la ruta, rige el catálogo "
+                                                      "empaquetado")
+    return dict(salida, frecuenciadespachos_tabla_rutas=valor, frecuencia_fuente=FRECUENCIA_DE_LA_FUENTE,
+                frecuencia_fuente_detalle=detalle)
 
 
 def nombres_rutas() -> list[str]:
@@ -133,7 +189,7 @@ def tipo_dia_de(fecha: date, festivo: bool = False) -> int:
 COLUMNAS_CONTEXTO = ["fecha", "hora", "nov_impacto", "nov_sube", "festivo_oficial"]
 
 
-@lru_cache(maxsize=2)
+@lru_cache(maxsize=8)
 def _cargar_parquet_opcional(ruta_archivo: str, mtime: float) -> pd.DataFrame | None:
     if mtime < 0:
         return None
@@ -168,6 +224,22 @@ def contexto_operacional() -> pd.DataFrame:
     return d[COLUMNAS_CONTEXTO]
 
 
+COLUMNAS_NOVEDADES_RUTA = ["ruta", "fecha", "hora", "nov_impacto", "nov_sube"]
+
+
+def novedades_por_ruta() -> pd.DataFrame:
+    """§11.2 novedades viales de rutas dadas (novedades_viales_ruta con filas) por ruta, fecha y hora: nov_impacto y
+    nov_sube solo en sus rutas (app/servicios/novedades.py). Vacía si falta datos/novedades_por_ruta.parquet, como en
+    Sobusa, donde la tabla no trae filas y cada novedad es de todas las rutas (contexto_operacional)."""
+    d = _opcional("novedades_por_ruta.parquet")
+    if d is None:
+        return pd.DataFrame({"ruta": pd.Series(dtype="object"), "fecha": pd.Series(dtype="object"),
+                             "hora": pd.Series(dtype="int64"), "nov_impacto": pd.Series(dtype="float64"),
+                             "nov_sube": pd.Series(dtype="int64")})
+    d["hora"] = d["hora"].astype(int)
+    return d[COLUMNAS_NOVEDADES_RUTA]
+
+
 def perfil_intrahorario() -> pd.DataFrame:
     """Fracción de las subidas de la hora que viaja en los buses que salen entre h:00 y h:29, por ruta, tipo_dia (0, 1,
     2) y hora (viajes de 2024). Vacía si falta datos/perfil_intrahorario.parquet (se usa entonces el reparto 0,5)."""
@@ -182,8 +254,43 @@ def clima_diario() -> pd.DataFrame | None:
     return _opcional("clima_diario.parquet")
 
 
+def ocupacion_segmentos_historica() -> pd.DataFrame | None:
+    """§10.1 ocupación histórica por segmento (datos/ocupacion_segmentos_hora.parquet, app/servicios/ocupacion.py):
+    carga a bordo media, P50, P90 y máxima por ruta, segmento, nivel (día de operación ISO o tipo de día), hora de
+    salida y estacionalidad. None si el archivo no está."""
+    return _opcional("ocupacion_segmentos_hora.parquet")
+
+
+ARCHIVO_BAJADAS = "bajadas_horaria.parquet"
+LLAVE_HORARIA = ["ruta", "fecha", "hora"]
+
+
+def bajadas_horaria() -> pd.DataFrame | None:
+    """§6.1 Bajadas: bajadas_viajes por ruta, fecha y hora de salida (4-20 h), 2023-2025 = Σ numerobajadas de los viajes
+    válidos (finalizado 'S', no cancelado, dato <= 300, ceros incluidos), la definición de pasajeros aplicada a los
+    descensos (scripts/preparar_datos_api.py --solo-bajadas). None si falta datos/bajadas_horaria.parquet."""
+    d = _opcional(ARCHIVO_BAJADAS)
+    if d is None:
+        return None
+    d["hora"] = d["hora"].astype(int)
+    d["bajadas_viajes"] = d["bajadas_viajes"].astype(float)
+    return d[[*LLAVE_HORARIA, "bajadas_viajes"]]
+
+
+def con_bajadas(serie: pd.DataFrame) -> pd.DataFrame:
+    """La serie horaria con bajadas_viajes (bajadas_horaria) por (ruta, fecha, hora); sin el archivo, o si la serie ya
+    la trae, tal cual. Una hora sin dato queda nula (nunca se inventa un cero)."""
+    bajadas = bajadas_horaria()
+    if bajadas is None or "bajadas_viajes" in serie.columns or not len(serie):
+        return serie
+    return serie.merge(bajadas, on=LLAVE_HORARIA, how="left")
+
+
 def limpiar_cache() -> None:
+    from app.servicios import fuentes
+
     _cargar_demanda.cache_clear()
     _cargar_catalogo.cache_clear()
     _cargar_parametros.cache_clear()
     _cargar_parquet_opcional.cache_clear()
+    fuentes.limpiar_frecuencias()

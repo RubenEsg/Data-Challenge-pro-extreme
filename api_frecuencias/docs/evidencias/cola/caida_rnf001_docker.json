@@ -2,70 +2,72 @@
  "escenarios": [
   {
    "escenario": "sigkill_lectura_incremental",
-   "execution_id": "98beaf12-10bd-4271-8180-838e36f22369",
-   "api_de_vuelta_s": 3.7,
-   "ok_tras_kill_s": 18.0,
+   "execution_id": "bc6df505-9fcc-4a1c-a287-b0d3a058dacd",
+   "api_de_vuelta_s": 2.8,
+   "ok_tras_kill_s": 21.5,
    "predicciones_visibles_antes_del_kill": 0,
    "intentos": 2,
    "traza": [
     [
      1,
-     "caida-a:1:e36019:t1",
+     "caida-a:1:b03997:t1",
      "abandonado"
     ],
     [
      2,
-     "caida-a:1:0fd04d:t1",
+     "caida-a:1:5242e6:t1",
      "ok"
     ]
    ]
   },
   {
    "escenario": "sigkill_prediccion",
-   "execution_id": "ca88e21a-23f4-4b77-a935-9dcb9dead2bd",
-   "api_de_vuelta_s": 3.5,
-   "ok_tras_kill_s": 20.1,
+   "execution_id": "408e65f1-0574-47cc-b5be-473bdf238521",
+   "api_de_vuelta_s": 3.7,
+   "ok_tras_kill_s": 23.3,
    "predicciones_visibles_antes_del_kill": 0,
    "intentos": 2,
    "traza": [
     [
      1,
-     "caida-a:1:0fd04d:t1",
+     "caida-a:1:5242e6:t1",
      "abandonado"
     ],
     [
      2,
-     "caida-a:1:820ab1:t1",
+     "caida-a:1:139802:t1",
      "ok"
     ]
    ]
   },
   {
    "escenario": "reserva_vencida_otra_replica",
-   "execution_id": "7c563427-01f7-42b9-94d7-fdfc88febf14",
-   "retomada_tras_kill_s": 6.7,
-   "ok_tras_kill_s": 20.6,
+   "execution_id": "12b2d906-2e3d-457f-a0d1-a5cdaacb8295",
+   "retomada_tras_kill_s": 5.9,
+   "ok_tras_kill_s": 24.2,
    "intentos": 2,
    "traza": [
     [
      1,
-     "caida-a:1:820ab1:t1",
+     "caida-b:1:631e89:t1",
      "abandonado"
     ],
     [
      2,
-     "caida-b:1:4a4bb0:t1",
+     "caida-a:1:139802:t1",
      "ok"
     ]
    ]
   }
  ],
  "referencia": {
-  "execution_id": "55b5c10f-b425-4ff2-acc2-563b2b860704",
+  "execution_id": "fd61d76d-6919-4cfe-9bba-8a8dd75a1927",
   "predicciones": 9,
-  "recomendaciones": 9,
-  "alertas": 11,
-  "intentos": 1
+  "recomendaciones": 60,
+  "alertas": 71,
+  "intentos": 1,
+  "foto_ruta": 12,
+  "foto_segmento": 1158
  },
  "ok": true,
  "fallas": []

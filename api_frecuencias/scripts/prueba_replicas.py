@@ -4,12 +4,16 @@
 2. Envía N ejecuciones (un día nuevo cada una), alternando la réplica que recibe el POST.
 3. Espera a que todas terminen y cuenta en la base: quién procesó cada una (execution_attempt), intentos 'ok' por
    ejecución (= 1), predicciones por ejecución sin duplicados, marca de agua contigua (ningún lote perdido ni
-   leído dos veces) y claves únicas en demanda_observada.
+   leído dos veces), claves únicas en demanda_observada y que la política de aprendizaje no dejó entrenamientos en
+   error (los que no se pueden entrenar se omiten con su motivo).
 4. Opcional (--planificador-minutos M): reinicia las dos réplicas con PLANIFICADOR_HABILITADO=true y
    PLAN_EJECUCION_CRON='*/1 * * * *' durante M minutos y comprueba que hay UNA ejecución por franja.
 
 Uso:  python scripts/prueba_replicas.py --base-datos ai_frecuencias_pruebas_cola --n 20 \
           --salida docs/evidencias/cola/replicas.txt [--planificador-minutos 3]
+Las réplicas corren con DATA_DIR y MODELOS_DIR en una copia temporal de datos/ (cola_servidor.datos_de_la_base): con
+--planificador-minutos la política de aprendizaje entrena un candidato por periodicidad, y queda en la copia. El
+repositorio queda igual.
 """
 from __future__ import annotations
 
@@ -22,7 +26,17 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cola_servidor import RAIZ, Cliente, Replica, lineas_de_log, motor, preparar_base, url_local  # noqa: E402
+from cola_servidor import (  # noqa: E402
+    RAIZ,
+    Cliente,
+    Replica,
+    lineas_de_log,
+    motor,
+    politica_del_lote,
+    preparar_base,
+    regla_de_la_politica,
+    url_local,
+)
 from sqlalchemy import text  # noqa: E402
 
 E = "ai_frecuencias"
@@ -111,6 +125,7 @@ def informe_lote(m, ids: list[str]) -> list[str]:
         ("marca de agua contigua: ningún lote perdido ni leído dos veces", contiguas),
         ("se procesaron en el orden de llegada de los datos", orden_hasta),
         (f"demanda_observada: {n_dem} filas = {n_dist} claves distintas", n_dem == n_dist),
+        regla_de_la_politica(politica_del_lote(m)),
     ]
     log(f"\nReparto por réplica (intento 'ok'): {dict(por_replica)}")
     log(f"Total de intentos: {sum(f.intentos_t for f in filas)}; ejecuciones: {len(filas)}; "

@@ -2,7 +2,7 @@
 
 - Servidor: SonarQube 26.11.0.134175 (Community Build) en Docker, contenedor `sobusa_sonar`, 127.0.0.1:9000.
 - Proyecto: `sobusa-api-frecuencias` (código analizado: `app/`; pruebas: `tests/`).
-- Análisis: 2026-11-09T17:49:56+0000 · evidencia generada 2026-11-09T12:50:34-05:00.
+- Análisis: 2026-11-14T05:55:19+0000 · evidencia generada 2026-11-14T00:56:02-05:00.
 - Perfil de calidad: «Reto Sobusa v1.5» (hereda de «Sonar way comprehensive», el perfil integrado más completo de SonarQube para Python, y activa además todas las reglas de seguridad de Python): 408 reglas activas, 62 de seguridad (61 del perfil padre más python:S5439).
 
 ## Puerta de calidad «Reto Sobusa v1.5»: **APROBADA**
@@ -11,7 +11,7 @@ Se evalúa sobre todo el código (no solo el código nuevo). Cada condición fal
 
 | Condición | Falla si | Valor medido | Resultado |
 |---|---|---|---|
-| Cobertura de pruebas (%) (`coverage`) | < 85 | 94.3 | cumple |
+| Cobertura de pruebas (%) (`coverage`) | < 85 | 95.7 | cumple |
 | Líneas duplicadas (%) (`duplicated_lines_density`) | > 3 | 0.0 | cumple |
 | Hallazgos bloqueantes (`blocker_violations`) | > 0 | 0 | cumple |
 | Bugs (`bugs`) | > 0 | 0 | cumple |
@@ -24,21 +24,21 @@ Condiciones sin valor en este análisis (no aplican): security_hotspots_reviewed
 
 | Medida | Valor |
 |---|---|
-| Líneas de código (ncloc) | 14530 |
+| Líneas de código (ncloc) | 19843 |
 | Bugs | 0 |
 | Vulnerabilidades | 0 |
 | Security hotspots (revisados) | 0 (— %) |
-| Code smells | 736 |
-| Cobertura de pruebas | 94.3 % (líneas por cubrir: 11221, sin cubrir: 642) |
+| Code smells | 1666 |
+| Cobertura de pruebas | 95.7 % (líneas por cubrir: 15314, sin cubrir: 658) |
 | Duplicación | 0.0 % |
 | Confiabilidad / Seguridad / Mantenibilidad | A / A / A |
-| Confiabilidad / Seguridad / Mantenibilidad, vista por impacto (la del tablero) | B (2 hallazgos) / A (0) / A (736) |
+| Confiabilidad / Seguridad / Mantenibilidad, vista por impacto (la del tablero) | B (4 hallazgos) / A (0) / A (1665) |
 | Revisión de seguridad | A |
 | Hallazgos aceptados con justificación | 1 |
-| Deuda técnica | 3676 min (0.8 %) |
-| Pruebas importadas (junit) | 1055 (fallas 0, errores 0, omitidas 5) |
+| Deuda técnica | 8314 min (1.4 %) |
+| Pruebas importadas (junit) | 1770 (fallas 0, errores 0, omitidas 0) |
 
-Hallazgos abiertos: 736 (MAJOR: 711, MINOR: 25). El detalle de cada uno está en `issues.json`; los security hotspots y su revisión, en `hotspots.json`.
+Hallazgos abiertos: 1666 (MAJOR: 1635, MINOR: 31). El detalle de cada uno está en `issues.json`; los security hotspots y su revisión, en `hotspots.json`.
 
 ### Deuda de mantenibilidad aceptada con justificación
 
@@ -50,7 +50,7 @@ Hallazgos abiertos: 736 (MAJOR: 711, MINOR: 25). El detalle de cada uno está en
 
 ## Pruebas y análisis estático que alimentan el análisis
 
-- pytest (todas las suites salvo Testcontainers): 1060 pruebas, 0 fallas, 0 errores, 5 omitidas, código de salida 0, 770.8 s. La cobertura que lee SonarQube incluye todo `app/` (también `app/servicios/motor_d5/`).
+- pytest (todas las suites salvo Testcontainers): 1770 pruebas, 0 fallas, 0 errores, 0 omitidas, código de salida 0, 2142.3 s. La cobertura que lee SonarQube incluye todo `app/` (también `app/servicios/motor_d5/`).
 - ruff (todo el repositorio de la API): 0 hallazgos (`docs/evidencias/calidad/ruff.txt`).
 - bandit `-r app` (todas las severidades): 0 hallazgos; bandit `-r scripts -ll`: 0 (`docs/evidencias/calidad/bandit.txt`).
 - sonar-scanner-cli terminó con código 0 (0 = puerta aprobada; el registro está en `scanner.log`).

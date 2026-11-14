@@ -30,9 +30,12 @@ def entorno_contrato(tmp_path_factory):
     copia = tmp_path_factory.mktemp("datos_contrato") / "datos"
     shutil.copytree(RAIZ / "datos", copia)
     mp = pytest.MonkeyPatch()
+    # FUENTE_DATABASE_URL vacía: la capa de segmentos queda en modo offline (sin agregación ni refrescos), igual en
+    # cualquier equipo y en el CI; tests/integracion/test_segmentos_materializados.py prueba el modo integrado.
     for nombre, valor in {"DATA_DIR": str(copia), "MODELOS_DIR": str(copia / "modelos"),
                           "AUTH_HABILITADA": "true", "METRICAS_PUBLICAS": "true",
-                          "PLANIFICADOR_HABILITADO": "false", "REANUDAR_EJECUCIONES": "false"}.items():
+                          "PLANIFICADOR_HABILITADO": "false", "REANUDAR_EJECUCIONES": "false",
+                          "FUENTE_DATABASE_URL": ""}.items():
         mp.setenv(nombre, valor)
     obtener_ajustes.cache_clear()
     datos.limpiar_cache()

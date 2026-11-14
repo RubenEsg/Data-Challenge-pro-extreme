@@ -41,6 +41,8 @@ import httpx
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ))
 sys.path.insert(0, str(RAIZ / "scripts"))
+from cliente_http import crear_cliente  # noqa: E402  # keep-alive corto y reintento solo en GET y HEAD
+
 ZONA = ZoneInfo("America/Bogota")
 PROTEGIDOS = {"sobusa_api", "sobusa_rep"}
 E = "ai_frecuencias"
@@ -306,7 +308,7 @@ def fase_demo(a, clave_admin: str, log: Bitacora, salida: Path) -> bool:
 
 def fase_sin_demo(a, clave: str, log: Bitacora) -> bool:
     """Sin la demostración: carga inicial y un día nuevo, que sirve de referencia a la prueba RNF-001."""
-    cli = httpx.Client(base_url=f"http://127.0.0.1:{a.puerto_api}", headers={"X-API-Key": clave}, timeout=30)
+    cli = crear_cliente(f"http://127.0.0.1:{a.puerto_api}", headers={"X-API-Key": clave}, timeout=30)
     ok = True
     for etiqueta, d in (("carga inicial", a.hasta), ("día nuevo (referencia)", a.hasta + timedelta(days=1))):
         t0 = time.time()
@@ -335,7 +337,7 @@ def fase_caida(pila: Pila, a, clave: str, log: Bitacora) -> bool:
            f"{a.puerto_db}/ai_frecuencias")
     m = create_engine(url, pool_pre_ping=True)
     base = f"http://127.0.0.1:{a.puerto_api}"
-    cli = httpx.Client(base_url=base, headers={"X-API-Key": clave}, timeout=10)
+    cli = crear_cliente(base, headers={"X-API-Key": clave}, timeout=10)
     log(f"RNF-001 · recuperación ante reinicios de la API en la pila Docker Compose «{a.proyecto}» · {ahora()}")
     log("La API corre como en producción (uvicorn en el contenedor, cola en PostgreSQL con reserva que vence, "
         "REANUDAR_EJECUCIONES=true). Escenarios, cada uno con un día nuevo de datos:")
@@ -520,6 +522,12 @@ def fase_bajar(pila: Pila, a, log: Bitacora) -> bool:
 ESCRITURAS = ("INSERT", "UPDATE", "DELETE", "MERGE", "CREATE", "ALTER", "DROP", "TRUNCATE", "GRANT", "REVOKE", "COPY")
 
 
+def entorno_integrado(puerto: int) -> dict[str, str]:
+    """Entorno de compose del modo integrado: la API se publica en el mismo puerto que consulta la verificación
+    (--puerto-integrado). Sin esto, compose la publicaba siempre en su puerto por omisión (8302)."""
+    return {"API_INTEGRADA_PUERTO_HOST": str(puerto)}
+
+
 def verificar_integrado(a) -> int:
     """Modo integrado (docker-compose.integracion.yml) contra la réplica que YA está corriendo en «sobusa_rep».
 
@@ -535,7 +543,7 @@ def verificar_integrado(a) -> int:
     proyecto, op = "sobusa_rep", "sobusa_rep-operacional-1"
     base = f"http://127.0.0.1:{a.puerto_integrado}"
     archivos = ["-f", "docker-compose.yml", "-f", "docker-compose.integracion.yml", "--profile", "integracion"]
-    entorno: dict[str, str] = {}
+    entorno: dict[str, str] = entorno_integrado(a.puerto_integrado)
 
     def compose(*args: str, check: bool = True, timeout: float = 1800) -> subprocess.CompletedProcess:
         r = subprocess.run(["docker", "compose", "-p", proyecto, *archivos, *args], cwd=RAIZ,  # noqa: S603, S607
@@ -595,7 +603,7 @@ def verificar_integrado(a) -> int:
     salud = httpx.get(f"{base}/health", timeout=5).json()
     log(f"3) Clave de rol analista creada dentro del contenedor (no se muestra); up -d --no-deps api: /health ok en "
         f"{time.time() - t0:.1f} s (salud {t_salud:.1f} s) -> {salud}")
-    cli = httpx.Client(base_url=base, headers={"X-API-Key": clave}, timeout=30)
+    cli = crear_cliente(base, headers={"X-API-Key": clave}, timeout=30)
     t0 = time.time()
     r = cli.post("/api/v1/frequency/executions", json={}, headers={"X-Correlation-Id": "modo-integrado"})
     r.raise_for_status()

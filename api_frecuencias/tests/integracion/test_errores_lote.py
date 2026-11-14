@@ -150,3 +150,51 @@ def test_errores_del_lote_por_api_con_lote_fila_llave_campo_valor_codigo_y_causa
                   f"10 h y SILENCIO 11 h; la fila con marca futura (OPOR-002, no bloqueante) sí entró. "
                   f"Errores por dimensión: {detalle['errores_por_dimension']}.")
     guardar_evidencia("datos/errores_lote.txt", "\n".join(lineas) + "\n")
+
+
+def test_el_lote_con_duplicados_se_reporta_al_responsable_sin_corregir(cliente, lote_malo, sesion, monkeypatch):
+    """§6.3 «Unicidad: reportar al responsable del consolidado; no corregir directamente»: la ejecución deja en
+    notification_log el reporte del lote (cada llave duplicada con sus filas) por el canal de correo. Sin destinatario
+    (lo define Extreme) queda «pendiente_destinatario»; con NOTIF_UNICIDAD_DESTINATARIOS se envía (simulado, con el
+    destinatario enmascarado). Nada se corrige: las dos filas de la llave quedan fuera del histórico."""
+    from app.modelos_db import Notificacion
+
+    def correr() -> tuple[str, Notificacion]:
+        r = cliente.post("/api/v1/frequency/executions", json={"hasta": HASTA})
+        assert r.status_code == 202, r.text
+        eid = r.json()["execution_id"]
+        EJECUCIONES.append(eid)
+        detalle = cliente.get(f"/api/v1/frequency/executions/{eid}").json()
+        assert detalle["estado"] == "ok", detalle.get("mensaje")
+        sesion.expire_all()
+        filas = sesion.scalars(select(Notificacion).where(Notificacion.execution_id == eid,
+                                                          Notificacion.alert_id.is_(None))).all()
+        reportes = [f for f in filas if (f.detalle or {}).get("tipo") == "reporte_unicidad"]
+        assert len(reportes) == 1, [f.detalle for f in filas]
+        assert detalle["metricas"]["reporte_unicidad"]["notification_id"] == reportes[0].id
+        return eid, reportes[0]
+
+    monkeypatch.delenv("NOTIF_UNICIDAD_DESTINATARIOS", raising=False)
+    eid, fila = correr()
+    reporte = fila.detalle["reporte"]
+    assert fila.estado == "pendiente_destinatario" and fila.destinatario is None and fila.canal == "correo"
+    assert reporte["llaves_duplicadas"] == 1 and reporte["filas_duplicadas"] == 2 and reporte["corregido"] is False
+    assert reporte["duplicados"][0]["llave"] == {"ruta": "SILENCIO", "fecha": DIA.isoformat(), "hora": 13}
+    assert len(reporte["duplicados"][0]["filas"]) == 2 and reporte["lote"].startswith(eid.replace("-", "")[:8])
+    errores = cliente.get(f"/api/v1/frequency/executions/{eid}/errors", params={"codigo": "UNI-001"}).json()
+    assert sorted(e["fila"] for e in errores["items"]) == sorted(reporte["duplicados"][0]["filas"])
+    assert reporte["consulta"].endswith(f"{eid}/errors?codigo=UNI-001") and "No se corrigió nada" in fila.mensaje
+    assert sesion.scalar(select(func.count()).select_from(DemandaObservada).where(
+        DemandaObservada.ruta == "SILENCIO", DemandaObservada.fecha == DIA, DemandaObservada.hora == 13)) == 0
+
+    monkeypatch.setenv("NOTIF_UNICIDAD_DESTINATARIOS", "consolidado@extreme.example")
+    _eid, enviado = correr()
+    assert enviado.estado == "simulada" and enviado.destinatario == "co***@extreme.example" and enviado.simulado
+    guardar_evidencia("datos/reporte_unicidad.json", {
+        "prueba": "tests/integracion/test_errores_lote.py::"
+                  "test_el_lote_con_duplicados_se_reporta_al_responsable_sin_corregir",
+        "sin_destinatario": {"estado": fila.estado, "canal": fila.canal, "destinatario": fila.destinatario,
+                             "asunto": fila.asunto, "mensaje": fila.mensaje, "reporte": reporte},
+        "con_destinatario": {"estado": enviado.estado, "destinatario": enviado.destinatario,
+                             "asunto": enviado.asunto},
+        "historico": "las dos filas de la llave duplicada no entraron a demanda_observada (no se corrige)"})

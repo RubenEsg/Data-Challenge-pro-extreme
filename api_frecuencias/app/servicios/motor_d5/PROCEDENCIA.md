@@ -62,10 +62,17 @@ cualquier fecha con variables:
   la carga crítica es lognormal con mediana factor de carga × P50 y dispersión ln(P90 / P50) / z_0,90 de la banda
   calibrada (mínimo 0,02, la del oráculo de D5);
 - minutos operados, km, CV de los intervalos y tasa de viajes no válidos: mediana 2025 de `insumos_d5_2025.parquet`
-  por ruta, tipo de día y hora; ciclo, flota e intervalo programado: `parametros_operativos_hora.parquet`; la oferta
-  de referencia del ingreso perdido es la programada (minutos / intervalo programado);
+  por ruta, tipo de día y hora; ciclo, flota, capacidad por bus e intervalo programado:
+  `parametros_operativos_hora.parquet`, con el ajuste local vigente encima (flota y ciclo de
+  `app/servicios/flota_ciclo.py`, `PUT /api/v1/catalogos/flota`; capacidad de toda la ruta,
+  `PUT /api/v1/catalogos/capacidad`); la oferta de referencia del ingreso perdido es la programada (minutos /
+  intervalo programado);
 - cotas de cada hora desde `threshold_config`: nmin = ceil(minutos / headway máximo efectivo), con headway máximo
   efectivo = min(headway_maximo_min, 2 × espera_max_min), y tope = floor(minutos / headway mínimo);
 - costos del bus-hora, del km, del tiempo de espera y de la sobrecarga desde `threshold_config` (pesos α, β, γ
-  aplicados a esos costos); tarifa, elasticidad (0,5), suavidad (DELTA = 6) y hora de inicio de la suavidad, de
-  `param_d5()`.
+  aplicados a esos costos); desde la migración 0010, también la tarifa (`tarifa_cop`), la elasticidad
+  (`elasticidad`, 0,5), la suavidad (`delta_suavidad`, 6) y la hora de inicio de la suavidad
+  (`hora_inicio_suavidad`, 7), que `optimizacion._p_milp` pone en las claves `TARIFA`, `ELASTICIDAD`, `DELTA` y
+  `HORA_INICIO_SUAVIDAD` del diccionario de parámetros del MILP (`optimizacion.PARAMETROS_PLAN`). Sin versión en la
+  tabla rigen los de `param_d5()`, que son los mismos valores. Esta copia no cambia: el MILP sigue leyendo el mismo
+  diccionario, ahora con las cifras gobernadas.

@@ -1,0 +1,93 @@
+{
+ "prueba": "tests/replica/test_segmentos.py::test_refresco_sin_cambios_no_relee_la_ventana_de_solape_y_mide_la_diferencia",
+ "fuente": "réplica operacional local (lector_ia, READ ONLY) sin filas nuevas; agregación en la base propia",
+ "solape_min": 15,
+ "antes_sin_huellas": {
+  "modo": "incremental",
+  "tramos": 1,
+  "fechas_releidas": 26,
+  "filas_leidas": 164206,
+  "filas_respuesta_reescritas": 113247,
+  "filas_dia": 358091,
+  "filas": 129801,
+  "ventana": {
+   "fechas_en_ventana": 26,
+   "comparada_con_el_refresco_anterior": false,
+   "fechas_cambiadas": 26
+  },
+  "marca_fuente": "2026-08-14 00:52:39.363697-05:00",
+  "segundos": 10.49,
+  "versiones_de_fila_escritas_o_quitadas": {
+   "segmento_estadistica": 226494,
+   "segmento_estadistica_dia": 328412
+  }
+ },
+ "ahora_con_huellas": {
+  "modo": "sin_cambios",
+  "tramos": 0,
+  "fechas_releidas": 0,
+  "filas_leidas": 0,
+  "filas_respuesta_reescritas": 0,
+  "filas_dia": 358091,
+  "filas": 129801,
+  "ventana": {
+   "fechas_en_ventana": 26,
+   "comparada_con_el_refresco_anterior": true,
+   "fechas_cambiadas": 0
+  },
+  "marca_fuente": "2026-08-14 00:52:39.363697-05:00",
+  "segundos": 0.46,
+  "versiones_de_fila_escritas_o_quitadas": {
+   "segmento_estadistica": 0,
+   "segmento_estadistica_dia": 0
+  }
+ },
+ "siguiente_con_huellas": {
+  "modo": "sin_cambios",
+  "tramos": 0,
+  "fechas_releidas": 0,
+  "filas_leidas": 0,
+  "filas_respuesta_reescritas": 0,
+  "filas_dia": 358091,
+  "filas": 129801,
+  "ventana": {
+   "fechas_en_ventana": 26,
+   "comparada_con_el_refresco_anterior": true,
+   "fechas_cambiadas": 0
+  },
+  "marca_fuente": "2026-08-14 00:52:39.363697-05:00",
+  "segundos": 0.42,
+  "versiones_de_fila_escritas_o_quitadas": {
+   "segmento_estadistica": 0,
+   "segmento_estadistica_dia": 0
+  }
+ },
+ "sin_solape": {
+  "modo": "sin_cambios",
+  "tramos": 0,
+  "fechas_releidas": 0,
+  "filas_leidas": 0,
+  "filas_respuesta_reescritas": 0,
+  "filas_dia": 358091,
+  "filas": 129801,
+  "ventana": {
+   "fechas_en_ventana": 0,
+   "comparada_con_el_refresco_anterior": false,
+   "fechas_cambiadas": 0
+  },
+  "marca_fuente": "2026-08-14 00:52:39.363697-05:00",
+  "segundos": 0.19,
+  "versiones_de_fila_escritas_o_quitadas": {
+   "segmento_estadistica": 0,
+   "segmento_estadistica_dia": 0
+  }
+ },
+ "tras_el_parcial_filas_distintas_de_rehacerla_entera": 0,
+ "identica_a_la_directa": {
+  "filtros": {
+   "idruta": 2
+  },
+  "total": 45502,
+  "items_identicos": true
+ }
+}

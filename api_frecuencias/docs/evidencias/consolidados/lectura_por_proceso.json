@@ -1,0 +1,341 @@
+{
+ "generado": "2026-11-10T20:50:59-05:00",
+ "rol": "extreme_dba",
+ "metodo": "una transacción que se revierte; EXPLAIN (ANALYZE, BUFFERS), la más rápida de 2 corridas por consulta; lock_timeout 2s",
+ "proceso": "sobusa",
+ "otro_proceso": "cootransoriente",
+ "contexto": {
+  "marcas": {
+   "timbradas_consolidado": "2026-08-14T11:29:05.057003-05:00",
+   "timbradas_segmentos_anio": null,
+   "timbradas_segmentos_consolidado": null
+  },
+  "filas_del_proceso": {
+   "timbradas_consolidado": 10731,
+   "timbradas_segmentos_anio": 0,
+   "timbradas_segmentos_consolidado": 0
+  },
+  "segmentos_por_ruta": 129
+ },
+ "reales": [
+  {
+   "escenario": "timbradas_consolidado",
+   "descripcion": "timbradas_consolidado, sin novedades: desde la marca 2026-08-14T11:29:05.057003-05:00 menos el solape",
+   "antes": {
+    "consultas": 2,
+    "ms_total": 6.42,
+    "filas_leidas": 10731,
+    "detalle": {
+     "timbradas_consolidado_lectura_sin_filtro": {
+      "ms_ejecucion": 4.88,
+      "ms_planificacion": 0.04,
+      "filas": 10731,
+      "buffers_hit": 186,
+      "buffers_read": 0,
+      "escaneos": [
+       "Seq Scan timbradas_consolidado"
+      ],
+      "filas_descartadas_por_filtro": 0,
+      "ms_corridas": [
+       5.37,
+       4.88
+      ],
+      "descripcion": "lectura incremental sin filtrar el proceso",
+      "origen": "fuentes.consulta_incremental (proceso «*»)"
+     },
+     "timbradas_consolidado_conteo_del_proceso": {
+      "ms_ejecucion": 1.54,
+      "ms_planificacion": 0.03,
+      "filas": 1,
+      "buffers_hit": 186,
+      "buffers_read": 0,
+      "escaneos": [
+       "Seq Scan timbradas_consolidado"
+      ],
+      "filas_descartadas_por_filtro": 0,
+      "ms_corridas": [
+       1.55,
+       1.54
+      ],
+      "descripcion": "count(*) del proceso (consolidados._sin_filas, retirado)",
+      "origen": "SQL_CONTEO_RETIRADO"
+     }
+    }
+   },
+   "ahora": {
+    "consultas": 1,
+    "ms_total": 5.23,
+    "filas_leidas": 10731,
+    "detalle": {
+     "timbradas_consolidado_lectura_del_proceso": {
+      "ms_ejecucion": 5.23,
+      "ms_planificacion": 0.04,
+      "filas": 10731,
+      "buffers_hit": 186,
+      "buffers_read": 0,
+      "escaneos": [
+       "Seq Scan timbradas_consolidado"
+      ],
+      "filas_descartadas_por_filtro": 0,
+      "ms_corridas": [
+       5.23,
+       5.36
+      ],
+      "descripcion": "lectura incremental del proceso en el SQL",
+      "origen": "fuentes.consulta_incremental (TABLAS_CON_PROCESO)"
+     }
+    }
+   }
+  },
+  {
+   "escenario": "timbradas_segmentos_anio",
+   "descripcion": "timbradas_segmentos_anio, sin filas del proceso en la réplica (H4): sin marca guardada, desde la marca inicial",
+   "antes": {
+    "consultas": 2,
+    "ms_total": 0.02,
+    "filas_leidas": 0,
+    "detalle": {
+     "timbradas_segmentos_anio_lectura_sin_filtro": {
+      "ms_ejecucion": 0.01,
+      "ms_planificacion": 0.03,
+      "filas": 0,
+      "buffers_hit": 0,
+      "buffers_read": 0,
+      "escaneos": [
+       "Seq Scan timbradas_segmentos_anio"
+      ],
+      "filas_descartadas_por_filtro": 0,
+      "ms_corridas": [
+       0.02,
+       0.01
+      ],
+      "descripcion": "lectura incremental sin filtrar el proceso",
+      "origen": "fuentes.consulta_incremental (proceso «*»)"
+     },
+     "timbradas_segmentos_anio_conteo_del_proceso": {
+      "ms_ejecucion": 0.01,
+      "ms_planificacion": 0.04,
+      "filas": 1,
+      "buffers_hit": 0,
+      "buffers_read": 0,
+      "escaneos": [
+       "Seq Scan timbradas_segmentos_anio"
+      ],
+      "filas_descartadas_por_filtro": 0,
+      "ms_corridas": [
+       0.01,
+       0.01
+      ],
+      "descripcion": "count(*) del proceso (consolidados._sin_filas, retirado)",
+      "origen": "SQL_CONTEO_RETIRADO"
+     }
+    }
+   },
+   "ahora": {
+    "consultas": 1,
+    "ms_total": 0.01,
+    "filas_leidas": 0,
+    "detalle": {
+     "timbradas_segmentos_anio_lectura_del_proceso": {
+      "ms_ejecucion": 0.01,
+      "ms_planificacion": 0.04,
+      "filas": 0,
+      "buffers_hit": 0,
+      "buffers_read": 0,
+      "escaneos": [
+       "Seq Scan timbradas_segmentos_anio"
+      ],
+      "filas_descartadas_por_filtro": 0,
+      "ms_corridas": [
+       0.01,
+       0.01
+      ],
+      "descripcion": "lectura incremental del proceso en el SQL",
+      "origen": "fuentes.consulta_incremental (TABLAS_CON_PROCESO)"
+     }
+    }
+   }
+  },
+  {
+   "escenario": "timbradas_segmentos_consolidado",
+   "descripcion": "timbradas_segmentos_consolidado, sin filas del proceso en la réplica (H4): sin marca guardada, desde la marca inicial",
+   "antes": {
+    "consultas": 2,
+    "ms_total": 0.02,
+    "filas_leidas": 0,
+    "detalle": {
+     "timbradas_segmentos_consolidado_lectura_sin_filtro": {
+      "ms_ejecucion": 0.01,
+      "ms_planificacion": 0.14,
+      "filas": 0,
+      "buffers_hit": 0,
+      "buffers_read": 0,
+      "escaneos": [
+       "Seq Scan timbradas_segmentos_consolidado"
+      ],
+      "filas_descartadas_por_filtro": 0,
+      "ms_corridas": [
+       0.01,
+       0.01
+      ],
+      "descripcion": "lectura incremental sin filtrar el proceso",
+      "origen": "fuentes.consulta_incremental (proceso «*»)"
+     },
+     "timbradas_segmentos_consolidado_conteo_del_proceso": {
+      "ms_ejecucion": 0.01,
+      "ms_planificacion": 0.03,
+      "filas": 1,
+      "buffers_hit": 0,
+      "buffers_read": 0,
+      "escaneos": [
+       "Seq Scan timbradas_segmentos_consolidado"
+      ],
+      "filas_descartadas_por_filtro": 0,
+      "ms_corridas": [
+       0.01,
+       0.01
+      ],
+      "descripcion": "count(*) del proceso (consolidados._sin_filas, retirado)",
+      "origen": "SQL_CONTEO_RETIRADO"
+     }
+    }
+   },
+   "ahora": {
+    "consultas": 1,
+    "ms_total": 0.01,
+    "filas_leidas": 0,
+    "detalle": {
+     "timbradas_segmentos_consolidado_lectura_del_proceso": {
+      "ms_ejecucion": 0.01,
+      "ms_planificacion": 0.05,
+      "filas": 0,
+      "buffers_hit": 0,
+      "buffers_read": 0,
+      "escaneos": [
+       "Seq Scan timbradas_segmentos_consolidado"
+      ],
+      "filas_descartadas_por_filtro": 0,
+      "ms_corridas": [
+       0.01,
+       0.01
+      ],
+      "descripcion": "lectura incremental del proceso en el SQL",
+      "origen": "fuentes.consulta_incremental (TABLAS_CON_PROCESO)"
+     }
+    }
+   }
+  }
+ ],
+ "sintetico": {
+  "escenario": "timbradas_segmentos_consolidado_con_otro_operador",
+  "descripcion": "timbradas_segmentos_consolidado con 1.384.299 filas de cootransoriente y ninguna de sobusa (H4), todas con el sello del último cierre (H7): cada ejecución, desde la marca inicial",
+  "antes": {
+   "consultas": 2,
+   "ms_total": 1151.63,
+   "filas_leidas": 500000,
+   "detalle": {
+    "timbradas_segmentos_consolidado_lectura_sin_filtro": {
+     "ms_ejecucion": 1026.32,
+     "ms_planificacion": 0.06,
+     "filas": 500000,
+     "buffers_hit": 0,
+     "buffers_read": 0,
+     "escaneos": [
+      "Seq Scan timbradas_segmentos_consolidado"
+     ],
+     "filas_descartadas_por_filtro": 0,
+     "ms_corridas": [
+      1248.57,
+      1026.32
+     ],
+     "descripcion": "lectura incremental sin filtrar el proceso",
+     "origen": "fuentes.consulta_incremental (proceso «*»)"
+    },
+    "timbradas_segmentos_consolidado_conteo_del_proceso": {
+     "ms_ejecucion": 125.31,
+     "ms_planificacion": 0.06,
+     "filas": 1,
+     "buffers_hit": 0,
+     "buffers_read": 0,
+     "escaneos": [
+      "Seq Scan timbradas_segmentos_consolidado"
+     ],
+     "filas_descartadas_por_filtro": 1384299,
+     "ms_corridas": [
+      142.03,
+      125.31
+     ],
+     "descripcion": "count(*) del proceso (consolidados._sin_filas, retirado)",
+     "origen": "SQL_CONTEO_RETIRADO"
+    }
+   },
+   "api": {
+    "filas_traidas": 500000,
+    "segundos_traer": 6.17,
+    "segundos_huellas": 6.87,
+    "huellas_en_el_estado": 500000,
+    "mb_estado_fuente": 35.28,
+    "truncada": true
+   }
+  },
+  "ahora": {
+   "consultas": 1,
+   "ms_total": 272.76,
+   "filas_leidas": 0,
+   "detalle": {
+    "timbradas_segmentos_consolidado_lectura_del_proceso": {
+     "ms_ejecucion": 272.76,
+     "ms_planificacion": 0.06,
+     "filas": 0,
+     "buffers_hit": 0,
+     "buffers_read": 0,
+     "escaneos": [
+      "Seq Scan timbradas_segmentos_consolidado"
+     ],
+     "filas_descartadas_por_filtro": 1384299,
+     "ms_corridas": [
+      273.57,
+      272.76
+     ],
+     "descripcion": "lectura incremental del proceso en el SQL",
+     "origen": "fuentes.consulta_incremental (TABLAS_CON_PROCESO)"
+    }
+   },
+   "api": {
+    "filas_traidas": 0,
+    "segundos_traer": 0.29,
+    "segundos_huellas": 0.0,
+    "huellas_en_el_estado": 0,
+    "mb_estado_fuente": 0.0,
+    "truncada": false
+   }
+  },
+  "filas_sinteticas": 1384299,
+  "segmentos_por_ruta": 129,
+  "sello": "2026-08-14T11:29:05.057003-05:00",
+  "segundos_carga": 2.0,
+  "indices": [
+   {
+    "indice": "ix_ia_tmp_marca",
+    "columnas": "ultima_actualizacion",
+    "ms_ejecucion": 261.21,
+    "filas": 0,
+    "escaneos": [
+     "Seq Scan timbradas_segmentos_consolidado"
+    ],
+    "usa_el_indice": false
+   },
+   {
+    "indice": "ix_ia_tmp_proceso_marca",
+    "columnas": "proceso, ultima_actualizacion",
+    "ms_ejecucion": 0.01,
+    "filas": 0,
+    "escaneos": [
+     "Index Scan timbradas_segmentos_consolidado ix_ia_tmp_proceso_marca"
+    ],
+    "usa_el_indice": true
+   }
+  ]
+ },
+ "temporal_al_terminar": false
+}

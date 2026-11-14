@@ -62,6 +62,110 @@ def test_las_etapas_se_miden_de_una_a_la_siguiente():
     assert eid not in ejecucion._etapas_en_curso
 
 
+def etiquetas_de_etapas() -> set[str]:
+    """Las etiquetas «etapa» que tiene hoy la métrica api_ejecucion_etapa_segundos en el registro de Prometheus."""
+    return {m.labels["etapa"] for familia in REGISTRY.collect() if familia.name == "api_ejecucion_etapa_segundos"
+            for m in familia.samples if "etapa" in m.labels}
+
+
+def test_la_etiqueta_de_la_etapa_es_su_nombre_sin_el_detalle():
+    assert ejecucion.etiqueta_etapa("lectura_fuente 1/2 (2023-01-01 a 2023-01-31)") == "lectura_fuente"
+    assert ejecucion.etiqueta_etapa("lectura_fuente (completo, 2 tramos)") == "lectura_fuente"
+    assert ejecucion.etiqueta_etapa("simulacion de las filas") == "simulacion"
+    assert ejecucion.etiqueta_etapa("calidad") == "calidad"
+    for otra in ("alertas: alert", "resultados: prediction", "2023-01-01", "", None, "Calidad", "etapa_nueva"):
+        assert ejecucion.etiqueta_etapa(otra) == ejecucion.ETAPA_OTRA, otra
+
+
+def _etapa_de_la_llamada(nodo, constantes: dict):
+    """La etapa de una llamada a _avance(execution_id, progreso, etapa) o a avance(progreso, etapa): un texto literal
+    o una constante del módulo (ETAPA_LECTURA); None si no es una de esas llamadas o la etapa llega en una variable."""
+    import ast
+
+    funcion = getattr(nodo, "func", None)
+    posicion = {"_avance": 2, "avance": 1}.get(getattr(funcion, "attr", None) or getattr(funcion, "id", None))
+    if not isinstance(nodo, ast.Call) or posicion is None or len(nodo.args) <= posicion:
+        return None
+    arg = nodo.args[posicion]
+    valor = arg.value if isinstance(arg, ast.Constant) else constantes.get(getattr(arg, "id", None))
+    return valor if isinstance(valor, str) else None
+
+
+def _etapas_en_el_codigo() -> dict[str, set[str]]:
+    """Las etapas que el código de app/servicios pasa a ejecucion._avance o al avance del refresco de segmentos y de la
+    retención, por archivo. Lo que llega en una variable (el avance que solo reenvía la etapa) no se cuenta."""
+    import ast
+    from pathlib import Path
+
+    salida: dict[str, set[str]] = {}
+    for archivo in sorted(Path(ejecucion.__file__).resolve().parent.glob("*.py")):
+        arbol = ast.parse(archivo.read_text(encoding="utf-8"))
+        constantes = {n.targets[0].id: n.value.value for n in arbol.body if isinstance(n, ast.Assign)
+                      and isinstance(n.targets[0], ast.Name) and isinstance(n.value, ast.Constant)}
+        etapas = {e for e in (_etapa_de_la_llamada(n, constantes) for n in ast.walk(arbol)) if e is not None}
+        if etapas:
+            salida[archivo.name] = etapas
+    return salida
+
+
+def test_cada_etapa_del_ciclo_y_de_los_trabajos_es_una_etiqueta_conocida():
+    """RNF-006 con el conjunto cerrado: cada etapa que escriben el ciclo de frecuencia (también el intradía, y los
+    consolidados, que corren dentro de las etapas del cierre), el entrenamiento, la respuesta, el refresco de segmentos
+    y la retención cae en su propio nombre de ETAPAS_METRICA y no en «otra» sin querer. La etapa de cada regla de la
+    retención se arma como «grupo: tabla» (un f-string, fuera de esta cuenta) y cuenta en «otra» a propósito."""
+    etapas = _etapas_en_el_codigo()
+    assert {"ejecucion.py", "segmentos_refresco.py", "retencion.py"} <= set(etapas), etapas
+    usadas = set().union(*etapas.values())
+    assert {ejecucion.etiqueta_etapa(e) for e in usadas} <= ejecucion.ETAPAS_METRICA, usadas
+    assert {"lectura_incremental", "calidad", "prediccion", "alertas", "notificaciones", "plan_dia", "cierre_modelo",
+            "lectura_fuente", "agregacion", "registro", "planificacion"} <= {ejecucion.etiqueta_etapa(e)
+                                                                              for e in usadas}
+    assert ejecucion.etiqueta_etapa("resultados: prediction") == ejecucion.ETAPA_OTRA
+
+
+def test_etapas_con_fechas_distintas_no_crean_series_nuevas():
+    """RNF-006: cada refresco de segmentos con otras fechas pasaba una etiqueta nueva (cardinalidad sin límite); con
+    el nombre de la etapa, cien tramos de fechas distintas caen en la misma serie y el conjunto de etiquetas queda
+    dentro del conjunto cerrado."""
+    from datetime import date, timedelta
+
+    antes = _muestra("api_ejecucion_etapa_segundos_count", {"etapa": "lectura_fuente"})
+    eid = uuid.uuid4()
+    for i in range(100):
+        dia = date(2023, 1, 1) + timedelta(days=i)
+        ejecucion._medir_etapa(eid, f"lectura_fuente {i + 1}/100 ({dia} a {dia})")
+    ejecucion.cerrar_etapa(eid)
+    assert _muestra("api_ejecucion_etapa_segundos_count", {"etapa": "lectura_fuente"}) == antes + 100
+    etiquetas = etiquetas_de_etapas()
+    assert etiquetas <= ejecucion.ETAPAS_METRICA | {ejecucion.ETAPA_OTRA}, etiquetas
+    assert not any(c.isdigit() for e in etiquetas for c in e)
+
+
+def test_el_avance_guarda_el_detalle_en_la_columna_y_mide_el_nombre(monkeypatch):
+    """_avance: la columna etapa de execution_log lleva el nombre y el detalle (el progreso que se consulta), la
+    métrica solo el nombre."""
+    from contextlib import contextmanager
+
+    sentencias: list = []
+
+    class Sesion:
+        def execute(self, consulta):
+            sentencias.append(consulta.compile().params)
+
+    @contextmanager
+    def sesion():
+        yield Sesion()
+
+    monkeypatch.setattr(ejecucion, "sesion_contexto", sesion)
+    eid = uuid.uuid4()
+    ejecucion._avance(eid, 40, "lectura_fuente", detalle="2/3 (2023-02-01 a 2023-02-28)")
+    ejecucion._avance(eid, 90, "agregacion")
+    ejecucion.cerrar_etapa(eid)
+    assert sentencias[0]["etapa"] == "lectura_fuente 2/3 (2023-02-01 a 2023-02-28)"
+    assert sentencias[1]["etapa"] == "agregacion"
+    assert "lectura_fuente 2/3 (2023-02-01 a 2023-02-28)" not in etiquetas_de_etapas()
+
+
 def test_la_profundidad_de_la_cola_no_rompe_metrics_sin_base(monkeypatch):
     class SinBase:
         def __enter__(self):

@@ -26,12 +26,15 @@ ESPERADO_ESCRITURAS = {
     ("POST", "/api/v1/predictions/run"): "analista",
     ("POST", "/api/v1/recommendations/calculate"): "analista",
     ("POST", "/api/v1/respuesta/calcular"): "analista",                  # §7.1: encola el cálculo de la respuesta
+    ("POST", "/api/v1/segmentos/estadisticas/refrescar"): "analista",    # §7.1: encola el refresco de segmentos
     ("POST", "/api/v1/models/train"): "analista",
     ("POST", "/api/v1/models/{model_id}/activate"): "admin",
     ("POST", "/api/v1/models/rollback"): "admin",
     ("PUT", "/api/v1/thresholds"): "admin",
     ("POST", "/api/v1/thresholds/{version}/aprobar"): "admin",           # §5.1: aprobación de una versión de umbrales
     ("PUT", "/api/v1/catalogos/capacidad"): "admin",
+    ("PUT", "/api/v1/catalogos/flota"): "admin",                       # §3.1: flota y tiempo de ciclo (ajuste local)
+    ("POST", "/api/v1/retencion/aplicar"): "admin",                    # §18: la retención bajo demanda borra datos
 }
 
 
@@ -140,7 +143,7 @@ def test_metrics_privado_si_se_configura(auth_activa, claves_prueba, monkeypatch
     assert auth_activa.get("/metrics", headers={"X-API-Key": claves_prueba["operador"]}).status_code == 200
 
 
-def test_auditoria_usa_el_principal_y_no_el_cuerpo(auth_activa, claves_prueba, sesion):
+def test_auditoria_usa_el_principal_y_no_el_cuerpo(auth_activa, claves_prueba, sesion, umbrales_restituidos):
     from app.servicios import ejecucion
 
     ahora = datetime.now(UTC)

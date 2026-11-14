@@ -107,7 +107,7 @@ def test_escenario_que_pasa_si_y_sensibilidad(auth, claves_prueba):
                                                        "sensibilidad": x["sensibilidad"]})
 
 
-def test_pesos_versionados_con_put_thresholds(auth, claves_prueba):
+def test_pesos_versionados_con_put_thresholds(auth, claves_prueba, umbrales_restituidos):
     admin, analista = _h(claves_prueba["admin"]), _h(claves_prueba["analista"])
     antes = auth.get("/api/v1/thresholds", headers=admin).json()
     assert auth.put("/api/v1/thresholds", json={"valores": {"peso_tiempo_espera": 4}, "creado_por": "x"},
@@ -142,13 +142,12 @@ def test_pesos_versionados_con_put_thresholds(auth, claves_prueba):
                                                                        "headway_min": y["headway_min"],
                                                                        "componentes_cop": y["detalle"]["salida"]
                                                                        .get("componentes_cop")}})
-    # deja los valores por omisión en una versión nueva (no afecta a las demás pruebas)
-    auth.put("/api/v1/thresholds", json={"valores": {"peso_tiempo_espera": 1, "nivel_servicio": 0.9},
-                                         "creado_por": "x", "motivo": "restituir"}, headers=admin)
+    # umbrales_restituidos borra al terminar la versión creada (no afecta a las demás pruebas)
 
 
-def test_espera_maxima_gobernada_cambia_la_recomendacion(auth, claves_prueba):
-    """§5.1 y S12: un PUT /thresholds que baja espera_max_min baja el headway máximo efectivo y cambia la franja."""
+def test_espera_maxima_gobernada_cambia_la_recomendacion(auth, claves_prueba, umbrales_restituidos):
+    """§5.1 y S12: un PUT /thresholds que baja espera_max_min baja el headway máximo efectivo y cambia la franja. Al
+    terminar, umbrales_restituidos deja vigente la versión de antes."""
     admin, analista = _h(claves_prueba["admin"]), _h(claves_prueba["analista"])
     cuerpo = dict(CUERPO, hora=11, demanda_hora=250, demanda_p90=300, demanda_p10=200, tipologias=False,
                   flota_disponible=200)
@@ -156,11 +155,7 @@ def test_espera_maxima_gobernada_cambia_la_recomendacion(auth, claves_prueba):
     r = auth.put("/api/v1/thresholds", json={"valores": {"espera_max_min": 3}, "creado_por": "x",
                                              "motivo": "prueba S12"}, headers=admin)
     assert r.status_code == 200, r.text
-    try:
-        despues = auth.post("/api/v1/recommendations/calculate", json=cuerpo, headers=analista).json()
-    finally:
-        auth.put("/api/v1/thresholds", json={"valores": {"espera_max_min": 5}, "creado_por": "x",
-                                             "motivo": "restituir"}, headers=admin)
+    despues = auth.post("/api/v1/recommendations/calculate", json=cuerpo, headers=analista).json()
     assert antes["headway_min"] == 10.0 and despues["headway_min"] <= 6.0
     assert despues["buses_hora"] > antes["buses_hora"]
     assert despues["contexto_franja"]["headway_maximo"]["manda"] == "espera_max_min"

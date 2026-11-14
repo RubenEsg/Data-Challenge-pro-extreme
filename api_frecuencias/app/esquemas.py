@@ -18,6 +18,26 @@ DESC_IDEMPRESA = "§8.3 rutas.idempresa (nulo si Extreme no lo trae)"
 DESC_IDPROCESO = "§8.3 llave de Procesos (rutas.proceso, texto en Extreme)"
 DESC_DIA_SEMANA = "§8.3 día ISO 1 = lunes … 7 = domingo de la fecha local"
 DESC_ESTACIONALIDAD = "§8.3 estacionalidades_anio vigente para el proceso (nula si no hay)"
+# §6.1 y §6.2: el headway vigente que fija la tabla rutas de Extreme, además del intervalo programado observado
+DESC_FRECUENCIADESPACHOS = ("§6.2 headway vigente tomado de la frecuencia de despachos: rutas.frecuenciadespachos de "
+                            "la ruta, en minutos (§6.1). La comparación con el intervalo programado observado sigue en "
+                            "frecuencia_actual_min y diferencia_min")
+DESC_DIFERENCIA_FRECUENCIADESPACHOS = ("§6.2 headway recomendado − headway vigente de rutas.frecuenciadespachos, en "
+                                       "minutos (negativo: despachar más seguido); nula si no hay headway recomendado "
+                                       "(no viable o sin salidas)")
+DESC_CAMBIO_FRECUENCIADESPACHOS = ("Sentido del cambio frente a rutas.frecuenciadespachos: reducir_intervalo, "
+                                   "ampliar_intervalo o mantener (±0,05 min)")
+DESC_OCUPACION_HISTORICA = ("§10.1 ocupación histórica: el segmento crítico de la ruta (mayor carga media a bordo) en "
+                            "el día de la semana de operación y la hora, con su sentido aproximado, su carga media, "
+                            "P50, P90 y máxima y su ocupación con los puestos de la recomendación (subidas y bajadas "
+                            "por segmento de cada viaje, 2023-01-01 a 2023-02-27; texto = la frase de la explicación)")
+DESC_RESTRICCION_REACTIVA = ("§10.1 ocupación actual, solo en la hora en que actúa: la ocupación observada del "
+                             "segmento crítico en la última hora cerrada superó el umbral crítico y estas salidas no "
+                             "bajan de las que exige esa carga (piso del MILP; activa = el piso manda). Es una "
+                             "restricción de seguridad, no un re-pronóstico")
+DESC_OCUPACION_ACTUAL = ("§10.1 ocupación actual: la restricción reactiva que evaluó el ciclo con la ocupación "
+                         "observada por segmento (si aplicó, en qué hora y con qué salidas mínimas, o por qué no); "
+                         "nula si el plan se calculó sin ocupación observada")
 
 
 class Salida(BaseModel):
@@ -113,6 +133,12 @@ class SolicitudEjecucion(BaseModel):
     plan_dia: bool = Field(True, description="Al cerrar con datos nuevos, calcular y guardar el plan del día siguiente "
                                              "por ruta y hora (recommendation.origen = plan_dia) y la foto de la "
                                              "respuesta del reto")
+    particion: Literal["ninguna", "ruta"] = Field(
+        "ninguna", description="RNF-005. «ruta»: la ejecución se parte en un trabajo por ruta (las de `rutas` o, sin "
+                               "`rutas`, todas las del catálogo) de la fecha `hasta`; cada trabajo lee solo su ruta "
+                               "desde la marca de agua de esa ruta, las réplicas procesan rutas distintas a la vez y "
+                               "dos trabajos de la misma ruta nunca corren a la vez. «ninguna»: un solo trabajo de "
+                               "todas las rutas (`rutas` limita entonces la predicción, no la lectura)")
 
 
 class EjecucionSalida(Salida):
@@ -138,6 +164,50 @@ class EjecucionSalida(Salida):
     iniciado_en: datetime | None = None
     terminado_en: datetime | None = None
     actualizado_en: datetime
+    # migración 0009 (RNF-005): partición del trabajo
+    ruta: str | None = Field(None, description="Ruta del trabajo: la única que lee, procesa y bloquea; null = todas "
+                                               "las rutas (ejecución sin partir) o la ejecución madre")
+    padre_id: uuid.UUID | None = Field(None, description="Ejecución partida (madre) a la que pertenece este trabajo")
+    particion: str | None = Field(None, description="En la ejecución madre, cómo se partió («ruta»); null en los "
+                                                    "trabajos y en las ejecuciones sin partir")
+
+
+class TrabajoEjecucion(Salida):
+    """Un trabajo por ruta de una ejecución partida (RNF-005)."""
+
+    execution_id: uuid.UUID
+    ruta: str | None = None
+    estado: str
+    etapa: str | None = None
+    progreso: float
+    intentos: int
+    marca_agua_anterior: datetime | None = None
+    marca_agua_nueva: datetime | None = None
+    filas_leidas: int | None = None
+    filas_validas: int | None = None
+    model_id: str | None = None
+    mensaje: str | None = None
+    creado_en: datetime
+    iniciado_en: datetime | None = None
+    terminado_en: datetime | None = None
+
+
+class EjecucionCreada(EjecucionSalida):
+    trabajos: list[TrabajoEjecucion] = Field(
+        default_factory=list, description="RNF-005: los trabajos por ruta de una ejecución partida (vacío si no se "
+                                          "partió). La madre termina cuando terminan todos")
+
+
+class MarcaAguaSalida(Salida):
+    """Marca de agua de la lectura incremental por proceso y ruta (RNF-005, migración 0009)."""
+
+    proceso: str = Field(description="Proceso (operador) que se lee: FUENTE_PROCESO, «*» = todos")
+    ruta: str = Field(description="Ruta; «*» es la frontera de las lecturas de todas las rutas del proceso")
+    marca_agua: datetime
+    execution_id: uuid.UUID | None = Field(None, description="Trabajo que dejó la marca (null si vino de la migración)")
+    origen: str = Field(description="ejecucion o migracion_0009 (marca global de antes, sembrada por ruta)")
+    huellas: int = Field(0, description="Huellas de la ventana de solape guardadas para la ruta")
+    actualizado_en: datetime
 
 
 class ErrorCalidadSalida(Salida):
@@ -157,7 +227,9 @@ class ErrorCalidadSalida(Salida):
     bloqueante: bool | None = Field(None, description="true: el registro no entra al histórico; false: advertencia")
 
 
-class EjecucionDetalle(EjecucionSalida):
+class EjecucionDetalle(EjecucionCreada):
+    """Detalle de una ejecución; en una ejecución partida, los conteos suman los de la madre y sus trabajos."""
+
     errores_por_dimension: dict[str, int] = Field(default_factory=dict)
     errores_muestra: list[ErrorCalidadSalida] = Field(default_factory=list)
     predicciones: int = 0
@@ -207,6 +279,9 @@ class RecomendacionSalida(Salida):
     idproceso: str | None = Field(None, description=DESC_IDPROCESO)
     id_dia_semana: int | None = Field(None, description=DESC_DIA_SEMANA)
     id_estacionalidad: int | None = Field(None, description=DESC_ESTACIONALIDAD)
+    # migración 0010: §6.2 «headway vigente, tomado de la frecuencia de despachos, y su diferencia con la recomendada»
+    frecuenciadespachos_min: float | None = Field(None, description=DESC_FRECUENCIADESPACHOS)
+    diferencia_frecuenciadespachos_min: float | None = Field(None, description=DESC_DIFERENCIA_FRECUENCIADESPACHOS)
 
 
 class PrediccionSalida(Salida):
@@ -330,8 +405,13 @@ class RecomendacionCalculada(RecomendacionSalida):
     comparacion_actual: dict | None = None
     escenario: dict | None = None
     sensibilidad: dict | None = None
-    contexto_franja: dict | None = None
+    contexto_franja: dict | None = Field(None, description="Ciclo, flota e intervalo programado de la franja con su "
+                                                           "fuente; ajuste_operativo dice si la flota o el ciclo "
+                                                           "vienen del ajuste local versionado (PUT /catalogos/flota)")
     capacidad_gobernada: dict | None = None
+    cambio_frecuenciadespachos: str | None = Field(None, description=DESC_CAMBIO_FRECUENCIADESPACHOS)
+    fuente_frecuenciadespachos: str | None = Field(None, description="De dónde sale el headway vigente (§6.1)")
+    ocupacion_historica: dict | None = Field(None, description=DESC_OCUPACION_HISTORICA)
     explicacion: list[str] = Field(default_factory=list)
 
 
@@ -383,6 +463,11 @@ class PlanHora(BaseModel):
     motivo: str | None = None
     sobreoferta: bool | None = Field(None, description="Ocupación esperada menor que ocupacion_objetivo_min (§5.1)")
     motivo_sobreoferta: str | None = None
+    frecuenciadespachos_min: float | None = Field(None, description=DESC_FRECUENCIADESPACHOS)
+    diferencia_frecuenciadespachos_min: float | None = Field(None, description=DESC_DIFERENCIA_FRECUENCIADESPACHOS)
+    cambio_frecuenciadespachos: str | None = Field(None, description=DESC_CAMBIO_FRECUENCIADESPACHOS)
+    ocupacion_historica: dict | None = Field(None, description=DESC_OCUPACION_HISTORICA)
+    restriccion_reactiva: dict | None = Field(None, description=DESC_RESTRICCION_REACTIVA)
 
 
 class PlanDia(BaseModel):
@@ -417,7 +502,16 @@ class PlanDia(BaseModel):
     horas_no_viables: list[int] = Field(default_factory=list)
     horas_sobreoferta: list[int] = Field(default_factory=list)
     viable: bool | None = None
-    parametros: dict | None = Field(None, description="Parámetros del MILP con la fuente de cada uno")
+    parametros: dict | None = Field(None, description="Parámetros del MILP con la fuente de cada uno (threshold_config "
+                                                      "vN o el código): límites de headway, costos y pesos de §10.2, "
+                                                      "tarifa, elasticidad y suavidad")
+    flota_y_ciclo: dict | None = Field(None, description="De dónde salen la flota disponible, el ciclo de cada hora y "
+                                                         "la capacidad por bus: el ajuste local versionado (PUT "
+                                                         "/catalogos/flota y PUT /catalogos/capacidad) o el dato "
+                                                         "empaquetado")
+    frecuenciadespachos_min: float | None = Field(None, description=DESC_FRECUENCIADESPACHOS)
+    fuente_frecuenciadespachos: str | None = None
+    ocupacion_actual: dict | None = Field(None, description=DESC_OCUPACION_ACTUAL)
     insumos_operativos: str | None = None
     execution_id: str | None = None
     calculado_en: datetime | None = None

@@ -1,0 +1,107 @@
+Corrida de las pruebas del gobierno de parámetros con el código final (2026-11-11 04:59 a 05:00 -0500, rama ev-contrato, código del commit bb7a612, base local de pruebas ai_frecuencias_pruebas_ev_contrato en 127.0.0.1:5433). Desde EntregaFinal/api_frecuencias con el venv del proyecto.
+
+Integración, con el comando de indice.md (regenera los cinco JSON de esta carpeta):
+  GENERAR_EVIDENCIAS=1 python -m pytest tests/integracion/test_gobierno_parametros.py
+  8 casos: 8 aprobados, 0 fallas, 0 errores, 0 omitidos (27.2 s); código de salida 0; pytest: «8 passed in 24.49s»
+Unitarias del mismo paquete:
+  python -m pytest tests/unit/test_gobierno_parametros.py
+  47 casos: 47 aprobados, 0 fallas, 0 errores, 0 omitidos (12.8 s); código de salida 0; pytest: «47 passed in 11.24s»
+
+La suite completa con el código final (todas las suites en una sesión) es pruebas/suite_final.xml (la misma
+corrida que importa SonarQube, sonarqube/pytest.xml).
+
+Ciclo de Alembic del CI sobre la base de pruebas (upgrade head -> downgrade base -> upgrade head), con la cadena
+integrada de las migraciones (cada una baja a la anterior):
+alembic upgrade head -> código 0
+alembic downgrade base -> código 0
+    INFO  [alembic.runtime.migration] Running downgrade 0014 -> 0013, Mínimo de probabilidad de ALT-003 de pronóstico versionado en threshold_config (§5.1 «regla de gobierno», §5.2,
+    INFO  [alembic.runtime.migration] Running downgrade 0013 -> 0012, Consolidados de Extreme en el ciclo diario: bajadas en el histórico, marca de agua por tabla y tolerancias del
+    INFO  [alembic.runtime.migration] Running downgrade 0012 -> 0011, Retención automática de datos (§18 «Exposición de datos → retención») y huellas de la ventana de solape del refresco
+    INFO  [alembic.runtime.migration] Running downgrade 0011 -> 0010, Ocupación actual de los buses por segmento (§10.1 «ocupación actual por segmento, estacionalidad actual, día de la
+    INFO  [alembic.runtime.migration] Running downgrade 0010 -> 0009, Parámetros del plan del día versionados en threshold_config y headway vigente de rutas.frecuenciadespachos en
+    INFO  [alembic.runtime.migration] Running downgrade 0009 -> 0008, Partición del ciclo por ruta (RNF-005 «procesamiento particionable por ruta y fecha»).
+    INFO  [alembic.runtime.migration] Running downgrade 0008 -> 0007, Agregación materializada de la capa analítica de segmentos (§6.1, §7.1, RNF-002, RNF-004).
+    INFO  [alembic.runtime.migration] Running downgrade 0007 -> 0006, Umbrales de las reglas nuevas de alertas versionados en threshold_config (§5.1 «regla de gobierno», RF-009).
+    INFO  [alembic.runtime.migration] Running downgrade 0006 -> 0005, Dimensiones de §8.3, trazabilidad de la calidad, llaves naturales, aprobación de umbrales y respuesta del reto.
+    INFO  [alembic.runtime.migration] Running downgrade 0005 -> 0004, Pesos y costos de la función objetivo de §10.2 versionados desde el inicio (§5.1 «regla de gobierno»).
+    INFO  [alembic.runtime.migration] Running downgrade 0004 -> 0003, Monitoreo del modelo, foto de variables particionada y trazabilidad (§9.2, §9.4, §9.5, §11.2, §8.1, RNF-011).
+    INFO  [alembic.runtime.migration] Running downgrade 0003 -> 0002, Estructura completa de la alerta (especificación v1.5, §5.3, §8.1, §9.4 y §18) y umbrales afinados (§5.1).
+    INFO  [alembic.runtime.migration] Running downgrade 0002 -> 0001, Cola de trabajos en PostgreSQL para N réplicas (RNF-001, RNF-004, RNF-005, §7.1).
+    INFO  [alembic.runtime.migration] Running downgrade 0001 -> , Esquema ai_frecuencias: registro de modelos, predicciones, recomendaciones, alertas,
+alembic upgrade head -> código 0
+    INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Esquema ai_frecuencias: registro de modelos, predicciones, recomendaciones, alertas,
+    INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Cola de trabajos en PostgreSQL para N réplicas (RNF-001, RNF-004, RNF-005, §7.1).
+    INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Estructura completa de la alerta (especificación v1.5, §5.3, §8.1, §9.4 y §18) y umbrales afinados (§5.1).
+    INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Monitoreo del modelo, foto de variables particionada y trazabilidad (§9.2, §9.4, §9.5, §11.2, §8.1, RNF-011).
+    INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Pesos y costos de la función objetivo de §10.2 versionados desde el inicio (§5.1 «regla de gobierno»).
+    INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Dimensiones de §8.3, trazabilidad de la calidad, llaves naturales, aprobación de umbrales y respuesta del reto.
+    INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Umbrales de las reglas nuevas de alertas versionados en threshold_config (§5.1 «regla de gobierno», RF-009).
+    INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Agregación materializada de la capa analítica de segmentos (§6.1, §7.1, RNF-002, RNF-004).
+    INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, Partición del ciclo por ruta (RNF-005 «procesamiento particionable por ruta y fecha»).
+    INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, Parámetros del plan del día versionados en threshold_config y headway vigente de rutas.frecuenciadespachos en
+    INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, Ocupación actual de los buses por segmento (§10.1 «ocupación actual por segmento, estacionalidad actual, día de la
+    INFO  [alembic.runtime.migration] Running upgrade 0011 -> 0012, Retención automática de datos (§18 «Exposición de datos → retención») y huellas de la ventana de solape del refresco
+    INFO  [alembic.runtime.migration] Running upgrade 0012 -> 0013, Consolidados de Extreme en el ciclo diario: bajadas en el histórico, marca de agua por tabla y tolerancias del
+    INFO  [alembic.runtime.migration] Running upgrade 0013 -> 0014, Mínimo de probabilidad de ALT-003 de pronóstico versionado en threshold_config (§5.1 «regla de gobierno», §5.2,
+alembic current -> código 0
+    0014 (head)
+alembic heads -> código 0
+    0014 (head)
+RESULTADO: OK
+
+Pruebas de este paquete (55):
+  tests.unit.test_gobierno_parametros::test_ajustes_vigentes_prioridad_y_valores_invalidos_ignorados
+  tests.unit.test_gobierno_parametros::test_cada_hora_del_plan_compara_con_frecuenciadespachos_y_se_persiste
+  tests.unit.test_gobierno_parametros::test_cambiar_la_suavidad_la_tarifa_o_la_elasticidad_cambia_el_plan
+  tests.unit.test_gobierno_parametros::test_claves_de_flota_y_ciclo
+  tests.unit.test_gobierno_parametros::test_el_milp_del_plan_solo_lee_claves_gobernadas
+  tests.unit.test_gobierno_parametros::test_el_plan_e12_tambien_usa_la_flota_gobernada
+  tests.unit.test_gobierno_parametros::test_fijar_valida_antes_de_tocar_la_base
+  tests.unit.test_gobierno_parametros::test_headway_vigente_de_frecuenciadespachos
+  tests.unit.test_gobierno_parametros::test_la_capacidad_gobernada_tambien_rige_el_plan_del_dia
+  tests.unit.test_gobierno_parametros::test_la_flota_gobernada_cambia_la_viabilidad_de_la_franja
+  tests.unit.test_gobierno_parametros::test_la_flota_y_el_ciclo_gobernados_cambian_el_plan_del_dia
+  tests.unit.test_gobierno_parametros::test_la_franja_compara_con_frecuenciadespachos_y_conserva_el_intervalo_programado
+  tests.unit.test_gobierno_parametros::test_la_fuente_del_headway_vigente_de_la_franja_es_la_real
+  tests.unit.test_gobierno_parametros::test_la_fuente_del_headway_vigente_del_plan_es_la_real_y_entra_en_la_memoria
+  tests.unit.test_gobierno_parametros::test_la_respuesta_usa_la_tarifa_con_que_se_resolvio_el_plan
+  tests.unit.test_gobierno_parametros::test_la_tolerancia_de_oportunidad_es_el_umbral_gobernado_de_datos_atrasados
+  tests.unit.test_gobierno_parametros::test_las_franjas_del_ciclo_usan_el_headway_vigente_del_plan
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_invalidos[valores0]
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_invalidos[valores10]
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_invalidos[valores1]
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_invalidos[valores2]
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_invalidos[valores3]
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_invalidos[valores4]
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_invalidos[valores5]
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_invalidos[valores6]
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_invalidos[valores7]
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_invalidos[valores8]
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_invalidos[valores9]
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_por_omision_son_los_de_d5
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_salen_de_la_version_vigente
+  tests.unit.test_gobierno_parametros::test_parametros_del_plan_validos
+  tests.unit.test_gobierno_parametros::test_sin_version_nueva_el_milp_recibe_exactamente_los_parametros_de_d5
+  tests.unit.test_gobierno_parametros::test_una_suavidad_gobernada_sin_solucion_no_entrega_un_plan
+  tests.unit.test_gobierno_parametros::test_validar_ajustes_de_un_cambio_de_umbrales
+  tests.unit.test_gobierno_parametros::test_valor_invalido[flota-0]
+  tests.unit.test_gobierno_parametros::test_valor_invalido[flota-40.5]
+  tests.unit.test_gobierno_parametros::test_valor_invalido[flota-5000]
+  tests.unit.test_gobierno_parametros::test_valor_invalido[flota-x]
+  tests.unit.test_gobierno_parametros::test_valor_invalido[tiempo_ciclo_min-5]
+  tests.unit.test_gobierno_parametros::test_valor_invalido[tiempo_ciclo_min-900]
+  tests.unit.test_gobierno_parametros::test_valor_invalido[tiempo_ciclo_min-None]
+  tests.unit.test_gobierno_parametros::test_valor_invalido[tiempo_ciclo_min-nan]
+  tests.unit.test_gobierno_parametros::test_valor_valido[flota-40-40]
+  tests.unit.test_gobierno_parametros::test_valor_valido[flota-40.0-40]
+  tests.unit.test_gobierno_parametros::test_valor_valido[tiempo_ciclo_min-180.5-180.5]
+  tests.unit.test_gobierno_parametros::test_valor_valido[tiempo_ciclo_min-250-250.0]
+  tests.unit.test_gobierno_parametros::test_vista_vigente_con_el_dato_empaquetado_y_el_ajuste
+  tests.integracion.test_gobierno_parametros::test_dos_cambios_simultaneos_del_conjunto_gobernado_no_pierden_parametros
+  tests.integracion.test_gobierno_parametros::test_el_ciclo_mide_los_datos_tardios_con_el_umbral_vigente_de_datos_atrasados
+  tests.integracion.test_gobierno_parametros::test_exportacion_xlsx_de_recomendaciones_trae_las_columnas_nuevas
+  tests.integracion.test_gobierno_parametros::test_flota_y_ciclo_por_la_api_versionados_auditados_y_usados_por_la_franja_y_el_plan
+  tests.integracion.test_gobierno_parametros::test_la_recomendacion_guarda_el_headway_vigente_de_frecuenciadespachos
+  tests.integracion.test_gobierno_parametros::test_migracion_0010_siembra_los_parametros_del_plan_y_las_columnas
+  tests.integracion.test_gobierno_parametros::test_put_thresholds_cambia_tarifa_elasticidad_y_suavidad_y_el_siguiente_plan_los_usa
+  tests.integracion.test_gobierno_parametros::test_todos_los_umbrales_que_usa_el_codigo_estan_en_postgresql

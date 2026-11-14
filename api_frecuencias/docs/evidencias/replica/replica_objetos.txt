@@ -1,4 +1,4 @@
-Objetos de la réplica operacional (2026-11-09T06:45:03-05:00)
+Objetos de la réplica operacional (2026-11-11T05:47:15-05:00)
 
                                                                                                          List of functions
  Schema |                Name                | Result data type |                                                                    Argument data types                                                                     | Type 
@@ -17,7 +17,7 @@ Objetos de la réplica operacional (2026-11-09T06:45:03-05:00)
                                                        List of relations
  Schema |                 Name                  | Type  |    Owner    | Persistence | Access method |    Size    | Description 
 --------+---------------------------------------+-------+-------------+-------------+---------------+------------+-------------
- public | Procesos                              | table | extreme_dba | permanent   | heap          | 64 kB      | 
+ public | Procesos                              | table | extreme_dba | permanent   | heap          | 88 kB      | 
  public | areascontrol                          | table | extreme_dba | permanent   | heap          | 8192 bytes | 
  public | conteo_pasajeros                      | table | extreme_dba | permanent   | heap          | 24 kB      | 
  public | dias_semana                           | table | extreme_dba | permanent   | heap          | 16 kB      | 
@@ -39,10 +39,10 @@ Objetos de la réplica operacional (2026-11-09T06:45:03-05:00)
  public | timbradas_anio_zonas_trazabilidad     | table | extreme_dba | permanent   | heap          | 0 bytes    | 
  public | timbradas_consolidado                 | table | extreme_dba | permanent   | heap          | 1528 kB    | 
  public | timbradas_consolidado_zonas           | table | extreme_dba | permanent   | heap          | 0 bytes    | 
- public | timbradas_segmentos                   | table | extreme_dba | permanent   | heap          | 268 MB     | 
- public | timbradas_segmentos_anio              | table | extreme_dba | permanent   | heap          | 0 bytes    | 
- public | timbradas_segmentos_anio_trazabilidad | table | extreme_dba | permanent   | heap          | 0 bytes    | 
- public | timbradas_segmentos_consolidado       | table | extreme_dba | permanent   | heap          | 0 bytes    | 
+ public | timbradas_segmentos                   | table | extreme_dba | permanent   | heap          | 270 MB     | 
+ public | timbradas_segmentos_anio              | table | extreme_dba | permanent   | heap          | 16 kB      | 
+ public | timbradas_segmentos_anio_trazabilidad | table | extreme_dba | permanent   | heap          | 16 kB      | 
+ public | timbradas_segmentos_consolidado       | table | extreme_dba | permanent   | heap          | 16 kB      | 
  public | vehiculos                             | table | extreme_dba | permanent   | heap          | 392 kB     | 
 (27 rows)
 

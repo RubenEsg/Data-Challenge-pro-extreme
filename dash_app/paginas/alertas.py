@@ -53,6 +53,17 @@ ORDEN_PRIORIDAD = "prioridad"
 RANGO_NIVEL = {"critica": 0, "preventiva": 1, "informativa": 2}
 TOPE_LOCAL = 500
 NO_APLICA = "— no aplica en el nivel ruta-hora"
+# §5.3: un viaje, un vehículo o un conductor vacío no siempre es «no aplica». Cada alerta dice en
+# variables.identificacion_5_3 a qué campos aplica su regla y qué encontró (resultado); si el campo aplica y quedó vacío,
+# el detalle dice ese motivo (ALT-006 y ALT-009 sin viajes en la fuente, por ejemplo).
+SIN_IDENTIFICAR = {
+    "fuente_sin_viajes": "— sin identificar: la fuente de datos no expone los viajes",
+    "fuente_sin_viajes_del_dia": "— sin identificar: la fuente no trae viajes de la ruta en ese día",
+    "sin_viaje_cancelado_ni_tardio": "— sin identificar: ningún despacho de la ventana está cancelado ni tardío",
+    "sin_viajes_incompletos": "— sin identificar: ningún viaje del día tiene datos faltantes",
+    "segmento_sin_viaje": "— sin identificar: el segmento crítico no tiene un viaje medido",
+    "solo_frescura": "— no aplica: la alerta es por la frescura de los datos, no por un viaje",
+}
 FUENTES = ["GET /api/v1/alerts", "GET /api/v1/alerts/{id}", "GET /api/v1/alerts/{id}/history"]
 # §5.3: de dónde sale la alerta y hacia dónde va su serie (§9.4); la tendencia no es un estado: icono y palabra, sin color
 ORIGEN = {"pronostico": "Pronóstico (antes de que pase)", "observado": "Observado (lo que ya pasó)",
@@ -334,6 +345,19 @@ def _o_no_aplica(x):
     return x if x not in (None, "") else NO_APLICA
 
 
+def _campo_5_3(a, campo):
+    """Un campo de identificación de §5.3. Si viene vacío y la regla de la alerta lo aplica (identificacion_5_3.aplica),
+    dice el motivo real (identificacion_5_3.resultado); si la regla no lo aplica, «no aplica»."""
+    x = a.get(campo)
+    if x not in (None, ""):
+        return x
+    ident = (a.get("variables") or {}).get("identificacion_5_3") or {}
+    if campo not in (ident.get("aplica") or []):
+        return NO_APLICA
+    resultado = ident.get("resultado") or "sin motivo declarado"
+    return SIN_IDENTIFICAR.get(resultado, f"— sin identificar ({resultado})")
+
+
 def _variables(v):
     if not v:
         return ui.nota("Sin variables.")
@@ -494,9 +518,9 @@ def campos(a):
                                   ("Ocurrencias", ui.num(a.get("ocurrencias"))),
                                   ("execution_id", html.Code(a.get("execution_id") or "—"))]),
         _grupo("Contexto", [("Empresa", _o_no_aplica(a.get("empresa"))), ("Ruta", _o_no_aplica(a.get("ruta"))),
-                            ("Sentido", _o_no_aplica(a.get("sentido"))), ("Viaje", _o_no_aplica(a.get("viaje"))),
-                            ("Conductor (seudónimo)", _o_no_aplica(a.get("conductor"))),
-                            ("Vehículo", _o_no_aplica(a.get("vehiculo"))), ("Ubicación", _ubicacion(a.get("ubicacion")))]),
+                            ("Sentido", _campo_5_3(a, "sentido")), ("Viaje", _campo_5_3(a, "viaje")),
+                            ("Conductor (seudónimo)", _campo_5_3(a, "conductor")),
+                            ("Vehículo", _campo_5_3(a, "vehiculo")), ("Ubicación", _ubicacion(a.get("ubicacion")))]),
         _grupo("Tiempo", [("Detectada", fecha_hora(a.get("detectada_en"))),
                           ("Ventana", f"{fecha_hora(a.get('ventana_inicio'))} → {fecha_hora(a.get('ventana_fin'))}"),
                           ("Horizonte", f"{ui.num(a.get('horizonte_min'))} min" if a.get("horizonte_min") is not None else "—"),

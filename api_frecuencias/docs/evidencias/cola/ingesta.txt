@@ -1,14 +1,14 @@
-RNF-003 · ingesta con COPY 2026-11-09 01:06:08 (portátil Windows 11, PostgreSQL 14 local en Docker, base ai_frecuencias_pruebas_cola; transacción revertida al final)
+RNF-003 · ingesta con COPY 2026-11-13 23:04:13 (portátil Windows 11, PostgreSQL 14 local en Docker, base ai_frecuencias_pruebas_ev_despliegue_ingesta; transacción revertida al final)
 Lote: 111,792 filas (serie de 55,896 + réplica con fechas -3 años); válidas 111,690; errores de calidad 102
-   lectura incremental (Parquet)               0.07 s
-   validación de calidad (6 dimensiones)       0.25 s
-   COPY a la tabla de paso                     0.71 s
-   INSERT … ON CONFLICT (upsert)               3.65 s   insertadas 111,231, actualizadas 0
-   ingesta (COPY + upsert)                     4.36 s   -> 25,623 filas/s
-   total del pipeline                          4.68 s
-Recarga idéntica (misma clave, mismos valores): 2.46 s; insertadas 0, actualizadas 0, sin cambio 111,690 -> idempotente
-Recarga con 1,116 filas cambiadas (1 %): 2.42 s; insertadas 0, actualizadas 1,116, sin cambio 110,574
-Memoria pico: tracemalloc 53 MiB (lectura + validación + COPY); conjunto de trabajo del proceso 221 MiB (antes de empezar 120 MiB)
-Método anterior (insert().values por lotes de 5.000), muestra de 10,000 filas: 5.66 s -> 1,766 filas/s; proyectado a 111,690 filas: 63 s (medido antes: 152,6 s en docs/evidencias/rendimiento.txt)
+   lectura incremental (Parquet)               0.06 s
+   validación de calidad (6 dimensiones)       0.15 s
+   COPY a la tabla de paso                     0.56 s
+   INSERT … ON CONFLICT (upsert)               1.75 s   insertadas 111,690, actualizadas 0
+   ingesta (COPY + upsert)                     2.32 s   -> 48,205 filas/s
+   total del pipeline                          2.53 s
+Recarga idéntica (misma clave, mismos valores): 1.36 s; insertadas 0, actualizadas 0, sin cambio 111,690 -> idempotente
+Recarga con 1,116 filas cambiadas (1 %): 1.37 s; insertadas 0, actualizadas 1,116, sin cambio 110,574
+Memoria pico: tracemalloc 61 MiB (lectura + validación + COPY); conjunto de trabajo del proceso 274 MiB (antes de empezar 119 MiB)
+Método anterior (insert().values por lotes de 5.000), muestra de 10,000 filas: 3.02 s -> 3,316 filas/s; proyectado a 111,690 filas: 34 s (medido antes: 152,6 s en docs/evidencias/rendimiento.txt)
 Aceleración de la ingesta: 14.5 veces (ambos medidos aquí, sin tracemalloc). Nota: los 152,6 s de rendimiento.txt se midieron con tracemalloc encendido, que frena las asignaciones de Python; por eso aquí la memoria se mide en una pasada aparte.
 RESULTADO: CUMPLE (≥ 100.000 filas en < 10 s, recarga sin duplicar ni reescribir, recarga con cambios solo actualiza lo cambiado)

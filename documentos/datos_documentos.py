@@ -56,8 +56,8 @@ FUENTES = {
     "alertas": EVID / "alertas" / "backtest_alertas.json",
     "alertas2024": EVID / "alertas" / "backtest_alertas_corte_2024-12-31.json",
     "alertas_pron": EVID / "alertas" / "backtest_alertas_pronostico.json",
-    "k6": EVID / "pruebas" / "k6_consultas.json",
-    "k6ingesta": EVID / "pruebas" / "k6_ingesta.json",
+    "k6": EVID / "pruebas" / "k6_segmentos_consultas.json",        # corrida vigente, con el volumen de un año
+    "k6ingesta": EVID / "pruebas" / "k6_segmentos_ingesta.json",
     "rendimiento": EVID / "rendimiento.txt",
     "compuerta": EVID / "monitoreo" / "compuerta_ejemplo.json",
     "onnx": EVID / "monitoreo" / "onnx_paridad.json",
@@ -239,10 +239,23 @@ def cifras_alertas():
     macro("AlertasPronostico", num(suma, 2), fp)
     macro("AlertasTotal", num(None if suma is None or obs is None else suma + obs, 2), fp)
     macro("ViablesBacktest", num(g(p, "recomendaciones_viables_pct"), 1), fp)
-    # Muestra etiquetada dos veces (§18 «etiquetas incorrectas»): el kappa, si la conciliación ya lo publicó.
+    # Mínimo de probabilidad de ALT-003 con que corrió el backtest (alt003_probabilidad_minima, migración 0014)
+    macro("UProbMinTres", num(g(p, "alt003_probabilidad_minima"), 2), fp)
+    # Muestra etiquetada dos veces (§18 «etiquetas incorrectas»): el kappa global entre los dos revisores antes de
+    # conciliar (conciliacion.json, acuerdo_antes_de_conciliar.global.kappa, la cifra del README y de la matriz). Si
+    # no está ahí, el primero que se encuentre en los JSON de la carpeta.
     carpeta = EVID / "alertas" / "revision_doble"
     kappa, origen = None, carpeta
-    for q in sorted(carpeta.glob("*.json")) if carpeta.exists() else []:
+    conciliacion = carpeta / "conciliacion.json"
+    if conciliacion.exists():
+        try:
+            k = g(json.loads(conciliacion.read_text(encoding="utf-8")), "acuerdo_antes_de_conciliar", "global",
+                  "kappa")
+        except ValueError:
+            k = None
+        if isinstance(k, (int, float)):
+            kappa, origen = k, conciliacion
+    for q in sorted(carpeta.glob("*.json")) if carpeta.exists() and kappa is None else []:
         try:
             pila = [json.loads(q.read_text(encoding="utf-8"))]
         except ValueError:
@@ -281,6 +294,160 @@ def cifras_k6():
             p95 = g(val, "p(95)")
     macro("Kingesta", num(p95, 0), FUENTES["k6ingesta"])
     return k
+
+
+def _leer(p: Path) -> dict:
+    """JSON de una evidencia; {} y un aviso si falta o no es JSON válido."""
+    if not p.exists():
+        avisos.append(f"falta {rel(p)}")
+        return {}
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except ValueError:
+        avisos.append(f"{rel(p)} no es JSON válido")
+        return {}
+
+
+def cifras_segmentos():
+    """Capa de segmentos materializada (migración 0008), modelo por segmento y sentido, foto de variables por segmento
+    y partición por ruta (migración 0009). La carga con k6 es la medición vigente (pruebas/k6_segmentos_*.json), la
+    misma que citan la matriz y el README; el «antes» es la medición con la agregación en cada petición
+    (pruebas/k6_volumen.txt)."""
+    p = EVID / "pruebas" / "k6_segmentos_resumen.json"
+    r = _leer(p)
+    est = g(r, "en_frio", "rutas", "segmentos_estadisticas") or {}
+    frio, caliente = (est.get("frio") or [None, None])[-1], (est.get("caliente") or [None, None])[-1]
+    macro("SegFrio", num(frio, 1), p)
+    macro("SegCaliente", num(caliente, 1), p)
+    macro("SegCarga", num(g(r, "segmentos", "p95", "http_req_duration{tipo:consulta}"), 1), p)
+    pt = p.parent / "k6_segmentos.txt"
+    t = pt.read_text(encoding="utf-8", errors="replace") if pt.exists() else ""
+    m = re.search(r"MIENTRAS corre un refresco completo.*?rampa [\d >-]*?(\d+) usuarios", t, flags=re.DOTALL)
+    macro("SegCargaUsuarios", m.group(1) if m else "s.\\,d.", pt)
+    pc = p.parent / "k6_segmentos_carga.json"
+    fallos = g(_leer(pc), "metrics", "http_req_failed", "value")
+    macro("SegCargaErrores", num(100 * fallos, 2) if fallos is not None else "s.\\,d.", pc)
+    pv = EVID / "pruebas" / "k6_volumen.txt"
+    tv = pv.read_text(encoding="utf-8", errors="replace") if pv.exists() else ""
+    m = re.search(r"GET /api/v1/segmentos/estadisticas\?limite=50\s+\d+\s+([\d.]+)\s+([\d.]+)", tv)
+    macro("SegAntesFrio", num(float(m.group(1)) / 1000, 1) if m else "s.\\,d.", pv)
+    macro("SegAntesCaliente", num(float(m.group(2)) / 1000, 1) if m else "s.\\,d.", pv)
+    if not (frio and m):
+        avisos.append("sin las cifras de GET /segmentos/estadisticas (antes o después de la agregación)")
+    # Modelo por segmento y sentido: la prueba única del protocolo (modelo/segmentos_modelo.json) y el IC95 de la
+    # diferencia con el reparto fijo B0 (modelo/segmentos_banda_ventanas.json).
+    pm = EVID / "modelo" / "segmentos_modelo.json"
+    s = _leer(pm)
+    cand = g(s, "activacion", "activo_candidato") or "M4"
+    macro("SegModeloActivo", str(g(s, "activacion", "activo", defecto="s. d.")).replace("_", "\\_"), pm)
+    prueba = str(g(s, "particion", "prueba", defecto="s. d. a s. d.")).split(" a ")
+    macro("SegPruebaDesde", prueba[0], pm)
+    macro("SegPruebaHasta", prueba[-1], pm)
+    macro("SegWAPEact", num(g(s, "prueba", "metricas", cand, "wape_segmento_hora")), pm)
+    macro("SegWAPEbcero", num(g(s, "prueba", "metricas", "B0", "wape_segmento_hora")), pm)
+    macro("SegCobSegmento", num(g(s, "prueba", cand, "banda_total_real", "segmento", "cobertura_pct")), pm)
+    macro("SegCobSentido", num(g(s, "prueba", cand, "banda_total_real", "sentido", "cobertura_pct")), pm)
+    pb = EVID / "modelo" / "segmentos_banda_ventanas.json"
+    ic = g(_leer(pb), "ic95_prueba_wape_segmento_hora_vs_B0", "ic95_pp") or [None, None]
+    macro("SegDifIC", f"{num(ic[0])} a {num(ic[-1])}", pb)
+    # Foto de variables por segmento y sentido de una ejecución (§7.3 paso 4).
+    pf = EVID / "monitoreo" / "foto_segmentos.json"
+    f = _leer(pf)
+    macro("FotoFilasSegmento", num(f.get("filas_segmento"), 0), pf)
+    b = f.get("bytes_datos_segmento")
+    macro("FotoMBEjecucion", num(b / 1e6, 2) if b is not None else "s.\\,d.", pf)
+    macro("FotoMBMes", num(f.get("megabytes_mes_una_ejecucion_diaria"), 0), pf)
+    # Partición por ruta con dos réplicas reales (RNF-005).
+    pr = EVID / "cola" / "replicas_por_ruta.json"
+    rr = _leer(pr)
+    macro("ParticionTrabajos", num(rr.get("trabajos"), 0), pr)
+    macro("ParticionPares", num(rr.get("pares_cruzados"), 0), pr)
+    macro("ParticionMismaRuta", num(rr.get("pares_misma_ruta"), 0), pr)
+    macro("ParticionRelojPartida", num(rr.get("reloj_lote_s"), 1), pr)
+    macro("ParticionRelojSinPartir", num(rr.get("reloj_lote_sin_partir_s"), 1), pr)
+    # Refresco incremental sin filas nuevas con las huellas de la ventana de solape (migración 0012, RNF-004): lo que
+    # relee y escribe sin huellas comparables (como cada ciclo hasta la 0011) y con ellas.
+    psc = EVID / "pruebas" / "segmentos_sin_cambios.json"
+    sc = _leer(psc)
+    macro("SegSinCambiosFechasAntes", num(g(sc, "antes_sin_huellas", "fechas_releidas"), 0), psc)
+    macro("SegSinCambiosFilasAntes", num(g(sc, "antes_sin_huellas", "filas_leidas"), 0), psc)
+    macro("SegSinCambiosFechas", num(g(sc, "ahora_con_huellas", "fechas_releidas"), 0), psc)
+    escritas = g(sc, "ahora_con_huellas", "versiones_de_fila_escritas_o_quitadas") or {}
+    macro("SegSinCambiosEscritas", num(sum(escritas.values()), 0) if escritas else "s.\\,d.", psc)
+
+
+def cifras_ocupacion():
+    """Ocupación por segmento (§10.1, migración 0011): la validación del método contra la ocupación máxima del
+    dispositivo en los mismos viajes (ocupacion/perfil_ocupacion_segmentos.json) y el efecto de la restricción
+    reactiva con datos reales de ene.-feb. 2023 (ocupacion/backtest_restriccion_reactiva.json)."""
+    pp = EVID / "ocupacion" / "perfil_ocupacion_segmentos.json"
+    p = _leer(pp)
+    macro("OcupViajesPerfil", num(g(p, "viajes", "en_perfil"), 0), pp)
+    macro("OcupCorrelacion", num(g(p, "validacion", "acotada_en_cada_segmento", "correlacion"), 3), pp)
+    macro("OcupViajesValidacion", num(g(p, "validacion", "acotada_en_cada_segmento", "viajes"), 0), pp)
+    pb = EVID / "ocupacion" / "backtest_restriccion_reactiva.json"
+    b = _leer(pb)
+    op = g(b, "frente_a_la_operacion") or {}
+    macro("OcupDisparos", num(op.get("disparos"), 0), pb)
+    persistencia, base = op.get("persistencia_hora_siguiente_sobre_umbral_si_dispara"), op.get(
+        "tasa_base_hora_siguiente_sobre_umbral")
+    macro("OcupPersistencia", num(100 * persistencia, 1) if persistencia is not None else "s.\\,d.", pb)
+    macro("OcupTasaBase", num(100 * base, 1) if base is not None else "s.\\,d.", pb)
+    macro("OcupSalidasAgregadas", num(op.get("salidas_agregadas"), 0), pb)
+    macro("OcupSalidasSinFalta", num(op.get("salidas_agregadas_donde_no_hacia_falta"), 0), pb)
+    corte = (g(b, "frente_al_tiempo_real", "cortes") or [{}])[0]
+    macro("OcupCorteTiempoReal", str(corte.get("corte", "s. d.")), pb)
+    macro("OcupDisparosTiempoReal", num(corte.get("de_esos_disparan_en_tiempo_real"), 0), pb)
+
+
+def cifras_retencion():
+    """Retención automática (§18, migración 0012): los meses en caliente de la política con que corrió la evidencia
+    (retencion/corrida_aplicada.json, los mismos que siembra la migración)."""
+    pr = EVID / "retencion" / "corrida_aplicada.json"
+    r = _leer(pr)
+    macro("RetencionMeses", num(g(r, "politica", "retencion_meses_foto"), 0), pr)
+
+
+def _pct(x, dec=1) -> str:
+    """Fracción de la evidencia (0,0139) en por ciento con la regla de num() (1,4); «s. d.» si falta."""
+    return num(Decimal(str(x)) * 100, dec) if isinstance(x, (int, float)) else "s.\\,d."
+
+
+def cifras_consolidados():
+    """Consolidados de Extreme en el ciclo (migración 0013): lectura incremental, calidad y contraste de
+    timbradas_consolidado con la agregación propia en la réplica, y las tablas por segmento sin filas de Sobusa (H4)
+    (consolidados/contraste_consolidados.json); por qué el histórico guarda bajadas_viajes
+    (consolidados/definicion_bajadas.json)."""
+    pc = EVID / "consolidados" / "contraste_consolidados.json"
+    c = _leer(pc)
+    ruta = g(c, "ruta") or {}
+    contraste = ruta.get("contraste") or {}
+    macro("ConsFilas", num(ruta.get("filas"), 0), pc)
+    macro("ConsValidas", num(g(ruta, "calidad", "validas"), 0), pc)
+    macro("ConsDescartadasHuella", num(g(ruta, "segunda_lectura_con_huellas", "repetidas_solape"), 0), pc)
+    macro("ConsLlaves", num(contraste.get("llaves"), 0), pc)
+    macro("ConsComparadas", num(contraste.get("comparadas"), 0), pc)
+    macro("ConsIncidencias", num(contraste.get("diferencias"), 0), pc)
+    macro("ConsGroseras", num(contraste.get("groseras"), 0), pc)
+    tol = contraste.get("tolerancias") or {}
+    macro("ConsTolerancia", _pct(tol.get("contraste_tolerancia"), 0), pc)
+    macro("ConsTolGrosera", _pct(tol.get("contraste_tolerancia_grosera"), 0), pc)
+    macro("ConsMedianaSubidas", _pct(g(ruta, "distribucion_diferencias", "promedio_subidas", "mediana")), pc)
+    # Bajadas de CL 72 (id_ruta 21) en el consolidado frente a las del histórico propio (H17)
+    cl72 = g(ruta, "totales_por_ruta", "21") or {}
+    ext, propia = cl72.get("bajadas_extreme"), cl72.get("bajadas_propia")
+    macro("ConsBajadasClDif", _pct(ext / propia - 1, 0) if ext and propia else "s.\\,d.", pc)
+    seg = g(c, "segmentos") or {}
+    filas_seg = [g(seg, tabla, "filas_del_proceso")
+                 for tabla in ("timbradas_segmentos_anio", "timbradas_segmentos_consolidado")]
+    macro("ConsFilasSegmentos", num(sum(filas_seg), 0) if None not in filas_seg else "s.\\,d.", pc)
+    pb = EVID / "consolidados" / "definicion_bajadas.json"
+    total = g(_leer(pb), "total") or {}
+    macro("BajadasDifMismos", _pct(total.get("diferencia_mismos_viajes")), pb)
+    macro("BajadasDifTotal", _pct(total.get("diferencia_total")), pb)
+    if not ruta or not total:
+        avisos.append("sin las cifras de los consolidados (consolidados/contraste_consolidados.json o "
+                      "definicion_bajadas.json)")
 
 
 def cifras_rendimiento():
@@ -992,6 +1159,10 @@ def main():
     cifras_horizontes()
     a = cifras_alertas()
     k = cifras_k6()
+    cifras_segmentos()
+    cifras_ocupacion()
+    cifras_retencion()
+    cifras_consolidados()
     cifras_rendimiento()
     conteo = cifras_pruebas()
     estado_ci()

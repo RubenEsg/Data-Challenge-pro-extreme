@@ -168,10 +168,14 @@ from app.routers import monitoreo as _monitoreo, pronostico_segmentos as _segmen
 for modulo in (ejecuciones, _segmentos, predicciones, alertas, modelos, umbrales, planificador, catalogos, _monitoreo):
     # §7.2: toda ruta de /api/v1 exige X-API-Key y el rol que fija la matriz de app/seguridad.py
     app.include_router(modulo.router, prefix=PREFIJO, dependencies=[Depends(seguridad.autenticar)])
+# RNF-005: marcas de agua por proceso y ruta (GET /api/v1/frequency/watermarks)
+app.include_router(ejecuciones.router_marcas, prefix=PREFIJO, dependencies=[Depends(seguridad.autenticar)])
 from app.routers import segmentos as _capa_segmentos  # noqa: E402,I001 §6.1/§6.2 capa analítica
 app.include_router(_capa_segmentos.router, prefix=PREFIJO, dependencies=[Depends(seguridad.autenticar)])
 from app.routers import respuesta as _respuesta  # noqa: E402,I001 §20 respuesta a la pregunta final del reto
 app.include_router(_respuesta.router, prefix=PREFIJO, dependencies=[Depends(seguridad.autenticar)])
+from app.routers import retencion as _retencion  # noqa: E402,I001 §18 retención de datos (política y tarea)
+app.include_router(_retencion.router, prefix=PREFIJO, dependencies=[Depends(seguridad.autenticar)])
 
 
 @app.get("/health", tags=["sistema"], summary="Estado del servicio y de la base")

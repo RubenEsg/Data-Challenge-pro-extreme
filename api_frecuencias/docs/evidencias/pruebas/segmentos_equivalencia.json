@@ -1,0 +1,124 @@
+{
+ "prueba": "tests/replica/test_segmentos.py::test_agregacion_materializada_identica_a_la_directa",
+ "fuente": "réplica operacional local (lector_ia, READ ONLY), timbradas_segmentos 2023-01-01 a 2023-02-27",
+ "refresco": {
+  "modo": "completo",
+  "tramos": 2,
+  "fechas_releidas": 58,
+  "filas_leidas": 358091,
+  "filas_dia": 358091,
+  "filas": 129801,
+  "fecha_min": "2023-01-01",
+  "fecha_max": "2023-02-27",
+  "segundos": 15.65
+ },
+ "comparaciones": [
+  {
+   "filtros": {},
+   "orden": null,
+   "limite": 50,
+   "desplazamiento": 0,
+   "total": 129801,
+   "total_directa": 129801,
+   "items_identicos": true,
+   "ms_directa": 9763,
+   "ms_materializada": 19
+  },
+  {
+   "filtros": {
+    "idruta": "2"
+   },
+   "orden": null,
+   "limite": 50,
+   "desplazamiento": 0,
+   "total": 45502,
+   "total_directa": 45502,
+   "items_identicos": true,
+   "ms_directa": 2609,
+   "ms_materializada": 13
+  },
+  {
+   "filtros": {
+    "idruta": "16",
+    "id_dia_semana": "2"
+   },
+   "orden": "-max_subidas",
+   "limite": 50,
+   "desplazamiento": 0,
+   "total": 6109,
+   "total_directa": 6109,
+   "items_identicos": true,
+   "ms_directa": 6665,
+   "ms_materializada": 13
+  },
+  {
+   "filtros": {
+    "hora": "7"
+   },
+   "orden": "prom_pasajeros",
+   "limite": 50,
+   "desplazamiento": 0,
+   "total": 6749,
+   "total_directa": 6749,
+   "items_identicos": true,
+   "ms_directa": 5810,
+   "ms_materializada": 19
+  },
+  {
+   "filtros": {
+    "idruta": "21",
+    "id_estacionalidad": "25"
+   },
+   "orden": null,
+   "limite": 100,
+   "desplazamiento": 250,
+   "total": 16839,
+   "total_directa": 16839,
+   "items_identicos": true,
+   "ms_directa": 1555,
+   "ms_materializada": 11
+  },
+  {
+   "filtros": {
+    "desde": "2023-02-14",
+    "hasta": "2023-02-14"
+   },
+   "orden": null,
+   "limite": 50,
+   "desplazamiento": 0,
+   "total": 6626,
+   "total_directa": 6626,
+   "items_identicos": true,
+   "ms_directa": 316,
+   "ms_materializada": 36
+  },
+  {
+   "filtros": {
+    "desde": "2023-01-01",
+    "hasta": "2023-01-31"
+   },
+   "orden": "-nro_viajes",
+   "limite": 50,
+   "desplazamiento": 0,
+   "total": 59808,
+   "total_directa": 59808,
+   "items_identicos": true,
+   "ms_directa": 6030,
+   "ms_materializada": 368
+  },
+  {
+   "filtros": {
+    "desde": "2023-01-10",
+    "idruta": "21"
+   },
+   "orden": null,
+   "limite": 50,
+   "desplazamiento": 100,
+   "total": 40085,
+   "total_directa": 40085,
+   "items_identicos": true,
+   "ms_directa": 1483,
+   "ms_materializada": 270
+  }
+ ]
+}

@@ -1,9 +1,11 @@
 Pruebas de la respuesta a la pregunta del reto (§20): unitarias e integración contra el PostgreSQL local.
 
-Comando (desde api_frecuencias/, con una base de pruebas propia en el PostgreSQL local, TEST_DATABASE_NAME, que el
-conftest migra desde cero con «alembic upgrade head», y DATA_DIR/MODELOS_DIR en una copia temporal de datos/):
-  python -m pytest tests/unit/test_respuesta.py tests/integracion/test_respuesta_api.py -rA
-Corrida del 2026-11-09 07:38 (America/Bogota).
+Comando (desde api_frecuencias/, escrito por scripts/evidencia_pytest.py):
+  TEST_DATABASE_NAME=ai_frecuencias_pruebas_ev_despliegue_pytest python -m pytest tests/unit/test_respuesta.py tests/integracion/test_respuesta_api.py -rA
+Corrida del 2026-11-13, de 22:27:38 a 22:27:56 (America/Bogota); 19 s.
+Resultado: 37 casos; 37 PASSED, 0 FAILED (código de salida de pytest: 0).
+Por archivo: tests/integracion/test_respuesta_api.py: 8; tests/unit/test_respuesta.py: 29.
+Nota: la base de pruebas (TEST_DATABASE_NAME) es propia de la corrida; el conftest la migra desde cero con «alembic upgrade head» y usa una copia temporal de datos/.
 
 PASSED tests/unit/test_respuesta.py::test_contrato_y_pregunta_literal
 PASSED tests/unit/test_respuesta.py::test_cada_cifra_sale_del_plan_del_dia_y_de_lo_programado
@@ -29,6 +31,10 @@ PASSED tests/unit/test_respuesta.py::test_dia_siguiente_al_ultimo_dato_con_el_mo
 PASSED tests/unit/test_respuesta.py::test_sin_plan_dia_el_respaldo_es_e12_y_solo_2025
 PASSED tests/unit/test_respuesta.py::test_sin_carga_critica_la_sobreocupacion_queda_en_null
 PASSED tests/unit/test_respuesta.py::test_la_foto_reutiliza_el_plan_que_el_ciclo_acaba_de_calcular
+PASSED tests/unit/test_respuesta.py::test_la_foto_del_ciclo_queda_con_la_version_de_umbrales_del_ciclo
+PASSED tests/unit/test_respuesta.py::test_la_foto_dice_que_planes_reutilizo_y_cuales_volvio_a_resolver
+PASSED tests/unit/test_respuesta.py::test_el_plan_vuelto_a_resolver_conserva_la_restriccion_reactiva_del_ciclo
+PASSED tests/unit/test_respuesta.py::test_el_motivo_de_volver_a_resolver_el_plan
 PASSED tests/unit/test_respuesta.py::test_un_plan_de_otro_modelo_o_version_no_se_reutiliza
 PASSED tests/integracion/test_respuesta_api.py::test_401_sin_clave_y_403_operador_en_el_calculo
 PASSED tests/integracion/test_respuesta_api.py::test_post_202_en_la_cola_y_get_200_desde_la_foto
@@ -38,4 +44,3 @@ PASSED tests/integracion/test_respuesta_api.py::test_sin_fecha_calcula_y_lee_el_
 PASSED tests/integracion/test_respuesta_api.py::test_atencion_abiertas_ahora_y_de_la_fecha
 PASSED tests/integracion/test_respuesta_api.py::test_exportacion_csv_desde_la_foto
 PASSED tests/integracion/test_respuesta_api.py::test_precalcular_reemplaza_la_foto_y_el_post_no_duplica
-33 passed, 0 failed, 0 errors (tests/unit/test_respuesta.py: 25; tests/integracion/test_respuesta_api.py: 8)

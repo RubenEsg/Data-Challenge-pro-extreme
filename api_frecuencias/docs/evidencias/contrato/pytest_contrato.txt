@@ -1,26 +1,32 @@
-Nivel «Contrato» (tests/contrato), última corrida: 09-11-2026, 07:49:26 a 07:51:46 (Bogotá), 140 s
+Nivel «Contrato» (tests/contrato), última corrida: 11-11-2026, 04:51:42 a 04:54:10 (Bogotá), 148 s
 Comando (desde EntregaFinal/api_frecuencias, PostgreSQL local de pruebas en el puerto 5433):
-  SCHEMATHESIS_EJEMPLOS=5 TEST_DATABASE_NAME=ai_frecuencias_pruebas_contrato_f python -m pytest tests/contrato
-Código de salida: 0.
+  SCHEMATHESIS_EJEMPLOS=5 TEST_DATABASE_NAME=ai_frecuencias_pruebas_ev_contrato python -m pytest tests/contrato
+Código de salida: 0. Resumen de pytest: 128 passed, 69 subtests passed in 144.85s (0:02:24).
 
-Resultado (contado en el junit de la corrida): 178 casos = 116 pruebas + 62 subpruebas de Schemathesis
+Resultado (contado en el junit de la corrida): 197 casos = 128 pruebas + 69 subpruebas de Schemathesis
 (una por operación del OpenAPI). Fallas: 0. Errores: 0. Omitidas: 0. Sin xfail.
-Por módulo: test_compatibilidad_openapi 6; test_contrato_openapi 101; test_presentacion_y_guarda 8; test_schemathesis 1.
+Por módulo: test_compatibilidad_openapi 6; test_contrato_openapi 113; test_presentacion_y_guarda 8; test_schemathesis 1.
 
 Qué cubre (sin ningún xfail ni lista de defectos conocidos)
 - test_contrato_openapi.py: cada operación válida contra su esquema (jsonschema, Draft 2020-12), también las
   escrituras POST /api/v1/respuesta/calcular (202 con analista, 403 con operador, 404 «sin_datos» para 2030-01-01 sin
-  encolar) y POST /api/v1/thresholds/{version}/aprobar (admin, idempotente, 403, 404 y 422); 401/403/404/422 con el
-  error uniforme; cada ErrorApi(<estado>, "<código>") del código declarado con su estado y en «x-codigos-error»; los
-  códigos propios provocados en vivo (422 «rango_invalido», «motivo_requerido» y «ventana_en_muestra»; 404
-  «sin_calcular» y «sin_datos»); 409/503/400 documentados; tipos de contenido; cabeceras; byte NUL; valores fuera de
-  rango (también el filtro idruta con un entero de 64 bits: 422, nunca 500); filtro espacial; §8.1 en PATCH de
-  alertas; el documento completado es idempotente.
+  encolar), POST /api/v1/thresholds/{version}/aprobar (admin, idempotente, 403, 404 y 422), POST
+  /api/v1/segmentos/estadisticas/refrescar (con la base operacional: 202 con analista y el mismo trabajo si se
+  repite, 403 con operador y 422 con un rango mal formado; sin ella, 503 «fuente_no_configurada»), PUT
+  /api/v1/catalogos/flota (retiro de un ajuste que no existe: 404 «ajuste_inexistente», o 200 si quedó uno) y POST
+  /api/v1/retencion/aplicar (202, simulada); toda operación GET sin caso propio se valida igual; 401 en las 67
+  operaciones de /api/v1 y 403 con cada rol por debajo del mínimo, con el error uniforme; cada
+  ErrorApi(<estado>, "<código>") del código declarado con su estado y en
+  «x-codigos-error»; los códigos propios provocados en vivo (422 «rango_invalido», «ruta_desconocida»,
+  «motivo_requerido» y «ventana_en_muestra»; 404 «sin_calcular» y «sin_datos»; 503 «fuente_no_configurada»);
+  409/503/400 documentados; tipos de contenido; cabeceras; byte NUL; valores fuera de rango (también el filtro idruta
+  con un entero de 64 bits: 422, nunca 500); filtro espacial; §8.1 en PATCH de alertas; el documento completado es
+  idempotente.
 - test_compatibilidad_openapi.py: compatibilidad hacia atrás contra docs/openapi.json (RNF-009).
 - test_presentacion_y_guarda.py: presentación §8.1 de los JSONB y guarda NUL (unidad).
 - test_schemathesis.py: todas las operaciones con cinco chequeos (ver schemathesis.txt).
 OpenAPI sin deriva: «python scripts/ci_local.py openapi» -> «OpenAPI sin deriva: openapi.json coincide con el generado
-(59 rutas)»; el documento tiene 62 operaciones.
+(65 rutas).»; el documento tiene 69 operaciones (67 de /api/v1, más /health y /metrics).
 
 Corrida anterior (antecedente, con el código de ese momento):
 Suite completa de pruebas con el contrato estricto (spec v1.5 §14.1 y §14.2), 09-11-2026, 03:42 a 03:55 (Bogotá)

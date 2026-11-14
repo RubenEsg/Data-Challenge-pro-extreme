@@ -395,7 +395,9 @@ def instrumentar_ejecucion(ejecucion=None, optimizacion=None) -> list[str]:
     def avance(original):
         def envuelta(execution_id, progreso, etapa, *args, **kwargs):
             resultado = original(execution_id, progreso, etapa, *args, **kwargs)
-            filas = {k: v for k, v in kwargs.items() if k in ("filas_leidas", "filas_validas")}
+            # el span se llama por el nombre de la etapa; el detalle (tramo, fechas) va como atributo y al log
+            filas = {k: v for k, v in kwargs.items() if k in ("filas_leidas", "filas_validas")
+                     or (k == "detalle" and v is not None)}
             marcar_etapa(execution_id, etapa, progreso, **filas)
             return resultado
         return envuelta

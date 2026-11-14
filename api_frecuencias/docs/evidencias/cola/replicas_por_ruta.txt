@@ -1,0 +1,72 @@
+RNF-005 · partición por ruta con dos réplicas 2026-11-13 20:04:43 (base local ai_frecuencias_pruebas_ev_arreglos_replicas_ruta; rutas SILENCIO, CRA 54, CL 72)
+
+[partida por ruta] réplica A (:8352) arrancó en 7.7 s; réplica B (:8353) en 8.1 s; 1 trabajador por réplica, reserva 30 s, sondeo 0,5 s, sin pausas inyectadas (tiempos reales)
+6 ejecuciones partidas por ruta enviadas en 0.4 s (POST alternado entre :8352 y :8353); días 2023-01-07 … 2023-01-12
+[partida por ruta] lote terminado en 55.8 s
+
+ trabajo   madre     hasta       ruta       réplica          estado int filas pred  reclamado      terminado      s     marca anterior -> marca nueva
+ 895c81f9  31e63c8f  2023-01-07  SILENCIO   replica-b        ok       1   119    3  20:05:00.545  20:05:14.578 14.03  (sin marca)       -> 2023-01-07 23:59
+ 5a7bfe88  31e63c8f  2023-01-07  CRA 54     replica-a        ok       1   119    3  20:05:00.829  20:05:14.704 13.88  (sin marca)       -> 2023-01-07 23:59
+ 7af94e10  31e63c8f  2023-01-07  CL 72      replica-b        ok       1   119    3  20:05:15.091  20:05:20.232  5.14  (sin marca)       -> 2023-01-07 23:59
+ ef67fac1  33411d54  2023-01-08  SILENCIO   replica-a        ok       1    17    3  20:05:15.228  20:05:19.181  3.95  2023-01-07 23:59 -> 2023-01-08 23:59
+ e77aa206  33411d54  2023-01-08  CRA 54     replica-a        ok       1    17    3  20:05:19.699  20:05:23.956  4.26  2023-01-07 23:59 -> 2023-01-08 23:59
+ 31e63c8f  -         2023-01-07  (madre)    replica-b        ok       1   357    0  20:05:20.759  20:05:20.889  0.13  (sin marca)       -> 2023-01-07 23:59
+ 29ccbb7f  33411d54  2023-01-08  CL 72      replica-b        ok       1    17    3  20:05:21.414  20:05:25.332  3.92  2023-01-07 23:59 -> 2023-01-08 23:59
+ 612a04f0  d41252f8  2023-01-09  SILENCIO   replica-a        ok       1    17    3  20:05:24.495  20:05:29.188  4.69  2023-01-08 23:59 -> 2023-01-09 23:59
+ 33411d54  -         2023-01-08  (madre)    replica-b        ok       1    51    0  20:05:25.858  20:05:27.212  1.35  2023-01-07 23:59 -> 2023-01-08 23:59
+ 89cf5eb9  d41252f8  2023-01-09  CRA 54     replica-b        ok       1    17    3  20:05:27.745  20:05:31.441  3.70  2023-01-08 23:59 -> 2023-01-09 23:59
+ c706c13d  d41252f8  2023-01-09  CL 72      replica-a        ok       1    17    3  20:05:29.715  20:05:33.192  3.48  2023-01-08 23:59 -> 2023-01-09 23:59
+ 6b468c52  de5dc08e  2023-01-10  SILENCIO   replica-b        ok       1    17    3  20:05:31.976  20:05:35.781  3.80  2023-01-09 23:59 -> 2023-01-10 23:59
+ d41252f8  -         2023-01-09  (madre)    replica-a        ok       1    51    0  20:05:33.731  20:05:34.887  1.16  2023-01-08 23:59 -> 2023-01-09 23:59
+ 1acfa97d  de5dc08e  2023-01-10  CRA 54     replica-a        ok       1    17    3  20:05:35.412  20:05:39.594  4.18  2023-01-09 23:59 -> 2023-01-10 23:59
+ 3b4ea931  de5dc08e  2023-01-10  CL 72      replica-b        ok       1    17    3  20:05:36.322  20:05:39.960  3.64  2023-01-09 23:59 -> 2023-01-10 23:59
+ de5dc08e  -         2023-01-10  (madre)    replica-a        ok       1    51    0  20:05:40.109  20:05:40.783  0.67  2023-01-09 23:59 -> 2023-01-10 23:59
+ 7510677b  988da4a3  2023-01-11  SILENCIO   replica-b        ok       1    17    3  20:05:40.498  20:05:44.257  3.76  2023-01-10 23:59 -> 2023-01-11 23:59
+ 1d0f223e  988da4a3  2023-01-11  CRA 54     replica-a        ok       1    17    3  20:05:41.328  20:05:45.353  4.02  2023-01-10 23:59 -> 2023-01-11 23:59
+ ded32462  988da4a3  2023-01-11  CL 72      replica-b        ok       1    17    3  20:05:44.773  20:05:49.264  4.49  2023-01-10 23:59 -> 2023-01-11 23:59
+ 85703dd1  b718142a  2023-01-12  SILENCIO   replica-a        ok       1    17    3  20:05:45.882  20:05:49.863  3.98  2023-01-11 23:59 -> 2023-01-12 23:59
+ 988da4a3  -         2023-01-11  (madre)    replica-b        ok       1    51    0  20:05:49.796  20:05:50.641  0.84  2023-01-10 23:59 -> 2023-01-11 23:59
+ 0c2807da  b718142a  2023-01-12  CRA 54     replica-a        ok       1    17    3  20:05:50.387  20:05:54.258  3.87  2023-01-11 23:59 -> 2023-01-12 23:59
+ b72b8c20  b718142a  2023-01-12  CL 72      replica-b        ok       1    17    3  20:05:51.185  20:05:55.165  3.98  2023-01-11 23:59 -> 2023-01-12 23:59
+ b718142a  -         2023-01-12  (madre)    replica-a        ok       1    51    0  20:05:55.299  20:05:55.962  0.66  2023-01-11 23:59 -> 2023-01-12 23:59
+
+Reparto de los trabajos de ruta por réplica: {'replica-b': 9, 'replica-a': 9}
+Trabajos de ruta: 18; suma de sus duraciones 92.8 s en 54.6 s de reloj (paralelismo medio 1.70); concurrencia máxima 2; pares cruzados 14
+   a la vez 13.75 s: SILENCIO 2023-01-07 en replica-b y CRA 54 2023-01-07 en replica-a
+   a la vez 3.95 s: CL 72 2023-01-07 en replica-b y SILENCIO 2023-01-08 en replica-a
+   a la vez 3.38 s: CL 72 2023-01-11 en replica-b y SILENCIO 2023-01-12 en replica-a
+   a la vez 3.27 s: CRA 54 2023-01-10 en replica-a y CL 72 2023-01-10 en replica-b
+   a la vez 3.07 s: CRA 54 2023-01-12 en replica-a y CL 72 2023-01-12 en replica-b
+   [OK] 24 de 24 terminados ok (6 madres y 18 trabajos de ruta)
+   [OK] exactamente un intento 'ok' por trabajo (0 duplicados)
+   [OK] un solo intento por trabajo (nadie lo tomó dos veces)
+   [OK] las dos réplicas procesaron trabajos de ruta
+   [OK] rutas distintas a la vez en réplicas distintas: 14 pares de intervalos cruzados (máximo 13.75 s)
+   [OK] la misma ruta nunca se procesó en paralelo (0 cruces)
+   [OK] cada ruta procesó sus días en orden
+   [OK] marca de agua de cada ruta contigua: ningún lote perdido ni leído dos veces
+   [OK] cada madre empezó cuando ya habían terminado sus trabajos
+   [OK] predicciones sin duplicados en cada trabajo
+   [OK] demanda_observada: 612 filas = 612 claves distintas
+   [OK] marca_agua_ruta: una fila por ruta, en la marca del último día de esa ruta
+   [OK] foto de variables: 7020 filas (6948 por segmento y sentido), cada una en el trabajo de su ruta y en la partición mensual de su ventana
+   [OK] la madre no guarda foto y ninguna fila de la foto se repite
+   [OK] política de aprendizaje: ningún entrenamiento en error (encolados: ninguno; ciclos que omitieron el reentrenamiento por datos insuficientes antes del corte: 5)
+
+[sin partir] réplica A (:8352) arrancó en 6.2 s; réplica B (:8353) en 3.9 s; 1 trabajador por réplica, reserva 30 s, sondeo 0,5 s, sin pausas inyectadas (tiempos reales)
+6 ejecuciones sin partir enviadas en 0.2 s (POST alternado entre :8352 y :8353); días 2023-01-07 … 2023-01-12
+[sin partir] lote terminado en 61.1 s
+
+Partida por ruta frente a sin partir (dos bases nuevas, los mismos días, dos réplicas cada una):
+   [OK] predicciones (ruta, instante, horizonte, P50, P10, P90, modelo): 54 filas iguales
+   [OK] recomendaciones de franja: 54 filas iguales
+   [OK] plan del día por ruta y hora: 306 filas iguales
+   [OK] alertas (clave, código, ruta, severidad, ocurrencias): 104 filas iguales
+   [OK] foto de la respuesta del reto por ruta: 18 filas iguales
+   [OK] histórico propio (demanda_observada): 612 filas iguales
+   [OK] monitoreo del modelo (una fila por ejecución): 6 filas iguales
+   [OK] foto de variables de la ruta: 72 filas iguales
+   [OK] foto de variables por segmento y sentido: 6948 filas iguales
+   reloj del lote: partida por ruta 55.8 s; sin partir 61.1 s
+
+RESULTADO: TODO OK

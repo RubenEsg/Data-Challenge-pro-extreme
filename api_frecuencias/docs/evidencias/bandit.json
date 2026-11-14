@@ -1,6 +1,6 @@
 {
  "errors": [],
- "generated_at": "2026-11-09T17:49:37Z",
+ "generated_at": "2026-11-14T05:55:04Z",
  "metrics": {
   "_totals": {
    "CONFIDENCE.HIGH": 0,
@@ -11,7 +11,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 16309,
+   "loc": 23118,
    "nosec": 0,
    "skipped_tests": 6
   },
@@ -37,7 +37,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 65,
+   "loc": 79,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -63,7 +63,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 481,
+   "loc": 563,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -76,7 +76,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 143,
+   "loc": 146,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -89,7 +89,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 387,
+   "loc": 463,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -102,7 +102,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 371,
+   "loc": 372,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -115,7 +115,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 377,
+   "loc": 391,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -154,7 +154,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 401,
+   "loc": 508,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -167,7 +167,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 103,
+   "loc": 106,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -180,7 +180,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 91,
+   "loc": 146,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -245,7 +245,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 153,
+   "loc": 115,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -262,6 +262,19 @@
    "nosec": 0,
    "skipped_tests": 0
   },
+  "app/routers/retencion.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 94,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
   "app/routers/segmentos.py": {
    "CONFIDENCE.HIGH": 0,
    "CONFIDENCE.LOW": 0,
@@ -271,7 +284,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 69,
+   "loc": 158,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -297,7 +310,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 183,
+   "loc": 188,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -323,7 +336,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 1366,
+   "loc": 1751,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -336,7 +349,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 383,
+   "loc": 526,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -349,7 +362,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 913,
+   "loc": 1047,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -375,7 +388,20 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 411,
+   "loc": 423,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "app/servicios/consolidados.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 678,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -388,7 +414,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 140,
+   "loc": 225,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -414,7 +440,20 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 1233,
+   "loc": 2076,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "app/servicios/flota_ciclo.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 250,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -427,7 +466,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 506,
+   "loc": 1001,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -440,7 +479,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 1679,
+   "loc": 1713,
    "nosec": 0,
    "skipped_tests": 3
   },
@@ -453,7 +492,20 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 190,
+   "loc": 226,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "app/servicios/modelo_segmentos.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 462,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -466,7 +518,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 441,
+   "loc": 582,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -531,7 +583,33 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 114,
+   "loc": 186,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "app/servicios/novedades.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 86,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "app/servicios/ocupacion.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 538,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -557,7 +635,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 2141,
+   "loc": 2482,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -570,7 +648,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 165,
+   "loc": 282,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -583,7 +661,7 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 490,
+   "loc": 514,
    "nosec": 0,
    "skipped_tests": 0
   },
@@ -596,9 +674,22 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 880,
+   "loc": 964,
    "nosec": 0,
    "skipped_tests": 3
+  },
+  "app/servicios/retencion.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 592,
+   "nosec": 0,
+   "skipped_tests": 0
   },
   "app/servicios/segmentos.py": {
    "CONFIDENCE.HIGH": 0,
@@ -609,7 +700,20 @@
    "SEVERITY.LOW": 0,
    "SEVERITY.MEDIUM": 0,
    "SEVERITY.UNDEFINED": 0,
-   "loc": 206,
+   "loc": 385,
+   "nosec": 0,
+   "skipped_tests": 0
+  },
+  "app/servicios/segmentos_refresco.py": {
+   "CONFIDENCE.HIGH": 0,
+   "CONFIDENCE.LOW": 0,
+   "CONFIDENCE.MEDIUM": 0,
+   "CONFIDENCE.UNDEFINED": 0,
+   "SEVERITY.HIGH": 0,
+   "SEVERITY.LOW": 0,
+   "SEVERITY.MEDIUM": 0,
+   "SEVERITY.UNDEFINED": 0,
+   "loc": 573,
    "nosec": 0,
    "skipped_tests": 0
   },

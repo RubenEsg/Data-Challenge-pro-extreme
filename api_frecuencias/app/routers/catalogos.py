@@ -1,7 +1,8 @@
 """Catálogos operacionales (§3.1 «Gestión operacional»): empresa, proceso, ruta, segmento, vehículo, capacidad, viaje
 y despacho, de solo lectura desde la réplica (o los archivos offline), con filtros, paginación, orden y exportación
-CSV/XLSX (§12.1, RF-016, RF-017). El único ajuste que se administra es la capacidad operativa por ruta y tipología, y
-vive solo en ai_frecuencias como parámetro gobernado y versionado (§3.2, §8.3); cambiarlo exige el rol admin.
+CSV/XLSX (§12.1, RF-016, RF-017). Lo que se administra son los parámetros operativos propios: la capacidad por ruta y
+tipología y la flota disponible y el tiempo de ciclo por ruta, tipo de día y hora. Viven solo en ai_frecuencias como
+parámetros gobernados y versionados (§3.2, §5.1, §8.3), con auditoría e historial; cambiarlos exige el rol admin.
 """
 from __future__ import annotations
 
@@ -17,6 +18,7 @@ from app.db import obtener_sesion
 from app.routers.comun import ErrorApi, ParametrosPagina
 from app.seguridad import Principal, autenticar, usuario_auditoria
 from app.servicios import catalogos as C
+from app.servicios import flota_ciclo as F
 from app.servicios.ejecucion import umbrales_vigentes
 
 router = APIRouter(prefix="/catalogos", tags=["catálogos"])
@@ -31,6 +33,9 @@ NroSegmento = Annotated[int | None, Query(ge=0, le=1_000_000)]
 IdVehiculo = Annotated[str | None, Query(min_length=1, max_length=64, pattern=r"^[A-Za-z0-9_-]+$")]
 Retraso = Annotated[float | None, Query(ge=-100_000, le=100_000, description="Minutos (salida real - programada)")]
 Texto = Annotated[str | None, Query(min_length=1, max_length=64, pattern=r"^[^\x00]+$")]
+Limite = Annotated[int, Query(ge=1, le=500, description="Tamaño de página")]
+Desplazamiento = Annotated[int, Query(ge=0, le=1_000_000, description="Eventos a saltar")]
+TipoDia = Literal["Laboral", "Sábado", "Domingo/festivo", "TODOS"]
 
 
 class PaginaCatalogo(BaseModel, Generic[T]):
@@ -87,8 +92,12 @@ class RutaSalida(BaseModel):
     cap_max_autorizada: float | None = Field(None, description="Si la tabla rutas la trae (§6.1)")
     capacidad_vigente: int
     capacidad_fuente: str
-    tiempo_ciclo_min: float | None = None
-    flota: int | None = None
+    tiempo_ciclo_min: float | None = Field(None, description="Referencia del catálogo empaquetado (mediana de día "
+                                                             "laboral de D1); el ciclo vigente por tipo de día y hora, "
+                                                             "con el ajuste local, está en GET /catalogos/flota")
+    flota: int | None = Field(None, description="Referencia del catálogo empaquetado (día laboral de D1); la flota "
+                                                "vigente por tipo de día, con el ajuste local, está en GET "
+                                                "/catalogos/flota")
     frecuencia_actual_min: float | None = None
     por_tipo_dia: dict[str, Any] = Field(default_factory=dict)
 
@@ -96,6 +105,10 @@ class RutaSalida(BaseModel):
 class RutaDetalle(RutaSalida):
     parametros_por_hora: list[dict[str, Any]] = Field(default_factory=list)
     capacidad_detalle: dict[str, Any] = Field(default_factory=dict)
+    flota_y_ciclo: dict[str, Any] = Field(default_factory=dict,
+                                          description="Flota disponible y tiempo de ciclo vigentes por tipo de día y "
+                                                      "hora, con su fuente (catálogo o ajuste local; ver GET "
+                                                      "/catalogos/flota)")
 
 
 class SegmentoSalida(BaseModel):
@@ -203,6 +216,61 @@ class EventoCapacidad(BaseModel):
     creado_en: datetime | None = None
 
 
+class CicloHora(BaseModel):
+    hora: int = Field(..., description="Hora de salida (4 a 20)")
+    tiempo_ciclo_min: float | None = Field(None, description="Vigente: el ajuste local o, si no hay, el del catálogo")
+    tiempo_ciclo_catalogo_min: float | None = Field(None, description="Dato empaquetado (mediana 2025 de D1)")
+    fuente: str = Field(..., description="catalogo o ajuste_local")
+    clave: str | None = Field(None, description="Parámetro de threshold_config que manda (ciclo_override…)")
+
+
+class FlotaTipoDia(BaseModel):
+    tipo_dia: str
+    flota: int | None = Field(None, description="Flota disponible vigente (vehículos)")
+    flota_catalogo: int | None = Field(None, description="Dato empaquetado (mediana 2025 de D1)")
+    flota_fuente: str = Field(..., description="catalogo o ajuste_local")
+    flota_clave: str | None = Field(None, description="Parámetro de threshold_config que manda (flota_override…)")
+    horas: list[CicloHora] = Field(default_factory=list)
+
+
+class FlotaCicloSalida(BaseModel):
+    ruta: str
+    idruta: int
+    umbrales_version: int | None = Field(None, description="Versión de threshold_config con la que se leyó")
+    por_tipo_dia: list[FlotaTipoDia]
+    ajustes: dict[str, float] = Field(default_factory=dict, description="Ajustes locales vigentes de la ruta")
+
+
+class SolicitudFlotaCiclo(BaseModel):
+    idruta: int = Field(..., ge=0, le=MAX_ID, description="idruta de la tabla rutas (llave sin cambiar su semántica)")
+    tipo_dia: TipoDia = Field("TODOS", description="Tipo de día del ajuste; TODOS vale para los tres")
+    flota: int | None = Field(None, ge=F.FLOTA_MIN, le=F.FLOTA_MAX,
+                              description="Vehículos disponibles. null retira el ajuste de flota; si el campo no "
+                                          "viene, la flota no cambia")
+    tiempo_ciclo_min: float | None = Field(None, ge=F.CICLO_MIN, le=F.CICLO_MAX,
+                                           description="Minutos de vuelta completa. null retira el ajuste de ciclo; "
+                                                       "si el campo no viene, el ciclo no cambia")
+    hora: int | None = Field(None, ge=4, le=20, description="Hora de salida del ajuste de ciclo (4 a 20); sin hora, "
+                                                            "todas las horas de servicio")
+    motivo: str = Field(..., min_length=3)
+    creado_por: str | None = Field(None, description="Se ignora con autenticación: firma el principal")
+
+
+class EventoFlotaCiclo(BaseModel):
+    version: int
+    idruta: int
+    ruta: str | None = None
+    parametro: Literal["flota", "tiempo_ciclo_min"]
+    tipo_dia: str
+    hora: int | None = Field(None, description="Hora del ajuste de ciclo; null = todas las horas (o la flota)")
+    accion: str = Field(..., description="creado, cambiado o retirado")
+    valor_anterior: float | None = None
+    valor_nuevo: float | None = None
+    creado_por: str
+    motivo: str | None = None
+    creado_en: datetime | None = None
+
+
 class IndiceCatalogos(BaseModel):
     fuente: str
     solo_lectura: bool = True
@@ -275,7 +343,9 @@ def indice():
                "segmentos": "Segmentos de ruta con longitud y geometría GeoJSON",
                "vehiculos": "Vehículos con capacidad sentados + de pie y tipología (sin datos personales)",
                "viajes": "Programación de viajes (progvehiculos)", "despachos": "Despachos reales (salida y llegada)",
-               "capacidad": "Capacidad vigente por ruta y tipología (ajuste local versionado)"}
+               "capacidad": "Capacidad vigente por ruta y tipología (ajuste local versionado)",
+               "flota": "Flota disponible y tiempo de ciclo vigentes por ruta, tipo de día y hora (ajuste local "
+                        "versionado)"}
     return {"fuente": fuente, "catalogos": [{"nombre": n, "descripcion": d, "ruta": f"/api/v1/catalogos/{n}"}
                                             for n, d in nombres.items()]}
 
@@ -333,18 +403,23 @@ def una_ruta(idruta: Annotated[int, Path(ge=0, le=MAX_ID)], sesion: Session = De
     item = C.registros(fila, C.COLUMNAS["rutas"])[0]
     item["parametros_por_hora"] = C.parametros_por_hora(idruta)
     item["capacidad_detalle"] = C.capacidad_vigente(idruta, umbrales=umbrales, umbrales_version=version)
+    item["flota_y_ciclo"] = F.vigente(idruta, None, umbrales=umbrales, umbrales_version=version)[0]
     return item
 
 
 # ---------------------------------------------------------------- segmentos
-def _segmentos(idruta, id_config, activo, nro_desde, nro_hasta, geometria):
-    d, fuente = _ejecutar(C.segmentos, geometria=geometria, idruta=idruta)
+def _filtrar_segmentos(d, idruta, id_config, activo, nro_desde, nro_hasta):
     d = _ejecutar(C.filtrar, d, idruta=idruta, id_config=id_config, activo=activo)
     if nro_desde is not None:
         d = d[d["nro_segmento"] >= nro_desde]
     if nro_hasta is not None:
         d = d[d["nro_segmento"] <= nro_hasta]
-    return d, fuente
+    return d
+
+
+def _segmentos(idruta, id_config, activo, nro_desde, nro_hasta, geometria):
+    d, fuente = _ejecutar(C.segmentos, geometria=geometria, idruta=idruta)
+    return _filtrar_segmentos(d, idruta, id_config, activo, nro_desde, nro_hasta), fuente
 
 
 @router.get("/segmentos", response_model=PaginaCatalogo[SegmentoSalida],
@@ -354,13 +429,14 @@ def listar_segmentos(idruta: IdRuta = None, id_config: IdConfig = None, activo: 
                      geometria: Geometria = Query("simplificada", description="simplificada (~1 m), completa o "
                                                                               "ninguna"),
                      pagina: ParametrosPagina = Depends()):
-    d, fuente = _segmentos(idruta, id_config, activo, nro_desde, nro_hasta, geometria)
-    respuesta = _pagina(d, "segmentos", fuente, pagina)
-    if geometria == "completa":                    # solo los segmentos de esta página (~95 kB cada uno)
-        geos = _ejecutar(C.geometria_completa, [it["id"] for it in respuesta["items"]])
-        for it in respuesta["items"]:
-            it["geometria"] = geos.get(it["id"])
-            it["vertices"] = len(it["geometria"]["coordinates"]) if it["geometria"] else 0
+    # RNF-002: se filtra y pagina sin geometría; la geometría (y los vértices de la original) se arma solo para los
+    # segmentos de esta página, no para los 2.695 de la tabla
+    d, fuente = _ejecutar(C.segmentos_listado, idruta=idruta)
+    respuesta = _pagina(_filtrar_segmentos(d, idruta, id_config, activo, nro_desde, nro_hasta), "segmentos", fuente,
+                        pagina)
+    geos = _ejecutar(C.geometria_de_pagina, [it["id"] for it in respuesta["items"]], geometria)
+    for it in respuesta["items"]:
+        it.update(geos.get(it["id"], {"geometria": None, "vertices": 0}))
     return respuesta
 
 
@@ -464,14 +540,12 @@ def capacidad(idruta: IdRuta = None, tipologia: Texto = None, sesion: Session = 
         raise ErrorApi(422, "tipologia_invalida", str(exc)) from exc
 
 
-@router.put("/capacidad", response_model=CapacidadSalida,
-            summary="Ajustar la capacidad operativa de una ruta o tipología (admin; versión nueva y auditada)")
-def ajustar_capacidad(solicitud: SolicitudCapacidad, sesion: Session = Depends(obtener_sesion),
-                      principal: Principal = Depends(autenticar)):
-    creado_por = usuario_auditoria(principal, solicitud.creado_por)      # RNF-011: firma el autenticado
+def _registrar_version(sesion: Session, fijar, *args, invalido: str) -> None:
+    """Versión nueva de un ajuste local (fijar = la función del servicio) con los errores en el formato uniforme: ruta
+    desconocida (422), retiro de un ajuste que no está vigente (404) o valor inválido (422 con el código `invalido`).
+    Ante cualquiera de ellos se revierte la transacción: el conjunto vigente no cambia."""
     try:
-        C.fijar_capacidad(sesion, solicitud.idruta, solicitud.tipologia, solicitud.capacidad, creado_por,
-                          solicitud.motivo)
+        fijar(sesion, *args)
     except KeyError as exc:
         sesion.rollback()
         raise ErrorApi(422, "ruta_desconocida", str(exc).strip("'\"")) from exc
@@ -480,7 +554,22 @@ def ajustar_capacidad(solicitud: SolicitudCapacidad, sesion: Session = Depends(o
         raise ErrorApi(404, "ajuste_inexistente", str(exc)) from exc
     except ValueError as exc:
         sesion.rollback()
-        raise ErrorApi(422, "capacidad_invalida", str(exc)) from exc
+        raise ErrorApi(422, invalido, str(exc)) from exc
+
+
+def _pagina_de_eventos(response: Response, eventos: list[dict], limite: int, desplazamiento: int) -> list[dict]:
+    """Una página del historial (del más reciente al más antiguo) con el total en la cabecera X-Total-Count."""
+    response.headers["X-Total-Count"] = str(len(eventos))
+    return eventos[desplazamiento:desplazamiento + limite]
+
+
+@router.put("/capacidad", response_model=CapacidadSalida,
+            summary="Ajustar la capacidad operativa de una ruta o tipología (admin; versión nueva y auditada)")
+def ajustar_capacidad(solicitud: SolicitudCapacidad, sesion: Session = Depends(obtener_sesion),
+                      principal: Principal = Depends(autenticar)):
+    creado_por = usuario_auditoria(principal, solicitud.creado_por)      # RNF-011: firma el autenticado
+    _registrar_version(sesion, C.fijar_capacidad, solicitud.idruta, solicitud.tipologia, solicitud.capacidad,
+                       creado_por, solicitud.motivo, invalido="capacidad_invalida")
     version, umbrales = umbrales_vigentes(sesion)
     tip = None if solicitud.tipologia.strip().upper() == C.TIPOLOGIA_TODAS else solicitud.tipologia
     return C.capacidad_vigente(solicitud.idruta, tip, umbrales=umbrales, umbrales_version=version)
@@ -490,10 +579,55 @@ def ajustar_capacidad(solicitud: SolicitudCapacidad, sesion: Session = Depends(o
             summary="Historial de ajustes de capacidad (versión, acción, valor anterior y nuevo, quién y por qué)",
             description="Del más reciente al más antiguo, paginado con limite y desplazamiento; el total de eventos "
                         "va en la cabecera X-Total-Count.")
-def historial_capacidad(response: Response, idruta: IdRuta = None,
-                        limite: Annotated[int, Query(ge=1, le=500, description="Tamaño de página")] = 100,
-                        desplazamiento: Annotated[int, Query(ge=0, le=1_000_000, description="Eventos a saltar")] = 0,
-                        sesion: Session = Depends(obtener_sesion)):
-    eventos = C.historial_capacidad(sesion, idruta)
-    response.headers["X-Total-Count"] = str(len(eventos))
-    return eventos[desplazamiento:desplazamiento + limite]
+def historial_capacidad(response: Response, idruta: IdRuta = None, limite: Limite = 100,
+                        desplazamiento: Desplazamiento = 0, sesion: Session = Depends(obtener_sesion)):
+    return _pagina_de_eventos(response, C.historial_capacidad(sesion, idruta), limite, desplazamiento)
+
+
+# ---------------------------------------------------------------- flota y tiempo de ciclo (ajuste local versionado)
+DESCRIPCION_FLOTA = (
+    "§3.1 «Gestión operacional» y §10.2: flota disponible por ruta y tipo de día y tiempo de ciclo por ruta, tipo de "
+    "día y hora de salida. Sin ajuste rige el dato empaquetado (datos/parametros_operativos_hora.parquet, mediana 2025 "
+    "de D1); el ajuste local vive en threshold_config (flota_override y ciclo_override), se versiona y se audita como "
+    "los umbrales, y lo usan la recomendación de la franja y el plan del día desde la versión siguiente, sin "
+    "reiniciar.")
+
+
+@router.get("/flota", response_model=list[FlotaCicloSalida],
+            summary="Flota disponible y tiempo de ciclo vigentes por ruta, tipo de día y hora (catálogo o ajuste "
+                    "local)", description=DESCRIPCION_FLOTA)
+def flota_y_ciclo(idruta: IdRuta = None,
+                  tipo_dia: Annotated[TipoDia | None, Query(description="Un tipo de día; sin él, los tres")] = None,
+                  sesion: Session = Depends(obtener_sesion)):
+    version, umbrales = _umbrales(sesion)
+    try:
+        return F.vigente(idruta, tipo_dia, umbrales=umbrales, umbrales_version=version)
+    except KeyError as exc:
+        raise ErrorApi(404, "no_encontrado", f"ruta {idruta} no existe en el catálogo") from exc
+
+
+@router.put("/flota", response_model=FlotaCicloSalida,
+            summary="Registrar una versión nueva de la flota o del tiempo de ciclo de una ruta (admin; versión nueva y "
+                    "auditada)",
+            description=DESCRIPCION_FLOTA + " El cuerpo trae flota, tiempo_ciclo_min o ambos (null retira el ajuste; "
+                        "un campo que no viene no cambia); hora acota el ajuste de ciclo a una hora de salida. Firma "
+                        "el usuario autenticado y el motivo es obligatorio. Responde la flota y el ciclo vigentes de "
+                        "la ruta con la versión nueva.")
+def ajustar_flota_y_ciclo(solicitud: SolicitudFlotaCiclo, sesion: Session = Depends(obtener_sesion),
+                          principal: Principal = Depends(autenticar)):
+    creado_por = usuario_auditoria(principal, solicitud.creado_por)      # RNF-011: firma el autenticado
+    cambios = {c: getattr(solicitud, c) for c in F.PARAMETROS if c in solicitud.model_fields_set}
+    _registrar_version(sesion, F.fijar, solicitud.idruta, solicitud.tipo_dia, solicitud.hora, cambios, creado_por,
+                       solicitud.motivo, invalido="ajuste_invalido")
+    version, umbrales = umbrales_vigentes(sesion)
+    return F.vigente(solicitud.idruta, None, umbrales=umbrales, umbrales_version=version)[0]
+
+
+@router.get("/flota/historial", response_model=list[EventoFlotaCiclo],
+            summary="Historial de la flota y del tiempo de ciclo (versión, acción, valor anterior y nuevo, quién y por "
+                    "qué)",
+            description="Del más reciente al más antiguo, paginado con limite y desplazamiento; el total de eventos "
+                        "va en la cabecera X-Total-Count.")
+def historial_flota_y_ciclo(response: Response, idruta: IdRuta = None, limite: Limite = 100,
+                            desplazamiento: Desplazamiento = 0, sesion: Session = Depends(obtener_sesion)):
+    return _pagina_de_eventos(response, F.historial(sesion, idruta), limite, desplazamiento)

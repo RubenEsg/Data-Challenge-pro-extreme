@@ -13,6 +13,8 @@ CATALOGOS_FUENTE=auto (por omisión), replica o archivos fuerza una de las dos.
 
 Datos personales (§18, minimización): no salen nunca la placa, el conductor, el propietario, los contactos, el módem,
 la póliza ni la posición GPS. La placa solo se usa en memoria para cruzar la clase del vehículo con el reporte de flota.
+La única excepción es el seudónimo del conductor (HMAC, nunca el identificador) de los viajes de una alerta
+(viajes_para_alertas, §5.3).
 
 Fechas (§8.1, §12.1): los ``timestamp`` sin zona de las tablas operacionales son hora local de Barranquilla; todo
 instante que sale de aquí lleva la zona America/Bogota (-05:00).
@@ -20,7 +22,8 @@ instante que sale de aquí lleva la zona America/Bogota (-05:00).
 Ajuste local (§3.2, §8.3): la capacidad operativa por ruta y tipología vive SOLO en ai_frecuencias, como parámetros
 gobernados del conjunto versionado ``threshold_config`` (prefijo ``capacidad_override.``). Cada cambio crea una versión
 nueva del conjunto con creado_por, motivo y creado_en; la versión queda en ``umbrales_version`` de cada recomendación.
-``capacidad_vigente(ruta)`` es el contrato que puede llamar el optimizador.
+``capacidad_vigente(ruta)`` es el contrato que puede llamar el optimizador. La flota disponible y el tiempo de ciclo
+se ajustan igual (app/servicios/flota_ciclo.py): ``versionar_ajustes`` y ``eventos_ajustes`` son comunes a los dos.
 """
 from __future__ import annotations
 
@@ -31,6 +34,7 @@ import os
 import re
 import threading
 import time
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from functools import lru_cache
 from pathlib import Path
@@ -282,6 +286,11 @@ class FuenteReplica:
         _cache[clave] = (ahora, d)
         return d.copy()
 
+    def viajes(self, ruta: Any, desde: datetime, hasta: datetime) -> pd.DataFrame:
+        """Los viajes de una ruta y una ventana con el SELECT de la lista blanca de fuentes.py (sin conteo de segmentos)
+        y el conductor seudonimizado (§5.3, §18)."""
+        return self._lector.viajes(ruta, desde, hasta, con_segmentos=False)
+
     def columnas(self, tabla: str) -> set[str]:
         d = self.consultar_cacheado(
             ("columnas", tabla),
@@ -292,6 +301,7 @@ class FuenteReplica:
 
 def limpiar_cache() -> None:
     _cache.clear()
+    _geometrias.clear()
     _leer_parquet.cache_clear()
     _progvehiculos_archivo.cache_clear()
     _segmentos_archivo.cache_clear()
@@ -575,15 +585,29 @@ def _segmentos_replica(f, geometria: str, idruta: int | None) -> pd.DataFrame:
     return d
 
 
-def _segmentos_exportacion(geometria: str) -> pd.DataFrame:
-    """rutas_segmentos.parquet; sin geometría no se convierte ni se simplifica la WKT de los 2.695 segmentos (unos
-    250 MB de texto): solo se cuentan sus vértices."""
+def _archivo_segmentos() -> Path:
+    """rutas_segmentos.parquet de las exportaciones; sin él (ni réplica), el catálogo no está disponible."""
     p = _archivo("rutas_segmentos.parquet")
     if not p.exists():
         raise CatalogoNoDisponible("Sin réplica y sin la exportación rutas_segmentos.parquet "
                                    "(defina CATALOGOS_DATABASE_URL o CATALOGOS_DATOS_DIR)")
+    return p
+
+
+def _segmentos_exportacion(geometria: str) -> pd.DataFrame:
+    """rutas_segmentos.parquet; sin geometría no se convierte ni se simplifica la WKT de los 2.695 segmentos (unos
+    250 MB de texto): solo se cuentan sus vértices."""
+    p = _archivo_segmentos()
     tolerancia = None if geometria == "ninguna" else TOLERANCIA_SIMPLIFICACION
     return _segmentos_archivo(str(p), _mtime(p), tolerancia).copy()
+
+
+def _wkt_de(ids: list[int]) -> list[dict]:
+    """[{id, geom_segmento}] de los segmentos pedidos, leídos del Parquet exportado (solo esas filas)."""
+    import pyarrow.parquet as pq
+
+    tabla = pq.read_table(str(_archivo_segmentos()), columns=["id", "geom_segmento"], filters=[("id", "in", ids)])
+    return tabla.to_pandas().to_dict("records")
 
 
 def geometria_completa(ids: list[int], fuente=None) -> dict[int, dict]:
@@ -596,14 +620,103 @@ def geometria_completa(ids: list[int], fuente=None) -> dict[int, dict]:
         d = f.consultar("SELECT id, ST_AsGeoJSON(geom_segmento, 7) AS geojson FROM rutas_segmentos "
                         "WHERE id = ANY(:ids)", {"ids": ids})
         return {int(r["id"]): json.loads(r["geojson"]) for r in d.to_dict("records") if r.get("geojson")}
-    import pyarrow.parquet as pq
+    return {int(r["id"]): g for r in _wkt_de(ids) if (g := wkt_a_geojson(r["geom_segmento"], 0)[0])}
 
-    p = _archivo("rutas_segmentos.parquet")
-    if not p.exists():
-        raise CatalogoNoDisponible("Sin réplica y sin la exportación rutas_segmentos.parquet "
-                                   "(defina CATALOGOS_DATABASE_URL o CATALOGOS_DATOS_DIR)")
-    t = pq.read_table(str(p), columns=["id", "geom_segmento"], filters=[("id", "in", ids)]).to_pandas()
-    return {int(r["id"]): g for r in t.to_dict("records") if (g := wkt_a_geojson(r["geom_segmento"], 0)[0])}
+
+# Listado paginado (RNF-002): el catálogo se filtra, ordena y pagina SIN geometría y la geometría (y los vértices de la
+# original) se arma después solo para los segmentos de la página. Antes, la primera petición simplificaba las 2.695
+# geometrías (unos 100 MB en la réplica) para devolver 50: 5,0 s en frío (docs/evidencias/pruebas/k6_volumen.txt).
+COLUMNAS_LISTADO_SEGMENTOS = ("id", "id_config", "idruta", "idrutageo", "nro_segmento", "activo", "longitud_m")
+SQL_SEGMENTOS_LISTADO = "SELECT " + ", ".join(COLUMNAS_LISTADO_SEGMENTOS) + _SEGMENTOS_FILTRO
+SQL_GEOMETRIA_PAGINA = ("SELECT id, ST_NPoints(geom_segmento) AS vertices_original, "
+                        "ST_AsGeoJSON(ST_SimplifyPreserveTopology(geom_segmento, CAST(:tol AS double precision)), 7) "
+                        "AS geojson FROM rutas_segmentos WHERE id = ANY(:ids)")
+SQL_VERTICES_PAGINA = ("SELECT id, ST_NPoints(geom_segmento) AS vertices_original FROM rutas_segmentos "
+                       "WHERE id = ANY(:ids)")
+
+
+def segmentos_listado(fuente=None, idruta: int | None = None) -> tuple[pd.DataFrame, str]:
+    """rutas_segmentos sin geometría (id, configuración, ruta, número, activo y longitud) para filtrar y paginar."""
+    f = _fuente(fuente)
+    if f is not None:
+        params = {"idruta": None if idruta is None else int(idruta)}
+        d, nombre = f.consultar_cacheado(("segmentos_listado", idruta), SQL_SEGMENTOS_LISTADO, params), f.nombre
+    else:
+        _archivo_segmentos()
+        d, nombre = _parquet("rutas_segmentos.parquet", COLUMNAS_LISTADO_SEGMENTOS), "archivos"
+    d["longitud_m"] = pd.to_numeric(d["longitud_m"], errors="coerce").astype(float)
+    d["ruta"] = d["idruta"].map(_nombre_ruta)
+    return d, nombre
+
+
+def _datos_geometria(geo: dict | None, vertices_original: Any) -> dict[str, Any]:
+    return {"geometria": geo, "vertices": len(geo["coordinates"]) if geo else 0,
+            "vertices_original": _limpio(vertices_original)}
+
+
+def _pagina_replica(f, ids: list[int], geometria: str) -> dict[int, dict]:
+    """Geometría de los segmentos pedidos, leída de la réplica (sin caché por página: la guarda _memorizadas)."""
+    if geometria == "ninguna":
+        d = f.consultar(SQL_VERTICES_PAGINA, {"ids": ids})
+        return {int(r["id"]): _datos_geometria(None, r["vertices_original"]) for r in d.to_dict("records")}
+    d = f.consultar(SQL_GEOMETRIA_PAGINA, {"ids": ids, "tol": TOLERANCIA_SIMPLIFICACION})
+    return {int(r["id"]): _datos_geometria(json.loads(r["geojson"]) if isinstance(r.get("geojson"), str) else None,
+                                           r["vertices_original"]) for r in d.to_dict("records")}
+
+
+# Geometría ya armada, POR SEGMENTO (RNF-002): cada página pide a la fuente solo los segmentos que no tiene guardados.
+# La memoria queda acotada por el número de segmentos (2.695 en Sobusa) por modo, no por las combinaciones de página,
+# orden y filtros: una caché por página crecía sin límite (cada desplazamiento distinto era una entrada nueva que nunca
+# se borraba). De la réplica, cada segmento vale CATALOGOS_CACHE_S segundos; del Parquet, mientras el archivo no
+# cambie (su fecha de modificación va en la llave). limpiar_cache() la vacía.
+_geometrias: dict[tuple, tuple[float, dict]] = {}
+
+
+def _memorizadas(origen: tuple, geometria: str, ids: list[int], leer, ttl: float | None) -> dict[int, dict]:
+    """{id: datos} de los ids pedidos: los vigentes de la memoria y los demás con leer(faltantes)."""
+    ahora = time.monotonic()
+    salida: dict[int, dict] = {}
+    for i in ids:
+        guardada = _geometrias.get((origen, geometria, i))
+        if guardada is not None and (ttl is None or ahora - guardada[0] < ttl):
+            salida[i] = guardada[1]
+    faltantes = [i for i in ids if i not in salida]
+    if faltantes:
+        for i, datos in leer(faltantes).items():
+            _geometrias[(origen, geometria, i)] = (ahora, datos)
+            salida[i] = datos
+    return {i: dict(salida[i]) for i in ids if i in salida}
+
+
+def _pagina_archivo(ids: list[int], geometria: str) -> dict[int, dict]:
+    salida = {}
+    for r in _wkt_de(ids):
+        if geometria == "ninguna":
+            salida[int(r["id"])] = _datos_geometria(None, _vertices_wkt(r["geom_segmento"]))
+        else:
+            geo, original = wkt_a_geojson(r["geom_segmento"], TOLERANCIA_SIMPLIFICACION)
+            salida[int(r["id"])] = _datos_geometria(geo, original)
+    return salida
+
+
+def geometria_de_pagina(ids: list[int], geometria: str, fuente=None) -> dict[int, dict]:
+    """{id: {geometria, vertices, vertices_original}} SOLO de los segmentos de una página: GeoJSON simplificado
+    (~1 m), completo o ninguno, y los vértices de la geometría original."""
+    if geometria not in ("simplificada", "completa", "ninguna"):
+        raise FiltroInvalido("geometria debe ser simplificada, completa o ninguna")
+    ids = [int(i) for i in ids][:500]
+    if not ids:
+        return {}
+    if geometria == "completa":
+        return {i: {**_datos_geometria(g, None), "vertices_original": len(g["coordinates"])}
+                for i, g in geometria_completa(ids, fuente).items()}
+    f = _fuente(fuente)
+    if f is not None:
+        origen = ("replica", getattr(f, "_id_motor", id(f)))
+        return _memorizadas(origen, geometria, ids, lambda faltantes: _pagina_replica(f, faltantes, geometria), _ttl())
+    p = _archivo_segmentos()
+    return _memorizadas(("archivo", str(p), _mtime(p)), geometria, ids,
+                        lambda faltantes: _pagina_archivo(faltantes, geometria), None)
 
 
 def _tipologia(clase: Any) -> str:
@@ -868,6 +981,45 @@ def _programacion_archivo(pedido: dict) -> tuple[pd.DataFrame, int]:
     return sub.iloc[inicio:inicio + pedido["limite"]].copy(), n
 
 
+# ---------------------------------------------------------------- viajes de una alerta (§5.3, ALT-006 y ALT-009)
+_COLUMNAS_VIAJES_ALERTA = ("idprogramacion", "idruta", "idvehiculo", "idconductor", "fechasalida", "fechainicio",
+                           "cancelada", "finalizado", "excedeplazosalida", "numeropasajeros")
+_NOMBRES_VIAJE_ALERTA = {"idprogramacion": "viaje", "idvehiculo": "vehiculo", "fechasalida": "salida",
+                         "fechainicio": "salida_real"}
+
+
+def _local_sin_zona(t: datetime) -> datetime:
+    """Instante -> timestamp local sin zona (así guarda las fechas progvehiculos)."""
+    return t.astimezone(ZONA).replace(tzinfo=None) if t.tzinfo is not None else t
+
+
+def viajes_para_alertas(ruta: Any, desde: datetime, hasta: datetime, fuente=None) -> pd.DataFrame:
+    """Los viajes de la ruta con salida programada en [desde, hasta) para identificar el viaje, el vehículo y el
+    conductor de ALT-006 y ALT-009 (§5.3): de la réplica en solo lectura (FuentePostgresSoloLectura.viajes) o, sin ella,
+    de la exportación progvehiculos.parquet (solo las filas de la ruta y la ventana, sin cargar la tabla entera). El
+    conductor sale solo seudonimizado (fuentes.seudonimizar_viajes, §18). Sin conteo de segmentos: fuera del ciclo
+    integrado la capa de segmentos no cubre el periodo de la serie empaquetada. CatalogoNoDisponible si no hay ni
+    réplica ni exportación."""
+    import pyarrow.parquet as pq
+
+    from app.servicios.fuentes import seudonimizar_viajes
+
+    f = _fuente(fuente)
+    if f is not None:
+        return f.viajes(ruta, desde, hasta)
+    p = _archivo("progvehiculos.parquet")
+    if not p.exists():
+        raise CatalogoNoDisponible("Sin réplica y sin la exportación progvehiculos.parquet: los viajes de la alerta "
+                                   "no se identifican (defina CATALOGOS_DATABASE_URL o CATALOGOS_DATOS_DIR)")
+    disponibles = set(pq.ParquetFile(str(p)).schema_arrow.names)
+    filtros = [("idruta", "=", int(ruta_info(ruta)["idruta"])), ("fechasalida", ">=", _local_sin_zona(desde)),
+               ("fechasalida", "<", _local_sin_zona(hasta))]
+    d = pq.read_table(str(p), columns=[c for c in _COLUMNAS_VIAJES_ALERTA if c in disponibles],
+                      filters=filtros).to_pandas()
+    d = d.sort_values(["fechasalida", "idprogramacion"], kind="mergesort").rename(columns=_NOMBRES_VIAJE_ALERTA)
+    return seudonimizar_viajes(d.assign(filas_segmento=None).drop(columns=["idruta"]))
+
+
 def _forma_programacion(catalogo: str, d: pd.DataFrame) -> pd.DataFrame:
     if not len(d):
         return pd.DataFrame(columns=COLUMNAS[catalogo])
@@ -1025,64 +1177,74 @@ def capacidad_vigente(ruta: Any, tipologia: str | None = None, *, umbrales: dict
             "por_tipologia": {t: c for (r, t), c in sorted(ajustes.items()) if r == idruta}}
 
 
-def fijar_capacidad(sesion, idruta: int, tipologia: str | None, capacidad: int | None, creado_por: str,
-                    motivo: str) -> int:
-    """Crea una versión nueva del conjunto gobernado con el ajuste (capacidad=None lo retira). Bloquea las filas
-    vigentes (FOR UPDATE) para que dos cambios simultáneos no choquen. Devuelve la versión nueva."""
+def versionar_ajustes(sesion, cambios: dict[str, Any], creado_por: str, motivo: str,
+                      describir: Callable[[str], str]) -> int:
+    """Versión nueva del conjunto gobernado (threshold_config) con `cambios` ({nombre: valor}; None retira el ajuste).
+    Copia el resto del conjunto vigente, firma creado_por y motivo y deja la anterior como histórico. Un cambio a la
+    vez: el candado de la transacción (ejecucion.bloquear_umbrales, el mismo de PUT /thresholds) se toma antes de leer
+    la versión vigente, así que dos cambios simultáneos no parten de la misma versión. LookupError si se retira un
+    ajuste que no está vigente. `describir(nombre)` da la descripción de un parámetro nuevo. Devuelve la versión
+    nueva. La usan el ajuste de capacidad y el de flota y ciclo (app/servicios/flota_ciclo.py)."""
     from sqlalchemy import func, select, update
 
     from app.modelos_db import Umbral
+    from app.servicios.ejecucion import bloquear_umbrales
 
-    ruta_info(idruta)                                     # integridad referencial hacia una ruta autorizada
-    if not motivo or not motivo.strip():
-        raise ValueError("motivo es obligatorio para un ajuste de capacidad")
-    clave = clave_capacidad(idruta, tipologia)
-    if capacidad is not None and not CAPACIDAD_MIN <= int(capacidad) <= CAPACIDAD_MAX:
-        raise ValueError(f"capacidad debe estar entre {CAPACIDAD_MIN} y {CAPACIDAD_MAX} pasajeros")
+    bloquear_umbrales(sesion)
     filas = sesion.scalars(select(Umbral).where(Umbral.vigente).with_for_update()).all()
     actuales = {f.nombre: f for f in filas}
     combinados = {n: f.valor for n, f in actuales.items()}
-    if capacidad is None:
-        if clave not in combinados:
-            raise LookupError(f"No hay un ajuste vigente {clave}")
-        combinados.pop(clave)
-    else:
-        combinados[clave] = int(capacidad)
+    for nombre, valor in cambios.items():
+        if valor is not None:
+            combinados[nombre] = valor
+        elif combinados.pop(nombre, None) is None:
+            raise LookupError(f"No hay un ajuste vigente {nombre}")
     nueva = (sesion.scalar(select(func.max(Umbral.version))) or 0) + 1
     sesion.execute(update(Umbral).where(Umbral.vigente).values(vigente=False))
     sesion.flush()
-    _, _, tip = clave.split(".")
     for nombre, valor in combinados.items():
-        descripcion = (actuales[nombre].descripcion if nombre in actuales else
-                       f"§3.2 Ajuste local: capacidad operativa autorizada de la ruta {idruta}, tipología {tip} "
-                       "(pasajeros por bus; solo en ai_frecuencias)")
+        descripcion = actuales[nombre].descripcion if nombre in actuales else describir(nombre)
         sesion.add(Umbral(nombre=nombre, valor=valor, descripcion=descripcion, version=nueva, vigente=True,
                           creado_por=creado_por, motivo=motivo.strip()))
     sesion.commit()
     return nueva
 
 
-def _eventos_capacidad(version: int, v: dict, anterior: dict, idruta: int | None) -> list[dict]:
-    """Ajustes de capacidad creados, cambiados o retirados en una versión frente a la anterior."""
+def fijar_capacidad(sesion, idruta: int, tipologia: str | None, capacidad: int | None, creado_por: str,
+                    motivo: str) -> int:
+    """Crea una versión nueva del conjunto gobernado con el ajuste (capacidad=None lo retira). Un cambio a la vez
+    (versionar_ajustes toma el candado de threshold_config). Devuelve la versión nueva."""
+    ruta_info(idruta)                                     # integridad referencial hacia una ruta autorizada
+    if not motivo or not motivo.strip():
+        raise ValueError("motivo es obligatorio para un ajuste de capacidad")
+    clave = clave_capacidad(idruta, tipologia)
+    if capacidad is not None and not CAPACIDAD_MIN <= int(capacidad) <= CAPACIDAD_MAX:
+        raise ValueError(f"capacidad debe estar entre {CAPACIDAD_MIN} y {CAPACIDAD_MAX} pasajeros")
+    _, _, tip = clave.split(".")
+    descripcion = (f"§3.2 Ajuste local: capacidad operativa autorizada de la ruta {idruta}, tipología {tip} "
+                   "(pasajeros por bus; solo en ai_frecuencias)")
+    return versionar_ajustes(sesion, {clave: None if capacidad is None else int(capacidad)}, creado_por, motivo,
+                             lambda _nombre: descripcion)
+
+
+def _cambios_de_version(version: int, v: dict, anterior: dict) -> list[dict]:
+    """Ajustes creados, cambiados o retirados en una versión frente a la anterior."""
     eventos = []
     actual = v["ajustes"]
     for nombre in sorted(set(anterior) | set(actual)):
         antes, despues = anterior.get(nombre), actual.get(nombre)
         if antes == despues:
             continue
-        _, r, tip = nombre.split(".")
-        if idruta is not None and int(r) != int(idruta):
-            continue
         accion = "creado" if antes is None else "retirado" if despues is None else "cambiado"
-        eventos.append({"version": version, "idruta": int(r), "ruta": _nombre_ruta(int(r)), "tipologia": tip,
-                        "accion": accion, "capacidad_anterior": antes, "capacidad_nueva": despues,
-                        "creado_por": v["creado_por"], "motivo": v["motivo"],
-                        "creado_en": a_bogota(v["creado_en"])})
+        eventos.append({"version": version, "nombre": nombre, "accion": accion, "antes": antes, "despues": despues,
+                        "creado_por": v["creado_por"], "motivo": v["motivo"], "creado_en": a_bogota(v["creado_en"])})
     return eventos
 
 
-def historial_capacidad(sesion, idruta: int | None = None) -> list[dict]:
-    """Cambios de los ajustes de capacidad, versión por versión (creado, cambiado o retirado), con quién y por qué."""
+def eventos_ajustes(sesion, prefijos: tuple[str, ...]) -> list[dict]:
+    """Cambios de los ajustes locales cuyos nombres empiezan por `prefijos`, versión por versión y del más antiguo al
+    más reciente: {version, nombre, accion (creado, cambiado o retirado), antes, despues, creado_por, motivo,
+    creado_en (America/Bogota)}. Los usan el historial de la capacidad y el de la flota y el ciclo."""
     from sqlalchemy import select
 
     from app.modelos_db import Umbral
@@ -1093,16 +1255,30 @@ def historial_capacidad(sesion, idruta: int | None = None) -> list[dict]:
     for f in filas:
         v = por_version.setdefault(f.version, {"ajustes": {}, "creado_por": f.creado_por, "motivo": f.motivo,
                                                "creado_en": f.creado_en})
-        if str(f.nombre).startswith(PREFIJO_CAPACIDAD + "."):
+        if str(f.nombre).startswith(prefijos):
             v["ajustes"][f.nombre] = f.valor
     eventos, anterior = [], {}
     for version in sorted(por_version):
         v = por_version[version]
-        eventos += _eventos_capacidad(version, v, anterior, idruta)
+        eventos += _cambios_de_version(version, v, anterior)
         anterior = v["ajustes"]
+    return eventos
+
+
+def historial_capacidad(sesion, idruta: int | None = None) -> list[dict]:
+    """Cambios de los ajustes de capacidad, versión por versión (creado, cambiado o retirado), con quién y por qué."""
+    eventos = []
+    for e in eventos_ajustes(sesion, (PREFIJO_CAPACIDAD + ".",)):
+        _, r, tip = e["nombre"].split(".")
+        if idruta is not None and int(r) != int(idruta):
+            continue
+        eventos.append({"version": e["version"], "idruta": int(r), "ruta": _nombre_ruta(int(r)), "tipologia": tip,
+                        "accion": e["accion"], "capacidad_anterior": e["antes"], "capacidad_nueva": e["despues"],
+                        "creado_por": e["creado_por"], "motivo": e["motivo"], "creado_en": e["creado_en"]})
     return list(reversed(eventos))
 
 
 __all__ = ["capacidad_vigente", "fijar_capacidad", "historial_capacidad", "ajustes_capacidad", "clave_capacidad",
+           "versionar_ajustes", "eventos_ajustes",
            "procesos", "empresas", "rutas", "segmentos", "vehiculos", "tipologias", "programacion", "a_bogota",
            "CatalogoNoDisponible", "FiltroInvalido", "FuenteReplica", "COLUMNAS", "COLUMNAS_PROHIBIDAS", "modo"]

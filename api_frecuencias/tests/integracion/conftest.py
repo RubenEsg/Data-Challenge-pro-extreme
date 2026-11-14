@@ -167,3 +167,31 @@ def sesion(migrada):
     s = nueva_sesion()
     yield s
     s.close()
+
+
+def restituir_umbrales(sesion, version: int) -> None:
+    """threshold_config como estaba: sin las versiones que creó la prueba y con la anterior vigente. Restaurar los
+    valores con otro PUT dejaría vigente una versión creada por PUT, y las pruebas de bajada de las migraciones
+    (test_api_integracion::test_migracion_0005 y ::test_migracion_0007) suponen que la vigente es la de una migración.
+    Ninguna prueba de integración deja vigente una versión que creó, en cualquier orden: las que crean versiones con
+    PUT /thresholds, con los ajustes locales de PUT /catalogos/capacidad y /catalogos/flota o con
+    ejecucion.nueva_version_umbrales lo llaman al terminar, directamente (consolidados, ALT-003, retención, ciclo
+    intradía, convivencia con la capa de segmentos y gobierno de parámetros) o con el fixture umbrales_restituidos
+    (gobierno de parámetros, recomendaciones, catálogos, seguridad y las de umbrales de test_api_integracion.py)."""
+    sesion.rollback()
+    sesion.execute(text("DELETE FROM ai_frecuencias.threshold_config WHERE version > :v"), {"v": version})
+    sesion.execute(text("UPDATE ai_frecuencias.threshold_config SET vigente = (version = :v)"), {"v": version})
+    sesion.commit()
+
+
+@pytest.fixture
+def umbrales_restituidos(sesion):
+    """La versión vigente de threshold_config al empezar la prueba; al terminar, aunque falle, restituir_umbrales con
+    ella (borra las versiones que la prueba creó y deja vigente la de antes)."""
+    from app.servicios import ejecucion
+
+    sesion.rollback()
+    version, _ = ejecucion.umbrales_vigentes(sesion)
+    sesion.rollback()
+    yield version
+    restituir_umbrales(sesion, version)

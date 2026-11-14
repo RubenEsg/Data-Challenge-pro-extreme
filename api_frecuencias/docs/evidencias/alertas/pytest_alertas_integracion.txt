@@ -1,13 +1,30 @@
-Pruebas de integración y de datos de alertas (Mon Nov  9 06:52:13 HPS 2026), con PostgreSQL real (base de pruebas propia, puerto 5433) y una copia temporal de datos/: tests/datos_ml/test_backtest_alertas.py 4, tests/integracion/test_alertas_observadas.py 2, tests/integracion/test_export_alertas.py 5; 11 aprobadas, 0 fallidas.
+$ python -m pytest tests/datos_ml/test_alt003_protocolo.py tests/datos_ml/test_backtest_alertas.py tests/datos_ml/test_identificacion_viajes_evidencia.py tests/integracion/test_alertas_identificacion.py tests/integracion/test_alertas_observadas.py tests/integracion/test_export_alertas.py tests/integracion/test_gobierno_alt003.py -vv
+============================= test session starts =============================
+platform win32 -- Python 3.13.3, pytest-9.2.0, pluggy-1.7.0 -- D:\Ruben\universidad\machine_learning\DATA CHALLENGE\EntregaFinal\api_frecuencias\.venv\Scripts\python.exe
+hypothesis profile 'default'
+rootdir: D:\Ruben\universidad\machine_learning\DATA CHALLENGE\.claude\worktrees\cierre-lectura\EntregaFinal\api_frecuencias
+configfile: pyproject.toml
+plugins: anyio-4.16.0, hypothesis-6.170.15, cov-7.1.0, schemathesis-4.33.1
+collecting ... collected 19 items
 
-PASSED tests/integracion/test_alertas_observadas.py::test_ejecucion_con_datos_observados_produce_alt005_a_alt009
-PASSED tests/integracion/test_alertas_observadas.py::test_la_base_rechaza_un_conductor_en_claro
-PASSED tests/integracion/test_export_alertas.py::test_exportar_alertas_csv_respeta_filtros
-PASSED tests/integracion/test_export_alertas.py::test_exportar_alertas_xlsx_y_errores
-PASSED tests/integracion/test_export_alertas.py::test_bandeja_por_prioridad_por_omision
-PASSED tests/integracion/test_export_alertas.py::test_filtro_por_idruta
-PASSED tests/integracion/test_export_alertas.py::test_historial_paginado_y_comentarios_en_bogota
-PASSED tests/datos_ml/test_backtest_alertas.py::test_backtest_reproduce_la_evidencia
-PASSED tests/datos_ml/test_backtest_alertas.py::test_backtest_de_pronostico_compara_unidades_por_hora
-PASSED tests/datos_ml/test_backtest_alertas.py::test_evidencia_de_pronostico_publicada
-PASSED tests/datos_ml/test_backtest_alertas.py::test_evidencia_observada_incluye_ocupacion_y_rupturas
+tests/datos_ml/test_alt003_protocolo.py::test_la_evidencia_publicada_respalda_el_minimo_vigente_de_alt003 PASSED [  5%]
+tests/datos_ml/test_alt003_protocolo.py::test_en_todas_las_horas_la_variante_adoptada_supera_la_tasa_base PASSED [ 10%]
+tests/datos_ml/test_alt003_protocolo.py::test_la_robustez_por_hora_se_reproduce_en_dos_dias PASSED [ 15%]
+tests/datos_ml/test_backtest_alertas.py::test_backtest_reproduce_la_evidencia PASSED [ 21%]
+tests/datos_ml/test_backtest_alertas.py::test_backtest_de_pronostico_compara_unidades_por_hora PASSED [ 26%]
+tests/datos_ml/test_backtest_alertas.py::test_evidencia_de_pronostico_publicada PASSED [ 31%]
+tests/datos_ml/test_backtest_alertas.py::test_el_backtest_usa_el_factor_de_carga_del_ciclo PASSED [ 36%]
+tests/datos_ml/test_backtest_alertas.py::test_evidencia_observada_incluye_ocupacion_y_rupturas PASSED [ 42%]
+tests/datos_ml/test_identificacion_viajes_evidencia.py::test_la_evidencia_de_identificacion_respalda_la_tabla_de_5_3 PASSED [ 47%]
+tests/integracion/test_alertas_identificacion.py::test_alt006_y_alt009_llevan_el_viaje_el_vehiculo_y_el_seudonimo_del_conductor PASSED [ 52%]
+tests/integracion/test_alertas_observadas.py::test_ejecucion_con_datos_observados_produce_alt005_a_alt009 PASSED [ 57%]
+tests/integracion/test_alertas_observadas.py::test_la_base_rechaza_un_conductor_en_claro PASSED [ 63%]
+tests/integracion/test_export_alertas.py::test_exportar_alertas_csv_respeta_filtros PASSED [ 68%]
+tests/integracion/test_export_alertas.py::test_exportar_alertas_xlsx_y_errores PASSED [ 73%]
+tests/integracion/test_export_alertas.py::test_bandeja_por_prioridad_por_omision PASSED [ 78%]
+tests/integracion/test_export_alertas.py::test_filtro_por_idruta PASSED  [ 84%]
+tests/integracion/test_export_alertas.py::test_historial_paginado_y_comentarios_en_bogota PASSED [ 89%]
+tests/integracion/test_gobierno_alt003.py::test_migracion_0014_versiona_el_minimo_de_alt003_como_propuesta_y_baja PASSED [ 94%]
+tests/integracion/test_gobierno_alt003.py::test_ejecucion_partida_usa_el_minimo_de_alt003_de_su_version PASSED [100%]
+
+======================== 19 passed in 71.23s (0:01:11) ========================

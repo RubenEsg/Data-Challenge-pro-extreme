@@ -1,0 +1,214 @@
+{
+ "franja": {
+  "solicitud": {
+   "ruta": "CL 72",
+   "hora": 11,
+   "fecha": "2025-03-04",
+   "demanda_hora": 500,
+   "demanda_p90": 600,
+   "demanda_p10": 400,
+   "flota_disponible": 200,
+   "tipologias": false
+  },
+  "headway_min": 10.0,
+  "frecuencia_actual_min (intervalo programado observado)": 14.37,
+  "diferencia_min": -4.37,
+  "frecuenciadespachos_min": 5.0,
+  "diferencia_frecuenciadespachos_min": 5.0,
+  "cambio_frecuenciadespachos": "ampliar_intervalo",
+  "fuente_frecuenciadespachos": "rutas.frecuenciadespachos de la tabla rutas de Extreme (exportación empaquetada en datos/catalogo_rutas.json, frecuenciadespachos_tabla_rutas), leída en minutos",
+  "explicacion": [
+   "Headway vigente de rutas.frecuenciadespachos: cada 5,00 min; el recomendado es cada 10,00 min (diferencia de 5,00 min)."
+  ]
+ },
+ "fila_recommendation": {
+  "frecuenciadespachos_min": 5.0,
+  "diferencia_frecuenciadespachos_min": 5.0
+ },
+ "cabecera_exportacion_csv": [
+  "recommendation_id",
+  "execution_id",
+  "prediction_id",
+  "ruta",
+  "fecha",
+  "hora",
+  "demanda_hora",
+  "demanda_p90",
+  "buses_hora",
+  "headway_min",
+  "vehiculos_requeridos",
+  "capacidad_efectiva",
+  "ocupacion_esperada",
+  "viable",
+  "motivo",
+  "frecuencia_actual_min",
+  "diferencia_min",
+  "formula",
+  "umbrales_version",
+  "detalle",
+  "creado_en",
+  "origen",
+  "idruta",
+  "idempresa",
+  "idproceso",
+  "id_dia_semana",
+  "id_estacionalidad",
+  "frecuenciadespachos_min",
+  "diferencia_frecuenciadespachos_min"
+ ],
+ "plan_del_dia": [
+  {
+   "hora": 4,
+   "salidas": 3,
+   "headway_min": 9.92,
+   "frecuencia_actual_min": 9.18,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 4.92,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 5,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 4.01,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 6,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 9.43,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 7,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 10.37,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 8,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 10.68,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 9,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 10.72,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 10,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 12.38,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 11,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 14.37,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 12,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 12.51,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 13,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 10.19,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 14,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 9.53,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 15,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 11.24,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 16,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 13.63,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 17,
+   "salidas": 6,
+   "headway_min": 10.0,
+   "frecuencia_actual_min": 11.9,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 5.0,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 18,
+   "salidas": 6,
+   "headway_min": 9.97,
+   "frecuencia_actual_min": 12.23,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 4.97,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 19,
+   "salidas": 6,
+   "headway_min": 9.94,
+   "frecuencia_actual_min": 11.98,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 4.94,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  },
+  {
+   "hora": 20,
+   "salidas": 5,
+   "headway_min": 9.04,
+   "frecuencia_actual_min": 10.53,
+   "frecuenciadespachos_min": 5.0,
+   "diferencia_frecuenciadespachos_min": 4.04,
+   "cambio_frecuenciadespachos": "ampliar_intervalo"
+  }
+ ]
+}

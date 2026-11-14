@@ -1,5 +1,5 @@
 {
- "generado_en": "2026-11-09T06:40:33-05:00",
+ "generado_en": "2026-11-11T05:11:18-05:00",
  "script": "scripts/reconstruir_desde_replica.py --linaje",
  "lee": "réplica local (lector_ia, transacciones READ ONLY)",
  "exportacion_original": "Exportación del 2026-10-03 21:51:37 (scripts/exportar_tablas.py del repositorio del equipo, no se vuelve a ejecutar): una sesión de solo lectura (set_session(readonly=True)) sobre la base compartida del reto y, por cada una de las 15 tablas (Procesos, rutas, vehiculos, dias_semana, estacionalidades, estacionalidades_anio, novedades_viales, novedades_viales_fecha, novedades_viales_ruta, rutas_segmentos_config, rutas_segmentos, timbradas_consolidado, timbradas_anio, timbradas_segmentos y progvehiculos), un único SELECT de columnas explícitas FROM public.\"tabla\" leído con un cursor de servidor en bloques de 100.000 filas, más un SELECT count(*) para comprobar que las filas exportadas coinciden con las del servidor (15 de 15 coinciden; progvehiculos 564.837 filas). Las credenciales viven fuera del repositorio. Desde entonces el proyecto solo usa esas exportaciones: la réplica local se cargó con ellas (scripts/replica_cargar.py).",
@@ -99,11 +99,170 @@
    "novedades": 28,
    "dias_con_novedad": 25,
    "horas_con_novedad": 246,
-   "filas_novedades_viales_ruta": 0,
    "festivos_oficiales_en_rango": 72,
    "procesos_estacionalidades": [
     "sobusa"
-   ]
+   ],
+   "filas_novedades_viales_ruta": 0,
+   "novedades_por_ruta": 0,
+   "novedades_todas_las_rutas": 28,
+   "rutas_fuera_del_catalogo": 0,
+   "filas_sin_novedad": 0,
+   "filas_novedades_por_ruta": 0
+  }
+ },
+ "bajadas_horaria": {
+  "archivo": "datos/bajadas_horaria.parquet",
+  "sha256_archivo": "ffba8d2ae3e135931817b0fdde8bf7adf3c55ca232b405dba8af7d209a181f63",
+  "columnas_comparadas": [
+   "ruta",
+   "fecha",
+   "hora",
+   "bajadas_viajes"
+  ],
+  "como_se_reconstruye": "SQL de las bajadas sobre progvehiculos (la regla de los pasajeros aplicada a numerobajadas) con la grilla de la serie",
+  "sha256_contenido_empaquetado": "f8d15eb6740c5d4e5589c34dd62e861fb19cf0652f917bac7e86999a36f5355c",
+  "sha256_contenido_reconstruido": "f8d15eb6740c5d4e5589c34dd62e861fb19cf0652f917bac7e86999a36f5355c",
+  "contenido_identico": true,
+  "comparacion": {
+   "filas_empaquetadas": 55896,
+   "filas_reconstruidas": 55896,
+   "solo_empaquetado": 0,
+   "solo_replica": 0,
+   "bajadas_viajes": {
+    "iguales": 55896,
+    "distintas": 0,
+    "suma_empaquetado": 41416281.0,
+    "suma_replica": 41416281.0,
+    "max_diferencia_abs": 0.0
+   }
+  }
+ },
+ "entradas_segmentos": {
+  "progvehiculos": {
+   "filas": 564837,
+   "columnas": "idprogramacion, fechasalida",
+   "sha256_contenido": "5153931b71d653fd2a1858bcbbed24c169116fbb8a9ff6cdef2c02131385a6af"
+  },
+  "timbradas_segmentos": {
+   "filas": 2769692,
+   "columnas": "id_segmento, id_viaje, fecha, subidas",
+   "sha256_contenido": "6ba28a20ef4262e96cf938f1c03ac71399e03038c80a62fd154fb1f7658236cd"
+  },
+  "rutas_segmentos": {
+   "filas": 2695,
+   "columnas": "id, idruta, idrutageo, nro_segmento, longitud_m",
+   "sha256_contenido": "3f30a8b608a2c2b8d609adccb2775aab0c66544258be9a2eacefcc7b87242551"
+  }
+ },
+ "subidas_segmento_hora": {
+  "archivo": "datos/subidas_segmento_hora.parquet",
+  "sha256_archivo": "b37c7238ffc3913313022246ce96f336bff906022862af521e32ed9883466a56",
+  "columnas_comparadas": [
+   "ruta",
+   "fecha",
+   "hora",
+   "tipo_dia",
+   "id_segmento",
+   "subidas",
+   "nro_segmento",
+   "sentido",
+   "km_inicio",
+   "longitud_m"
+  ],
+  "como_se_reconstruye": "scripts/preparar_segmentos.py (cargar, sentidos y celdas_segmento_hora) sobre timbradas_segmentos, rutas_segmentos y progvehiculos de la réplica",
+  "sha256_contenido_empaquetado": "928a64398a12188b4bb4d570bc146c98b62f2b166c948784fd0e11e94eec6678",
+  "sha256_contenido_reconstruido": "34f3d499a58c6de8bab5c6d65a1daf93f4d2a20dc0cc21e9522f727e910620e7",
+  "contenido_identico": false,
+  "comparacion": {
+   "filas_empaquetadas": 341820,
+   "filas_reconstruidas": 337572,
+   "solo_empaquetado": 4248,
+   "solo_replica": 0,
+   "subidas": {
+    "iguales": 337572,
+    "distintas": 0,
+    "suma_empaquetado": 2238743.0,
+    "suma_replica": 2238743.0,
+    "max_diferencia_abs": 0.0
+   },
+   "tipo_dia": {
+    "iguales": 337572,
+    "distintas": 0,
+    "suma_empaquetado": 160371.0,
+    "suma_replica": 160371.0,
+    "max_diferencia_abs": 0.0
+   },
+   "nro_segmento": {
+    "iguales": 337572,
+    "distintas": 0,
+    "suma_empaquetado": 21802036.0,
+    "suma_replica": 21802036.0,
+    "max_diferencia_abs": 0.0
+   },
+   "km_inicio": {
+    "iguales": 337572,
+    "distintas": 0,
+    "suma_empaquetado": 10732232.0,
+    "suma_replica": 10732232.0,
+    "max_diferencia_abs": 0.0
+   },
+   "longitud_m": {
+    "iguales": 337572,
+    "distintas": 0,
+    "suma_empaquetado": 168153969.594,
+    "suma_replica": 168153969.594,
+    "max_diferencia_abs": 0.0
+   }
+  },
+  "sin_el_dia_reservado": {
+   "dia": "2023-02-07",
+   "idrutas": [
+    2,
+    21
+   ],
+   "filas_del_dia_empaquetadas": 4248,
+   "filas_del_dia_reconstruidas": 0,
+   "sha256_contenido_empaquetado": "34f3d499a58c6de8bab5c6d65a1daf93f4d2a20dc0cc21e9522f727e910620e7",
+   "sha256_contenido_reconstruido": "34f3d499a58c6de8bab5c6d65a1daf93f4d2a20dc0cc21e9522f727e910620e7",
+   "contenido_identico": true
+  }
+ },
+ "sin_reconstruir": {
+  "reparto_segmentos.parquet": {
+   "archivo": "datos/reparto_segmentos.parquet",
+   "sha256_archivo": "0a184027657513a085b4213afb17ccf24d8374f41d3796538a300015ee8910b6",
+   "motivo": "Reparto fijo B0 de scripts/preparar_segmentos.py: agrega todo ene.-feb. de 2023. La réplica no tiene los 265 viajes reservados del 2023-02-07 de las rutas 2 y 21 en timbradas_segmentos (los deja para simular su llegada por el trigger), así que desde ella no da lo mismo. Su entrada por viaje y segmento sí es la de la réplica: subidas_segmento_hora es idéntica fuera de ese día."
+  },
+  "ocupacion_segmentos_hora.parquet": {
+   "archivo": "datos/ocupacion_segmentos_hora.parquet",
+   "sha256_archivo": "af7a902636860a18b98272817bc2fa22bc5fcdc7444629c52c903a7fc1599167",
+   "motivo": "Perfil de scripts/preparar_ocupacion_segmentos.py: agrega todo ene.-feb. de 2023. La réplica no tiene los 265 viajes reservados del 2023-02-07 de las rutas 2 y 21 en timbradas_segmentos (los deja para simular su llegada por el trigger), así que desde ella no da lo mismo. Su entrada por viaje y segmento sí es la de la réplica: subidas_segmento_hora es idéntica fuera de ese día, y tests/replica/test_ocupacion_segmentos.py compara la lectura del ciclo con las exportaciones viaje por viaje. Además usa la estacionalidad de la exportación (nula para Sobusa, H1), que la réplica armoniza."
+  },
+  "clima_diario.parquet": {
+   "archivo": "datos/clima_diario.parquet",
+   "sha256_archivo": "33728cc8059bca6ac09ebd6e79652feb5e89e78e82e73e5547a31acb6620ff26",
+   "motivo": "Clima diario de Barranquilla, una fuente externa al reto (scripts/preparar_datos_api.py): no es una tabla de Extreme y solo condiciona la evaluación."
+  },
+  "perfil_intrahorario.parquet": {
+   "archivo": "datos/perfil_intrahorario.parquet",
+   "sha256_archivo": "8ffb14b01e2953de15b37a4a789941b48f70340aa4375f4e6375eb2eb5cd6722",
+   "motivo": "Sale de progvehiculos y de conteo_viajes de 2024 (scripts/preparar_datos_api.py). conteo_viajes es un agregado por viaje de conteo_pasajeros de la exportación, y la réplica no carga conteo_pasajeros."
+  },
+  "parametros_operativos_hora.parquet": {
+   "archivo": "datos/parametros_operativos_hora.parquet",
+   "sha256_archivo": "ea83901ab56f76596340f0d7076bbe379722a6915b2e6e71d1baf4e4e5779a57",
+   "motivo": "Parámetros del optimizador del proyecto (experimentos/D1_optimizacion) con los límites del MILP D5 (scripts/preparar_datos_api.py): no es una tabla de Extreme."
+  },
+  "insumos_d5_2025.parquet": {
+   "archivo": "datos/insumos_d5_2025.parquet",
+   "sha256_archivo": "6c1e651a401692c3d9d65d32e9052ed9e88e32c4aec429cc9090dcc5daa142a5",
+   "motivo": "Insumos del MILP D5 del tablero (EntregaFinal/dash_app/datos), una salida del proyecto."
+  },
+  "pronosticos_2025.parquet": {
+   "archivo": "datos/pronosticos_2025.parquet",
+   "sha256_archivo": "225224b00965dabd6d72f34ac526993997dadcfc49b93f5d7872b02c285f47b9",
+   "motivo": "Pronósticos del tablero (EntregaFinal/dash_app/datos), una salida del proyecto."
   }
  }
 }

@@ -1,0 +1,251 @@
+{
+ "antes": {
+  "umbrales_version": 9,
+  "flota_laboral_cra54": 79,
+  "franja_7h": {
+   "umbrales_version": 9,
+   "viable": true,
+   "buses_hora": 12,
+   "headway_min": 5.0,
+   "vehiculos_requeridos": 51,
+   "motivo": null,
+   "contexto_franja": {
+    "flota_disponible": 79,
+    "tiempo_ciclo_min": 249.1,
+    "ajuste_operativo": null
+   }
+  },
+  "plan_del_dia": {
+   "flota_disponible": 79.0,
+   "buses_en_ruta_pico": 78.55,
+   "salidas_por_hora": [
+    8,
+    30,
+    26,
+    20,
+    14,
+    12,
+    10,
+    10,
+    15,
+    18,
+    21,
+    18,
+    14,
+    9,
+    8,
+    7,
+    6
+   ]
+  }
+ },
+ "roles": "operador y analista: 403 «prohibido» (rol_requerido admin); admin: 200",
+ "put_flota_40": {
+  "umbrales_version": 10,
+  "laboral": {
+   "flota": 40,
+   "flota_catalogo": 79,
+   "flota_fuente": "ajuste_local",
+   "flota_clave": "flota_override.16.LABORAL"
+  }
+ },
+ "franja_7h_con_flota_40": {
+  "umbrales_version": 10,
+  "viable": false,
+  "buses_hora": 8,
+  "headway_min": 7.5,
+  "vehiculos_requeridos": 36,
+  "motivo": "La flota disponible (40 vehículos, ciclo de 249,1 min) solo sostiene 388 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 584 (66,5 % de cobertura). Se informa la mejor aproximación ejecutable: 8 buses/h cada 7,50 min, que cubre el 66,5 % de la carga del nivel de servicio.",
+  "contexto_franja": {
+   "flota_disponible": 40,
+   "tiempo_ciclo_min": 249.1,
+   "ajuste_operativo": {
+    "flota_disponible": {
+     "valor": 40,
+     "fuente": "ajuste_local",
+     "clave": "flota_override.16.LABORAL",
+     "umbrales_version": 10
+    }
+   }
+  }
+ },
+ "plan_del_dia_con_flota_40": {
+  "flota_disponible": 40.0,
+  "flota_y_ciclo": {
+   "flota_disponible": {
+    "clave": "flota_override.16.LABORAL",
+    "valor": 40.0,
+    "fuente": "ajuste_local"
+   },
+   "tiempo_ciclo_min": {
+    "claves": [],
+    "fuente": "datos/parametros_operativos_hora.parquet (mediana 2025 de D1 por ruta, tipo de día y hora)",
+    "horas_con_ajuste_local": {}
+   },
+   "capacidad_por_bus": {
+    "clave": null,
+    "valor": 50.0,
+    "fuente": "datos/parametros_operativos_hora.parquet (mediana 2025 de D1 por ruta, tipo de día y hora)"
+   }
+  },
+  "buses_en_ruta_pico": 39.98,
+  "salidas_por_hora": [
+   8,
+   19,
+   10,
+   9,
+   10,
+   10,
+   9,
+   9,
+   12,
+   10,
+   9,
+   9,
+   10,
+   8,
+   8,
+   7,
+   6
+  ]
+ },
+ "put_ciclo_7h_150": {
+  "hora": 7,
+  "tiempo_ciclo_min": 150.0,
+  "tiempo_ciclo_catalogo_min": 249.1,
+  "fuente": "ajuste_local",
+  "clave": "ciclo_override.16.LABORAL.7"
+ },
+ "franja_7h_con_ciclo_150": {
+  "umbrales_version": 11,
+  "viable": true,
+  "buses_hora": 12,
+  "headway_min": 5.0,
+  "vehiculos_requeridos": 30,
+  "motivo": null,
+  "contexto_franja": {
+   "flota_disponible": 40,
+   "tiempo_ciclo_min": 150.0,
+   "ajuste_operativo": {
+    "flota_disponible": {
+     "valor": 40,
+     "fuente": "ajuste_local",
+     "clave": "flota_override.16.LABORAL",
+     "umbrales_version": 11
+    },
+    "tiempo_ciclo_min": {
+     "valor": 150.0,
+     "fuente": "ajuste_local",
+     "clave": "ciclo_override.16.LABORAL.7",
+     "umbrales_version": 11
+    }
+   }
+  }
+ },
+ "validaciones": [
+  {
+   "cuerpo": {
+    "idruta": 999,
+    "flota": 40,
+    "motivo": "ruta inexistente"
+   },
+   "estado": 422,
+   "codigo": "ruta_desconocida"
+  },
+  {
+   "cuerpo": {
+    "idruta": 16,
+    "flota": 0,
+    "motivo": "flota cero"
+   },
+   "estado": 422,
+   "codigo": "validacion"
+  },
+  {
+   "cuerpo": {
+    "idruta": 16,
+    "tiempo_ciclo_min": 5,
+    "motivo": "ciclo de 5 min"
+   },
+   "estado": 422,
+   "codigo": "validacion"
+  },
+  {
+   "cuerpo": {
+    "idruta": 16,
+    "flota": 40,
+    "hora": 7,
+    "motivo": "hora sin ciclo"
+   },
+   "estado": 422,
+   "codigo": "ajuste_invalido"
+  },
+  {
+   "cuerpo": {
+    "idruta": 16,
+    "motivo": "sin cambios"
+   },
+   "estado": 422,
+   "codigo": "ajuste_invalido"
+  },
+  {
+   "cuerpo": {
+    "idruta": 16,
+    "flota": 40,
+    "motivo": ""
+   },
+   "estado": 422,
+   "codigo": "validacion"
+  },
+  {
+   "cuerpo": {
+    "idruta": 16,
+    "tipo_dia": "Lunes",
+    "flota": 40,
+    "motivo": "tipo de día"
+   },
+   "estado": 422,
+   "codigo": "validacion"
+  },
+  {
+   "cuerpo": {
+    "idruta": 16,
+    "tipo_dia": "Sábado",
+    "flota": null,
+    "motivo": "no existe"
+   },
+   "estado": 404,
+   "codigo": "ajuste_inexistente"
+  }
+ ],
+ "historial": [
+  {
+   "version": 11,
+   "idruta": 16,
+   "ruta": "CRA 54",
+   "parametro": "tiempo_ciclo_min",
+   "tipo_dia": "Laboral",
+   "hora": 7,
+   "accion": "creado",
+   "valor_anterior": null,
+   "valor_nuevo": 150.0,
+   "creado_por": "prueba_admin",
+   "motivo": "Ciclo medido en la hora pico (prueba)",
+   "creado_en": "2026-11-11T04:59:26.872374-05:00"
+  },
+  {
+   "version": 10,
+   "idruta": 16,
+   "ruta": "CRA 54",
+   "parametro": "flota",
+   "tipo_dia": "Laboral",
+   "hora": null,
+   "accion": "creado",
+   "valor_anterior": null,
+   "valor_nuevo": 40.0,
+   "creado_por": "prueba_admin",
+   "motivo": "Flota operativa confirmada (prueba)",
+   "creado_en": "2026-11-11T04:59:25.523405-05:00"
+  }
+ ]
+}

@@ -110,7 +110,16 @@ def medir(m, ident: str) -> dict:
                    (SELECT count(*) FROM {E}.notification_log n
                      WHERE n.execution_id = e.execution_id) AS notificaciones,
                    (SELECT count(*) FROM {E}.data_quality_error q
-                     WHERE q.execution_id = e.execution_id) AS errores_dq
+                     WHERE q.execution_id = e.execution_id) AS errores_dq,
+                   (SELECT count(*) FROM {E}.feature_snapshot f
+                     WHERE f.execution_id = e.execution_id AND f.segmento IS NULL) AS foto_ruta,
+                   (SELECT count(DISTINCT (f.prediction_id, f.fecha, f.hora)) FROM {E}.feature_snapshot f
+                     WHERE f.execution_id = e.execution_id AND f.segmento IS NULL) AS foto_ruta_distintas,
+                   (SELECT count(*) FROM {E}.feature_snapshot f
+                     WHERE f.execution_id = e.execution_id AND f.segmento IS NOT NULL) AS foto_segmento,
+                   (SELECT count(DISTINCT (f.prediction_id, f.sentido, f.segmento, f.fecha, f.hora))
+                      FROM {E}.feature_snapshot f
+                     WHERE f.execution_id = e.execution_id AND f.segmento IS NOT NULL) AS foto_segmento_distintas
               FROM {E}.execution_log e WHERE e.execution_id = :i"""), {"i": ident}).one()._asdict()  # nosec B608  # {E} es la constante ESQUEMA
         f["intentos_traza"] = [tuple(x) for x in c.execute(text(
             f"SELECT intento, worker_id, resultado FROM {E}.execution_attempt WHERE execution_id = :i "  # nosec B608  # identificadores de constantes del script; valores por parámetro
@@ -148,6 +157,11 @@ def comprobar(nombre: str, d: dict, ref: dict, anterior: dict, caida: bool) -> l
         (f"errores de calidad = {dq_esp} (validar el lote una vez)", d["errores_dq"] == dq_esp),
         (f"filas leídas = {filas_esp} (las del día nuevo)", d["filas_leidas"] == filas_esp),
         ("marca de agua contigua", anterior is None or d["marca_agua_anterior"] == anterior["marca_agua_nueva"]),
+        # §11.2 y §7.3 paso 4: la foto de variables (de la ruta y por segmento y sentido) queda una sola vez; el
+        # intento abandonado no deja filas (van en la transacción que confirma el intento «ok»)
+        ("foto de variables = referencia y sin filas repetidas (de la ruta y por segmento)",
+         d["foto_ruta"] == d["foto_ruta_distintas"] == ref["foto_ruta"] > 0
+         and d["foto_segmento"] == d["foto_segmento_distintas"] == ref["foto_segmento"]),
     ]
     for regla, ok in reglas:
         log(f"   [{'OK' if ok else 'FALLA'}] {regla}")
@@ -159,7 +173,8 @@ def comprobar(nombre: str, d: dict, ref: dict, anterior: dict, caida: bool) -> l
 def resumen(nombre: str, d: dict) -> None:
     log(f"   {nombre}: estado={d['estado']} intentos={d['intentos']} filas_leidas={d['filas_leidas']} "
         f"predicciones={d['predicciones']} recomendaciones={d['recomendaciones']} alertas={d['alertas']} "
-        f"notificaciones={d['notificaciones']} errores_dq={d['errores_dq']}")
+        f"notificaciones={d['notificaciones']} errores_dq={d['errores_dq']} foto_ruta={d['foto_ruta']} "
+        f"foto_segmento={d['foto_segmento']}")
     log(f"   traza de intentos: {d['intentos_traza']}")
     log(f"   marca de agua: {d['marca_agua_anterior']} -> {d['marca_agua_nueva']}")
 
@@ -213,7 +228,8 @@ def main() -> int:
         resumen("referencia", ref)
         fallas += comprobar("referencia", ref, ref, None, caida=False)
         salida_json["referencia"] = {"execution_id": ref_id, **{k: ref[k] for k in ("predicciones", "recomendaciones",
-                                                                                  "alertas", "intentos")}}
+                                                                                  "alertas", "intentos", "foto_ruta",
+                                                                                  "foto_segmento")}}
         anterior = ref
 
         # 1) y 2) SIGKILL en una etapa; la misma réplica reinicia

@@ -102,3 +102,69 @@ def test_foto_de_variables_es_el_vector_que_vio_el_modelo():
     assert all(feats[c] == pytest.approx(float(x.iloc[0][c])) for c in x.columns)
     assert filas[0]["feature_version"] == modelo["feature_version"]
     assert 0 < feats["_fraccion_ventana"] < 1
+
+
+# ------------------------------------------------------------------ foto por segmento y sentido (§7.3 paso 4)
+def test_foto_por_segmento_se_apaga_con_la_configuracion(monkeypatch):
+    from app import config
+
+    monkeypatch.setattr(config, "obtener_ajustes", lambda: SimpleNamespace(foto_segmentos=False))
+    estado: dict = {}
+    assert monitoreo._modelo_foto_segmentos(estado) is None and estado["estado"] == "apagada"
+
+
+def test_foto_por_segmento_sin_modelo_queda_omitida(monkeypatch, tmp_path):
+    from app.servicios import modelo_segmentos
+
+    monkeypatch.setenv("MODELOS_DIR", str(tmp_path))            # carpeta sin registro de segmentos
+    modelo_segmentos.limpiar_cache()
+    estado: dict = {}
+    assert monitoreo._modelo_foto_segmentos(estado) is None
+    assert estado["estado"] == "omitida" and "segmentos" in estado["avisos"][0]
+
+
+@pytest.mark.parametrize("contenido", ['{"activo": "x", "modelos": {', "no es json"])
+def test_foto_por_segmento_con_registro_corrupto_queda_omitida_sin_tumbar_el_ciclo(monkeypatch, tmp_path, contenido):
+    """El modelo de segmentos se carga fuera del punto de guardado de la foto: un registro que no es JSON válido
+    (ValueError, no LookupError ni RuntimeError) solo omite las filas por segmento; antes salía de guardar_snapshot y
+    tumbaba el ciclo de §14.2."""
+    from app.servicios import modelo_segmentos
+
+    (tmp_path / "segmentos").mkdir()
+    (tmp_path / "segmentos" / modelo_segmentos.ARCHIVO_REGISTRO).write_text(contenido, encoding="utf-8")
+    monkeypatch.setenv("MODELOS_DIR", str(tmp_path))
+    modelo_segmentos.limpiar_cache()
+    seg, modelo = monitoreo._inicio_foto_segmentos({})
+    assert modelo is None and seg["estado"] == "omitida" and seg["filas"] == 0
+    assert seg["avisos"][0].startswith("sin modelo de segmentos")
+
+
+def test_foto_por_segmento_sin_horas_de_servicio_no_escribe(monkeypatch):
+    """Una ventana sin horas de servicio con demanda no tiene filas por segmento: no se envía nada y sigue «ok»."""
+    from app.servicios import modelo_segmentos
+
+    def no_escribe(*_a, **_k):
+        pytest.fail("no debía escribir")
+
+    monkeypatch.setattr(modelo_segmentos, "filas_foto", lambda *_a, **_k: [])
+    sesion = SimpleNamespace(flush=no_escribe, execute=no_escribe)
+    estado: dict = {"estado": "ok", "filas": 0}
+    pred = SimpleNamespace(ruta="SILENCIO", horizonte_min=30)
+    assert monitoreo._foto_segmentos(sesion, pred, None, None, {"model_id": "x"}, None, estado) == 0
+    assert estado == {"estado": "ok", "filas": 0}
+
+
+def test_foto_por_segmento_que_falla_no_escribe_y_avisa(monkeypatch):
+    """Si las filas por segmento fallan, no se escribe nada de ellas (la de la ruta sigue) y queda el aviso."""
+    from app.servicios import modelo_segmentos
+
+    def falla(*_a, **_k):
+        raise RuntimeError("variables de segmento no disponibles (simulado)")
+
+    monkeypatch.setattr(modelo_segmentos, "filas_foto", falla)
+    sesion = SimpleNamespace(execute=lambda *_a, **_k: pytest.fail("no debía escribir"))
+    pred = SimpleNamespace(ruta="SILENCIO", horizonte_min=60)
+    estado: dict = {"estado": "ok", "filas": 0}
+    assert monitoreo._foto_segmentos(sesion, pred, None, None, {"model_id": "x"}, None, estado) == 0
+    assert estado["estado"] == "fallo" and "simulado" in estado["avisos"][0]
+    assert monitoreo._foto_segmentos(sesion, pred, None, None, None, None, estado) == 0    # sin modelo: nada

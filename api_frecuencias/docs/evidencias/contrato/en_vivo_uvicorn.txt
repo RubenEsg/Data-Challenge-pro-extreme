@@ -1,16 +1,16 @@
-Comprobación con el servidor real (uvicorn, puerto 8311, 09-11-2026 04:05 Bogotá): guarda NUL, cotas y tipos de contenido
-Arranque: uvicorn app.main:app --port 8311 con AUTH_HABILITADA=false y sin base (la guarda responde antes de tocar SQL).
+Comprobación con el servidor real (uvicorn, puerto 8354, 11-11-2026 05:42 Bogotá): guarda NUL, cotas y tipos de contenido
+Arranque: uvicorn app.main:app --port 8354 con AUTH_HABILITADA=false y sin base (la guarda responde antes de tocar SQL; DATABASE_URL apunta a un puerto local sin servidor).
 Las respuestas 422 llegan con el error uniforme y la cabecera X-Correlation-Id (la enviada o una nueva).
 
 == GET /api/v1/alerts?codigo=lease&ruta=%00
 HTTP/1.1 422 Unprocessable Content
-x-correlation-id: 4b2f82de-3c7b-45ca-a644-10c43ec1136e
-{"error":{"codigo":"validacion","mensaje":"La solicitud no es válida","detalle":[{"campo":"query.ruta","mensaje":"El valor contiene el byte NUL (0x00), que no se admite","tipo":"caracter_nulo"}],"correlation_id":"4b2f82de-3c7b-45ca-a644-10c43ec1136e"}}
+x-correlation-id: e66261c0-87d9-4fb8-942e-364578d290eb
+{"error":{"codigo":"validacion","mensaje":"La solicitud no es válida","detalle":[{"campo":"query.ruta","mensaje":"El valor contiene el byte NUL (0x00), que no se admite","tipo":"caracter_nulo"}],"correlation_id":"e66261c0-87d9-4fb8-942e-364578d290eb"}}
 
 == GET /api/v1/models/%00
 HTTP/1.1 422 Unprocessable Content
-x-correlation-id: c88a7f6b-2a76-4333-b644-bd026404b32e
-{"error":{"codigo":"validacion","mensaje":"La solicitud no es válida","detalle":[{"campo":"path","mensaje":"El valor contiene el byte NUL (0x00), que no se admite","tipo":"caracter_nulo"}],"correlation_id":"c88a7f6b-2a76-4333-b644-bd026404b32e"}}
+x-correlation-id: f315386e-66e9-4cef-9acd-32401f2c1bf3
+{"error":{"codigo":"validacion","mensaje":"La solicitud no es válida","detalle":[{"campo":"path","mensaje":"El valor contiene el byte NUL (0x00), que no se admite","tipo":"caracter_nulo"}],"correlation_id":"f315386e-66e9-4cef-9acd-32401f2c1bf3"}}
 
 == PUT /api/v1/thresholds con \u0000 en el cuerpo
 HTTP/1.1 422 Unprocessable Content
@@ -19,7 +19,8 @@ x-correlation-id: en-vivo-nul
 
 == GET /api/v1/predictions/export?formato=csv&horizonte_min=9223372036854775808
 HTTP/1.1 422 Unprocessable Content
-{"error":{"codigo":"validacion","mensaje":"La solicitud no es válida","detalle":[{"campo":"query.horizonte_min","mensaje":"Input should be less than or equal to 120","tipo":"less_than_equal"}],"correlation_id":"154bc5b1-67c6-4ca6-a007-055df8155dfa"}}
+x-correlation-id: 83faa93e-4c2b-4476-a7e7-55b74486f928
+{"error":{"codigo":"validacion","mensaje":"La solicitud no es válida","detalle":[{"campo":"query.horizonte_min","mensaje":"Input should be less than or equal to 120","tipo":"less_than_equal"}],"correlation_id":"83faa93e-4c2b-4476-a7e7-55b74486f928"}}
 
 == GET /metrics (tipo de contenido)
 HTTP/1.1 200 OK

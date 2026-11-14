@@ -9,7 +9,7 @@ Se regeneran con `.venv\Scripts\python docs\evidencias\catalogos\generar_evidenc
 Todas las rutas cuelgan de `/api/v1/catalogos` y exigen `X-API-Key`:
 
 - **Procesos y empresas.**
-- **Rutas.** Traen `frecuenciadespachos` y la capacidad. Si la tabla las tiene, también `cap_min_autorizada` y `cap_max_autorizada`. Suman el ciclo, la flota y los parámetros por hora.
+- **Rutas.** Traen `frecuenciadespachos` (y `frecuenciadespachos_min`, el mismo valor leído en minutos: supuesto S14, H15 de `../../hallazgos_extreme.md`) y la capacidad. Si la tabla las tiene, también `cap_min_autorizada` y `cap_max_autorizada`. Suman el ciclo, la flota y los parámetros por hora; el detalle de una ruta trae además la flota y el ciclo vigentes, con el ajuste local (`flota_y_ciclo`).
 - **Segmentos.** Traen la longitud y la geometría en GeoJSON: simplificada a unos 1 m, completa solo para la página pedida, o sin geometría.
 - **Vehículos.** Traen sentados más de pie y la tipología del reporte de flota.
 - **Viajes.** Es la programación.
@@ -38,7 +38,9 @@ La placa, el conductor, el propietario, los contactos, el módem, la póliza y l
 - El historial muestra la acción, el valor anterior, el nuevo, quién y cuándo.
 - La versión queda en `umbrales_version` de cada recomendación.
 
-El optimizador la lee con `app.servicios.catalogos.capacidad_vigente(ruta, tipologia=None, *, umbrales=None, umbrales_version=None, sesion=None)`. Devuelve `capacidad`, `capacidad_catalogo`, `fuente` (`ajuste_local` o `catalogo`), `clave`, `umbrales_version` y `por_tipologia`.
+El optimizador la lee con `app.servicios.catalogos.capacidad_vigente(ruta, tipologia=None, *, umbrales=None, umbrales_version=None, sesion=None)`. Devuelve `capacidad`, `capacidad_catalogo`, `fuente` (`ajuste_local` o `catalogo`), `clave`, `umbrales_version` y `por_tipologia`. Desde el gobierno de parámetros, la capacidad de toda la ruta también rige el plan del día, no solo la franja (`../../gobierno_parametros.md`).
+
+**`GET` y `PUT /catalogos/flota`**, más `GET /catalogos/flota/historial`. Fijan la flota disponible por ruta y tipo de día (`flota_override.<idruta>.<TIPO>`, de 1 a 1.000 vehículos) y el tiempo de ciclo por ruta, tipo de día y hora (`ciclo_override.<idruta>.<TIPO>.<HORA>`, de 10 a 720 min). Usan el mismo mecanismo que la capacidad: versión completa de `threshold_config`, firma del usuario autenticado, motivo obligatorio e historial (creado, cambiado o retirado, con el valor anterior y el nuevo), con el PUT solo para admin; `null` retira el ajuste. Sin ajuste rige el dato empaquetado (`datos/parametros_operativos_hora.parquet`, mediana 2025 de D1). Los usan la franja de §10.2 y el plan del día desde el cálculo siguiente (`app/servicios/flota_ciclo.py`). Evidencia: `../gobierno/ajuste_flota_ciclo.json`.
 
 ## Archivos
 
@@ -50,14 +52,14 @@ El optimizador la lee con `app.servicios.catalogos.capacidad_vigente(ruta, tipol
 | `sin_datos_personales.txt` | Comprueba que no sale ninguna columna prohibida en la réplica ni en los archivos, y muestra la cabecera del CSV de vehículos. |
 | `ajuste_capacidad.txt` | El flujo completo: 403 para operador y analista, 200 para admin, una versión nueva y la lectura del optimizador. El optimizador recomienda 9, 10 y 15 buses/h con capacidades de 50, 46 y 30. Termina con el historial y el retiro del ajuste. |
 | `fechas_8_1.json` | El recorrido de **todas** las rutas GET de `/api/v1` (§8.1): 47 verificadas, 2 omitidas porque exigen un filtro (422) y 0 instantes sin zona o en UTC. |
-| `pytest_catalogos.txt` | 42 pruebas propias: 33 unitarias y 9 de integración, todas en verde (09-11-2026, 05:35 a 05:36). |
+| `pytest_catalogos.txt` | 46 pruebas propias: 37 unitarias y 9 de integración, todas en verde (13-11-2026; generado con `scripts/evidencia_pytest.py`). |
 | `rendimiento_exportaciones.txt` · `medir_exportaciones.py` | Antes y después de acelerar `segmentos?geometria=completa` (primera petición de 8,09 s a 1,68 s) y la exportación XLSX de 100.000 despachos (de 27,6–40,3 s a 18,3–18,4 s), con el guion que lo mide. |
 
 ## Sin réplica ni exportaciones (máquina limpia, GitHub Actions)
 
 En un clon recién descargado no hay réplica ni las exportaciones Parquet de la raíz (`datos/` no se versiona). La política es la misma en todos los catálogos y está en `app/routers/catalogos.py::_ejecutar`:
 
-- `rutas`, `rutas/{idruta}`, `rutas/export`, `capacidad` y `capacidad/historial` responden **200** con el catálogo empaquetado de la API (`datos/catalogo_rutas.json`, `fuente = archivos_api`).
+- `rutas`, `rutas/{idruta}`, `rutas/export`, `capacidad`, `capacidad/historial`, `flota` y `flota/historial` responden **200** con el catálogo empaquetado de la API (`datos/catalogo_rutas.json`, `fuente = archivos_api`; la flota y el ciclo, de `datos/parametros_operativos_hora.parquet`).
 - `procesos`, `empresas`, `segmentos`, `vehiculos`, `viajes`, `despachos` y sus exportaciones responden **503 `catalogo_no_disponible`**, con el error uniforme y la variable que falta definir (`CATALOGOS_DATABASE_URL` o `CATALOGOS_DATOS_DIR`). El 503 está declarado en el OpenAPI de cada operación.
 - Si la réplica está configurada pero no responde (conexión rechazada, tiempo de espera o circuito abierto), la respuesta es **503 `fuente_no_disponible`** desde la primera petición, nunca un 500.
 

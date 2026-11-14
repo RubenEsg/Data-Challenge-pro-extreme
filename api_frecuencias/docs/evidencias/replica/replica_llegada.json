@@ -1,27 +1,35 @@
 {
- "inicio": "2026-11-09T06:29:49.007231-05:00",
+ "inicio": "2026-11-11T05:13:25.693441-05:00",
  "rol_escritura": "extreme_dba",
  "ciclo_api": {
   "preparacion": {
    "reinicio": {
-    "objetos_borrados": 18
+    "objetos_borrados": 25
    },
    "alembic_upgrade_head_como_escritor_ia": true,
-   "alembic_segundos": 2.23,
+   "alembic_segundos": 2.48,
    "alembic_salida": [
     "INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Esquema ai_frecuencias: registro de modelos, predicciones, recomendaciones, alertas,",
     "INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, Cola de trabajos en PostgreSQL para N réplicas (RNF-001, RNF-004, RNF-005, §7.1).",
     "INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, Estructura completa de la alerta (especificación v1.5, §5.3, §8.1, §9.4 y §18) y umbrales afinados (§5.1).",
     "INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Monitoreo del modelo, foto de variables particionada y trazabilidad (§9.2, §9.4, §9.5, §11.2, §8.1, RNF-011).",
     "INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Pesos y costos de la función objetivo de §10.2 versionados desde el inicio (§5.1 «regla de gobierno»).",
-    "INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Dimensiones de §8.3, trazabilidad de la calidad, llaves naturales, aprobación de umbrales y respuesta del reto."
+    "INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Dimensiones de §8.3, trazabilidad de la calidad, llaves naturales, aprobación de umbrales y respuesta del reto.",
+    "INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Umbrales de las reglas nuevas de alertas versionados en threshold_config (§5.1 «regla de gobierno», RF-009).",
+    "INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Agregación materializada de la capa analítica de segmentos (§6.1, §7.1, RNF-002, RNF-004).",
+    "INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, Partición del ciclo por ruta (RNF-005 «procesamiento particionable por ruta y fecha»).",
+    "INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, Parámetros del plan del día versionados en threshold_config y headway vigente de rutas.frecuenciadespachos en",
+    "INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, Ocupación actual de los buses por segmento (§10.1 «ocupación actual por segmento, estacionalidad actual, día de la",
+    "INFO  [alembic.runtime.migration] Running upgrade 0011 -> 0012, Retención automática de datos (§18 «Exposición de datos → retención») y huellas de la ventana de solape del refresco",
+    "INFO  [alembic.runtime.migration] Running upgrade 0012 -> 0013, Consolidados de Extreme en el ciclo diario: bajadas en el histórico, marca de agua por tabla y tolerancias del",
+    "INFO  [alembic.runtime.migration] Running upgrade 0013 -> 0014, Mínimo de probabilidad de ALT-003 de pronóstico versionado en threshold_config (§5.1 «regla de gobierno», §5.2,"
    ]
   },
   "corridas": [
    {
     "corrida": "1_carga_inicial_antes_de_la_llegada",
     "http": 202,
-    "segundos": 64.04,
+    "segundos": 44.65,
     "estado": "ok",
     "filas_leidas": 2757,
     "filas_validas": 2757,
@@ -29,11 +37,56 @@
     "marca_agua_nueva": "2026-08-14T00:52:39.363697-05:00",
     "lectura": {
      "desde": "1969-12-31T19:00:00-05:00",
+     "rutas": {
+      "CL 72": {
+       "leidas": 906,
+       "nuevas": 906,
+       "tardias": 0,
+       "entregadas": 906,
+       "marca_nueva": "2026-08-14T00:52:39.363697-05:00",
+       "modificadas": 0,
+       "huellas_estado": 411,
+       "marca_anterior": "1969-12-31T19:00:00-05:00",
+       "duplicadas_llave": 0,
+       "repetidas_solape": 0,
+       "descartadas_marca_ruta": 0
+      },
+      "CRA 54": {
+       "leidas": 938,
+       "nuevas": 938,
+       "tardias": 0,
+       "entregadas": 938,
+       "marca_nueva": "2026-08-14T00:52:39.363697-05:00",
+       "modificadas": 0,
+       "huellas_estado": 436,
+       "marca_anterior": "1969-12-31T19:00:00-05:00",
+       "duplicadas_llave": 0,
+       "repetidas_solape": 0,
+       "descartadas_marca_ruta": 0
+      },
+      "SILENCIO": {
+       "leidas": 913,
+       "nuevas": 913,
+       "tardias": 0,
+       "entregadas": 913,
+       "marca_nueva": "2026-08-14T00:52:39.363697-05:00",
+       "modificadas": 0,
+       "huellas_estado": 415,
+       "marca_anterior": "1969-12-31T19:00:00-05:00",
+       "duplicadas_llave": 0,
+       "repetidas_solape": 0,
+       "descartadas_marca_ruta": 0
+      }
+     },
      "tabla": "demanda_segmentos",
      "leidas": 2757,
      "nuevas": 2757,
+     "proceso": "sobusa",
      "tardias": 0,
      "truncada": false,
+     "particion": [
+      "*"
+     ],
      "entregadas": 2757,
      "solape_min": 15,
      "marca_nueva": "2026-08-14T00:52:39.363697-05:00",
@@ -41,12 +94,13 @@
      "huellas_estado": 1262,
      "marca_anterior": "1969-12-31T19:00:00-05:00",
      "duplicadas_llave": 0,
-     "repetidas_solape": 0
+     "repetidas_solape": 0,
+     "descartadas_marca_ruta": 0
     },
     "incorporadas_historico": 2757,
     "predicciones": 9,
     "recomendaciones": 9,
-    "alertas_nuevas": 13,
+    "alertas_nuevas": 45,
     "nota": null,
     "errores_calidad": {},
     "fallos": [],
@@ -55,27 +109,73 @@
    {
     "corrida": "2_despues_de_la_llegada",
     "http": 202,
-    "segundos": 17.99,
+    "segundos": 12.68,
     "estado": "ok",
     "filas_leidas": 1,
     "filas_validas": 1,
     "marca_agua_anterior": "2026-08-14T00:52:39.363697-05:00",
-    "marca_agua_nueva": "2026-11-09T06:31:59.366894-05:00",
+    "marca_agua_nueva": "2026-11-11T05:14:35.674085-05:00",
     "lectura": {
      "desde": "2026-08-14T00:37:39.363697-05:00",
+     "rutas": {
+      "CL 72": {
+       "leidas": 411,
+       "nuevas": 0,
+       "tardias": 0,
+       "entregadas": 0,
+       "marca_nueva": "2026-08-14T00:52:39.363697-05:00",
+       "modificadas": 0,
+       "huellas_estado": 411,
+       "marca_anterior": "2026-08-14T00:52:39.363697-05:00",
+       "duplicadas_llave": 0,
+       "repetidas_solape": 411,
+       "descartadas_marca_ruta": 0
+      },
+      "CRA 54": {
+       "leidas": 436,
+       "nuevas": 0,
+       "tardias": 0,
+       "entregadas": 0,
+       "marca_nueva": "2026-08-14T00:52:39.363697-05:00",
+       "modificadas": 0,
+       "huellas_estado": 436,
+       "marca_anterior": "2026-08-14T00:52:39.363697-05:00",
+       "duplicadas_llave": 0,
+       "repetidas_solape": 436,
+       "descartadas_marca_ruta": 0
+      },
+      "SILENCIO": {
+       "leidas": 416,
+       "nuevas": 1,
+       "tardias": 0,
+       "entregadas": 1,
+       "marca_nueva": "2026-11-11T05:14:35.674085-05:00",
+       "modificadas": 0,
+       "huellas_estado": 1,
+       "marca_anterior": "2026-08-14T00:52:39.363697-05:00",
+       "duplicadas_llave": 0,
+       "repetidas_solape": 415,
+       "descartadas_marca_ruta": 0
+      }
+     },
      "tabla": "demanda_segmentos",
      "leidas": 1263,
      "nuevas": 1,
+     "proceso": "sobusa",
      "tardias": 0,
      "truncada": false,
+     "particion": [
+      "*"
+     ],
      "entregadas": 1,
      "solape_min": 15,
-     "marca_nueva": "2026-11-09T06:31:59.366894-05:00",
+     "marca_nueva": "2026-11-11T05:14:35.674085-05:00",
      "modificadas": 0,
-     "huellas_estado": 1,
+     "huellas_estado": 848,
      "marca_anterior": "2026-08-14T00:52:39.363697-05:00",
      "duplicadas_llave": 0,
-     "repetidas_solape": 1262
+     "repetidas_solape": 1262,
+     "descartadas_marca_ruta": 0
     },
     "incorporadas_historico": 1,
     "predicciones": 9,
@@ -91,27 +191,69 @@
    {
     "corrida": "3_sin_datos_nuevos",
     "http": 202,
-    "segundos": 2.33,
+    "segundos": 1.82,
     "estado": "ok",
     "filas_leidas": 0,
     "filas_validas": 0,
-    "marca_agua_anterior": "2026-11-09T06:31:59.366894-05:00",
-    "marca_agua_nueva": "2026-11-09T06:31:59.366894-05:00",
+    "marca_agua_anterior": "2026-11-11T05:14:35.674085-05:00",
+    "marca_agua_nueva": "2026-11-11T05:14:35.674085-05:00",
     "lectura": {
-     "desde": "2026-11-09T06:16:59.366894-05:00",
+     "desde": "2026-11-11T04:59:35.674085-05:00",
+     "rutas": {
+      "CL 72": {
+       "leidas": 0,
+       "nuevas": 0,
+       "tardias": 0,
+       "entregadas": 0,
+       "marca_nueva": "2026-11-11T05:14:35.674085-05:00",
+       "modificadas": 0,
+       "marca_anterior": "2026-11-11T05:14:35.674085-05:00",
+       "repetidas_solape": 0,
+       "descartadas_marca_ruta": 0
+      },
+      "CRA 54": {
+       "leidas": 0,
+       "nuevas": 0,
+       "tardias": 0,
+       "entregadas": 0,
+       "marca_nueva": "2026-11-11T05:14:35.674085-05:00",
+       "modificadas": 0,
+       "marca_anterior": "2026-11-11T05:14:35.674085-05:00",
+       "repetidas_solape": 0,
+       "descartadas_marca_ruta": 0
+      },
+      "SILENCIO": {
+       "leidas": 1,
+       "nuevas": 0,
+       "tardias": 0,
+       "entregadas": 0,
+       "marca_nueva": "2026-11-11T05:14:35.674085-05:00",
+       "modificadas": 0,
+       "huellas_estado": 1,
+       "marca_anterior": "2026-11-11T05:14:35.674085-05:00",
+       "duplicadas_llave": 0,
+       "repetidas_solape": 1,
+       "descartadas_marca_ruta": 0
+      }
+     },
      "tabla": "demanda_segmentos",
      "leidas": 1,
      "nuevas": 0,
+     "proceso": "sobusa",
      "tardias": 0,
      "truncada": false,
+     "particion": [
+      "*"
+     ],
      "entregadas": 0,
      "solape_min": 15,
-     "marca_nueva": "2026-11-09T06:31:59.366894-05:00",
+     "marca_nueva": "2026-11-11T05:14:35.674085-05:00",
      "modificadas": 0,
      "huellas_estado": 1,
-     "marca_anterior": "2026-11-09T06:31:59.366894-05:00",
+     "marca_anterior": "2026-11-11T05:14:35.674085-05:00",
      "duplicadas_llave": 0,
-     "repetidas_solape": 1
+     "repetidas_solape": 1,
+     "descartadas_marca_ruta": 0
     },
     "incorporadas_historico": 0,
     "predicciones": 0,
@@ -129,7 +271,7 @@
   5141356,
   5141357
  ],
- "t0": "2026-11-09T06:29:49.189851-05:00",
+ "t0": "2026-11-11T05:13:25.846510-05:00",
  "antes": {
   "timbradas_segmentos": {
    "filas": 2769692,
@@ -162,20 +304,20 @@
  },
  "llegada": {
   "filas": 584,
-  "segundos": 89.6,
-  "ms_por_fila": 153.4,
+  "segundos": 28.82,
+  "ms_por_fila": 49.4,
   "por_viaje": {
    "5141355": {
     "filas": 216,
-    "segundos": 35.76
+    "segundos": 11.7
    },
    "5141356": {
     "filas": 172,
-    "segundos": 24.62
+    "segundos": 7.7
    },
    "5141357": {
     "filas": 196,
-    "segundos": 29.21
+    "segundos": 9.42
    }
   }
  },
@@ -183,22 +325,22 @@
   {
    "viaje": 5141355,
    "resultado": true,
-   "segundos": 0.682
+   "segundos": 0.247
   },
   {
    "viaje": 5141356,
    "resultado": true,
-   "segundos": 0.548
+   "segundos": 0.206
   },
   {
    "viaje": 5141357,
    "resultado": true,
-   "segundos": 0.517
+   "segundos": 0.208
   }
  ],
  "consolidacion": {
   "resultado": true,
-  "segundos": 0.664,
+  "segundos": 0.336,
   "filas": 10731,
   "reselladas_misma_huella": 2779,
   "cambiadas_contenido": 7952,
@@ -211,16 +353,16 @@
   "nuevas": 0,
   "repetidas_solape": 2779,
   "marca_anterior": "2026-08-14T11:29:05.057003-05:00",
-  "marca_nueva": "2026-11-09T06:32:30.669494-05:00"
+  "marca_nueva": "2026-11-11T05:14:46.055406-05:00"
  },
  "despues": {
   "timbradas_segmentos": {
    "filas": 2769920,
-   "max_marca": "2026-11-09T06:31:59.366894"
+   "max_marca": "2026-11-11T05:14:35.674085"
   },
   "timbradas_anio": {
    "filas": 30913,
-   "max_marca": "2026-11-09T06:32:29.815787"
+   "max_marca": "2026-11-11T05:14:45.549296"
   },
   "timbradas_anio_zonas": {
    "filas": 0,
@@ -228,7 +370,7 @@
   },
   "timbradas_consolidado": {
    "filas": 10731,
-   "max_marca": "2026-11-09T06:32:30.669494"
+   "max_marca": "2026-11-11T05:14:46.055406"
   },
   "timbradas_consolidado_zonas": {
    "filas": 0,
@@ -236,11 +378,11 @@
   },
   "timbradas_segmentos_anio": {
    "filas": 162,
-   "max_marca": "2026-11-09T06:32:29.815787"
+   "max_marca": "2026-11-11T05:14:45.549296"
   },
   "timbradas_segmentos_consolidado": {
    "filas": 162,
-   "max_marca": "2026-11-09T06:32:30.669494"
+   "max_marca": "2026-11-11T05:14:46.055406"
   }
  },
  "filas_con_marca_posterior_a_t0": {
@@ -272,7 +414,7 @@
     "tardias": 0,
     "modificadas": 0,
     "repetidas_solape": 0,
-    "marca_nueva": "2026-11-09T06:31:59.366894-05:00"
+    "marca_nueva": "2026-11-11T05:14:35.674085-05:00"
    },
    "segunda": {
     "leidas": 1,
@@ -288,7 +430,7 @@
     "tardias": 0,
     "modificadas": 0,
     "repetidas_solape": 0,
-    "marca_nueva": "2026-11-09T06:31:59.366894-05:00"
+    "marca_nueva": "2026-11-11T05:14:35.674085-05:00"
    },
    "segunda": {
     "leidas": 228,
@@ -304,7 +446,7 @@
     "tardias": 0,
     "modificadas": 0,
     "repetidas_solape": 0,
-    "marca_nueva": "2026-11-09T06:32:29.815787-05:00"
+    "marca_nueva": "2026-11-11T05:14:45.549296-05:00"
    },
    "segunda": {
     "leidas": 2,
@@ -320,7 +462,7 @@
     "tardias": 0,
     "modificadas": 0,
     "repetidas_solape": 0,
-    "marca_nueva": "2026-11-09T06:32:30.669494-05:00"
+    "marca_nueva": "2026-11-11T05:14:46.055406-05:00"
    },
    "segunda": {
     "leidas": 10731,
@@ -336,7 +478,7 @@
     "tardias": 0,
     "modificadas": 0,
     "repetidas_solape": 0,
-    "marca_nueva": "2026-11-09T06:32:29.815787-05:00"
+    "marca_nueva": "2026-11-11T05:14:45.549296-05:00"
    },
    "segunda": {
     "leidas": 162,
@@ -352,7 +494,7 @@
     "tardias": 0,
     "modificadas": 0,
     "repetidas_solape": 0,
-    "marca_nueva": "2026-11-09T06:32:30.669494-05:00"
+    "marca_nueva": "2026-11-11T05:14:46.055406-05:00"
    },
    "segunda": {
     "leidas": 162,
@@ -362,7 +504,7 @@
   }
  },
  "tablas_de_escritor_ia_por_esquema": {
-  "ai_frecuencias": 17
+  "ai_frecuencias": 24
  },
  "restauracion": {
   "timbradas_segmentos_borradas": 228,

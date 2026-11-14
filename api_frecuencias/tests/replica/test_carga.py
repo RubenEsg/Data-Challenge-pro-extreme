@@ -2,12 +2,16 @@
 from __future__ import annotations
 
 import json
+import os
+from pathlib import Path
 
 import pytest
 
 from scripts import replica_comun as rc
 
-DATOS = rc.RAIZ.parents[1] / "datos"
+# las exportaciones del reto con que se cargó la réplica: REPLICA_DATOS_DIR (la misma regla que
+# scripts/replica_cargar.py; p. ej. desde un worktree, que no tiene datos/) o la carpeta datos/ del proyecto
+DATOS = Path(os.environ.get("REPLICA_DATOS_DIR") or rc.RAIZ.parents[1] / "datos")
 
 
 def _exportacion() -> dict:

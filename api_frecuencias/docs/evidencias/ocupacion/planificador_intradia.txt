@@ -1,0 +1,55 @@
+§10.1 · ciclo intradía PROGRAMADO con la ocupación actual (2026-11-13 20:44:08, Windows 11, PostgreSQL local)
+Base local desechable ai_frecuencias_pruebas_ev_arreglos_intradia, migrada desde cero; datos en una copia temporal. Planificador real (APScheduler) y cola real (TRABAJADORES=1): ninguna ejecución se crea con POST. Día comprimido: cada minuto real es la hora siguiente del 2025-10-22 desde las 8:05, con la franja calculada con PLAN_INTRADIA_CRON por omisión «5 6-20 * * *»; cada hora llega 2 min después de cerrar.
+GET /api/v1/scheduler -> ciclo_intradia cron='5 6-20 * * *' próxima=2026-11-13T20:45:00-05:00
+
+Ciclos intradía encolados por el planificador y procesados por la cola:
+   franja 2025-10-22T08:05:00-05:00  estado=ok  filas_leidas=114  predicciones=9  recomendaciones=60  foto_variables=1176  ocupacion_segmento=22  monitoreo=0  duración=7.0 s  worker=DESKTOP-RA73BA3:34472:69fa26:t1
+      restricción del plan: aplica=True hora_cerrada=7 hora_aplica=8 salidas_minimas=12; salidas del plan a esa hora: 12
+      motivo: En la última hora cerrada (7:00) la ocupación observada del segmento crítico 34 (ida) fue 100 % en 10 viajes, con 500,0 pasajeros a bordo en ese segmento en la hora, que alcanza el umbral crítico de 90 %: las salidas de las 8:00 no pueden ser menos de las que exige esa carga.
+      recomendación de 30 min (hora 8): 9 buses/h; restricción aplicada=True sin piso=6 pedidas=12 piso=9 limitada_por_flota=True
+         fórmula: buses_minimos = ceil(500,0 / (50 × 0,85)) = 12 → acotado por la flota disponible de cada tipología y el ciclo a 9
+      recomendación de 60 min (hora 8): 9 buses/h; restricción aplicada=True sin piso=6 pedidas=12 piso=9 limitada_por_flota=True
+         fórmula: buses_minimos = ceil(500,0 / (50 × 0,85)) = 12 → acotado por la flota disponible de cada tipología y el ciclo a 9
+      recomendación de 120 min (hora 9): 6 buses/h; sin restricción en esta hora
+   franja 2025-10-22T09:05:00-05:00  estado=ok  filas_leidas=3  predicciones=9  recomendaciones=60  foto_variables=1176  ocupacion_segmento=11  monitoreo=0  duración=3.47 s  worker=DESKTOP-RA73BA3:34472:69fa26:t1
+      restricción del plan: aplica=True hora_cerrada=8 hora_aplica=9 salidas_minimas=15; salidas del plan a esa hora: 15
+      motivo: En la última hora cerrada (8:00) la ocupación observada del segmento crítico 34 (ida) fue 100 % en 12 viajes, con 600,0 pasajeros a bordo en ese segmento en la hora, que alcanza el umbral crítico de 90 %: las salidas de las 9:00 no pueden ser menos de las que exige esa carga.
+      ALT-002 observada de CL 72 abierta en este ciclo: 7:00 a 9:00, medida con segmento_critico
+      recomendación de 30 min (hora 9): 9 buses/h; restricción aplicada=True sin piso=6 pedidas=15 piso=9 limitada_por_flota=True
+         fórmula: buses_minimos = ceil(600,0 / (50 × 0,85)) = 15 → acotado por la flota disponible de cada tipología y el ciclo a 9
+      recomendación de 60 min (hora 9): 9 buses/h; restricción aplicada=True sin piso=6 pedidas=15 piso=9 limitada_por_flota=True
+         fórmula: buses_minimos = ceil(600,0 / (50 × 0,85)) = 15 → acotado por la flota disponible de cada tipología y el ciclo a 9
+      recomendación de 120 min (hora 10): 6 buses/h; sin restricción en esta hora
+   franja 2025-10-22T10:05:00-05:00  estado=ok  filas_leidas=3  predicciones=9  recomendaciones=60  foto_variables=1176  ocupacion_segmento=11  monitoreo=0  duración=3.29 s  worker=DESKTOP-RA73BA3:34472:69fa26:t1
+      restricción del plan: aplica=False hora_cerrada=9 hora_aplica=10 salidas_minimas=None; salidas del plan a esa hora: 6
+      motivo: En la última hora cerrada (9:00) la ocupación observada del segmento crítico 34 (ida) fue 50 % en 6 viajes, con 150,0 pasajeros a bordo en ese segmento en la hora, por debajo del umbral crítico de 90 %: no restringe el plan.
+      recomendación de 30 min (hora 10): 6 buses/h; sin restricción en esta hora
+      recomendación de 60 min (hora 10): 6 buses/h; sin restricción en esta hora
+      recomendación de 120 min (hora 11): 6 buses/h; sin restricción en esta hora
+   franja 2025-10-22T11:05:00-05:00  estado=ok  filas_leidas=3  predicciones=9  recomendaciones=60  foto_variables=1176  ocupacion_segmento=0  monitoreo=0  duración=3.59 s  worker=DESKTOP-RA73BA3:34472:69fa26:t1
+      restricción del plan: aplica=None hora_cerrada=None hora_aplica=None salidas_minimas=None; salidas del plan a esa hora: 6
+      motivo: None
+      recomendación de 30 min (hora 11): 6 buses/h; sin restricción en esta hora
+      recomendación de 60 min (hora 11): 6 buses/h; sin restricción en esta hora
+      recomendación de 120 min (hora 12): 6 buses/h; sin restricción en esta hora
+
+Consulta paginada GET /api/v1/recommendations (50 filas): con un ciclo en curso {"n": 60, "p50_s": 0.035, "p95_s": 0.047, "max_s": 0.057}; sin ciclo {"n": 774, "p50_s": 0.032, "p95_s": 0.037, "max_s": 0.132}
+
+   [OK] el planificador tiene el trabajo ciclo_intradia
+   [OK] una fila por franja: la segunda réplica no encoló nada
+   [OK] cada ciclo es intradía, con instante = su franja
+   [OK] todos terminaron «ok» y la cola los procesó de uno en uno
+   [OK] el primero leyó el histórico y cada siguiente solo la hora que llegó (3 rutas)
+   [OK] la ocupación actual se midió solo en horas cerradas, y cada vez la de la hora que llegó
+   [OK] 8:05: la restricción actúa a las 8 h con la ocupación de las 7 h
+   [OK] 9:05: actúa a las 9 h con la ocupación de las 8 h
+   [OK] 10:05: con la ocupación de las 9 h bajo el umbral no actúa y lo dice
+   [OK] 11:05: sin viajes medidos en la hora que llegó, el plan es el de siempre
+   [OK] el plan del día en curso no baja del piso en la hora en que actúa
+   [OK] las de 30 y 60 min de esa hora aplican la misma restricción; la de 120 min no
+   [OK] 9:05: ALT-002 del episodio de las 7 y 8 h en el segmento crítico, con la hora de las 7 que midió el ciclo de las 8:05
+   [OK] ningún ciclo intradía guardó monitoreo, leyó los consolidados ni pidió el refresco de segmentos
+   [OK] ninguna alerta observada por horas que todavía no pasaron
+   [OK] la consulta paginada con un ciclo en curso: p95 < 2 s (RNF-002) y siempre 200
+
+RESULTADO: TODO OK

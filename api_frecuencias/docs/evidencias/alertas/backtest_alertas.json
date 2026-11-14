@@ -1,5 +1,5 @@
 {
-  "generado": "2026-11-09T06:50:13-05:00",
+  "generado": "2026-11-10T10:19:40-05:00",
   "modelo": "modelo activo hgb_fv2_20250831_s42",
   "model_id": "hgb_fv2_20250831_s42",
   "data_cutoff": "2025-08-31",
@@ -10,6 +10,14 @@
   "calibracion_version": "v2",
   "calibracion": "conformal de Mondrian por bloque (calibracion_v2.json, SHA-256 dae6b1a616ee…)",
   "banda_calibrada_pct_horas": 100.0,
+  "factor_carga": {
+    "funcion": "optimizacion.factor_carga_franja, la del ciclo (alertas._factor_de_la_hora): mediana 2025 de carga crítica / abordajes por ruta × día de la semana de operación (7 = domingo o festivo) × hora, con el tipo de día como respaldo",
+    "horas_por_nivel": {
+      "dia_semana": 5468,
+      "tipo_dia": 0,
+      "sin_factor": 40
+    }
+  },
   "festivos_entre_semana": [
     "2025-10-13",
     "2025-11-03",
@@ -47,20 +55,21 @@
     "semanas_referencia": 8,
     "minimo_dias_referencia": 4,
     "pendiente_tendencia": 0.05,
-    "wape_max": 0.2
+    "wape_max": 0.2,
+    "alt003_probabilidad_minima": 0.3
   },
   "por_defecto": {
     "por_codigo": {
       "ALT-002": {
-        "alertas": 224,
-        "por_ruta_dia": 0.6914,
-        "por_dia_3_rutas": 2.074,
-        "horas_en_alerta": 583,
-        "pct_dias_especiales": 14.3,
-        "precision_proxy": 0.4107,
-        "evaluables": 224,
+        "alertas": 230,
+        "por_ruta_dia": 0.7099,
+        "por_dia_3_rutas": 2.13,
+        "horas_en_alerta": 595,
+        "pct_dias_especiales": 13.5,
+        "precision_proxy": 0.4043,
+        "evaluables": 230,
         "tasa_base": 0.1831,
-        "lift": 2.24
+        "lift": 2.21
       },
       "ALT-005": {
         "alertas": 46,
@@ -107,15 +116,20 @@
         "lift": null
       },
       "ALT-008": {
-        "alertas": 20,
-        "por_ruta_dia": 0.0617,
-        "por_dia_3_rutas": 0.185,
+        "alertas": 23,
+        "por_ruta_dia": 0.071,
+        "por_dia_3_rutas": 0.213,
         "horas_en_alerta": 0,
-        "pct_dias_especiales": 70.0,
-        "precision_proxy": 0.7,
-        "evaluables": 20,
+        "pct_dias_especiales": 65.2,
+        "precision_proxy": 0.6522,
+        "evaluables": 23,
         "tasa_base": 0.1852,
-        "lift": 3.78
+        "lift": 3.52,
+        "campos_sobre_umbral": {
+          "bajadas": 21,
+          "nro_viajes": 7,
+          "subidas": 20
+        }
       },
       "ALT-009": {
         "alertas": 0,
@@ -131,8 +145,8 @@
     },
     "dias_ruta": 324,
     "dias": 108,
-    "observadas_por_ruta_dia": 1.238,
-    "observadas_por_ruta_dia_005_009": 0.534,
+    "observadas_por_ruta_dia": 1.265,
+    "observadas_por_ruta_dia_005_009": 0.543,
     "rupturas": [
       {
         "fecha_inicio_cambio": "2025-12-08",
@@ -175,6 +189,22 @@
         "confirmada": null
       }
     ]
+  },
+  "bajadas_en_la_serie": true,
+  "alt008_sin_bajadas": {
+    "alertas": 20,
+    "por_ruta_dia": 0.0617,
+    "por_dia_3_rutas": 0.185,
+    "horas_en_alerta": 0,
+    "pct_dias_especiales": 70.0,
+    "precision_proxy": 0.7,
+    "evaluables": 20,
+    "tasa_base": 0.1852,
+    "lift": 3.78,
+    "campos_sobre_umbral": {
+      "nro_viajes": 7,
+      "subidas": 20
+    }
   },
   "detector_rupturas": {
     "parametros": {
@@ -221,7 +251,7 @@
   },
   "ejemplos": [
     {
-      "id": "b5312cd8-f80a-4b87-b59f-06319c35c10f",
+      "id": "5ca5d116-9aef-445b-843c-233a9351f5c8",
       "codigo": "ALT-002",
       "nombre": "Sobreocupación",
       "origen": "observado",
@@ -233,14 +263,14 @@
       "vehiculo": null,
       "detectada_en": "2025-09-16 06:00:00-05:00",
       "ventana_inicio": "2025-09-15 13:00:00-05:00",
-      "ventana_fin": "2025-09-15 16:00:00-05:00",
+      "ventana_fin": "2025-09-15 17:00:00-05:00",
       "horizonte_min": 0,
       "severidad": "critica",
       "estado": "nueva",
-      "observado": 1.1379,
-      "esperado": 0.8313,
+      "observado": 1.1244,
+      "esperado": 0.8215,
       "umbral": 0.9,
-      "puntaje": 0.632,
+      "puntaje": 0.625,
       "probabilidad": null,
       "metodo_puntaje": "exceso relativo de la ocupación sobre el umbral crítico; ocupación = factor de carga × pasajeros por hora / (buses/h × puestos), como en el optimizador",
       "tendencia": "sin_datos",
@@ -248,73 +278,86 @@
       "serie_reciente": [
         {
           "inicio": "2025-09-15T11:00:00-05:00",
-          "ocupacion_observada": 0.6198544,
+          "ocupacion_observada": 0.6422239999999999,
           "pasajeros": 451.0,
           "salidas_observadas": 5
         },
         {
           "inicio": "2025-09-15T12:00:00-05:00",
-          "ocupacion_observada": 0.47852999999999996,
+          "ocupacion_observada": 0.47892,
           "pasajeros": 260.0,
           "salidas_observadas": 4
         },
         {
           "inicio": "2025-09-15T13:00:00-05:00",
-          "ocupacion_observada": 0.9728896,
+          "ocupacion_observada": 0.9444519999999998,
           "pasajeros": 578.0,
           "salidas_observadas": 5
         },
         {
           "inicio": "2025-09-15T14:00:00-05:00",
-          "ocupacion_observada": 1.1379367999999999,
+          "ocupacion_observada": 1.1244324,
           "pasajeros": 637.0,
           "salidas_observadas": 5
         },
         {
           "inicio": "2025-09-15T15:00:00-05:00",
-          "ocupacion_observada": 1.0387709999999999,
+          "ocupacion_observada": 1.107438,
           "pasajeros": 487.0,
           "salidas_observadas": 4
+        },
+        {
+          "inicio": "2025-09-15T16:00:00-05:00",
+          "ocupacion_observada": 0.944824,
+          "pasajeros": 356.0,
+          "salidas_observadas": 3
         }
       ],
-      "explicacion": "La ocupación observada (113,8 %) alcanza o supera el umbral crítico (90,0 %). Esperada: 83,1 %; observada: 113,8 % (= factor de carga 0,447 × 637 pasajeros ÷ (5 salidas × 50 puestos) en 14:00-15:00).",
+      "explicacion": "La ocupación observada (112,4 %) alcanza o supera el umbral crítico (90,0 %). Esperada: 82,1 %; observada: 112,4 % (= factor de carga 0,441 × 637 pasajeros ÷ (5 salidas × 50 puestos) en 14:00-15:00).",
       "variables": {
-        "ocupacion_esperada": 0.8313403018713349,
-        "ocupacion_observada": 1.1379367999999999,
+        "ocupacion_esperada": 0.8214744183068072,
+        "ocupacion_observada": 1.1244324,
         "tipo_ocupacion": "observada",
         "demanda_prevista": null,
-        "factor_carga": 0.4466,
-        "fuente_factor_carga": "mediana 2025 de carga crítica / abordajes por ruta, tipo de día y hora",
+        "factor_carga": 0.4413,
+        "fuente_factor_carga": "mediana 2025 de carga crítica / abordajes por ruta, día de la semana de operación (ISO; 7 = domingo o festivo) y hora (insumos D5)",
         "capacidad_ofrecida": 250.0,
         "buses_hora_actual": 5,
         "capacidad": 50.0,
-        "horas_episodio": 3,
+        "horas_episodio": 4,
         "hora_pico": "2025-09-15T14:00:00-05:00",
         "pasajeros_observados": 637.0,
         "salidas_observadas": 5,
         "salidas_programadas": 6.298388207742113,
         "fuente_capacidad": "contexto (catálogo de la ruta)",
+        "metodo_ocupacion": "factor_carga",
         "ocupacion_por_hora": {
-          "13:00": 0.9729,
-          "14:00": 1.1379,
-          "15:00": 1.0388
+          "13:00": 0.9445,
+          "14:00": 1.1244,
+          "15:00": 1.1074,
+          "16:00": 0.9448
         },
-        "persistencia_horas": 2
+        "persistencia_horas": 2,
+        "identificacion_5_3": {
+          "aplica": [],
+          "motivo": "la ocupación es de la ruta en la franja (pronóstico) o en la hora con el factor de carga (observada sin la ocupación por segmento), con varios buses: no es de un viaje",
+          "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+        }
       },
       "variables_influyentes": [
         {
           "variable": "ocupacion_esperada",
-          "valor": 0.8313403018713349,
+          "valor": 0.8214744183068072,
           "fuente": "regla"
         },
         {
           "variable": "ocupacion_observada",
-          "valor": 1.1379367999999999,
+          "valor": 1.1244324,
           "fuente": "regla"
         },
         {
           "variable": "factor_carga",
-          "valor": 0.4466,
+          "valor": 0.4413,
           "fuente": "regla"
         }
       ],
@@ -327,7 +370,7 @@
       "clave_dedup": "ALT-002|CL 72|2025-09-15T13:00:00-05:00|obs"
     },
     {
-      "id": "a0b04dc2-7a6e-42e0-a1a2-d8a01495d5a3",
+      "id": "6a128095-b059-48a9-9aab-96e0c3229554",
       "codigo": "ALT-005",
       "nombre": "Caída anormal de demanda",
       "origen": "observado",
@@ -405,7 +448,12 @@
         "p10": 993.0814985385848,
         "caida_relativa": 0.3545,
         "horas_seguidas": 3,
-        "persistencia_horas": 2
+        "persistencia_horas": 2,
+        "identificacion_5_3": {
+          "aplica": [],
+          "motivo": "la regla mide la demanda agregada de la ruta en la ventana (todos sus viajes), no un viaje",
+          "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+        }
       },
       "variables_influyentes": [
         {
@@ -448,7 +496,7 @@
       "clave_dedup": "ALT-005|CL 72|2025-10-10T10:00:00-05:00|obs"
     },
     {
-      "id": "8f75175e-9afd-4a8f-8ce6-d63d38377e6e",
+      "id": "2981176a-e7d7-4529-aca7-93a8db01d322",
       "codigo": "ALT-006",
       "nombre": "Despacho ausente o tardío",
       "origen": "observado",
@@ -509,6 +557,16 @@
         "fuente_tolerancia": "threshold_config.tolerancia_despacho_min",
         "salidas_esperadas": 4.175088773559136,
         "salidas_observadas": 0.0,
+        "identificacion_5_3": {
+          "aplica": [
+            "viaje",
+            "vehiculo",
+            "conductor"
+          ],
+          "motivo": "el despacho de la ventana que no salió o salió tarde (progvehiculos): su viaje, su vehículo y el seudónimo de su conductor",
+          "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)",
+          "resultado": "fuente_sin_viajes"
+        },
         "horas_episodio": 1,
         "persistencia_horas_conteo": 2,
         "por_tiempo": true
@@ -549,7 +607,7 @@
       "clave_dedup": "ALT-006|CL 72|2025-09-17T11:00:00-05:00|obs"
     },
     {
-      "id": "2cace17d-9c9f-4890-8428-4a620d3d544e",
+      "id": "d59ef92d-a8b8-415f-9b79-f9d28ef373c7",
       "codigo": "ALT-007",
       "nombre": "Desviación del pronóstico",
       "origen": "observado",
@@ -602,7 +660,12 @@
         "error_relativo": 0.4262,
         "sentido_desviacion": "-",
         "horas_seguidas": 2,
-        "persistencia_horas": 2
+        "persistencia_horas": 2,
+        "identificacion_5_3": {
+          "aplica": [],
+          "motivo": "la regla mide la demanda agregada de la ruta en la ventana (todos sus viajes), no un viaje",
+          "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+        }
       },
       "variables_influyentes": [
         {
@@ -640,7 +703,7 @@
       "clave_dedup": "ALT-007|CL 72|2025-09-18T04:00:00-05:00|obs"
     },
     {
-      "id": "523a6dd4-2012-4fd6-b3e7-c338d81a6b63",
+      "id": "ac39c786-2058-49bd-b7a6-a87d8534d037",
       "codigo": "ALT-007",
       "nombre": "Desviación del pronóstico",
       "origen": "observado",
@@ -752,7 +815,12 @@
         "referencia_centro": -0.0099,
         "referencia_escala": 0.0273,
         "referencia_dias": 28,
-        "cambio_minimo": 0.08
+        "cambio_minimo": 0.08,
+        "identificacion_5_3": {
+          "aplica": [],
+          "motivo": "la regla mide la demanda agregada de la ruta en la ventana (todos sus viajes), no un viaje",
+          "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+        }
       },
       "variables_influyentes": [
         {
@@ -770,7 +838,7 @@
       "clave_dedup": "ALT-007|CRA 54|2025-12-08T00:00:00-05:00|ruptura"
     },
     {
-      "id": "799defc2-be1a-4b31-9a82-6c41ca441906",
+      "id": "4ba4720e-625b-4dcb-9779-d4e014f93011",
       "codigo": "ALT-008",
       "nombre": "Consolidado anómalo",
       "origen": "observado",
@@ -800,12 +868,18 @@
         "campo": "subidas",
         "z_maximo": -3.701,
         "subidas": 5829.0,
-        "bajadas": null,
+        "bajadas": 5826.0,
         "nro_viajes": 78.0,
+        "identificacion_5_3": {
+          "aplica": [],
+          "motivo": "consolidado diario de la ruta (subidas, bajadas y número de viajes del día), no un viaje",
+          "sentido": "no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9)"
+        },
         "umbral_z": 3.5,
         "z_por_campo": {
           "subidas": -3.701,
-          "nro_viajes": -1.518
+          "nro_viajes": -1.518,
+          "bajadas": -3.394
         },
         "referencia_mediana_escala": {
           "subidas": [
@@ -815,6 +889,10 @@
           "nro_viajes": [
             87.0,
             5.93
+          ],
+          "bajadas": [
+            7587.0,
+            518.91
           ]
         },
         "fecha": "2025-10-10"
@@ -828,6 +906,11 @@
         {
           "variable": "subidas",
           "valor": 5829.0,
+          "fuente": "regla"
+        },
+        {
+          "variable": "bajadas",
+          "valor": 5826.0,
           "fuente": "regla"
         },
         {
@@ -854,15 +937,15 @@
     },
     "por_codigo": {
       "ALT-002": {
-        "alertas": 224,
-        "por_ruta_dia": 0.6914,
-        "por_dia_3_rutas": 2.074,
-        "horas_en_alerta": 583,
-        "pct_dias_especiales": 14.3,
-        "precision_proxy": 0.4107,
-        "evaluables": 224,
+        "alertas": 230,
+        "por_ruta_dia": 0.7099,
+        "por_dia_3_rutas": 2.13,
+        "horas_en_alerta": 595,
+        "pct_dias_especiales": 13.5,
+        "precision_proxy": 0.4043,
+        "evaluables": 230,
         "tasa_base": 0.1831,
-        "lift": 2.24
+        "lift": 2.21
       },
       "ALT-005": {
         "alertas": 420,
@@ -909,15 +992,20 @@
         "lift": null
       },
       "ALT-008": {
-        "alertas": 32,
-        "por_ruta_dia": 0.0988,
-        "por_dia_3_rutas": 0.296,
+        "alertas": 34,
+        "por_ruta_dia": 0.1049,
+        "por_dia_3_rutas": 0.315,
         "horas_en_alerta": 0,
-        "pct_dias_especiales": 53.1,
-        "precision_proxy": 0.5312,
-        "evaluables": 32,
+        "pct_dias_especiales": 50.0,
+        "precision_proxy": 0.5,
+        "evaluables": 34,
         "tasa_base": 0.1852,
-        "lift": 2.87
+        "lift": 2.7,
+        "campos_sobre_umbral": {
+          "bajadas": 29,
+          "nro_viajes": 16,
+          "subidas": 27
+        }
       },
       "ALT-009": {
         "alertas": 0,
@@ -933,8 +1021,8 @@
     },
     "dias_ruta": 324,
     "dias": 108,
-    "observadas_por_ruta_dia": 6.781,
-    "observadas_por_ruta_dia_005_009": 6.077,
+    "observadas_por_ruta_dia": 6.806,
+    "observadas_por_ruta_dia_005_009": 6.083,
     "rupturas": [
       {
         "fecha_inicio_cambio": "2025-12-08",
@@ -981,9 +1069,9 @@
   "sensibilidad": {
     "persistencia_horas=1": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 1.0679,
@@ -1006,16 +1094,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "persistencia_horas=2": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1038,16 +1126,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "persistencia_horas=3": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.0432,
@@ -1070,16 +1158,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "persistencia_ocupacion_horas=1": {
       "ALT-002": {
-        "por_ruta_dia": 1.6142,
-        "precision_proxy": 0.4283,
-        "lift": 2.34
+        "por_ruta_dia": 1.5957,
+        "precision_proxy": 0.4449,
+        "lift": 2.43
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1102,16 +1190,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "persistencia_ocupacion_horas=2": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1134,16 +1222,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "persistencia_ocupacion_horas=3": {
       "ALT-002": {
-        "por_ruta_dia": 0.284,
-        "precision_proxy": 0.413,
-        "lift": 2.26
+        "por_ruta_dia": 0.287,
+        "precision_proxy": 0.4086,
+        "lift": 2.23
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1166,16 +1254,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "ruptura_h=4.0": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1198,16 +1286,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "ruptura_h=5.0": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1230,16 +1318,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "ruptura_h=6.0": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1262,16 +1350,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "ruptura_cambio_minimo=0.05": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1294,16 +1382,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "ruptura_cambio_minimo=0.08": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1326,16 +1414,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "alt005_exigir_p10=0": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.1883,
@@ -1358,16 +1446,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "alt005_exigir_p10=1": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1390,16 +1478,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "caida_demanda=0.2": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.2377,
@@ -1422,16 +1510,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "caida_demanda=0.3": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1454,16 +1542,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "caida_demanda=0.4": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.0741,
@@ -1486,16 +1574,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "error_pronostico=0.15": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1518,16 +1606,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "error_pronostico=0.25": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1550,16 +1638,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "tolerancia_salidas=0.2": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1582,16 +1670,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "tolerancia_salidas=0.35": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1614,16 +1702,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "tolerancia_salidas=0.5": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1646,16 +1734,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "z_anomalia=3.0": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1678,16 +1766,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0988,
-        "precision_proxy": 0.5312,
-        "lift": 2.87
+        "por_ruta_dia": 0.1049,
+        "precision_proxy": 0.5,
+        "lift": 2.7
       }
     },
     "z_anomalia=3.5": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1710,16 +1798,16 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0617,
-        "precision_proxy": 0.7,
-        "lift": 3.78
+        "por_ruta_dia": 0.071,
+        "precision_proxy": 0.6522,
+        "lift": 3.52
       }
     },
     "z_anomalia=4.0": {
       "ALT-002": {
-        "por_ruta_dia": 0.6914,
-        "precision_proxy": 0.4107,
-        "lift": 2.24
+        "por_ruta_dia": 0.7099,
+        "precision_proxy": 0.4043,
+        "lift": 2.21
       },
       "ALT-005": {
         "por_ruta_dia": 0.142,
@@ -1742,13 +1830,13 @@
         "lift": null
       },
       "ALT-008": {
-        "por_ruta_dia": 0.0432,
-        "precision_proxy": 0.8571,
-        "lift": 4.63
+        "por_ruta_dia": 0.0494,
+        "precision_proxy": 0.8125,
+        "lift": 4.39
       }
     }
   },
-  "duracion_s": 10.0,
+  "duracion_s": 10.3,
   "antes_del_cambio": {
     "generado": "2026-11-09T02:07:46-05:00",
     "calibracion_version": "v1",

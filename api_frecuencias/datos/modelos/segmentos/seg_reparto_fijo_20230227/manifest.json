@@ -1,0 +1,111 @@
+{
+  "model_id": "seg_reparto_fijo_20230227",
+  "tipo": "reparto_fijo",
+  "candidato": "B0",
+  "algoritmo": "reparto fijo B0: fracción histórica de subidas por ruta, tipo de día y hora",
+  "periodo_datos": "2023-01-01 a 2023-02-27",
+  "entrenado_con": "los 56 días con datos (reentrenado con la configuración elegida en la validación)",
+  "semilla": 42,
+  "hiperparametros": null,
+  "hiperparametros_sentido": null,
+  "variables": [
+    "ruta_cod",
+    "nro_segmento",
+    "pos_rel",
+    "sentido_cod",
+    "hora",
+    "tipo_dia",
+    "dia_semana",
+    "festivo",
+    "vacaciones",
+    "carnaval",
+    "log_fraccion_base",
+    "log_subidas_celda"
+  ],
+  "variables_sentido": null,
+  "min_subidas": 200,
+  "dias_pliegue": 7,
+  "particion_evaluacion": {
+    "entrenamiento": "2023-01-01 a 2023-02-08",
+    "validacion": "2023-02-09 a 2023-02-17",
+    "prueba": "2023-02-18 a 2023-02-27"
+  },
+  "regla_eleccion": {
+    "bootstrap_replicas": 1000,
+    "semilla": 42,
+    "nivel_ic": 0.95,
+    "tolerancia_wape_sentido_pp": 0.25,
+    "texto": "elegible si mejora el WAPE por segmento y hora de B0 con el IC95 bootstrap por días de la validación por debajo de 0 y no empeora el WAPE por sentido y hora en más de 0,25 pp; gana el elegible de menor WAPE; sin elegibles sigue B0. Salvaguarda: si el elegido es peor que B0 en la prueba, no se activa."
+  },
+  "eleccion": {
+    "elegido": "M4",
+    "detalle": {
+      "M1": {
+        "mejora_significativa": false,
+        "sentido_no_empeora": false,
+        "elegible": false,
+        "wape_segmento_hora": 37.25
+      },
+      "M2": {
+        "mejora_significativa": true,
+        "sentido_no_empeora": false,
+        "elegible": false,
+        "wape_segmento_hora": 36.93
+      },
+      "M3": {
+        "mejora_significativa": true,
+        "sentido_no_empeora": true,
+        "elegible": true,
+        "wape_segmento_hora": 36.83
+      },
+      "M4": {
+        "mejora_significativa": true,
+        "sentido_no_empeora": true,
+        "elegible": true,
+        "wape_segmento_hora": 36.8
+      }
+    },
+    "regla": "elegible si mejora el WAPE por segmento y hora de B0 con el IC95 bootstrap por días de la validación por debajo de 0 y no empeora el WAPE por sentido y hora en más de 0,25 pp; gana el elegible de menor WAPE; sin elegibles sigue B0. Salvaguarda: si el elegido es peor que B0 en la prueba, no se activa."
+  },
+  "metricas_validacion": {
+    "wape_segmento_hora": 38.06,
+    "wape_sentido_hora": 8.47,
+    "mae_segmento_hora": 2.872,
+    "sesgo_pct": 0.0,
+    "sesgo_abs_mediano_pct": 8.74
+  },
+  "metricas_prueba": {
+    "wape_segmento_hora": 43.06,
+    "wape_sentido_hora": 8.2,
+    "mae_segmento_hora": 2.549,
+    "sesgo_pct": 0.0,
+    "sesgo_abs_mediano_pct": 7.98
+  },
+  "banda": {
+    "metodo": "conformal de Mondrian por tramo de μ = T·f, puntaje (y − μ)/√(μ + 1), cuantiles 10 % y 90 % con corrección de muestra finita; compuesta en cuadratura con la banda P10-P90 de la ruta",
+    "ajustada_con": "validación 2023-02-09 a 2023-02-17",
+    "cobertura_prueba_pct": 78.48,
+    "cobertura_prueba_sentido_pct": 80.75,
+    "cobertura_prueba_b2_pct": 72.53,
+    "cobertura_prueba_b2_sentido_pct": 53.78,
+    "cobertura_compuesta_ruta_activa_pct": null,
+    "cobertura_compuesta_ruta_activa_sentido_pct": null
+  },
+  "version_datos": {
+    "archivo": "datos/subidas_segmento_hora.parquet",
+    "sha256": "b37c7238ffc3913313022246ce96f336bff906022862af521e32ed9883466a56",
+    "filas": 341820,
+    "subidas": 2263584
+  },
+  "codigo_sha256": {
+    "modelo_segmentos.py": "c9fc70230ad964a90e3360765c2d9d28b6b1a9f01f738757ad54347741f513eb",
+    "entrenar_segmentos.py": "4a69039d9532ecd90544a51190294a4906a47333c4bd95bc03232c8e484cc3e6",
+    "modelo_segmentos.py_sin_docstring": "bbfcfea06aa8d0c4cd91d96d7b16be055f946a01fb7e213e909d7f1f6fffde85"
+  },
+  "codigo_normalizacion": "texto UTF-8 con fin de línea LF (CRLF y CR pasan a LF antes del SHA-256)",
+  "creado_en": "2026-11-10T01:23:23+00:00",
+  "evaluacion": "docs/evidencias/modelo/segmentos_modelo.md",
+  "artefacto": "modelo.joblib",
+  "sha256": "ba87bf110a1ed37dc493b4b2689b6da34583eac9782a4420ae441c33b7e97969",
+  "feature_version": "sv1-2026-11-09"
+}

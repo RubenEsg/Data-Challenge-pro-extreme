@@ -1,0 +1,122 @@
+Revisión independiente del paquete «gobierno de parámetros» (2026-11-09, rama worktree-wf_bac12927-91e-3, sobre el
+commit 95a6447). Base local de pruebas ai_frecuencias_pruebas_gobierno_parametros_rev en 127.0.0.1:5433; la réplica
+no se modificó. Desde EntregaFinal/api_frecuencias, con el venv del proyecto. Se encontraron dos defectos. Los dos se
+reprodujeron, se corrigieron y quedaron cubiertos por pruebas.
+
+======================================================================================================================
+1. Dos cambios simultáneos del conjunto gobernado (§5.1 «se versionan»)
+======================================================================================================================
+Dónde: app/servicios/catalogos.py (versionar_ajustes, usado por PUT /catalogos/capacidad y PUT /catalogos/flota) y
+app/servicios/ejecucion.py (nueva_version_umbrales, usado por PUT /thresholds).
+
+Reproducción: dos sesiones en dos hilos. El primer ajuste (flota_override.16.LABORAL = 40) espera 1,5 s antes del
+commit, y el segundo (ciclo_override.16.LABORAL.7 = 150) arranca 0,5 s después.
+
+  Antes de la corrección:
+    versión vigente 6 con 61 parámetros -> versión vigente 8 con 1 parámetro: {'ciclo_override.16.LABORAL.7': 150}
+    Los 61 umbrales dejaron de regir. PUT /thresholds tampoco podía restituirlos: «Parámetros desconocidos:
+    ocupacion_critica», porque solo acepta nombres vigentes o conocidos por el código.
+    Causa: el FOR UPDATE del segundo espera al primero y, en READ COMMITTED, al despertar vuelve a evaluar las filas.
+    Esas filas ya tienen vigente = false, y las filas nuevas del primero no están en la foto de esa consulta, así que
+    el segundo lee un conjunto vacío.
+    Con un PUT /thresholds simultáneo (sin FOR UPDATE), los dos cambios calculan el mismo número de versión. El segundo
+    choca con UNIQUE (nombre, version) y responde 500.
+
+  Después de la corrección:
+    versión vigente 8 con 63 parámetros: los 61 anteriores más los dos ajustes, en una sola versión vigente.
+
+Corrección: ejecucion.bloquear_umbrales ejecuta
+SELECT pg_advisory_xact_lock(hashtext('ai_frecuencias.threshold_config')) antes de leer la versión vigente, en
+nueva_version_umbrales y en catalogos.versionar_ajustes. El candado se suelta con el commit o el rollback.
+
+Prueba: tests/integracion/test_gobierno_parametros.py::test_dos_cambios_simultaneos_del_conjunto_gobernado_no_pierden_parametros
+Cubre dos ajustes simultáneos y un ajuste simultáneo con PUT /thresholds, y comprueba que el conjunto se restituye al
+final. Sin el candado (bloquear_umbrales anulado con monkeypatch), falla porque la versión vigente queda con
+{'ciclo_override.16.LABORAL.7': 150}.
+
+======================================================================================================================
+2. Suavidad gobernada válida pero sin solución (§5.1 «se modifican sin recompilar», §10.2)
+======================================================================================================================
+Dónde: app/servicios/optimizacion.py (_resolver_plan, validar_parametros_plan).
+
+Con la suavidad de D5 (delta 6 desde las 7 h), el MILP del plan siempre tiene solución, porque la flota tiene
+holgura. Una suavidad gobernada que la validación aceptaba podía dejarlo sin solución.
+
+Escaneo con los parámetros por omisión, salvo el indicado: plan_dia con pronostico=E12 en los 1.095 pares (día de
+2025, ruta) y con el modelo activo en 9 pares (ruta, tipo de día), con el código anterior a la corrección:
+  suavidad de D5 (7 h, delta 6)   E12: 1.095 Optimal              activo: 9 Optimal
+  hora_inicio_suavidad = 6        E12: 1.095 Optimal              activo: 9 Optimal
+  hora_inicio_suavidad = 5        E12: 68 fallas, 1.027 Optimal   activo: 1 falla (SILENCIO, domingo), 8 Optimal
+    Las fallas son un ValueError dentro del motor, que busca un nivel de salidas que no existe; en SILENCIO el
+    2025-11-16 fue «np.int64(334) is not in list». A las 4 h de ese domingo SILENCIO opera 0,18 min, así que una
+    salida equivale a 333 salidas por hora, y la transición 4 -> 5 h no tiene solución entera.
+    hora_inicio_suavidad = 4 equivale a 5, porque la hora 4 no tiene hora anterior.
+  delta_suavidad = 0,05 (SILENCIO, domingo 2025-11-16)
+    estado «Infeasible», horas no viables 13 a 19 y el resto marcadas viables: se entregaba y se persistía.
+  delta_suavidad = 0,05 y hora_inicio_suavidad = 5 (CRA 54, mismo domingo)
+    estado «Infeasible», viable = true, sin horas no viables: un plan infactible que se presentaba como válido.
+
+Después de la corrección:
+  SILENCIO 2025-11-16 {'hora_inicio_suavidad': 5}: ValueError: El MILP del plan del día terminó en «Infeasible», sin
+    un plan factible: con la suavidad gobernada (delta_suavidad = 6,00 salidas/h entre dos horas seguidas desde las 5
+    h) y los límites de headway de cada hora no hay un número entero de salidas que los cumpla. Revise esos parámetros
+    en threshold_config (PUT /api/v1/thresholds).
+  SILENCIO 2025-11-16 {'delta_suavidad': 0.05}: ValueError con el mismo texto (delta_suavidad = 0,05 ... desde las 7 h).
+  CRA 54 2025-11-16 {'delta_suavidad': 0.05, 'hora_inicio_suavidad': 5}: ValueError con el mismo texto.
+  SILENCIO 2025-11-16 con la suavidad de D5: estado Optimal, viable True, 98 salidas en el día.
+  validar_parametros_plan(hora_inicio_suavidad = 4 o 5): «hora_inicio_suavidad debe ser un entero de 6 a 21».
+    PUT /thresholds responde 422 umbral_invalido.
+
+Corrección:
+  _resolver_d5 resuelve con motor_d5.milp.resolver_dia, la misma formulación de resolver_dia_detalle sin los
+    componentes, que el plan calcula aparte. La copia vendorizada no cambia. Si el solver no llega al óptimo, lanza un
+    ValueError que nombra los parámetros: el ciclo diario lo registra como advertencia de la ruta, GET
+    /recommendations/plan responde 404 y la respuesta del reto queda «sin datos». Nunca se persiste un plan
+    infactible.
+  hora_inicio_suavidad se valida de 6 a 21.
+  Un delta pequeño sigue siendo válido (> 0). Si deja un día sin solución, el error aparece al calcular ese plan, no
+    en el PUT: no hay una comprobación de factibilidad al versionar.
+
+Pruebas:
+  tests/unit/test_gobierno_parametros.py::test_una_suavidad_gobernada_sin_solucion_no_entrega_un_plan
+  tests/unit/test_gobierno_parametros.py::test_parametros_del_plan_invalidos (casos 4 y 5)
+  tests/integracion/test_gobierno_parametros.py::test_put_thresholds_cambia_tarifa_elasticidad_y_suavidad_y_el_siguiente_plan_los_usa
+    (PUT con hora_inicio_suavidad = 5 -> 422 umbral_invalido)
+
+======================================================================================================================
+3. Ajuste menor del contrato
+======================================================================================================================
+GET /catalogos/rutas sigue trayendo flota y tiempo_ciclo_min del catálogo empaquetado (día laboral de D1), también
+después de un PUT /catalogos/flota. Ahora el esquema lo dice y remite a GET /catalogos/flota y a flota_y_ciclo del
+detalle, donde está la vista vigente. docs/openapi.json se regeneró: «OpenAPI sin deriva (61 rutas)».
+
+Comprobación de solo lectura en la réplica local (rol lector_ia, SET TRANSACTION READ ONLY):
+rutas.frecuenciadespachos = '5' en las rutas 2, 16 y 21, el mismo valor del catálogo empaquetado.
+
+======================================================================================================================
+Corrida final de la revisión (código del commit 35198b2; los commits siguientes solo agregan esta evidencia)
+======================================================================================================================
+TEST_DATABASE_NAME=ai_frecuencias_pruebas_gobierno_parametros_rev, SCHEMATHESIS_EJEMPLOS=3. La cobertura de app/ se
+midió con las tres suites (COVERAGE_FILE fuera del repositorio).
+  python -m pytest tests/unit --cov=app
+    611 aprobadas, 0 fallas, 0 omitidas (99,1 s)
+  python -m pytest tests/integracion --cov=app --cov-append
+    110 aprobadas, 0 fallas, 4 omitidas (291,7 s). Las omitidas son las de siempre: PRUEBA_CAIDA, PRUEBA_PLANIFICADOR
+    y dos sin las exportaciones Parquet del reto.
+  python -m pytest tests/contrato --cov=app --cov-append
+    119 aprobadas y 65 subpruebas, 0 fallas (105,7 s)
+  Cobertura de líneas de app/: 93,38 % (10.858 de 11.628).
+  Compatibilidad del OpenAPI de la rama frente a docs/openapi.json de main: las seis pruebas de
+    tests/contrato/test_compatibilidad_openapi.py, con el documento de main como versionado: 6 aprobadas.
+  ruff check app scripts tests -> All checks passed!
+  bandit -r app -ll -> 0 hallazgos. bandit -r app scripts -c pyproject.toml -ll -q (paso del CI) -> código 0.
+  scripts/ci_local.py openapi -> OpenAPI sin deriva: openapi.json coincide con el generado (61 rutas).
+  scripts/verificar_despliegue.py --proyecto sobusa_gobierno_rev --puerto-api 8334 --puerto-db 8335
+    --salida <api_frecuencias>/reportes/tmp/rev_despliegue
+    Pila aislada desde cero (8,0 min): migraciones 0001 -> 0010 (head), claves por rol, demostración §14.2 con código 0
+    en 338 s, RNF-001 (SIGKILL y reinicio ordenado) OK, down -v sin restos. Resultado global: OK.
+    El script reescribe docs/evidencias/demo_ciclo.txt y requisitos_congelados.txt (en este último solo cambió la
+    cabecera, con los mismos 72 paquetes). Los dos se restauraron con git checkout: se regeneran al integrar.
+No se corrieron tests/replica, tests/datos_ml ni tests/testcontainers. En tests/replica,
+test_alembic_upgrade_head_como_escritor_ia migra la réplica compartida a head (0010) sin la guarda
+REPLICA_PRUEBAS_ESCRITURA.

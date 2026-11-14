@@ -168,7 +168,8 @@ def test_sin_replica_ni_exportaciones_cada_catalogo_responde_200_o_503_declarado
             assert "503" in doc["paths"][plantilla]["get"]["responses"], plantilla
     con_paquete = ("/api/v1/catalogos", "/api/v1/catalogos/rutas", "/api/v1/catalogos/rutas/{idruta}",
                    "/api/v1/catalogos/rutas/export", "/api/v1/catalogos/capacidad",
-                   "/api/v1/catalogos/capacidad/historial")
+                   "/api/v1/catalogos/capacidad/historial", "/api/v1/catalogos/flota",
+                   "/api/v1/catalogos/flota/historial")
     assert {p: estados[p] for p in con_paquete} == dict.fromkeys(con_paquete, 200)
     sin_exportacion = ("/api/v1/catalogos/despachos", "/api/v1/catalogos/viajes", "/api/v1/catalogos/segmentos",
                        "/api/v1/catalogos/vehiculos", "/api/v1/catalogos/procesos", "/api/v1/catalogos/empresas")
@@ -198,7 +199,7 @@ def test_replica_configurada_pero_caida_responde_503_y_no_500(cliente, monkeypat
 
 
 # ---------------------------------------------------------------- roles (§7.2)
-def test_roles_en_catalogos(auth_activa, claves_prueba):
+def test_roles_en_catalogos(auth_activa, claves_prueba, umbrales_restituidos):
     c = auth_activa
     assert c.get("/api/v1/catalogos/rutas", headers={"X-API-Key": ""}).status_code == 401
     for rol in ("operador", "analista", "admin"):
@@ -216,7 +217,10 @@ def test_roles_en_catalogos(auth_activa, claves_prueba):
 
 
 # ---------------------------------------------------------------- ajuste local versionado (§3.2, §8.3)
-def test_ajuste_de_capacidad_versionado_auditado_y_leido_por_el_optimizador(auth_activa, claves_prueba, sesion):
+def test_ajuste_de_capacidad_versionado_auditado_y_leido_por_el_optimizador(auth_activa, claves_prueba, sesion,
+                                                                            umbrales_restituidos):
+    """El retiro del final es parte de lo que se prueba (la capacidad vuelve a la del catálogo); umbrales_restituidos
+    borra después todas las versiones que creó la prueba."""
     from app.servicios import optimizacion
 
     c, admin = auth_activa, _clave(claves_prueba, "admin")

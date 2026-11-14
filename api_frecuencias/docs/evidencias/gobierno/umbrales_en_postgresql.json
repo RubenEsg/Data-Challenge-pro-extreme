@@ -1,0 +1,413 @@
+{
+ "version_vigente": 9,
+ "grupos": {
+  "alertas (alertas.UMBRALES_POR_DEFECTO)": {
+   "alt003_probabilidad_minima": {
+    "valor": 0.3,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-003: probabilidad mínima de que la carga crítica supere la capacidad efectiva de la frecuencia actual (capacidad × ocupación objetivo máxima) para alertar; 0,10 = solo el nivel de servicio 0,90 del optimizador (elegida sin fuga: scripts/variantes_alt003.py)"
+   },
+   "alt005_exigir_p10": {
+    "valor": 1,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-005: 1 = además de caer bajo (1 - caida_demanda) × patrón, la demanda real debe quedar bajo el P10 calibrado del modelo"
+   },
+   "baja_utilizacion": {
+    "valor": 0.3,
+    "creado_por": "migracion_0014",
+    "descripcion": "§5.1 Baja utilización: despacho potencialmente ineficiente (<)"
+   },
+   "caida_demanda": {
+    "valor": 0.3,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-005: caída relativa frente al patrón histórico (≥)"
+   },
+   "demanda_minima_patron": {
+    "valor": 10.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-005: no se evalúa con patrones de demanda muy bajos"
+   },
+   "error_pronostico": {
+    "valor": 0.15,
+    "creado_por": "migracion_0014",
+    "descripcion": "§5.1 Error de pronóstico: desviación relativa pronóstico vs. consolidado (≥)"
+   },
+   "escala_minima_z": {
+    "valor": 0.05,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-008: escala mínima del z robusto como fracción de la mediana (evita z enormes con MAD casi nula)"
+   },
+   "espera_max_min": {
+    "valor": 5.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "§5.1 Espera máxima objetivo (minutos)"
+   },
+   "minimo_dias_referencia": {
+    "valor": 4,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-008: días mínimos del mismo tipo en la referencia para evaluar"
+   },
+   "ocupacion_critica": {
+    "valor": 0.9,
+    "creado_por": "migracion_0014",
+    "descripcion": "§5.1 Ocupación crítica: riesgo de sobreocupación (≥)"
+   },
+   "ocupacion_objetivo_max": {
+    "valor": 0.85,
+    "creado_por": "migracion_0014",
+    "descripcion": "§5.1 Ocupación objetivo: límite superior; capacidad efectiva = capacidad × valor"
+   },
+   "ocupacion_objetivo_min": {
+    "valor": 0.65,
+    "creado_por": "migracion_0014",
+    "descripcion": "§5.1 Ocupación objetivo: límite inferior del rango deseado (fracción)"
+   },
+   "pendiente_tendencia": {
+    "valor": 0.05,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 tendencia: cambio relativo por hora a partir del cual la serie se declara al alza o a la baja"
+   },
+   "periodo_ingesta_min": {
+    "valor": 1440.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "Duración de un período de ingesta (minutos); la actualización es diaria"
+   },
+   "periodos_atraso": {
+    "valor": 2,
+    "creado_por": "migracion_0014",
+    "descripcion": "§5.1 Datos atrasados: períodos de ingesta sin recepción antes de alertar"
+   },
+   "persistencia_horas": {
+    "valor": 2,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-005/ALT-007: horas seguidas (mismo sentido) que debe sostenerse la desviación antes de alertar; backtest 2025"
+   },
+   "persistencia_ocupacion_horas": {
+    "valor": 2,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-002 observada: horas seguidas sobre la ocupación crítica (backtest)"
+   },
+   "ruptura_cambio_minimo": {
+    "valor": 0.08,
+    "creado_por": "migracion_0014",
+    "descripcion": "RF-009 ruptura: cambio medio mínimo del residuo relativo (backtest)"
+   },
+   "ruptura_dias_referencia": {
+    "valor": 28,
+    "creado_por": "migracion_0014",
+    "descripcion": "RF-009 ruptura: días de referencia para la media y la escala robustas"
+   },
+   "ruptura_dias_reinicio": {
+    "valor": 7,
+    "creado_por": "migracion_0014",
+    "descripcion": "RF-009 ruptura: días de espera tras detectar, antes de fijar el nivel nuevo"
+   },
+   "ruptura_h": {
+    "valor": 6.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "RF-009 ruptura: umbral h del CUSUM (backtest de falsas alarmas sin cambio)"
+   },
+   "ruptura_k": {
+    "valor": 0.5,
+    "creado_por": "migracion_0014",
+    "descripcion": "RF-009 ruptura: holgura k del CUSUM (en desviaciones robustas)"
+   },
+   "salidas_minimas_esperadas": {
+    "valor": 2,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-006: no se evalúa el déficit por conteo en horas con menos salidas esperadas (bordes del servicio)"
+   },
+   "salidas_minimas_ocupacion": {
+    "valor": 2,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-002 observada: salidas mínimas en la hora para medir la ocupación"
+   },
+   "semanas_referencia": {
+    "valor": 8,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-008: semanas previas que forman la referencia del mismo tipo de día"
+   },
+   "tolerancia_despacho_min": {
+    "valor": 5.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-006: minutos de tolerancia sobre el headway programado"
+   },
+   "tolerancia_salidas": {
+    "valor": 0.5,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-006: déficit relativo de salidas tolerado en una hora frente a 60 / intervalo programado; afinado con el backtest 2025 (antes 0,20)"
+   },
+   "wape_max": {
+    "valor": 0.2,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-010: WAPE móvil máximo tolerado (≈ WAPE de la regla manual B1, 20,04 %)"
+   },
+   "z_anomalia": {
+    "valor": 3.5,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-008: |z robusto| (mediana y 1,4826 × MAD del mismo tipo de día, 8 semanas previas); afinado con el backtest 2025 (antes 3,0)"
+   }
+  },
+  "monitoreo (monitoreo.UMBRALES_DEFECTO)": {
+   "cobertura_aviso": {
+    "valor": 0.75,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 cobertura P10-P90 de aviso; también es el mínimo de la compuerta de activación"
+   },
+   "cobertura_max": {
+    "valor": 0.9,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 cobertura P10-P90 máxima (banda demasiado ancha); máximo de la compuerta"
+   },
+   "cobertura_min": {
+    "valor": 0.7,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 cobertura P10-P90 mínima: por debajo el monitoreo queda en alerta"
+   },
+   "descartadas_aviso": {
+    "valor": 0.5,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 fracción de alertas descartadas de la ventana que genera aviso"
+   },
+   "descartadas_minimo": {
+    "valor": 5,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 alertas mínimas en la ventana para evaluar el porcentaje de descartadas"
+   },
+   "monitoreo_ventana_dias": {
+    "valor": 28,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 días observados de la ventana móvil del monitoreo"
+   },
+   "psi_alerta": {
+    "valor": 0.25,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 deriva: PSI de alerta (umbral efectivo = máx. con el ruido p95 de la referencia)"
+   },
+   "psi_aviso": {
+    "valor": 0.1,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 deriva: PSI a partir del cual se avisa (umbral efectivo = máx. con el ruido p50 de la referencia)"
+   },
+   "wape_aviso": {
+    "valor": 0.18,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 WAPE móvil de aviso (antes de la tolerancia wape_max de ALT-010)"
+   },
+   "wape_max": {
+    "valor": 0.2,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-010: WAPE móvil máximo tolerado (≈ WAPE de la regla manual B1, 20,04 %)"
+   }
+  },
+  "política de aprendizaje (politica.UMBRALES_DEFECTO)": {
+   "activacion_automatica": {
+    "valor": 1,
+    "creado_por": "migracion_0014",
+    "descripcion": "RF-019 1 = el retador que pasa la compuerta se activa (auditado); 0 = espera a un admin"
+   },
+   "cobertura_aviso": {
+    "valor": 0.75,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 cobertura P10-P90 de aviso; también es el mínimo de la compuerta de activación"
+   },
+   "cobertura_max": {
+    "valor": 0.9,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 cobertura P10-P90 máxima (banda demasiado ancha); máximo de la compuerta"
+   },
+   "cobertura_min": {
+    "valor": 0.7,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.4 cobertura P10-P90 mínima: por debajo el monitoreo queda en alerta"
+   },
+   "reentreno_dias_degradacion": {
+    "valor": 3,
+    "creado_por": "migracion_0014",
+    "descripcion": "RF-018 reentrenar si el WAPE móvil supera wape_max en N ejecuciones seguidas"
+   },
+   "reentreno_en_ciclo": {
+    "valor": 1,
+    "creado_por": "migracion_0014",
+    "descripcion": "RF-018 1 = el ciclo diario encola el reentrenamiento cuando la política lo decide"
+   },
+   "reentreno_periodicidad_dias": {
+    "valor": 28,
+    "creado_por": "migracion_0014",
+    "descripcion": "RF-018 reentrenar cada N días de datos nuevos (backtest: 48 días > 20 % en 2024 con el modelo congelado)"
+   },
+   "reversion_minimo_dias": {
+    "valor": 3,
+    "creado_por": "migracion_0014",
+    "descripcion": "§18 rollback: días mínimos tras la activación para evaluar la reversión"
+   },
+   "reversion_ventana_dias": {
+    "valor": 7,
+    "creado_por": "migracion_0014",
+    "descripcion": "§18 rollback: días de datos tras una activación en que se vigila la degradación"
+   },
+   "sesgo_max": {
+    "valor": 0.05,
+    "creado_por": "migracion_0014",
+    "descripcion": "RF-019 compuerta: |sesgo| máximo del retador en la ventana de sombra"
+   },
+   "sombra_dias": {
+    "valor": 14,
+    "creado_por": "migracion_0014",
+    "descripcion": "§9.5/§18 días que el retador predice en sombra antes de la compuerta de activación"
+   },
+   "wape_max": {
+    "valor": 0.2,
+    "creado_por": "migracion_0014",
+    "descripcion": "ALT-010: WAPE móvil máximo tolerado (≈ WAPE de la regla manual B1, 20,04 %)"
+   }
+  },
+  "función objetivo §10.2 (optimizacion.PARAMETROS_OBJETIVO)": {
+   "costo_bus_hora_cop": {
+    "valor": 26400.22,
+    "creado_por": "migracion_0014",
+    "descripcion": "Costo de un bus-hora de conductor (COP 2026, costos/ con fuente; datos/costos_fuente.json)"
+   },
+   "costo_cambio_frecuencia_cop": {
+    "valor": 26400.22,
+    "creado_por": "migracion_0014",
+    "descripcion": "Costo de apartarse 1 bus/h de la frecuencia programada (COP; supuesto del equipo: 1 bus-hora de conductor por reprogramación)"
+   },
+   "costo_km_cop": {
+    "valor": 1991.24,
+    "creado_por": "migracion_0014",
+    "descripcion": "Costo evitable por km recorrido (COP 2026, costos/ con fuente)"
+   },
+   "nivel_servicio": {
+    "valor": 0.9,
+    "creado_por": "migracion_0014",
+    "descripcion": "§10.2 nivel de servicio: probabilidad de que la carga crítica quepa en la capacidad efectiva; 0,90 = P90 calibrado del modelo"
+   },
+   "penalidad_sobreocupacion_cop": {
+    "valor": 10000.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "Penalidad por pasajero esperado por encima de la ocupación crítica (COP; supuesto de D5)"
+   },
+   "peso_costo_operativo": {
+    "valor": 1.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "§10.2 α: peso del costo operativo (COP/h) en la función objetivo"
+   },
+   "peso_desviacion_frecuencia": {
+    "valor": 1.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "§10.2 δ: peso de la desviación frente a la frecuencia programada (COP/h)"
+   },
+   "peso_sobreocupacion": {
+    "valor": 1.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "§10.2 γ: peso de la penalización por sobreocupación esperada (COP/h)"
+   },
+   "peso_tiempo_espera": {
+    "valor": 1.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "§10.2 β: peso del costo del tiempo de espera de los pasajeros (COP/h)"
+   },
+   "valor_tiempo_espera_cop_h": {
+    "valor": 7000.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "Valor del tiempo de espera de un pasajero (COP por hora; supuesto de D5)"
+   }
+  },
+  "plan del día (optimizacion.PARAMETROS_PLAN)": {
+   "delta_suavidad": {
+    "valor": 6,
+    "creado_por": "migracion_0014",
+    "descripcion": "Suavidad del plan del día: cambio máximo de salidas por hora entre dos horas seguidas, |x_h / f_h - x_(h-1) / f_(h-1)| <= delta_suavidad"
+   },
+   "elasticidad": {
+    "valor": 0.5,
+    "creado_por": "migracion_0014",
+    "descripcion": "Elasticidad de la demanda frente a la oferta del plan del día: fracción de los pasajeros que se pierde por unidad relativa de oferta recortada frente a la programada (β estimada ≈ 0,70 sin validar en campo; 0,5 por prudencia)"
+   },
+   "hora_inicio_suavidad": {
+    "valor": 7,
+    "creado_por": "migracion_0014",
+    "descripcion": "Hora desde la que rige la suavidad del plan del día (se aplica a la transición de la hora anterior a esta; 21 = sin suavidad)"
+   },
+   "tarifa_cop": {
+    "valor": 3182.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "Tarifa neta por pasajero (COP 2026): la tarifa pública del Área Metropolitana (3.700) × 0,86 que retiene el operador (datos/costos_fuente.json). Ingreso perdido del plan del día (§10.2) y recaudo de la respuesta del reto"
+   }
+  },
+  "headway §5.1": {
+   "headway_maximo_min": {
+    "valor": 10.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "Headway máximo (minutos) = 2 × espera máxima; valor supuesto del equipo"
+   },
+   "headway_minimo_min": {
+    "valor": 2.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "§5.1 Headway mínimo (minutos); lo define la operación: valor supuesto del equipo"
+   }
+  },
+  "oportunidad de la calidad §6.3 (calidad.retraso_maximo_de)": {
+   "periodo_ingesta_min": {
+    "valor": 1440.0,
+    "creado_por": "migracion_0014",
+    "descripcion": "Duración de un período de ingesta (minutos); la actualización es diaria"
+   },
+   "periodos_atraso": {
+    "valor": 2,
+    "creado_por": "migracion_0014",
+    "descripcion": "§5.1 Datos atrasados: períodos de ingesta sin recepción antes de alertar"
+   }
+  },
+  "retención de datos §18 (retencion.PARAMETROS)": {
+   "retencion_aplicar_programada": {
+    "valor": 1,
+    "creado_por": "migracion_0014",
+    "descripcion": "§18 retención: 1 = la corrida del planificador aplica la política; 0 = solo la simula y deja el informe en retencion_registro"
+   },
+   "retencion_archivar_particiones": {
+    "valor": 0,
+    "creado_por": "migracion_0014",
+    "descripcion": "§18 retención: 1 = la partición vieja de feature_snapshot solo se separa y queda como tabla <partición>_archivo para archivarla (pg_dump); 0 = se separa y se borra"
+   },
+   "retencion_meses_alertas": {
+    "valor": 13,
+    "creado_por": "migracion_0014",
+    "descripcion": "§18 retención: meses de las alertas cerradas o descartadas (con su historial) y de notification_log; una alerta abierta nunca se borra; 0 = no se recorta"
+   },
+   "retencion_meses_ejecuciones": {
+    "valor": 13,
+    "creado_por": "migracion_0014",
+    "descripcion": "§18 retención: meses de execution_log terminado (con sus intentos, errores de calidad y filas de monitoreo); nunca la que sostiene una marca de agua, un modelo, el histórico validado o un resultado que se conserva, ni la última de cada tipo; 0 = no se recorta"
+   },
+   "retencion_meses_foto": {
+    "valor": 13,
+    "creado_por": "migracion_0014",
+    "descripcion": "§18 retención: meses en caliente de feature_snapshot. Las particiones mensuales enteras anteriores al corte se separan (DETACH PARTITION) y se borran (DROP) o se archivan; 0 = no se recorta"
+   },
+   "retencion_meses_resultados": {
+    "valor": 13,
+    "creado_por": "migracion_0014",
+    "descripcion": "§18 retención: meses de prediction, recommendation, respuesta_reto y segmento_estadistica_refresco (por su fecha de creación); lo que cuelga de ellas por llave foránea se borra con ellas; 0 = no se recorta"
+   }
+  },
+  "contraste de los consolidados §6.3 y §11.2 (consolidados.TOLERANCIAS_POR_DEFECTO)": {
+   "contraste_tolerancia": {
+    "valor": 0.15,
+    "creado_por": "migracion_0014",
+    "descripcion": "Contraste de los consolidados de Extreme con la agregación propia (§6.3, §11.2): diferencia relativa de un promedio por viaje o de los viajes por día desde la que se registra la incidencia en data_quality_error (no bloqueante)"
+   },
+   "contraste_tolerancia_grosera": {
+    "valor": 0.5,
+    "creado_por": "migracion_0014",
+    "descripcion": "Contraste de los consolidados: diferencia relativa grosera; la incidencia es bloqueante y la llave del consolidado queda fuera del análisis"
+   },
+   "contraste_viajes_minimos": {
+    "valor": 30,
+    "creado_por": "migracion_0014",
+    "descripcion": "Contraste de los consolidados: viajes mínimos de cada lado de una llave para comparar sus promedios y sus viajes por día (con menos, la diferencia es ruido)"
+   }
+  }
+ }
+}

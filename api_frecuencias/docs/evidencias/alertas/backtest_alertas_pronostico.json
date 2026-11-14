@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-09T06:32:29-05:00",
+ "generado": "2026-11-10T10:21:37-05:00",
  "periodo": [
   "2025-09-15",
   "2025-12-31"
@@ -20,9 +20,9 @@
   "120->06 h": 324
  },
  "buses_hora_medios_por_horizonte": {
-  "30": 9.96,
-  "60": 9.96,
-  "120": 9.96
+  "30": 9.97,
+  "60": 9.97,
+  "120": 9.97
  },
  "recomendaciones_viables_pct": 46.0,
  "nota_precision": "cada alerta se confirma con la demanda REAL de su hora, en las mismas unidades: carga crítica real = factor de carga × pasajeros reales; ALT-001 si superó la capacidad por hora (buses/h programados × 50 puestos), ALT-002 si la ocupación real llegó al 90 %, ALT-003 si superó la capacidad efectiva (× 85 %) y ALT-004 si la ocupación real quedó bajo el 30 %; la tasa base es la de esa condición en las horas que miran los contextos (lift = precisión / tasa base).",
@@ -37,7 +37,9 @@
      "confirmadas": 735,
      "precision_real": 0.8888,
      "tasa_base_real": 0.8189,
-     "lift": 1.09
+     "lift": 1.09,
+     "tasa_base_elegible": 0.8189,
+     "lift_elegible": 1.09
     },
     "ALT-002": {
      "alertas": 764,
@@ -46,16 +48,20 @@
      "confirmadas": 717,
      "precision_real": 0.9385,
      "tasa_base_real": 0.8714,
-     "lift": 1.08
+     "lift": 1.08,
+     "tasa_base_elegible": 0.8714,
+     "lift_elegible": 1.08
     },
     "ALT-003": {
-     "alertas": 81,
-     "por_ruta_dia": 0.25,
-     "evaluables": 81,
-     "confirmadas": 61,
-     "precision_real": 0.7531,
+     "alertas": 56,
+     "por_ruta_dia": 0.173,
+     "evaluables": 56,
+     "confirmadas": 51,
+     "precision_real": 0.9107,
      "tasa_base_real": 0.8961,
-     "lift": 0.84
+     "lift": 1.02,
+     "tasa_base_elegible": 0.6069,
+     "lift_elegible": 1.5
     },
     "ALT-004": {
      "alertas": 1,
@@ -64,39 +70,47 @@
      "confirmadas": 0,
      "precision_real": 0.0,
      "tasa_base_real": 0.0031,
-     "lift": 0.0
+     "lift": 0.0,
+     "tasa_base_elegible": 0.0031,
+     "lift_elegible": 0.0
     }
    }
   },
   "franja": {
-   "metodo": "alertas.contexto_pronostico + evaluar_pronostico (lo que hace hoy el ciclo): carga crítica POR HORA de la franja recomendada (factor de carga del optimizador × P10/P50/P90 por hora) frente a la capacidad POR HORA ofrecida; ALT-003 por el nivel de servicio de la frecuencia actual (comparacion_actual); ventana de la alerta = la hora recomendada; los horizontes que caen en la misma franja dan una sola alerta",
+   "metodo": "alertas.contexto_pronostico + evaluar_pronostico (lo que hace hoy el ciclo): carga crítica POR HORA de la franja recomendada (factor de carga del optimizador × P10/P50/P90 por hora) frente a la capacidad POR HORA ofrecida; ALT-003 por el nivel de servicio de la frecuencia actual (comparacion_actual) con la probabilidad mínima de superar la capacidad efectiva (alt003_probabilidad_minima); ventana de la alerta = la hora recomendada; los horizontes que caen en la misma franja dan una sola alerta",
    "por_codigo": {
     "ALT-001": {
-     "alertas": 141,
-     "por_ruta_dia": 0.435,
-     "evaluables": 141,
-     "confirmadas": 44,
-     "precision_real": 0.3121,
-     "tasa_base_real": 0.1759,
-     "lift": 1.77
+     "alertas": 142,
+     "por_ruta_dia": 0.438,
+     "evaluables": 142,
+     "confirmadas": 42,
+     "precision_real": 0.2958,
+     "tasa_base_real": 0.1636,
+     "lift": 1.81,
+     "tasa_base_elegible": 0.1636,
+     "lift_elegible": 1.81
     },
     "ALT-002": {
-     "alertas": 102,
-     "por_ruta_dia": 0.315,
-     "evaluables": 102,
-     "confirmadas": 81,
-     "precision_real": 0.7941,
-     "tasa_base_real": 0.3951,
-     "lift": 2.01
+     "alertas": 99,
+     "por_ruta_dia": 0.306,
+     "evaluables": 99,
+     "confirmadas": 80,
+     "precision_real": 0.8081,
+     "tasa_base_real": 0.3981,
+     "lift": 2.03,
+     "tasa_base_elegible": 0.3981,
+     "lift_elegible": 2.03
     },
     "ALT-003": {
-     "alertas": 123,
-     "por_ruta_dia": 0.38,
-     "evaluables": 123,
-     "confirmadas": 44,
-     "precision_real": 0.3577,
-     "tasa_base_real": 0.4784,
-     "lift": 0.75
+     "alertas": 53,
+     "por_ruta_dia": 0.164,
+     "evaluables": 53,
+     "confirmadas": 26,
+     "precision_real": 0.4906,
+     "tasa_base_real": 0.4691,
+     "lift": 1.05,
+     "tasa_base_elegible": 0.2363,
+     "lift_elegible": 2.08
     },
     "ALT-004": {
      "alertas": 10,
@@ -105,14 +119,16 @@
      "confirmadas": 4,
      "precision_real": 0.4,
      "tasa_base_real": 0.0525,
-     "lift": 7.62
+     "lift": 7.62,
+     "tasa_base_elegible": 0.0525,
+     "lift_elegible": 7.62
     }
    }
   }
  },
  "milp": {
   "llamadas": 324,
-  "segundos_medios": 0.072
+  "segundos_medios": 0.062
  },
  "antes": {
   "generado": "2026-11-09T03:40:52-05:00",
@@ -155,6 +171,14 @@
    }
   }
  },
+ "antes_alt003": {
+  "generado": "2026-11-09T06:32:29-05:00",
+  "alertas": 123,
+  "por_ruta_dia": 0.38,
+  "precision_real": 0.3577,
+  "tasa_base_real": 0.4784,
+  "lift": 0.75
+ },
  "festivos_entre_semana": [
   "2025-10-13",
   "2025-11-03",
@@ -162,5 +186,304 @@
   "2025-12-08",
   "2025-12-25"
  ],
- "duracion_s": 197.5
+ "alt003_probabilidad_minima": 0.3,
+ "alt003": {
+  "corte_validacion": "2025-10-31",
+  "candidatos": [
+   0.1,
+   0.15,
+   0.2,
+   0.25,
+   0.3,
+   0.35,
+   0.4,
+   0.5
+  ],
+  "anterior": 0.1,
+  "adoptada": 0.3,
+  "n_min_validacion": 20,
+  "remuestreos": 2000,
+  "semilla": 20251101,
+  "ventanas": {
+   "validacion": [
+    "2025-09-15",
+    "2025-10-31"
+   ],
+   "evaluacion": [
+    "2025-11-01",
+    "2025-12-31"
+   ]
+  },
+  "variantes": {
+   "0.10": {
+    "validacion": {
+     "alertas": 62,
+     "confirmadas": 17,
+     "precision": 0.2742,
+     "tasa_base": 0.461,
+     "lift": 0.595,
+     "tasa_base_elegible": 0.2024,
+     "lift_elegible": 1.355,
+     "franjas": 141,
+     "franjas_elegibles": 84
+    },
+    "evaluacion": {
+     "alertas": 59,
+     "confirmadas": 26,
+     "precision": 0.4407,
+     "tasa_base": 0.4754,
+     "lift": 0.927,
+     "tasa_base_elegible": 0.2653,
+     "lift_elegible": 1.661,
+     "franjas": 183,
+     "franjas_elegibles": 98
+    }
+   },
+   "0.15": {
+    "validacion": {
+     "alertas": 56,
+     "confirmadas": 17,
+     "precision": 0.3036,
+     "tasa_base": 0.461,
+     "lift": 0.659,
+     "tasa_base_elegible": 0.2024,
+     "lift_elegible": 1.5,
+     "franjas": 141,
+     "franjas_elegibles": 84
+    },
+    "evaluacion": {
+     "alertas": 55,
+     "confirmadas": 25,
+     "precision": 0.4545,
+     "tasa_base": 0.4754,
+     "lift": 0.956,
+     "tasa_base_elegible": 0.2653,
+     "lift_elegible": 1.713,
+     "franjas": 183,
+     "franjas_elegibles": 98
+    }
+   },
+   "0.20": {
+    "validacion": {
+     "alertas": 45,
+     "confirmadas": 16,
+     "precision": 0.3556,
+     "tasa_base": 0.461,
+     "lift": 0.771,
+     "tasa_base_elegible": 0.2024,
+     "lift_elegible": 1.757,
+     "franjas": 141,
+     "franjas_elegibles": 84
+    },
+    "evaluacion": {
+     "alertas": 48,
+     "confirmadas": 20,
+     "precision": 0.4167,
+     "tasa_base": 0.4754,
+     "lift": 0.876,
+     "tasa_base_elegible": 0.2653,
+     "lift_elegible": 1.571,
+     "franjas": 183,
+     "franjas_elegibles": 98
+    }
+   },
+   "0.25": {
+    "validacion": {
+     "alertas": 36,
+     "confirmadas": 13,
+     "precision": 0.3611,
+     "tasa_base": 0.461,
+     "lift": 0.783,
+     "tasa_base_elegible": 0.2024,
+     "lift_elegible": 1.784,
+     "franjas": 141,
+     "franjas_elegibles": 84
+    },
+    "evaluacion": {
+     "alertas": 39,
+     "confirmadas": 18,
+     "precision": 0.4615,
+     "tasa_base": 0.4754,
+     "lift": 0.971,
+     "tasa_base_elegible": 0.2653,
+     "lift_elegible": 1.74,
+     "franjas": 183,
+     "franjas_elegibles": 98
+    }
+   },
+   "0.30": {
+    "validacion": {
+     "alertas": 24,
+     "confirmadas": 10,
+     "precision": 0.4167,
+     "tasa_base": 0.461,
+     "lift": 0.904,
+     "tasa_base_elegible": 0.2024,
+     "lift_elegible": 2.059,
+     "franjas": 141,
+     "franjas_elegibles": 84
+    },
+    "evaluacion": {
+     "alertas": 29,
+     "confirmadas": 16,
+     "precision": 0.5517,
+     "tasa_base": 0.4754,
+     "lift": 1.161,
+     "tasa_base_elegible": 0.2653,
+     "lift_elegible": 2.08,
+     "franjas": 183,
+     "franjas_elegibles": 98
+    }
+   },
+   "0.35": {
+    "validacion": {
+     "alertas": 12,
+     "confirmadas": 6,
+     "precision": 0.5,
+     "tasa_base": 0.461,
+     "lift": 1.085,
+     "tasa_base_elegible": 0.2024,
+     "lift_elegible": 2.471,
+     "franjas": 141,
+     "franjas_elegibles": 84
+    },
+    "evaluacion": {
+     "alertas": 21,
+     "confirmadas": 13,
+     "precision": 0.619,
+     "tasa_base": 0.4754,
+     "lift": 1.302,
+     "tasa_base_elegible": 0.2653,
+     "lift_elegible": 2.333,
+     "franjas": 183,
+     "franjas_elegibles": 98
+    }
+   },
+   "0.40": {
+    "validacion": {
+     "alertas": 7,
+     "confirmadas": 5,
+     "precision": 0.7143,
+     "tasa_base": 0.461,
+     "lift": 1.549,
+     "tasa_base_elegible": 0.2024,
+     "lift_elegible": 3.529,
+     "franjas": 141,
+     "franjas_elegibles": 84
+    },
+    "evaluacion": {
+     "alertas": 15,
+     "confirmadas": 11,
+     "precision": 0.7333,
+     "tasa_base": 0.4754,
+     "lift": 1.543,
+     "tasa_base_elegible": 0.2653,
+     "lift_elegible": 2.764,
+     "franjas": 183,
+     "franjas_elegibles": 98
+    }
+   },
+   "0.50": {
+    "validacion": {
+     "alertas": 2,
+     "confirmadas": 1,
+     "precision": 0.5,
+     "tasa_base": 0.461,
+     "lift": 1.085,
+     "tasa_base_elegible": 0.2024,
+     "lift_elegible": 2.471,
+     "franjas": 141,
+     "franjas_elegibles": 84
+    },
+    "evaluacion": {
+     "alertas": 8,
+     "confirmadas": 5,
+     "precision": 0.625,
+     "tasa_base": 0.4754,
+     "lift": 1.315,
+     "tasa_base_elegible": 0.2653,
+     "lift_elegible": 2.356,
+     "franjas": 183,
+     "franjas_elegibles": 98
+    }
+   }
+  },
+  "elegida": 0.3,
+  "decision": "adoptar",
+  "intervalos_elegida": {
+   "lift": [
+    0.822,
+    1.508
+   ],
+   "lift_elegible": [
+    1.506,
+    2.994
+   ]
+  },
+  "intervalos_anterior": {
+   "lift": [
+    0.694,
+    1.178
+   ],
+   "lift_elegible": [
+    1.312,
+    2.213
+   ]
+  },
+  "intervalos_adoptada": {
+   "lift": [
+    0.822,
+    1.508
+   ],
+   "lift_elegible": [
+    1.506,
+    2.994
+   ]
+  },
+  "diagnostico": {
+   "franjas": 324,
+   "tasa_base": 0.4691,
+   "con_alt001": {
+    "franjas": 142,
+    "positivas": 0.7676
+   },
+   "alt003_anterior": {
+    "franjas": 121,
+    "positivas": 0.3554
+   },
+   "sin_alerta": {
+    "franjas": 61,
+    "positivas": 0.0
+   },
+   "senal_frecuencia_insuficiente": {
+    "franjas": 263,
+    "positivas": 0.5779,
+    "nota": "ALT-003 sola o incluida en ALT-001 (variables.incluye_alt003): lo que ve el operador"
+   },
+   "por_ruta": {
+    "CL 72": {
+     "franjas": 108,
+     "tasa_base": 0.2407,
+     "con_alt001": 11,
+     "alt003_anterior": 76,
+     "positivas_alt003_anterior": 0.3158
+    },
+    "CRA 54": {
+     "franjas": 108,
+     "tasa_base": 0.7037,
+     "con_alt001": 83,
+     "alt003_anterior": 5,
+     "positivas_alt003_anterior": 0.4
+    },
+    "SILENCIO": {
+     "franjas": 108,
+     "tasa_base": 0.463,
+     "con_alt001": 48,
+     "alt003_anterior": 40,
+     "positivas_alt003_anterior": 0.425
+    }
+   }
+  }
+ },
+ "duracion_s": 50.4
 }

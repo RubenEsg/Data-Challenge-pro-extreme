@@ -8,7 +8,7 @@
   "demanda_p10": 5000
  },
  "respuesta": {
-  "recommendation_id": "1e668a85-4aad-487e-9f79-c56841c95906",
+  "recommendation_id": "a1c9bc4f-d7f3-45e7-8b95-ddfec3b187e2",
   "execution_id": null,
   "prediction_id": null,
   "ruta": "CRA 54",
@@ -20,20 +20,22 @@
   "headway_min": 3.53,
   "vehiculos_requeridos": 72,
   "capacidad_efectiva": 48.6,
-  "ocupacion_esperada": 3.0469,
+  "ocupacion_esperada": 3.0543,
   "viable": false,
-  "motivo": "Ni con el headway mínimo (30 buses/h) y la tipología más grande (72 puestos) se cubre la carga del nivel de servicio: se requieren 4.065 puestos/h y el máximo es 2.160. La flota disponible (79 vehículos, ciclo de 249,1 min) solo sostiene 826 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 3.455 (23,9 % de cobertura). Se informa la mejor aproximación ejecutable: 17 buses/h cada 3,53 min, que cubre el 23,9 % de la carga del nivel de servicio.",
+  "motivo": "Ni con el headway mínimo (30 buses/h) y la tipología más grande (72 puestos) se cubre la carga del nivel de servicio: se requieren 4.075 puestos/h y el máximo es 2.160. La flota disponible (79 vehículos, ciclo de 249,1 min) solo sostiene 826 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 3.464 (23,9 % de cobertura). Se informa la mejor aproximación ejecutable: 17 buses/h cada 3,53 min, que cubre el 23,9 % de la carga del nivel de servicio.",
   "frecuencia_actual_min": 2.94,
   "diferencia_min": null,
-  "formula": "§10.2 min α·costo_operativo + β·tiempo_espera + γ·penalización_sobreocupación + δ·desviación_frecuencia (α = 1,00, β = 1,00, γ = 1,00, δ = 1,00): sin solución que cumpla todas las restricciones. Ni con el headway mínimo (30 buses/h) y la tipología más grande (72 puestos) se cubre la carga del nivel de servicio: se requieren 4.065 puestos/h y el máximo es 2.160. La flota disponible (79 vehículos, ciclo de 249,1 min) solo sostiene 826 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 3.455 (23,9 % de cobertura). Se informa la mejor aproximación ejecutable: 17 buses/h cada 3,53 min, que cubre el 23,9 % de la carga del nivel de servicio.",
-  "umbrales_version": 5,
-  "creado_en": "2026-11-09T07:39:59.851589-05:00",
+  "formula": "§10.2 min α·costo_operativo + β·tiempo_espera + γ·penalización_sobreocupación + δ·desviación_frecuencia (α = 1,00, β = 1,00, γ = 1,00, δ = 1,00): sin solución que cumpla todas las restricciones. Ni con el headway mínimo (30 buses/h) y la tipología más grande (72 puestos) se cubre la carga del nivel de servicio: se requieren 4.075 puestos/h y el máximo es 2.160. La flota disponible (79 vehículos, ciclo de 249,1 min) solo sostiene 826 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 3.464 (23,9 % de cobertura). Se informa la mejor aproximación ejecutable: 17 buses/h cada 3,53 min, que cubre el 23,9 % de la carga del nivel de servicio.",
+  "umbrales_version": 9,
+  "creado_en": "2026-11-11T05:03:01.102196-05:00",
   "origen": "franja",
   "idruta": 16,
   "idempresa": null,
   "idproceso": "sobusa",
   "id_dia_semana": 2,
   "id_estacionalidad": null,
+  "frecuenciadespachos_min": 5.0,
+  "diferencia_frecuenciadespachos_min": null,
   "metodo": "funcion_objetivo_10_2",
   "objetivo": {
    "expresion": "min α·costo_operativo + β·tiempo_espera + γ·penalización_sobreocupación + δ·desviación_frecuencia",
@@ -42,51 +44,51 @@
      "simbolo": "α",
      "nombre": "peso_costo_operativo",
      "valor": 1.0,
-     "fuente": "threshold_config v5"
+     "fuente": "threshold_config v9"
     },
     "beta": {
      "simbolo": "β",
      "nombre": "peso_tiempo_espera",
      "valor": 1.0,
-     "fuente": "threshold_config v5"
+     "fuente": "threshold_config v9"
     },
     "gamma": {
      "simbolo": "γ",
      "nombre": "peso_sobreocupacion",
      "valor": 1.0,
-     "fuente": "threshold_config v5"
+     "fuente": "threshold_config v9"
     },
     "delta": {
      "simbolo": "δ",
      "nombre": "peso_desviacion_frecuencia",
      "valor": 1.0,
-     "fuente": "threshold_config v5"
+     "fuente": "threshold_config v9"
     }
    },
    "parametros": {
     "nivel_servicio": {
      "valor": 0.9,
-     "fuente": "threshold_config v5"
+     "fuente": "threshold_config v9"
     },
     "costo_bus_hora_cop": {
      "valor": 26400.22,
-     "fuente": "threshold_config v5"
+     "fuente": "threshold_config v9"
     },
     "costo_km_cop": {
      "valor": 1991.24,
-     "fuente": "threshold_config v5"
+     "fuente": "threshold_config v9"
     },
     "valor_tiempo_espera_cop_h": {
      "valor": 7000.0,
-     "fuente": "threshold_config v5"
+     "fuente": "threshold_config v9"
     },
     "penalidad_sobreocupacion_cop": {
      "valor": 10000.0,
-     "fuente": "threshold_config v5"
+     "fuente": "threshold_config v9"
     },
     "costo_cambio_frecuencia_cop": {
      "valor": 26400.22,
-     "fuente": "threshold_config v5"
+     "fuente": "threshold_config v9"
     }
    },
    "definiciones": {
@@ -108,16 +110,16 @@
    "p90": 7000.0,
    "nivel_servicio": 0.9,
    "criterio": "banda P90 calibrada",
-   "factor_carga": 0.4936,
+   "factor_carga": 0.4948,
    "sigma_log": 0.1203,
-   "carga_critica_mediana": 2961.6,
-   "carga_critica_diseno": 3455.2,
-   "capacidad_requerida_puestos": 4064.94
+   "carga_critica_mediana": 2968.8,
+   "carga_critica_diseno": 3463.6,
+   "capacidad_requerida_puestos": 4074.82
   },
   "solver": {
    "formulacion": "MILP de la franja (PuLP/CBC)",
    "estado": "Infeasible",
-   "segundos": 0.0397,
+   "segundos": 0.0356,
    "verificacion_enumeracion": null
   },
   "restricciones": [],
@@ -169,12 +171,12 @@
    "headway_min": 2.0,
    "vehiculos_requeridos": 125,
    "capacidad_efectiva": 42.5,
-   "ocupacion_esperada": 1.9744,
+   "ocupacion_esperada": 1.9792,
    "viable": false,
-   "motivo": "La demanda de diseño (3.455,2 pas/h) exige 82 buses/h, un intervalo de 0,73 min, menor que el headway mínimo permitido (2,00 min, máximo 30 buses/h = 1.275,0 pas/h de capacidad efectiva). La flota disponible (79 vehículos) no alcanza: con un ciclo de 249,1 min y un headway de 2,00 min se requieren 125 vehículos; la flota solo sostiene 19 buses/h.",
-   "formula": "capacidad_efectiva = 50 × 0,85 = 42,5; carga_critica = 0,494 × P90 7.000,0 = 3.455,2; buses_hora = max(ceil(3.455,2 / 42,5) = 82, ceil(60 / 10,00) = 6) = 82 → acotado por headway_min a 30; headway = 60 / 30 = 2,00 → [2,00, 10,00] = 2,00 min; vehiculos_requeridos = ceil(249,1 / 2,00) = 125",
+   "motivo": "La demanda de diseño (3.463,6 pas/h) exige 82 buses/h, un intervalo de 0,73 min, menor que el headway mínimo permitido (2,00 min, máximo 30 buses/h = 1.275,0 pas/h de capacidad efectiva). La flota disponible (79 vehículos) no alcanza: con un ciclo de 249,1 min y un headway de 2,00 min se requieren 125 vehículos; la flota solo sostiene 19 buses/h.",
+   "formula": "capacidad_efectiva = 50 × 0,85 = 42,5; carga_critica = 0,495 × P90 7.000,0 = 3.463,6; buses_hora = max(ceil(3.463,6 / 42,5) = 82, ceil(60 / 10,00) = 6) = 82 → acotado por headway_min a 30; headway = 60 / 30 = 2,00 → [2,00, 10,00] = 2,00 min; vehiculos_requeridos = ceil(249,1 / 2,00) = 125",
    "nombre": "§10.3 ajustada: ceil(carga crítica de diseño / capacidad efectiva), carga crítica = factor de carga × P90",
-   "factor_carga": 0.4936,
+   "factor_carga": 0.4948,
    "criterio_demanda": "p90"
   },
   "linea_base_10_3_literal": {
@@ -198,14 +200,14 @@
    "headway_min": 3.53,
    "vehiculos_requeridos": 72,
    "capacidad_efectiva_pasajeros_h": 826.2,
-   "cobertura_nivel_servicio": 0.2391,
+   "cobertura_nivel_servicio": 0.2385,
    "componentes_cop": {
     "costo_operativo": 3772484.44,
     "tiempo_espera": 1837134.35,
-    "sobreocupacion": 21083024.01,
+    "sobreocupacion": 21155546.76,
     "desviacion_frecuencia": 89976.26
    },
-   "total_ponderado_cop": 26782619.06,
+   "total_ponderado_cop": 26855141.81,
    "asignacion": [
     {
      "codigo": "T1",
@@ -252,18 +254,18 @@
     "buses_hora": 20.41,
     "vehiculos_requeridos": 85,
     "capacidad_ofrecida": 1020.4,
-    "ocupacion_esperada": 2.9024,
+    "ocupacion_esperada": 2.9094,
     "cumple_nivel_servicio": false,
     "cabe_en_la_flota": false,
     "espera_media_min": 2.186,
-    "sobrecarga_esperada_pax": 2064.741,
+    "sobrecarga_esperada_pax": 2071.993,
     "componentes_cop": {
      "costo_operativo": 4528792.84,
      "tiempo_espera": 1530332.92,
-     "sobreocupacion": 20647406.46,
+     "sobreocupacion": 20719929.35,
      "desviacion_frecuencia": 0.0
     },
-    "total_ponderado_cop": 26706532.23
+    "total_ponderado_cop": 26779055.11
    },
    "recomendada": null,
    "conclusion": "La recomendada no es viable; la actual se muestra como referencia."
@@ -282,19 +284,21 @@
     "regla": "headway máximo efectivo = min(headway_maximo_min, 2 × espera_max_min): la espera máxima de §5.1 se lee como espera media del pasajero, headway / 2 con llegadas aleatorias (supuesto S12)",
     "headway_maximo_min": {
      "valor": 10.0,
-     "fuente": "threshold_config v5"
+     "fuente": "threshold_config v9"
     },
     "espera_max_min": {
      "valor": 5.0,
-     "fuente": "threshold_config v5"
+     "fuente": "threshold_config v9"
     },
     "dos_por_espera_min": 10.0,
     "nota": null
    },
    "factor_carga": {
-    "factor_carga": 0.4936,
-    "dias": 236,
-    "fuente": "mediana 2025 de carga crítica / abordajes por ruta, tipo de día y hora (insumos D5)"
+    "factor_carga": 0.4948,
+    "dias": 51,
+    "nivel": "dia_semana",
+    "id_dia_semana": 2,
+    "fuente": "mediana 2025 de carga crítica / abordajes por ruta, día de la semana de operación (ISO; 7 = domingo o festivo) y hora (insumos D5)"
    }
   },
   "capacidad_gobernada": {
@@ -302,13 +306,41 @@
    "fuente": "catalogo",
    "clave": null,
    "tipologia": "TODAS",
-   "umbrales_version": 5
+   "umbrales_version": 9
+  },
+  "cambio_frecuenciadespachos": null,
+  "fuente_frecuenciadespachos": "rutas.frecuenciadespachos de la tabla rutas de Extreme (exportación empaquetada en datos/catalogo_rutas.json, frecuenciadespachos_tabla_rutas), leída en minutos",
+  "ocupacion_historica": {
+   "id_segmento": 1158,
+   "nro_segmento": 27,
+   "sentido": "ida",
+   "km_inicio": 13.0,
+   "nivel": "dia_semana",
+   "id_dia_semana": 2,
+   "tipo_dia": 0,
+   "hora": 7,
+   "id_estacionalidad": null,
+   "nro_viajes": 162,
+   "dias": 7,
+   "carga_media": 34.45,
+   "carga_p50": 33.5,
+   "carga_p90": 53.0,
+   "carga_max": 62,
+   "capacidad": 50.0,
+   "ocupacion_media": 0.689,
+   "ocupacion_p90": 1.06,
+   "fraccion_viajes_criticos": 0.0679,
+   "periodo": "2023-01-01 a 2023-02-27",
+   "metodo": "carga al salir del segmento k = max(0, carga al salir del segmento k − 1 + subidas_k − bajadas_k) en el orden de nro_segmento (la suma de subidas − bajadas de los segmentos 1..k acotada en 0 en cada segmento); ocupación = carga / puestos por bus",
+   "fuente": "datos/ocupacion_segmentos_hora.parquet: subidas y bajadas por segmento de cada viaje (timbradas_segmentos 2023-01-01 a 2023-02-27, scripts/preparar_ocupacion_segmentos.py)",
+   "texto": "Segmento crítico histórico de la franja: el 27 (ida, desde el km 13,0), con 34,5 pasajeros a bordo en promedio al salir de él (69 % de 50 puestos; P90 53,0, 106 %) en 162 viajes de 7 días (los martes a las 7:00, 2023-01-01 a 2023-02-27); fue el tramo más cargado del 7 % de esos viajes."
   },
   "explicacion": [
-   "No viable: Ni con el headway mínimo (30 buses/h) y la tipología más grande (72 puestos) se cubre la carga del nivel de servicio: se requieren 4.065 puestos/h y el máximo es 2.160.",
-   "No viable: La flota disponible (79 vehículos, ciclo de 249,1 min) solo sostiene 826 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 3.455 (23,9 % de cobertura).",
+   "No viable: Ni con el headway mínimo (30 buses/h) y la tipología más grande (72 puestos) se cubre la carga del nivel de servicio: se requieren 4.075 puestos/h y el máximo es 2.160.",
+   "No viable: La flota disponible (79 vehículos, ciclo de 249,1 min) solo sostiene 826 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 3.464 (23,9 % de cobertura).",
    "No viable: Se informa la mejor aproximación ejecutable: 17 buses/h cada 3,53 min, que cubre el 23,9 % de la carga del nivel de servicio.",
-   "Línea base §10.3 literal (factor 1, demanda puntual): 30 buses/h, headway 2,00 min (no viable); ajustada (factor de carga 0,494, P90): 30 buses/h, headway 2,00 min (no viable)."
+   "Línea base §10.3 literal (factor 1, demanda puntual): 30 buses/h, headway 2,00 min (no viable); ajustada (factor de carga 0,495, P90): 30 buses/h, headway 2,00 min (no viable).",
+   "Segmento crítico histórico de la franja: el 27 (ida, desde el km 13,0), con 34,5 pasajeros a bordo en promedio al salir de él (69 % de 50 puestos; P90 53,0, 106 %) en 162 viajes de 7 días (los martes a las 7:00, 2023-01-01 a 2023-02-27); fue el tramo más cargado del 7 % de esos viajes."
   ]
  }
 }

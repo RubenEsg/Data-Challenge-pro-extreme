@@ -1,12 +1,14 @@
-"""Pronóstico por segmento y sentido (§9.1 «ruta, sentido, segmento») por DESAGREGACIÓN documentada.
+"""Pronóstico por segmento y sentido (§3.1 «Predicción de demanda: por ruta, sentido, segmento y franja horaria →
+pronóstico e intervalo de confianza», §9.1, §9.2).
 
-No hay un modelo por segmento: timbradas_segmentos solo trae 2023-01-01 a 2023-02-27, así que el pronóstico de la
-ruta (el del modelo activo, con su banda calibrada) se reparte con la fracción histórica de subidas de cada segmento
-por ruta, tipo de día y hora de salida (datos/reparto_segmentos.parquet, scripts/preparar_segmentos.py). La suma de
-los segmentos es exactamente el pronóstico de la ruta. El sentido es una aproximación geométrica (mitad del ciclo por
-longitud acumulada): las exportaciones no traen columna de sentido. P10/P90 por segmento se escalan con la misma
-fracción (los cuantiles no se suman: es una banda aproximada). Evaluación del reparto en
-docs/evidencias/monitoreo/desagregacion_segmentos.json.
+El pronóstico de la ruta (el del modelo activo, con su banda calibrada) se reparte entre segmentos con el MODELO DE
+SEGMENTOS activo (app/servicios/modelo_segmentos.py; registro datos/modelos/segmentos/registro.json, artefacto con
+SHA-256 verificado al cargar): la fracción de cada segmento, hora por hora de la ventana, condicionada a ruta, sentido,
+hora y calendario; la de cada sentido es la suma de sus segmentos y la suma de los segmentos es exactamente el
+pronóstico de la ruta. La banda P10-P90 de cada segmento y sentido es conformal (ajustada en la validación de
+feb-2023) compuesta con la banda de la ruta. El sentido es una aproximación geométrica (supuesto S9: mitad del ciclo
+por longitud acumulada); las exportaciones no traen sentido. ?modelo_segmentos= elige otra versión registrada, por
+ejemplo el reparto fijo B0 (la línea base). Evaluación: docs/evidencias/modelo/segmentos_modelo.md.
 
 GET /api/v1/predictions/segmentos?prediction_id=...            reparte una predicción guardada
 GET /api/v1/predictions/segmentos?ruta=...&instante=...&horizonte_min=60   pronóstico al vuelo (no se guarda)
@@ -14,93 +16,39 @@ GET /api/v1/predictions/segmentos?ruta=...&instante=...&horizonte_min=60   pron�
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
-from functools import lru_cache
-from typing import Any, Literal
+from datetime import date, datetime
+from typing import Literal
 
-import pandas as pd
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.db import obtener_sesion
 from app.modelos_db import Prediccion
 from app.routers.comun import ErrorApi, no_encontrado
+from app.servicios import modelo_segmentos as ms
 
 router = APIRouter(tags=["predicciones y recomendaciones"])
-ARCHIVO = "reparto_segmentos.parquet"
-NOTA = ("Desagregación del pronóstico de la ruta con el reparto histórico de subidas por segmento "
-        "(timbradas_segmentos, ene-feb 2023); sentido aproximado por la mitad del ciclo; no es un modelo por segmento")
+tramos_de_prediccion = ms.tramos_de_prediccion   # compatibilidad: la función vive en el servicio
+SUPUESTO_SENTIDO = "sentido aproximado por la mitad del ciclo (supuesto S9; las exportaciones no traen sentido)"
 
 
-@lru_cache(maxsize=2)
-def _reparto(ruta_archivo: str, mtime: float) -> pd.DataFrame:
-    return pd.read_parquet(ruta_archivo)
+def modelo_de_segmentos(model_id: str | None) -> dict:
+    """Modelo de segmentos registrado (el activo por omisión), con su SHA-256 verificado.
+
+    404 solo si el cliente pidió un model_id que no está; si al activo le falta el manifiesto, o el registro o el
+    manifiesto no son JSON válido (ValueError), es una degradación del servidor: 503 «reparto_no_disponible»."""
+    try:
+        return ms.cargar(model_id)
+    except ms.ModeloSegmentosNoEncontrado as exc:
+        if model_id is None:
+            raise _no_disponible(exc) from exc
+        raise ErrorApi(404, "modelo_no_encontrado", str(exc).strip("'\""), {"modelo_segmentos": model_id}) from exc
+    except (ms.ErrorModeloSegmentos, OSError, ValueError) as exc:
+        raise _no_disponible(exc) from exc
 
 
-def reparto() -> pd.DataFrame:
-    from app.servicios import datos
-
-    archivo = datos.carpeta_datos() / ARCHIVO
-    if not archivo.exists():
-        raise ErrorApi(503, "reparto_no_disponible", f"Falta datos/{ARCHIVO}: ejecute scripts/preparar_segmentos.py")
-    return _reparto(str(archivo), archivo.stat().st_mtime)
-
-
-def tramos_de_prediccion(variables: dict, pasajeros: float) -> list[tuple[str, int, float]]:
-    """[(fecha, hora, pasajeros de la ventana en esa hora)] desde variables['por_hora'] (normalizado al total)."""
-    k = float(variables.get("factor_nowcast") or 1.0)
-    por_hora = variables.get("por_hora") or []
-    t = [(str(h["fecha"]), int(h["hora"]), float(h["fraccion"]) * float(h["pasajeros_hora"]) * k) for h in por_hora]
-    suma = sum(x for _, _, x in t)
-    if suma > 0 and pasajeros is not None:
-        t = [(f, h, x * float(pasajeros) / suma) for f, h, x in t]
-    return t
-
-
-def desagregar(ruta: str, tramos: list[tuple[str, int, float]], pasajeros: float, p10: float | None,
-               p90: float | None, tipo_dia_de) -> dict[str, Any]:
-    """Reparte la demanda de la ventana entre segmentos; devuelve segmentos, sentidos y el control de la suma."""
-    r = reparto()
-    r = r[r["ruta"] == ruta]
-    if r.empty:
-        raise ErrorApi(404, "ruta_sin_segmentos", f"No hay reparto por segmento para la ruta {ruta}")
-    acumulado: dict[int, float] = {}
-    niveles: dict[int, str] = {}
-    for fecha, hora, demanda in tramos:
-        td = tipo_dia_de(fecha, hora)
-        celda = r[(r["tipo_dia"] == td) & (r["hora"] == hora)]
-        if celda.empty:
-            celda = r[r["tipo_dia"] == td].groupby("id_segmento", as_index=False).agg(
-                fraccion=("fraccion", "mean"), nivel=("nivel", "first"))
-            celda["fraccion"] = celda["fraccion"] / celda["fraccion"].sum()
-            celda["nivel"] = "ruta_tipo_dia (hora sin datos)"
-        for s, f, n in zip(celda["id_segmento"], celda["fraccion"], celda["nivel"], strict=False):
-            acumulado[int(s)] = acumulado.get(int(s), 0.0) + demanda * float(f)
-            niveles.setdefault(int(s), str(n))
-    meta = r.drop_duplicates("id_segmento").set_index("id_segmento")
-    total = sum(acumulado.values()) or 1.0
-    segmentos = []
-    for s, v in sorted(acumulado.items(), key=lambda kv: int(meta.at[kv[0], "nro_segmento"])):
-        frac = v / total
-        segmentos.append({
-            "id_segmento": s, "nro_segmento": int(meta.at[s, "nro_segmento"]), "sentido": meta.at[s, "sentido"],
-            "km_inicio": round(float(meta.at[s, "km_inicio"]), 3),
-            "longitud_m": round(float(meta.at[s, "longitud_m"]), 1),
-            "fraccion": round(frac, 6), "pasajeros": round(v, 3),
-            "p10": None if p10 is None else round(float(p10) * frac, 3),
-            "p90": None if p90 is None else round(float(p90) * frac, 3), "nivel_reparto": niveles[s]})
-    sentidos = {}
-    for seg in segmentos:
-        d = sentidos.setdefault(seg["sentido"], {"sentido": seg["sentido"], "pasajeros": 0.0, "fraccion": 0.0,
-                                                 "segmentos": 0})
-        d["pasajeros"] += seg["pasajeros"]
-        d["fraccion"] += seg["fraccion"]
-        d["segmentos"] += 1
-    for d in sentidos.values():
-        d["pasajeros"], d["fraccion"] = round(d["pasajeros"], 3), round(d["fraccion"], 6)
-    return {"segmentos": segmentos, "sentidos": list(sentidos.values()),
-            "suma_segmentos": round(sum(acumulado.values()), 3),   # sin redondear cada segmento
-            "periodo_reparto": str(r["periodo"].iloc[0]) if "periodo" in r.columns else None}
+def _no_disponible(exc: Exception) -> ErrorApi:
+    return ErrorApi(503, "reparto_no_disponible", f"Modelo de segmentos no disponible: {exc}")
 
 
 def _base_guardada(sesion: Session, prediction_id: uuid.UUID) -> tuple[dict, dict]:
@@ -143,36 +91,47 @@ def _base_al_vuelo(sesion: Session, ruta: str | None, instante: datetime | None,
     return base, r["variables"]
 
 
-@router.get("/predictions/segmentos", summary="Pronóstico por segmento y sentido (desagregación documentada del "
-                                              "pronóstico de la ruta)")
+def _desagregar(modelo: dict, base: dict, variables: dict, tabla) -> dict:
+    def calendario_de(f: date, h: int) -> dict:
+        return ms.calendario_de_tabla(tabla, base["ruta"], f, h)
+
+    tramos = ms.tramos_de_prediccion(variables, base["pasajeros_ruta"])
+    try:
+        return ms.desagregar_ventana(modelo, base["ruta"], tramos, base["pasajeros_ruta"], base["p10"], base["p90"],
+                                     calendario_de)
+    except ms.RutaSinSegmentos as exc:
+        raise ErrorApi(404, "ruta_sin_segmentos", str(exc)) from exc
+
+
+@router.get("/predictions/segmentos", summary="Pronóstico por segmento y sentido (modelo de segmentos versionado "
+                                              "sobre el pronóstico de la ruta, con banda P10-P90)")
 def por_segmento(prediction_id: uuid.UUID | None = None, ruta: str | None = None, instante: datetime | None = None,
                  horizonte_min: int = Query(60, ge=30, le=120, json_schema_extra={"enum": [30, 60, 120]},
                                             description="30, 60 o 120"), model_id: str | None = None,
                  sentido: Literal["ida", "regreso"] | None = None, nivel: Literal["segmento", "sentido"] = "segmento",
+                 modelo_segmentos: str | None = Query(None, max_length=120, description=(
+                     "model_id del registro de segmentos (datos/modelos/segmentos/registro.json); por omisión el "
+                     "activo. seg_reparto_fijo_20230227 es el reparto fijo B0, la línea base")),
                  sesion: Session = Depends(obtener_sesion)):
     from app.servicios import ejecucion as servicio
     from app.servicios import inferencia
 
     if int(horizonte_min) not in (30, 60, 120):
         raise ErrorApi(422, "horizonte_invalido", "horizonte_min debe ser 30, 60 o 120")
+    modelo = modelo_de_segmentos(modelo_segmentos)
     if prediction_id is not None:
         base, variables = _base_guardada(sesion, prediction_id)
     else:
         base, variables = _base_al_vuelo(sesion, ruta, instante, int(horizonte_min), model_id)
-    tabla = inferencia.tabla_variables(sesion)
-
-    def tipo_dia_de(fecha: str, hora: int) -> int:
-        f = pd.Timestamp(fecha).date()
-        return inferencia._tipo_dia_tabla(tabla, base["ruta"], f, hora)
-
-    tramos = tramos_de_prediccion(variables, base["pasajeros_ruta"])
-    d = desagregar(base["ruta"], tramos, base["pasajeros_ruta"], base["p10"], base["p90"], tipo_dia_de)
+    d = _desagregar(modelo, base, variables, inferencia.tabla_variables(sesion))
     if sentido:
         d["segmentos"] = [x for x in d["segmentos"] if x["sentido"] == sentido]
         d["sentidos"] = [x for x in d["sentidos"] if x["sentido"] == sentido]
-    salida = dict(base, nivel=nivel, nota=NOTA, metodo="fracción histórica de subidas por segmento × pronóstico "
-                  "de la ruta, hora por hora de la ventana", periodo_reparto=d["periodo_reparto"],
-                  suma_segmentos=d["suma_segmentos"], sentidos=d["sentidos"],
-                  segmentos=d["segmentos"] if nivel == "segmento" else [],
-                  evaluacion="docs/evidencias/monitoreo/desagregacion_segmentos.json")
+    salida = dict(base, nivel=nivel, nota=f"{ms.DESCRIPCIONES[modelo['tipo']]}, ajustado con las subidas por "
+                                         f"segmento de {modelo.get('periodo_datos')}; {SUPUESTO_SENTIDO}",
+                  metodo="fracción prevista por el modelo de segmentos × pronóstico de la ruta, hora por hora de la "
+                         "ventana", periodo_reparto=d["periodo_reparto"], suma_segmentos=d["suma_segmentos"],
+                  sentidos=d["sentidos"], segmentos=d["segmentos"] if nivel == "segmento" else [],
+                  modelo_segmentos=ms.ficha(modelo), banda_segmentos=ms.METODO_BANDA,
+                  evaluacion="docs/evidencias/modelo/segmentos_modelo.md")
     return servicio.json_seguro(salida)

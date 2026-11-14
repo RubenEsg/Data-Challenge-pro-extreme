@@ -1,0 +1,211 @@
+{
+ "ok": true,
+ "trabajos": 18,
+ "madres": 6,
+ "pares_cruzados": 14,
+ "pares_misma_ruta": 0,
+ "concurrencia_maxima": 2,
+ "suma_duraciones_s": 92.78,
+ "reloj_s": 54.62,
+ "por_replica": {
+  "replica-b": 9,
+  "replica-a": 9
+ },
+ "foto_de_variables": {
+  "filas": 7020,
+  "por_segmento": 6948,
+  "en_la_madre": 0,
+  "de_otra_ruta": 0,
+  "fuera_de_su_particion": 0,
+  "repetidas": 0
+ },
+ "politica_de_aprendizaje": {
+  "entrenamientos": {},
+  "omitidos_sin_datos": 5
+ },
+ "fallas": [],
+ "intervalos": [
+  {
+   "execution_id": "895c81f9-6d04-40c3-a974-e83f0b428efb",
+   "padre_id": "31e63c8f-e3db-4804-a20d-0133151881de",
+   "ruta": "SILENCIO",
+   "hasta": "2023-01-07",
+   "replica": "replica-b",
+   "worker_id": "replica-b:29128:b5ca2d:t1",
+   "reclamado_en": "2026-11-13T20:05:00.545828-05:00",
+   "terminado_en": "2026-11-13T20:05:14.578840-05:00"
+  },
+  {
+   "execution_id": "5a7bfe88-8f5a-4909-b1c3-bdd2dfa389fc",
+   "padre_id": "31e63c8f-e3db-4804-a20d-0133151881de",
+   "ruta": "CRA 54",
+   "hasta": "2023-01-07",
+   "replica": "replica-a",
+   "worker_id": "replica-a:15772:43acaf:t1",
+   "reclamado_en": "2026-11-13T20:05:00.829396-05:00",
+   "terminado_en": "2026-11-13T20:05:14.704770-05:00"
+  },
+  {
+   "execution_id": "7af94e10-bb6a-4021-a844-544f91e9f0e3",
+   "padre_id": "31e63c8f-e3db-4804-a20d-0133151881de",
+   "ruta": "CL 72",
+   "hasta": "2023-01-07",
+   "replica": "replica-b",
+   "worker_id": "replica-b:29128:b5ca2d:t1",
+   "reclamado_en": "2026-11-13T20:05:15.091061-05:00",
+   "terminado_en": "2026-11-13T20:05:20.232422-05:00"
+  },
+  {
+   "execution_id": "ef67fac1-e73d-439e-9f08-141c7d0291ac",
+   "padre_id": "33411d54-0065-4c24-b4cd-54ef13f7df14",
+   "ruta": "SILENCIO",
+   "hasta": "2023-01-08",
+   "replica": "replica-a",
+   "worker_id": "replica-a:15772:43acaf:t1",
+   "reclamado_en": "2026-11-13T20:05:15.228250-05:00",
+   "terminado_en": "2026-11-13T20:05:19.181091-05:00"
+  },
+  {
+   "execution_id": "e77aa206-b0c4-4bc6-8845-b9dfc5195cd9",
+   "padre_id": "33411d54-0065-4c24-b4cd-54ef13f7df14",
+   "ruta": "CRA 54",
+   "hasta": "2023-01-08",
+   "replica": "replica-a",
+   "worker_id": "replica-a:15772:43acaf:t1",
+   "reclamado_en": "2026-11-13T20:05:19.699493-05:00",
+   "terminado_en": "2026-11-13T20:05:23.956120-05:00"
+  },
+  {
+   "execution_id": "29ccbb7f-3f85-44cf-b119-e2191e5574d8",
+   "padre_id": "33411d54-0065-4c24-b4cd-54ef13f7df14",
+   "ruta": "CL 72",
+   "hasta": "2023-01-08",
+   "replica": "replica-b",
+   "worker_id": "replica-b:29128:b5ca2d:t1",
+   "reclamado_en": "2026-11-13T20:05:21.414563-05:00",
+   "terminado_en": "2026-11-13T20:05:25.332311-05:00"
+  },
+  {
+   "execution_id": "612a04f0-d8f1-40f5-9fd0-e87c8dfed3f7",
+   "padre_id": "d41252f8-dff3-4429-9d03-f401bdd73ea5",
+   "ruta": "SILENCIO",
+   "hasta": "2023-01-09",
+   "replica": "replica-a",
+   "worker_id": "replica-a:15772:43acaf:t1",
+   "reclamado_en": "2026-11-13T20:05:24.495058-05:00",
+   "terminado_en": "2026-11-13T20:05:29.188427-05:00"
+  },
+  {
+   "execution_id": "89cf5eb9-b45c-467c-b71c-e90c48892742",
+   "padre_id": "d41252f8-dff3-4429-9d03-f401bdd73ea5",
+   "ruta": "CRA 54",
+   "hasta": "2023-01-09",
+   "replica": "replica-b",
+   "worker_id": "replica-b:29128:b5ca2d:t1",
+   "reclamado_en": "2026-11-13T20:05:27.745531-05:00",
+   "terminado_en": "2026-11-13T20:05:31.441830-05:00"
+  },
+  {
+   "execution_id": "c706c13d-2c0a-46f7-b5d1-7876cbc9e78b",
+   "padre_id": "d41252f8-dff3-4429-9d03-f401bdd73ea5",
+   "ruta": "CL 72",
+   "hasta": "2023-01-09",
+   "replica": "replica-a",
+   "worker_id": "replica-a:15772:43acaf:t1",
+   "reclamado_en": "2026-11-13T20:05:29.715177-05:00",
+   "terminado_en": "2026-11-13T20:05:33.192380-05:00"
+  },
+  {
+   "execution_id": "6b468c52-e30e-4e1d-90a0-61e015a4bd2c",
+   "padre_id": "de5dc08e-7de7-48a9-ab9b-35a748f4a960",
+   "ruta": "SILENCIO",
+   "hasta": "2023-01-10",
+   "replica": "replica-b",
+   "worker_id": "replica-b:29128:b5ca2d:t1",
+   "reclamado_en": "2026-11-13T20:05:31.976502-05:00",
+   "terminado_en": "2026-11-13T20:05:35.781089-05:00"
+  },
+  {
+   "execution_id": "1acfa97d-a0a0-4970-bc3d-b7433a04fa2d",
+   "padre_id": "de5dc08e-7de7-48a9-ab9b-35a748f4a960",
+   "ruta": "CRA 54",
+   "hasta": "2023-01-10",
+   "replica": "replica-a",
+   "worker_id": "replica-a:15772:43acaf:t1",
+   "reclamado_en": "2026-11-13T20:05:35.412803-05:00",
+   "terminado_en": "2026-11-13T20:05:39.594307-05:00"
+  },
+  {
+   "execution_id": "3b4ea931-763a-46c6-a800-8637e60b1d2a",
+   "padre_id": "de5dc08e-7de7-48a9-ab9b-35a748f4a960",
+   "ruta": "CL 72",
+   "hasta": "2023-01-10",
+   "replica": "replica-b",
+   "worker_id": "replica-b:29128:b5ca2d:t1",
+   "reclamado_en": "2026-11-13T20:05:36.322178-05:00",
+   "terminado_en": "2026-11-13T20:05:39.960483-05:00"
+  },
+  {
+   "execution_id": "7510677b-7aa4-4333-bb20-fde941d6e6a4",
+   "padre_id": "988da4a3-07b4-461f-8910-41f356117d69",
+   "ruta": "SILENCIO",
+   "hasta": "2023-01-11",
+   "replica": "replica-b",
+   "worker_id": "replica-b:29128:b5ca2d:t1",
+   "reclamado_en": "2026-11-13T20:05:40.498637-05:00",
+   "terminado_en": "2026-11-13T20:05:44.257419-05:00"
+  },
+  {
+   "execution_id": "1d0f223e-7e74-4794-87e1-7cd2cbcd482b",
+   "padre_id": "988da4a3-07b4-461f-8910-41f356117d69",
+   "ruta": "CRA 54",
+   "hasta": "2023-01-11",
+   "replica": "replica-a",
+   "worker_id": "replica-a:15772:43acaf:t1",
+   "reclamado_en": "2026-11-13T20:05:41.328667-05:00",
+   "terminado_en": "2026-11-13T20:05:45.353320-05:00"
+  },
+  {
+   "execution_id": "ded32462-78f0-42d0-9a14-1c0a325e5657",
+   "padre_id": "988da4a3-07b4-461f-8910-41f356117d69",
+   "ruta": "CL 72",
+   "hasta": "2023-01-11",
+   "replica": "replica-b",
+   "worker_id": "replica-b:29128:b5ca2d:t1",
+   "reclamado_en": "2026-11-13T20:05:44.773784-05:00",
+   "terminado_en": "2026-11-13T20:05:49.264997-05:00"
+  },
+  {
+   "execution_id": "85703dd1-bd3e-4758-8098-9d96d4282885",
+   "padre_id": "b718142a-1e76-4eed-8266-6fcd63a07345",
+   "ruta": "SILENCIO",
+   "hasta": "2023-01-12",
+   "replica": "replica-a",
+   "worker_id": "replica-a:15772:43acaf:t1",
+   "reclamado_en": "2026-11-13T20:05:45.882159-05:00",
+   "terminado_en": "2026-11-13T20:05:49.863442-05:00"
+  },
+  {
+   "execution_id": "0c2807da-685b-4dd6-b2bd-7297404fe337",
+   "padre_id": "b718142a-1e76-4eed-8266-6fcd63a07345",
+   "ruta": "CRA 54",
+   "hasta": "2023-01-12",
+   "replica": "replica-a",
+   "worker_id": "replica-a:15772:43acaf:t1",
+   "reclamado_en": "2026-11-13T20:05:50.387604-05:00",
+   "terminado_en": "2026-11-13T20:05:54.258832-05:00"
+  },
+  {
+   "execution_id": "b72b8c20-5150-4885-aeba-6da520444859",
+   "padre_id": "b718142a-1e76-4eed-8266-6fcd63a07345",
+   "ruta": "CL 72",
+   "hasta": "2023-01-12",
+   "replica": "replica-b",
+   "worker_id": "replica-b:29128:b5ca2d:t1",
+   "reclamado_en": "2026-11-13T20:05:51.185341-05:00",
+   "terminado_en": "2026-11-13T20:05:55.165173-05:00"
+  }
+ ],
+ "reloj_lote_s": 55.8,
+ "reloj_lote_sin_partir_s": 61.1
+}

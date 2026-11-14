@@ -8,7 +8,8 @@ Las claves son tokens aleatorios de alta entropía (``secrets.token_urlsafe(32)`
 para eso basta SHA-256, como en los tokens de GitHub; no son contraseñas elegidas por personas.
 
 Roles acumulativos: operador (lectura y cambio de estado de alertas) < analista (+ ejecuciones, predicciones,
-recomendaciones y entrenamiento) < admin (+ activar o revertir modelos y cambiar umbrales). La matriz de permisos
+recomendaciones y entrenamiento) < admin (+ activar o revertir modelos, cambiar umbrales, los ajustes locales de
+capacidad, flota y tiempo de ciclo y correr la retención de datos). La matriz de permisos
 vive aquí, en un solo lugar auditable (POLITICA); toda ruta de /api/v1 pasa por ``autenticar`` desde main.py.
 Una escritura sin entrada explícita en la matriz exige admin (denegación por omisión).
 Con ``AUTH_HABILITADA=false`` (solo para desarrollo local) todo se permite y el usuario auditado es el declarado.
@@ -44,15 +45,19 @@ PREFIJO = "/api/v1"
 POLITICA: dict[tuple[str, str], str] = {
     ("PATCH", "/alerts/{alert_id}/status"): "operador",
     ("POST", "/frequency/executions"): "analista",
+    ("GET", "/frequency/watermarks"): "operador",            # RNF-005: marcas de agua por proceso y ruta
     ("POST", "/predictions/run"): "analista",
     ("POST", "/recommendations/calculate"): "analista",
     ("POST", "/respuesta/calcular"): "analista",
+    ("POST", "/segmentos/estadisticas/refrescar"): "analista",
     ("POST", "/models/train"): "analista",
     ("POST", "/models/{model_id}/activate"): "admin",
     ("POST", "/models/rollback"): "admin",
     ("PUT", "/thresholds"): "admin",
     ("POST", "/thresholds/{version}/aprobar"): "admin",
     ("PUT", "/catalogos/capacidad"): "admin",
+    ("PUT", "/catalogos/flota"): "admin",          # §3.1: flota disponible y tiempo de ciclo (ajuste local)
+    ("POST", "/retencion/aplicar"): "admin",       # §18: la tarea de retención bajo demanda (borra datos viejos)
 }
 METODOS_LECTURA = ("GET", "HEAD", "OPTIONS")
 

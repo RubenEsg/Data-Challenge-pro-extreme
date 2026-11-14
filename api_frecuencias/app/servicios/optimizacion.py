@@ -19,7 +19,9 @@ Tres niveles:
 3. plan_dia(): el plan del día por hora (4..20) con el MILP de D5 (app/servicios/motor_d5, sin cambios) y el pronóstico
    horario P10/P50/P90 del modelo ACTIVO, para cualquier fecha con variables: minimiza costo operativo + espera +
    sobrecarga esperada + ingreso perdido, sujeto a la flota disponible, la suavidad, el headway máximo efectivo y el
-   headway mínimo gobernado como cotas explícitas de cada hora (§10.2), con los parámetros de threshold_config. Cada
+   headway mínimo gobernado como cotas explícitas de cada hora (§10.2), con los parámetros de threshold_config (también
+   la tarifa, la elasticidad y la suavidad de D5, PARAMETROS_PLAN) y la flota y el ciclo del ajuste local vigente
+   (app/servicios/flota_ciclo.py). Cada
    hora dice qué límites mandan, la demanda de diseño, el margen, si es viable y por qué (§10.3 y §18), y si hay
    sobreoferta. Una hora con una sola salida no tiene intervalo que verificar (sin_intervalo) y no es no viable por
    eso. Los vehículos de cada hora son ceil(ciclo / headway) con headway = 60 / salidas por hora, y el plan dice qué
@@ -28,6 +30,14 @@ Tres niveles:
    plan del laboratorio con los pronósticos de 2025.
 Un festivo entre semana usa, en la programación de comparación, el contexto de la franja y el factor de carga, el
 tipo de día «Domingo/festivo», el mismo de D5 (tipo_dia_operacion).
+La franja y cada hora del plan comparan el headway recomendado con dos referencias (§6.1 y §6.2): el intervalo
+programado observado (frecuencia_actual_min, diferencia_min) y el headway vigente de rutas.frecuenciadespachos
+(frecuenciadespachos_min, diferencia_frecuenciadespachos_min).
+§10.1 ocupación histórica y actual (app/servicios/ocupacion.py, docs/ocupacion_segmentos.md): el factor de carga
+crítica es por ruta, día de la semana de operación y hora (el de tipo de día como respaldo, factor_carga_franja); la
+franja y cada hora del plan nombran su segmento crítico histórico con su ocupación (ocupacion_historica), y el plan
+del día recibe la ocupación observada por segmento como restricción reactiva de seguridad (ocupacion_actual: un piso
+del MILP en la hora siguiente a una hora cerrada sobre el umbral crítico; sin ella el MILP es exactamente el mismo).
 """
 from __future__ import annotations
 
@@ -488,6 +498,39 @@ FUENTE_D5 = "código de D5 (motor_d5.comun.param_d5)"
 FUENTE_POR_OMISION = "código (valor por omisión)"     # parámetro que no traen threshold_config ni la solicitud
 FUENTE_OPERATIVA = ("datos/parametros_operativos_hora.parquet y datos/insumos_d5_2025.parquet (mediana 2025 por ruta, "
                     "tipo de día y hora)")
+FUENTE_FLOTA_CICLO = "datos/parametros_operativos_hora.parquet (mediana 2025 de D1 por ruta, tipo de día y hora)"
+FUENTE_FLOTA_CICLO_E12 = "datos/insumos_d5_2025.parquet (insumos de D5 del día, opción de laboratorio E12)"
+AJUSTE_LOCAL_OPERATIVO = "ajuste_local"
+FUENTE_FRECUENCIADESPACHOS = ("rutas.frecuenciadespachos de la tabla rutas de Extreme (exportación empaquetada en "
+                              "datos/catalogo_rutas.json, frecuenciadespachos_tabla_rutas), leída en minutos")
+# §6.1 y §6.2 en modo integrado: el valor salió de la tabla rutas de la base de Extreme (datos.ruta_info lo dice con
+# frecuencia_fuente = «fuente»); si la fuente no respondió o no trae valor para la ruta, rige el texto anterior.
+FUENTE_FRECUENCIADESPACHOS_EN_VIVO = ("rutas.frecuenciadespachos de la tabla rutas de la base de Extreme (consultada "
+                                      "en solo lectura en modo integrado), leída en minutos")
+# §5.1 «regla de gobierno»: los parámetros del MILP de D5 que no son costos de §10.2 también se versionan en
+# threshold_config (migración 0010). nombre -> (clave de motor_d5.comun.param_d5, descripción). Si la tabla no trae un
+# nombre, rige el valor de param_d5, así que sin una versión nueva el plan es exactamente el de D5. Los demás valores
+# de param_d5 no los lee el MILP del plan: CAPACIDAD (la capacidad sale del catálogo), INTERVALO_MIN e INTERVALO_MAX
+# (mandan headway_minimo_min, headway_maximo_min y espera_max_min), FACTOR_FLOTA, HORIZONTE y Z_CUANTILES (solo del
+# experimento D5); tests/unit/test_gobierno_parametros.py lo comprueba con las claves que lee el MILP.
+PARAMETROS_PLAN: dict[str, tuple[str, str]] = {
+    "tarifa_cop": ("TARIFA", "Tarifa neta por pasajero (COP 2026): la tarifa pública del Área Metropolitana (3.700) × "
+                             "0,86 que retiene el operador (datos/costos_fuente.json). Ingreso perdido del plan del "
+                             "día (§10.2) y recaudo de la respuesta del reto"),
+    "elasticidad": ("ELASTICIDAD", "Elasticidad de la demanda frente a la oferta del plan del día: fracción de los "
+                                   "pasajeros que se pierde por unidad relativa de oferta recortada frente a la "
+                                   "programada (β estimada ≈ 0,70 sin validar en campo; 0,5 por prudencia)"),
+    "delta_suavidad": ("DELTA", "Suavidad del plan del día: cambio máximo de salidas por hora entre dos horas "
+                                "seguidas, |x_h / f_h - x_(h-1) / f_(h-1)| <= delta_suavidad"),
+    "hora_inicio_suavidad": ("HORA_INICIO_SUAVIDAD", "Hora desde la que rige la suavidad del plan del día (se aplica "
+                                                     "a la transición de la hora anterior a esta; 21 = sin "
+                                                     "suavidad)"),
+}
+# hora_inicio_suavidad: un entero de 6 a 21 (21 = la suavidad no rige ninguna hora). Desde 4 o 5 la suavidad tomaría la
+# transición de las 4 h, la apertura del servicio, que un domingo opera minutos sueltos (0,18 min en SILENCIO: una
+# salida es un ritmo de 333 salidas/h) y deja el MILP sin solución. Desde 6 h hay solución en los 1.095 días E12 de 2025
+# y en los nueve pares ruta × tipo de día del modelo activo.
+HORAS_SUAVIDAD = (6, 21)
 _PLANES: OrderedDict = OrderedDict()
 _PRONOSTICOS: OrderedDict = OrderedDict()
 _PLANES_MAX = 256
@@ -523,14 +566,49 @@ def headway_maximo_efectivo(umbrales: dict | None, version: int | None = None) -
             "espera_max_min": espera, "dos_por_espera_min": round(dos, 4), "nota": nota}
 
 
+def _parametro_plan(nombre: str, umbrales: dict, version: int | None, d5: dict, gobernado: bool) -> dict:
+    """Un parámetro del MILP de D5 (PARAMETROS_PLAN) con su fuente: threshold_config (vN) o, si la tabla no lo trae
+    (o no se gobierna, como la tarifa con los supuestos de D5), el valor de param_d5."""
+    if gobernado and umbrales.get(nombre) is not None:
+        return _umbral(nombre, umbrales, version, 0.0)
+    fuente = {"tarifa_cop": f"{FUENTE_D5}: {d5['FUENTE']}", "elasticidad": f"{FUENTE_D5}; {TEXTO_ELASTICIDAD}"}
+    return {"valor": float(d5[PARAMETROS_PLAN[nombre][0]]), "fuente": fuente.get(nombre, FUENTE_D5)}
+
+
+def validar_parametros_plan(valores: dict) -> None:
+    """Valida los parámetros del plan (PARAMETROS_PLAN) presentes en `valores` (ValueError con el motivo): tarifa >= 0,
+    elasticidad en [0, 1] (con 1 una hora sin oferta perdería todos sus pasajeros), suavidad > 0 y la hora de inicio de
+    la suavidad un entero de 6 a 21 (HORAS_SUAVIDAD). Una suavidad válida pero muy estricta puede dejar sin solución el
+    plan de algún día: entonces plan_dia lo dice con un ValueError (_resolver_d5)."""
+    presentes = {n: valores[n] for n in set(valores) & set(PARAMETROS_PLAN)}
+    for nombre, valor in presentes.items():
+        _num(nombre, valor, 0, estricto=nombre == "delta_suavidad")
+    if "elasticidad" in presentes and float(presentes["elasticidad"]) > 1:
+        raise ValueError(f"elasticidad debe estar en [0, 1] (recibido: {presentes['elasticidad']}).")
+    if "hora_inicio_suavidad" in presentes:
+        hora = float(presentes["hora_inicio_suavidad"])
+        if not hora.is_integer() or not HORAS_SUAVIDAD[0] <= hora <= HORAS_SUAVIDAD[1]:
+            raise ValueError(f"hora_inicio_suavidad debe ser un entero de {HORAS_SUAVIDAD[0]} a {HORAS_SUAVIDAD[1]} "
+                             f"(recibido: {presentes['hora_inicio_suavidad']}).")
+
+
+def descripcion_parametro(nombre: str) -> str | None:
+    """Descripción de un parámetro gobernado que el código conoce (función objetivo de §10.2 o plan del día)."""
+    if nombre in PARAMETROS_OBJETIVO:
+        return PARAMETROS_OBJETIVO[nombre][1]
+    return PARAMETROS_PLAN[nombre][1] if nombre in PARAMETROS_PLAN else None
+
+
 def parametros_plan(umbrales: dict | None, umbrales_version: int | None, fuente_costos: bool = True) -> dict:
     """Parámetros del MILP del plan del día con la fuente de cada uno (§5.1 «regla de gobierno»).
 
     De threshold_config (o del código si la tabla no los trae): headway mínimo y máximo efectivo (nmin y nmax de cada
     hora), ocupación objetivo, nivel de servicio, costos de §10.2 (bus-hora, km, valor del tiempo de espera, penalidad
-    por sobreocupación) y los pesos α, β, γ, que escalan el costo operativo, la espera y la sobrecarga del MILP. De D5:
-    tarifa, elasticidad, suavidad (DELTA) y hora de inicio de la suavidad. El peso δ no aplica al plan: su papel lo
-    cumplen la suavidad entre horas y el ingreso perdido frente a la oferta programada."""
+    por sobreocupación), los pesos α, β, γ, que escalan el costo operativo, la espera y la sobrecarga del MILP, y los
+    parámetros propios del MILP de D5 (PARAMETROS_PLAN, migración 0010): tarifa, elasticidad, suavidad (DELTA) y hora de
+    inicio de la suavidad; sin versión en la tabla, los de param_d5. Con fuente_costos=False (los supuestos de D5) el
+    bus-hora, el km y la tarifa son los de D5. El peso δ no aplica al plan: su papel lo cumplen la suavidad entre horas
+    y el ingreso perdido frente a la oferta programada."""
     from .motor_d5 import comun as C
 
     u = umbrales or {}
@@ -549,15 +627,15 @@ def parametros_plan(umbrales: dict | None, umbrales_version: int | None, fuente_
         **{n: objetivo[n] for n in ("nivel_servicio", "costo_bus_hora_cop", "costo_km_cop",
                                     "valor_tiempo_espera_cop_h", "penalidad_sobreocupacion_cop",
                                     "peso_costo_operativo", "peso_tiempo_espera", "peso_sobreocupacion")},
-        "tarifa_cop": {"valor": float(d5["TARIFA"]), "fuente": f"{FUENTE_D5}: {d5['FUENTE']}"},
-        "elasticidad": {"valor": float(d5["ELASTICIDAD"]), "fuente": f"{FUENTE_D5}; {TEXTO_ELASTICIDAD}"},
-        "delta_suavidad": {"valor": float(d5["DELTA"]), "fuente": FUENTE_D5},
-        "hora_inicio_suavidad": {"valor": float(d5["HORA_INICIO_SUAVIDAD"]), "fuente": FUENTE_D5},
+        **{n: _parametro_plan(n, u, umbrales_version, d5, fuente_costos or n != "tarifa_cop")
+           for n in PARAMETROS_PLAN},
     }
 
 
 def _p_milp(gob: dict, fuente_costos: bool, ponderar: bool = True) -> dict:
-    """Parámetros de motor_d5.milp con los valores gobernados (con ponderar, los pesos α, β, γ ya aplicados)."""
+    """Parámetros de motor_d5.milp con los valores gobernados (con ponderar, los pesos α, β, γ ya aplicados). Toda clave
+    que lee el MILP sale de `gob`: los costos y pesos de §10.2 y la tarifa, la elasticidad y la suavidad
+    (PARAMETROS_PLAN); de param_d5 solo quedan valores que el MILP no lee."""
     from .motor_d5 import comun as C
 
     p = C.param_d5(fuente=fuente_costos)
@@ -566,6 +644,7 @@ def _p_milp(gob: dict, fuente_costos: bool, ponderar: bool = True) -> dict:
                else (1.0, 1.0, 1.0))
     bus_hora, km = ((v["costo_bus_hora_cop"], v["costo_km_cop"]) if fuente_costos
                     else (float(p["COSTO_BUS_HORA"]), float(p["COSTO_KM"])))
+    p.update({clave: v[n] for n, (clave, _d) in PARAMETROS_PLAN.items() if n in v})
     p.update({"COSTO_BUS_HORA": bus_hora * a, "COSTO_KM": km * a,
               "VALOR_TIEMPO_ESPERA": v["valor_tiempo_espera_cop_h"] * b,
               "PENALIDAD_SOBRECARGA": v["penalidad_sobreocupacion_cop"] * g,
@@ -759,21 +838,90 @@ def _con_cotas(tb, gob: dict):
     return tb
 
 
-def _resolver_plan(tb, p_milp: dict) -> dict:
-    """MILP de D5 sin el tope y, si alguna hora lo pasa, otra vez con nmax = tope (headway mínimo gobernado)."""
-    import numpy as np
-
+def _resolver_d5(tb, flota: float, p_milp: dict) -> tuple:
+    """Un MILP de D5 del día con motor_d5.milp.resolver_dia (la misma formulación de resolver_dia_detalle, sin los
+    componentes del costo, que el plan calcula aparte). La flota tiene holgura, así que con la suavidad de D5 siempre
+    hay solución; una suavidad gobernada más estricta (delta_suavidad, hora_inicio_suavidad) puede dejar el problema
+    sin solución, y entonces sus cifras no son un plan: ValueError con el motivo, en lugar de entregar o persistir un
+    plan infactible (o de fallar dentro del motor al buscar un nivel que no existe)."""
     from .motor_d5 import milp, plan_base
 
+    x, estado, holgura = milp.resolver_dia(plan_base.entradas_d5(_con_piso_reactivo(tb)), tb["ciclo"].values, flota,
+                                           p_milp, solver="cbc")
+    if estado != "Optimal":
+        raise ValueError(
+            f"El MILP del plan del día terminó en «{estado}», sin un plan factible: con la suavidad gobernada "
+            f"(delta_suavidad = {_f(float(p_milp['DELTA']), 2)} salidas/h entre dos horas seguidas desde las "
+            f"{_f(float(p_milp['HORA_INICIO_SUAVIDAD']), 0)} h) y los límites de headway de cada hora no hay un número "
+            f"entero de salidas que los cumpla. Revise esos parámetros en threshold_config (PUT /api/v1/thresholds).")
+    return x, estado, holgura
+
+
+def _con_piso_reactivo(tb):
+    """Las entradas del MILP con el piso de la restricción reactiva (§10.1 ocupación actual): nmin = max(nmin,
+    piso_reactivo) en la hora en que actúa. Sin piso, la misma tabla: el MILP es exactamente el de siempre."""
+    if "piso_reactivo" not in tb or not (tb["piso_reactivo"] > 0).any():
+        return tb
+    import numpy as np
+
+    con_piso = tb.copy()
+    con_piso["nmin"] = np.maximum(tb["nmin"].to_numpy(int), tb["piso_reactivo"].to_numpy(int))
+    return con_piso
+
+
+def _aplicar_reactiva(tb, reactiva: dict | None, gob: dict) -> dict | None:
+    """Prepara la restricción reactiva en los insumos del día: piso_reactivo = 0 en todas las horas y, si la
+    restricción aplica, en su hora ceil(carga crítica observada × min(minutos, 60) / 60 / (puestos × ocupación objetivo
+    máxima)) salidas (la fórmula de §10.3 con la carga observada), acotado por el tope del headway mínimo. Devuelve la
+    restricción con las salidas que pide, las que se exigen y la fórmula escrita con las cifras."""
+    tb["piso_reactivo"] = 0
+    if not (reactiva and reactiva.get("aplica")):
+        return reactiva
+    filas = tb.index[tb["hora"] == int(reactiva["hora_aplica"])]
+    if not len(filas) or float(tb.at[filas[0], "minutos"]) <= 0:
+        return dict(reactiva, aplica=False, motivo=f"{reactiva['motivo']} La hora {reactiva['hora_aplica']}:00 no "
+                                                   "se opera en el plan: no hay salidas que exigir.")
+    i = filas[0]
+    cap, occ = float(tb.at[i, "capacidad"]), float(gob["ocupacion_objetivo_max"]["valor"])
+    fraccion = min(float(tb.at[i, "minutos"]), 60.0) / 60.0
+    carga = float(reactiva["carga_critica_pax_h"]) * fraccion
+    pedidas = int(math.ceil(carga / (cap * occ) - EPS))
+    tope = int(tb.at[i, "tope_headway"])
+    tb.at[i, "piso_reactivo"] = min(pedidas, tope)
+    return dict(reactiva, salidas_pedidas=pedidas, salidas_minimas=min(pedidas, tope), capacidad_plan=cap,
+                ocupacion_objetivo_max=occ, limitada_por_headway_minimo=pedidas > tope,
+                formula=f"salidas_minimas = ceil({_f(carga)} / ({_f(cap, 0)} × {_f(occ, 2)})) = {pedidas}"
+                        + (f" → acotado por el headway mínimo a {tope}" if pedidas > tope else ""))
+
+
+def _resolver_con_reactiva(tb, p_milp: dict, reactiva: dict | None) -> tuple[dict, dict | None]:
+    """El MILP del plan con el piso reactivo. Si con el piso no hay solución (la suavidad gobernada no deja subir
+    tanto la hora), el plan sin el piso, y la restricción dice que no se pudo aplicar: nunca un plan infactible."""
+    try:
+        return _resolver_plan(tb, p_milp), reactiva
+    except ValueError:
+        if not (reactiva and reactiva.get("aplica") and (tb["piso_reactivo"] > 0).any()):
+            raise
+    tb["piso_reactivo"] = 0
+    return _resolver_plan(tb, p_milp), dict(
+        reactiva, aplica=False, motivo=f"{reactiva['motivo']} No se pudo aplicar: con ese piso y la suavidad "
+                                       "gobernada el MILP del día no tiene solución; el plan se resolvió sin él.")
+
+
+def _resolver_plan(tb, p_milp: dict) -> dict:
+    """MILP de D5 sin el tope y, si alguna hora lo pasa, otra vez con nmax = tope (headway mínimo gobernado).
+    ValueError si el MILP no tiene solución (_resolver_d5)."""
+    import numpy as np
+
+    from .motor_d5 import plan_base
+
     flota = float(tb["flota_disp"].iloc[0])
-    x, estado, holgura, _ = milp.resolver_dia_detalle(plan_base.entradas_d5(tb), tb["ciclo"].values, flota, p_milp,
-                                                      solver="cbc")
+    x, estado, holgura = _resolver_d5(tb, flota, p_milp)
     tb["x_sin_tope"] = np.asarray(x, int)
     if (tb["x_sin_tope"] > tb["tope_headway"]).any():
         acotada = tb.copy()
         acotada["nmax"] = acotada["tope_headway"]
-        x, estado, holgura, _ = milp.resolver_dia_detalle(plan_base.entradas_d5(acotada), tb["ciclo"].values, flota,
-                                                          p_milp, solver="cbc")
+        x, estado, holgura = _resolver_d5(acotada, flota, p_milp)
     tb["x_plan"] = np.asarray(x, int)
     tb["programar"] = np.ceil(tb["x_plan"] / (1 - tb["tasa_no_valido"].fillna(0))).astype(int)
     return {"tabla": tb, "estado": estado, "holgura": float(holgura or 0.0), "flota": flota,
@@ -880,15 +1028,24 @@ def _viabilidad_hora(fila, flota_estado: str, hmin: float, hmax: float, flota: f
     return motivos
 
 
+def _causa_sobreoferta(activos: list[str], hmax: float, nmin: int) -> str:
+    """Qué impone la oferta de una hora con sobreoferta: la restricción reactiva de ocupación observada (§10.1), la
+    espera máxima o, si no manda ningún límite, el costo del MILP."""
+    if "ocupacion_observada" in activos:
+        return ("la impone la restricción reactiva de ocupación observada (§10.1): la carga observada en el segmento "
+                "crítico de la última hora cerrada exige esas salidas aunque el pronóstico espere menos")
+    if "headway_maximo" in activos:
+        return (f"la impone la espera máxima: el headway máximo efectivo de {_f(hmax, 2)} min exige al menos {nmin} "
+                f"salidas")
+    return "el costo de la espera y de la sobrecarga esperada del MILP justifica esa oferta"
+
+
 def _sobreoferta_hora(occ, minimo: float, activos: list[str], hmax: float, nmin: int) -> str | None:
     """Motivo de la marca de sobreoferta (ocupación esperada < ocupación objetivo mínima de §5.1) o None."""
     if occ is None or occ >= minimo - 1e-9:
         return None
-    causa = (f"la impone la espera máxima: el headway máximo efectivo de {_f(hmax, 2)} min exige al menos {nmin} "
-             f"salidas" if "headway_maximo" in activos else
-             "el costo de la espera y de la sobrecarga esperada del MILP justifica esa oferta")
     return (f"Sobreoferta: ocupación esperada en el punto de carga máxima {_f(100 * occ, 1)} %, menor que la ocupación "
-            f"objetivo mínima de {_f(100 * minimo, 0)} % (§5.1); {causa}.")
+            f"objetivo mínima de {_f(100 * minimo, 0)} % (§5.1); {_causa_sobreoferta(activos, hmax, nmin)}.")
 
 
 def _hora_del_plan(i: int, contexto: dict) -> dict:
@@ -908,10 +1065,12 @@ def _hora_del_plan(i: int, contexto: dict) -> dict:
     activos = _limites_hora(i, tb, contexto["flota_estado"], v["delta_suavidad"], v["hora_inicio_suavidad"])
     motivos = _viabilidad_hora(fila, contexto["flota_estado"].get(h), v["headway_minimo_min"],
                                v["headway_maximo_efectivo_min"], r["flota"])
+    ocupacion_hora = _ocupacion_de_la_hora(contexto, fila, x, activos)     # antes: la sobreoferta ve el piso activo
     sobre = _sobreoferta_hora(occ, v["ocupacion_objetivo_min"], activos, v["headway_maximo_efectivo_min"],
                               int(fila["nmin"]))
     entrada = plan_base.entradas_d5(tb.iloc[[i]])[0]
     entrada["nmax"] = max(int(fila["tope_headway"]), int(fila["nmin"]))       # el tope gobernado es una cota dura
+    entrada["nmin"] = max(int(fila["nmin"]), int(fila.get("piso_reactivo", 0)))    # y el piso reactivo, si lo hay
     margen = _margen_hora(entrada, x, contexto["p_milp"])
     margen.update({"capacidad_efectiva_pax_h": round(cap_ef, 1), "demanda_diseno_pax_h": round(demanda_diseno, 1),
                    "holgura_pax_h": round(cap_ef - demanda_diseno, 1),
@@ -934,8 +1093,32 @@ def _hora_del_plan(i: int, contexto: dict) -> dict:
         "buses_en_ruta_max": contexto["flota_max"].get(h), "limites_activos": activos, "margen": margen,
         "sin_intervalo": x == 1,          # una sola salida: no hay intervalo entre salidas que verificar en la hora
         "viable": not motivos, "motivo": " ".join(motivos) or None,
-        "sobreoferta": sobre is not None, "motivo_sobreoferta": sobre,
+        "sobreoferta": sobre is not None, "motivo_sobreoferta": sobre, **ocupacion_hora,
     }
+
+
+def _ocupacion_de_la_hora(contexto: dict, fila, x: int, activos: list[str]) -> dict:
+    """§10.1 en la hora del plan: el segmento crítico histórico con su ocupación (ocupacion_historica) y, en la hora en
+    que actúa, la restricción reactiva con la ocupación observada (restriccion_reactiva, «ocupacion_observada» entre
+    los límites activos si el piso manda)."""
+    h = int(fila["hora"])
+    reactiva = contexto.get("reactiva") or {}
+    de_la_hora = reactiva if reactiva.get("aplica") and int(reactiva.get("hora_aplica", -1)) == h else None
+    piso = int(fila.get("piso_reactivo", 0) or 0)
+    if de_la_hora is not None:
+        de_la_hora = dict(de_la_hora, activa=0 < piso and x <= piso, salidas_plan=x)
+        if de_la_hora["activa"]:
+            activos.append("ocupacion_observada")
+    return {"ocupacion_historica": (contexto.get("historica") or {}).get(h), "restriccion_reactiva": de_la_hora}
+
+
+def _historicas(ruta: str, fecha: date, tb) -> dict[int, dict | None]:
+    """{hora: segmento crítico histórico con su ocupación} del día (ocupacion.segmento_critico_historico), con los
+    puestos por bus del plan."""
+    from app.servicios import ocupacion
+
+    return {int(h): ocupacion.segmento_critico_historico(ruta, fecha, int(h), float(c))
+            for h, c in zip(tb["hora"], tb["capacidad"], strict=True)}
 
 
 def _clave_plan(*partes) -> str:
@@ -951,19 +1134,28 @@ def limpiar_cache_plan() -> None:
 
 def plan_dia(fecha, ruta: str, *, umbrales: dict, umbrales_version: int | None, pronostico: str = "activo",
              pronostico_horario: list[dict] | None = None, model_id: str | None = None,
-             fuente_costos: bool = True) -> dict:
+             fuente_costos: bool = True, ocupacion_actual: dict | None = None) -> dict:
     """Plan del día por hora (4-20 h) con el MILP de D5 y el pronóstico horario del modelo ACTIVO (contrato C1).
 
     - pronostico="activo" (por omisión): P10/P50/P90 de cada hora con inferencia (h = 60 al inicio de la hora, sin
       factor intradía), o los de `pronostico_horario` ({hora, p10, p50, p90}) si se pasan. Sirve para cualquier fecha
       con variables. pronostico="E12": el pronóstico precalculado de 2025 (opción de laboratorio).
     - Parámetros gobernados (parametros_plan, con la fuente de cada uno): nmin de cada hora = ceil(minutos / headway
-      máximo efectivo) y tope = floor(minutos / headway mínimo) como cotas explícitas del MILP; costos y pesos de
-      threshold_config.
-    - Cada hora trae limites_activos, demanda_diseno, margen, viable y motivo, más la marca de sobreoferta (§5.1).
+      máximo efectivo) y tope = floor(minutos / headway mínimo) como cotas explícitas del MILP; costos, pesos, tarifa,
+      elasticidad y suavidad de threshold_config.
+    - Flota disponible y ciclo de cada hora: el ajuste local vigente (app/servicios/flota_ciclo.py, threshold_config)
+      o, si no hay, el dato empaquetado; flota_y_ciclo dice de dónde salió cada uno.
+    - Cada hora trae limites_activos, demanda_diseno, margen, viable y motivo, más la marca de sobreoferta (§5.1) y el
+      headway vigente de rutas.frecuenciadespachos con su diferencia frente al recomendado (§6.2).
+    - §10.1: cada hora trae su segmento crítico histórico con su ocupación (ocupacion_historica). Con
+      `ocupacion_actual` (la restricción reactiva de ocupacion.restriccion_reactiva, que arma el ciclo con la ocupación
+      observada por segmento), si aplica, la hora en que actúa no baja de las salidas que exige la carga observada
+      (piso del MILP, restriccion_reactiva en la hora y ocupacion_actual en el resumen). Sin ella, o si no aplica, el
+      MILP es exactamente el de siempre.
     La salida tiene las claves de resumen_plan_d5 más fuente_pronostico, model_id, calibracion_version, umbrales_version
-    y parametros. Memoria por (fecha, ruta, model_id, calibracion_version, umbrales_version, pronostico). Lanza
-    ValueError si la ruta, el pronóstico o la fecha no sirven.
+    y parametros. Memoria por (fecha, ruta, model_id, calibracion_version, umbrales_version, pronostico, restricción
+    reactiva, headway vigente y su fuente). Lanza ValueError si la ruta, el pronóstico o la fecha no sirven, o si con
+    la suavidad gobernada el MILP no tiene solución (_resolver_d5).
     """
     from .motor_d5 import comun as C
 
@@ -973,6 +1165,7 @@ def plan_dia(fecha, ruta: str, *, umbrales: dict, umbrales_version: int | None, 
     if pronostico not in PRONOSTICOS_PLAN:
         raise ValueError(f"pronostico debe ser uno de {', '.join(PRONOSTICOS_PLAN)} (recibido: {pronostico!r}).")
     gob = parametros_plan(umbrales, umbrales_version, fuente_costos)
+    operacion = _operacion_del_dia(ruta, f, umbrales, umbrales_version)
     fuente, calibracion, pron = PRONOSTICOS_PLAN[pronostico], None, None
     if pronostico == "E12":
         modelo = FUENTE_E12
@@ -986,14 +1179,20 @@ def plan_dia(fecha, ruta: str, *, umbrales: dict, umbrales_version: int | None, 
     else:
         lista, modelo, calibracion = _pronostico_memorizado(f, ruta, model_id)
         pron = _normalizar_pronostico(lista)
+    # el headway vigente y su fuente entran en la clave: en modo integrado salen de la tabla rutas de la fuente o, si
+    # no responde, del catálogo empaquetado, y la memoria no debe devolver un plan con otro valor u otra fuente
+    info_ruta = _info_catalogo(ruta)
     clave = _clave_plan(f.isoformat(), ruta, modelo, calibracion, umbrales_version, pronostico,
-                        {n: e["valor"] for n, e in gob.items()}, pron, bool(fuente_costos))
+                        {n: e["valor"] for n, e in gob.items()}, pron, bool(fuente_costos), operacion,
+                        ocupacion_actual, [info_ruta.get(k) for k in ("frecuenciadespachos_tabla_rutas",
+                                                                      "frecuencia_fuente")])
     with _PLANES_CANDADO:
         guardado = _PLANES.get(clave)
     if guardado is not None:
         return json.loads(guardado)
     texto = json.dumps(_calcular_plan(f, ruta, gob, pron, fuente, modelo, calibracion, umbrales_version,
-                                      fuente_costos), default=str, ensure_ascii=False)
+                                      fuente_costos, operacion, ocupacion_actual, info_ruta=info_ruta),
+                       default=str, ensure_ascii=False)
     with _PLANES_CANDADO:
         _PLANES[clave] = texto
         while len(_PLANES) > _PLANES_MAX:
@@ -1001,31 +1200,92 @@ def plan_dia(fecha, ruta: str, *, umbrales: dict, umbrales_version: int | None, 
     return json.loads(texto)
 
 
+def _operacion_del_dia(ruta: str, fecha: date, umbrales: dict | None, version: int | None) -> dict | None:
+    """Ajuste local vigente de la ruta para el tipo de día de `fecha`: la flota y el ciclo (flota_ciclo.del_dia) y la
+    capacidad por bus de toda la ruta (catalogos.capacidad_vigente, la misma que usa la franja): {"flota": {...} o
+    None, "ciclo": {hora: {...}}, "capacidad": {...} o None}; None si no hay ninguno."""
+    from app.servicios import flota_ciclo
+
+    idruta = flota_ciclo.idruta_de(None, ruta)
+    operacion = flota_ciclo.del_dia(idruta, TIPOS_DIA[tipo_dia_operacion(fecha)], umbrales, version)
+    capacidad = _capacidad_gobernada(ruta, umbrales or {}, version)
+    if capacidad.get("fuente") != AJUSTE_LOCAL:
+        return operacion
+    ajuste = {"valor": capacidad["capacidad"], "fuente": AJUSTE_LOCAL, "clave": capacidad.get("clave")}
+    return dict(operacion or {"flota": None, "ciclo": {}, "umbrales_version": version}, capacidad=ajuste)
+
+
+def _aplicar_operacion(tb, operacion: dict | None):
+    """Los insumos del día con la flota, el ciclo y la capacidad por bus del ajuste local vigente; sin ajuste, los
+    mismos."""
+    if not operacion:
+        return tb
+    if operacion.get("flota"):
+        tb["flota_disp"] = float(operacion["flota"]["valor"])
+    if operacion.get("capacidad"):
+        tb["capacidad"] = float(operacion["capacidad"]["valor"])
+    for hora, ajuste in (operacion.get("ciclo") or {}).items():
+        tb.loc[tb["hora"] == int(hora), "ciclo"] = float(ajuste["valor"])
+    return tb
+
+
+def _cifra_operativa(valor: float, ajuste: dict | None, base: str) -> dict:
+    """Una cifra operativa del plan con su fuente: el ajuste local (con su clave de threshold_config) o el dato
+    empaquetado."""
+    return {"valor": valor, "fuente": AJUSTE_LOCAL_OPERATIVO if ajuste else base, "clave": (ajuste or {}).get("clave")}
+
+
+def _flota_y_ciclo_del_plan(operacion: dict | None, flota: float, capacidad: float, fuente: str) -> dict:
+    """§3.1 y §10.2: de dónde salen la flota disponible, el ciclo y la capacidad por bus del plan: el ajuste local
+    vigente (con su clave de threshold_config) o el dato empaquetado."""
+    base = FUENTE_FLOTA_CICLO_E12 if fuente == FUENTE_E12 else FUENTE_FLOTA_CICLO
+    operacion = operacion or {}
+    ciclos = operacion.get("ciclo") or {}
+    return {"flota_disponible": _cifra_operativa(flota, operacion.get("flota"), base),
+            "capacidad_por_bus": _cifra_operativa(capacidad, operacion.get("capacidad"), base),
+            "tiempo_ciclo_min": {"fuente": base,
+                                 "horas_con_ajuste_local": {str(h): a["valor"] for h, a in ciclos.items()},
+                                 "claves": sorted({a["clave"] for a in ciclos.values()})}}
+
+
+def _completar_horas(horas: list[dict], costos_hora: list[dict], flota: float, vigente: float | None) -> None:
+    """Cada hora persistida lleva su costo, la flota del día y el headway vigente de rutas.frecuenciadespachos con su
+    diferencia frente al headway recomendado de la hora (§6.2)."""
+    for h, c in zip(horas, costos_hora, strict=True):
+        h["componentes_costo_cop"] = {k: round(v, 2) for k, v in c.items()}
+        h["costo_hora_cop"] = round(sum(c.values()), 2)
+        h["flota_disponible"] = flota
+        h.update(comparacion_frecuenciadespachos(h["headway_min"], vigente))
+
+
 def _calcular_plan(f: date, ruta: str, gob: dict, pron, fuente: str, modelo: str, calibracion, umbrales_version,
-                   fuente_costos: bool) -> dict:
+                   fuente_costos: bool, operacion: dict | None = None, ocupacion_actual: dict | None = None, *,
+                   info_ruta: dict) -> dict:
     tb = _insumos_e12(f, ruta) if fuente == FUENTE_E12 else _insumos_modelo_activo(f, ruta, pron)
-    tb = _con_cotas(tb.reset_index(drop=True), gob)
+    tb = _con_cotas(_aplicar_operacion(tb.reset_index(drop=True), operacion), gob)
+    reactiva = _aplicar_reactiva(tb, ocupacion_actual, gob)
     p_milp = _p_milp(gob, fuente_costos)
-    r = _resolver_plan(tb, p_milp)
+    r, reactiva = _resolver_con_reactiva(tb, p_milp, reactiva)
     flota_max, flota_estado = _flota_por_hora(tb, r["flota"])
     por_hora = {}
     for m in r["horario"]:
         por_hora.setdefault(int(m) // 60, []).append(f"{int(m) // 60:02d}:{int(m) % 60:02d}")
     contexto = {"tb": tb, "gob": gob, "r": r, "p_milp": p_milp, "flota_max": flota_max, "flota_estado": flota_estado,
-                "por_hora": por_hora, "fuente": fuente, "model_id": modelo, "calibracion": calibracion}
+                "por_hora": por_hora, "fuente": fuente, "model_id": modelo, "calibracion": calibracion,
+                "reactiva": reactiva, "historica": _historicas(ruta, f, tb)}
     horas = [_hora_del_plan(i, contexto) for i in range(len(tb))]
     programado = _intervalos_programados(ruta, f)
     total_prog = sum((_completar_hora_d5(h, tb.set_index("hora"), programado) for h in horas), 0.0)
     costos_hora = _componentes_por_hora(tb, _p_milp(gob, fuente_costos, ponderar=False))
     comp = _componentes(tb, {}, costos_hora)
-    for h, c in zip(horas, costos_hora, strict=True):   # cada fila persistida lleva su costo y la flota del día
-        h["componentes_costo_cop"] = {k: round(v, 2) for k, v in c.items()}
-        h["costo_hora_cop"] = round(sum(c.values()), 2)
-        h["flota_disponible"] = r["flota"]
+    vigente = frecuenciadespachos_min(info_ruta)
+    _completar_horas(horas, costos_hora, r["flota"], vigente)
     hmin, hmax = gob["headway_minimo_min"]["valor"], gob["headway_maximo_efectivo_min"]["valor"]
     return {
         "ruta": ruta, "fecha": f.isoformat(), "modelo": modelo, "tipo_dia": str(tb["tipo_dia"].iloc[0]),
         "estado_solver": r["estado"], "flota_disponible": r["flota"], "holgura_flota": round(r["holgura"], 4),
+        "flota_y_ciclo": _flota_y_ciclo_del_plan(operacion, r["flota"], float(tb["capacidad"].max()), fuente),
+        "frecuenciadespachos_min": vigente, "fuente_frecuenciadespachos": fuente_frecuenciadespachos(info_ruta),
         "salidas_dia": int(sum(h["salidas"] for h in horas)),
         "salidas_programadas_dia": round(total_prog, 1) if total_prog else None,
         "vehiculos_hora_pico": max((h["vehiculos_requeridos"] for h in horas), default=0),
@@ -1047,9 +1307,18 @@ def _calcular_plan(f: date, ruta: str, gob: dict, pron, fuente: str, modelo: str
             f"sobrecarga esperada (lognormal con la banda calibrada) + ingreso perdido, sujeto a flota en ruta cada "
             f"15 min, suavidad |x_h - x_(h-1)| <= DELTA, headway máximo efectivo de {_f(hmax, 2)} min (x_h >= "
             f"ceil(minutos_h / headway_max)) y headway mínimo gobernado de {_f(hmin, 2)} min (x_h <= "
-            f"floor(minutos_h / headway_min))."),
+            f"floor(minutos_h / headway_min))." + _texto_reactiva(reactiva)),
+        "ocupacion_actual": reactiva,
         "horas": horas,
     }
+
+
+def _texto_reactiva(reactiva: dict | None) -> str:
+    """La restricción reactiva en la formulación del plan, solo si actuó."""
+    if not (reactiva and reactiva.get("aplica")):
+        return ""
+    return (f" Restricción reactiva de ocupación observada (§10.1): x_{reactiva['hora_aplica']} >= "
+            f"{reactiva['salidas_minimas']} ({reactiva['formula']}).")
 
 
 def fila_plan(plan: dict, hora: dict) -> dict:
@@ -1074,8 +1343,9 @@ def fila_plan(plan: dict, hora: dict) -> dict:
             "capacidad_efectiva": hora.get("capacidad_efectiva"),
             "ocupacion_esperada": hora.get("ocupacion_esperada"), "viable": bool(hora.get("viable", True)),
             "motivo": hora.get("motivo"), "frecuencia_actual_min": hora.get("frecuencia_actual_min"),
-            "diferencia_min": diferencia, "formula": plan.get("formulacion"),
-            "umbrales_version": plan.get("umbrales_version"), "origen": "plan_dia",
+            "diferencia_min": diferencia, "frecuenciadespachos_min": hora.get("frecuenciadespachos_min"),
+            "diferencia_frecuenciadespachos_min": hora.get("diferencia_frecuenciadespachos_min"),
+            "formula": plan.get("formulacion"), "umbrales_version": plan.get("umbrales_version"), "origen": "plan_dia",
             "idruta": idruta if idruta is not None else C.ID_RUTA.get(plan["ruta"]),
             "detalle": {"origen": "plan_dia", "hora_plan": hora, "plan": resumen}}
 
@@ -1356,6 +1626,14 @@ def tipo_dia_operacion(fecha) -> int:
     return datos.tipo_dia_de(f, festivo=es_festivo(f))
 
 
+def dia_semana_operacion(fecha) -> int | None:
+    """§10.1 «día de la semana»: el día ISO con que se opera la fecha (1 = lunes … 6 = sábado) y 7 para los domingos y
+    los festivos, que se operan como domingo (el tipo de día «Domingo/festivo» de D5). None sin fecha."""
+    if fecha is None:
+        return None
+    return 7 if tipo_dia_operacion(fecha) == 2 else _fecha_de(fecha).isoweekday()
+
+
 def _intervalos_programados(ruta: str, fecha: date | None) -> dict[int, float]:
     """Intervalo programado (min) por hora para el tipo de día de `fecha` (parametros_operativos_hora.parquet, D1). Un
     festivo entre semana usa la programación de domingo o festivo, como el plan D5."""
@@ -1404,34 +1682,77 @@ def contexto_franja(ruta: str, fecha: date | None, hora: int) -> dict:
             "fuente": "datos/parametros_operativos_hora.parquet (mediana 2025 por ruta, tipo de día y hora; D1)"}
 
 
-@lru_cache(maxsize=1)
-def _factores_carga_hora() -> dict:
-    """§10.1 «ocupación histórica por día de la semana y rango de horas»: mediana 2025 de carga crítica / abordajes
-    (L_real / real de datos/insumos_d5_2025.parquet, horas con > 20 abordajes) por ruta, tipo de día y hora."""
+MIN_DIAS_FACTOR = 10           # días con datos que exige una celda del factor de carga (si no, el respaldo)
+FUENTE_FACTOR_DIA = ("mediana 2025 de carga crítica / abordajes por ruta, día de la semana de operación (ISO; 7 = "
+                     "domingo o festivo) y hora (insumos D5)")
+FUENTE_FACTOR_TIPO = "mediana 2025 de carga crítica / abordajes por ruta, tipo de día y hora (insumos D5)"
+
+
+def _cargas_2025():
+    """Horas de 2025 con más de 20 abordajes y carga crítica conocida (datos/insumos_d5_2025.parquet): factor = L_real
+    / real, donde L_real es la mediana de la ocupación máxima a bordo de los viajes con contadores consistentes
+    (conteo_viajes.ocupacion_max, R9) × viajes válidos y real, los abordajes de la hora. None sin el archivo."""
     from .motor_d5 import comun as C
 
     archivo = C.DATOS / ARCHIVO_INSUMOS_D5
     if not archivo.exists():
-        return {}
+        return None
     import pandas as pd
 
-    d = pd.read_parquet(archivo, columns=["ruta", "tipo_dia", "hora", "real", "L_real"])
+    d = pd.read_parquet(archivo, columns=["ruta", "dia", "tipo_dia", "hora", "real", "L_real"])
     d = d[(d["real"] > 20) & (d["L_real"] > 0)].copy()
     d["f"] = d["L_real"] / d["real"]
     d["t"] = d["tipo_dia"].astype(str).str[:1]
-    g = d.groupby(["ruta", "t", "hora"])["f"].agg(["median", "count"])
-    return {(str(r), str(t), int(h)): (float(m), int(n)) for (r, t, h), (m, n) in g.iterrows() if n >= 10}
+    return d
+
+
+def _medianas_por(d, clave: str) -> dict:
+    """{(ruta, clave, hora): (mediana, días)} con al menos MIN_DIAS_FACTOR días."""
+    g = d.groupby(["ruta", clave, "hora"])["f"].agg(["median", "count"])
+    return {(str(r), k if isinstance(k, str) else int(k), int(h)): (float(m), int(n))
+            for (r, k, h), (m, n) in g.iterrows() if n >= MIN_DIAS_FACTOR}
+
+
+@lru_cache(maxsize=1)
+def _factores_carga_hora() -> dict:
+    """§10.1 «ocupación histórica por día de la semana y rango de horas», nivel de respaldo: mediana 2025 de carga
+    crítica / abordajes (L_real / real de datos/insumos_d5_2025.parquet, horas con > 20 abordajes) por ruta, tipo de
+    día y hora."""
+    d = _cargas_2025()
+    return {} if d is None else _medianas_por(d, "t")
+
+
+@lru_cache(maxsize=1)
+def _factores_carga_dia() -> dict:
+    """§10.1 «día de la semana»: la misma mediana 2025 por ruta, día de operación ISO y hora. Los domingos y los
+    festivos (tipo de día «Domingo/festivo» de D5) van juntos en el día 7, así que un festivo entre semana nunca se
+    mezcla con su día de la semana ni lo contamina."""
+    d = _cargas_2025()
+    if d is None:
+        return {}
+    import pandas as pd
+
+    iso = pd.to_datetime(d["dia"]).dt.isocalendar().day.astype(int)
+    d["dia_op"] = iso.where(d["t"] != "D", 7).astype(int)
+    return _medianas_por(d, "dia_op")
+
+
+def _salida_factor(v: tuple[float, int], nivel: str, dia: int | None, fuente: str) -> dict:
+    return {"factor_carga": round(min(max(v[0], 0.05), 1.0), 4), "dias": v[1], "nivel": nivel, "id_dia_semana": dia,
+            "fuente": fuente}
 
 
 def factor_carga_franja(ruta: str, fecha: date | None, hora: int) -> dict | None:
-    """Factor de carga crítica de la franja (ruta, tipo de día, hora); None si no hay al menos 10 días con datos. Un
-    festivo entre semana usa el factor de domingo o festivo."""
-    letra = "LSD"[tipo_dia_operacion(fecha)]
-    v = _factores_carga_hora().get((ruta, letra, int(hora)))
-    if v is None:
-        return None
-    return {"factor_carga": round(min(max(v[0], 0.05), 1.0), 4), "dias": v[1],
-            "fuente": "mediana 2025 de carga crítica / abordajes por ruta, tipo de día y hora (insumos D5)"}
+    """Factor de carga crítica de la franja (§10.1): el de la ruta, el día de la semana de operación de la fecha (7 =
+    domingo o festivo) y la hora; si esa celda no tiene al menos MIN_DIAS_FACTOR días (o no hay fecha), el de la ruta,
+    el tipo de día y la hora, el que se usaba antes (nivel «tipo_dia»). None si tampoco hay respaldo. Un festivo entre
+    semana usa el factor de domingo o festivo."""
+    dia = dia_semana_operacion(fecha)
+    v = _factores_carga_dia().get((ruta, dia, int(hora))) if dia is not None else None
+    if v is not None:
+        return _salida_factor(v, "dia_semana", dia, FUENTE_FACTOR_DIA)
+    v = _factores_carga_hora().get((ruta, "LSD"[tipo_dia_operacion(fecha)], int(hora)))
+    return None if v is None else _salida_factor(v, "tipo_dia", dia, FUENTE_FACTOR_TIPO)
 
 
 def _distribucion_carga(demanda, p90, p10, factor, nivel):
@@ -1481,10 +1802,14 @@ class _Franja:
     """Datos de una franja ya validados y los costos de §10.2 de cualquier solución (k buses/h, mezcla n_t)."""
 
     def __init__(self, *, demanda, pax, mu, s, carga_diseno, occ, occ_crit, ciclo, km, cv, k_act, flota, tipos, p,
-                 k_lo, k_hi):
+                 k_lo, k_hi, piso=None):
         self.demanda, self.pax, self.mu, self.s, self.carga_diseno = demanda, pax, mu, s, carga_diseno
         self.occ, self.occ_crit, self.ciclo, self.km, self.cv, self.k_act = occ, occ_crit, ciclo, km, cv, k_act
-        self.flota, self.tipos, self.p, self.k_lo, self.k_hi = flota, tipos, p, k_lo, k_hi
+        self.flota, self.tipos, self.p, self.k_hi = flota, tipos, p, k_hi
+        # k_lo del headway máximo de la política; con el piso de la ocupación observada (§10.1, restricción reactiva)
+        # la cota inferior del MILP es max(k_lo, piso), sin pasar el tope del headway mínimo
+        self.k_lo_headway, self.piso = k_lo, (min(int(piso), k_hi) if piso else None)
+        self.k_lo = max(k_lo, self.piso or 0)
         self.caps = [float(t["capacidad"]) for t in tipos]
         ciclo_h = (ciclo if ciclo is not None else 60.0) / 60.0
         self.costo_salida = ciclo_h * p["costo_bus_hora_cop"] + km * p["costo_km_cop"]
@@ -1679,13 +2004,19 @@ def _restricciones(fr: _Franja, n, e) -> list[dict]:
          "valor": round(60.0 / k, 2), "limite": round(60.0 / fr.k_hi, 2) if fr.k_hi else None,
          "unidad": "min", "activa": k >= fr.k_hi},
         {"nombre": "headway_maximo", "descripcion": "Headway máximo (espera máxima de la política de servicio)",
-         "valor": round(60.0 / k, 2), "limite": round(60.0 / fr.k_lo, 2) if fr.k_lo else None,
-         "unidad": "min", "activa": k <= fr.k_lo},
+         "valor": round(60.0 / k, 2), "limite": round(60.0 / fr.k_lo_headway, 2) if fr.k_lo_headway else None,
+         "unidad": "min", "activa": k <= fr.k_lo_headway},
         {"nombre": "nivel_servicio",
          "descripcion": "Capacidad: capacidad efectiva >= carga crítica del nivel de servicio",
          "valor": round(cap * fr.occ, 2), "limite": round(fr.carga_diseno, 2), "unidad": "pasajeros/h",
          "activa": cap * fr.occ - fr.carga_diseno < menor * fr.occ - 1e-9},
     ]
+    if fr.piso:
+        filas.append({"nombre": "ocupacion_observada",
+                      "descripcion": "Restricción reactiva de ocupación observada (§10.1): buses/h >= los que exige "
+                                     "la carga observada en el segmento crítico de la última hora cerrada",
+                      "valor": k, "limite": fr.piso, "unidad": "buses/h",
+                      "activa": k <= fr.piso and fr.piso > fr.k_lo_headway})
     if fr.ciclo is not None:
         filas += _filas_flota_y_ciclo(fr, n, e)
     filas += _filas_tipologias(fr, n)
@@ -1720,7 +2051,7 @@ def _holgura(f: dict):
     """Holgura de una restricción: cuánto falta para el límite (None si no hay valor o límite numérico)."""
     if not (isinstance(f["valor"], (int, float)) and isinstance(f["limite"], (int, float))):
         return None
-    if f["nombre"] in ("headway_minimo", "nivel_servicio"):
+    if f["nombre"] in ("headway_minimo", "nivel_servicio", "ocupacion_observada"):
         return round(f["valor"] - f["limite"], 2)
     return round(f["limite"] - f["valor"], 2)
 
@@ -1787,13 +2118,16 @@ def _diagnostico(fr: _Franja, aprox=None) -> list[str]:
 def optimizar(ruta, hora, demanda_hora, demanda_p90=None, demanda_p10=None, *, capacidad=50,
               ocupacion_objetivo=0.85, ocupacion_critica=0.90, tiempo_ciclo_min=None, flota_disponible=None,
               headway_min=2.0, headway_max=10.0, frecuencia_actual_min=None, factor_carga=None, km_ciclo=None,
-              cv_intervalos=None, parametros=None, tipologias=None, verificar=False):
+              cv_intervalos=None, parametros=None, tipologias=None, verificar=False, buses_minimos=None):
     """Recomendación con la función objetivo de §10.2 (MILP de la franja), la línea base de §10.3 al lado y la
     explicación (restricciones activas, límites que mandan, por qué k y no k ± 1).
 
     parametros: salida de parametros_objetivo() o un dict {nombre: valor}; None = valores del código.
     tipologias: lista de tipologias_ruta() (con `disponibles`) para la asignación de capacidad de §10.1; None o [] =
       una sola tipología de `capacidad` puestos.
+    buses_minimos: el piso de la restricción reactiva de ocupación observada (§10.1, ocupacion.piso_de_la_franja):
+      la cota inferior de buses/h pasa a max(60 / headway máximo, buses_minimos) y la restricción «ocupacion_observada»
+      aparece en restricciones y, si manda, en limites_activos. None (por omisión): el MILP de siempre.
     Las claves de recomendar() se conservan (buses_hora, headway_min, vehiculos_requeridos, viable, motivo, ...). Si la
     franja es inviable sale viable=False con el motivo; buses_hora, headway_min y vehiculos_requeridos llevan la mejor
     aproximación EJECUTABLE (respeta flota, ciclo y headway, no el nivel de servicio), repetida y rotulada en
@@ -1809,7 +2143,7 @@ def optimizar(ruta, hora, demanda_hora, demanda_p90=None, demanda_p10=None, *, c
     literal = recomendar(ruta, hora, demanda_hora, demanda_p90=None, factor_carga=1.0, **comunes)
     extra = _entradas_10_2(ruta, base, demanda_p10, ocupacion_critica, km_ciclo, cv_intervalos)
     efectivos = _efectivos_objetivo(parametros)
-    fr, usa_tipologias, criterio = _franja_de(base, extra, efectivos, tipologias, capacidad)
+    fr, usa_tipologias, criterio = _franja_de(base, extra, efectivos, tipologias, capacidad, buses_minimos)
     mezcla, solver = _resolver_franja(fr, verificar)
     objetivo = _objetivo_explicito(efectivos, extra, base)
     salida = {"ruta": ruta, "hora": hora, "metodo": "funcion_objetivo_10_2", "solver": solver, "objetivo": objetivo,
@@ -1888,8 +2222,10 @@ def _tipos_franja(tipologias, capacidad) -> tuple[list[dict], bool]:
              "disponibles": None}], False
 
 
-def _franja_de(base: dict, extra: dict, efectivos: dict, tipologias, capacidad) -> tuple[_Franja, bool, str]:
-    """La franja de §10.2 (demanda lognormal calibrada, límites de headway, flota y tipologías) y su criterio."""
+def _franja_de(base: dict, extra: dict, efectivos: dict, tipologias, capacidad,
+               piso: int | None = None) -> tuple[_Franja, bool, str]:
+    """La franja de §10.2 (demanda lognormal calibrada, límites de headway, flota y tipologías) y su criterio. `piso`:
+    buses/h mínimos de la restricción reactiva de ocupación observada (§10.1), si la hay."""
     p = {n: float(e["valor"]) for n, e in efectivos.items()}
     demanda, factor = base["demanda_hora"], base["factor_carga"]
     mu, s, carga_diseno, criterio = _distribucion_carga(demanda, base["demanda_p90"], extra["p10"], factor,
@@ -1900,7 +2236,7 @@ def _franja_de(base: dict, extra: dict, efectivos: dict, tipologias, capacidad) 
     fr = _Franja(demanda=demanda, pax=demanda, mu=mu, s=s, carga_diseno=carga_diseno, occ=extra["occ"],
                  occ_crit=extra["occ_crit"], ciclo=base["tiempo_ciclo_min"], km=extra["km"], cv=extra["cv"],
                  k_act=(60.0 / actual) if actual else None, flota=base["flota_disponible"], tipos=tipos, p=p,
-                 k_lo=int(math.ceil(60.0 / hmax - EPS)), k_hi=int(math.floor(60.0 / hmin + EPS)))
+                 k_lo=int(math.ceil(60.0 / hmax - EPS)), k_hi=int(math.floor(60.0 / hmin + EPS)), piso=piso)
     return fr, usa_tipologias, criterio
 
 
@@ -2122,7 +2458,8 @@ def _margen(fr: _Franja, n, e):
 
 
 NOMBRES_LIMITES = {"headway_minimo": "el headway mínimo", "headway_maximo": "la espera máxima (headway máximo)",
-                   "nivel_servicio": "la capacidad del nivel de servicio", "flota_disponible": "la flota disponible"}
+                   "nivel_servicio": "la capacidad del nivel de servicio", "flota_disponible": "la flota disponible",
+                   "ocupacion_observada": "la restricción reactiva de ocupación observada (§10.1)"}
 
 
 def _texto_limites(fr: _Franja, activos) -> str:
@@ -2146,11 +2483,16 @@ def _textos_margen(margen: dict, activos) -> list[str]:
                       f"{_f(mas['delta_total_ponderado_cop'], 0)} COP/h.")
     if menos.get("factible"):
         textos.append(f"Un bus menos cambiaría el objetivo en {_f(menos['delta_total_ponderado_cop'], 0)} COP/h.")
-    elif "nivel_servicio" in activos:
-        textos.append("Un bus menos no es factible: violaría el nivel de servicio.")
-    elif "headway_maximo" in activos:
-        textos.append("Un bus menos no es factible: violaría la espera máxima.")
+        return textos
+    razon = next((r for nombre, r in RAZONES_SIN_UN_BUS_MENOS if nombre in activos), None)
+    if razon:
+        textos.append(f"Un bus menos no es factible: violaría {razon}.")
     return textos
+
+
+# por qué no se puede quitar un bus, en el orden en que se explica (la primera restricción activa que lo impide)
+RAZONES_SIN_UN_BUS_MENOS = (("nivel_servicio", "el nivel de servicio"), ("headway_maximo", "la espera máxima"),
+                            ("ocupacion_observada", "el piso de la ocupación observada (§10.1)"))
 
 
 def _razon_frente_a_linea_base(e: dict, base: dict, asign) -> str:
@@ -2439,6 +2781,7 @@ def _entradas_franja(info: dict, umbrales: dict, fecha: date | None, hora: int, 
     entradas["headway_max"] = hmax["valor"]
     ctx = contexto_franja(ruta, fecha, hora)
     ctx = dict(ctx, headway_maximo=hmax) if ctx else {"headway_maximo": hmax}
+    ctx = _con_ajuste_operativo(ctx, info, fecha, hora, umbrales, version)
     for campo in ("tiempo_ciclo_min", "flota_disponible", "frecuencia_actual_min"):
         if ctx.get(campo) is not None:
             entradas[campo] = ctx[campo]
@@ -2450,6 +2793,85 @@ def _entradas_franja(info: dict, umbrales: dict, fecha: date | None, hora: int, 
         if campo in solicitud:
             entradas[campo] = solicitud[campo]
     return entradas, ctx
+
+
+def _con_ajuste_operativo(ctx: dict, info: dict, fecha: date | None, hora: int, umbrales: dict,
+                          version: int | None) -> dict:
+    """§3.1 y §10.2: flota disponible y tiempo de ciclo de la franja con el ajuste local vigente
+    (app/servicios/flota_ciclo.py, versionado en threshold_config) en lugar del dato empaquetado;
+    ctx["ajuste_operativo"] dice qué se ajustó, con su clave y su versión. Sin ajuste, ctx queda igual."""
+    from app.servicios import flota_ciclo
+
+    idruta = flota_ciclo.idruta_de(info, info.get("ruta"))
+    ajuste = flota_ciclo.de_la_franja(idruta, TIPOS_DIA[tipo_dia_operacion(fecha)], hora, umbrales, version)
+    if not ajuste:
+        return ctx
+    return dict(ctx, **{campo: a["valor"] for campo, a in ajuste.items()}, ajuste_operativo=ajuste)
+
+
+def frecuenciadespachos_min(info: dict | None) -> float | None:
+    """§6.2 «headway vigente, tomado de la frecuencia de despachos» y §6.1 «frecuenciadespachos»: el valor de
+    rutas.frecuenciadespachos de la ruta, en minutos (None si el catálogo no trae un número positivo)."""
+    valor = (info or {}).get("frecuenciadespachos_tabla_rutas")
+    try:
+        minutos = float(str(valor).strip().replace(",", "."))
+    except (TypeError, ValueError):
+        return None
+    return minutos if math.isfinite(minutos) and minutos > 0 else None
+
+
+def fuente_frecuenciadespachos(info: dict | None) -> str:
+    """De dónde salió el headway vigente de la ruta (§6.1, §6.2): la tabla rutas de la base de Extreme cuando
+    datos.ruta_info lo leyó de la fuente (frecuencia_fuente = «fuente», modo integrado), o la exportación empaquetada
+    del catálogo en los demás casos (modo offline, o la fuente no respondió o no trae valor para la ruta)."""
+    from app.servicios import datos
+
+    en_vivo = (info or {}).get("frecuencia_fuente") == datos.FRECUENCIA_DE_LA_FUENTE
+    return FUENTE_FRECUENCIADESPACHOS_EN_VIVO if en_vivo else FUENTE_FRECUENCIADESPACHOS
+
+
+def comparacion_frecuenciadespachos(headway_min: float | None, vigente: float | None) -> dict:
+    """Headway vigente de rutas.frecuenciadespachos y su diferencia con el recomendado (recomendado − vigente, en
+    minutos, y el sentido del cambio: reducir_intervalo, ampliar_intervalo o mantener). Sin headway recomendado (una
+    franja no viable o una hora sin salidas) la diferencia queda en None."""
+    diferencia, cambio = _cambio_frecuencia(headway_min, vigente) if headway_min is not None else (None, None)
+    return {"frecuenciadespachos_min": vigente, "diferencia_frecuenciadespachos_min": diferencia,
+            "cambio_frecuenciadespachos": cambio}
+
+
+def _info_catalogo(ruta: str) -> dict:
+    """La ruta del catálogo (datos.ruta_info: datos/catalogo_rutas.json y, en modo integrado, la frecuencia vigente de
+    la tabla rutas de la fuente con frecuencia_fuente); vacío si no está."""
+    from app.servicios import datos
+
+    try:
+        return datos.ruta_info(ruta)
+    except KeyError:
+        return {}
+
+
+def _comparar_con_frecuenciadespachos(r: dict, info: dict) -> None:
+    """§6.2 y §6.1 en la franja: el headway vigente de rutas.frecuenciadespachos y su diferencia con el recomendado,
+    además de la comparación con el intervalo programado observado (frecuencia_actual_min y diferencia_min), que se
+    conserva. La diferencia solo se da si la franja es viable, igual que diferencia_min."""
+    vigente = frecuenciadespachos_min(info)
+    r.update(comparacion_frecuenciadespachos(r.get("headway_min") if r.get("viable") else None, vigente))
+    r["fuente_frecuenciadespachos"] = fuente_frecuenciadespachos(info) if vigente is not None else None
+    if r["diferencia_frecuenciadespachos_min"] is not None:
+        r.setdefault("explicacion", []).append(
+            f"Headway vigente de rutas.frecuenciadespachos: cada {_f(vigente, 2)} min; el recomendado es cada "
+            f"{_f(r['headway_min'], 2)} min (diferencia de {_f(r['diferencia_frecuenciadespachos_min'], 2)} min).")
+
+
+def _con_ocupacion_historica(r: dict, ruta: str, fecha: date | None, hora: int, capacidad) -> None:
+    """§10.1 ocupación histórica en la franja: el segmento crítico de la ruta en el día de la semana y la hora, con su
+    ocupación con los puestos de la recomendación (ocupacion_historica y una frase en la explicación). Sin perfil
+    empaquetado queda en None y la explicación no cambia."""
+    from app.servicios import ocupacion
+
+    r["ocupacion_historica"] = ocupacion.segmento_critico_historico(ruta, fecha, hora, capacidad)
+    if r["ocupacion_historica"]:
+        r.setdefault("explicacion", []).append(r["ocupacion_historica"]["texto"])
 
 
 def _tipologias_gobernadas(ruta: str, umbrales: dict, version: int | None, flota_disponible) -> list[dict] | None:
@@ -2478,11 +2900,12 @@ def recomendacion_franja(info: dict, umbrales: dict, version_umbrales: int | Non
                          demanda_hora: float, demanda_p90: float | None = None, demanda_p10: float | None = None,
                          solicitud: dict | None = None, pesos: dict | None = None, nivel_servicio: float | None = None,
                          usar_tipologias: bool = True, escenario: dict | None = None,
-                         incluir_sensibilidad: bool = False) -> tuple[dict, dict]:
+                         incluir_sensibilidad: bool = False, buses_minimos: int | None = None) -> tuple[dict, dict]:
     """Recomendación de §10.2 de una franja con todas sus fuentes, en orden de prioridad:
     catálogo de la ruta -> parámetros de la hora y el tipo de día (D1) -> umbrales vigentes (threshold_config, con los
     pesos versionados) -> lo que traiga la solicitud. Devuelve (resultado de optimizar() con la comparación con la
-    frecuencia actual, el escenario y la sensibilidad si se piden; entradas efectivas para la trazabilidad)."""
+    frecuencia actual, el escenario y la sensibilidad si se piden; entradas efectivas para la trazabilidad).
+    `buses_minimos`: el piso de la restricción reactiva de ocupación observada (§10.1), ver optimizar()."""
     ruta = info["ruta"]
     solicitud = {k: v for k, v in (solicitud or {}).items() if v is not None}
     entradas, ctx = _entradas_franja(info, umbrales, fecha, hora, solicitud, version_umbrales)
@@ -2499,8 +2922,12 @@ def recomendacion_franja(info: dict, umbrales: dict, version_umbrales: int | Non
         tipologias = _tipologias_gobernadas(ruta, umbrales, version_umbrales, entradas.get("flota_disponible"))
     kwargs = dict(ruta=ruta, hora=hora, demanda_hora=demanda_hora, demanda_p90=demanda_p90, demanda_p10=demanda_p10,
                   parametros=parametros, tipologias=tipologias, **entradas)
+    if buses_minimos:
+        kwargs["buses_minimos"] = int(buses_minimos)
     r = optimizar(**kwargs)
     marcar_sobreoferta(r, umbrales)
+    _comparar_con_frecuenciadespachos(r, info)
+    _con_ocupacion_historica(r, ruta, fecha, hora, entradas.get("capacidad"))
     r["contexto_franja"] = ctx or None
     r["capacidad_gobernada"] = gobernada or None
     r["comparacion_actual"] = comparar_actual(r, entradas.get("frecuencia_actual_min"), entradas["capacidad"])

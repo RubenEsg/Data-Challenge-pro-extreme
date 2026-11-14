@@ -1,10 +1,27 @@
 DATASET ACORDADO DE RNF-002 (§14.1 «Carga | k6 | Consultas e ingesta con el volumen acordado»)
 El volumen acordado es UN AÑO de operación del ciclo diario: 365 ejecuciones o más, con sus predicciones, recomendaciones y alertas.
 Se arma con scripts/sembrar_volumen.py, que replica filas reales de la API con identificadores nuevos y fechas corridas.
-Medición vigente: 2026-11-09, base local ai_frecuencias_volumen_infra5 (77 MB): 396 ejecuciones, 3.348 predicciones, 3.348 recomendaciones,
+Medición vigente: 2026-11-13, con el código final (migraciones 0001 a 0014), en docs/evidencias/pruebas/k6_segmentos.txt y sus k6_segmentos_*.json
+(scripts/medir_segmentos.py; API de un solo proceso en :8360, modo integrado con la réplica 5434 como lector_ia, autenticación encendida).
+   Base local sembrada con scripts/sembrar_volumen.py desde 33 ejecuciones reales del ciclo final (docs/evidencias/pruebas/plantilla_volumen.py): unos 1.000 MB,
+   1.056 ejecuciones del ciclo, 9.216 predicciones, 61.440 recomendaciones (franjas y horas del plan del día), 8.224 alertas, 8.896 entradas de historial y
+   1.198.080 fotos de variables (1.170 por ejecución, con la foto por segmento). Son 32 copias y no 12: con las reglas finales las 33 ejecuciones
+   abren 257 alertas (antes 749), y el guion exige 8.000 alertas como mínimo. Es más volumen que el año acordado (cota conservadora).
+   consultas PAGINADAS concurrentes (k6/consultas.js, rampa 0 -> 25 -> 50 usuarios en 60 s): p95 de 864,1 ms y 0,00 % de errores -> cumple p95 < 2 s
+      (predictions 786,6 ms; recommendations 993,1 ms; alerts 858,9 ms; executions 719,7 ms; models 676,2 ms)
+   refresco completo de la agregación como trabajo de la cola: «ok» a los 33,8 s del POST; durante la carga de 50 usuarios, 25,7 s de trabajo
+   EN FRÍO (k6/en_frio.js): p95 de las 20 consultas paginadas de 173,8 ms en frío y 83,3 ms en caliente
+   GET /api/v1/segmentos/estadisticas (agregación materializada, migración 0008): 20,8 ms en frío y 18,3 ms en caliente; con idruta 16,5 y 15,0 ms -> cumple
+   GET /api/v1/catalogos/segmentos: 169,8 ms en frío y 35,0 ms en caliente -> cumple
+   50 usuarios sobre la capa de segmentos DURANTE un refresco completo (k6/segmentos.js): p95 de 332,4 ms, la peor consulta 411,0 ms, 0 % de errores
+   30 usuarios DURANTE una ingesta incremental desde la réplica (2.757 filas): p95 de 574,5 ms durante la ingesta y 0 % de errores; la ingesta termina «ok» en 225,8 s
+   exportaciones CSV completas (9.216 predicciones / 8.224 alertas): 7.264 a 7.726 ms y 4.287 a 4.290 ms; son descargas del conjunto, no consultas paginadas
+
+Medición del 2026-11-09 (anterior a la agregación materializada de la migración 0008; se conserva para comparar):
+base local ai_frecuencias_volumen_infra5 (77 MB): 396 ejecuciones, 3.348 predicciones, 3.348 recomendaciones,
 8.988 alertas, 8.988 entradas de historial y 4.464 fotos de variables. La ingesta se mide aparte con 111.792 filas (RNF-003, más abajo).
 
-RNF-002 · k6 con el volumen acordado (docs/evidencias/pruebas/k6_volumen.txt y .json, k6_en_frio.json); API de un solo proceso en :8507, autenticación encendida
+RNF-002 · k6 con el volumen acordado, medición del 2026-11-09 (docs/evidencias/pruebas/k6_volumen.txt y .json, k6_en_frio.json); API de un solo proceso en :8507, autenticación encendida
    consultas PAGINADAS concurrentes (k6/consultas.js, rampa 0 -> 25 -> 50 usuarios en 60 s): 2.873 peticiones, 0,00 % de errores, 47,6 req/s
    todas                              p50=  287,9 ms  p95=  627,5 ms  p99=  927,0 ms  máx= 1278,9 ms  -> cumple p95 < 2 s
    GET predictions                    p50=  342,8 ms  p95=  729,7 ms  p99= 1058,6 ms  -> cumple p95 < 2 s
@@ -13,8 +30,8 @@ RNF-002 · k6 con el volumen acordado (docs/evidencias/pruebas/k6_volumen.txt y 
    GET executions                     p50=  258,6 ms  p95=  567,1 ms  p99=  690,2 ms  -> cumple p95 < 2 s
    GET models                         p50=  216,9 ms  p95=  504,7 ms  p99=  645,6 ms  -> cumple p95 < 2 s
    EN FRÍO (k6/en_frio.js, primera petición tras arrancar la API): 17 de 22 rutas < 100 ms (predicciones 62,4 ms, alertas 56,7 ms)
-   GET /api/v1/segmentos/estadisticas (réplica, sin caché): 8.783 ms en frío y 11.882 ms en caliente; con idruta 2.279 a 2.916 ms -> NO cumple
-   GET /api/v1/catalogos/segmentos: 5.004 ms la primera vez y 65,5 ms con la caché -> no cumple en frío
+   GET /api/v1/segmentos/estadisticas (réplica, sin caché): 8.783 ms en frío y 11.882 ms en caliente; con idruta 2.279 a 2.916 ms -> NO cumple (el 9-11; desde la migración 0008 cumple: ver la medición vigente)
+   GET /api/v1/catalogos/segmentos: 5.004 ms la primera vez y 65,5 ms con la caché -> no cumple en frío (el 9-11; hoy cumple: ver la medición vigente)
    exportaciones CSV completas (3.348 predicciones / 8.988 alertas): 3.425 a 5.165 ms; son descargas del conjunto, no consultas paginadas
 
 MEDICIONES ANTERIORES (un mes de resultados), conservadas para comparar

@@ -140,6 +140,36 @@
   },
   {
    "metodo": "GET",
+   "ruta": "/api/v1/catalogos/flota",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "PUT",
+   "ruta": "/api/v1/catalogos/flota",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "admin"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/catalogos/flota/historial",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
    "ruta": "/api/v1/catalogos/procesos",
    "seguridad": [
     {
@@ -291,6 +321,16 @@
   {
    "metodo": "GET",
    "ruta": "/api/v1/frequency/executions/{execution_id}/errors",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "GET",
+   "ruta": "/api/v1/frequency/watermarks",
    "seguridad": [
     {
      "ApiKey": []
@@ -530,6 +570,26 @@
   },
   {
    "metodo": "GET",
+   "ruta": "/api/v1/retencion",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "operador"
+  },
+  {
+   "metodo": "POST",
+   "ruta": "/api/v1/retencion/aplicar",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "admin"
+  },
+  {
+   "metodo": "GET",
    "ruta": "/api/v1/scheduler",
    "seguridad": [
     {
@@ -557,6 +617,16 @@
     }
    ],
    "rol_minimo": "operador"
+  },
+  {
+   "metodo": "POST",
+   "ruta": "/api/v1/segmentos/estadisticas/refrescar",
+   "seguridad": [
+    {
+     "ApiKey": []
+    }
+   ],
+   "rol_minimo": "analista"
   },
   {
    "metodo": "GET",

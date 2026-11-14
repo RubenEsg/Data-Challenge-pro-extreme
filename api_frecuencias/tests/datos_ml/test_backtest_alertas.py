@@ -102,6 +102,32 @@ def test_evidencia_de_pronostico_publicada():
     assert publicado["festivos_entre_semana"], "el periodo trae festivos entre semana (tratados como festivo)"
 
 
+def test_el_backtest_usa_el_factor_de_carga_del_ciclo(datos_copia):
+    """ALT-002 observada se estima en el backtest con el MISMO factor de carga que el ciclo
+    (optimizacion.factor_carga_franja, ruta × día de la semana de operación × hora, con el tipo de día como respaldo;
+    alertas._factor_de_la_hora), sin copiar su cálculo: cada fila horaria lleva el factor y la fuente de la función,
+    también un festivo entre semana (se opera como domingo). La evidencia publicada lo declara."""
+    from datetime import date
+
+    import pandas as pd
+
+    from app.servicios import optimizacion
+    from scripts import backtest_alertas
+
+    h = pd.DataFrame({"ruta": ["SILENCIO", "SILENCIO", "SILENCIO", "CRA 54"],
+                      "fecha": [date(2025, 10, 13), date(2025, 10, 15), date(2025, 10, 18), date(2025, 12, 8)],
+                      "hora": [7, 7, 7, 11]})
+    factores, fuentes = backtest_alertas.factores_de_las_franjas(h)
+    for (ruta, fecha, hora), factor, fuente in zip(h.itertuples(index=False), factores, fuentes, strict=True):
+        fc = optimizacion.factor_carga_franja(ruta, fecha, int(hora))
+        assert (factor, fuente) == (fc["factor_carga"], fc["fuente"]), (ruta, fecha, hora)
+    assert len(set(factores[:3])) > 1                     # lunes, miércoles y sábado: no es el factor por tipo de día
+    assert factores[3] == optimizacion.factor_carga_franja("CRA 54", date(2025, 12, 7), 11)["factor_carga"]
+    if EVIDENCIA.exists():
+        publicado = json.loads(EVIDENCIA.read_text(encoding="utf-8"))["factor_carga"]
+        assert "factor_carga_franja" in publicado["funcion"] and publicado["horas_por_nivel"]["dia_semana"] > 0
+
+
 @pytest.mark.skipif(not EVIDENCIA.exists(), reason="sin la evidencia del backtest")
 def test_evidencia_observada_incluye_ocupacion_y_rupturas():
     """ALT-002 con la ocupación observada y el detector de rupturas (RF-009) están en la evidencia publicada, con su

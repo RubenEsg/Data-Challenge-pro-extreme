@@ -296,6 +296,12 @@ def reiniciar_esquema_integrado() -> dict:
         return {"objetos_borrados": len(sentencias)}
 
 
+def migraciones_aplicadas(salida: str | None) -> list[str]:
+    """Todas las líneas «Running upgrade» (y los errores) de alembic upgrade head: el informe dice cuántas migraciones
+    aplicó y cuáles (antes se guardaban solo las últimas seis y el informe decía «6 migraciones» con más)."""
+    return [x for x in (salida or "").strip().splitlines() if "Running upgrade" in x or "Error" in x]
+
+
 class ApiIntegrada:
     """La API en modo integrado dentro de este proceso: DATABASE_URL = escritor_ia y FUENTE_DATABASE_URL = lector_ia
     en la MISMA base de la réplica; datos y modelos en una copia temporal (no se toca datos/ del repositorio)."""
@@ -323,8 +329,7 @@ class ApiIntegrada:
                              check=False, env={**os.environ, "PYTHONIOENCODING": "utf-8"})
         self.preparacion.update(alembic_upgrade_head_como_escritor_ia=mig.returncode == 0,
                                 alembic_segundos=round(time.perf_counter() - t0, 2),
-                                alembic_salida=[x for x in (mig.stderr or mig.stdout).strip().splitlines()
-                                                if "Running upgrade" in x or "Error" in x][-6:])
+                                alembic_salida=migraciones_aplicadas(mig.stderr or mig.stdout))
         if mig.returncode != 0:
             raise RuntimeError("alembic upgrade head falló como escritor_ia: " + (mig.stderr or "")[-800:])
         from fastapi.testclient import TestClient
@@ -510,10 +515,11 @@ def texto_informe(r: dict) -> str:
     api = r.get("ciclo_api") or {}
     if api:
         prep = api.get("preparacion") or {}
+        aplicadas = sum("Running upgrade" in x for x in prep.get("alembic_salida") or [])
         filas += ["== 5. La API en modo integrado (DATABASE_URL = escritor_ia, FUENTE_DATABASE_URL = lector_ia, misma "
                   "base)",
                   f"   alembic upgrade head como escritor_ia: {prep.get('alembic_upgrade_head_como_escritor_ia')} en "
-                  f"{prep.get('alembic_segundos')} s ({len(prep.get('alembic_salida') or [])} migraciones)"]
+                  f"{prep.get('alembic_segundos')} s ({aplicadas} migraciones)"]
         filas += [f"      {x.split('Running upgrade', 1)[-1].strip()}" for x in prep.get("alembic_salida") or []]
         filas += [_corrida(c) for c in api.get("corridas") or []]
         filas += [f"   tablas de escritor_ia por esquema: {r.get('tablas_de_escritor_ia_por_esquema')}", ""]

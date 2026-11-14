@@ -81,14 +81,20 @@ domingo o festivo 18,61 frente a 50,89; festivo 21,11 frente a 145,99; vacacione
 o más 14,87 frente a 24,73. Donde más falla: víspera de festivo (WAPE 30,28, sesgo +17,54 %) y Navidad (29,80, solo
 51 horas). El sesgo por ruta y condición está en `evaluacion_modelo.json`, clave `prueba_reservada.sesgo_ruta_condicion`.
 
-**Limitación de §9.3 por sentido y segmento.** El modelo pronostica por ruta y hora. El pronóstico por sentido y
-segmento (`GET /predictions/segmentos`) reparte el de la ruta con las fracciones observadas del 2023-01-01 al
-2023-02-27 (58 días). Lo que se midió es solo el error del reparto: las fracciones de enero aplicadas al total REAL de
-febrero de 2023 dan un WAPE por segmento y hora de 40,96 % y por sentido y hora de 7,9 a 9,4 % según la ruta
-(`docs/evidencias/monitoreo/desagregacion_segmentos.json`). No se midió el sesgo del pronóstico por sentido ni por
-segmento, ni si esas fracciones siguen valiendo en 2025; el sentido es una aproximación geométrica (mitad de la
-longitud del ciclo), porque las exportaciones no lo traen. Con subidas por segmento recientes se puede medir el error
-combinado (pronóstico × reparto) con la misma función de evaluación.
+**Sentido y segmento (§9.1, §9.3).** El modelo de la ruta pronostica por ruta y hora, y el pronóstico por sentido y
+segmento (`GET /predictions/segmentos`) usa un modelo supervisado propio que reparte el de la ruta
+(`segmentos_modelo.md`, con el protocolo en `segmentos_protocolo.md`; `../../modelo_segmentos.md`). Es un HGB Poisson
+jerárquico (`seg_hgb_jerarquico_20230227_s42`) entrenado con las subidas del 2023-01-01 al 2023-02-08 y elegido en la
+validación (2023-02-09 a 02-17) con una regla fijada antes de mirar la prueba. En la prueba (02-18 a 02-27, con
+Carnaval), con el total real de la ruta, el WAPE por segmento y hora es de 42,09, frente a 43,06 del reparto fijo B0
+(IC95 de la diferencia de −1,60 a −0,02 pp, `segmentos_banda_ventanas.json`); por sentido y hora, 8,19 frente a 8,20;
+el p90 del sesgo absoluto por segmento baja de 25,33 a 21,19 %. La banda P10–P90 cubre 78,31 % por segmento y
+83,40 % por sentido con el total real, de 76,0 a 76,8 % y de 80,2 a 80,5 % en ventanas de 2 y 3 horas
+(`segmentos_banda_ventanas.json`), y 79,46 % y 80,82 % compuesta con errores reales del modelo de ruta de 2025. El
+sesgo por franja, tipo de día y Carnaval está en la misma evidencia. Límites: el sentido es una aproximación
+geométrica (supuesto S9) y no hay subidas por segmento después de feb-2023 para medir el error en 2025. El error del
+reparto fijo B0 de antes, con enero aplicado al total real de febrero, sigue en
+`docs/evidencias/monitoreo/desagregacion_segmentos.json`.
 
 ## 4. Horizontes de 30, 60 y 120 minutos
 
@@ -280,7 +286,8 @@ Los buses/h recomendados ya no dependen del horizonte (antes 8,22, 13,35 y 18,46
 ahora 9,97 en los tres). El MILP tarda 0,065 s de media por franja. Con la calibración v2, las alertas observadas
 ALT-005 a ALT-009 pasan de 0,509 a 0,534 por ruta y día (ALT-007 de 0,176 a 0,204, con lift 1,28 → 1,34;
 `docs/evidencias/alertas/backtest_alertas.md`, línea «Antes del cambio»). Con todas las reglas observadas (también la
-ALT-002 observada y la ruptura de comportamiento) son 1,238 por ruta y día.
+ALT-002 observada y la ruptura de comportamiento) y el código final (factor de carga del ciclo, ALT-008 con bajadas)
+son 1,265 por ruta y día; ALT-005 a ALT-009, 0,543 (`scripts/cifras_vigentes.py`).
 
 ## 10. Limitaciones
 
@@ -300,10 +307,12 @@ ALT-002 observada y la ruptura de comportamiento) son 1,238 por ruta y día.
 - La prueba reservada de nov–dic 2025 se consultó al elegir fv2 frente a fv1 (sección 1): es informativa. Se pide a
   Extreme un periodo de 2026 como prueba limpia.
 - El histórico validado (`demanda_observada`) guarda ruta, fecha, hora, pasajeros y salidas; el sentido, el segmento,
-  el viaje y el vehículo no están en él (sección 3). Por lo mismo, la foto de variables (`feature_snapshot`) es por
-  ruta y hora: guarda las dimensiones de §8.3 (`idruta`, `idempresa`, `idproceso`, `id_dia_semana`,
-  `id_estacionalidad`), pero `sentido` y `segmento` quedan nulos, porque el modelo no los usa (el reparto por segmento
-  se aplica después del pronóstico).
+  el viaje y el vehículo no están en él (sección 3). La foto de variables (`feature_snapshot`) guarda, por cada
+  predicción, las filas de la ruta con las dimensiones de §8.3 (`idruta`, `idempresa`, `idproceso`, `id_dia_semana`,
+  `id_estacionalidad`) y, además, una fila por segmento y sentido con el modelo de segmentos activo (`sentido` y
+  `segmento` llenos; `FOTO_SEGMENTOS=false` las apaga). Son 1.158 filas por segmento en una ejecución de 9
+  predicciones (`../monitoreo/foto_segmentos.json`). El modelo de la ruta no usa el sentido ni el segmento: el reparto
+  por segmento se aplica después del pronóstico.
 - La calibración v2 del activo se ajustó con septiembre y octubre de 2025 y no anticipa el cambio de temporada de
   noviembre y diciembre. Cada reentrenamiento ajusta y versiona la suya con su propia validación (sección 6.1), así que
   un candidato entrenado con datos recientes trae una banda calibrada con esos datos.
@@ -325,6 +334,9 @@ ALT-002 observada y la ruptura de comportamiento) son 1,238 por ruta y día.
 | `../monitoreo/monitoreo_2025.json` (con `calibracion_version` y `generado_en`), `../monitoreo/compuerta_ejemplo.json` (2025-09-01 a 2025-09-14, fuera de la prueba reservada) y `../monitoreo/psi_dia_lag7.json` | `python scripts/evidencias_monitoreo.py` |
 | `ciclo_recomendacion_franja.json` | `POST /api/v1/frequency/executions` con la fuente Parquet de octubre de 2025, antes y después del cambio |
 | `pesos_objetivo_0005.json` | `python scripts/evidencia_0005.py`: migración 0005 en una base local temporal (instalación, `GET /thresholds`, bajada y subida; la base se borra al terminar) |
+| `segmentos_modelo.md` y `.json`; artefactos y registro de `datos/modelos/segmentos/` | `python scripts/entrenar_segmentos.py` (con `--sin-prueba`, solo entrenamiento y validación, sin guardar nada); los datos, con `python scripts/preparar_segmentos.py` |
+| `segmentos_banda_ventanas.json` | `python scripts/evaluar_banda_ventanas_segmentos.py` |
+| `../monitoreo/foto_segmentos.json` | `GENERAR_EVIDENCIAS=1 pytest tests/integracion/test_monitoreo_api.py::test_ciclo_guarda_variables_por_segmento_y_sentido` |
 | `../alertas/backtest_alertas.md` y `.json` | `python scripts/backtest_alertas.py` |
 | `../alertas/backtest_alertas_pronostico.md` y `.json` | `python scripts/backtest_alertas.py --pronostico` |
 | la suite completa de pruebas (unitarias, integración, réplica, contrato y datos/ML) | la suite final de la tabla «Cifras vigentes» de `../README.md`. La corrida de las 05:32 con el detalle de las pruebas del modelo (904 pruebas, 900 pasan, 0 fallos y 4 omitidas a propósito) está en `../historial/modelo_suite_9nov_0532.txt` |

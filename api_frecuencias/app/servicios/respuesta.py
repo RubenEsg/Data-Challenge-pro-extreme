@@ -332,6 +332,13 @@ def _insumos_del_plan(plan: dict, ruta: str, fecha: date, umbrales: dict, versio
     return None
 
 
+def _capacidad_del_plan(plan: dict, actual):
+    """La capacidad por bus con que se resolvió el plan (el ajuste local de PUT /catalogos/capacidad, que el plan
+    informa en flota_y_ciclo) o, si el plan no la trae, la de los insumos."""
+    valor = ((plan.get("flota_y_ciclo") or {}).get("capacidad_por_bus") or {}).get("valor")
+    return float(valor) if valor else actual
+
+
 def _tabla_comparacion(plan: dict, ruta: str, fecha: date, umbrales: dict | None = None,
                        version_u: int | None = None, fuente: str = "modelo_activo"):
     """Insumos por hora para comparar ofertas: los del plan (_insumos_del_plan) con su ciclo y sus minutos; si no se
@@ -349,6 +356,7 @@ def _tabla_comparacion(plan: dict, ruta: str, fecha: date, umbrales: dict | None
         tb = base.sort_values("hora").reset_index(drop=True)[list(COLUMNAS_OFERTA)].copy()
         if tb["hora"].tolist() == horas["hora"].tolist():
             tb["ciclo"], tb["minutos"] = horas["ciclo"].to_numpy(float), horas["minutos"].to_numpy(float)
+            tb["capacidad"] = _capacidad_del_plan(plan, tb["capacidad"])
             return tb
     horas["dist"] = optimizacion.KM_CICLO.get(ruta, optimizacion.KM_CICLO_POR_OMISION)
     horas["cv_d4"] = optimizacion.CV_INTERVALOS.get(ruta, optimizacion.CV_POR_OMISION)
@@ -356,13 +364,20 @@ def _tabla_comparacion(plan: dict, ruta: str, fecha: date, umbrales: dict | None
 
 
 def _costos_del_plan(plan: dict, params: dict) -> dict:
-    """param_d5(fuente=True) con el costo de bus-hora y de km con que se resolvió el plan (threshold_config)."""
+    """param_d5(fuente=True) con el costo de bus-hora y de km y la tarifa con que se resolvió el plan (threshold_config,
+    §5.1): el recaudo y la comparación de ofertas usan las mismas cifras que el MILP. Sin parámetros en el plan (un plan
+    persistido antes de la migración 0010), los de param_d5."""
     salida = dict(params)
     gob = plan.get("parametros") or {}
     for clave, nombre in (("COSTO_BUS_HORA", "costo_bus_hora_cop"), ("COSTO_KM", "costo_km_cop")):
         valor = servicio._num((gob.get(nombre) or {}).get("valor") if isinstance(gob.get(nombre), dict) else None)
         if valor is not None and valor > 0:
             salida[clave] = valor
+    tarifa = gob.get("tarifa_cop") if isinstance(gob.get("tarifa_cop"), dict) else {}
+    valor = servicio._num(tarifa.get("valor"))
+    if valor is not None and valor >= 0:          # una tarifa gobernada de 0 deja el recaudo «sin dato» (§19)
+        salida["TARIFA"] = valor
+    salida["FUENTE_TARIFA"] = tarifa.get("fuente")
     return salida
 
 
@@ -527,10 +542,13 @@ def _vehiculos(plan: dict) -> dict:
 def _nota_recaudo(tarifa: float | None, params: dict, costo_actual: float) -> str:
     if not tarifa:
         return NOTA_TARIFA_SIN_DATO
-    return (f"Recaudo = pasajeros esperados × tarifa neta de {_f(float(tarifa), 0)} COP por pasajero: tarifa pública "
-            f"del Área Metropolitana 2026 (3.700 COP) × 0,86 que retiene el operador (datos/costos_fuente.json, la "
-            f"misma de param_d5(fuente=True)); Extreme no suministró la tarifa (§19), así que es una cifra de "
-            f"referencia. Costo operativo = bus-hora ({_f(params['COSTO_BUS_HORA'], 0)} COP) + km "
+    fuente = params.get("FUENTE_TARIFA")
+    origen = f"{fuente}; por omisión, la " if fuente and str(fuente).startswith("threshold_config") else ""
+    return (f"Recaudo = pasajeros esperados × tarifa neta de {_f(float(tarifa), 0)} COP por pasajero ({origen}tarifa "
+            f"pública del Área Metropolitana 2026 (3.700 COP) × 0,86 que retiene el operador, "
+            f"datos/costos_fuente.json, versionada en threshold_config como tarifa_cop); Extreme no suministró la "
+            f"tarifa (§19), así que es una cifra de referencia. Costo operativo = bus-hora "
+            f"({_f(params['COSTO_BUS_HORA'], 0)} COP) + km "
             f"({_f(params['COSTO_KM'], 0)} COP) del plan; con lo programado hoy sería {_f(costo_actual, 0)} COP. "
             f"vehiculos_hora_ahorrados > 0: el plan usa menos vehículos-hora que lo programado; < 0: usa más.")
 
@@ -569,33 +587,73 @@ def _flota_y_recaudo(plan: dict, tabla, params: dict, pasajeros_dia: float) -> d
     }
 
 
+def _motivo_no_reutilizable(plan: dict | None, model_id: str | None, version_u: int | None,
+                            pronostico: str) -> str | None:
+    """Por qué el plan que trae quien llama no sirve tal cual para la foto (None si sirve): tiene que tener horas, ser
+    del pronóstico del modelo activo, del mismo modelo activo de la foto y de la misma versión de umbrales."""
+    if not (isinstance(plan, dict) and plan.get("horas")):
+        return "el plan que llegó no tiene horas"
+    if pronostico != "activo" or plan.get("fuente_pronostico") != "modelo_activo":
+        return "la foto o el plan no usan el pronóstico del modelo activo"
+    if model_id is not None and plan.get("model_id") != model_id:
+        return (f"el modelo activo cambió durante la ejecución: el plan es de {plan.get('model_id')} y la foto, de "
+                f"{model_id}")
+    if plan.get("umbrales_version") != version_u:
+        return (f"la versión de umbrales del plan ({plan.get('umbrales_version')}) no es la de la foto "
+                f"({version_u})")
+    return None
+
+
 def _plan_reutilizable(plan: dict | None, model_id: str | None, version_u: int | None, pronostico: str) -> bool:
     """El plan que trae quien llama (el ciclo diario acaba de calcularlo y persistirlo) sirve tal cual si es del mismo
     modelo activo, de la misma versión de umbrales y con el pronóstico del modelo activo."""
-    return (isinstance(plan, dict) and bool(plan.get("horas")) and pronostico == "activo"
-            and plan.get("fuente_pronostico") == "modelo_activo"
-            and (model_id is None or plan.get("model_id") == model_id)
-            and plan.get("umbrales_version") == version_u)
+    return _motivo_no_reutilizable(plan, model_id, version_u, pronostico) is None
+
+
+def reutilizacion_del_plan(previo: dict | None, plan: dict, model_id: str | None, version_u: int | None,
+                           pronostico: str) -> dict[str, Any]:
+    """Qué pasó con el plan de una ruta en la foto: «reutilizado» (el que trajo quien llama, tal cual, sin volver a
+    resolver el MILP), «recalculado» (trajo uno, pero no servía: se volvió a resolver, con el motivo) o «calculado»
+    (no trajo ninguno)."""
+    if previo is None:
+        return {"estado": "calculado", "motivo": None}
+    if plan is previo:
+        return {"estado": "reutilizado", "motivo": None}
+    motivo = _motivo_no_reutilizable(previo, model_id, version_u, pronostico)
+    return {"estado": "recalculado", "motivo": motivo or "el plan del día no está disponible: se usó el respaldo"}
 
 
 def _llamar_plan_dia(plan_dia, ruta: str, fecha: date, umbrales: dict, version_u: int | None, pronostico: str,
-                     pron: list[dict], model_id: str | None, calibracion: str | None) -> tuple[dict, str]:
+                     pron: list[dict], model_id: str | None, calibracion: str | None,
+                     ocupacion_actual: dict | None = None) -> tuple[dict, str]:
     """Plan del día con optimizacion.plan_dia y la fuente de su pronóstico. Con el pronóstico del modelo activo y un
     plan_dia que acepta model_id es la misma llamada del ciclo diario; si no, plan_dia recibe el pronóstico hora por
-    hora de la respuesta (solo cuando el pronóstico es el del modelo activo)."""
+    hora de la respuesta (solo cuando el pronóstico es el del modelo activo). `ocupacion_actual` (§10.1): la
+    restricción reactiva del plan que este reemplaza (_plan), si plan_dia la acepta."""
     import inspect
 
     parametros = inspect.signature(plan_dia).parameters
+    extra = {"ocupacion_actual": ocupacion_actual} if ocupacion_actual and "ocupacion_actual" in parametros else {}
     if pronostico == "activo" and model_id and "model_id" in parametros:
         # la misma llamada del ciclo diario (ejecucion.plan_y_respuesta): su memoria evita repetir el MILP
-        plan = plan_dia(fecha, ruta, umbrales=dict(umbrales or {}), umbrales_version=version_u, model_id=model_id)
+        plan = plan_dia(fecha, ruta, umbrales=dict(umbrales or {}), umbrales_version=version_u, model_id=model_id,
+                        **extra)
     else:
         horario = [{"hora": p["hora"], "p10": p["p10"], "p50": p["esperado"], "p90": p["p90"],
                     "calibracion_version": calibracion} for p in pron]
         plan = plan_dia(fecha, ruta, umbrales=dict(umbrales or {}), umbrales_version=version_u,
-                        pronostico=pronostico, pronostico_horario=horario if pronostico == "activo" else None)
+                        pronostico=pronostico, pronostico_horario=horario if pronostico == "activo" else None,
+                        **extra)
     fuente = plan.get("fuente_pronostico") or ("modelo_activo" if pronostico == "activo" else "E12")
     return plan, str(fuente)
+
+
+def _reactiva_del_plan(plan: dict | None) -> dict | None:
+    """§10.1: la restricción reactiva por ocupación actual con que se resolvió un plan del ciclo (su «ocupacion_actual»,
+    la de ocupacion.restriccion_reactiva con lo que el plan calculó), o None. Si la foto vuelve a resolver ese plan
+    (_plan), lo hace con la misma restricción: el piso del ciclo intradía no se pierde porque cambie el modelo."""
+    reactiva = plan.get("ocupacion_actual") if isinstance(plan, dict) else None
+    return reactiva if isinstance(reactiva, dict) else None
 
 
 def _plan(ruta: str, fecha: date, umbrales: dict, version_u: int | None, pronostico: str,
@@ -606,8 +664,10 @@ def _plan(ruta: str, fecha: date, umbrales: dict, version_u: int | None, pronost
     Con optimizacion.plan_dia (MILP de D5 con los umbrales vigentes) y el pronóstico del modelo activo: el mismo
     plan que el ciclo diario persiste como filas origen = 'plan_dia' (misma llamada, con model_id; si quien llama ya
     lo calculó, `plan_previo` se usa tal cual y no se vuelve a resolver el MILP). Así GET /respuesta y
-    GET /recommendations/plan dicen las mismas salidas hora por hora. Sin plan_dia, el respaldo es el plan D5 con el
-    pronóstico E12 precalculado, que solo existe para 2025."""
+    GET /recommendations/plan dicen las mismas salidas hora por hora. Si `plan_previo` no sirve tal cual (el modelo
+    activo cambió a mitad de la ejecución), se vuelve a resolver con su misma restricción reactiva por ocupación
+    actual (_reactiva_del_plan, §10.1). Sin plan_dia, el respaldo es el plan D5 con el pronóstico E12 precalculado,
+    que solo existe para 2025."""
     from app.servicios import optimizacion
 
     plan_dia = _plan_dia_disponible()
@@ -616,7 +676,7 @@ def _plan(ruta: str, fecha: date, umbrales: dict, version_u: int | None, pronost
             return plan_previo, str(plan_previo.get("fuente_pronostico"))
         if plan_dia is not None:
             return _llamar_plan_dia(plan_dia, ruta, fecha, umbrales, version_u, pronostico, pron, model_id,
-                                    calibracion)
+                                    calibracion, _reactiva_del_plan(plan_previo))
         plan = optimizacion.resumen_plan_d5(ruta, fecha, modelo="E12", fuente_costos=True,
                                             headway_min=_umbral(umbrales, "headway_minimo_min"))
     except (ValueError, LookupError) as exc:
@@ -627,14 +687,16 @@ def _plan(ruta: str, fecha: date, umbrales: dict, version_u: int | None, pronost
 def _bloque_ruta(ruta: str, fecha: date, model_id: str, umbrales: dict, version_u: int | None,
                  planes: dict[str, dict] | None = None) -> dict:
     """Todo lo de una ruta y un día que no depende de las alertas: pronóstico, plan, vehículos, flota y recaudo.
-    `planes` ({ruta: plan}): el plan que ya calculó quien llama se reutiliza; el que se calcule aquí se agrega."""
+    `planes` ({ruta: plan}): el plan que ya calculó quien llama se reutiliza si sirve (_plan_reutilizable); el que se
+    calcule aquí se agrega o lo reemplaza. «_reutilizacion» dice cuál de los dos pasó y por qué."""
     from app.servicios import datos
     from app.servicios.motor_d5 import comun as motor_comun
 
     pron_lista = _pronostico_dia(ruta, fecha, model_id)
     calibraciones = sorted({str(p.pop("_calibracion")) for p in pron_lista if p.get("_calibracion")})
+    previo = (planes or {}).get(ruta)
     plan, fuente = _plan(ruta, fecha, umbrales, version_u, pronostico_plan(), pron_lista, model_id,
-                         ", ".join(calibraciones) or None, plan_previo=(planes or {}).get(ruta))
+                         ", ".join(calibraciones) or None, plan_previo=previo)
     if planes is not None:
         planes[ruta] = plan
     pron = {p["hora"]: p for p in pron_lista}
@@ -652,6 +714,7 @@ def _bloque_ruta(ruta: str, fecha: date, model_id: str, umbrales: dict, version_
             "pasajeros_esperados": pasajeros, "vehiculos": _vehiculos(plan),
             "flota_y_recaudo": _flota_y_recaudo(plan, tabla, params, pasajeros["dia"]),
             "_fuente_pronostico": fuente, "_calibracion": calibraciones,
+            "_reutilizacion": reutilizacion_del_plan(previo, plan, model_id, version_u, pronostico_plan()),
             "_plan": {"estado_solver": plan.get("estado_solver"), "headway_minimo_min": plan.get("headway_minimo_min"),
                       "plan_model_id": plan.get("model_id"), "plan_calibracion": plan.get("calibracion_version")}}
 
@@ -761,11 +824,13 @@ def limitaciones(modelo: dict, fuente_pronostico: str) -> list[str]:
         "aleatorias): el headway máximo efectivo es min(headway_maximo_min, 2 × espera_max_min) (supuesto S12, "
         "pregunta a Extreme en docs/hallazgos_extreme.md).",
         "La banda P10-P90 del día suma las bandas de cada hora: es más ancha que la banda del total del día.",
-        "La tarifa no la suministró Extreme (§19): el recaudo usa la tarifa pública 2026 del Área Metropolitana × 0,86 "
-        "(datos/costos_fuente.json) y es una cifra de referencia.",
+        "La tarifa no la suministró Extreme (§19): el recaudo usa la tarifa neta vigente de threshold_config "
+        "(tarifa_cop; por omisión la tarifa pública 2026 del Área Metropolitana × 0,86, datos/costos_fuente.json) y "
+        "es una cifra de referencia.",
         "Ciclo, flota disponible e intervalo programado son medianas de 2025 por ruta, tipo de día y hora (D1) y no "
         "siempre cuadran entre sí: con la programación de hoy, los buses en ruta pueden superar la flota "
-        "(vehiculos.requeridos_programados). Extreme debe confirmar el ciclo y la flota por franja (§19).",
+        "(vehiculos.requeridos_programados). Extreme debe confirmar el ciclo y la flota por franja (§19); el valor "
+        "oficial se registra sin regenerar datos con PUT /api/v1/catalogos/flota (ajuste local versionado).",
         "El valor del tiempo de espera (7.000 COP/h) y la penalidad por pasajero sobre la capacidad (10.000 COP) son "
         f"supuestos de D5 que debe validar el área operativa (§5.1). Elasticidad: {elasticidad}.",
         "Atención inmediata: la lista «abiertas ahora» son las alertas sin cerrar ni descartar en el momento de la "
@@ -779,6 +844,15 @@ def _umbrales(sesion: Session | None) -> tuple[int | None, dict]:
         return None, {}
     version, umbrales = servicio.umbrales_vigentes(sesion)
     return version, dict(umbrales or {})
+
+
+def _umbrales_del_calculo(sesion: Session | None, fijados: tuple[int | None, dict] | None) -> tuple[int | None, dict]:
+    """La versión de threshold_config con que se calcula la respuesta: la que fija quien llama (el ciclo diario pasa la
+    de su ejecución, que en una ejecución partida por ruta es la fijada al crearla, RNF-005) o, sin ella, la vigente."""
+    if fijados is None:
+        return _umbrales(sesion)
+    version, valores = fijados
+    return version, dict(valores or {})
 
 
 def _avisos(modelo: dict, fuente: str, tipo_dia: str | None, fecha: date) -> list[str]:
@@ -841,7 +915,8 @@ def _fuentes(modelo: dict, fuente: str) -> list[str]:
         "ai_frecuencias.demanda_observada (lo que incorpora el ciclo diario)",
         "Frecuencia programada, ciclo y flota: datos/parametros_operativos_hora.parquet (D1, mediana 2025 por ruta, "
         "tipo de día y hora)",
-        "Costos y tarifa: datos/costos_fuente.json (param_d5(fuente=True))",
+        "Costos y tarifa: threshold_config vigente (costo_bus_hora_cop, costo_km_cop y tarifa_cop, sembrados desde "
+        "datos/costos_fuente.json); sin versión en la tabla, param_d5(fuente=True)",
         "Foto de la respuesta: tabla ai_frecuencias.respuesta_reto (una fila por fecha, ruta, modelo y versión de "
         "umbrales)",
         "Atención inmediata: tabla ai_frecuencias.alert (abiertas ahora: estados nueva, reconocida y asignada)",
@@ -850,24 +925,29 @@ def _fuentes(modelo: dict, fuente: str) -> list[str]:
 
 def componer(sesion: Session | None, ruta: str | None = None, fecha: date | None = None, *,
              rutas: list[str] | tuple[str, ...] | None = None, execution_id: Any = None,
-             con_alertas: bool = True, planes: dict[str, dict] | None = None) -> dict:
+             con_alertas: bool = True, planes: dict[str, dict] | None = None,
+             umbrales: tuple[int | None, dict] | None = None) -> dict:
     """Calcula la respuesta completa (pronóstico y plan de cada ruta) sin guardarla. Lanza SinDatos si la fecha no se
     puede calcular y ValueError si una ruta no es válida. Es el cálculo de precalcular(); no corre en un GET.
-    `planes`: ver precalcular()."""
+    `planes` y `umbrales`: ver precalcular()."""
     elegidas = _validar_rutas([ruta] if ruta else rutas)
     with _serie_vigente(sesion):
-        return _componer(sesion, elegidas, fecha or fecha_por_omision(sesion), execution_id, con_alertas, planes)
+        return _componer(sesion, elegidas, fecha or fecha_por_omision(sesion), execution_id, con_alertas, planes,
+                         umbrales)
 
 
 def _componer(sesion: Session | None, elegidas: tuple[str, ...], fecha: date, execution_id: Any,
-              con_alertas: bool, planes: dict[str, dict] | None = None) -> dict:
+              con_alertas: bool, planes: dict[str, dict] | None = None,
+              umbrales_fijados: tuple[int | None, dict] | None = None) -> dict:
     _validar_fecha(fecha)
     modelo = modelo_vigente(sesion)
-    version_u, umbrales = _umbrales(sesion)
+    version_u, umbrales = _umbrales_del_calculo(sesion, umbrales_fijados)
     consultado_en = _ahora_bogota()
     bloques, calibraciones, fuentes = [], set(), set()
+    reutilizacion: dict[str, Any] = {"reutilizados": [], "recalculados": [], "calculados": [], "motivos": {}}
     for r in elegidas:
         completo = _bloque_ruta(r, fecha, modelo["model_id"], umbrales, version_u, planes)
+        _anotar_reutilizacion(reutilizacion, r, completo["_reutilizacion"])
         calibraciones.update(completo.get("_calibracion") or [])
         fuentes.add(completo["_fuente_pronostico"])
         bloque = {k: v for k, v in completo.items() if not k.startswith("_")}
@@ -897,7 +977,19 @@ def _componer(sesion: Session | None, elegidas: tuple[str, ...], fecha: date, ex
         },
         "rutas": bloques,
         "limitaciones": _avisos(modelo, fuente or "", tipo_dia, fecha),
+        # C2: qué planes de quien llama se usaron tal cual y cuáles se volvieron a resolver (no va en la foto)
+        "planes": reutilizacion,
     }
+
+
+_GRUPO_REUTILIZACION = {"reutilizado": "reutilizados", "recalculado": "recalculados", "calculado": "calculados"}
+
+
+def _anotar_reutilizacion(resumen: dict[str, Any], ruta: str, estado: dict[str, Any]) -> None:
+    """La ruta en su grupo (reutilizados, recalculados o calculados) y, si se volvió a resolver, su motivo."""
+    resumen[_GRUPO_REUTILIZACION[estado["estado"]]].append(ruta)
+    if estado.get("motivo"):
+        resumen["motivos"][ruta] = estado["motivo"]
 
 
 # ---------------------------------------------------------------------------------------------------- foto guardada
@@ -911,9 +1003,10 @@ def _payload_ruta(respuesta: dict, bloque: dict) -> dict:
 
 
 def precalcular(sesion: Session, fecha: date | None, rutas: list[str] | None = None, *, execution_id: Any = None,
-                confirmar: bool = False, planes: dict[str, dict] | None = None) -> dict:
-    """Calcula la respuesta del reto (modelo activo, umbrales vigentes) y guarda una foto por ruta en
-    ai_frecuencias.respuesta_reto. Devuelve la respuesta calculada, con «guardadas» = filas escritas.
+                confirmar: bool = False, planes: dict[str, dict] | None = None,
+                umbrales: tuple[int | None, dict] | None = None) -> dict:
+    """Calcula la respuesta del reto (modelo activo, umbrales vigentes o los de `umbrales`) y guarda una foto por ruta
+    en ai_frecuencias.respuesta_reto. Devuelve la respuesta calculada, con «guardadas» = filas escritas.
 
     Reemplaza la foto anterior de la misma (fecha, ruta, modelo, versión de umbrales). No hace commit salvo con
     `confirmar`: el trabajador de la cola lo hace en la misma transacción del cierre «ok» de la ejecución.
@@ -921,9 +1014,16 @@ def precalcular(sesion: Session, fecha: date | None, rutas: list[str] | None = N
     `planes` ({ruta: plan de optimizacion.plan_dia}) es de entrada y salida: el ciclo diario pasa los planes que
     acaba de calcular y persistir, y la respuesta los usa tal cual (mismo modelo y versión de umbrales; no vuelve a
     resolver el MILP). Las rutas que falten se calculan y se agregan al diccionario, para que quien llama persista
-    las mismas horas (trabajo «respuesta» de la cola)."""
+    las mismas horas (trabajo «respuesta» de la cola). Un plan que no sirve (por ejemplo, el modelo activo cambió
+    entre el plan del ciclo y la foto) se vuelve a resolver y lo reemplaza. La respuesta dice en «planes» qué rutas
+    reutilizaron el plan recibido, cuáles lo volvieron a resolver (con el motivo) y cuáles lo calcularon aquí.
+
+    `umbrales` = (versión, valores) de threshold_config: el ciclo diario pasa los de su ejecución (§5.1; en una
+    ejecución partida por ruta, la versión fijada al crearla, RNF-005). Así la foto queda con la misma versión que el
+    plan que el ciclo acaba de guardar y lo reutiliza, aunque un PUT /thresholds haya llegado mientras corría. Sin
+    `umbrales` (trabajo «respuesta» de la cola), la versión vigente."""
     respuesta = componer(sesion, fecha=fecha, rutas=rutas, execution_id=execution_id, con_alertas=False,
-                         planes=planes)
+                         planes=planes, umbrales=umbrales)
     traz = respuesta["trazabilidad"]
     ejecucion_id = None if execution_id is None else str(execution_id)
     # TABLA es la constante del módulo (ai_frecuencias.respuesta_reto), no una entrada: todo valor va como parámetro

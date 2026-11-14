@@ -114,7 +114,13 @@ def test_post_202_en_la_cola_y_get_200_desde_la_foto(auth_activa, claves_prueba,
     assert fila.fuente_pronostico == traz["fuente_pronostico"] and fila.idruta == 2
 
 
-def test_404_sin_calcular_con_la_pista(auth_activa, claves_prueba):
+def test_404_sin_calcular_con_la_pista(auth_activa, claves_prueba, sesion):
+    """Sin foto guardada del día, 404 «sin_calcular» con la pista del POST. La precondición se fija aquí: otras pruebas
+    (los ciclos de test_particion_ruta.py hasta el 2025-03-03) dejan la foto del 2025-03-04 con la versión de umbrales
+    vigente, y como ninguna prueba deja vigente una versión creada por PUT (restituir_umbrales), al consultar es la
+    misma versión."""
+    sesion.execute(text("DELETE FROM ai_frecuencias.respuesta_reto WHERE fecha = :f"), {"f": date(2025, 3, 4)})
+    sesion.commit()
     clave = _clave(claves_prueba, "operador")
     r = auth_activa.get("/api/v1/respuesta", params={"ruta": "CRA 54", "fecha": "2025-03-04"}, headers=clave)
     assert r.status_code == 404

@@ -10,16 +10,23 @@ Como módulo: Replica (arrancar, esperar /health, matar sin aviso), Cliente HTTP
 SOBUSA_API_KEY) y utilidades de base. Solo contra un PostgreSQL LOCAL: la URL sale de app.config (archivo .env
 local o DATABASE_URL) con la base de pruebas indicada, y nunca se imprime.
 
+Las réplicas nunca escriben en datos/ del repositorio: corren con DATA_DIR y MODELOS_DIR en una COPIA temporal
+(datos_de_la_base). Un ciclo puede escribir ahí: si la política de aprendizaje decide reentrenar, el candidato queda en
+MODELOS_DIR/<candidato>/ y cambia registro.json.
+
 Nota Windows: Popen.kill() es TerminateProcess, el equivalente de SIGKILL (kill -9): el proceso muere sin correr
 finally, atexit ni el apagado de uvicorn, y PostgreSQL revierte su transacción abierta al cortarse la conexión.
 """
 from __future__ import annotations
 
 import argparse
+import atexit
 import json
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -28,6 +35,36 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parents[1]
 HOSTS_LOCALES = {"localhost", "127.0.0.1", "db", "::1"}
 sys.path.insert(0, str(RAIZ))
+_COPIAS_DE_DATOS: dict[str, Path] = {}      # base de las réplicas -> su copia temporal de la carpeta de datos
+
+
+# ---------------------------------------------------------------- datos de las réplicas (nunca los del repositorio)
+def datos_de_la_base(url: str) -> dict[str, str]:
+    """DATA_DIR y MODELOS_DIR de las réplicas que comparten la base `url`: una COPIA temporal de la carpeta de datos
+    vigente (DATA_DIR si viene definida; si no, datos/ del repositorio) con sus modelos. Es la misma para todas las
+    réplicas de esa base, que comparten el registro de modelos, y otra para cada base: cada lote parte de los modelos
+    empaquetados y la carpeta de origen queda como estaba aunque un ciclo entrene un candidato. Las copias se borran
+    al terminar el proceso."""
+    if url not in _COPIAS_DE_DATOS:
+        from app.servicios import datos
+
+        origen, modelos = datos.carpeta_datos(), datos.carpeta_modelos()
+        copia = Path(tempfile.mkdtemp(prefix="sobusa_replicas_")) / "datos"
+        shutil.copytree(origen, copia)
+        if modelos.resolve() != (origen / "modelos").resolve():       # MODELOS_DIR apunta a otra carpeta
+            shutil.copytree(modelos, copia / "modelos", dirs_exist_ok=True)
+        if not _COPIAS_DE_DATOS:
+            atexit.register(borrar_copias_de_datos)
+        _COPIAS_DE_DATOS[url] = copia
+    copia = _COPIAS_DE_DATOS[url]
+    return {"DATA_DIR": str(copia), "MODELOS_DIR": str(copia / "modelos")}
+
+
+def borrar_copias_de_datos() -> None:
+    """Borra las copias temporales de datos de este proceso (al salir; las réplicas ya terminaron)."""
+    while _COPIAS_DE_DATOS:
+        _url, copia = _COPIAS_DE_DATOS.popitem()
+        shutil.rmtree(copia.parent, ignore_errors=True)
 
 
 # ---------------------------------------------------------------- base local de pruebas
@@ -64,6 +101,42 @@ def motor(url: str):
     return create_engine(url, pool_pre_ping=True, connect_args={"options": "-c timezone=America/Bogota"})
 
 
+# ---------------------------------------------------------------- la política de aprendizaje durante un lote
+SQL_ENTRENAMIENTOS = ("SELECT estado, count(*) FROM ai_frecuencias.execution_log WHERE tipo = 'entrenamiento' "
+                      "GROUP BY estado ORDER BY estado")
+SQL_REENTRENOS_OMITIDOS = """
+SELECT count(*) FROM ai_frecuencias.execution_log e
+ WHERE EXISTS (SELECT 1
+                 FROM jsonb_array_elements_text(COALESCE(e.metricas #> '{monitoreo,politica,reentreno,bloqueos}',
+                                                         CAST('[]' AS jsonb))) AS b(texto)
+                WHERE b.texto LIKE :patron)
+"""
+
+
+def politica_del_lote(m) -> dict:
+    """Qué hizo la política de aprendizaje en la base de un lote: los entrenamientos que encoló, por estado, y los
+    ciclos en que omitió el reentrenamiento porque su corte no se puede entrenar (el motivo queda en
+    metricas.monitoreo.politica.reentreno.bloqueos de la ejecución)."""
+    from sqlalchemy import text
+
+    from app.servicios.politica import OMITIDO_SIN_DATOS
+
+    with m.connect() as c:
+        entrenamientos = {estado: int(n) for estado, n in c.execute(text(SQL_ENTRENAMIENTOS)).all()}
+        omitidos = c.execute(text(SQL_REENTRENOS_OMITIDOS), {"patron": OMITIDO_SIN_DATOS + "%"}).scalar()
+    return {"entrenamientos": entrenamientos, "omitidos_sin_datos": int(omitidos or 0)}
+
+
+def regla_de_la_politica(politica: dict) -> tuple[str, bool]:
+    """La línea del informe de un lote y si se cumple: la política no dejó entrenamientos en error. Un reentrenamiento
+    cuyo corte no se puede entrenar (al comienzo de la serie, 61 días antes del primer dato) no se encola: se omite
+    con su motivo."""
+    encolados = ", ".join(f"{n} {estado}" for estado, n in sorted(politica["entrenamientos"].items())) or "ninguno"
+    return (f"política de aprendizaje: ningún entrenamiento en error (encolados: {encolados}; ciclos que omitieron el "
+            f"reentrenamiento por datos insuficientes antes del corte: {politica['omitidos_sin_datos']})",
+            not politica["entrenamientos"].get("error"))
+
+
 # ---------------------------------------------------------------- réplicas
 class Replica:
     def __init__(self, nombre: str, puerto: int, url: str, carpeta_logs: Path, **entorno: str):
@@ -75,7 +148,8 @@ class Replica:
         self.arranques = 0
 
     def arrancar(self, pausa_lectura: float = 0.0, pausa_prediccion: float = 0.0) -> float:
-        env = os.environ | {
+        # los datos van en una copia temporal (datos_de_la_base): la réplica nunca escribe en datos/ del repositorio
+        env = os.environ | datos_de_la_base(self.url) | {
             "DATABASE_URL": self.url, "TRABAJADOR_ID": self.nombre, "REANUDAR_EJECUCIONES": "true",
             "TRABAJADORES": "1", "MAX_REINTENTOS": "3", "AUTH_HABILITADA": "false", "LOG_NIVEL": "INFO",
             "PLANIFICADOR_HABILITADO": "false", "PYTHONIOENCODING": "utf-8"} | self.entorno
@@ -203,17 +277,22 @@ def lineas_de_log(ruta: Path, claves: tuple[str, ...]) -> list[str]:
 
 
 # ---------------------------------------------------------------- servidor con pausas inyectadas
+def _lectura_lenta(original, pausa: float):
+    def leer_lento(self, *a, **k):
+        time.sleep(pausa)
+        return original(self, *a, **k)
+
+    return leer_lento
+
+
 def servir(puerto: int, pausa_lectura: float, pausa_prediccion: float, host: str = "127.0.0.1") -> None:
     if pausa_lectura > 0:
         from app.servicios import fuentes
 
-        leer = fuentes.FuenteParquet.leer_incremental
-
-        def leer_lento(self, *a, **k):
-            time.sleep(pausa_lectura)
-            return leer(self, *a, **k)
-
-        fuentes.FuenteParquet.leer_incremental = leer_lento
+        # el ciclo lee por partición (RNF-005: leer_particion); leer_incremental es la lectura sin partir
+        for nombre in ("leer_incremental", "leer_particion"):
+            setattr(fuentes.FuenteParquet, nombre,
+                    _lectura_lenta(getattr(fuentes.FuenteParquet, nombre), pausa_lectura))
     if pausa_prediccion > 0:
         from app.servicios import inferencia
 

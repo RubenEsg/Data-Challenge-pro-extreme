@@ -186,7 +186,7 @@
   "limitaciones": [
     "timbradas_segmentos solo cubre 2023-01-01 a 2023-02-27 (los triggers de segmentación no se han vuelto a ejecutar): el reparto es de hace casi tres años y no ve cambios de ruta posteriores",
     "ene-feb incluye vacaciones y el inicio del año escolar; no hay Semana Santa ni diciembre",
-    "no hay modelo por segmento: es una desagregación del pronóstico de la ruta",
+    "esta es la evaluación del reparto fijo B0 (enero aplicado a febrero); el modelo supervisado por segmento y sentido y su comparación con B0 en una partición entrenamiento / validación / prueba están en docs/evidencias/modelo/segmentos_modelo.md (scripts/entrenar_segmentos.py)",
     "el sentido es una aproximación geométrica, no un campo de Extreme"
   ]
 }

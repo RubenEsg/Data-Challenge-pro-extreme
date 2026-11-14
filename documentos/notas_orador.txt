@@ -25,7 +25,12 @@ Calidad de datos vale el diez por ciento. Validamos las seis dimensiones de la s
 con lote, fila, llave del registro y causa, consultable por la API. La lectura incremental usa la marca de agua con una
 ventana de solape y una huella por fila: cuando el cierre nocturno de Extreme resella todo el consolidado, solo
 entregamos lo que cambió. La carga es idempotente y las pruebas de datos alteran el futuro para demostrar que ninguna
-variable lo ve.
+variable lo ve. Las llaves duplicadas no se corrigen: el reporte de cada lote va al responsable del consolidado por el
+canal de notificaciones, y el destinatario lo define Extreme. Una vez por ejecución leemos también los consolidados de
+Extreme, cada uno con su marca de agua, los validamos y los contrastamos con nuestra propia agregación: en la réplica
+salen {{ConsGroseras}} diferencias groseras que apuntan a sus datos, y las reportamos como el hallazgo H17. Las bajadas
+entran a nuestro histórico desde la migración 0013. Las novedades viales se cruzan por fecha, rango horario y ruta, y
+una tarea de la cola aplica la retención de nuestros propios datos: {{RetencionMeses}} meses en caliente, con bitácora.
 
 === 4. El modelo le gana a la regla actual
 Este es el veinte por ciento del modelo. En la prueba reservada de noviembre y diciembre de 2025, el modelo activo
@@ -43,7 +48,10 @@ conformal está versionada: se ajustó solo con la validación y la API verifica
 SHAP. El modelo no se reemplaza solo: el monitoreo mide deriva y error, el candidato pasa catorce días en sombra y una
 compuerta de cuatro criterios decide; la activación manual pasa por la misma compuerta. En el ejemplo real, el
 candidato sacó {{GateWAPECand}} % frente a {{GateWAPEAct}} % del activo y la compuerta lo dejó {{GateDecision}}. A la
-derecha, la pantalla de monitoreo del tablero.
+derecha, la pantalla de monitoreo del tablero. Debajo, el segmento y el sentido: un modelo propio reparte el pronóstico
+de la ruta. En su prueba de febrero de 2023 se equivoca {{SegWAPEact}} % por segmento y hora, frente a
+{{SegWAPEbcero}} % del reparto fijo, y su banda cubre {{SegCobSegmento}} % por segmento. Solo hay subidas por segmento
+de enero y febrero de 2023, así que su error en 2025 no se puede medir.
 
 === 6. Recomendaciones viables
 El optimizador resuelve la función objetivo de la sección 10.2: costo, espera, sobreocupación y desviación, con las
@@ -52,22 +60,34 @@ leemos como espera media, así que el headway máximo efectivo es el menor entre
 el supuesto S12 y se lo preguntamos a Extreme. Es un programa entero exacto: coincide con la enumeración completa en
 todas las franjas reales que probamos. Cuando no hay flota para cumplir, no inventa una cifra: dice no viable, explica
 por qué y propone la mejor aproximación ejecutable. La elasticidad de los pasajeros la estimamos en 0,70 por
-observación, sin validar en campo; el plan usa 0,5 por prudencia y el piloto la mide.
+observación, sin validar en campo; el plan usa 0,5 por prudencia y el piloto la mide. Abajo a la derecha, la ocupación
+por segmento: la calculamos con las subidas y bajadas de cada viaje, no con el campo pasajeros, y frente al dispositivo
+correlaciona {{OcupCorrelacion}}. Con la ocupación actual, el plan pone un piso de salidas en la hora siguiente cuando
+el segmento crítico se llena. Ese piso actúa en los ciclos intradía que el planificador encola cada hora; cuánto actúa depende
+de la latencia con que llegan los conteos de Extreme.
 
 === 7. Alertas que se pueden creer
 Las diez alertas del catálogo están implementadas con la estructura completa de la sección 5.3. El riesgo de la
 sección 18 son las alertas excesivas: con persistencia de dos horas y una alerta por episodio, las observadas de
 ALT-005 a ALT-009 pasan de {{AlertasAntes}} a {{AlertasAhora}} por ruta y día; contando todas las familias, también la
-sobreocupación observada, las rupturas y las de pronóstico del ciclo diario, el despachador ve {{AlertasTotal}}. La precisión relativa sube en los cuatro códigos medidos. Si un episodio se agrava, la alerta escala
-de severidad. Cada alerta muestra el valor real, el esperado, el umbral, la tendencia y la recomendación; el operador
-la gestiona y queda en la bitácora.
+sobreocupación observada, las rupturas y las de pronóstico del ciclo diario, el despachador ve {{AlertasTotal}}. La
+precisión relativa sube en los cuatro códigos medidos, y el consolidado anómalo ya evalúa subidas, bajadas y viajes. La
+frecuencia insuficiente exige ahora una probabilidad mínima de superar la capacidad efectiva, elegida en una validación
+anterior a la evaluación; la versión de umbrales que la trae espera la aprobación del área operativa. Si un episodio se
+agrava, la alerta escala de severidad. Cada alerta muestra el valor real, el esperado, el umbral, la tendencia y la
+recomendación, y dice qué campos de identificación le aplican: el despacho ausente y los datos incompletos llevan el
+viaje, el vehículo y el seudónimo del conductor. El operador la gestiona y queda en la bitácora.
 
 === 8. Se conecta sin interferir
 Integración vale el quince por ciento. Montamos una réplica con los scripts y el trigger de Extreme. En
 {{NIntentosTotal}} intentos de escritura indebida, {{NIntentosLector}} del usuario de lectura y {{NIntentosEscritor}}
 del de resultados sobre las tablas de Extreme, no pasó ninguno. Una llegada real pasa por el trigger y la API entrega
 exactamente la franja nueva. El EXPLAIN muestra que la lectura diaria es casi gratis con el índice que proponemos, que
-aplicaría su DBA. Y con {{Kvus}} usuarios, el p95 queda muy por debajo de dos segundos.
+aplicaría su DBA. La ejecución diaria también se puede partir por ruta: con dos réplicas, rutas distintas corren a la
+vez, nunca la misma ruta en paralelo, sin duplicados y con las mismas salidas que sin partir. Y con {{Kvus}} usuarios,
+el p95 queda muy por debajo de dos segundos. Las estadísticas por segmento ya no se calculan en cada consulta: una
+agregación materializada responde en {{SegFrio}} ms, y con hasta {{SegCargaUsuarios}} usuarios durante un refresco el
+p95 es de {{SegCarga}} ms.
 
 === 9. Ingeniería que se puede auditar
 Ingeniería vale el quince por ciento. Hay {{Ntotal}} pruebas en seis niveles: unitarias, integración, réplica,
@@ -102,7 +122,7 @@ antes de cambiar horarios.
 
 === 13. Plan de implementación
 El plan sale de PLAN_EVOLUCION. Semanas {{PlanSemanasConexion}}: conexión, con las respuestas a los hallazgos, una
-réplica de lectura y los dos usuarios. Semanas {{PlanSemanasSombra}}: modo sombra, donde nadie despacha con el sistema;
+réplica de lectura y los dos usuarios; la flota y el ciclo oficiales se cargan por la API, sin regenerar datos. Semanas {{PlanSemanasSombra}}: modo sombra, donde nadie despacha con el sistema;
 pasamos si se cumple: {{PlanCriterioSombra}}. Semanas {{PlanSemanasPiloto}}: piloto de ocho semanas en CRA 54 y CL 72
 con días sorteados. La infraestructura cuesta del orden de {{PlanCostoTotalA}} dólares al mes en la plataforma de
 Extreme, todo es software libre, y los riesgos principales tienen su mitigación.

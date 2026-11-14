@@ -1,4 +1,4 @@
-Migraciones Alembic aplicadas por el servicio «migrar» en la base nueva · 2026-11-09 08:27:44 -0500
+Migraciones Alembic aplicadas por el servicio «migrar» en la base nueva · 2026-11-13 23:07:26 -0500
 
 $ docker compose logs migrar   (alembic upgrade head sobre volumen nuevo)
   INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
@@ -11,9 +11,33 @@ $ docker compose logs migrar   (alembic upgrade head sobre volumen nuevo)
   INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, Pesos y costos de la función objetivo de §10.2 versionados desde el inicio (§5.1 «regla de gobierno»).
   INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, Dimensiones de §8.3, trazabilidad de la calidad, llaves naturales, aprobación de umbrales y respuesta del reto.
   INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, Umbrales de las reglas nuevas de alertas versionados en threshold_config (§5.1 «regla de gobierno», RF-009).
+  INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, Agregación materializada de la capa analítica de segmentos (§6.1, §7.1, RNF-002, RNF-004).
+  INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, Partición del ciclo por ruta (RNF-005 «procesamiento particionable por ruta y fecha»).
+  INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, Parámetros del plan del día versionados en threshold_config y headway vigente de rutas.frecuenciadespachos en
+  recommendation (§5.1 «regla de gobierno», §6.1 y §6.2).
+  INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, Ocupación actual de los buses por segmento (§10.1 «ocupación actual por segmento, estacionalidad actual, día de la
+  semana y hora»; §5.2 ALT-002 «ocupación observada»).
+  INFO  [alembic.runtime.migration] Running upgrade 0011 -> 0012, Retención automática de datos (§18 «Exposición de datos → retención») y huellas de la ventana de solape del refresco
+  de segmentos (§6.1, §7.1, RNF-004).
+  INFO  [alembic.runtime.migration] Running upgrade 0012 -> 0013, Consolidados de Extreme en el ciclo diario: bajadas en el histórico, marca de agua por tabla y tolerancias del
+  contraste versionadas (§5.2 ALT-008, §6.1, §6.3, §7.3 paso 3, §9.5, §11.2).
+  INFO  [alembic.runtime.migration] Running upgrade 0013 -> 0014, Mínimo de probabilidad de ALT-003 de pronóstico versionado en threshold_config (§5.1 «regla de gobierno», §5.2,
+  §18 «Alertas excesivas»).
 
 $ alembic history
-  0006 -> 0007 (head), Umbrales de las reglas nuevas de alertas versionados en threshold_config (§5.1 «regla de gobierno», RF-009).
+  0013 -> 0014 (head), Mínimo de probabilidad de ALT-003 de pronóstico versionado en threshold_config (§5.1 «regla de gobierno», §5.2,
+  §18 «Alertas excesivas»).
+  0012 -> 0013, Consolidados de Extreme en el ciclo diario: bajadas en el histórico, marca de agua por tabla y tolerancias del
+  contraste versionadas (§5.2 ALT-008, §6.1, §6.3, §7.3 paso 3, §9.5, §11.2).
+  0011 -> 0012, Retención automática de datos (§18 «Exposición de datos → retención») y huellas de la ventana de solape del refresco
+  de segmentos (§6.1, §7.1, RNF-004).
+  0010 -> 0011, Ocupación actual de los buses por segmento (§10.1 «ocupación actual por segmento, estacionalidad actual, día de la
+  semana y hora»; §5.2 ALT-002 «ocupación observada»).
+  0009 -> 0010, Parámetros del plan del día versionados en threshold_config y headway vigente de rutas.frecuenciadespachos en
+  recommendation (§5.1 «regla de gobierno», §6.1 y §6.2).
+  0008 -> 0009, Partición del ciclo por ruta (RNF-005 «procesamiento particionable por ruta y fecha»).
+  0007 -> 0008, Agregación materializada de la capa analítica de segmentos (§6.1, §7.1, RNF-002, RNF-004).
+  0006 -> 0007, Umbrales de las reglas nuevas de alertas versionados en threshold_config (§5.1 «regla de gobierno», RF-009).
   0005 -> 0006, Dimensiones de §8.3, trazabilidad de la calidad, llaves naturales, aprobación de umbrales y respuesta del reto.
   0004 -> 0005, Pesos y costos de la función objetivo de §10.2 versionados desde el inicio (§5.1 «regla de gobierno»).
   0003 -> 0004, Monitoreo del modelo, foto de variables particionada y trazabilidad (§9.2, §9.4, §9.5, §11.2, §8.1, RNF-011).
@@ -23,7 +47,7 @@ $ alembic history
   bitácora de ejecuciones, errores de calidad, umbrales versionados y notificaciones.
 
 $ alembic current
-  0007 (head)
+  0014 (head)
 
 $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones, el índice GiST y pg_stat_statements
                                                               version                                                            
@@ -38,16 +62,16 @@ $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones
   
    version_num 
   -------------
-   0007
+   0014
   (1 row)
   
    tablas 
   --------
-       16
+       23
   (1 row)
   
-          tablename        
-  -------------------------
+             tablename           
+  -------------------------------
    alembic_version
    alert
    alert_history
@@ -57,14 +81,21 @@ $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones
    execution_log
    feature_snapshot
    feature_snapshot_202611
+   marca_agua_ruta
+   marca_agua_tabla
    model_monitoring
    model_registry
    notification_log
+   ocupacion_segmento
    prediction
    recommendation
    respuesta_reto
+   retencion_registro
+   segmento_estadistica
+   segmento_estadistica_dia
+   segmento_estadistica_refresco
    threshold_config
-  (16 rows)
+  (23 rows)
   
                  particion                
   ----------------------------------------
@@ -93,9 +124,9 @@ $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones
   
 
 $ alembic upgrade head (segunda vez): no hay nada pendiente
-   Container sobusa_limpio-migrar-run-88239d844364 Creating 
-   Container sobusa_limpio-migrar-run-88239d844364 Created 
+   Container sobusa_limpio-migrar-run-bd8a1b4cfaae Creating 
+   Container sobusa_limpio-migrar-run-bd8a1b4cfaae Created 
   INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
   INFO  [alembic.runtime.migration] Will assume transactional DDL.
 
-Resultado: versión actual 0007 (head) = head 0007 -> OK
+Resultado: versión actual 0014 (head) = head 0014 -> OK

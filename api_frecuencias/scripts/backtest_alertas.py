@@ -4,7 +4,10 @@ las de pronóstico ALT-001..ALT-004 del ciclo diario.
 Reproduce, día a día y ruta a ruta, lo que hace el ciclo (ejecucion.contexto_observado + alertas.evaluar_observadas):
 cada hora cerrada de servicio (4-20 h) con el pronóstico del modelo para esa hora y su banda P10-P90 CALIBRADA
 (conformal móvil de inferencia, que solo usa días anteriores), las salidas observadas frente a 60 / intervalo
-programado y el consolidado del día frente al mismo tipo de día de las 8 semanas previas (z robusto).
+programado, el factor de carga crítica de su franja para ALT-002 observada (optimizacion.factor_carga_franja, el mismo
+del ciclo: ruta × día de la semana de operación × hora, con el tipo de día como respaldo) y el consolidado del día
+(subidas, bajadas de datos/bajadas_horaria.parquet y viajes) frente al mismo tipo de día de las 8 semanas previas (z
+robusto). También mide ALT-008 sin las bajadas, para ver lo que agregan.
 
 Mide por código:
 - cuántas veces se dispara: alertas por ruta y día y por día (las 3 rutas);
@@ -21,6 +24,10 @@ Uso (desde EntregaFinal/api_frecuencias):
   python scripts/backtest_alertas.py                      # modelo activo (fv2, corte 2025-08-31): fuera de muestra
   python scripts/backtest_alertas.py --corte 2024-12-31   # fv2 temporal con corte 2024-12-31: casi todo 2025
   python scripts/backtest_alertas.py --pronostico         # ALT-001..ALT-004 del ciclo diario, antes y ahora
+  python scripts/backtest_alertas.py --alt003-todas-las-horas   # ALT-003: el protocolo sin fuga en las 5-19 h
+
+El modo --pronostico incluye el protocolo de ALT-003 (scripts/variantes_alt003.py): diagnóstico de su tasa base y
+elección del mínimo de probabilidad en una ventana de validación anterior a la de evaluación.
 """
 from __future__ import annotations
 
@@ -85,11 +92,44 @@ def _pronosticos(modelo, inferencia, tabla, desde, hasta):
     return t[["ruta", "fecha", "hora", "esperado", "p10", "p90", "calibrada"]]
 
 
-def _factores_por_dia():
-    """{(ruta, letra del tipo de día, hora): factor de carga} del optimizador (optimizacion.factor_carga_franja)."""
+def factores_de_las_franjas(h) -> tuple[list, list]:
+    """(factores, fuentes) de cada fila horaria (ruta, fecha, hora) de `h`, con optimizacion.factor_carga_franja: el
+    mismo factor de carga crítica que usa el ciclo para ALT-002 observada (alertas._factor_de_la_hora, sin factor en
+    el contexto), por ruta × día de la semana de operación (7 = domingo o festivo) × hora, con el tipo de día como
+    respaldo; None donde no hay ninguno. Se calcula una vez por franja distinta (la función lee el calendario de
+    festivos en cada llamada)."""
     from app.servicios import optimizacion
 
-    return {k: round(min(max(v[0], 0.05), 1.0), 4) for k, v in optimizacion._factores_carga_hora().items()}
+    memoria: dict[tuple, tuple] = {}
+    factores, fuentes = [], []
+    for ruta, fecha, hora in zip(h["ruta"], h["fecha"], h["hora"].astype(int), strict=True):
+        clave = (ruta, fecha, int(hora))
+        if clave not in memoria:
+            fc = optimizacion.factor_carga_franja(ruta, fecha, int(hora))
+            memoria[clave] = (float(fc["factor_carga"]), fc.get("fuente")) if fc else (None, None)
+        factores.append(memoria[clave][0])
+        fuentes.append(memoria[clave][1])
+    return factores, fuentes
+
+
+def resumen_factor(h) -> dict:
+    """De dónde sale el factor de carga de las horas evaluadas (el del ciclo) y cuántas horas tiene cada nivel."""
+    from app.servicios import optimizacion
+
+    fuentes = h["fuente_factor_carga"].fillna("sin factor").value_counts().to_dict()
+    return {"funcion": ("optimizacion.factor_carga_franja, la del ciclo (alertas._factor_de_la_hora): mediana 2025 de "
+                        "carga crítica / abordajes por ruta × día de la semana de operación (7 = domingo o festivo) × "
+                        "hora, con el tipo de día como respaldo"),
+            "horas_por_nivel": {"dia_semana": int(fuentes.get(optimizacion.FUENTE_FACTOR_DIA, 0)),
+                                "tipo_dia": int(fuentes.get(optimizacion.FUENTE_FACTOR_TIPO, 0)),
+                                "sin_factor": int(fuentes.get("sin factor", 0))}}
+
+
+def _con_factor(hora: dict, factor, fuente) -> dict:
+    """La hora del contexto con el factor de su franja (el del ciclo); sin factor, la hora tal cual."""
+    if factor is None or pd.isna(factor):
+        return hora
+    return dict(hora, factor_carga=float(factor), fuente_factor_carga=fuente)
 
 
 def series_diarias(h, datos):
@@ -103,11 +143,42 @@ def series_diarias(h, datos):
             for r, x in g.groupby("ruta")}
 
 
+def _diarios(s):
+    """Totales por ruta y día: subidas (Σ pasajeros), nro_viajes (Σ salidas) y, si la serie trae bajadas_viajes
+    (datos/bajadas_horaria.parquet), bajadas solo en los días con el dato en todas sus horas (como el ciclo,
+    ejecucion._consolidado_del_dia)."""
+    agregados = {"subidas": ("pasajeros", "sum"), "nro_viajes": ("salidas", "sum"), "horas": ("hora", "count"),
+                 "tipo_dia": ("tipo_dia", "first"), "especial": ("especial", "max"), "excluido": ("excluido", "max")}
+    if "bajadas_viajes" in s.columns:
+        agregados |= {"bajadas": ("bajadas_viajes", "sum"), "horas_bajadas": ("bajadas_viajes", "count")}
+    diarios = s.groupby(["ruta", "fecha"]).agg(**agregados).reset_index()
+    if "bajadas" in diarios.columns:
+        diarios["bajadas"] = diarios["bajadas"].where(diarios["horas_bajadas"] == diarios["horas"])
+    return diarios
+
+
+def _consolidado(hoy, ref, inicio_dia):
+    """El consolidado del día de evaluar_observadas (ALT-008): subidas, bajadas (si las hay) y viajes frente a la
+    referencia del mismo tipo de día."""
+    cons = {"fecha": inicio_dia.date(), "inicio": inicio_dia, "fin": inicio_dia + timedelta(days=1),
+            "subidas": float(hoy["subidas"].iloc[0]), "nro_viajes": float(hoy["nro_viajes"].iloc[0]),
+            "referencia_valores": {"subidas": ref["subidas"].astype(float).tolist(),
+                                   "nro_viajes": ref["nro_viajes"].astype(float).tolist()},
+            "serie": ref["subidas"].astype(float).tolist()[-6:] + [float(hoy["subidas"].iloc[0])]}
+    if "bajadas" in hoy.columns:
+        b = hoy["bajadas"].iloc[0]
+        cons["bajadas"] = None if pd.isna(b) else float(b)
+        cons["referencia_valores"]["bajadas"] = ref["bajadas"].dropna().astype(float).tolist()
+    return cons
+
+
 def _contextos(serie, pron, parametros, datos, alertas, desde, hasta, semanas=8):
     """{(ruta, fecha): contexto de evaluar_observadas} y la tabla horaria usada (para la precisión).
 
-    Cada contexto lleva, como en el ciclo, la capacidad del catálogo y el factor de carga de la franja (ALT-002 con la
-    ocupación observada) y la serie diaria de la ruta hasta ese día (ruptura de comportamiento, RF-009)."""
+    Cada contexto lleva, como en el ciclo, la capacidad del catálogo y, en cada hora, el factor de carga de su franja
+    (factores_de_las_franjas: ruta × día de la semana de operación × hora, el de ALT-002 con la ocupación observada;
+    la tabla horaria lo guarda en factor_carga para la tasa base), la serie diaria de la ruta hasta ese día (ruptura de
+    comportamiento, RF-009) y el consolidado del día con subidas, bajadas y viajes (ALT-008)."""
     s = serie.copy()
     s["fecha"] = pd.to_datetime(s["fecha"]).dt.date
     s = s[s["hora"].isin(list(datos.HORAS_SERVICIO))]
@@ -115,14 +186,12 @@ def _contextos(serie, pron, parametros, datos, alertas, desde, hasta, semanas=8)
     h = s.merge(pron, on=["ruta", "fecha", "hora"], how="left")
     td_txt = h["tipo_dia"].map(datos.TIPOS_DIA)
     h["intervalo"] = [parametros.get((r, t, int(x))) for r, t, x in zip(h["ruta"], td_txt, h["hora"], strict=False)]
-    diarios = (s.groupby(["ruta", "fecha"]).agg(subidas=("pasajeros", "sum"), nro_viajes=("salidas", "sum"),
-                                                 horas=("hora", "count"), tipo_dia=("tipo_dia", "first"),
-                                                 especial=("especial", "max"), excluido=("excluido", "max"))
-               .reset_index())
-    factores = _factores_por_dia()
+    diarios = _diarios(s)
     capacidades = {x["ruta"]: float(x.get("capacidad") or 50) for x in datos.catalogo_rutas()}
     ctxs = {}
     h = h[(h["fecha"] >= desde) & (h["fecha"] <= hasta)].sort_values(["ruta", "fecha", "hora"])
+    factores, fuentes_factor = factores_de_las_franjas(h)
+    h = h.assign(factor_carga=factores, fuente_factor_carga=fuentes_factor)
     por_ruta = series_diarias(h, datos)
     for (ruta, fecha), g in h.groupby(["ruta", "fecha"], sort=False):
         horas = []
@@ -130,10 +199,11 @@ def _contextos(serie, pron, parametros, datos, alertas, desde, hasta, semanas=8)
             inicio = datetime.combine(fecha, dtime(int(x.hora)), tzinfo=ZONA)
             obs = None if pd.isna(x.pasajeros) else float(x.pasajeros)
             interv = None if x.intervalo is None or pd.isna(x.intervalo) else float(x.intervalo)
-            horas.append(alertas.contexto_hora(
+            horas.append(_con_factor(alertas.contexto_hora(
                 inicio, obs, None if pd.isna(x.esperado) else float(x.esperado),
                 None if pd.isna(x.p10) else float(x.p10), None if pd.isna(x.p90) else float(x.p90),
-                None if pd.isna(x.salidas) else int(x.salidas), (60.0 / interv) if interv else None, interv))
+                None if pd.isna(x.salidas) else int(x.salidas), (60.0 / interv) if interv else None, interv),
+                x.factor_carga, x.fuente_factor_carga))
         d = diarios[(diarios["ruta"] == ruta)]
         hoy = d[d["fecha"] == fecha]
         td = int(hoy["tipo_dia"].iloc[0])
@@ -141,27 +211,19 @@ def _contextos(serie, pron, parametros, datos, alertas, desde, hasta, semanas=8)
                 & (d["horas"] >= len(datos.HORAS_SERVICIO))]
         inicio_dia = datetime.combine(fecha, dtime(0), tzinfo=ZONA)
         faltan = [f"{fecha} {x:02d}:00" for x in datos.HORAS_SERVICIO if x not in set(g["hora"].astype(int))]
-        letra = "LSD"[td]
         ctxs[(ruta, fecha)] = {
             "ruta": ruta, "empresa": "Sobusa", "detectada_en": inicio_dia + timedelta(days=1, hours=6),
             "tolerancia_tiempo_min": 0, "horas": horas, "capacidad": capacidades.get(ruta, 50.0),
-            "factor_carga_por_hora": {x: factores[(ruta, letra, x)] for x in datos.HORAS_SERVICIO
-                                      if (ruta, letra, x) in factores},
-            "fuente_factor_carga": "mediana 2025 de carga crítica / abordajes por ruta, tipo de día y hora",
             "serie_diaria": [dict(x, nueva=x["fecha"] == fecha) for x in por_ruta.get(ruta, []) if x["fecha"] <= fecha],
-            "consolidado": {"fecha": fecha, "inicio": inicio_dia, "fin": inicio_dia + timedelta(days=1),
-                            "subidas": float(hoy["subidas"].iloc[0]), "nro_viajes": float(hoy["nro_viajes"].iloc[0]),
-                            "referencia_valores": {"subidas": ref["subidas"].astype(float).tolist(),
-                                                   "nro_viajes": ref["nro_viajes"].astype(float).tolist()},
-                            "serie": ref["subidas"].astype(float).tolist()[-6:] + [float(hoy["subidas"].iloc[0])]},
+            "consolidado": _consolidado(hoy, ref, inicio_dia),
             "datos": {"horas_faltantes": faltan, "campos_faltantes": [], "fecha": fecha},
         }
     return ctxs, h, diarios
 
 
-def _ocupacion_hora(x, u, alertas, factores, capacidades):
-    """Ocupación observada de una fila horaria con el factor de su franja (None si no se puede medir)."""
-    f = factores.get((x.ruta, "LSD"[int(x.tipo_dia)], int(x.hora)))
+def _ocupacion_hora(x, u, alertas, capacidades):
+    """Ocupación observada de una fila horaria con el factor de su franja, el del ciclo (None si no se puede medir)."""
+    f = None if x.factor_carga is None or pd.isna(x.factor_carga) else float(x.factor_carga)
     hh = {"observado": None if pd.isna(x.pasajeros) else float(x.pasajeros),
           "salidas_observadas": None if pd.isna(x.salidas) else float(x.salidas),
           "borde_servicio": int(x.hora) in alertas.HORAS_BORDE}
@@ -172,7 +234,6 @@ def _condiciones(h, u, alertas):
     """Condición por hora (para la tasa base y la confirmación en la hora siguiente)."""
     from app.servicios import datos
 
-    factores = _factores_por_dia()
     capacidades = {x["ruta"]: float(x.get("capacidad") or 50) for x in datos.catalogo_rutas()}
     out = {}
     for x in h.itertuples(index=False):
@@ -187,7 +248,7 @@ def _condiciones(h, u, alertas):
         c006 = int(x.hora) not in alertas.HORAS_BORDE and se is not None and so is not None and se >= 1 and (
             so == 0 or (se >= float(u["salidas_minimas_esperadas"]) and se - so >= 1
                         and (se - so) / se > float(u["tolerancia_salidas"])))
-        occ = _ocupacion_hora(x, u, alertas, factores, capacidades)
+        occ = _ocupacion_hora(x, u, alertas, capacidades)
         c002 = None if occ is None else occ >= float(u["ocupacion_critica"])
         out[(x.ruta, x.fecha, int(x.hora))] = (c005, s007, c006, c002)
     return out
@@ -211,6 +272,24 @@ def _clave_codigo(a):
     return "ALT-007 ruptura" if a["variables"].get("variante") == "ruptura_comportamiento" else a["codigo"]
 
 
+def _sin_bajadas(ctxs):
+    """Los mismos contextos sin las bajadas del consolidado (para medir lo que las bajadas agregan a ALT-008)."""
+    salida = {}
+    for clave, ctx in ctxs.items():
+        cons = {c: v for c, v in ctx["consolidado"].items() if c != "bajadas"}
+        cons["referencia_valores"] = {c: v for c, v in cons["referencia_valores"].items() if c != "bajadas"}
+        salida[clave] = dict(ctx, consolidado=cons)
+    return salida
+
+
+def _campos_008(a, u):
+    """Los campos del consolidado con |z| ≥ z_anomalia en una alerta ALT-008 (subidas, bajadas, nro_viajes); el caso
+    de subidas con 0 viajes cuenta como «subidas_sin_viajes»."""
+    zs = a["variables"].get("z_por_campo") or {}
+    campos = [c for c, z in zs.items() if abs(float(z)) >= float(u["z_anomalia"])]
+    return campos or ["subidas_sin_viajes"]
+
+
 def correr(ctxs, h, diarios, umbrales, alertas, series=None):
     u = alertas._umbrales(umbrales)
     cond = _condiciones(h, u, alertas)
@@ -221,6 +300,7 @@ def correr(ctxs, h, diarios, umbrales, alertas, series=None):
     por_codigo = defaultdict(lambda: {"n": 0, "confirmadas": 0, "evaluables": 0, "especial": 0, "horas": 0})
     series = series or {}
     detalle_rupturas = []
+    campos_008: dict[str, int] = defaultdict(int)
     for (ruta, fecha), ctx in ctxs.items():
         for a in alertas.evaluar_observadas(ctx, u):
             clave = _clave_codigo(a)
@@ -249,6 +329,8 @@ def correr(ctxs, h, diarios, umbrales, alertas, series=None):
             elif clave == "ALT-008":
                 c["evaluables"] += 1
                 c["confirmadas"] += int(excluidos.get((ruta, fecha), 0) or especiales.get((ruta, fecha), 0))
+                for campo in _campos_008(a, u):
+                    campos_008[campo] += 1
     vals = list(cond.values())
     medibles = [v[3] for v in vals if v[3] is not None]
     base = {"ALT-005": float(np.mean([v[0] for v in vals])) if vals else None,
@@ -271,6 +353,7 @@ def correr(ctxs, h, diarios, umbrales, alertas, series=None):
             "precision_proxy": None if prec is None else round(prec, 4), "evaluables": c["evaluables"],
             "tasa_base": None if base.get(codigo) is None else round(base[codigo], 4),
             "lift": round(prec / base[codigo], 2) if prec is not None and base.get(codigo) else None}
+    res["ALT-008"]["campos_sobre_umbral"] = dict(sorted(campos_008.items()))
     total = sum(v["alertas"] for v in res.values())
     sin_nuevas = sum(v["alertas"] for c, v in res.items() if c in CODIGOS_ANTERIORES)
     return {"por_codigo": res, "dias_ruta": dias_ruta, "dias": dias,
@@ -372,8 +455,9 @@ METODO_VARIANTE = {
     "franja": ("alertas.contexto_pronostico + evaluar_pronostico (lo que hace hoy el ciclo): carga crítica POR HORA "
                "de la franja recomendada (factor de carga del optimizador × P10/P50/P90 por hora) frente a la "
                "capacidad POR HORA ofrecida; ALT-003 por el nivel de servicio de la frecuencia actual "
-               "(comparacion_actual); ventana de la alerta = la hora recomendada; los horizontes que caen en la misma "
-               "franja dan una sola alerta"),
+               "(comparacion_actual) con la probabilidad mínima de superar la capacidad efectiva "
+               "(alt003_probabilidad_minima); ventana de la alerta = la hora recomendada; los horizontes que caen en "
+               "la misma franja dan una sola alerta"),
 }
 
 
@@ -461,15 +545,8 @@ def _pronosticos_ruta_dia(ruta, info, instante, cache, medidas):
     return ctxs
 
 
-def _contar_variante(v, ctxs, observado, u, acum):
-    """Cuenta las alertas de la variante v en una ruta-día y su confirmación con lo observado en la hora de la
-    alerta; la tasa base es la de la condición en las horas distintas que miran los contextos."""
-    from app.servicios import alertas
-
-    if v == "franja":
-        lista = alertas.evaluar_pronostico(ctxs, u)
-    else:
-        lista = [a for c in ctxs for a in alertas.evaluar_alertas(c, u)]
+def _contar_alertas(lista, ctxs, observado, u, acum):
+    """Cuenta las alertas de pronóstico de una ruta-día y su confirmación con lo observado en la hora de la alerta."""
     por_h = {c["horizonte_min"]: c for c in ctxs}
     for a in lista:
         if a["codigo"] not in CODIGOS_PRONOSTICO:
@@ -479,36 +556,104 @@ def _contar_variante(v, ctxs, observado, u, acum):
         if real is not None:
             acum["evaluables"][a["codigo"]] += 1
             acum["confirmadas"][a["codigo"]] += int(real)
+
+
+def _contar_base(lista, ctxs, observado, u, acum):
+    """Tasa base de cada condición en las horas distintas que miran los contextos y, para ALT-003, la de las franjas
+    donde puede emitirse: donde sale ALT-001, ALT-003 no se emite (§18, va incluida en ALT-001)."""
+    con_001 = {(a["ruta"], a["ventana_inicio"]) for a in lista if a["codigo"] == "ALT-001"}
     horas = {(c["ruta"], c["ventana_inicio"]): c for c in ctxs}
-    for c in horas.values():
+    for clave, c in horas.items():
         for codigo, real in _condiciones_reales(c, observado, u).items():
             acum["base_n"][codigo] += 1
             acum["base_si"][codigo] += int(real)
+            elegible = codigo != "ALT-003" or clave not in con_001
+            acum["base_n_elegible"][codigo] += int(elegible)
+            acum["base_si_elegible"][codigo] += int(elegible and real)
+
+
+def _fila_alt003(ctxs, lista, observado):
+    """La franja de una ruta y un día para el protocolo de ALT-003 (scripts/variantes_alt003.py): la carga crítica
+    del optimizador (mediana y σ_log), la capacidad efectiva de la frecuencia actual, el nivel de servicio, si salió
+    ALT-001 y lo real de la hora (None si falta)."""
+    from app.servicios import alertas
+
+    c = min(ctxs, key=lambda x: x["horizonte_min"])
+    par = _real_en_la_hora(c, observado)
+    mediana, sigma = alertas._distribucion_de_la_carga(c)
+    occ = float(c.get("ocupacion_objetivo_max") or alertas.UMBRALES_POR_DEFECTO["ocupacion_objetivo_max"])
+    ini = c["ventana_inicio"].astimezone(ZONA)
+    return {"ruta": c["ruta"], "fecha": str(ini.date()), "hora": ini.hour, "carga_mediana": mediana,
+            "sigma_log": sigma, "capacidad_efectiva": None if par is None else par[1] * occ,
+            "factor_carga": None if par is None else par[2], "real": None if par is None else par[0],
+            "cumple_nivel_servicio": c.get("cumple_nivel_servicio"),
+            "alt001": any(a["codigo"] == "ALT-001" and a["ventana_inicio"] == c["ventana_inicio"] for a in lista)}
+
+
+def _contar_variante(v, ctxs, observado, u, acum):
+    """Cuenta las alertas de la variante v en una ruta-día y su confirmación con lo observado en la hora de la
+    alerta; la tasa base es la de la condición en las horas distintas que miran los contextos. En la variante actual
+    guarda además la franja para el protocolo de ALT-003."""
+    from app.servicios import alertas
+
+    if v == "franja":
+        lista = alertas.evaluar_pronostico(ctxs, u)
+    else:
+        lista = [a for c in ctxs for a in alertas.evaluar_alertas(c, u)]
+    _contar_alertas(lista, ctxs, observado, u, acum)
+    _contar_base(lista, ctxs, observado, u, acum)
+    if v == "franja" and ctxs:
+        acum["filas"].append(_fila_alt003(ctxs, lista, observado))
+
+
+def _cociente(a, b, d=4):
+    return round(a / b, d) if b else None
 
 
 def _resumen_variante(acum, dias_ruta):
     salida = {}
     for c in CODIGOS_PRONOSTICO:
         n, ev, conf = acum["conteo"][c], acum["evaluables"][c], acum["confirmadas"][c]
-        fila = {"alertas": n, "por_ruta_dia": round(n / dias_ruta, 3) if dias_ruta else None}
-        if c in CODIGOS_PRONOSTICO:
-            prec = conf / ev if ev else None
-            base = acum["base_si"][c] / acum["base_n"][c] if acum["base_n"][c] else None
-            fila.update({"evaluables": ev, "confirmadas": conf,
-                         "precision_real": None if prec is None else round(prec, 4),
-                         "tasa_base_real": None if base is None else round(base, 4),
-                         "lift": round(prec / base, 2) if prec is not None and base else None})
-        salida[c] = fila
+        prec = conf / ev if ev else None
+        base = _cociente(acum["base_si"][c], acum["base_n"][c])
+        base_e = _cociente(acum["base_si_elegible"][c], acum["base_n_elegible"][c])
+        salida[c] = {"alertas": n, "por_ruta_dia": round(n / dias_ruta, 3) if dias_ruta else None,
+                     "evaluables": ev, "confirmadas": conf, "precision_real": None if prec is None else round(prec, 4),
+                     "tasa_base_real": base, "lift": round(prec / base, 2) if prec is not None and base else None,
+                     "tasa_base_elegible": base_e,
+                     "lift_elegible": round(prec / base_e, 2) if prec is not None and base_e else None}
     return salida
+
+
+def _json_previo(anterior: Path) -> dict | None:
+    """La evidencia de la corrida anterior (None si no existe o no se puede leer)."""
+    if not anterior.exists():
+        return None
+    try:
+        return json.loads(anterior.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def _antes_alt003(anterior: Path) -> dict | None:
+    """ALT-003 de la corrida anterior a la elección sin fuga del mínimo de probabilidad (solo la regla del nivel de
+    servicio, con el lift medido contra todas las franjas); se conserva entre corridas."""
+    previo = _json_previo(anterior)
+    if previo is None:
+        return None
+    if "alt003_probabilidad_minima" in previo:
+        return previo.get("antes_alt003")
+    fila = (((previo.get("variantes") or {}).get("franja") or {}).get("por_codigo") or {}).get("ALT-003")
+    if not fila:
+        return None
+    return {"generado": previo.get("generado"),
+            **{k: fila.get(k) for k in ("alertas", "por_ruta_dia", "precision_real", "tasa_base_real", "lift")}}
 
 
 def _antes_pronostico(anterior: Path) -> dict | None:
     """Cifras de corridas anteriores del modo --pronostico (se conservan entre corridas)."""
-    if not anterior.exists():
-        return None
-    try:
-        previo = json.loads(anterior.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+    previo = _json_previo(anterior)
+    if previo is None:
         return None
     if previo.get("antes"):
         return previo["antes"]
@@ -523,11 +668,8 @@ def _antes_pronostico(anterior: Path) -> dict | None:
 def _antes_sin_factor(anterior: Path) -> dict | None:
     """Las cifras de la corrida anterior a la ocupación con factor de carga (abordajes / capacidad, ALT-003 por número
     de buses); se conservan entre corridas."""
-    if not anterior.exists():
-        return None
-    try:
-        previo = json.loads(anterior.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+    previo = _json_previo(anterior)
+    if previo is None:
         return None
     if previo.get("con_factor_carga"):
         return previo.get("antes_sin_factor")
@@ -556,12 +698,14 @@ def pronostico(desde, hasta, salida: Path) -> dict:
     frente a capacidad por hora, una alerta por franja). ALT-001 y ALT-002 se confirman con la demanda real de la
     hora de la alerta: real > capacidad por hora y ocupación real ≥ 90 %."""
     from app.servicios import alertas, datos, inferencia
+    from scripts import variantes_alt003
 
     t0 = time.perf_counter()
     u = dict(alertas.UMBRALES_POR_DEFECTO)
     catalogo = {x["ruta"]: x for x in datos.catalogo_rutas()}
     observado = _observado_horario(datos)
-    acum = {v: {k: defaultdict(int) for k in ("conteo", "evaluables", "confirmadas", "base_n", "base_si")}
+    acum = {v: {**{k: defaultdict(int) for k in ("conteo", "evaluables", "confirmadas", "base_n", "base_si",
+                                                  "base_n_elegible", "base_si_elegible")}, "filas": []}
             for v in VARIANTES_PRONOSTICO}
     medidas = {"u": u, "seg_milp": 0.0, "n_milp": 0, "buses": defaultdict(list), "viables": [],
                "franjas": defaultdict(int)}
@@ -598,12 +742,62 @@ def pronostico(desde, hasta, salida: Path) -> dict:
     res["antes"] = _antes_pronostico(salida / "backtest_alertas_pronostico.json")
     res["con_factor_carga"] = True
     res["antes_sin_factor"] = _antes_sin_factor(salida / "backtest_alertas_pronostico.json")
+    res["antes_alt003"] = _antes_alt003(salida / "backtest_alertas_pronostico.json")
     res["festivos_entre_semana"] = _festivos_entre_semana(desde, hasta)
+    res["alt003_probabilidad_minima"] = float(u["alt003_probabilidad_minima"])
+    # ALT-003: diagnóstico y elección del mínimo de probabilidad con validación anterior a la evaluación (§9.3, §18)
+    res["alt003"] = variantes_alt003.evaluar(acum["franja"]["filas"], variantes_alt003.corte_de(desde, hasta),
+                                             adoptada=res["alt003_probabilidad_minima"])
     res["duracion_s"] = round(time.perf_counter() - t0, 1)
     salida.mkdir(parents=True, exist_ok=True)
     (salida / "backtest_alertas_pronostico.json").write_text(json.dumps(res, ensure_ascii=False, indent=1,
                                                                         default=str), encoding="utf-8")
     (salida / "backtest_alertas_pronostico.md").write_text(informe_pronostico(res), encoding="utf-8")
+    return res
+
+
+HORAS_ALT003 = range(5, 20)        # instantes h:00 del análisis de robustez de ALT-003 (franjas de 5 a 19 h)
+
+
+def alt003_todas_las_horas(desde, hasta, salida: Path, horas=HORAS_ALT003) -> dict:
+    """Robustez del protocolo de ALT-003: el ciclo pronosticando desde cada hora en punto de `horas` (no solo a las
+    6:00), con la misma partición temporal y las mismas variantes. Escribe alt003_variantes_todas_las_horas.json y .md
+    (≈ 12 min: un MILP por franja)."""
+    from app.servicios import alertas, datos
+    from scripts import variantes_alt003
+
+    t0 = time.perf_counter()
+    u = dict(alertas.UMBRALES_POR_DEFECTO)
+    catalogo = {x["ruta"]: x for x in datos.catalogo_rutas()}
+    observado = _observado_horario(datos)
+    medidas = {"u": u, "seg_milp": 0.0, "n_milp": 0, "buses": defaultdict(list), "viables": [],
+               "franjas": defaultdict(int)}
+    cache, filas = {}, []
+    d = desde
+    while d <= hasta:
+        for h in horas:
+            instante = datetime.combine(d, dtime(h, 0), tzinfo=ZONA)
+            for ruta, info in catalogo.items():
+                ctxs = _pronosticos_ruta_dia(ruta, info, instante, cache, medidas)["franja"]
+                if ctxs:
+                    filas.append(_fila_alt003(ctxs, alertas.evaluar_pronostico(ctxs, u), observado))
+        d += timedelta(days=1)
+    res = {"generado": datetime.now(ZONA).isoformat(timespec="seconds"), "periodo": [str(desde), str(hasta)],
+           "horas_instante": list(horas), "horizontes_min": [30, 60, 120],
+           "alt003": variantes_alt003.evaluar(filas, variantes_alt003.corte_de(desde, hasta),
+                                              adoptada=float(u["alt003_probabilidad_minima"])),
+           "duracion_s": round(time.perf_counter() - t0, 1)}
+    salida.mkdir(parents=True, exist_ok=True)
+    (salida / "alt003_variantes_todas_las_horas.json").write_text(
+        json.dumps(res, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
+    titulo = (f"ALT-003 en todas las horas de servicio (ciclo desde las {horas[0]}:00 hasta las {horas[-1]}:00, "
+              f"{res['periodo'][0]} a {res['periodo'][1]})")
+    texto = "\n".join([f"# {titulo}", "",
+                       f"Generado {res['generado']} con `scripts/backtest_alertas.py --alt003-todas-las-horas` "
+                       f"({_celda(res['duracion_s'], 1)} s): la robustez del protocolo de "
+                       "`backtest_alertas_pronostico.md` fuera de la franja de las 6:00.", ""]
+                      + variantes_alt003.informe(res["alt003"], "Diagnóstico y variantes"))
+    (salida / "alt003_variantes_todas_las_horas.md").write_text(texto, encoding="utf-8")
     return res
 
 
@@ -614,6 +808,24 @@ def _por_horizonte(par):
 
 def _celda(x, d=3):
     return "—" if x is None else f"{x:.{d}f}".replace(".", ",")
+
+
+def _informe_alt003(r: dict) -> list[str]:
+    """La sección de ALT-003: la regla anterior, el diagnóstico y la elección del mínimo de probabilidad sin fuga."""
+    from scripts import variantes_alt003
+
+    if not r.get("alt003"):
+        return []
+    lin = [""]
+    antes = r.get("antes_alt003")
+    if antes:
+        lin += [f"ALT-003 antes de la elección sin fuga (corrida del {antes['generado']}, solo el nivel de servicio, "
+                f"lift contra todas las franjas): {antes['alertas']} alertas ({_celda(antes['por_ruta_dia'])} por ruta "
+                f"y día), precisión {_celda(antes['precision_real'])}, tasa base {_celda(antes['tasa_base_real'])}, "
+                f"lift {_celda(antes['lift'], 2)}.", ""]
+    lin.append(f"Mínimo de probabilidad vigente de ALT-003 en esta corrida (alt003_probabilidad_minima): "
+               f"{_celda(r.get('alt003_probabilidad_minima'), 2)}.")
+    return lin + [""] + variantes_alt003.informe(r["alt003"], "ALT-003: diagnóstico y elección del umbral sin fuga")
 
 
 def informe_pronostico(r: dict) -> str:
@@ -630,13 +842,17 @@ def informe_pronostico(r: dict) -> str:
     for c in CODIGOS_PRONOSTICO:
         lin.append(f"| {c} | {a[c]['alertas']} | {f(a[c]['por_ruta_dia'])} | {n[c]['alertas']} | "
                    f"{f(n[c]['por_ruta_dia'])} |")
-    lin += ["", "Confirmación con la demanda real de la hora de la alerta (" + r["nota_precision"] + ")", "",
-            "| Código | Variante | Evaluables | Confirmadas | Precisión | Tasa base | Lift |",
-            "|---|---|---|---|---|---|---|"]
+    lin += ["", "Confirmación con la demanda real de la hora de la alerta (" + r["nota_precision"] + ") «Donde puede "
+                "emitirse»: la tasa base de las franjas sin ALT-001, porque ALT-003 no se emite donde sale ALT-001 "
+                "(§18, va incluida en ella); para los demás códigos es la misma tasa base.", "",
+            "| Código | Variante | Evaluables | Confirmadas | Precisión | Tasa base | Lift | Tasa base donde puede "
+            "emitirse | Lift donde puede emitirse |", "|---|---|---|---|---|---|---|---|---|"]
     for c in CODIGOS_PRONOSTICO:
         for etiqueta, v in (("antes", a[c]), ("ahora", n[c])):
             lin.append(f"| {c} | {etiqueta} | {v['evaluables']} | {v['confirmadas']} | {f(v['precision_real'])} | "
-                       f"{f(v['tasa_base_real'])} | {f(v['lift'], 2)} |")
+                       f"{f(v['tasa_base_real'])} | {f(v['lift'], 2)} | {f(v.get('tasa_base_elegible'))} | "
+                       f"{f(v.get('lift_elegible'), 2)} |")
+    lin += _informe_alt003(r)
     sf = r.get("antes_sin_factor")
     if sf:
         lin += ["", f"Antes de medir con el factor de carga (corrida del {sf['generado']}: ocupación = abordajes / "
@@ -672,15 +888,18 @@ def main(argv=None):
     ap.add_argument("--sin-sensibilidad", action="store_true")
     ap.add_argument("--pronostico", action="store_true",
                     help="ALT-001..ALT-004 del ciclo diario con la recomendación anterior y la actual")
+    ap.add_argument("--alt003-todas-las-horas", action="store_true",
+                    help="robustez del protocolo de ALT-003 con el ciclo desde cada hora de 5 a 19 h")
     args = ap.parse_args(argv)
 
     from app.servicios import alertas, datos, inferencia
 
-    if args.pronostico:
+    if args.pronostico or args.alt003_todas_las_horas:
         modelo = inferencia.cargar(None)
-        corte = modelo["data_cutoff"]
-        r = pronostico(args.desde or (corte + timedelta(days=inferencia.CONFORMAL_MIN_DIAS + 1)), args.hasta,
-                       args.salida)
+        desde = args.desde or (modelo["data_cutoff"] + timedelta(days=inferencia.CONFORMAL_MIN_DIAS + 1))
+        if args.alt003_todas_las_horas:
+            return alt003_todas_las_horas(desde, args.hasta, args.salida)
+        r = pronostico(desde, args.hasta, args.salida)
         print(informe_pronostico(r))
         return r
 
@@ -701,7 +920,7 @@ def main(argv=None):
     par = datos.parametros_operativos()
     parametros = {(r, t, int(x)): float(v) for r, t, x, v in zip(par["ruta"], par["tipo_dia"], par["hora"],
                                                                   par["intervalo_programado_min"], strict=False)}
-    serie = datos.demanda_horaria()
+    serie = datos.con_bajadas(datos.demanda_horaria())   # ALT-008 con bajadas (datos/bajadas_horaria.parquet)
     ctxs, h, diarios = _contextos(serie, pron, parametros, datos, alertas, desde, args.hasta)
     series = series_diarias(h, datos)
 
@@ -715,6 +934,7 @@ def main(argv=None):
         "calibracion": (f"{cal['nombre']} ({cal['archivo']}, SHA-256 {cal['sha256'][:12]}…)" if cal else
                         inferencia.CALIBRACION_V1),
         "banda_calibrada_pct_horas": round(100 * float(pron["calibrada"].mean()), 1),
+        "factor_carga": resumen_factor(h),
         "festivos_entre_semana": _festivos_entre_semana(desde, args.hasta),
         "tolerancia_tiempo_min": "Procesos.toleranciatiempo = 0 en la exportación: se usa tolerancia_despacho_min",
         "nota_precision": ("No hay incidentes etiquetados: la precisión se aproxima con la persistencia de la "
@@ -724,6 +944,9 @@ def main(argv=None):
                            "Una alerta no confirmada se cuenta como falso positivo (§18)."),
         "umbrales_por_defecto": por_defecto,
         "por_defecto": correr(ctxs, h, diarios, por_defecto, alertas, series),
+        "bajadas_en_la_serie": "bajadas_viajes" in serie.columns,
+        # lo que agregan las bajadas a ALT-008: el mismo periodo sin evaluarlas (como antes de la migración 0013)
+        "alt008_sin_bajadas": correr(_sin_bajadas(ctxs), h, diarios, por_defecto, alertas)["por_codigo"]["ALT-008"],
         "detector_rupturas": evaluar_detector(series, por_defecto, alertas),
         "ejemplos": ejemplos(ctxs, por_defecto, alertas),
         "reglas_anteriores": {"umbrales": {k: anteriores[k] for k in ("persistencia_horas", "alt005_exigir_p10",
@@ -811,6 +1034,20 @@ def _informe_detector(r):
     return lin + [""]
 
 
+def _lineas_008(r):
+    """ALT-008 con bajadas (§5.2): los campos sobre el umbral y la misma corrida sin evaluar las bajadas."""
+    a = r["por_defecto"]["por_codigo"].get("ALT-008") or {}
+    sin = r.get("alt008_sin_bajadas")
+    if not r.get("bajadas_en_la_serie") or sin is None:
+        return ["- ALT-008: sin bajadas en la serie (falta datos/bajadas_horaria.parquet): evalúa subidas y viajes."]
+    campos = ", ".join(f"{c} {n}" for c, n in (a.get("campos_sobre_umbral") or {}).items()) or "ninguno"
+    return [f"- ALT-008 evalúa subidas (Σ pasajeros), bajadas (Σ bajadas_viajes, la misma definición) y número de "
+            f"viajes con el mismo z robusto y los mismos umbrales; campos con |z| sobre el umbral en las alertas: "
+            f"{campos}. Sin evaluar las bajadas (como antes de la migración 0013): {sin['alertas']} alertas "
+            f"({_coma(sin['por_ruta_dia'], 4)} por ruta y día, precisión {_coma(sin['precision_proxy'])}, lift "
+            f"{_coma(sin['lift'], 2)})."]
+
+
 def _fila(c, v):
     def f(x, d=3):
         return "—" if x is None else f"{x:.{d}f}".replace(".", ",")
@@ -845,6 +1082,11 @@ def informe(r):
         lin += [f"Festivos entre semana del periodo ({len(r['festivos_entre_semana'])}): "
                 + (", ".join(r["festivos_entre_semana"]) or "ninguno") + ". Cuentan como domingo o festivo para la "
                 "programación, el factor de carga y la referencia del consolidado.", ""]
+    fc = r.get("factor_carga")
+    if fc:
+        n = fc["horas_por_nivel"]
+        lin += [f"Factor de carga de ALT-002 observada: {fc['funcion']}. Horas evaluadas con el de día de la semana: "
+                f"{n['dia_semana']}; con el de tipo de día: {n['tipo_dia']}; sin factor: {n['sin_factor']}.", ""]
     lin += [r["nota_precision"], "", f"ALT-006: {r['tolerancia_tiempo_min']}.", "",
            "## Umbrales por defecto (versionados en threshold_config por la migración 0003)", "", cab]
     lin += [_fila(c, v) for c, v in r["por_defecto"]["por_codigo"].items()]
@@ -857,7 +1099,7 @@ def informe(r):
                 "el episodio sigue en la hora siguiente.",
             "- ALT-007 ruptura (RF-009): CUSUM de dos lados sobre el residuo diario relativo; precisión proxy: el "
             "nivel "
-            "nuevo se sostiene en los 14 días siguientes (ver la sección del detector).", ""]
+            "nuevo se sostiene en los 14 días siguientes (ver la sección del detector).", *_lineas_008(r), ""]
     lin += _informe_detector(r)
     lin += ["## Reglas anteriores (sin persistencia, sin P10, tolerancia de salidas 20 %, |z| 3,0)", "", cab]
     lin += [_fila(c, v) for c, v in r["reglas_anteriores"]["por_codigo"].items()]

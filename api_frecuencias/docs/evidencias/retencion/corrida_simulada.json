@@ -1,0 +1,212 @@
+{
+ "prueba": "tests/integracion/test_retencion.py (corrida_simulada)",
+ "ahora": "2026-11-11 10:16:31.653986+00:00",
+ "sembrado_viejo": "2025-09-07 10:16:31.653986+00:00",
+ "sembrado_nuevo": "2025-12-16 10:16:31.653986+00:00",
+ "simulado": true,
+ "cortes": {
+  "retencion_meses_foto": "2025-10-11 05:16:31.653986-05:00",
+  "retencion_meses_resultados": "2025-10-11 05:16:31.653986-05:00",
+  "retencion_meses_alertas": "2025-10-11 05:16:31.653986-05:00",
+  "retencion_meses_ejecuciones": "2025-10-11 05:16:31.653986-05:00"
+ },
+ "politica": {
+  "retencion_meses_foto": 13,
+  "retencion_meses_resultados": 13,
+  "retencion_meses_alertas": 13,
+  "retencion_meses_ejecuciones": 13,
+  "retencion_archivar_particiones": 0,
+  "retencion_aplicar_programada": 1
+ },
+ "totales": {
+  "filas": 12,
+  "particiones": 1,
+  "filas_particiones": 1,
+  "bytes_particiones": 98304,
+  "pospuestas": 0
+ },
+ "acciones": [
+  {
+   "grupo": "foto",
+   "objeto": "feature_snapshot_201901",
+   "accion": "separar_y_borrar",
+   "corte": "2025-10-11 05:16:31.653986-05:00",
+   "filas": 1,
+   "bytes": 98304,
+   "detalle": {
+    "desde": "2018-12-31 19:00:00-05:00",
+    "hasta": "2019-01-31 19:00:00-05:00"
+   }
+  },
+  {
+   "grupo": "foto",
+   "objeto": "feature_snapshot_201902",
+   "accion": "conservar",
+   "corte": "2025-10-11 05:16:31.653986-05:00",
+   "filas": 1,
+   "bytes": 98304,
+   "detalle": {
+    "desde": "2019-01-31 19:00:00-05:00",
+    "hasta": "2019-02-28 19:00:00-05:00",
+    "recientes": 1,
+    "motivo": "tiene filas creadas después del corte: su predicción se conserva"
+   }
+  },
+  {
+   "grupo": "resultados",
+   "objeto": "recommendation",
+   "accion": "borrar_filas",
+   "corte": "2025-10-11 05:16:31.653986-05:00",
+   "filas": 1,
+   "bytes": null,
+   "detalle": {
+    "descripcion": "recomendaciones por fecha de creación",
+    "lotes": 1
+   }
+  },
+  {
+   "grupo": "resultados",
+   "objeto": "prediction",
+   "accion": "borrar_filas",
+   "corte": "2025-10-11 05:16:31.653986-05:00",
+   "filas": 1,
+   "bytes": null,
+   "detalle": {
+    "descripcion": "predicciones por fecha de creación (su foto de variables se borra con ellas; nunca una que sostiene una recomendación que se conserva)",
+    "lotes": 1
+   }
+  },
+  {
+   "grupo": "resultados",
+   "objeto": "respuesta_reto",
+   "accion": "borrar_filas",
+   "corte": "2025-10-11 05:16:31.653986-05:00",
+   "filas": 1,
+   "bytes": null,
+   "detalle": {
+    "descripcion": "fotos de la respuesta del reto por fecha de cálculo",
+    "lotes": 1
+   }
+  },
+  {
+   "grupo": "resultados",
+   "objeto": "segmento_estadistica_refresco",
+   "accion": "borrar_filas",
+   "corte": "2025-10-11 05:16:31.653986-05:00",
+   "filas": 1,
+   "bytes": null,
+   "detalle": {
+    "descripcion": "marcas de los refrescos de segmentos (nunca la última ni la del último completo)",
+    "lotes": 1
+   }
+  },
+  {
+   "grupo": "alertas",
+   "objeto": "notification_log",
+   "accion": "borrar_filas",
+   "corte": "2025-10-11 05:16:31.653986-05:00",
+   "filas": 1,
+   "bytes": null,
+   "detalle": {
+    "descripcion": "notificaciones y reportes enviados, por fecha",
+    "lotes": 1
+   }
+  },
+  {
+   "grupo": "alertas",
+   "objeto": "alert",
+   "accion": "borrar_filas",
+   "corte": "2025-10-11 05:16:31.653986-05:00",
+   "filas": 1,
+   "bytes": null,
+   "detalle": {
+    "descripcion": "alertas cerradas o descartadas, por su última actualización (con su historial)",
+    "lotes": 1
+   }
+  },
+  {
+   "grupo": "ejecuciones",
+   "objeto": "execution_log",
+   "accion": "borrar_filas",
+   "corte": "2025-10-11 05:16:31.653986-05:00",
+   "filas": 6,
+   "bytes": null,
+   "detalle": {
+    "descripcion": "ejecuciones terminadas que ya no sostienen nada (con sus intentos, errores de calidad y monitoreo); nunca la última de cada tipo",
+    "lotes": 2
+   }
+  },
+  {
+   "grupo": "derivada",
+   "objeto": "segmento_estadistica_dia",
+   "accion": "conservar",
+   "corte": null,
+   "filas": 0,
+   "bytes": 32768,
+   "detalle": {
+    "fecha_min": null,
+    "fecha_max": null,
+    "motivo": "derivada de timbradas_segmentos: el refresco la iguala a la fuente y el refresco completo periódico la recalcula (SEGMENTOS_COMPLETO_DIAS), así que se conserva y su retención es la de Extreme"
+   }
+  },
+  {
+   "grupo": "derivada",
+   "objeto": "segmento_estadistica",
+   "accion": "conservar",
+   "corte": null,
+   "filas": 0,
+   "bytes": 40960,
+   "detalle": {
+    "fecha_min": null,
+    "fecha_max": null,
+    "motivo": "derivada de timbradas_segmentos: el refresco la iguala a la fuente y el refresco completo periódico la recalcula (SEGMENTOS_COMPLETO_DIAS), así que se conserva y su retención es la de Extreme"
+   }
+  }
+ ],
+ "filas_sembradas": {
+  "execution_log": {
+   "ejecucion_vieja": "conservada",
+   "ejecucion_vieja_error": "conservada",
+   "madre_borrable": "conservada",
+   "trabajo_borrable_1": "conservada",
+   "trabajo_borrable_2": "conservada",
+   "trabajo_borrable_3": "conservada",
+   "ejecucion_vieja_en_cola": "conservada",
+   "ejecucion_con_marca": "conservada",
+   "ejecucion_con_modelo": "conservada",
+   "ejecucion_con_resultado_nuevo": "conservada",
+   "ejecucion_nueva": "conservada",
+   "madre_con_trabajo_protegido": "conservada",
+   "trabajo_con_marca": "conservada"
+  },
+  "prediction": {
+   "prediccion_vieja": "conservada",
+   "prediccion_vieja_con_recomendacion_nueva": "conservada",
+   "prediccion_nueva": "conservada"
+  },
+  "recommendation": {
+   "recomendacion_vieja": "conservada",
+   "recomendacion_nueva": "conservada"
+  },
+  "respuesta_reto": {
+   "respuesta_vieja": "conservada",
+   "respuesta_nueva": "conservada"
+  },
+  "segmento_estadistica_refresco": {
+   "refresco_viejo": "conservada",
+   "ultimo_completo_viejo": "conservada",
+   "refresco_nuevo": "conservada"
+  },
+  "alert": {
+   "alerta_cerrada_vieja": "conservada",
+   "alerta_abierta_vieja": "conservada",
+   "alerta_cerrada_nueva": "conservada",
+   "alerta_cerrada_vieja_con_notificacion_nueva": "conservada"
+  },
+  "notification_log": {
+   "notificacion_vieja": "conservada",
+   "notificacion_nueva": "conservada"
+  }
+ },
+ "centinela": "las tablas execution_log, prediction y feature_snapshot (con su partición 201901) del esquema retencion_centinela quedaron intactas"
+}

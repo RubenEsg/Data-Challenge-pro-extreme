@@ -22,7 +22,12 @@ Línea de tiempo con los valores por omisión (los mismos que pasa scripts/verif
 Uso:  set SOBUSA_API_URL=http://127.0.0.1:8000 & set SOBUSA_API_KEY=<clave admin>
       python scripts/demo_ciclo_api.py --hasta 2025-08-30 --corte 2025-09-30 [--revertir] [--salida archivo.txt]
 La clave llega SOLO por el entorno (activar o revertir un modelo exige el rol admin). La base debe estar recién
-migrada (sin ejecuciones previas): la primera ejecución es la carga inicial.
+migrada (sin ejecuciones previas): la primera ejecución es la carga inicial. El cliente HTTP es el de
+scripts/cliente_http.py (keep-alive corto y un reintento solo en GET y HEAD).
+Este guion solo habla por HTTP: no escribe en datos/. Quien escribe es la API que atiende: el entrenamiento del paso
+(4) deja el candidato en su MODELOS_DIR. Con la pila de Docker eso queda dentro del contenedor
+(scripts/verificar_despliegue.py). Si la API es un uvicorn de este checkout, arránquela con DATA_DIR y MODELOS_DIR en
+una copia de datos/, para que el repositorio quede igual.
 """
 from __future__ import annotations
 
@@ -35,6 +40,9 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import httpx
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cliente_http import cabeceras_api, crear_cliente  # noqa: E402
 
 ZONA = ZoneInfo("America/Bogota")
 API = "/api/v1"
@@ -52,12 +60,6 @@ def decir(*partes) -> None:
 
 def titulo(numero: int, texto: str) -> None:
     decir(f"\n({numero}) {texto}")
-
-
-def cabeceras_api() -> dict[str, str]:
-    """§7.2: la clave de API llega SOLO por el entorno (SOBUSA_API_KEY)."""
-    clave = os.environ.get("SOBUSA_API_KEY", "").strip()
-    return {"X-API-Key": clave} if clave else {}
 
 
 def fecha(valor) -> date | None:
@@ -199,7 +201,7 @@ def guardar(a: argparse.Namespace, codigo: int) -> int:
 
 def main() -> int:  # noqa: C901, PLR0912, PLR0915 - el guion sigue los seis pasos de §14.2 en orden
     a = argumentos()
-    c = httpx.Client(base_url=a.base, timeout=300, headers=cabeceras_api())
+    c = crear_cliente(a.base, timeout=300, headers=cabeceras_api())
     inicio = datetime.now(ZONA)
     decir(f"=== Ciclo completo de la especificación v1.5 §14.2 «Demostración» · API {a.base} · "
           f"{inicio:%Y-%m-%d %H:%M:%S %z} (America/Bogota) ===")

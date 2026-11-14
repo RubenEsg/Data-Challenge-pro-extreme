@@ -102,3 +102,29 @@ def test_volumen_conversion_rapida():
     t0 = time.perf_counter()
     filas = sum(1 for _ in ingesta.filas_para_copy(lote))
     assert filas == n and time.perf_counter() - t0 < 10
+
+
+def test_medidas_opcionales_en_el_csv_y_en_la_sentencia_copy():
+    """Migración 0013: bajadas_viajes, subidas, bajadas y viajes_con_timbradas van al final del CSV, en el orden de
+    MEDIDAS y solo si el lote las trae; sin ellas el CSV y el COPY son los de siempre."""
+    lote = _lote().iloc[:2].copy()
+    lote["viajes_con_timbradas"] = [3.0, None]
+    lote["bajadas_viajes"] = [11.5, np.nan]
+    assert ingesta.medidas_del_lote(lote) == ["bajadas_viajes", "viajes_con_timbradas"]
+    assert ingesta.sentencia_copy(["bajadas_viajes", "viajes_con_timbradas"]) == (
+        "COPY tmp_ingesta_demanda (ruta, dias, hora, pasajeros, salidas, ua_us, bajadas_viajes, viajes_con_timbradas) "
+        "FROM STDIN WITH (FORMAT csv)")
+    assert ingesta.sentencia_copy([]) == ingesta._COPY
+    (bloque,) = list(ingesta.bloques_csv(lote))
+    primera, segunda = bloque.splitlines()
+    assert primera.endswith(",11.5,3") and segunda.endswith(",,")       # nulos -> campo vacío (NULL)
+    n = ingesta.normalizar(lote)
+    assert str(n["viajes_con_timbradas"].dtype) == "Int64" and str(n["bajadas_viajes"].dtype) == "float64"
+    assert "subidas" not in n.columns
+
+
+def test_el_upsert_no_borra_una_medida_que_el_lote_no_trae():
+    sql = " ".join(ingesta._UPSERT.split())
+    for medida in ingesta.MEDIDAS:
+        assert f"{medida} = COALESCE(EXCLUDED.{medida}, d.{medida})" in sql
+    assert "IS DISTINCT FROM" in sql and "d.bajadas_viajes" in sql

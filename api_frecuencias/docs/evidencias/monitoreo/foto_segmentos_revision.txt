@@ -1,0 +1,39 @@
+Foto por segmento y sentido (§7.3 paso 4) bajo caída y en la ejecución programada: revisión del paquete
+2026-11-09, America/Bogota. Código probado: commit 003aceb (rama del paquete del modelo por segmento), con los arreglos
+de la revisión (la foto por segmento no tumba el ciclo, va en su propio punto de guardado y la paginación desempata).
+Conteos: consulta de solo lectura a feature_snapshot de cada base local al terminar (segmento no nulo / nulo).
+
+1) Prueba de caída RNF-001: scripts/prueba_caida.py con dos réplicas uvicorn reales en 127.0.0.1:8341 y 8342 (puertos
+   del paquete; detenidas al terminar) sobre la base local ai_frecuencias_pruebas_modelo_segmentos_rev_caida.
+   Resultado del script: «RESULTADO: TODO OK» (ok = true, sin fallas). Cada escenario terminó con 2 intentos y traza
+   [abandonado, ok]: SIGKILL durante la lectura incremental, SIGKILL durante la predicción y reserva vencida que toma la
+   otra réplica.
+
+   | Ejecución                 | Estado | Filas por segmento (sentido lleno) | Filas de la ruta |
+   |---------------------------|--------|------------------------------------|------------------|
+   | caida-referencia          | ok     | 1158                               | 12               |
+   | caida-lectura_incremental | ok     | 1158                               | 12               |
+   | caida-prediccion          | ok     | 1158                               | 12               |
+   | caida-reserva             | ok     | 1158                               | 12               |
+
+   Los intentos abandonados no dejan filas repetidas: la foto se escribe en la misma transacción que los resultados y
+   solo la confirma el intento que cierra la ejecución.
+
+2) Ejecución programada real (§14.2): PRUEBA_PLANIFICADOR=1 pytest tests/integracion/test_planificador_programado.py
+   -> 1 passed en 177 s (APScheduler con cron cada minuto, sin POST manual; base desechable
+   ai_frecuencias_pruebas_modelo_segmentos_rev_plan y copia temporal de datos/).
+
+   | Franja (correlation_id)               | Estado | Filas por segmento (sentido lleno) | Filas de la ruta |
+   |---------------------------------------|--------|------------------------------------|------------------|
+   | planificador-frecuencia-20261109T2151 | ok     | 1158                               | 12               |
+   | planificador-frecuencia-20261109T2152 | ok     | 1158                               | 12               |
+   | planificador-frecuencia-20261109T2153 | ok     | 0 (sin datos nuevos, no pronostica) | 0                |
+
+   1158 = 3 horizontes × (128 + 123 + 135) segmentos de CL 72, CRA 54 y SILENCIO. La prueba programada no cuenta estas
+   filas por sí misma: el conteo de esta tabla es la consulta posterior.
+
+3) Paginación de la foto de una ejecución (GET /api/v1/monitoring/feature-snapshots?execution_id=...): las 1.170 filas
+   comparten ventana_inicio. Sin desempate, en PostgreSQL 14 se vieron 1.160 filas distintas de 1.170 con limite=50 y
+   1.166 con limite=100 (filas repetidas entre páginas y otras saltadas). Con la llave primaria como desempate
+   (app/routers/comun.py, ordenar) se ven las 1.170: tests/integracion/test_monitoreo_api.py::
+   test_foto_de_una_ejecucion_se_pagina_sin_repetir_ni_perder_filas (falla con el orden anterior).

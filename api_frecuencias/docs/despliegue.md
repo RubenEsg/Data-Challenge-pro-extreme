@@ -51,6 +51,16 @@ Todas viven en `.env.example` (plantilla versionada, sin secretos reales). El `.
 indique `API_ENV_FILE`) y `docker-compose.yml` fija explícitamente las que dependen del contenedor (`DATABASE_URL`,
 `DATA_DIR`, `TZ`). «Secreto» = no debe aparecer en el repositorio, en logs ni en capturas.
 
+`docker-compose.yml` no nombra una por una las variables de la partición por ruta, de la capa de segmentos, de la
+foto por segmento, de la retención ni del reporte de unicidad (`PLAN_PARTICION`, `PLAN_SEGMENTOS_CRON`,
+`SEGMENTOS_DIAS_POR_LOTE`, `SEGMENTOS_COMPLETO_DIAS`, `FOTO_SEGMENTOS`, `PLAN_RETENCION_CRON` y
+`NOTIF_UNICIDAD_DESTINATARIOS`): llegan a la API solo por `env_file`, desde el `.env` o el archivo de `API_ENV_FILE`.
+Sin una línea en ese archivo rige el valor por omisión (el de `app/config.py`; `NOTIF_UNICIDAD_DESTINATARIOS`, vacía),
+y una variable definida solo en la consola no llega al contenedor. Para fijarlas, escríbalas en el `.env` (por
+ejemplo, `PLAN_PARTICION=ruta`) y recree la API: `docker compose -p sobusa_api up -d --no-deps api`. El modo integrado
+y las dos réplicas usan el mismo `env_file`. En el venv, `NOTIF_UNICIDAD_DESTINATARIOS` (como las demás `NOTIF_*`)
+se lee del entorno del proceso y no del `.env`: hay que definirla en la consola antes de arrancar `uvicorn`.
+
 **Base de datos y puertos**
 
 | Variable | Para qué | Por omisión | Secreto |
@@ -66,7 +76,7 @@ indique `API_ENV_FILE`) y `docker-compose.yml` fija explícitamente las que depe
 | Variable | Para qué | Por omisión | Secreto |
 |---|---|---|---|
 | `FUENTE` | `parquet` (sin red, reproducible) o `postgres` (base de Extreme o réplica, solo lectura) | `parquet` | No |
-| `FUENTE_DATABASE_URL` | Con `FUENTE=postgres`: usuario con solo `SELECT` (`lector_ia`) | vacía | **Sí** |
+| `FUENTE_DATABASE_URL` | Con `FUENTE=postgres`: usuario con solo `SELECT` (`lector_ia`). Con ella corren también el refresco de segmentos y, al cerrar cada ejecución, la lectura de los consolidados de Extreme (`docs/consolidados_ciclo.md`) | vacía | **Sí** |
 | `FUENTE_STATEMENT_TIMEOUT_MS` | Límite de cada consulta a la fuente | 30000 | No |
 | `FUENTE_TABLA`, `FUENTE_PROCESO`, `FUENTE_SOLAPE_MIN` | Lectura que alimenta el ciclo (solo `demanda_segmentos` llega de punta a punta; otro valor detiene el arranque con un error claro), proceso que se lee y solape de la marca de agua (min) | `demanda_segmentos`, `sobusa`, 15 | No |
 | `CATALOGOS_FUENTE` | `/api/v1/catalogos`: `auto`, `replica` o `archivos` | `auto` | No |
@@ -85,11 +95,17 @@ indique `API_ENV_FILE`) y `docker-compose.yml` fija explícitamente las que depe
 | `TRABAJADORES`, `LEASE_SEGUNDOS`, `SONDEO_COLA_SEGUNDOS`, `TRABAJADOR_ID` | Cola en PostgreSQL: hilos por réplica, reserva que vence, sondeo e identidad (vacía = nombre del contenedor) | 1, 30, 1, vacía | No |
 | `PLANIFICADOR_HABILITADO` | Planificador interno (APScheduler) | `false` en el venv, `true` en Compose; en el modo integrado lo fija `PLANIFICADOR_HABILITADO_INTEGRADO` (`true` por omisión) | No |
 | `PLAN_EJECUCION_CRON`, `PLAN_REENTRENAMIENTO_CRON` | Ejecución diaria y revisión semanal de reentrenamiento. La revisión aplica la política de `threshold_config` (`GET /api/v1/monitoring/policy`): reentrena si llegaron `reentreno_periodicidad_dias` días de datos nuevos (28), si el error se degradó, si hay deriva o si la cobertura bajó. Con `activacion_automatica` = 1 (por omisión), el retador que pasa la compuerta de sombra se activa solo, con auditoría | `15 5 * * *`, `0 4 * * 1` | No |
+| `PLAN_INTRADIA_CRON` | Ciclos intradía del planificador con `instante` = la franja (§10.1, 10.1-d): el plan del día en curso y las recomendaciones de 30 y 60 min usan la ocupación de la última hora cerrada. Solo actúa con `FUENTE=postgres`; vacía los apaga. Cada ciclo lee la fuente: unos 3,1 s en la réplica y, sin los índices de H12, unos 63 s estimados con el histórico completo (`docs/evidencias/ocupacion/ciclo_intradia_fuente.md`); si la base lo resiente, se espacia (`5 6-20/2 * * *`) o se apaga. Solo por `env_file` | `5 6-20 * * *` | No |
+| `PLAN_PARTICION` | RNF-005: `ruta` parte la ejecución diaria del planificador en una madre y un trabajo por ruta del catálogo, que las réplicas reparten; `ninguna` la deja en un solo trabajo de todas las rutas (`docs/particion_por_ruta.md`). Solo por `env_file` | `ninguna` | No |
+| `PLAN_SEGMENTOS_CRON`, `SEGMENTOS_DIAS_POR_LOTE`, `SEGMENTOS_COMPLETO_DIAS` | Refresco de la agregación materializada de segmentos (solo con `FUENTE_DATABASE_URL`): cron, días de `timbradas_segmentos` por lectura (si una no cabe en `FUENTE_STATEMENT_TIMEOUT_MS`, se parte sola) y días máximos entre dos refrescos completos en modo `auto` (`docs/segmentos_materializados.md`). Solo por `env_file` | `45 5 * * *`, 31, 7 | No |
+| `FOTO_SEGMENTOS` | Filas por segmento y sentido de cada predicción en la foto de variables (§7.3 paso 4; su volumen por ejecución está en `docs/evidencias/monitoreo/foto_segmentos.json`); `false` las apaga. Solo por `env_file` | `true` | No |
+| `PLAN_RETENCION_CRON` | Corrida programada de la retención de datos (§18; `docs/retencion_datos.md`); vacía la apaga. Con el planificador encendido (Compose), esa corrida **aplica** la política por omisión (`retencion_aplicar_programada` = 1 en `threshold_config`; sección 7). Solo por `env_file` | `30 3 * * 0` (domingos, 03:30) | No |
 | `MODELO_PLAN` | Pronóstico de la foto de la respuesta del reto: el modelo activo o `E12` (el pronóstico precalculado de 2025 del experimento 12 del informe) | modelo activo | No |
 | `INFERENCIA_SERIE` | `validada`: un script sin sesión de base arma las variables con el histórico validado de `demanda_observada` (la API y el ciclo ya lo hacen con su sesión) | vacía en el venv (serie empaquetada); `validada` en Compose y en `.env.example` (definirla vacía en el `.env` deja solo la serie empaquetada) | No |
 | `MOTOR_INFERENCIA`, `CALIBRACION_BANDA` | `sklearn` u `onnx`; `v1` fuerza la banda conformal móvil en lugar de la calibración versionada | `sklearn`, vacía | No |
 | `NOTIFICACIONES_CANALES`, `NOTIFICACIONES_SEVERIDAD` | Canales simulados (`correo,whatsapp`) y severidad mínima | vacío en el venv (`correo,whatsapp` en Compose), `critica` | No |
 | `NOTIF_CORREO_DESTINATARIOS`, `NOTIF_CORREO_REMITENTE`, `NOTIF_WHATSAPP_NUMEROS` | Destinatarios (se enmascaran en logs; el envío es simulado) | vacíos (Compose: `despacho@example.com`, `+570000000000`) | Dato personal |
+| `NOTIF_UNICIDAD_DESTINATARIOS` | Correos del responsable del consolidado para el reporte de llaves duplicadas de cada lote (§6.3; correo simulado, con el remitente de `NOTIF_CORREO_REMITENTE`). Lo define Extreme; sin él, el reporte queda en `notification_log` como `pendiente_destinatario`. Solo por `env_file` | vacía | Dato personal |
 | `CIRCUITO_FUENTE_FALLOS_MAX`, `CIRCUITO_FUENTE_REINICIO_S`, `CIRCUITO_NOTIF_FALLOS_MAX`, `CIRCUITO_NOTIF_REINICIO_S` | Circuit breaker (RNF-010) | 3, 60, 5, 120 | No |
 | `OTEL_EXPORTADOR`, `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT` | Trazas OpenTelemetry (`ninguno`, `consola`, `otlp`) | `ninguno`, `api-frecuencias`, `http://jaeger:4318` | No |
 | `METRICAS_PUBLICAS` | `/metrics` sin clave para Prometheus en la red interna | `true` | No |
@@ -102,7 +118,7 @@ indique `API_ENV_FILE`) y `docker-compose.yml` fija explícitamente las que depe
 | `API_KEYS` | JSON `{"<sha256>": {"usuario", "rol"}}`: solo los hashes de las claves | vacía | **Sí** (configuración de acceso) |
 | `API_KEY_OPERADOR`, `API_KEY_ANALISTA`, `API_KEY_ADMIN` | Alternativa: una clave en claro por rol (mínimo 16 caracteres) | vacías | **Sí** |
 | `SEUDONIMO_SECRETO` | Secreto del HMAC-SHA256 que seudonimiza al conductor en las alertas (§18); vacío = conductor `NULL` | marcador en `.env.example` | **Sí** |
-| `SOBUSA_API_URL`, `SOBUSA_API_KEY` | Lo que usan los clientes (tablero Dash, k6, `scripts/demo_ciclo_api.py`, `scripts/medir_rendimiento.py`) | `http://127.0.0.1:8000`, vacía | La clave **sí** |
+| `SOBUSA_API_URL`, `SOBUSA_API_KEY` | Lo que usan los clientes (tablero Dash, k6, `scripts/demo_ciclo_api.py`, `scripts/medir_rendimiento.py`; `scripts/demo_ciclo.py` lee solo la clave y la URL va en `--base`) | `http://127.0.0.1:8000`, vacía | La clave **sí** |
 | `SOBUSA_API_KEY_DASH` | Clave de rol analista reservada para el tablero Dash local | vacía | **Sí** |
 
 **Réplica operacional y variantes de Compose**
@@ -124,7 +140,13 @@ Variables solo de pruebas (ver `docs/manual_tecnico.md`, sección 13):
 - `GENERAR_EVIDENCIAS=1`: las pruebas que dejan evidencia reescriben `docs/evidencias/`; sin ella escriben en un
   directorio temporal o en `EVIDENCIAS_DIR`, y el checkout no cambia.
 - `TESTCONTAINERS=1`, `SCHEMATHESIS_EJEMPLOS`, `REPLICA_PRUEBAS_ESCRITURA=1`, `PRUEBA_CAIDA=1` (RNF-001 con procesos
-  reales) y `PRUEBA_PLANIFICADOR=1` (la ejecución programada de §14.2).
+  reales), `PRUEBA_REPLICAS=1` (dos réplicas reales con la ejecución partida por ruta, RNF-005) y
+  `PRUEBA_PLANIFICADOR=1` (la ejecución programada de §14.2). `PRUEBA_CAIDA_PUERTOS` y `PRUEBA_REPLICAS_PUERTOS`
+  (`"a,b"`) fijan los dos puertos de las réplicas de esas pruebas; sin ellas se usan dos puertos libres.
+- Al correr las pruebas desde una copia sin la carpeta `datos/` de la raíz (por ejemplo, un worktree de git), defina
+  `REPLICA_DATOS_DIR` con la carpeta de las exportaciones con que se cargó la réplica (la leen
+  `tests/replica/test_carga.py` y los scripts de la réplica) y `CATALOGOS_DATOS_DIR` (tabla de arriba; si falta, los
+  catálogos usan `REPLICA_DATOS_DIR`).
 
 ## 3. Modos de ejecución
 
@@ -211,7 +233,17 @@ docker compose -p sobusa_rep -f docker-compose.yml -f docker-compose.integracion
 Las claves `LECTOR_IA_PASSWORD` y `ESCRITOR_IA_PASSWORD` salen solo del `.env` local. En este modo el planificador
 queda encendido por omisión (`PLANIFICADOR_HABILITADO_INTEGRADO=true`), así que la ejecución diaria lee la réplica sin
 ningún POST, y `docker-compose.integracion.yml` pasa `FUENTE_PROCESO` (por omisión `sobusa`) al servicio de la API.
-Evidencia: `modo_integrado.txt`.
+Como ese modo define `FUENTE_DATABASE_URL`, el planificador programa además el refresco de la agregación de segmentos
+(`PLAN_SEGMENTOS_CRON`, por omisión `45 5 * * *`), que relee `timbradas_segmentos` con `lector_ia`. Cada ciclo lee
+también, con `lector_ia`, las subidas y bajadas por segmento de los viajes de las franjas que acaba de entregar, para
+la ocupación actual por segmento (§10.1, `docs/ocupacion_segmentos.md`), y los viajes del día de cada ruta en
+`progvehiculos`, para el viaje, el vehículo y el seudónimo del conductor de ALT-006 y ALT-009
+(`docs/alertas_viajes_y_alt003.md`). Al cerrar, cada ejecución lee además los consolidados de Extreme desde su marca
+por tabla, los valida y los contrasta con la agregación propia (`docs/consolidados_ciclo.md`). La retención de datos
+(`PLAN_RETENCION_CRON`) se programa igual que en los demás modos con el planificador encendido y solo borra en
+`ai_frecuencias` (sección 7).
+Evidencia: `modo_integrado.txt` (de cuando la cabeza era la 0005: no incluye la ocupación por segmento, la retención,
+los viajes de las alertas ni los consolidados).
 
 ### 3.4 Dos réplicas de la API (RNF-005)
 
@@ -222,6 +254,11 @@ docker compose -p sobusa_api -f docker-compose.yml -f docker-compose.replicas.ym
 Quedan en los puertos 8000 y 8001 sobre la misma base y la misma cola (SKIP LOCKED + reserva que vence); cada una
 reclama trabajos con su propia identidad (el nombre del contenedor) y la migración la corre una sola vez `migrar`.
 La prueba con dos réplicas y la caída de una está en `docs/evidencias/cola/` (`caida_rnf001_docker.txt`).
+
+Para repartir rutas entre las réplicas, use `POST /api/v1/frequency/executions` con `"particion": "ruta"` o fije
+`PLAN_PARTICION=ruta` en el `.env` (sección 2). La prueba con dos réplicas partidas por ruta, con procesos uvicorn,
+está en `docs/evidencias/cola/replicas_por_ruta.txt`, y la marca de agua de cada ruta se consulta en
+`GET /api/v1/frequency/watermarks`.
 
 ### 3.5 Trazas con Jaeger (RNF-006)
 
@@ -240,8 +277,22 @@ la cola y queda en `execution_log.traceparent`.
   `feature_snapshot` particionada por mes y trazabilidad, 0005 pesos y costos versionados de la función objetivo de
   §10.2, 0006 dimensiones de §8.3, campos de trazabilidad de la calidad, aprobación de umbrales y la tabla
   `respuesta_reto`, 0007 los umbrales de la ALT-002 observada y del detector de rupturas de RF-009 versionados en
-  `threshold_config`). Son aditivas: no borran datos. La 0007 crea una versión nueva del conjunto de umbrales, así que
-  en una base nueva sin ningún `PUT /thresholds` la versión vigente es la 5.
+  `threshold_config`, 0008 la agregación materializada de la capa de segmentos y el tipo de trabajo `segmentos`, 0009
+  la partición por ruta: columnas `ruta`, `padre_id` y `particion` en `execution_log` y la tabla `marca_agua_ruta`,
+  0010 los parámetros del plan del día (tarifa, elasticidad y suavidad) versionados en `threshold_config` y el headway
+  vigente de `rutas.frecuenciadespachos` en `recommendation`, 0011 la tabla `ocupacion_segmento` con la ocupación actual
+  por segmento de §10.1, 0012 el tipo de trabajo `retencion`, la bitácora `retencion_registro`, la columna
+  `huellas_solape` de `segmento_estadistica_refresco` y los seis parámetros de la retención de §18 en
+  `threshold_config`, 0013 las bajadas y las medidas de los segmentos en `demanda_observada`, la tabla
+  `marca_agua_tabla` y las tolerancias del contraste de los consolidados en `threshold_config`, y 0014 el mínimo de
+  probabilidad de ALT-003 en `threshold_config`). Son aditivas: no borran datos (la que borra datos viejos es la tarea
+  de retención, no la migración; sección 7). Las que versionan umbrales (la 0001, la 0003, la 0004, la 0005, la 0007,
+  la 0010, la 0012, la 0013 y la 0014) crean cada una una versión nueva del conjunto, así que en una base nueva sin
+  ningún `PUT /thresholds` la versión vigente es la 9, con 71 parámetros. La crea la 0014 y nace **propuesta**: rige
+  desde que se aplica la migración, `GET /api/v1/thresholds` la muestra como propuesta y el área operativa la aprueba
+  con `POST /api/v1/thresholds/{version}/aprobar` (`docs/alertas_viajes_y_alt003.md`, sección 4). La 0013 y la 0014
+  toman el candado de `bloquear_umbrales`: un `PUT /thresholds` de otra réplica durante el despliegue espera. La
+  evidencia `docs/evidencias/gobierno/umbrales_en_postgresql.json` es de la cabeza 0014 (`version_vigente` = 9).
 - En Compose las aplica el servicio `migrar` (`alembic upgrade head`) antes de la API; con varias réplicas nadie
   compite por Alembic. Repetirla no hace nada (comprobado en `migraciones.txt`).
 - Comandos útiles: `docker compose -p sobusa_api run --rm migrar alembic current`, `... alembic history`, y para
@@ -253,8 +304,10 @@ la cola y queda en `execution_log.traceparent`.
 
 La API exige `X-API-Key` en todo `/api/v1` (`AUTH_HABILITADA=true`). Roles (matriz `POLITICA` de `app/seguridad.py`):
 **operador** (todas las consultas y los cambios de estado de las alertas), **analista** (además lanzar ejecuciones,
-predicciones y recomendaciones a pedido y entrenar candidatos) y **admin** (además activar y revertir modelos, cambiar
-umbrales y el catálogo de capacidad). La clave en claro nunca se guarda en el servidor: solo su SHA-256.
+predicciones y recomendaciones a pedido, entrenar candidatos y pedir el refresco de la agregación de segmentos) y
+**admin** (además activar y revertir modelos, cambiar umbrales y los ajustes locales de capacidad, flota y tiempo de
+ciclo, y correr la retención de datos bajo demanda con `POST /api/v1/retencion/aplicar`). La clave en claro nunca se
+guarda en el servidor: solo su SHA-256.
 
 1. Crear la clave (dentro del contenedor, no hace falta el venv):
 
@@ -277,16 +330,27 @@ docker compose -p sobusa_api run --rm --no-deps api python scripts/crear_api_key
 
 Sin clave la API responde 401; con un rol insuficiente, 403 (comprobado en `arranque_limpio.txt`).
 
+**El cliente HTTP de la demostración.** `scripts/demo_ciclo.py`, `scripts/demo_ciclo_api.py` y
+`scripts/verificar_despliegue.py` hablan con la API por el cliente común `scripts/cliente_http.py` (`crear_cliente` y
+`cabeceras_api`). No es `../dash_app/cliente_api.py`, el cliente del tablero. Reutiliza una conexión ociosa solo 2 s
+(`KEEPALIVE_S`), porque uvicorn la cierra a los 5 s y ni el Dockerfile ni los archivos de Compose cambian
+`--timeout-keep-alive`. Reintenta una sola vez un GET o un HEAD ante `httpx.RemoteProtocolError`,
+`httpx.ConnectError`, `httpx.ReadError` o `httpx.WriteError` (`ERRORES_REINTENTABLES`), nunca ante un tiempo agotado;
+POST, PUT, PATCH y DELETE van cada uno por una conexión nueva y nunca se reintentan, así que no
+se duplica una ejecución ni una activación. Si alguien pone `--timeout-keep-alive` en el Dockerfile o en Compose,
+`tests/unit/test_cliente_http.py::test_el_keep_alive_del_cliente_es_menor_que_el_del_servidor` falla. Con su
+transporte propio, httpx no aplica `HTTP_PROXY` ni `ALL_PROXY`: la API debe ser alcanzable directamente.
+
 ## 6. Salud, métricas y trazas
 
 | Qué | Dónde |
 |---|---|
 | Salud | `GET /health` → 200 `{"estado": "ok", "base_datos": "ok", "version", "fuente"}`; 503 si la base no responde. Es el HEALTHCHECK de la imagen (cada 15 s) |
-| Métricas Prometheus | `GET /metrics` (pública en la red interna con `METRICAS_PUBLICAS=true`). Además de las peticiones y los circuitos, la cola y el ciclo: `api_ejecuciones_total`, `api_ejecucion_duracion_segundos`, `api_cola_reintentos_total`, `api_cola_trabajos` (por tipo y estado), `api_ejecucion_etapa_segundos` y `api_serie_diaria_segundos` (detalle en `docs/manual_tecnico.md`, sección 9) |
+| Métricas Prometheus | `GET /metrics` (pública en la red interna con `METRICAS_PUBLICAS=true`). Además de las peticiones y los circuitos, la cola y el ciclo: `api_ejecuciones_total`, `api_ejecucion_duracion_segundos`, `api_cola_reintentos_total`, `api_cola_trabajos` (por tipo y estado), `api_ejecucion_etapa_segundos` y `api_serie_diaria_segundos` (detalle en `docs/manual_tecnico.md`, sección 9). La etiqueta `etapa` de `api_ejecucion_etapa_segundos` sale de un conjunto cerrado (`ejecucion.ETAPAS_METRICA`); cualquier otra etapa cuenta en `otra` |
 | Rendimiento de las consultas a la base de resultados | El servicio `db` arranca con `shared_preload_libraries=pg_stat_statements` y `track_io_timing=on`; la extensión la crea `initdb_resultados/10_pg_stat_statements.sql` en un volumen nuevo (`docs/evidencias/despliegue/pg_stat_statements_db.txt`). En un volumen que ya existía, se crea una vez con `CREATE EXTENSION IF NOT EXISTS pg_stat_statements` |
 | Logs | JSON por línea (structlog) con `correlation_id`, `execution_id`, `worker_id`, `trace_id`: `docker compose logs api` |
 | Trazas | OpenTelemetry → Jaeger (sección 3.5) |
-| Trabajos | `GET /api/v1/frequency/executions/{id}` (estado, etapa, progreso, intentos) y `GET /api/v1/scheduler` |
+| Trabajos | `GET /api/v1/frequency/executions/{execution_id}` (estado, etapa, progreso, intentos; también los trabajos `segmentos` y `retencion`, en una ejecución partida sus `trabajos` por ruta y, en `metricas.calidad.consolidados`, el paso de los consolidados de Extreme), `GET /api/v1/frequency/watermarks` (marca de agua por proceso y ruta), `GET /api/v1/scheduler` y `GET /api/v1/retencion` (la política de retención y su última corrida) |
 
 ## 7. Respaldo y restauración
 
@@ -299,10 +363,27 @@ Los modelos entrenados viven en el volumen `modelos` (`/app/datos/modelos`); par
 `docker compose -p sobusa_api cp api:/app/datos/modelos ./respaldo_modelos`. La réplica operacional no se respalda
 desde aquí: es una copia que se reconstruye con `scripts/replica_cargar.py`.
 
+**Retención de datos (§18).** Con el planificador encendido (en Compose, por omisión), la franja de
+`PLAN_RETENCION_CRON` (los domingos a las 03:30) **aplica** la política: borra de `ai_frecuencias` lo que tiene más
+de 13 meses según la fecha en que se escribió, y separa y borra las particiones mensuales viejas de
+`feature_snapshot`. Antes de la primera corrida sobre una base con datos que se quieran guardar:
+
+- revise qué borraría con `GET /api/v1/retencion` (la política y el corte de hoy) o con una simulación,
+  `POST /api/v1/retencion/aplicar` (admin; simula por omisión), y el resultado en
+  `GET /api/v1/frequency/executions/{execution_id}`;
+- para que la corrida programada solo informe, cree con `PUT /api/v1/thresholds` (admin) una versión con
+  `retencion_aplicar_programada` = 0; para que no corra, deje `PLAN_RETENCION_CRON=` vacía en el `.env` y recree la
+  API;
+- para conservar las particiones viejas de la foto de variables, use `retencion_archivar_particiones` = 1: cada una
+  queda como `ai_frecuencias.feature_snapshot_AAAAMM_archivo`, sin llaves foráneas, y el DBA la vuelca con
+  `pg_dump -t` y la borra. Mientras ese archivo exista, archivar otra vez el mismo mes queda «pospuesto».
+
+La política completa y su bitácora (`retencion_registro`) están en `docs/retencion_datos.md`.
+
 ## 8. Verificación reproducible del despliegue
 
 ```
-.venv\Scripts\python scripts\verificar_despliegue.py                  (todo: 5,7 min el 9-11-2026 con la caché de BuildKit)
+.venv\Scripts\python scripts\verificar_despliegue.py                  (todo: 4,0 min el 13-11-2026 con la caché de BuildKit)
 .venv\Scripts\python scripts\verificar_despliegue.py --sin-demo       (sin la demostración; RNF-001 con un día de referencia)
 .venv\Scripts\python scripts\verificar_despliegue.py --modo-integrado (API contra la réplica que ya corre en sobusa_rep)
    otras opciones: --sin-cache (reconstruye la imagen), --sin-caida (omite RNF-001), --conservar (no baja la pila)
@@ -332,41 +413,42 @@ de prueba se generan al azar en un archivo temporal que se borra al final. Devue
    2025-12-01 al 2025-12-14.
 5. **Comparación con el modelo activo** en la misma ventana, 2025-12-01..14: posterior a todo lo que vieron los dos
    modelos y anterior al 2025-12-31, último día de la serie empaquetada. Llegan esos 14 días (714 filas) y
-   `GET /api/v1/models/{id}/evaluation` da WAPE 14,108 % del candidato frente a 13,982 % del activo.
+   `GET /api/v1/models/{model_id}/evaluation` da WAPE 14,108 % del candidato frente a 13,982 % del activo.
 6. **Decisión:** la compuerta de cuatro criterios (`politica.compuerta`) imprime cada uno. Solo falla «WAPE del
    candidato ≤ WAPE del activo» (los de `wape_max`, cobertura P10–P90 y sesgo se cumplen), así que el candidato queda
-   rechazado y el activo sigue. Activarlo sin forzar con `POST /api/v1/models/{id}/activate` responde 409
+   rechazado y el activo sigue. Activarlo sin forzar con `POST /api/v1/models/{model_id}/activate` responde 409
    `requiere_forzar`. Con `--revertir`, si la compuerta lo hubiera activado, se revierte con `POST /models/rollback`; en
    esta corrida no hay nada que revertir.
 
-`POST /models/{id}/activate` exige una ventana posterior a lo que vio el candidato (corte + 61 días) y responde 422
-`ventana_en_muestra` si no lo es; la demostración nunca le pasa una ventana dentro de la muestra. No cambian entre
+`POST /models/{model_id}/activate` exige una ventana posterior a lo que vio el candidato (corte + 61 días) y responde
+422 `ventana_en_muestra` si no lo es; la demostración nunca le pasa una ventana dentro de la muestra. No cambian entre
 corridas las filas, las marcas de agua, los WAPE, el identificador y el SHA-256 del candidato, los criterios ni la
 decisión; sí, los tiempos, los identificadores de las ejecuciones y el número de alertas y de notificaciones omitidas.
 
 **Dónde queda cada corrida.** La corrida en Docker sobre la pila creada desde cero queda en
 `docs/evidencias/despliegue/demo_ciclo_api.txt`, que `verificar_despliegue.py` reescribe en cada corrida (y en
 `docs/evidencias/demo_ciclo.txt`). La salida de referencia, contra la API en el venv con una base de pruebas nueva y una
-copia temporal de `datos/`, está en `demo_esperado.md`: dos corridas del 9-11-2026 (07:30 y 07:40) con código 0, en 139
-y 125 s, y la misma salida salvo los tiempos y los identificadores.
+copia temporal de `datos/`, está en `demo_esperado.md`: dos corridas del 13-11-2026 (22:13 y 22:16) con código 0, en 120 s
+cada una, y la misma salida salvo los tiempos y los identificadores.
 
 Los demás resultados de la tabla salen de la corrida completa de `verificar_despliegue.py` (con la demostración) del
-9-11-2026, de 08:27 a 08:32, en el equipo de desarrollo: «Resultado global: OK» en 5,7 min, que dejó
+13-11-2026, a las 23:07, en el equipo de desarrollo: «Resultado global: OK» en 4,0 min, que dejó
 `arranque_limpio.txt`, `migraciones.txt`, `demo_ciclo_api.txt`, `reinicio.txt` e `imagen.txt`. Los tiempos varían de
-una corrida a otra; cada corrida reescribe esos archivos.
+una corrida a otra; cada corrida reescribe esos archivos. Es del código final: la cabeza de
+Alembic es la 0014 (`alembic/versions/`) y la demostración usa el cliente común `scripts/cliente_http.py` (sección 5).
 
 | Paso | Resultado |
 |---|---|
-| Construcción | 173 s la primera vez sin caché (`construccion_sin_cache.txt`); 9,0 s reutilizando la caché de BuildKit (`arranque_limpio.txt`, paso 1) |
-| `up -d --build` desde volúmenes nuevos | retorna en 17,7 s; `GET /health` = ok a los 24,3 s y HEALTHCHECK `healthy` a los 28,5 s; `db` sano y `migrar` termina con código 0 (`arranque_limpio.txt`, pasos 2 y 3) |
-| Migraciones | 0001 → 0007 (head) en la base nueva; `alembic current` = 0007 (head); repetir `alembic upgrade head` no hace nada; 16 tablas en `ai_frecuencias`, la partición `feature_snapshot_202611`, el índice GiST `ix_alert_ubicacion` y `pg_stat_statements` cargado (`migraciones.txt`) |
+| Construcción | 173 s la primera vez sin caché (`construccion_sin_cache.txt`); 3,1 s reutilizando la caché de BuildKit (`arranque_limpio.txt`, paso 1) |
+| `up -d --build` desde volúmenes nuevos | retorna en 13,5 s; `GET /health` = ok a los 16,3 s y HEALTHCHECK `healthy` a los 19,1 s; `db` sano y `migrar` termina con código 0 (`arranque_limpio.txt`, pasos 2 y 3) |
+| Migraciones | 0001 → 0014 (head) en la base nueva; `alembic current` = 0014 (head); repetir `alembic upgrade head` no hace nada; 23 tablas en `ai_frecuencias`, la partición `feature_snapshot_202611`, el índice GiST `ix_alert_ubicacion` y `pg_stat_statements` cargado (`migraciones.txt`) |
 | Claves y roles | 2 claves (admin y operador) creadas con `scripts/crear_api_key.py` dentro del contenedor; sin clave 401, operador 200, operador sobre una ruta de admin (`POST /api/v1/models/rollback`) 403, `/metrics` 200; `SEUDONIMO_SECRETO` llega al contenedor (64 caracteres, no se muestra) (`arranque_limpio.txt`, paso 4) |
-| Demostración §14.2 (referencia con la API en el venv, `demo_esperado.md`) | pasos (1) a (6) con código 0 en 139 s (125 s en la confirmación): 49.623, 51 y 4.641 filas; repetición con 0 filas; candidato `hgb_fv2_20250930_s42` entrenado por el trabajador de la cola; 714 filas de la sombra; comparación en 2025-12-01..14 (WAPE 14,108 % del candidato frente a 13,982 % del activo); decisión: **rechazado** por la compuerta de sombra, y 409 `requiere_forzar` al intentar activarlo sin forzar; el activo sigue siendo `hgb_fv2_20250831_s42`; notificaciones simuladas 0 y omitidas 56 |
-| Demostración §14.2 en Docker (`demo_ciclo_api.txt`) | sobre la pila creada desde cero (9-11-2026, 08:28–08:31), código 0 en 190,9 s con los seis pasos impresos: 49.623, 51 y 4.641 filas; repetición con 0 filas; candidato `hgb_fv2_20250930_s42` entrenado por el trabajador de la cola en 37,2 s; 714 filas de la sombra; comparación en 2025-12-01..14 (WAPE 14,108 % del candidato frente a 13,982 % del activo); decisión: **rechazado** por la compuerta de cuatro criterios (solo falla «WAPE del candidato ≤ WAPE del activo»), y 409 `requiere_forzar` al intentar activarlo sin forzar; el activo sigue siendo `hgb_fv2_20250831_s42`; notificaciones simuladas 16 y omitidas 40 |
-| RNF-001 (`reinicio.txt`) | A) SIGKILL (`docker kill` + `docker start`) durante la etapa «calidad»: API de vuelta en 2,6 s, ejecución terminada 36,4 s después del corte con la traza de intentos [abandonado, ok]; B) `docker compose restart api` durante «calidad»: de vuelta en 1,8 s, terminada 51,1 s después, [abandonado, ok]. En los dos: 9 predicciones y 60 recomendaciones, las mismas de la ejecución de referencia, sin duplicados, una sola entrada «crear» por alerta, filas leídas = las del día y marca de agua contigua (11 de 11 comprobaciones); en toda la base, 0 predicciones duplicadas y 0 ejecuciones colgadas |
-| Imagen (`imagen.txt`) | 1,51 GB en disco (365,8 MB de capas), usuario `sobusa` (uid 10001), sin herramientas de desarrollo; su `pip freeze` (72 paquetes, `requisitos_congelados.txt`) es idéntico a `requirements.txt` con los marcadores de Linux y Python 3.11 |
-| `down -v` | 2,4 s; sin contenedores ni volúmenes del proyecto |
-| Modo integrado (`modo_integrado.txt`) | migración 0004 → 0005 como `escritor_ia`; la API lee como `lector_ia` (solo `SELECT`/`WITH` en transacciones que terminan en `ROLLBACK`) y escribe solo en `ai_frecuencias` como `escritor_ia` (0 escrituras fuera del esquema); un `CREATE TABLE` como `lector_ia` se rechaza (`ReadOnlySqlTransaction`); el contenedor y el volumen de la réplica no cambian |
+| Demostración §14.2 (referencia con la API en el venv, `demo_esperado.md`) | pasos (1) a (6) con código 0 en 120 s (120 s en la confirmación): 49.623, 51 y 4.641 filas; repetición con 0 filas; candidato `hgb_fv2_20250930_s42` entrenado por el trabajador de la cola; 714 filas de la sombra; comparación en 2025-12-01..14 (WAPE 14,108 % del candidato frente a 13,982 % del activo); decisión: **rechazado** por la compuerta de sombra, y 409 `requiere_forzar` al intentar activarlo sin forzar; el activo sigue siendo `hgb_fv2_20250831_s42`; notificaciones simuladas 116 y omitidas 72, porque las alertas observadas evalúan ahora cada día del lote |
+| Demostración §14.2 en Docker (`demo_ciclo_api.txt`) | sobre la pila creada desde cero (13-11-2026, 23:07), código 0 en 133,5 s con los seis pasos impresos: 49.623, 51 y 4.641 filas; repetición con 0 filas; candidato `hgb_fv2_20250930_s42` entrenado por el trabajador de la cola en 14,6 s; 714 filas de la sombra; comparación en 2025-12-01..14 (WAPE 14,108 % del candidato frente a 13,982 % del activo); decisión: **rechazado** por la compuerta de cuatro criterios (solo falla «WAPE del candidato ≤ WAPE del activo»), y 409 `requiere_forzar` al intentar activarlo sin forzar; el activo sigue siendo `hgb_fv2_20250831_s42`; notificaciones simuladas 116 y omitidas 72 |
+| RNF-001 (`reinicio.txt`) | A) SIGKILL (`docker kill` + `docker start`) durante la ejecución: API de vuelta en 2,6 s, ejecución terminada 24,1 s después del corte con la traza de intentos [abandonado, ok]; B) `docker compose restart api`: de vuelta en 2,6 s, terminada 34,9 s después, [abandonado, ok]. En los dos, las mismas predicciones y recomendaciones de la ejecución de referencia, sin duplicados, con todas las comprobaciones de `scripts/prueba_caida.py` en OK; en toda la base, 0 predicciones duplicadas y 0 ejecuciones colgadas |
+| Imagen (`imagen.txt`) | 1,52 GB en disco (369,2 MB de capas), usuario `sobusa` (uid 10001), sin herramientas de desarrollo; su `pip freeze` (72 paquetes, `requisitos_congelados.txt`) es idéntico a `requirements.txt` con los marcadores de Linux y Python 3.11 |
+| `down -v` | 1,9 s; sin contenedores ni volúmenes del proyecto |
+| Modo integrado (`modo_integrado.txt`) | `alembic upgrade head` como `escritor_ia` (la base ya estaba en la 0014); `/health` ok en 3,5 s y una ejecución «ok» en 2,1 s con 0 filas nuevas (13-11-2026); la API lee como `lector_ia` (solo `SELECT`/`WITH` en transacciones que terminan en `ROLLBACK`) y escribe solo en `ai_frecuencias` como `escritor_ia` (0 escrituras fuera del esquema); un `CREATE TABLE` como `lector_ia` se rechaza (`ReadOnlySqlTransaction`); el contenedor y el volumen de la réplica no cambian |
 
 ## 9. Actualizar una pila en uso sin perder datos
 

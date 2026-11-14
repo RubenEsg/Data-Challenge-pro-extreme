@@ -1,0 +1,29 @@
+RNF-005 · lectura incremental por ruta en la réplica (2026-11-13T19:31:21.518592-05:00), como lector_ia, en transacción READ ONLY con statement_timeout (FuentePostgresSoloLectura.consultar)
+Condiciones de la medición: equipo sin otras suites de pruebas ni otros procesos de Python mientras se midió; la réplica, sin otras sesiones
+Lectura completa de demanda_segmentos desde la marca inicial: 2757 filas
+
+Ruta CL 72: carga inicial de su trabajo 906 filas = 906 de la completa; iguales en llave y valores: True; solo su ruta: True
+   desde marca intermedia (2026-08-13T20:39:15.446600-05:00): su trabajo 906 filas; la lectura de siempre, filtrada por la ruta, 906; iguales: True
+      EXPLAIN todas las rutas: 4297.69 ms, 2757 filas, bloques 84977 en caché + 197843 leídos
+      EXPLAIN solo la ruta:    3497.06 ms, 906 filas, bloques 107842 en caché + 236927 leídos
+   desde la marca mayor (2026-08-14T00:52:39.363697-05:00): su trabajo 411 filas; la lectura de siempre, filtrada por la ruta, 411; iguales: True
+      EXPLAIN todas las rutas: 3618.61 ms, 1262 filas, bloques 86622 en caché + 196048 leídos
+      EXPLAIN solo la ruta:    3296.0 ms, 411 filas, bloques 105874 en caché + 238745 leídos
+Ruta CRA 54: carga inicial de su trabajo 938 filas = 938 de la completa; iguales en llave y valores: True; solo su ruta: True
+   desde marca intermedia (2026-08-13T20:39:15.446600-05:00): su trabajo 938 filas; la lectura de siempre, filtrada por la ruta, 938; iguales: True
+      EXPLAIN todas las rutas: 4293.36 ms, 2757 filas, bloques 99231 en caché + 183589 leídos
+      EXPLAIN solo la ruta:    3633.43 ms, 938 filas, bloques 115593 en caché + 229181 leídos
+   desde la marca mayor (2026-08-14T00:52:39.363697-05:00): su trabajo 436 filas; la lectura de siempre, filtrada por la ruta, 436; iguales: True
+      EXPLAIN todas las rutas: 3523.17 ms, 1262 filas, bloques 93980 en caché + 188690 leídos
+      EXPLAIN solo la ruta:    3218.43 ms, 436 filas, bloques 107457 en caché + 237167 leídos
+Ruta SILENCIO: carga inicial de su trabajo 913 filas = 913 de la completa; iguales en llave y valores: True; solo su ruta: True
+   desde marca intermedia (2026-08-13T20:39:15.446600-05:00): su trabajo 913 filas; la lectura de siempre, filtrada por la ruta, 913; iguales: True
+      EXPLAIN todas las rutas: 4265.61 ms, 2757 filas, bloques 87831 en caché + 194989 leídos
+      EXPLAIN solo la ruta:    3473.64 ms, 913 filas, bloques 108047 en caché + 236722 leídos
+   desde la marca mayor (2026-08-14T00:52:39.363697-05:00): su trabajo 415 filas; la lectura de siempre, filtrada por la ruta, 415; iguales: True
+      EXPLAIN todas las rutas: 3620.14 ms, 1262 filas, bloques 99395 en caché + 183275 leídos
+      EXPLAIN solo la ruta:    3201.99 ms, 415 filas, bloques 115477 en caché + 229142 leídos
+
+Tiempo medio del SELECT: todas las rutas 3936 ms; una ruta 3387 ms. Recorridos completos en la variante por ruta: Seq Scan Procesos, Seq Scan estacionalidades_anio, Seq Scan progvehiculos, Seq Scan rutas, Seq Scan timbradas_segmentos. La réplica no conserva los índices propuestos (docs/evidencias/replica/propuesta_indices.sql): cada lectura, de una ruta o de todas, busca lo cambiado recorriendo timbradas_segmentos; la de una ruta re-agrega solo sus franjas. Con la ejecución partida cada trabajo de ruta hace su propia lectura.
+
+RESULTADO: TODO OK (cada ruta lee exactamente lo suyo, desde su marca)

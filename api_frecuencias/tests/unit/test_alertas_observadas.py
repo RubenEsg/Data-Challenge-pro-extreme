@@ -188,6 +188,33 @@ def test_alt008_subidas_sin_viajes():
     assert "ALT-008" in codigos(ctx)
 
 
+def _con_bajadas(bajadas, referencia):
+    cons = _consolidado(1000.0, [1000.0, 1010.0, 990.0, 1005.0, 995.0, 1020.0, 980.0, 1000.0])
+    cons["bajadas"] = bajadas
+    cons["referencia_valores"]["bajadas"] = referencia
+    return cons
+
+
+def test_alt008_evalua_las_bajadas_con_el_mismo_z_robusto_en_su_frontera():
+    """§5.2 «subidas, bajadas o número de viajes atípicos»: con subidas y viajes normales, unas bajadas fuera de
+    mediana ± z_anomalia × escala del mismo tipo de día dan ALT-008 con campo «bajadas»; justo dentro, no."""
+    ref = [950.0, 960.0, 940.0, 955.0, 945.0, 970.0, 930.0, 950.0]       # mediana 950, MAD 10 -> escala 47,5 (5 %)
+    umbral = U["z_anomalia"]
+    assert "ALT-008" not in codigos(dict(dia(), consolidado=_con_bajadas(950 - 47.5 * umbral + 1, ref)))
+    a = solo(dict(dia(), consolidado=_con_bajadas(950 - 47.5 * umbral - 1, ref)), "ALT-008")
+    assert a["variables"]["campo"] == "bajadas" and a["variables"]["bajadas"] == pytest.approx(950 - 47.5 * umbral - 1)
+    assert a["variables"]["z_por_campo"]["bajadas"] < -umbral and "bajadas =" in a["explicacion"]
+    assert a["umbral"] == pytest.approx(950 - umbral * 47.5, abs=1e-3) and "Límite para bajadas" in a["explicacion"]
+    # con los umbrales gobernados de la versión: un z_anomalia mayor ya no la dispara
+    assert "ALT-008" not in codigos(dict(dia(), consolidado=_con_bajadas(950 - 47.5 * umbral - 1, ref)),
+                                    {"z_anomalia": umbral + 1})
+
+
+def test_alt008_no_evalua_bajadas_sin_dato_ni_referencia_minima():
+    assert "ALT-008" not in codigos(dict(dia(), consolidado=_con_bajadas(None, [950.0] * 8)))
+    assert "ALT-008" not in codigos(dict(dia(), consolidado=_con_bajadas(10.0, [950.0] * 3)))
+
+
 # ---------------------------------------------------------------- ALT-009
 @pytest.mark.parametrize("minutos,dispara", [(2 * 1440 - 1, False), (2 * 1440, True)])
 def test_alt009_frescura_dos_periodos_de_ingesta(minutos, dispara):

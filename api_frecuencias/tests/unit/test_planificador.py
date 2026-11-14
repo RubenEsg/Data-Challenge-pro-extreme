@@ -75,6 +75,97 @@ def test_reentrenamiento_solo_si_hace_falta(monkeypatch, decision, esperado):
         assert llamadas == []
 
 
+def _intradia(monkeypatch, cron="5 6-20 * * *", diaria="15 5 * * *", rutas=None):
+    """La tarea intradía con estos crons; devuelve las llamadas a encolar_franja (tipo, franja, parámetros, motivo,
+    rutas)."""
+    monkeypatch.setattr(p, "obtener_ajustes", lambda: SimpleNamespace(plan_intradia_cron=cron, fuente="postgres",
+                                                                      plan_ejecucion_cron=diaria))
+    monkeypatch.setattr(p, "rutas_de_la_particion", lambda: rutas)
+    llamadas = []
+    monkeypatch.setattr(p, "encolar_franja", lambda tipo, franja, parametros, motivo, rutas=None: llamadas.append(
+        (tipo, franja, parametros, motivo, rutas)) or "id-intradia")
+    return llamadas
+
+
+def test_tarea_intradia_encola_la_franja_con_su_instante(monkeypatch):
+    """§10.1: la franja del cron intradía se encola como una ejecución de frecuencia con instante = la franja (así el
+    plan es el del día en curso y la restricción reactiva por ocupación actual actúa) y parametros.intradia."""
+    llamadas = _intradia(monkeypatch)
+    assert p.tarea_ciclo_intradia(datetime(2026, 3, 2, 7, 5, 9, tzinfo=Z)) == "id-intradia"
+    ((tipo, franja, parametros, motivo, rutas),) = llamadas
+    assert tipo == "frecuencia" and franja == datetime(2026, 3, 2, 7, 5, tzinfo=Z) and rutas is None
+    assert parametros == {"notificar": True, "origen": p.ORIGEN_INTRADIA, "intradia": True,
+                          "instante": "2026-03-02T07:05:00-05:00"}
+    assert "intradía" in motivo and p._ultimas["frecuencia_intradia"]["execution_id"] == "id-intradia"
+
+
+def test_el_log_de_una_franja_dice_si_la_encolo_esta_replica_u_otra(monkeypatch, caplog):
+    """El mismo texto para las tres tareas que encolan franjas (diaria, intradía y las demás programadas): la
+    ejecución que encoló esta réplica o, si la franja ya estaba, que la encoló otra réplica (p.YA_ENCOLADA)."""
+    assert p.como_quedo("id-1") == "encolada id-1" and p.como_quedo(None) == p.YA_ENCOLADA
+    _intradia(monkeypatch)
+    monkeypatch.setattr(p, "encolar_franja", lambda *a, **k: None)          # otra réplica ganó la franja
+    with caplog.at_level("INFO", logger=p.log.name):
+        assert p.tarea_ciclo_intradia(datetime(2026, 3, 2, 7, 5, 9, tzinfo=Z)) is None
+    assert any(p.YA_ENCOLADA in r.getMessage() for r in caplog.records)
+    assert p._ultimas["frecuencia_intradia"]["encolada_por_esta_replica"] is False
+
+
+def test_tarea_intradia_partida_por_ruta_encola_la_madre_con_sus_rutas(monkeypatch):
+    llamadas = _intradia(monkeypatch, rutas=["CL 72", "SILENCIO"])
+    p.tarea_ciclo_intradia(datetime(2026, 3, 2, 18, 5, 1, tzinfo=Z))
+    assert llamadas[0][2]["rutas"] == ["CL 72", "SILENCIO"] and llamadas[0][4] == ["CL 72", "SILENCIO"]
+    assert llamadas[0][2]["instante"] == "2026-03-02T18:05:00-05:00"
+
+
+def test_tarea_intradia_no_toma_la_franja_del_ciclo_diario(monkeypatch):
+    """Si los dos crons caen a la misma hora, la franja es del ciclo diario: el índice único (tipo, programada_para)
+    se la daría a la primera réplica que llegue, y el ciclo diario quedaría sin correr."""
+    llamadas = _intradia(monkeypatch, cron="15 5-20 * * *")
+    assert p.tarea_ciclo_intradia(datetime(2026, 3, 2, 5, 15, 2, tzinfo=Z)) is None and llamadas == []
+    assert p._ultimas["frecuencia_intradia"]["omitida"].startswith("coincide")
+    assert p.tarea_ciclo_intradia(datetime(2026, 3, 2, 6, 15, 2, tzinfo=Z)) == "id-intradia"
+
+
+@pytest.mark.parametrize("cron, ahora", [("", datetime(2026, 3, 2, 7, 5, tzinfo=Z)),
+                                         ("5 6-20 * * *", datetime(2026, 3, 2, 3, 0, tzinfo=Z))])
+def test_tarea_intradia_sin_cron_o_sin_franja_no_encola(monkeypatch, cron, ahora):
+    llamadas = _intradia(monkeypatch, cron=cron)
+    assert p.tarea_ciclo_intradia(ahora) is None and llamadas == []
+
+
+def test_el_ciclo_intradia_por_omision_cubre_el_servicio_sin_chocar_con_el_diario():
+    """PLAN_INTRADIA_CRON por omisión («5 6-20 * * *»): una franja a las :05 de cada hora de 6 a 20 (15 al día),
+    ninguna a la hora del ciclo diario (05:15) y la primera cuando ya cerró la primera hora de servicio (4 h)."""
+    from app.config import Ajustes
+
+    cron = Ajustes.model_fields["plan_intradia_cron"].default
+    diaria = p.disparador(Ajustes.model_fields["plan_ejecucion_cron"].default)
+    t, franjas = p.disparador(cron), []
+    siguiente = t.get_next_fire_time(None, datetime(2026, 3, 2, 0, 0, tzinfo=Z))
+    while siguiente.date() == datetime(2026, 3, 2).date():
+        franjas.append(siguiente)
+        siguiente = t.get_next_fire_time(siguiente, siguiente + timedelta(seconds=1))
+    assert [f.hour for f in franjas] == list(range(6, 21)) and {f.minute for f in franjas} == {5}
+    assert diaria.get_next_fire_time(None, datetime(2026, 3, 2, 0, 0, tzinfo=Z)) not in franjas
+    trabajos = {i for i, *_ in p.trabajos_programados(SimpleNamespace(
+        plan_ejecucion_cron="15 5 * * *", plan_reentrenamiento_cron="0 4 * * 1", plan_intradia_cron=cron,
+        fuente="postgres"))}
+    assert trabajos == {"ejecucion_diaria", "reentrenamiento", "ciclo_intradia"}
+
+
+def test_sin_captura_en_vivo_no_hay_ciclo_intradia(monkeypatch):
+    """Con la serie empaquetada (FUENTE=parquet, la demostración) no llega nada dentro del día: el trabajo intradía no
+    se registra y la tarea no encola (no compite con los ciclos de la demostración por la marca de agua)."""
+    aj = SimpleNamespace(plan_ejecucion_cron="15 5 * * *", plan_reentrenamiento_cron="0 4 * * 1",
+                         plan_intradia_cron="5 6-20 * * *", fuente="parquet")
+    assert "ciclo_intradia" not in {i for i, *_ in p.trabajos_programados(aj)} and not p.intradia_disponible(aj)
+    llamadas = _intradia(monkeypatch)
+    monkeypatch.setattr(p, "obtener_ajustes", lambda: aj)
+    assert p.tarea_ciclo_intradia(datetime(2026, 3, 2, 7, 5, 9, tzinfo=Z)) is None and llamadas == []
+    assert p.intradia_disponible(SimpleNamespace(plan_intradia_cron="", fuente="postgres")) is False
+
+
 def test_deshabilitado_por_omision(monkeypatch):
     from app.config import Ajustes
 

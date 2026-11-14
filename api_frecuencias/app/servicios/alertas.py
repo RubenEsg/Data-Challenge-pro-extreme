@@ -27,7 +27,9 @@ Dos entradas:
 - evaluar_observadas(contexto): ALT-002 (ocupación observada) y ALT-005..ALT-009 con DATOS OBSERVADOS, hora a hora
   sobre las horas cerradas que trajo la ejecución, con persistencia, episodios (una alerta por episodio, no por hora)
   y supresión entre reglas (§18 «Alertas excesivas»); con una serie diaria, también la ruptura de comportamiento
-  (RF-009, CUSUM sobre los residuos diarios). Ver su docstring.
+  (RF-009, CUSUM sobre los residuos diarios); con los viajes del día, el viaje, el vehículo y el conductor
+  (seudónimo) de ALT-006 y ALT-009, y con la ocupación por segmento, el sentido aproximado y el viaje más cargado de la
+  ALT-002 medida en el segmento crítico (§5.3, IDENTIFICACION_5_3 y VARIANTES_5_3). Ver su docstring.
 
 Ocupación y capacidad (ALT-001, ALT-002 y ALT-004) se miden igual que en el optimizador: carga crítica = factor de
 carga de la franja × demanda por hora, frente a la capacidad ofrecida = buses/h × puestos. Así una alerta y la
@@ -83,6 +85,10 @@ UMBRALES_POR_DEFECTO = {
     "minimo_dias_referencia": 4,        # ALT-008: días mínimos en la referencia
     "pendiente_tendencia": 0.05,        # §9.4: cambio relativo por hora para declarar tendencia
     "wape_max": 0.20,                   # ALT-010: tolerancia del WAPE móvil (≈ WAPE de la regla manual B1, 20,04 %)
+    # ALT-003: P(carga crítica > capacidad efectiva) mínima para alertar; 0,10 = solo el nivel de servicio 0,90 del
+    # optimizador. Elegida en validación (15/09-31/10/2025) y medida en evaluación (11-12/2025):
+    # scripts/variantes_alt003.py (migración 0014)
+    "alt003_probabilidad_minima": 0.30,
 }
 
 CATALOGO = {
@@ -177,13 +183,34 @@ def _puntaje(observado, umbral, mayor=True):
 
 
 # ---------------------------------------------------------------- §18 seudonimización, §9.4 tendencia, probabilidad
+def _nulo(v):
+    """None para None, NaN, NaT y pd.NA (lo que entrega pandas en una celda vacía); el valor si no."""
+    if v is None:
+        return None
+    try:
+        return None if v != v else v
+    except TypeError:          # pd.NA: su comparación no es un booleano
+        return None
+
+
+def id_texto(v):
+    """Identificador como texto estable: 4512345.0 -> «4512345» (el mismo seudónimo venga de la base o del Parquet);
+    None si está vacío."""
+    v = _nulo(v)
+    if v is None:
+        return None
+    if isinstance(v, float) and v.is_integer():
+        v = int(v)
+    return str(v).strip() or None
+
+
 def seudonimo_conductor(valor, secreto=None):
     """Referencia seudonimizada del conductor (§18): «cnd_» + 24 hex de HMAC-SHA256(secreto, id). Sin secreto en el
     entorno (SEUDONIMO_SECRETO) o sin valor devuelve None: nunca se guarda el dato en claro. Un seudónimo ya válido
-    se conserva."""
-    if valor is None or str(valor).strip() == "":
+    se conserva; el id se normaliza (id_texto) para que 77 y 77.0 den el mismo seudónimo."""
+    texto = id_texto(valor)
+    if texto is None:
         return None
-    texto = str(valor).strip()
     if PATRON_SEUDONIMO.match(texto):
         return texto
     clave = secreto if secreto is not None else os.environ.get("SEUDONIMO_SECRETO", "")
@@ -270,6 +297,64 @@ def clave_episodio(codigo, ruta, inicio_episodio, sufijo="obs"):
     return f"{codigo}|{ruta or '-'}|{_iso(inicio_episodio) or '-'}|{sufijo}"
 
 
+# ---------------------------------------------------------------- §5.3 empresa, ruta, sentido, viaje, conductor
+# «Cuando aplique»: la empresa y la ruta aplican a todas las reglas. Viaje, vehículo y conductor (este, solo seudónimo)
+# aplican a las reglas que miran un viaje concreto de progvehiculos: ALT-006 (el despacho cancelado o tardío) y ALT-009
+# (los viajes con datos faltantes). El sentido no aplica a las reglas por ruta de este motor: la serie es por ruta y
+# cada viaje recorre el circuito completo (ida y regreso); el sentido solo existe por segmento (supuesto S9,
+# modelo_segmentos). La excepción es la variante de ALT-002 observada que se mide en el segmento crítico de la hora
+# (§10.1 ocupación actual por segmento, VARIANTES_5_3): lleva el sentido aproximado de ese segmento y el viaje, el
+# vehículo y el conductor del viaje más cargado en él. Cada alerta lo dice en variables.identificacion_5_3
+# (docs/evidencias/alertas/identificacion_viajes.md).
+CAMPOS_VIAJE = ("viaje", "vehiculo", "conductor")
+_SIN_VIAJE_PRONOSTICO = ("pronóstico de la ruta para una franja futura: todavía no hay un viaje, un vehículo ni un "
+                         "conductor que atribuirle")
+_SIN_VIAJE_AGREGADO = "la regla mide la demanda agregada de la ruta en la ventana (todos sus viajes), no un viaje"
+SENTIDO_NO_APLICA = ("no aplica: la serie es por ruta y cada viaje recorre el circuito completo (ida y regreso); el "
+                     "sentido solo existe por segmento (supuesto S9)")
+IDENTIFICACION_5_3 = {
+    "ALT-001": ((), _SIN_VIAJE_PRONOSTICO),
+    "ALT-002": ((), "la ocupación es de la ruta en la franja (pronóstico) o en la hora con el factor de carga "
+                    "(observada sin la ocupación por segmento), con varios buses: no es de un viaje"),
+    "ALT-003": ((), _SIN_VIAJE_PRONOSTICO),
+    "ALT-004": ((), _SIN_VIAJE_PRONOSTICO),
+    "ALT-005": ((), _SIN_VIAJE_AGREGADO),
+    "ALT-006": (CAMPOS_VIAJE, "el despacho de la ventana que no salió o salió tarde (progvehiculos): su viaje, su "
+                              "vehículo y el seudónimo de su conductor"),
+    "ALT-007": ((), _SIN_VIAJE_AGREGADO),
+    "ALT-008": ((), "consolidado diario de la ruta (subidas, bajadas y número de viajes del día), no un viaje"),
+    "ALT-009": (CAMPOS_VIAJE, "el viaje de la ventana con datos faltantes (progvehiculos): su viaje, su vehículo y el "
+                              "seudónimo de su conductor"),
+    "ALT-010": ((), "degradación del modelo de la ruta, no de un viaje"),
+}
+SENTIDO_SEGMENTO_CRITICO = ("aproximado: el del segmento crítico donde se midió la ocupación (§10.1); el sentido solo "
+                            "existe por segmento (supuesto S9)")
+# Variantes de una regla con otra identificación: (código, variante) -> (campos, motivo, sentido). La ALT-002 observada
+# medida en el segmento crítico (METODO_OCUPACION_SEGMENTO, §10.1) nombra su sentido y su viaje más cargado.
+VARIANTES_5_3 = {
+    ("ALT-002", "segmento_critico"): (
+        ("sentido", *CAMPOS_VIAJE),
+        "la ocupación observada medida en el segmento crítico de la hora pico (§10.1): el sentido aproximado de ese "
+        "segmento y el viaje más cargado en él, con su vehículo y el seudónimo de su conductor",
+        SENTIDO_SEGMENTO_CRITICO),
+}
+
+
+def identificacion_5_3(codigo, resultado=None, variante=None, **detalle):
+    """{aplica, motivo, sentido[, variante, resultado, …]}: qué campos de §5.3 «sentido, viaje, conductor y vehículo»
+    aplican a la regla `codigo` (o a su `variante`, VARIANTES_5_3) y por qué; resultado dice qué se encontró cuando
+    aplican (identificado, fuente_sin_viajes, …)."""
+    if (codigo, variante) in VARIANTES_5_3:
+        aplica, motivo, sentido = VARIANTES_5_3[(codigo, variante)]
+        salida = {"aplica": list(aplica), "motivo": motivo, "sentido": sentido, "variante": variante}
+    else:
+        aplica, motivo = IDENTIFICACION_5_3.get(codigo, ((), "regla sin identificación de viaje"))
+        salida = {"aplica": list(aplica), "motivo": motivo, "sentido": SENTIDO_NO_APLICA}
+    if resultado:
+        salida["resultado"] = resultado
+    return salida | {k: v for k, v in detalle.items() if v is not None}
+
+
 def _alerta(ctx, u, codigo, severidad, observado, esperado, umbral, puntaje, explicacion, variables, *,
             probabilidad=None, metodo="exceso", serie=None, influyentes=None):
     nombre, recomendacion = CATALOGO[codigo]
@@ -278,6 +363,8 @@ def _alerta(ctx, u, codigo, severidad, observado, esperado, umbral, puntaje, exp
     infl = influyentes if influyentes is not None else (ctx.get("variables_influyentes") or [])
     infl = list(infl) + [x for x in _influyentes_de_regla(variables) if x["variable"] not in
                          {i.get("variable") for i in infl}]
+    variables = dict(variables or {})
+    variables.setdefault("identificacion_5_3", identificacion_5_3(codigo))
     return {
         "id": str(uuid.uuid4()),
         "codigo": codigo,
@@ -488,6 +575,12 @@ def _nivel_servicio_actual(ctx, u):
     return cap * occ >= carga - 1e-7, carga, cap * occ, "factor de carga × P90 frente a la capacidad efectiva"
 
 
+METODO_ALT003 = ("exceso relativo de los buses/h necesarios para el nivel de servicio sobre los actuales; probabilidad "
+                 "= P(carga crítica > capacidad efectiva de la frecuencia actual) con la carga lognormal del "
+                 "optimizador (mediana = factor de carga × demanda por hora, σ de la banda P10-P90 calibrada); se "
+                 "alerta si llega a alt003_probabilidad_minima")
+
+
 def _texto_003(act, cap_ef, carga, occ, necesarios, rec, viable):
     h_act = 60.0 / float(act) if act and float(act) > 0 else None
     texto = (f"La frecuencia actual ({_f(act, 1)} buses/h, cada {_f(h_act, 1)} min) no cubre la demanda con el nivel "
@@ -503,15 +596,67 @@ def _texto_003(act, cap_ef, carga, occ, necesarios, rec, viable):
     return texto + "."
 
 
+def probabilidad_sobre_capacidad(mediana, sigma_log, capacidad_efectiva):
+    """P(L > capacidad_efectiva) con la carga crítica L lognormal de mediana `mediana` y dispersión `sigma_log` (la
+    misma distribución del optimizador, optimizacion._distribucion_carga); con σ = 0 vale 1 o 0 según la mediana. None
+    si faltan datos."""
+    if mediana is None or capacidad_efectiva is None or float(capacidad_efectiva) <= 0:
+        return None
+    m, s = float(mediana), float(sigma_log or 0.0)
+    if m <= 0:
+        return 0.0
+    if s <= 1e-9:
+        return 1.0 if m > float(capacidad_efectiva) else 0.0
+    return round(0.5 * math.erfc(math.log(float(capacidad_efectiva) / m) / (s * math.sqrt(2))), 4)
+
+
+def _distribucion_de_la_carga(ctx):
+    """(mediana, σ_log) de la carga crítica de la franja: los del optimizador (recommendation.detalle.demanda) o, en
+    un contexto sin él, factor de carga × demanda por hora y σ_log = ln(P90 / P50) / z_0,90 (si no, con el P10)."""
+    if ctx.get("carga_critica_mediana") is not None and ctx.get("sigma_log") is not None:
+        return float(ctx["carga_critica_mediana"]), float(ctx["sigma_log"])
+    d, p90, p10 = ctx.get("demanda_prevista"), ctx.get("p90"), ctx.get("p10")
+    if d is None or float(d) <= 0:
+        return None, None
+    d = float(d)
+    if p90 is not None and float(p90) > d:
+        s = math.log(float(p90) / d) / Z_P90
+    elif p10 is not None and 0 < float(p10) < d:
+        s = math.log(d / float(p10)) / Z_P90
+    else:
+        s = 0.0
+    return _factor(ctx) * d, s
+
+
+def _riesgo_003(ctx, u, cap_ef):
+    """(probabilidad de que la carga crítica supere la capacidad efectiva de la frecuencia actual, mínimo para alertar
+    alt003_probabilidad_minima de threshold_config)."""
+    mediana, s = _distribucion_de_la_carga(ctx)
+    minimo = float(u.get("alt003_probabilidad_minima", UMBRALES_POR_DEFECTO["alt003_probabilidad_minima"]))
+    return probabilidad_sobre_capacidad(mediana, s, cap_ef), minimo
+
+
 def _alt003(ctx, u):
     """ALT-003 por NIVEL DE SERVICIO, no por número de buses: la capacidad efectiva de la frecuencia actual no cubre
-    la carga crítica de diseño (comparacion_actual.actual.cumple_nivel_servicio = False). Se dispara también cuando la
-    recomendación no es viable (entonces lo dice y pide escalar)."""
+    la carga crítica de diseño (comparacion_actual.actual.cumple_nivel_servicio = False) Y la probabilidad de que la
+    carga crítica supere esa capacidad efectiva llega a alt003_probabilidad_minima (0,10 equivale al nivel de servicio
+    0,90 del optimizador; el valor vigente se eligió sin fuga, scripts/variantes_alt003.py). Se dispara también cuando
+    la recomendación no es viable (entonces lo dice y pide escalar)."""
     ns = _nivel_servicio_actual(ctx, u)
     act = ctx.get("buses_hora_actual")
     if ns is None or ns[0] or act is None:
         return None
+    prob, minimo = _riesgo_003(ctx, u, ns[2])
+    if prob is not None and prob < minimo:
+        return None
+    return _alerta_003(ctx, u, act, ns, (prob, minimo))
+
+
+def _alerta_003(ctx, u, act, ns, riesgo):
+    """La alerta ALT-003 de una franja que no cumple el nivel de servicio (ns de _nivel_servicio_actual; riesgo =
+    (probabilidad, mínimo para alertar))."""
     _, carga, cap_ef, fuente = ns
+    prob, minimo = riesgo
     occ = float(ctx.get("ocupacion_objetivo_max") or u["ocupacion_objetivo_max"])
     c = ctx.get("capacidad")
     necesarios = carga / (occ * float(c)) if carga is not None and c else None
@@ -519,16 +664,20 @@ def _alt003(ctx, u):
     esperado = rec if viable is not False and rec is not None else necesarios
     umbral = necesarios if necesarios is not None else esperado
     puntaje = _puntaje(umbral, act) if umbral is not None and float(act) > 0 else 1.0
-    return _alerta(ctx, u, "ALT-003", "preventiva", act, esperado, umbral, puntaje,
-                   _texto_003(act, cap_ef, carga, occ, necesarios, rec, viable),
+    texto = _texto_003(act, cap_ef, carga, occ, necesarios, rec, viable)
+    if prob is not None:
+        texto += (f" Probabilidad estimada de que la carga crítica supere la capacidad efectiva: {_pct(prob)} "
+                  f"(se alerta desde {_pct(minimo)}).")
+    return _alerta(ctx, u, "ALT-003", "preventiva", act, esperado, umbral, puntaje, texto,
                    {"buses_hora_actual": act, "buses_hora_recomendado": rec,
                     "buses_hora_necesarios_nivel_servicio": None if necesarios is None else round(necesarios, 2),
                     "headway_actual_min": 60.0 / float(act) if float(act) > 0 else None,
                     "capacidad_efectiva_actual": None if cap_ef is None else round(cap_ef, 1),
                     "carga_critica_diseno": carga, "cumple_nivel_servicio": False, "fuente_nivel_servicio": fuente,
+                    "probabilidad_sobre_capacidad_efectiva": prob, "alt003_probabilidad_minima": minimo,
                     "demanda_prevista": ctx.get("demanda_prevista"), "p90": ctx.get("p90"),
                     **_variables_carga(ctx)},
-                   metodo="exceso relativo de los buses/h necesarios para el nivel de servicio sobre los actuales")
+                   probabilidad=prob, metodo=METODO_ALT003)
 
 
 def _alt004(ctx, u):
@@ -847,6 +996,7 @@ def _carga_del_optimizador(recomendacion, entradas):
                "capacidad_ofrecida": actual.get("capacidad_ofrecida"),
                "cumple_nivel_servicio": actual.get("cumple_nivel_servicio"),
                "carga_critica_diseno": dem.get("carga_critica_diseno"),
+               "carga_critica_mediana": dem.get("carga_critica_mediana"), "sigma_log": dem.get("sigma_log"),
                "ocupacion_objetivo_max": (rec.get("parametros") or {}).get("ocupacion_objetivo"),
                "recomendacion_viable": rec.get("viable")}
     return {k: v for k, v in valores.items() if v is not None}
@@ -1097,10 +1247,13 @@ def _alerta_006_episodio(ctx, horas, u, k, episodio, marcas):
         return None
     base = _base_ctx(ctx, horas, r0, i1, "ALT-006", r0)
     base["ubicacion"] = ctx.get("ubicacion")
+    campos, identificacion, frase = identificar_viaje_006(ctx, base["ventana_inicio"], base["ventana_fin"],
+                                                          _tolerancia_despacho(ctx, u)[0])
+    base.update(campos)
     expl = (f"En {_tramo(horas, r0, i1)} ({i1 - r0 + 1} h): salieron {_f(so, 0)} de {_f(se, 0)} despachos esperados "
-            f"(60 / intervalo programado). " + a_ep["explicacion"])
+            f"(60 / intervalo programado). " + a_ep["explicacion"] + frase)
     variables = dict(a_ep["variables"], horas_episodio=i1 - r0 + 1, persistencia_horas_conteo=k,
-                     por_tiempo=i_t is not None)
+                     por_tiempo=i_t is not None, **identificacion)
     return _alerta(base, u, "ALT-006", "critica", a_ep["observado"], a_ep["esperado"], a_ep["umbral"],
                    a_ep["puntaje"], expl, variables,
                    serie=_razones(horas, r0, i1, "salidas_observadas", "salidas_esperadas"), influyentes=[])
@@ -1140,9 +1293,9 @@ def _base_008(ctx, cons, ref):
             "ventana_fin": cons.get("fin"), "horizonte_min": 0, "origen": "observado",
             "serie_tendencia": cons.get("serie"), "serie_reciente": cons.get("serie_detalle") or [],
             "clave_dedup": clave_episodio("ALT-008", ctx.get("ruta"), cons.get("inicio"), "dia"),
-            "consolidado": {"subidas": cons.get("subidas"), "nro_viajes": cons.get("nro_viajes"),
-                            "referencia": ref, "nombre_centro": "la mediana", "metodo": "z_robusto",
-                            "descripcion_referencia": cons.get("descripcion_referencia")}}
+            "consolidado": {"subidas": cons.get("subidas"), "bajadas": cons.get("bajadas"),
+                            "nro_viajes": cons.get("nro_viajes"), "referencia": ref, "nombre_centro": "la mediana",
+                            "metodo": "z_robusto", "descripcion_referencia": cons.get("descripcion_referencia")}}
 
 
 def _umbral_en_unidades_008(a, ref, zs, u):
@@ -1158,7 +1311,9 @@ def _umbral_en_unidades_008(a, ref, zs, u):
 
 
 def _observadas_008(ctx, u):
-    """ALT-008: consolidado del día con z robusto frente al mismo tipo de día."""
+    """ALT-008: consolidado del día con z robusto frente al mismo tipo de día, en subidas, bajadas (si el día y al
+    menos minimo_dias_referencia días de la referencia las traen) y número de viajes; la regla y los umbrales son los
+    mismos para los tres campos (z_anomalia, escala_minima_z, semanas_referencia y minimo_dias_referencia)."""
     cons = ctx.get("consolidado") or {}
     if not (cons and cons.get("referencia_valores")):
         return []
@@ -1177,20 +1332,265 @@ def _observadas_008(ctx, u):
 
 
 def _observadas_009(ctx, u):
-    """ALT-009: datos incompletos o retrasados (una por ruta y día con faltantes; una por ruta si solo hay atraso)."""
+    """ALT-009: datos incompletos o retrasados (una por ruta y día con faltantes; una por ruta si solo hay atraso).
+    Con los viajes del día, una hora faltante sin ningún viaje programado no cancelado no es un dato que falte (no
+    hubo servicio que capturar): se descarta y queda en variables.horas_sin_viajes_programados."""
     dat = ctx.get("datos") or {}
     if not dat:
         return []
+    horas, sin_servicio = _horas_con_servicio(ctx, dat.get("horas_faltantes"))
+    dat = dict(dat, horas_faltantes=horas)
     base = {"ruta": ctx.get("ruta"), "empresa": ctx.get("empresa"), "detectada_en": ctx.get("detectada_en"),
             "ventana_inicio": dat.get("ultima_llegada"), "ventana_fin": dat.get("referencia"),
             "horizonte_min": 0, "origen": "calidad_datos", "minutos_sin_datos": dat.get("minutos_sin_datos"),
-            "campos_faltantes": dat.get("campos_faltantes"), "horas_faltantes": dat.get("horas_faltantes"),
+            "campos_faltantes": dat.get("campos_faltantes"), "horas_faltantes": horas,
             "ultima_llegada": dat.get("ultima_llegada")}
-    con_faltantes = bool(dat.get("campos_faltantes") or dat.get("horas_faltantes"))
+    con_faltantes = bool(dat.get("campos_faltantes") or horas)
     base["clave_dedup"] = clave_episodio("ALT-009", ctx.get("ruta"), dat.get("fecha") if con_faltantes else None,
                                          "faltantes" if con_faltantes else "frescura")
+    campos, identificacion, frase = identificar_viajes_009(ctx, dat)
+    base.update(campos)
     a = _alt009(base, u)
-    return [] if a is None else [a]
+    if a is None:
+        return []
+    a["variables"].update(identificacion, horas_sin_viajes_programados=sin_servicio)
+    a["explicacion"] += frase
+    return [a]
+
+
+def _horas_con_servicio(ctx, horas):
+    """(horas faltantes con algún viaje programado no cancelado, horas faltantes sin ninguno). Sin los viajes del día
+    todas siguen contando como faltantes: tanto si la fuente no los expone (None) como si no trae ninguno del día ([]).
+    El día evaluado es el último con demanda de la ruta, así que una fuente de viajes vacía no cubre ese día (réplica o
+    exportación desfasada, progvehiculos incompleto): no prueba que no hubo servicio y no puede callar ALT-009."""
+    horas = list(horas or [])
+    viajes = ctx.get("viajes")
+    if not viajes or not horas:
+        return horas, []
+    con_servicio = {(v["salida"].date(), v["salida"].hour) for v in viajes
+                    if v.get("salida") is not None and v.get("estado") != "cancelado"}
+    quedan = [h for h in horas if _hora_de(h) is None or _hora_de(h) in con_servicio]
+    return quedan, [h for h in horas if h not in quedan]
+
+
+# ---------------------------------------------------------------- §5.3 viaje, vehículo y conductor de ALT-006 y ALT-009
+ESTADOS_VIAJE = ("valido", "cancelado", "sin_finalizar")
+PASAJEROS_MAXIMOS_VIAJE = 300          # la definición de pasajeros excluye el dato > 300 (fuentes.py)
+MAX_VIAJES_EN_ALERTA = 10              # viajes que se listan en variables (el total siempre va)
+MOTIVOS_DATO_FALTANTE = {
+    "sin_finalizar": "sin finalizar (el viaje no cerró: su dato no ha llegado)",
+    "sin_numeropasajeros": "sin numeropasajeros",
+    "pasajeros_fuera_de_rango": f"numeropasajeros mayor que {PASAJEROS_MAXIMOS_VIAJE} (fuera de rango)",
+    "sin_timbradas_segmento": "sin timbradas de segmento (no llegó a timbradas_segmentos)",
+}
+ROLES_006 = {"cancelado": "programado y cancelado (despacho ausente)",
+             "tardio": "salió fuera del plazo o de la tolerancia (despacho tardío)",
+             "sin_finalizar": "despachado y sin finalizar"}
+
+
+def _instante_bogota(v):
+    """Instante con la zona de Bogotá; un timestamp sin zona de progvehiculos ya es hora local de Barranquilla."""
+    v = _nulo(v)
+    if v is None:
+        return None
+    if hasattr(v, "to_pydatetime"):
+        v = v.to_pydatetime()
+    if not isinstance(v, datetime):
+        v = datetime.fromisoformat(str(v))
+    return v.replace(tzinfo=ZONA) if v.tzinfo is None else v.astimezone(ZONA)
+
+
+def _estado_viaje(fila):
+    if str(_nulo(fila.get("cancelada")) or "").upper() == "S":
+        return "cancelado"
+    return "valido" if str(_nulo(fila.get("finalizado")) or "").upper() == "S" else "sin_finalizar"
+
+
+def viaje_de_fila(fila):
+    """Un viaje de progvehiculos (fila de fuentes.FuentePostgresSoloLectura.viajes o de catalogos.viajes_para_alertas)
+    en el formato de las alertas: estado, salida programada en hora de Bogotá, retraso de la salida real frente a la
+    programada (min), si la fuente lo marcó fuera del plazo de salida (excedeplazosalida), pasajeros y filas de
+    segmento. El conductor llega ya seudonimizado y se vuelve a validar (§18): nunca se conserva un dato en claro."""
+    salida, real = _instante_bogota(fila.get("salida")), _instante_bogota(fila.get("salida_real"))
+    pasajeros, filas = _nulo(fila.get("numeropasajeros")), _nulo(fila.get("filas_segmento"))
+    excede = str(_nulo(fila.get("excedeplazosalida")) or "").upper() == "S"
+    return {"viaje": id_texto(fila.get("viaje")), "vehiculo": id_texto(fila.get("vehiculo")),
+            "conductor": seudonimo_conductor(fila.get("conductor")), "salida": salida,
+            "estado": _estado_viaje(fila), "excede_plazo": excede,
+            "retraso_min": None if salida is None or real is None else round((real - salida).total_seconds() / 60, 1),
+            "pasajeros": None if pasajeros is None else float(pasajeros),
+            "filas_segmento": None if filas is None else int(filas)}
+
+
+def _publico(v):
+    """Lo que una alerta guarda de un viaje: identificadores, seudónimo, salida, estado y retraso."""
+    if v is None:
+        return None
+    return {"viaje": v["viaje"], "vehiculo": v["vehiculo"], "conductor": v["conductor"], "salida": _iso(v["salida"]),
+            "estado": v["estado"], "retraso_min": v["retraso_min"], "excede_plazo": v["excede_plazo"]}
+
+
+def _campos_viaje(v):
+    """Los campos de §5.3 de la alerta con el viaje principal ({} si no hay)."""
+    return {} if v is None else {"viaje": v["viaje"], "vehiculo": v["vehiculo"], "conductor": v["conductor"]}
+
+
+def _en_ventana(viajes, inicio, fin):
+    """Viajes con salida programada en [inicio, fin), en orden de salida."""
+    ini, fi = _instante_bogota(inicio), _instante_bogota(fin)
+    if ini is None or fi is None:
+        return []
+    return sorted((v for v in viajes if v.get("salida") is not None and ini <= v["salida"] < fi),
+                  key=lambda v: (v["salida"], v["viaje"] or ""))
+
+
+def _tardios(viajes, tolerancia):
+    """Despachos fuera de la tolerancia (la fuente los marcó con excedeplazosalida o su salida real llegó más de
+    `tolerancia` min después de la programada), del más tardío al menos tardío."""
+    fuera = [v for v in viajes if v["estado"] != "cancelado"
+             and (v["excede_plazo"] or (v["retraso_min"] or 0.0) > float(tolerancia))]
+    return sorted(fuera, key=lambda v: -(v["retraso_min"] or 0.0))
+
+
+def _principal_006(viajes, tolerancia):
+    """(viaje, rol) del despacho de ALT-006: el primero cancelado de la ventana (ausente); si no hay, el más tardío
+    fuera de la tolerancia; si no, el primero sin finalizar. (None, None) si todos salieron a tiempo."""
+    for rol, candidatos in (("cancelado", [v for v in viajes if v["estado"] == "cancelado"]),
+                            ("tardio", _tardios(viajes, tolerancia)),
+                            ("sin_finalizar", [v for v in viajes if v["estado"] == "sin_finalizar"])):
+        if candidatos:
+            return candidatos[0], rol
+    return None, None
+
+
+def _ultimo_despacho(viajes, inicio):
+    """El último viaje que sí se despachó antes de la ventana (contexto: quién salió antes del vacío)."""
+    ini = _instante_bogota(inicio)
+    previos = [v for v in viajes if v["estado"] != "cancelado" and v.get("salida") is not None and ini is not None
+               and v["salida"] < ini]
+    return max(previos, key=lambda v: v["salida"]) if previos else None
+
+
+def _resumen_ventana(viajes, tolerancia):
+    """Conteo de los viajes programados de la ventana por estado y la lista (los primeros MAX_VIAJES_EN_ALERTA)."""
+    return {"total": len(viajes), **{e: sum(1 for v in viajes if v["estado"] == e) for e in ESTADOS_VIAJE},
+            "tardios": len(_tardios(viajes, tolerancia)), "lista": [_publico(v) for v in viajes[:MAX_VIAJES_EN_ALERTA]]}
+
+
+def _frase_006(principal, rol, ultimo):
+    """La frase de la explicación con el viaje identificado (o con el último despacho si ninguno lo es)."""
+    if principal is not None:
+        return (f" Viaje {principal['viaje']} (vehículo {principal['vehiculo'] or '—'}), salida programada "
+                f"{_hora(principal['salida'])}: {ROLES_006[rol]}.")
+    if ultimo is not None:
+        return (f" No hay viajes cancelados ni tardíos en la ventana (el déficit es de programación); el último "
+                f"despacho fue el viaje {ultimo['viaje']} (vehículo {ultimo['vehiculo'] or '—'}) a las "
+                f"{_hora(ultimo['salida'])}.")
+    return (" No hay viajes cancelados ni tardíos en la ventana ni un despacho antes de ella (el déficit es de "
+            "programación).")
+
+
+# Sin viajes que mirar: la fuente no los expone (None) o no trae ninguno del día ([]: no cubre ese día, que sí tiene
+# demanda). En los dos casos la alerta sale igual, sin viaje, y lo dice.
+FRASES_SIN_VIAJES = {"fuente_sin_viajes": "",
+                     "fuente_sin_viajes_del_dia": " La fuente de viajes no trae ningún viaje de la ruta en ese día: la "
+                                                  "alerta no se atribuye a un viaje."}
+
+
+def _sin_viajes(codigo, viajes):
+    """(campos, variables, frase) de una alerta que no puede mirar viajes, o None si los hay."""
+    if viajes:
+        return None
+    resultado = "fuente_sin_viajes" if viajes is None else "fuente_sin_viajes_del_dia"
+    return {}, {"identificacion_5_3": identificacion_5_3(codigo, resultado)}, FRASES_SIN_VIAJES[resultado]
+
+
+def identificar_viaje_006(ctx, inicio, fin, tolerancia):
+    """§5.3 viaje, vehículo y conductor de ALT-006 con los viajes del día del contexto (ctx['viajes'], None si la
+    fuente no los expone: la serie empaquetada es horaria). Devuelve (campos de la alerta, variables, frase)."""
+    viajes = ctx.get("viajes")
+    sin_viajes = _sin_viajes("ALT-006", viajes)
+    if sin_viajes is not None:
+        return sin_viajes
+    ventana = _en_ventana(viajes, inicio, fin)
+    principal, rol = _principal_006(ventana, tolerancia)
+    ultimo = _ultimo_despacho(viajes, inicio)
+    resultado = "identificado" if principal is not None else "sin_viaje_cancelado_ni_tardio"
+    variables = {"identificacion_5_3": identificacion_5_3("ALT-006", resultado, rol_viaje=rol,
+                                                           tolerancia_retraso_min=float(tolerancia)),
+                 "viajes_ventana": _resumen_ventana(ventana, tolerancia), "ultimo_despacho_previo": _publico(ultimo)}
+    return _campos_viaje(principal), variables, _frase_006(principal, rol, ultimo)
+
+
+def faltantes_del_viaje(v):
+    """Qué le falta a un viaje no cancelado (MOTIVOS_DATO_FALTANTE); [] si está completo o fue cancelado. Las filas de
+    segmento solo cuentan cuando la fuente las informa (filas_segmento no nulo)."""
+    if v["estado"] == "cancelado":
+        return []
+    motivos = []
+    if v["estado"] == "sin_finalizar":
+        motivos.append("sin_finalizar")
+    elif v["pasajeros"] is None:
+        motivos.append("sin_numeropasajeros")
+    elif v["pasajeros"] > PASAJEROS_MAXIMOS_VIAJE:
+        motivos.append("pasajeros_fuera_de_rango")
+    if v["filas_segmento"] == 0:
+        motivos.append("sin_timbradas_segmento")
+    return motivos
+
+
+def _hora_de(valor):
+    """(fecha, hora) local de un instante ISO de horas_faltantes; None si no se puede leer."""
+    try:
+        t = _instante_bogota(valor)
+    except ValueError:
+        return None
+    return None if t is None else (t.date(), t.hour)
+
+
+def _frase_009(incompletos, horas, programados_en_horas):
+    """La frase de la explicación: el primer viaje con faltantes o, si no hay, qué dice progvehiculos de esas horas
+    (las horas sin viajes programados ya se descartaron en _horas_con_servicio)."""
+    if incompletos:
+        v, motivos = incompletos[0]
+        return (f" Viajes con datos faltantes: {len(incompletos)} (el primero, viaje {v['viaje']} del vehículo "
+                f"{v['vehiculo'] or '—'} a las {_hora(v['salida'])}: "
+                + ", ".join(MOTIVOS_DATO_FALTANTE[m] for m in motivos) + ").")
+    if horas:
+        return (f" Los viajes programados de las horas faltantes ({programados_en_horas}) están completos en "
+                "progvehiculos: el dato se perdió después, en la segmentación o la consolidación.")
+    return " Ningún viaje del día tiene datos faltantes en progvehiculos."
+
+
+def _en_horas(viajes, horas):
+    """Los viajes con salida programada en alguna de las horas (fecha, hora) dadas."""
+    return [v for v in viajes if v.get("salida") is not None and (v["salida"].date(), v["salida"].hour) in horas]
+
+
+def identificar_viajes_009(ctx, dat):
+    """§5.3 viaje, vehículo y conductor de ALT-009: los viajes del día con datos faltantes, primero los de las horas
+    faltantes. Solo aplica a los faltantes (campos u horas); la frescura sola no tiene un viaje al que atribuirse.
+    Devuelve (campos de la alerta, variables, frase)."""
+    viajes = ctx.get("viajes")
+    if not (dat.get("campos_faltantes") or dat.get("horas_faltantes")):
+        return {}, {"identificacion_5_3": identificacion_5_3("ALT-009", "solo_frescura")}, ""
+    sin_viajes = _sin_viajes("ALT-009", viajes)
+    if sin_viajes is not None:
+        return sin_viajes
+    horas = {x for x in map(_hora_de, dat.get("horas_faltantes") or []) if x is not None}
+    programados = {id(v) for v in _en_horas(viajes, horas)}
+    incompletos = [(v, m) for v, m in ((v, faltantes_del_viaje(v)) for v in viajes) if m]
+    # primero los de las horas faltantes (en orden de salida), después los demás del día
+    incompletos.sort(key=lambda x: id(x[0]) not in programados)
+    principal = incompletos[0][0] if incompletos else None
+    variables = {"identificacion_5_3": identificacion_5_3(
+                     "ALT-009", "identificado" if principal is not None else "sin_viajes_incompletos"),
+                 "viajes_con_datos_faltantes": {
+                     "total": len(incompletos),
+                     "en_horas_faltantes": sum(1 for v, _ in incompletos if id(v) in programados),
+                     "programados_en_horas_faltantes": len(programados),
+                     "lista": [dict(_publico(v), faltantes=m) for v, m in incompletos[:MAX_VIAJES_EN_ALERTA]]}}
+    return _campos_viaje(principal), variables, _frase_009(incompletos, horas, len(programados))
 
 
 # ---------------------------------------------------------------- ALT-002 con la ocupación OBSERVADA
@@ -1241,15 +1641,79 @@ def ocupacion_observada_hora(h, factor, capacidad, minimo_salidas):
     return float(factor) * float(obs) / (float(so) * float(capacidad))
 
 
+METODO_OCUPACION_SEGMENTO = "segmento_critico"     # medida en el segmento crítico (§10.1 ocupación actual)
+METODO_OCUPACION_FACTOR = "factor_carga"           # estimada con el factor de carga de la franja
+
+
+def segmento_medido(h, u):
+    """El resumen del segmento crítico de la hora (§10.1 ocupación actual por segmento, lo agrega el ciclo) si trae
+    la ocupación medida con al menos salidas_minimas_ocupacion viajes; None si no, o si es una hora de borde (servicio
+    parcial), que ALT-002 no evalúa con ningún método."""
+    seg = h.get("segmento_critico")
+    if not isinstance(seg, dict) or seg.get("ocupacion_media") is None or h.get("borde_servicio"):
+        return None
+    if float(seg.get("nro_viajes") or 0) < max(float(u["salidas_minimas_ocupacion"]), 1.0):
+        return None
+    return seg
+
+
 def _ocupaciones_observadas(ctx, horas, u):
-    """[(ocupación, factor, fuente)] por hora; la ocupación es None donde no se puede medir."""
+    """[(ocupación, factor, fuente, segmento)] por hora: la MEDIDA en el segmento crítico si la hora trae la ocupación
+    por segmento (segmento = su resumen), si no la estimada con el factor de carga (segmento = None); la ocupación es
+    None donde no se puede medir."""
     capacidad, _ = _capacidad_de_la_ruta(ctx)
     salida = []
     for h in horas:
         factor, fuente = _factor_de_la_hora(ctx, h) if h.get("observado") is not None else (None, None)
-        salida.append((ocupacion_observada_hora(h, factor, capacidad, u["salidas_minimas_ocupacion"]), factor,
-                       fuente))
+        seg = segmento_medido(h, u)
+        occ = (float(seg["ocupacion_media"]) if seg is not None
+               else ocupacion_observada_hora(h, factor, capacidad, u["salidas_minimas_ocupacion"]))
+        salida.append((occ, factor, fuente, seg))
     return salida
+
+
+def _calculo_observada(h, factor, capacidad, seg, cuando):
+    """El cálculo de la ocupación observada de la hora pico del episodio, con sus cifras."""
+    if seg is not None:
+        return (f"= {_f(seg['carga_media'])} pasajeros a bordo en promedio al salir del segmento crítico "
+                f"{seg['nro_segmento']} ({seg.get('sentido') or 'sentido sin dato'}) en {seg['nro_viajes']} viajes ÷ "
+                f"{_f(seg['capacidad'], 0)} puestos en {cuando}, medida con las subidas y bajadas por segmento")
+    return (f"= factor de carga {_f(factor, 3)} × {_f(h.get('observado'), 0)} pasajeros ÷ "
+            f"({_f(h.get('salidas_observadas'), 0)} salidas × {_f(capacidad, 0)} puestos) en {cuando}")
+
+
+def _viaje_del_segmento(seg, viajes):
+    """El viaje más cargado en el segmento crítico de la hora: el que midió este ciclo (con su vehículo y el seudónimo
+    de su conductor) o, en una hora que midió un ciclo anterior (ai_frecuencias.ocupacion_segmento guarda solo su id,
+    id_viaje_max = progvehiculos.idprogramacion), el mismo viaje en los viajes del día que el ciclo ya leyó en solo
+    lectura para §5.3 (ctx["viajes"], con el conductor seudonimizado por fuentes.seudonimos). Vacío si no está."""
+    viaje = seg.get("viaje") or {}
+    ident = seg.get("id_viaje_max")
+    if viaje.get("id_viaje") is not None or ident is None:
+        return viaje
+    del_dia = next((v for v in viajes or [] if v.get("viaje") == id_texto(ident)), None)
+    if del_dia is None:
+        return {}
+    return {"id_viaje": int(ident), "vehiculo": del_dia.get("vehiculo"), "conductor": del_dia.get("conductor"),
+            "carga": seg.get("carga_max"), "medido_por": "ciclo_anterior"}
+
+
+def _con_viaje_critico(base, seg, viajes=None):
+    """§5.3 «sentido, viaje, conductor y vehículo cuando aplique»: los del viaje más cargado en el segmento crítico de
+    la hora pico (el conductor solo como seudónimo, §18; _viaje_del_segmento); sin ocupación por segmento, nada. La
+    alerta lo declara en variables.identificacion_5_3 con la variante «segmento_critico» (VARIANTES_5_3)."""
+    if seg is None:
+        return
+    viaje = _viaje_del_segmento(seg, viajes)
+    base.update({"sentido": seg.get("sentido"), "viaje": viaje.get("id_viaje"), "vehiculo": viaje.get("vehiculo"),
+                 "conductor": viaje.get("conductor")})
+    base["variables_ocupacion"].update({
+        "segmento_critico": seg.get("nro_segmento"), "id_segmento_critico": seg.get("id_segmento"),
+        "sentido_aproximado": seg.get("sentido"), "viajes_medidos": seg.get("nro_viajes"),
+        "carga_media_segmento": seg.get("carga_media"), "carga_viaje_critico": viaje.get("carga"),
+        "identificacion_5_3": identificacion_5_3(
+            "ALT-002", "identificado" if viaje.get("id_viaje") is not None else "segmento_sin_viaje",
+            variante=METODO_OCUPACION_SEGMENTO, viaje_medido_por=viaje.get("medido_por"))})
 
 
 def _alerta_002_observada(ctx, horas, u, tramo, medidas):
@@ -1257,25 +1721,25 @@ def _alerta_002_observada(ctx, horas, u, tramo, medidas):
     r0, i1 = tramo
     capacidad, fuente_cap = _capacidad_de_la_ruta(ctx)
     i_max = max(range(r0, i1 + 1), key=lambda i: medidas[i][0] or 0.0)
-    occ, factor, fuente = medidas[i_max]
+    occ, factor, fuente, seg = medidas[i_max]
     h = horas[i_max]
     base = _base_ctx(ctx, horas, r0, i1, "ALT-002", r0)
     base.update({"origen": "observado", "ocupacion_observada": occ, "factor_carga": factor, "capacidad": capacidad,
                  "fuente_factor_carga": fuente, "solo_observada": True,
                  "buses_hora_actual": h.get("salidas_observadas"),
-                 "calculo_ocupacion_observada": (
-                     f"= factor de carga {_f(factor, 3)} × {_f(h.get('observado'), 0)} pasajeros ÷ "
-                     f"({_f(h.get('salidas_observadas'), 0)} salidas × {_f(capacidad, 0)} puestos) en "
-                     f"{_tramo(horas, i_max, i_max)}"),
+                 "calculo_ocupacion_observada": _calculo_observada(h, factor, capacidad, seg,
+                                                                   _tramo(horas, i_max, i_max)),
                  "variables_ocupacion": {
                      "horas_episodio": i1 - r0 + 1, "hora_pico": _iso(h.get("inicio")),
                      "pasajeros_observados": h.get("observado"), "salidas_observadas": h.get("salidas_observadas"),
                      "salidas_programadas": h.get("salidas_esperadas"), "fuente_capacidad": fuente_cap,
+                     "metodo_ocupacion": METODO_OCUPACION_SEGMENTO if seg is not None else METODO_OCUPACION_FACTOR,
                      "ocupacion_por_hora": {_hora(horas[i]["inicio"]): round(medidas[i][0], 4)
                                             for i in range(r0, i1 + 1) if medidas[i][0] is not None},
                      "persistencia_horas": int(float(u["persistencia_ocupacion_horas"]))}})
+    _con_viaje_critico(base, seg, ctx.get("viajes"))
     # la esperada: el pronóstico de esa hora con la oferta PROGRAMADA (60 / intervalo), como en el optimizador
-    if h.get("esperado") is not None and h.get("salidas_esperadas"):
+    if factor is not None and h.get("esperado") is not None and h.get("salidas_esperadas"):
         base["ocupacion_esperada"] = factor * float(h["esperado"]) / (float(h["salidas_esperadas"]) * capacidad)
     a = _alt002(base, u)
     if a is not None:
@@ -1287,8 +1751,9 @@ def _alerta_002_observada(ctx, horas, u, tramo, medidas):
 
 
 def _observadas_002(ctx, horas, u):
-    """ALT-002 con la ocupación OBSERVADA de cada hora cerrada (§5.2 «ocupación esperada u observada»): factor de
-    carga de la franja × pasajeros / (salidas × puestos) ≥ ocupacion_critica, en episodios de horas seguidas."""
+    """ALT-002 con la ocupación OBSERVADA de cada hora cerrada (§5.2 «ocupación esperada u observada») ≥
+    ocupacion_critica, en episodios de horas seguidas: la medida en el segmento crítico cuando el ciclo trae la
+    ocupación por segmento (§10.1), si no factor de carga de la franja × pasajeros / (salidas × puestos)."""
     if not horas:
         return []
     medidas = _ocupaciones_observadas(ctx, horas, u)
@@ -1491,11 +1956,12 @@ def evaluar_observadas(contexto, umbrales=None):
       ruta, empresa, sentido, detectada_en, ubicacion (GeoJSON del punto de despacho, opcional)
       tolerancia_tiempo_min        Procesos.toleranciatiempo (min); 0 o ausente = umbral tolerancia_despacho_min
       horas: lista CRONOLÓGICA de horas cerradas de la ruta [{inicio, fin, observado, esperado, p10, p90,
-             salidas_observadas, salidas_esperadas, headway_programado_min, nueva, variables_influyentes}]
+             salidas_observadas, salidas_esperadas, headway_programado_min, nueva, variables_influyentes,
+             segmento_critico (opcional: la ocupación actual del segmento crítico, ocupacion.resumen_por_hora)}]
              (esperado/p10/p90 = pronóstico del modelo y banda calibrada para esa hora; nueva = llegó en esta
              ejecución). Las horas no nuevas solo sirven de contexto para la persistencia y la tendencia.
-      consolidado: {fecha, inicio, fin, subidas, nro_viajes, referencia_valores: {campo: [valores de los días del
-             mismo tipo en las semanas previas]}, serie: [totales diarios cronológicos], descripcion_referencia}
+      consolidado: {fecha, inicio, fin, subidas, bajadas, nro_viajes, referencia_valores: {campo: [valores de los días
+             del mismo tipo en las semanas previas]}, serie: [totales diarios cronológicos], descripcion_referencia}
       datos: {minutos_sin_datos, ultima_llegada, referencia, campos_faltantes, horas_faltantes, fecha}
 
     Reglas (umbrales versionados en threshold_config):
@@ -1506,16 +1972,23 @@ def evaluar_observadas(contexto, umbrales=None):
                headway programado + tolerancia (Procesos.toleranciatiempo); por conteo: déficit de salidas frente a
                60 / intervalo programado > tolerancia_salidas durante persistencia_horas horas. No se evalúa en la
                primera ni en la última hora de servicio (servicio parcial).
-      ALT-008  |z robusto| ≥ z_anomalia en subidas o número de viajes del día frente al mismo tipo de día.
+      ALT-008  |z robusto| ≥ z_anomalia en subidas, bajadas o número de viajes del día frente al mismo tipo de día.
       ALT-009  datos atrasados (≥ periodos_atraso × periodo_ingesta_min), campos obligatorios u horas faltantes.
-      ALT-002  ocupación OBSERVADA = factor de carga de la franja × pasajeros / (salidas × puestos) ≥ ocupacion_critica
-               en horas con al menos salidas_minimas_ocupacion salidas (no en las de borde), origen «observado».
+      ALT-002  ocupación OBSERVADA ≥ ocupacion_critica en horas con al menos salidas_minimas_ocupacion salidas (no en
+               las de borde), origen «observado»: la medida en el segmento crítico si la hora trae segmento_critico
+               (§10.1 ocupación actual por segmento; la alerta lleva el segmento, el sentido aproximado y el viaje, el
+               vehículo y el conductor seudónimo del viaje más cargado) o, si no, factor de carga de la franja ×
+               pasajeros / (salidas × puestos).
       ALT-007  variante «ruptura de comportamiento» (RF-009) si el contexto trae serie_diaria: CUSUM de dos lados
                sobre el residuo diario relativo (detectar_rupturas).
     Las horas que cumplen se agrupan en episodios: UNA alerta por episodio, con clave estable (código + ruta +
     inicio del episodio + «obs») para que una ejecución posterior la actualice en lugar de duplicarla.
     Opcionales del contexto: capacidad (puestos por bus; si falta, la del catálogo), factor_carga_por_hora
-    ({hora: factor}; si falta, optimizacion.factor_carga_franja) y serie_diaria.
+    ({hora: factor}; si falta, optimizacion.factor_carga_franja), serie_diaria y viajes (§5.3: los viajes del día de
+    progvehiculos en el formato de viaje_de_fila, con el conductor seudonimizado; None si la fuente no los expone). Con
+    viajes, ALT-006 lleva el viaje, el vehículo y el conductor del despacho cancelado o tardío y ALT-009 los del viaje
+    con datos faltantes (identificar_viaje_006, identificar_viajes_009); toda alerta dice en
+    variables.identificacion_5_3 qué campos de identificación le aplican y por qué.
     """
     u = _umbrales(umbrales)
     ctx = dict(contexto or {})

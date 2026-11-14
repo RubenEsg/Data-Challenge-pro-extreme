@@ -1,0 +1,21 @@
+{
+ "requisito": "§7.3 paso 4 (variables por ruta, sentido, segmento y ventana) y §11.2 (foto de variables)",
+ "prueba": "tests/integracion/test_monitoreo_api.py::test_ciclo_guarda_variables_por_segmento_y_sentido",
+ "ejecucion": "ciclo de frecuencia con datos hasta 2025-09-15 (3 rutas × 30/60/120 min = 9 predicciones)",
+ "modelo_segmentos": "seg_hgb_jerarquico_20230227_s42",
+ "feature_version": "sv1-2026-11-09",
+ "filas_ruta": 12,
+ "filas_segmento": 1158,
+ "segmentos_por_ruta": {
+  "CL 72": 128,
+  "CRA 54": 123,
+  "SILENCIO": 135
+ },
+ "bytes_datos_ruta": 9624,
+ "bytes_datos_segmento": 471472,
+ "bytes_por_fila_segmento": 407.1,
+ "megabytes_mes_una_ejecucion_diaria": 14.14,
+ "medicion": "pg_column_size de las filas de la ejecución (datos de la fila; sin índices ni TOAST aparte)",
+ "contenido_fila_segmento": "solo lo propio del segmento (número, fracción B0 y subidas de su celda, fracción prevista, pasajeros, P10 y P90); la hora y el calendario de la ventana están en las filas de la ruta de la misma predicción",
+ "como_apagarla": "FOTO_SEGMENTOS=false (app/config.py): solo se guardan las filas de la ruta"
+}

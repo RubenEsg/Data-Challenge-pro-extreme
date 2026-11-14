@@ -6,10 +6,14 @@ FuentePostgresSoloLectura.consultar: SELECT de una sola sentencia, transacción 
 y escribe sus resultados en docs/evidencias/datos/ (nunca en datos/):
 
   --linaje                 reconstruye la serie de datos/demanda_horaria.parquet (pasajeros y salidas por ruta, fecha y
-                           hora de salida 4-20 h, 2023-01-01 a 2025-12-31) con las reglas del objetivo del modelo y
+                           hora de salida 4-20 h, 2023-01-01 a 2025-12-31) con las reglas del objetivo del modelo,
                            datos/contexto_operacional.parquet (novedades viales y festivos oficiales) con
-                           preparar_datos_api.contexto_desde_tablas; compara fila a fila y por SHA-256 del contenido
-                           normalizado con lo empaquetado -> linaje.json y linaje.md.
+                           preparar_datos_api.contexto_desde_tablas, datos/bajadas_horaria.parquet (Σ numerobajadas de
+                           los viajes válidos, la misma regla) y datos/subidas_segmento_hora.parquet (con las mismas
+                           funciones de scripts/preparar_segmentos.py sobre las tablas de la réplica); compara fila a
+                           fila y por SHA-256 del contenido normalizado con lo empaquetado -> linaje.json y linaje.md.
+                           De los demás archivos de datos/ da el SHA-256 y por qué no se reconstruyen
+                           (SIN_RECONSTRUIR).
   --definicion-pasajeros   mide en el solape de timbradas_segmentos (2023-01-01 a 2023-02-27) la diferencia entre
                            Σ subidas de los segmentos y Σ numeropasajeros de los viajes válidos, por ruta y hora
                            -> definicion_pasajeros.json.
@@ -31,6 +35,7 @@ import argparse
 import hashlib
 import json
 import sys
+import tempfile
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -129,6 +134,59 @@ EXPORTACION_ORIGINAL = (
     "progvehiculos 564.837 filas). Las credenciales viven fuera del repositorio. Desde entonces el proyecto solo usa "
     "esas exportaciones: la réplica local se cargó con ellas (scripts/replica_cargar.py)."
 )
+SQL_BAJADAS = """
+SELECT pv.idruta, CAST(pv.fechasalida AS date) AS fecha, CAST(EXTRACT(HOUR FROM pv.fechasalida) AS integer) AS hora,
+       COALESCE(SUM(pv.numerobajadas) FILTER (WHERE pv.numerobajadas IS NOT NULL AND pv.numerobajadas <= 300), 0)
+           AS bajadas_viajes
+  FROM progvehiculos pv
+ WHERE pv.finalizado = 'S' AND pv.cancelada = 'N'
+   AND pv.fechasalida >= :desde AND pv.fechasalida < :hasta
+   AND EXTRACT(HOUR FROM pv.fechasalida) BETWEEN 4 AND 20
+ GROUP BY 1, 2, 3
+"""
+# Las columnas que scripts/preparar_segmentos.py lee de las exportaciones, leídas de la réplica (sin conductor ni otros
+# datos personales). Se escriben como parquet en una carpeta temporal y las mismas funciones que empaquetaron
+# subidas_segmento_hora.parquet lo vuelven a armar desde ahí.
+TABLAS_SEGMENTOS = {
+    "progvehiculos": "SELECT idprogramacion, fechasalida FROM progvehiculos",
+    "timbradas_segmentos": "SELECT id_segmento, id_viaje, fecha, subidas FROM timbradas_segmentos",
+    "rutas_segmentos": "SELECT id, idruta, idrutageo, nro_segmento, CAST(longitud_m AS double precision) AS longitud_m "
+                       "FROM rutas_segmentos",
+}
+# La réplica deja fuera de timbradas_segmentos los viajes de la muestra de conteo (rutas 2 y 21 del 2023-02-07: 265
+# viajes y 25.915 filas) para simular su llegada por el trigger (scripts/replica_cargar.py, replica_meta.
+# viajes_reservados). Lo empaquetado salió de la exportación completa, así que ese día de esas rutas solo está ahí.
+DIA_RESERVADO, IDRUTAS_RESERVADAS = date(2023, 2, 7), (2, 21)
+# Columnas de texto en la normalización del contenido (las demás son fechas o números).
+TEXTO = ("ruta", "sentido", "nivel", "periodo")
+# Los archivos de datos/ que salen de tablas de Extreme y se reconstruyen desde la réplica, y los demás con el motivo.
+# tests/unit/test_reconstruir_desde_replica.py comprueba que cada .parquet de datos/ está en una de las dos listas.
+RECONSTRUIDOS = ("demanda_horaria.parquet", "contexto_operacional.parquet", "bajadas_horaria.parquet",
+                 "subidas_segmento_hora.parquet")
+_SIN_EL_DIA_RESERVADO = ("La réplica no tiene los 265 viajes reservados del 2023-02-07 de las rutas 2 y 21 en "
+                         "timbradas_segmentos (los deja para simular su llegada por el trigger), así que desde ella no "
+                         "da lo mismo. Su entrada por viaje y segmento sí es la de la réplica: subidas_segmento_hora "
+                         "es idéntica fuera de ese día")
+SIN_RECONSTRUIR = {
+    "reparto_segmentos.parquet": "Reparto fijo B0 de scripts/preparar_segmentos.py: agrega todo ene.-feb. de 2023. "
+                                 f"{_SIN_EL_DIA_RESERVADO}.",
+    "ocupacion_segmentos_hora.parquet": "Perfil de scripts/preparar_ocupacion_segmentos.py: agrega todo ene.-feb. de "
+                                        f"2023. {_SIN_EL_DIA_RESERVADO}, y tests/replica/test_ocupacion_segmentos.py "
+                                        "compara la lectura del ciclo con las exportaciones viaje por viaje. Además "
+                                        "usa la estacionalidad de la exportación (nula para Sobusa, H1), que la "
+                                        "réplica armoniza.",
+    "clima_diario.parquet": "Clima diario de Barranquilla, una fuente externa al reto (scripts/preparar_datos_api.py): "
+                            "no es una tabla de Extreme y solo condiciona la evaluación.",
+    "perfil_intrahorario.parquet": "Sale de progvehiculos y de conteo_viajes de 2024 (scripts/preparar_datos_api.py). "
+                                   "conteo_viajes es un agregado por viaje de conteo_pasajeros de la exportación, y la "
+                                   "réplica no carga conteo_pasajeros.",
+    "parametros_operativos_hora.parquet": "Parámetros del optimizador del proyecto (experimentos/D1_optimizacion) con "
+                                          "los límites del MILP D5 (scripts/preparar_datos_api.py): no es una tabla de "
+                                          "Extreme.",
+    "insumos_d5_2025.parquet": "Insumos del MILP D5 del tablero (EntregaFinal/dash_app/datos), una salida del "
+                               "proyecto.",
+    "pronosticos_2025.parquet": "Pronósticos del tablero (EntregaFinal/dash_app/datos), una salida del proyecto.",
+}
 
 
 def _fuente():
@@ -155,42 +213,58 @@ def _rutas() -> dict[int, str]:
     return {int(r["idruta"]): r["ruta"] for r in datos.catalogo_rutas()}
 
 
-def demanda_reconstruida(f) -> pd.DataFrame:
-    """Serie ruta × fecha × hora (4-20 h) con pasajeros y salidas de los viajes válidos; las franjas vacías valen 0."""
-    rutas = _rutas()
-    d = f.consultar(SQL_DEMANDA, {"desde": datetime.combine(DESDE, datetime.min.time()),
-                                  "hasta": datetime.combine(HASTA + timedelta(days=1), datetime.min.time())})
+def _por_franja(f, sql: str, rutas: dict[int, str]) -> pd.DataFrame:
+    """El SQL por ruta, fecha y hora de 2023-2025 sobre la grilla ruta × fecha × hora (4-20 h): las franjas sin viajes
+    válidos quedan en NaN."""
+    d = f.consultar(sql, {"desde": datetime.combine(DESDE, datetime.min.time()),
+                          "hasta": datetime.combine(HASTA + timedelta(days=1), datetime.min.time())})
     d = d[d["idruta"].isin(list(rutas))].copy()
     d["fecha"] = pd.to_datetime(d["fecha"]).dt.date
     rejilla = pd.MultiIndex.from_product([sorted(rutas), pd.date_range(DESDE, HASTA).date, list(HORAS)],
                                          names=["idruta", "fecha", "hora"]).to_frame(index=False)
     t = rejilla.merge(d, on=["idruta", "fecha", "hora"], how="left")
+    t["ruta"] = t["idruta"].map(rutas)
+    return t
+
+
+def demanda_reconstruida(f) -> pd.DataFrame:
+    """Serie ruta × fecha × hora (4-20 h) con pasajeros y salidas de los viajes válidos; las franjas vacías valen 0."""
+    t = _por_franja(f, SQL_DEMANDA, _rutas())
     t["pasajeros"] = pd.to_numeric(t["pasajeros"]).fillna(0)
     t["salidas"] = pd.to_numeric(t["salidas"]).fillna(0)
-    t["ruta"] = t["idruta"].map(rutas)
     return t[["ruta", "idruta", "fecha", "hora", "pasajeros", "salidas"]]
 
 
-def normalizada(df: pd.DataFrame, columnas: list[str]) -> str:
-    """Texto CSV ordenado y con tipos fijos (enteros sin decimales, fechas ISO): base del SHA-256 del contenido."""
+def bajadas_reconstruidas(f) -> pd.DataFrame:
+    """datos/bajadas_horaria.parquet: Σ numerobajadas de los viajes válidos (dato <= 300, ceros incluidos) por ruta ×
+    fecha × hora de salida (4-20 h), con la grilla de la serie (una franja sin viajes válidos vale 0)."""
+    t = _por_franja(f, SQL_BAJADAS, _rutas())
+    t["bajadas_viajes"] = pd.to_numeric(t["bajadas_viajes"]).fillna(0)
+    return t[["ruta", "fecha", "hora", "bajadas_viajes"]]
+
+
+def normalizada(df: pd.DataFrame, columnas: list[str], orden: list[str] | None = None) -> str:
+    """Texto CSV ordenado y con tipos fijos (enteros sin decimales, fechas ISO, texto tal cual): base del SHA-256 del
+    contenido. Se ordena por `orden` (por omisión, las tres primeras columnas)."""
     t = df[columnas].copy()
     for c in columnas:
         if c == "fecha":
             t[c] = pd.to_datetime(t[c]).dt.strftime("%Y-%m-%d")
-        elif c == "ruta":
+        elif c in TEXTO:
             t[c] = t[c].astype(str)
         else:
             t[c] = pd.to_numeric(t[c]).fillna(-1).round(4)
             if (t[c] % 1 == 0).all():
                 t[c] = t[c].astype("int64")
-    return t.sort_values(columnas[:3]).to_csv(index=False, lineterminator="\n")
+    return t.sort_values(orden or columnas[:3]).to_csv(index=False, lineterminator="\n")
 
 
 def comparar(empaquetada: pd.DataFrame, reconstruida: pd.DataFrame, llave: list[str], medidas: list[str]) -> dict:
     a = empaquetada[llave + medidas].copy()
     b = reconstruida[llave + medidas].copy()
     for t in (a, b):
-        t["fecha"] = pd.to_datetime(t["fecha"]).dt.date
+        if "fecha" in t.columns:
+            t["fecha"] = pd.to_datetime(t["fecha"]).dt.date
     m = a.merge(b, on=llave, how="outer", suffixes=("_empaquetado", "_replica"), indicator=True)
     salida = {"filas_empaquetadas": int(len(a)), "filas_reconstruidas": int(len(b)),
               "solo_empaquetado": int((m["_merge"] == "left_only").sum()),
@@ -210,8 +284,78 @@ def comparar(empaquetada: pd.DataFrame, reconstruida: pd.DataFrame, llave: list[
     return salida
 
 
+def tablas_de_la_replica(f, carpeta: Path) -> dict:
+    """Escribe en `carpeta`, como las exportaciones (parquet), las columnas de TABLAS_SEGMENTOS leídas de la réplica.
+    Devuelve, por tabla, las filas y el SHA-256 de su contenido (ordenado por todas sus columnas)."""
+    huellas = {}
+    for nombre, sql in TABLAS_SEGMENTOS.items():
+        d = f.consultar(sql)
+        texto = d.sort_values(list(d.columns)).to_csv(index=False, lineterminator="\n")
+        huellas[nombre] = {"filas": int(len(d)), "columnas": ", ".join(d.columns),
+                           "sha256_contenido": sha256_texto(texto)}
+        d.to_parquet(carpeta / f"{nombre}.parquet", index=False)
+    return huellas
+
+
+def subidas_segmento_reconstruidas(carpeta: Path) -> pd.DataFrame:
+    """datos/subidas_segmento_hora.parquet con las MISMAS funciones que lo empaquetaron (scripts/preparar_segmentos.py:
+    cargar, sentidos y celdas_segmento_hora), sobre las tablas de la réplica que escribió tablas_de_la_replica."""
+    from scripts import preparar_segmentos as ps
+
+    d = ps.cargar(carpeta)
+    rs = ps.sentidos(d[["ruta", "idruta", "idrutageo", "id_segmento", "nro_segmento", "longitud_m"]]
+                     .drop_duplicates("id_segmento"))
+    return ps.celdas_segmento_hora(d, rs)
+
+
+# Por archivo: llave (única) y medidas de la comparación fila a fila, cómo se reconstruye y si sale de
+# timbradas_segmentos (entonces el día reservado de la réplica solo está en lo empaquetado).
+COMPARACION_ARCHIVOS = {
+    "bajadas_horaria.parquet": (["ruta", "fecha", "hora"], ["bajadas_viajes"],
+                                "SQL de las bajadas sobre progvehiculos (la regla de los pasajeros aplicada a "
+                                "numerobajadas) con la grilla de la serie", False),
+    "subidas_segmento_hora.parquet": (["ruta", "fecha", "hora", "id_segmento"],
+                                      ["subidas", "tipo_dia", "nro_segmento", "km_inicio", "longitud_m"],
+                                      "scripts/preparar_segmentos.py (cargar, sentidos y celdas_segmento_hora) sobre "
+                                      "timbradas_segmentos, rutas_segmentos y progvehiculos de la réplica", True),
+}
+
+
+def _sin_el_dia_reservado(d: pd.DataFrame) -> pd.DataFrame:
+    """Las filas que no son del día reservado de las rutas reservadas (DIA_RESERVADO, IDRUTAS_RESERVADAS)."""
+    rutas = _rutas()
+    reservadas = {rutas[i] for i in IDRUTAS_RESERVADAS if i in rutas}
+    del_dia = (pd.to_datetime(d["fecha"]).dt.date == DIA_RESERVADO) & d["ruta"].isin(reservadas)
+    return d[~del_dia]
+
+
+def comparacion_archivo(nombre: str, empaquetada: pd.DataFrame, reconstruida: pd.DataFrame) -> dict:
+    """Un archivo empaquetado frente a su reconstrucción: SHA-256 del contenido normalizado (todas las columnas del
+    archivo, ordenadas por la llave) y comparación fila a fila de las medidas. Si el archivo sale de
+    timbradas_segmentos, también la comparación sin el día reservado de la réplica (DIA_RESERVADO, IDRUTAS_RESERVADAS),
+    que solo está en lo empaquetado."""
+    llave, medidas, como, de_timbradas_segmentos = COMPARACION_ARCHIVOS[nombre]
+    columnas = list(empaquetada.columns)
+    ta, tb = normalizada(empaquetada, columnas, llave), normalizada(reconstruida, columnas, llave)
+    salida = {"archivo": f"datos/{nombre}", "sha256_archivo": sha256_archivo(DATOS / nombre),
+              "columnas_comparadas": columnas, "como_se_reconstruye": como,
+              "sha256_contenido_empaquetado": sha256_texto(ta), "sha256_contenido_reconstruido": sha256_texto(tb),
+              "contenido_identico": ta == tb, "comparacion": comparar(empaquetada, reconstruida, llave, medidas)}
+    if de_timbradas_segmentos:
+        sin_a, sin_b = _sin_el_dia_reservado(empaquetada), _sin_el_dia_reservado(reconstruida)
+        na, nb = normalizada(sin_a, columnas, llave), normalizada(sin_b, columnas, llave)
+        salida["sin_el_dia_reservado"] = {
+            "dia": DIA_RESERVADO.isoformat(), "idrutas": list(IDRUTAS_RESERVADAS),
+            "filas_del_dia_empaquetadas": int(len(empaquetada) - len(sin_a)),
+            "filas_del_dia_reconstruidas": int(len(reconstruida) - len(sin_b)),
+            "sha256_contenido_empaquetado": sha256_texto(na), "sha256_contenido_reconstruido": sha256_texto(nb),
+            "contenido_identico": na == nb}
+    return salida
+
+
 def linaje(f) -> dict:
-    """Serie y contexto reconstruidos desde la réplica frente a los archivos empaquetados."""
+    """Los archivos empaquetados que salen de tablas de Extreme, reconstruidos desde la réplica, frente a lo
+    empaquetado; y los demás archivos de datos/, con su SHA-256 y por qué no se reconstruyen."""
     from scripts.preparar_datos_api import contexto_desde_tablas
 
     resultado: dict = {"generado_en": datetime.now(ZONA).isoformat(timespec="seconds"),
@@ -256,6 +400,15 @@ def linaje(f) -> dict:
         "sha256_archivo": sha256_archivo(DATOS / "contexto_operacional.parquet"),
         "sha256_contenido_empaquetado": sha256_texto(ta), "sha256_contenido_reconstruido": sha256_texto(tb),
         "contenido_identico": ta == tb, "comparacion": comp, "resumen_reconstruido": info}
+    resultado["bajadas_horaria"] = comparacion_archivo(
+        "bajadas_horaria.parquet", pd.read_parquet(DATOS / "bajadas_horaria.parquet"), bajadas_reconstruidas(f))
+    with tempfile.TemporaryDirectory(prefix="linaje_replica_") as carpeta:
+        resultado["entradas_segmentos"] = tablas_de_la_replica(f, Path(carpeta))
+        subidas = subidas_segmento_reconstruidas(Path(carpeta))
+    resultado["subidas_segmento_hora"] = comparacion_archivo(
+        "subidas_segmento_hora.parquet", pd.read_parquet(DATOS / "subidas_segmento_hora.parquet"), subidas)
+    resultado["sin_reconstruir"] = {n: {"archivo": f"datos/{n}", "sha256_archivo": sha256_archivo(DATOS / n),
+                                        "motivo": m} for n, m in SIN_RECONSTRUIR.items() if (DATOS / n).exists()}
     return resultado
 
 
@@ -331,13 +484,40 @@ def _md_linaje(r: dict) -> str:
         f"`{dh['sha256_contenido_reconstruido'][:16]}…` | {'sí' if dh['contenido_identico'] else 'no'} |",
         f"| `datos/contexto_operacional.parquet` (fecha, hora, nov_impacto, nov_sube, festivo_oficial) | "
         f"{_n(cx['comparacion']['filas_empaquetadas'])} | `{cx['sha256_contenido_empaquetado'][:16]}…` | "
-        f"`{cx['sha256_contenido_reconstruido'][:16]}…` | {'sí' if cx['contenido_identico'] else 'no'} |", "",
+        f"`{cx['sha256_contenido_reconstruido'][:16]}…` | {'sí' if cx['contenido_identico'] else 'no'} |",
+    ]
+    nuevos = [n.removesuffix(".parquet") for n in COMPARACION_ARCHIVOS if n.removesuffix(".parquet") in r]
+    for nombre in nuevos:
+        a = r[nombre]
+        filas.append(f"| `{a['archivo']}` ({', '.join(a['columnas_comparadas'])}) | "
+                     f"{_n(a['comparacion']['filas_empaquetadas'])} | `{a['sha256_contenido_empaquetado'][:16]}…` | "
+                     f"`{a['sha256_contenido_reconstruido'][:16]}…` | {'sí' if a['contenido_identico'] else 'no'} |")
+    filas += [
+        "",
         f"- Pasajeros: {_n(cp['iguales'])} franjas iguales y {_n(cp['distintas'])} distintas; suma empaquetada "
         f"{_n(cp['suma_empaquetado'])} frente a {_n(cp['suma_replica'])} reconstruida.",
         f"- Salidas: {_n(cs['iguales'])} iguales y {_n(cs['distintas'])} distintas.",
         f"- Filas solo en lo empaquetado: {dh['comparacion']['solo_empaquetado']}; solo en la reconstrucción: "
         f"{dh['comparacion']['solo_replica']}.",
-        f"- No se reconstruye: {dh['no_reconstruido']}.", "",
+        f"- No se reconstruye: {dh['no_reconstruido']}."]
+    for nombre in nuevos:
+        a, c = r[nombre], r[nombre]["comparacion"]
+        medida = COMPARACION_ARCHIVOS[f"{nombre}.parquet"][1][0]
+        linea = (f"- `{nombre}`: {a['como_se_reconstruye']}. En las filas de los dos lados, {medida}: "
+                 f"{_n(c[medida]['iguales'])} iguales y {_n(c[medida]['distintas'])} distintas (suma "
+                 f"{_n(c[medida]['suma_empaquetado'])} frente a {_n(c[medida]['suma_replica'])}); filas solo en lo "
+                 f"empaquetado: {_n(c['solo_empaquetado'])}; solo en la reconstrucción: {_n(c['solo_replica'])}.")
+        s = a.get("sin_el_dia_reservado")
+        if s:
+            linea += (f" Las {_n(s['filas_del_dia_empaquetadas'])} filas del {s['dia']} de las rutas "
+                      f"{' y '.join(str(i) for i in s['idrutas'])} solo están en lo empaquetado (en la réplica hay "
+                      f"{_n(s['filas_del_dia_reconstruidas'])}): son las de los viajes que la réplica deja fuera de "
+                      "timbradas_segmentos para simular su llegada por el trigger. Sin ese día, el contenido es "
+                      f"{'idéntico' if s['contenido_identico'] else 'DISTINTO'} (SHA-256 "
+                      f"`{s['sha256_contenido_empaquetado'][:16]}…` y `{s['sha256_contenido_reconstruido'][:16]}…`).")
+        filas.append(linea)
+    filas += [
+        "",
         "## Huellas de las entradas (réplica)", "",
         "| Tabla | Filas | SHA-256 del contenido |", "|---|---:|---|",
         f"| progvehiculos (2023-2025; {e['progvehiculos']['columnas']}) | "
@@ -346,9 +526,19 @@ def _md_linaje(r: dict) -> str:
     ]
     for nombre in CONTEXTO:
         filas.append(f"| {nombre} | {_n(e[nombre]['filas'])} | `{e[nombre]['sha256_contenido']}` |")
+    for nombre, h in (r.get("entradas_segmentos") or {}).items():
+        filas.append(f"| {nombre} ({h['columnas']}; la que leen las preparaciones por segmento) | {_n(h['filas'])} | "
+                     f"`{h['sha256_contenido']}` |")
     filas += ["", "## Huellas de los archivos empaquetados", "",
               f"- `datos/demanda_horaria.parquet`: `{dh['sha256_archivo']}`",
-              f"- `datos/contexto_operacional.parquet`: `{cx['sha256_archivo']}`", "",
+              f"- `datos/contexto_operacional.parquet`: `{cx['sha256_archivo']}`"]
+    filas += [f"- `{r[n]['archivo']}`: `{r[n]['sha256_archivo']}`" for n in nuevos]
+    if r.get("sin_reconstruir"):
+        filas += ["", "## Archivos de `datos/` que no se reconstruyen desde la réplica", "",
+                  "| Archivo | SHA-256 | Por qué no se reconstruye desde la réplica |", "|---|---|---|"]
+        filas += [f"| `{x['archivo']}` | `{x['sha256_archivo']}` | {x['motivo']} |"
+                  for x in r["sin_reconstruir"].values()]
+    filas += ["",
               "## Reglas", "",
               "- Viaje válido: `finalizado = 'S'` y `cancelada = 'N'` en progvehiculos; la hora es la de `fechasalida` "
               "(4 a 20 h: no hay salidas válidas a las 21 h en 2023-2025).",
@@ -356,7 +546,17 @@ def _md_linaje(r: dict) -> str:
               "`salidas` = número de viajes válidos; una franja sin viajes vale 0.",
               "- Contexto: `preparar_datos_api.contexto_desde_tablas` (novedades viales por fecha y rango horario; "
               f"novedades_viales_ruta tiene {e['novedades_viales_ruta']['filas']} filas, así que cada novedad aplica "
-              "a las tres rutas; festivos oficiales = FESTIVO_NACIONAL de estacionalidades_anio).", ""]
+              "a las tres rutas; festivos oficiales = FESTIVO_NACIONAL de estacionalidades_anio)."]
+    if nuevos:
+        filas += [
+            "- `bajadas_viajes` = Σ `numerobajadas` de los viajes válidos con dato y ≤ 300 (ceros incluidos), por la "
+            "hora de salida; una franja sin viajes vale 0 (la definición de pasajeros, "
+            "`../consolidados/definicion_bajadas.md`).",
+            "- Subidas por segmento: las columnas que lee `scripts/preparar_segmentos.py` se leen de la réplica, se "
+            "escriben como las exportaciones en una carpeta temporal y las mismas funciones arman el archivo desde "
+            "ahí (subidas por ruta, fecha, hora de salida y segmento, con el tipo de día del calendario del "
+            "proyecto)."]
+    filas.append("")
     return "\n".join(filas)
 
 
@@ -382,8 +582,11 @@ def main(argv=None) -> int:
         (EVIDENCIAS / "linaje.json").write_text(json.dumps(r, ensure_ascii=False, indent=1, default=str),
                                                 encoding="utf-8")
         (EVIDENCIAS / "linaje.md").write_text(_md_linaje(r), encoding="utf-8")
-        print("demanda_horaria idéntica:", r["demanda_horaria"]["contenido_identico"],
-              "· contexto idéntico:", r["contexto_operacional"]["contenido_identico"])
+        for n in RECONSTRUIDOS:
+            a = r[n.removesuffix(".parquet")]
+            sin = a.get("sin_el_dia_reservado")
+            extra = f"; sin el día reservado: {'idéntico' if sin['contenido_identico'] else 'DISTINTO'}" if sin else ""
+            print(f"{n}: {'idéntico' if a['contenido_identico'] else 'distinto'}{extra}")
     return 0
 
 

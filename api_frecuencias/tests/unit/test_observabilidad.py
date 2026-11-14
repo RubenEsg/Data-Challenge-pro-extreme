@@ -151,6 +151,34 @@ def test_el_hilo_de_la_cola_continua_la_traza_de_quien_encolo(memoria):
     assert ciclo.attributes["correlation_id"] == "cid-cola-1" and vistos["cid"] == "cid-cola-1"
 
 
+def test_el_ciclo_que_encola_el_refresco_de_segmentos_no_cambia_el_id_de_su_etapa(memoria, monkeypatch):
+    """Un ciclo de frecuencia con datos nuevos encola el refresco de segmentos (crear_ejecucion instrumentado anota el
+    execution_id NUEVO en el span actual). Eso pasa en un span propio, hijo de la última etapa: la etapa del ciclo
+    conserva su execution_id y la traza sigue de punta a punta."""
+    from contextlib import nullcontext
+
+    from app.servicios import segmentos_refresco as R
+
+    memoria.clear()
+
+    def solicitar(_s, parametros, *_a, **_k):
+        O.anotar(execution_id="seg-1")                   # lo que hace crear_ejecucion instrumentado
+        return SimpleNamespace(execution_id="seg-1"), True
+
+    monkeypatch.setattr(R.segmentos, "fuente_configurada", lambda: True)
+    monkeypatch.setattr(R, "solicitar", solicitar)
+    monkeypatch.setattr(R, "sesion_contexto", nullcontext)
+    with O.ejecucion_en_curso("ciclo-1", "frecuencia"):
+        O.marcar_etapa("ciclo-1", "notificaciones", 85)
+        assert R.encolar_tras_ciclo("ciclo-1") == "seg-1"
+    spans = {s.name: s for s in memoria.get_finished_spans()}
+    etapa = spans["ejecucion.notificaciones"]
+    assert etapa.attributes["execution_id"] == "ciclo-1"           # antes quedaba «seg-1»
+    encolado = spans["ejecucion.encolar_refresco_segmentos"]
+    assert encolado.attributes["execution_id"] == "seg-1" and encolado.attributes["ciclo"] == "ciclo-1"
+    assert encolado.parent.span_id == etapa.context.span_id
+
+
 def test_exportador_desconocido_se_rechaza():
     with pytest.raises(ValueError):
         O.configurar_trazas("zipkin")

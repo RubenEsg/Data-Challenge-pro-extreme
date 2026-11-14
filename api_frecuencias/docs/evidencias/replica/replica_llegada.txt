@@ -1,20 +1,20 @@
 Llegada de datos por el trigger de Extreme y lectura incremental (scripts/replica_simular_llegada.py)
-Inicio: 2026-11-09T06:29:49.007231-05:00 · escribe: extreme_dba (la captura) · lee: lector_ia · resultados: escritor_ia
+Inicio: 2026-11-11T05:13:25.693441-05:00 · escribe: extreme_dba (la captura) · lee: lector_ia · resultados: escritor_ia
 Viajes reservados simulados: [5141355, 5141356, 5141357]
 
 == 1. Llegada (un INSERT por fila cruda, una transacción por viaje)
-   584 filas crudas en 89.6 s (153.4 ms por fila): {5141355: {'filas': 216, 'segundos': 35.76}, 5141356: {'filas': 172, 'segundos': 24.62}, 5141357: {'filas': 196, 'segundos': 29.21}}
+   584 filas crudas en 28.82 s (49.4 ms por fila): {5141355: {'filas': 216, 'segundos': 11.7}, 5141356: {'filas': 172, 'segundos': 7.7}, 5141357: {'filas': 196, 'segundos': 9.42}}
    filas con marca posterior a t0: {'timbradas_segmentos': 228, 'timbradas_anio': 2, 'timbradas_anio_zonas': 0, 'timbradas_consolidado': 10731, 'timbradas_consolidado_zonas': 0, 'timbradas_segmentos_anio': 162, 'timbradas_segmentos_consolidado': 162}
    equivalencia trigger vs exportación: 223/223 pares (segmento, viaje) iguales (100.0 %); Σ subidas 201 = 201; Σ bajadas 209 = 209
 
 == 2. Liquidación fn_insert_timbradas_anio (por viaje)
-   viaje 5141355: True en 0.682 s 
-   viaje 5141356: True en 0.548 s 
-   viaje 5141357: True en 0.517 s 
+   viaje 5141355: True en 0.247 s 
+   viaje 5141356: True en 0.206 s 
+   viaje 5141357: True en 0.208 s 
 
 == 3. Cierre fn_consolidar_timbradas_historicas()
-   resultado True en 0.664 s; filas 10731; cambiadas de contenido 7952; reselladas con la misma huella 2779; nuevas 0
-   visto por lector_ia con huella: {'leidas': 10731, 'entregadas': 7952, 'modificadas': 7952, 'nuevas': 0, 'repetidas_solape': 2779, 'marca_anterior': '2026-08-14T11:29:05.057003-05:00', 'marca_nueva': '2026-11-09T06:32:30.669494-05:00'}
+   resultado True en 0.336 s; filas 10731; cambiadas de contenido 7952; reselladas con la misma huella 2779; nuevas 0
+   visto por lector_ia con huella: {'leidas': 10731, 'entregadas': 7952, 'modificadas': 7952, 'nuevas': 0, 'repetidas_solape': 2779, 'marca_anterior': '2026-08-14T11:29:05.057003-05:00', 'marca_nueva': '2026-11-11T05:14:46.055406-05:00'}
 
 == 4. Lecturas incrementales como lector_ia desde t0 (primera) y con el estado de huellas (segunda)
    demanda_segmentos                  primera: leidas=1 entregadas=1 · segunda: leidas=1 entregadas=0 repetidas=1
@@ -25,17 +25,25 @@ Viajes reservados simulados: [5141355, 5141356, 5141357]
    timbradas_segmentos_consolidado    primera: leidas=162 entregadas=162 · segunda: leidas=162 entregadas=0 repetidas=162
 
 == 5. La API en modo integrado (DATABASE_URL = escritor_ia, FUENTE_DATABASE_URL = lector_ia, misma base)
-   alembic upgrade head como escritor_ia: True en 2.23 s (6 migraciones)
+   alembic upgrade head como escritor_ia: True en 2.48 s (14 migraciones)
       -> 0001, Esquema ai_frecuencias: registro de modelos, predicciones, recomendaciones, alertas,
       0001 -> 0002, Cola de trabajos en PostgreSQL para N réplicas (RNF-001, RNF-004, RNF-005, §7.1).
       0002 -> 0003, Estructura completa de la alerta (especificación v1.5, §5.3, §8.1, §9.4 y §18) y umbrales afinados (§5.1).
       0003 -> 0004, Monitoreo del modelo, foto de variables particionada y trazabilidad (§9.2, §9.4, §9.5, §11.2, §8.1, RNF-011).
       0004 -> 0005, Pesos y costos de la función objetivo de §10.2 versionados desde el inicio (§5.1 «regla de gobierno»).
       0005 -> 0006, Dimensiones de §8.3, trazabilidad de la calidad, llaves naturales, aprobación de umbrales y respuesta del reto.
-   1_carga_inicial_antes_de_la_llegada: HTTP 202, estado ok, filas_leidas=2757 (leidas en la ventana 2757, repetidas 0, nuevas 2757), predicciones=9, recomendaciones=9, errores de calidad {}, marca None -> 2026-08-14T00:52:39.363697-05:00, 64.04 s
-   2_despues_de_la_llegada: HTTP 202, estado ok, filas_leidas=1 (leidas en la ventana 1263, repetidas 1262, nuevas 1), predicciones=9, recomendaciones=9, errores de calidad {'oportunidad': 1}, marca 2026-08-14T00:52:39.363697-05:00 -> 2026-11-09T06:31:59.366894-05:00, 17.99 s
-   3_sin_datos_nuevos: HTTP 202, estado ok, filas_leidas=0 (leidas en la ventana 1, repetidas 1, nuevas 0), predicciones=0, recomendaciones=0, errores de calidad {}, marca 2026-11-09T06:31:59.366894-05:00 -> 2026-11-09T06:31:59.366894-05:00, 2.33 s · nota: Sin datos nuevos desde la marca de agua: no se reprocesa el histórico.
-   tablas de escritor_ia por esquema: {'ai_frecuencias': 17}
+      0006 -> 0007, Umbrales de las reglas nuevas de alertas versionados en threshold_config (§5.1 «regla de gobierno», RF-009).
+      0007 -> 0008, Agregación materializada de la capa analítica de segmentos (§6.1, §7.1, RNF-002, RNF-004).
+      0008 -> 0009, Partición del ciclo por ruta (RNF-005 «procesamiento particionable por ruta y fecha»).
+      0009 -> 0010, Parámetros del plan del día versionados en threshold_config y headway vigente de rutas.frecuenciadespachos en
+      0010 -> 0011, Ocupación actual de los buses por segmento (§10.1 «ocupación actual por segmento, estacionalidad actual, día de la
+      0011 -> 0012, Retención automática de datos (§18 «Exposición de datos → retención») y huellas de la ventana de solape del refresco
+      0012 -> 0013, Consolidados de Extreme en el ciclo diario: bajadas en el histórico, marca de agua por tabla y tolerancias del
+      0013 -> 0014, Mínimo de probabilidad de ALT-003 de pronóstico versionado en threshold_config (§5.1 «regla de gobierno», §5.2,
+   1_carga_inicial_antes_de_la_llegada: HTTP 202, estado ok, filas_leidas=2757 (leidas en la ventana 2757, repetidas 0, nuevas 2757), predicciones=9, recomendaciones=9, errores de calidad {}, marca None -> 2026-08-14T00:52:39.363697-05:00, 44.65 s
+   2_despues_de_la_llegada: HTTP 202, estado ok, filas_leidas=1 (leidas en la ventana 1263, repetidas 1262, nuevas 1), predicciones=9, recomendaciones=9, errores de calidad {'oportunidad': 1}, marca 2026-08-14T00:52:39.363697-05:00 -> 2026-11-11T05:14:35.674085-05:00, 12.68 s
+   3_sin_datos_nuevos: HTTP 202, estado ok, filas_leidas=0 (leidas en la ventana 1, repetidas 1, nuevas 0), predicciones=0, recomendaciones=0, errores de calidad {}, marca 2026-11-11T05:14:35.674085-05:00 -> 2026-11-11T05:14:35.674085-05:00, 1.82 s · nota: Sin datos nuevos desde la marca de agua: no se reprocesa el histórico.
+   tablas de escritor_ia por esquema: {'ai_frecuencias': 24}
 
 == 6. Restauración (la réplica vuelve al estado cargado)
    {'timbradas_segmentos_borradas': 228, 'conteo_pasajeros_borradas': 584, 'tablas_restauradas': ['timbradas_anio', 'timbradas_anio_trazabilidad', 'timbradas_anio_zonas', 'timbradas_anio_zonas_trazabilidad', 'timbradas_consolidado', 'timbradas_consolidado_zonas', 'timbradas_segmentos_anio', 'timbradas_segmentos_anio_trazabilidad', 'timbradas_segmentos_consolidado']}

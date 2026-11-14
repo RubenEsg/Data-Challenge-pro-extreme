@@ -1,0 +1,393 @@
+{
+ "dia": "2025-10-22",
+ "cron_por_omision": "5 6-20 * * *",
+ "franjas": [
+  {
+   "execution_id": "23ffa546-4e32-4601-8252-4d7a7bae2f8b",
+   "franja": "2025-10-22T08:05:00-05:00",
+   "instante": "2025-10-22T08:05:00-05:00",
+   "intradia": true,
+   "estado": "ok",
+   "filas_leidas": 114,
+   "predicciones": 9,
+   "recomendaciones": 60,
+   "filas_foto_variables": 1176,
+   "filas_ocupacion_segmento": 22,
+   "filas_monitoreo": 0,
+   "consolidados": false,
+   "nota_intradia": true,
+   "fin_alertas_observadas": "2025-10-21T16:00:00-05:00",
+   "alt002_observadas_cl72": [],
+   "restriccion_plan": {
+    "aplica": true,
+    "hora_cerrada": 7,
+    "hora_aplica": 8,
+    "ocupacion_observada": 1.0,
+    "salidas_minimas": 12,
+    "motivo": "En la última hora cerrada (7:00) la ocupación observada del segmento crítico 34 (ida) fue 100 % en 10 viajes, con 500,0 pasajeros a bordo en ese segmento en la hora, que alcanza el umbral crítico de 90 %: las salidas de las 8:00 no pueden ser menos de las que exige esa carga."
+   },
+   "salidas_plan_en_la_hora": 12,
+   "recomendaciones_franja": [
+    {
+     "horizonte_min": 30,
+     "hora": 8,
+     "buses_hora": 9,
+     "restriccion_reactiva": {
+      "fuente": "ai_frecuencias.ocupacion_segmento: subidas y bajadas por segmento de los viajes de las franjas que trajo la lectura incremental (timbradas_segmentos que llena tg_timbrada_segmento)",
+      "motivo": "Restricción reactiva de ocupación observada (§10.1): en la última hora cerrada (7:00) el segmento crítico 34 llegó a 100 %; a las 8:00 no menos de 9 buses/h (buses_minimos = ceil(500,0 / (50 × 0,85)) = 12 → acotado por la flota disponible de cada tipología y el ciclo a 9); sin el piso serían 6.",
+      "formula": "buses_minimos = ceil(500,0 / (50 × 0,85)) = 12 → acotado por la flota disponible de cada tipología y el ciclo a 9",
+      "sentido": "ida",
+      "aplicada": true,
+      "segmento": 34,
+      "capacidad": 50.0,
+      "naturaleza": "restricción reactiva de seguridad con la ocupación observada; no es un re-pronóstico (en el backtest del proyecto, re-pronosticar dentro del día no mejoró la precisión)",
+      "hora_aplica": 8,
+      "hora_cerrada": 7,
+      "tope_por_flota": 10,
+      "salidas_minimas": 9,
+      "salidas_pedidas": 12,
+      "limitada_por_flota": true,
+      "buses_hora_sin_piso": 6,
+      "carga_critica_pax_h": 500.0,
+      "ocupacion_observada": 1.0,
+      "ocupacion_objetivo_max": 0.85,
+      "limitada_por_headway_minimo": false
+     }
+    },
+    {
+     "horizonte_min": 60,
+     "hora": 8,
+     "buses_hora": 9,
+     "restriccion_reactiva": {
+      "fuente": "ai_frecuencias.ocupacion_segmento: subidas y bajadas por segmento de los viajes de las franjas que trajo la lectura incremental (timbradas_segmentos que llena tg_timbrada_segmento)",
+      "motivo": "Restricción reactiva de ocupación observada (§10.1): en la última hora cerrada (7:00) el segmento crítico 34 llegó a 100 %; a las 8:00 no menos de 9 buses/h (buses_minimos = ceil(500,0 / (50 × 0,85)) = 12 → acotado por la flota disponible de cada tipología y el ciclo a 9); sin el piso serían 6.",
+      "formula": "buses_minimos = ceil(500,0 / (50 × 0,85)) = 12 → acotado por la flota disponible de cada tipología y el ciclo a 9",
+      "sentido": "ida",
+      "aplicada": true,
+      "segmento": 34,
+      "capacidad": 50.0,
+      "naturaleza": "restricción reactiva de seguridad con la ocupación observada; no es un re-pronóstico (en el backtest del proyecto, re-pronosticar dentro del día no mejoró la precisión)",
+      "hora_aplica": 8,
+      "hora_cerrada": 7,
+      "tope_por_flota": 10,
+      "salidas_minimas": 9,
+      "salidas_pedidas": 12,
+      "limitada_por_flota": true,
+      "buses_hora_sin_piso": 6,
+      "carga_critica_pax_h": 500.0,
+      "ocupacion_observada": 1.0,
+      "ocupacion_objetivo_max": 0.85,
+      "limitada_por_headway_minimo": false
+     }
+    },
+    {
+     "horizonte_min": 120,
+     "hora": 9,
+     "buses_hora": 6,
+     "restriccion_reactiva": null
+    }
+   ],
+   "duracion_s": 7.0,
+   "duracion_etapas_s": {
+    "plan_dia": 1.254,
+    "respuesta": 0.585
+   },
+   "worker_id": "DESKTOP-RA73BA3:34472:69fa26:t1",
+   "reclamado": "2026-11-13 20:45:00.724595-05:00",
+   "fin_intento": "2026-11-13 20:45:07.724259-05:00"
+  },
+  {
+   "execution_id": "9456b50a-a8e2-42a6-99ee-dbd0330a4379",
+   "franja": "2025-10-22T09:05:00-05:00",
+   "instante": "2025-10-22T09:05:00-05:00",
+   "intradia": true,
+   "estado": "ok",
+   "filas_leidas": 3,
+   "predicciones": 9,
+   "recomendaciones": 60,
+   "filas_foto_variables": 1176,
+   "filas_ocupacion_segmento": 11,
+   "filas_monitoreo": 0,
+   "consolidados": false,
+   "nota_intradia": true,
+   "fin_alertas_observadas": "2025-10-22T09:00:00-05:00",
+   "alt002_observadas_cl72": [
+    {
+     "inicio": "2025-10-22T07:00:00-05:00",
+     "fin": "2025-10-22T09:00:00-05:00",
+     "metodo": "segmento_critico"
+    }
+   ],
+   "restriccion_plan": {
+    "aplica": true,
+    "hora_cerrada": 8,
+    "hora_aplica": 9,
+    "ocupacion_observada": 1.0,
+    "salidas_minimas": 15,
+    "motivo": "En la última hora cerrada (8:00) la ocupación observada del segmento crítico 34 (ida) fue 100 % en 12 viajes, con 600,0 pasajeros a bordo en ese segmento en la hora, que alcanza el umbral crítico de 90 %: las salidas de las 9:00 no pueden ser menos de las que exige esa carga."
+   },
+   "salidas_plan_en_la_hora": 15,
+   "recomendaciones_franja": [
+    {
+     "horizonte_min": 30,
+     "hora": 9,
+     "buses_hora": 9,
+     "restriccion_reactiva": {
+      "fuente": "ai_frecuencias.ocupacion_segmento: subidas y bajadas por segmento de los viajes de las franjas que trajo la lectura incremental (timbradas_segmentos que llena tg_timbrada_segmento)",
+      "motivo": "Restricción reactiva de ocupación observada (§10.1): en la última hora cerrada (8:00) el segmento crítico 34 llegó a 100 %; a las 9:00 no menos de 9 buses/h (buses_minimos = ceil(600,0 / (50 × 0,85)) = 15 → acotado por la flota disponible de cada tipología y el ciclo a 9); sin el piso serían 6.",
+      "formula": "buses_minimos = ceil(600,0 / (50 × 0,85)) = 15 → acotado por la flota disponible de cada tipología y el ciclo a 9",
+      "sentido": "ida",
+      "aplicada": true,
+      "segmento": 34,
+      "capacidad": 50.0,
+      "naturaleza": "restricción reactiva de seguridad con la ocupación observada; no es un re-pronóstico (en el backtest del proyecto, re-pronosticar dentro del día no mejoró la precisión)",
+      "hora_aplica": 9,
+      "hora_cerrada": 8,
+      "tope_por_flota": 10,
+      "salidas_minimas": 9,
+      "salidas_pedidas": 15,
+      "limitada_por_flota": true,
+      "buses_hora_sin_piso": 6,
+      "carga_critica_pax_h": 600.0,
+      "ocupacion_observada": 1.0,
+      "ocupacion_objetivo_max": 0.85,
+      "limitada_por_headway_minimo": false
+     }
+    },
+    {
+     "horizonte_min": 60,
+     "hora": 9,
+     "buses_hora": 9,
+     "restriccion_reactiva": {
+      "fuente": "ai_frecuencias.ocupacion_segmento: subidas y bajadas por segmento de los viajes de las franjas que trajo la lectura incremental (timbradas_segmentos que llena tg_timbrada_segmento)",
+      "motivo": "Restricción reactiva de ocupación observada (§10.1): en la última hora cerrada (8:00) el segmento crítico 34 llegó a 100 %; a las 9:00 no menos de 9 buses/h (buses_minimos = ceil(600,0 / (50 × 0,85)) = 15 → acotado por la flota disponible de cada tipología y el ciclo a 9); sin el piso serían 6.",
+      "formula": "buses_minimos = ceil(600,0 / (50 × 0,85)) = 15 → acotado por la flota disponible de cada tipología y el ciclo a 9",
+      "sentido": "ida",
+      "aplicada": true,
+      "segmento": 34,
+      "capacidad": 50.0,
+      "naturaleza": "restricción reactiva de seguridad con la ocupación observada; no es un re-pronóstico (en el backtest del proyecto, re-pronosticar dentro del día no mejoró la precisión)",
+      "hora_aplica": 9,
+      "hora_cerrada": 8,
+      "tope_por_flota": 10,
+      "salidas_minimas": 9,
+      "salidas_pedidas": 15,
+      "limitada_por_flota": true,
+      "buses_hora_sin_piso": 6,
+      "carga_critica_pax_h": 600.0,
+      "ocupacion_observada": 1.0,
+      "ocupacion_objetivo_max": 0.85,
+      "limitada_por_headway_minimo": false
+     }
+    },
+    {
+     "horizonte_min": 120,
+     "hora": 10,
+     "buses_hora": 6,
+     "restriccion_reactiva": null
+    }
+   ],
+   "duracion_s": 3.47,
+   "duracion_etapas_s": {
+    "plan_dia": 0.391,
+    "respuesta": 0.551
+   },
+   "worker_id": "DESKTOP-RA73BA3:34472:69fa26:t1",
+   "reclamado": "2026-11-13 20:46:00.514157-05:00",
+   "fin_intento": "2026-11-13 20:46:03.982927-05:00"
+  },
+  {
+   "execution_id": "b92bd078-186b-423f-9765-6a189ae297dc",
+   "franja": "2025-10-22T10:05:00-05:00",
+   "instante": "2025-10-22T10:05:00-05:00",
+   "intradia": true,
+   "estado": "ok",
+   "filas_leidas": 3,
+   "predicciones": 9,
+   "recomendaciones": 60,
+   "filas_foto_variables": 1176,
+   "filas_ocupacion_segmento": 11,
+   "filas_monitoreo": 0,
+   "consolidados": false,
+   "nota_intradia": true,
+   "fin_alertas_observadas": null,
+   "alt002_observadas_cl72": [],
+   "restriccion_plan": {
+    "aplica": false,
+    "hora_cerrada": 9,
+    "hora_aplica": 10,
+    "ocupacion_observada": 0.5,
+    "salidas_minimas": null,
+    "motivo": "En la última hora cerrada (9:00) la ocupación observada del segmento crítico 34 (ida) fue 50 % en 6 viajes, con 150,0 pasajeros a bordo en ese segmento en la hora, por debajo del umbral crítico de 90 %: no restringe el plan."
+   },
+   "salidas_plan_en_la_hora": 6,
+   "recomendaciones_franja": [
+    {
+     "horizonte_min": 30,
+     "hora": 10,
+     "buses_hora": 6,
+     "restriccion_reactiva": null
+    },
+    {
+     "horizonte_min": 60,
+     "hora": 10,
+     "buses_hora": 6,
+     "restriccion_reactiva": null
+    },
+    {
+     "horizonte_min": 120,
+     "hora": 11,
+     "buses_hora": 6,
+     "restriccion_reactiva": null
+    }
+   ],
+   "duracion_s": 3.29,
+   "duracion_etapas_s": {
+    "plan_dia": 0.336,
+    "respuesta": 0.621
+   },
+   "worker_id": "DESKTOP-RA73BA3:34472:69fa26:t1",
+   "reclamado": "2026-11-13 20:47:00.747622-05:00",
+   "fin_intento": "2026-11-13 20:47:04.039974-05:00"
+  },
+  {
+   "execution_id": "8f1112cb-9e36-4d2a-b3dd-b9b77d7c63d4",
+   "franja": "2025-10-22T11:05:00-05:00",
+   "instante": "2025-10-22T11:05:00-05:00",
+   "intradia": true,
+   "estado": "ok",
+   "filas_leidas": 3,
+   "predicciones": 9,
+   "recomendaciones": 60,
+   "filas_foto_variables": 1176,
+   "filas_ocupacion_segmento": 0,
+   "filas_monitoreo": 0,
+   "consolidados": false,
+   "nota_intradia": true,
+   "fin_alertas_observadas": null,
+   "alt002_observadas_cl72": [],
+   "restriccion_plan": {
+    "aplica": null,
+    "hora_cerrada": null,
+    "hora_aplica": null,
+    "ocupacion_observada": null,
+    "salidas_minimas": null,
+    "motivo": null
+   },
+   "salidas_plan_en_la_hora": 6,
+   "recomendaciones_franja": [
+    {
+     "horizonte_min": 30,
+     "hora": 11,
+     "buses_hora": 6,
+     "restriccion_reactiva": null
+    },
+    {
+     "horizonte_min": 60,
+     "hora": 11,
+     "buses_hora": 6,
+     "restriccion_reactiva": null
+    },
+    {
+     "horizonte_min": 120,
+     "hora": 12,
+     "buses_hora": 6,
+     "restriccion_reactiva": null
+    }
+   ],
+   "duracion_s": 3.59,
+   "duracion_etapas_s": {
+    "plan_dia": 0.612,
+    "respuesta": 0.582
+   },
+   "worker_id": "DESKTOP-RA73BA3:34472:69fa26:t1",
+   "reclamado": "2026-11-13 20:48:00.830776-05:00",
+   "fin_intento": "2026-11-13 20:48:04.425091-05:00"
+  }
+ ],
+ "disparos": [
+  {
+   "simulado": "2025-10-22T08:05:09-05:00",
+   "execution_id": "23ffa546-4e32-4601-8252-4d7a7bae2f8b",
+   "segunda_replica_encolo": false
+  },
+  {
+   "simulado": "2025-10-22T09:05:09-05:00",
+   "execution_id": "9456b50a-a8e2-42a6-99ee-dbd0330a4379",
+   "segunda_replica_encolo": false
+  },
+  {
+   "simulado": "2025-10-22T10:05:09-05:00",
+   "execution_id": "b92bd078-186b-423f-9765-6a189ae297dc",
+   "segunda_replica_encolo": false
+  },
+  {
+   "simulado": "2025-10-22T11:05:09-05:00",
+   "execution_id": "8f1112cb-9e36-4d2a-b3dd-b9b77d7c63d4",
+   "segunda_replica_encolo": false
+  }
+ ],
+ "horas_de_ocupacion_pedidas": [
+  {
+   "instante": "2025-10-22T08:05:00-05:00",
+   "horas": [
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  {
+   "instante": "2025-10-22T09:05:00-05:00",
+   "horas": [
+    8
+   ]
+  },
+  {
+   "instante": "2025-10-22T10:05:00-05:00",
+   "horas": [
+    9
+   ]
+  },
+  {
+   "instante": "2025-10-22T11:05:00-05:00",
+   "horas": [
+    10
+   ]
+  }
+ ],
+ "refrescos_pedidos": 0,
+ "latencia_consulta_paginada": {
+  "con_ciclo_en_curso": {
+   "n": 60,
+   "p50_s": 0.035,
+   "p95_s": 0.047,
+   "max_s": 0.057
+  },
+  "sin_ciclo": {
+   "n": 774,
+   "p50_s": 0.032,
+   "p95_s": 0.037,
+   "max_s": 0.132
+  },
+  "respuestas_no_200": 0
+ },
+ "comprobaciones": {
+  "el planificador tiene el trabajo ciclo_intradia": true,
+  "una fila por franja: la segunda réplica no encoló nada": true,
+  "cada ciclo es intradía, con instante = su franja": true,
+  "todos terminaron «ok» y la cola los procesó de uno en uno": true,
+  "el primero leyó el histórico y cada siguiente solo la hora que llegó (3 rutas)": true,
+  "la ocupación actual se midió solo en horas cerradas, y cada vez la de la hora que llegó": true,
+  "8:05: la restricción actúa a las 8 h con la ocupación de las 7 h": true,
+  "9:05: actúa a las 9 h con la ocupación de las 8 h": true,
+  "10:05: con la ocupación de las 9 h bajo el umbral no actúa y lo dice": true,
+  "11:05: sin viajes medidos en la hora que llegó, el plan es el de siempre": true,
+  "el plan del día en curso no baja del piso en la hora en que actúa": true,
+  "las de 30 y 60 min de esa hora aplican la misma restricción; la de 120 min no": true,
+  "9:05: ALT-002 del episodio de las 7 y 8 h en el segmento crítico, con la hora de las 7 que midió el ciclo de las 8:05": true,
+  "ningún ciclo intradía guardó monitoreo, leyó los consolidados ni pidió el refresco de segmentos": true,
+  "ninguna alerta observada por horas que todavía no pasaron": true,
+  "la consulta paginada con un ciclo en curso: p95 < 2 s (RNF-002) y siempre 200": true
+ }
+}

@@ -28,7 +28,16 @@ Reglas que fijan las pruebas (`tests/unit/test_optimizacion*.py` y `tests/integr
 - **Parámetros gobernados (§5.1 «regla de gobierno»).** El headway mínimo y el máximo efectivo son las cotas de cada
   hora del MILP (nmin = ceil(minutos / headway máximo), tope = floor(minutos / headway mínimo)); los costos y los pesos
   α, β, γ salen de `threshold_config` y cada parámetro dice su fuente; un cambio de umbrales cambia el plan
-  (`test_plan_dia_toma_los_umbrales_gobernados_como_cotas_del_milp`).
+  (`test_plan_dia_toma_los_umbrales_gobernados_como_cotas_del_milp`). La tarifa, la elasticidad y la suavidad del MILP
+  también salen de `threshold_config` (migración 0010), y la flota, el ciclo y la capacidad, del ajuste local
+  versionado si existe. Sin una versión nueva, el plan es el de D5
+  (`tests/unit/test_gobierno_parametros.py::test_sin_version_nueva_el_milp_recibe_exactamente_los_parametros_de_d5`,
+  `tests/unit/test_gobierno_parametros.py::test_la_flota_y_el_ciclo_gobernados_cambian_el_plan_del_dia`). Cada hora
+  compara además su headway con `rutas.frecuenciadespachos` (`frecuenciadespachos_min`,
+  `diferencia_frecuenciadespachos_min`); la evidencia de estas reglas está en `../gobierno/`.
+- **Sin solución, no hay plan.** Si con la suavidad gobernada el MILP del día no tiene solución, `plan_dia` lanza un
+  ValueError que nombra los parámetros que hay que revisar, y no se entrega ni se persiste un plan infactible
+  (`tests/unit/test_gobierno_parametros.py::test_una_suavidad_gobernada_sin_solucion_no_entrega_un_plan`).
 - **Una sola salida no tiene intervalo.** En una hora operada menos minutos que el headway mínimo (SILENCIO a las 4 h
   del domingo y del festivo: 0,2 min), el tope es 1 salida. Sin intervalo entre salidas no hay headway que verificar,
   así que la hora no es no viable por eso (`sin_intervalo = true`). Es la misma regla de la respuesta del reto. Con
@@ -70,7 +79,9 @@ Reglas que fijan las pruebas (`tests/unit/test_optimizacion*.py` y `tests/integr
   (`test_festivo_entre_semana_usa_la_programacion_de_domingo_o_festivo`).
 
 Fuentes de datos: pronóstico y banda P10-P90 calibrada del modelo activo; ciclo, flota e intervalo programado por ruta,
-tipo de día y hora (`datos/parametros_operativos_hora.parquet`); minutos operados, km, CV de los intervalos y tasa de
+tipo de día y hora (`datos/parametros_operativos_hora.parquet`, o el ajuste local de `PUT /api/v1/catalogos/flota` para
+la flota y el ciclo); headway vigente de `rutas.frecuenciadespachos` (`datos/catalogo_rutas.json`, leído en minutos,
+supuesto S14); minutos operados, km, CV de los intervalos y tasa de
 viajes no válidos del plan (mediana 2025 de `datos/insumos_d5_2025.parquet`); factor de carga crítica por ruta, tipo de
 día y hora (misma fuente); tipologías de capacidad de `app/servicios/tipologias_flota.json`; costos con fuente de
 `datos/costos_fuente.json`. Ninguna corrida escribe en `datos/`.

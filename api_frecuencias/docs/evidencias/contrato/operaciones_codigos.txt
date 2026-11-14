@@ -1,6 +1,6 @@
 Operaciones del contrato OpenAPI y códigos de respuesta declarados (spec v1.5 §12.1, §12.2, RNF-009)
-Generado desde app.openapi() (app/openapi_doc.py) el 09-11-2026, 07:47:18 (Bogotá) | versión de la API 1.0.0 | OpenAPI 3.1.0
-59 rutas y 62 operaciones. Todo 4xx/5xx declarado usa el esquema uniforme RespuestaError {error: {codigo, mensaje, detalle, correlation_id}}.
+Generado desde app.openapi() (app/openapi_doc.py) el 11-11-2026, 04:47:11 (Bogotá) | versión de la API 1.0.0 | OpenAPI 3.1.0
+65 rutas y 69 operaciones. Todo 4xx/5xx declarado usa el esquema uniforme RespuestaError {error: {codigo, mensaje, detalle, correlation_id}}.
 Columnas: método, ruta, rol mínimo (x-rol-minimo), estados declarados, tipos de contenido del éxito.
 
 GET    /api/v1/alerts                                          operador  200 401 422 500                    application/json
@@ -16,6 +16,9 @@ GET    /api/v1/catalogos/despachos                             operador  200 401
 GET    /api/v1/catalogos/despachos/export                      operador  200 401 422 500 503                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
 GET    /api/v1/catalogos/empresas                              operador  200 401 422 500 503                application/json
 GET    /api/v1/catalogos/empresas/export                       operador  200 401 422 500 503                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/catalogos/flota                                 operador  200 401 404 422 500 503            application/json
+PUT    /api/v1/catalogos/flota                                 admin     200 400 401 403 404 422 500        application/json
+GET    /api/v1/catalogos/flota/historial                       operador  200 401 422 500 503                application/json
 GET    /api/v1/catalogos/procesos                              operador  200 401 422 500 503                application/json
 GET    /api/v1/catalogos/procesos/export                       operador  200 401 422 500 503                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
 GET    /api/v1/catalogos/rutas                                 operador  200 401 422 500 503                application/json
@@ -32,6 +35,7 @@ GET    /api/v1/frequency/executions                            operador  200 401
 POST   /api/v1/frequency/executions                            analista  202 400 401 403 422 500            application/json
 GET    /api/v1/frequency/executions/{execution_id}             operador  200 401 404 422 500                application/json
 GET    /api/v1/frequency/executions/{execution_id}/errors      operador  200 401 404 422 500                application/json
+GET    /api/v1/frequency/watermarks                            operador  200 401 422 500                    application/json
 GET    /api/v1/models                                          operador  200 401 422 500                    application/json
 POST   /api/v1/models/rollback                                 admin     200 400 401 403 404 409 422 500    application/json
 POST   /api/v1/models/train                                    analista  202 400 401 403 422 500            application/json
@@ -55,9 +59,12 @@ GET    /api/v1/recommendations/plan                            operador  200 401
 GET    /api/v1/respuesta                                       operador  200 401 404 422 500                application/json
 POST   /api/v1/respuesta/calcular                              analista  202 400 401 403 404 422 500        application/json
 GET    /api/v1/respuesta/export                                operador  200 401 404 422 500                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/retencion                                       operador  200 401 422 500                    application/json
+POST   /api/v1/retencion/aplicar                               admin     202 400 401 403 422 500            application/json
 GET    /api/v1/scheduler                                       operador  200 401 422 500                    application/json
 GET    /api/v1/segmentos/estadisticas                          operador  200 401 422 500 503                application/json
 GET    /api/v1/segmentos/estadisticas/export                   operador  200 401 422 500 503                application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+POST   /api/v1/segmentos/estadisticas/refrescar                analista  202 400 401 403 422 500 503        application/json
 GET    /api/v1/segmentos/zonas                                 operador  200 401 422 500 503                application/json
 GET    /api/v1/thresholds                                      operador  200 401 422 500                    application/json
 PUT    /api/v1/thresholds                                      admin     200 400 401 403 422 500            application/json
@@ -90,6 +97,9 @@ GET    /api/v1/catalogos/empresas                              503  catalogo_no_
 GET    /api/v1/catalogos/empresas/export                       422  filtro_invalido
 GET    /api/v1/catalogos/empresas/export                       500  operacion_no_permitida
 GET    /api/v1/catalogos/empresas/export                       503  catalogo_no_disponible, fuente_no_disponible
+GET    /api/v1/catalogos/flota                                 404  no_encontrado
+PUT    /api/v1/catalogos/flota                                 404  ajuste_inexistente
+PUT    /api/v1/catalogos/flota                                 422  ruta_desconocida, ajuste_invalido
 GET    /api/v1/catalogos/procesos                              422  filtro_invalido
 GET    /api/v1/catalogos/procesos                              500  operacion_no_permitida
 GET    /api/v1/catalogos/procesos                              503  catalogo_no_disponible, fuente_no_disponible
@@ -127,6 +137,7 @@ GET    /api/v1/catalogos/viajes/export                         422  filtro_inval
 GET    /api/v1/catalogos/viajes/export                         500  operacion_no_permitida
 GET    /api/v1/catalogos/viajes/export                         503  catalogo_no_disponible, fuente_no_disponible
 GET    /api/v1/frequency/executions                            422  rango_invalido
+POST   /api/v1/frequency/executions                            422  ruta_desconocida
 POST   /api/v1/models/rollback                                 404  no_encontrado
 POST   /api/v1/models/rollback                                 409  sin_version_anterior
 POST   /api/v1/models/{model_id}/activate                      409  ya_activo, requiere_forzar, activacion_rechazada, sin_datos_validacion, validacion_fallida
@@ -151,7 +162,9 @@ GET    /api/v1/respuesta/export                                404  sin_calcular
 GET    /api/v1/segmentos/estadisticas                          422  parametro_invalido
 GET    /api/v1/segmentos/estadisticas                          503  fuente_no_disponible
 GET    /api/v1/segmentos/estadisticas/export                   422  parametro_invalido
-GET    /api/v1/segmentos/estadisticas/export                   503  fuente_no_disponible
+GET    /api/v1/segmentos/estadisticas/export                   503  fuente_no_disponible, agregacion_pendiente
+POST   /api/v1/segmentos/estadisticas/refrescar                422  parametro_invalido
+POST   /api/v1/segmentos/estadisticas/refrescar                503  fuente_no_configurada, fuente_no_disponible
 GET    /api/v1/segmentos/zonas                                 422  parametro_invalido
 GET    /api/v1/segmentos/zonas                                 503  fuente_no_disponible
 PUT    /api/v1/thresholds                                      422  umbral_invalido

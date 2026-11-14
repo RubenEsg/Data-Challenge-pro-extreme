@@ -16,10 +16,13 @@ longitud acumulada del ciclo, «regreso» = el resto. Es una aproximación decla
 Evaluación (sin fuga): reparto con enero de 2023 aplicado al total real de cada ruta-hora de febrero de 2023 (el error
 es solo del reparto, con el total de la ruta perfecto): WAPE y sesgo por segmento, por sentido y por ruta.
 
-Salidas: datos/reparto_segmentos.parquet (lo usa GET /api/v1/predictions/segmentos) y
-docs/evidencias/monitoreo/desagregacion_segmentos.json.
+Salidas: datos/reparto_segmentos.parquet (el reparto fijo B0), docs/evidencias/monitoreo/desagregacion_segmentos.json
+y datos/subidas_segmento_hora.parquet: subidas por (ruta, fecha, hora de salida, segmento) con el tipo de día y los
+metadatos del segmento (sin viajes ni vehículos), la entrada versionada del modelo por segmento
+(scripts/entrenar_segmentos.py), que así se reentrena y se prueba sin las exportaciones crudas.
 
 Uso:  python scripts/preparar_segmentos.py [--origen ../../datos] [--salida datos/reparto_segmentos.parquet]
+                                           [--celdas datos/subidas_segmento_hora.parquet] [--solo-celdas]
 """
 from __future__ import annotations
 
@@ -150,16 +153,35 @@ def evaluar(d: pd.DataFrame, rs: pd.DataFrame) -> dict:
             "por_ruta": por_ruta, "por_sentido": por_sentido.to_dict("records")}
 
 
+def celdas_segmento_hora(d: pd.DataFrame, rs: pd.DataFrame) -> pd.DataFrame:
+    """Subidas por (ruta, fecha, hora de salida, tipo de día, segmento), incluidos los ceros de los segmentos que el
+    viaje recorrió sin subidas, con el número, el sentido aproximado y la posición del segmento."""
+    c = d.groupby(["ruta", "fecha", "hora", "tipo_dia", "id_segmento"], as_index=False)["subidas"].sum()
+    c = c.merge(rs[["id_segmento", "nro_segmento", "sentido", "km_inicio", "longitud_m"]], on="id_segmento",
+                how="left")
+    return c.astype({"hora": "int8", "tipo_dia": "int8", "id_segmento": "int32", "nro_segmento": "int16",
+                     "subidas": "int32"}).sort_values(["ruta", "fecha", "hora", "nro_segmento"]).reset_index(drop=True)
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--origen", type=Path, default=RAIZ.parents[1] / "datos")
     p.add_argument("--salida", type=Path, default=RAIZ / "datos" / "reparto_segmentos.parquet")
     p.add_argument("--evidencia", type=Path,
                    default=RAIZ / "docs" / "evidencias" / "monitoreo" / "desagregacion_segmentos.json")
+    p.add_argument("--celdas", type=Path, default=RAIZ / "datos" / "subidas_segmento_hora.parquet")
+    p.add_argument("--solo-celdas", action="store_true", help="escribe solo --celdas (no toca el reparto ni la "
+                                                              "evidencia)")
     a = p.parse_args()
     d = cargar(a.origen)
     rs = sentidos(d[["ruta", "idruta", "idrutageo", "id_segmento", "nro_segmento", "longitud_m"]]
                   .drop_duplicates("id_segmento"))
+    celdas = celdas_segmento_hora(d, rs)
+    a.celdas.parent.mkdir(parents=True, exist_ok=True)
+    celdas.to_parquet(a.celdas, index=False)
+    print(f"{a.celdas.name}: {len(celdas)} filas, {int(celdas['subidas'].sum())} subidas")
+    if a.solo_celdas:
+        return
     ev = evaluar(d, rs)
     fr = fracciones(d).merge(rs[["id_segmento", "idruta", "idrutageo", "sentido", "longitud_m", "km_inicio"]],
                              on="id_segmento", how="left")
@@ -174,7 +196,9 @@ def main() -> None:
                    "timbradas_segmentos solo cubre 2023-01-01 a 2023-02-27 (los triggers de segmentación no se han "
                    "vuelto a ejecutar): el reparto es de hace casi tres años y no ve cambios de ruta posteriores",
                    "ene-feb incluye vacaciones y el inicio del año escolar; no hay Semana Santa ni diciembre",
-                   "no hay modelo por segmento: es una desagregación del pronóstico de la ruta",
+                   "esta es la evaluación del reparto fijo B0 (enero aplicado a febrero); el modelo supervisado por "
+                   "segmento y sentido y su comparación con B0 en una partición entrenamiento / validación / prueba "
+                   "están en docs/evidencias/modelo/segmentos_modelo.md (scripts/entrenar_segmentos.py)",
                    "el sentido es una aproximación geométrica, no un campo de Extreme"]})
     a.evidencia.parent.mkdir(parents=True, exist_ok=True)
     a.evidencia.write_text(json.dumps(ev, ensure_ascii=False, indent=2, default=str), encoding="utf-8")

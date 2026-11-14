@@ -1,11 +1,11 @@
 {
  "pruebas": {
   "codigo_salida": 0,
-  "duracion_s": 770.8,
-  "tests": 1060,
+  "duracion_s": 2142.3,
+  "tests": 1770,
   "failures": 0,
   "errors": 0,
-  "skipped": 5
+  "skipped": 0
  },
  "lint": {
   "ruff": {
@@ -22,5 +22,5 @@
   }
  },
  "codigo_scanner": 0,
- "generado_en": "2026-11-09T12:50:32-05:00"
+ "generado_en": "2026-11-14T00:56:01-05:00"
 }

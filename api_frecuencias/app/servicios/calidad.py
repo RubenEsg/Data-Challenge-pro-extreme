@@ -5,19 +5,32 @@ Cada error lleva lote, fila (posición en el lote), llave (dict con las columnas
 sin depender del orden del lote), campo, valor (texto de la celda), codigo, dimension, detalle y bloqueante. Las filas
 con un error bloqueante se rechazan (no pasan a la inferencia ni al histórico) y nunca se corrigen; el registro y su
 causa quedan en data_quality_error. Los errores de oportunidad no son bloqueantes: son informativos y la alerta de
-retraso es ALT-009 (frescura de la fuente).
+retraso es ALT-009 (frescura de la fuente). La tolerancia de un dato tardío (OPOR-001) es el mismo umbral de §5.1
+«datos atrasados» de la versión vigente de threshold_config (retraso_maximo_de), no una cifra del código.
 
-Se reconocen dos esquemas de lote:
+Se reconocen cuatro esquemas de lote:
 - "demanda": la salida de FuenteParquet / datos.demanda_horaria() y de la lectura integrada demanda_segmentos
-  [ruta, fecha, hora, pasajeros, salidas, ultima_actualizacion (+ idruta, subidas, bajadas, id_estacionalidad)];
+  [ruta, fecha, hora, pasajeros, salidas, ultima_actualizacion (+ idruta, subidas, bajadas, bajadas_viajes,
+  viajes_con_timbradas, id_estacionalidad)];
 - "consolidado": timbradas_consolidado de Extreme [proceso, id_ruta, id_dia_semana, id_estacionalidad, hora,
   hora_inicio, hora_fin, subidas, bajadas, nro_viajes, promedio_subidas, promedio_bajadas, ultima_actualizacion]. Su
   llave es la de 7 columnas del DDL (fuentes.LLAVES): bloques de 15 minutos con hora, hora_inicio y hora_fin de tipo
-  time; hora_fin = 00:00 cierra el día (cuenta como 24:00).
+  time; hora_fin = 00:00 cierra el día (cuenta como 24:00);
+- "segmentos_anio" y "segmentos_consolidado": timbradas_segmentos_anio y timbradas_segmentos_consolidado (la misma
+  forma por segmento, con pasajeros y promedio_pasajeros, y ano e id_estacionalidad_anio en la anual). pasajeros puede
+  ser negativo (hallazgo H9: diferencia de contadores acumulados): se valida como número, no como conteo >= 0. Se pide
+  el esquema por su nombre: detectar_esquema no acepta filas por segmento.
+
+CONS-001 acepta el promedio exacto (tolerancia del 1 %) y el que escribe fn_consolidar_timbradas_historicas,
+CEIL(Σ / nro_viajes) (hallazgo H7): los dos son coherentes con subidas, bajadas y nro_viajes.
 
 Validación relacional (§6.3, §8.3): contra los catálogos que recibe (rutas, idrutas, procesos, estacionalidades,
-novedades, segmentos, capacidades), leídos en solo lectura de la fuente con catalogos_desde_fuente(fuente). Sin
-catálogos se usa el catálogo de rutas empaquetado (datos/catalogo_rutas.json), nunca una lista fija en el código.
+novedades, segmentos, segmentos_ruta, dias_semana, capacidades), leídos en solo lectura de la fuente con
+catalogos_desde_fuente(fuente). Sin catálogos se usa el catálogo de rutas empaquetado (datos/catalogo_rutas.json), nunca
+una lista fija en el código. §7.3 paso 3 (segmento y día de la semana): REL-004 (el segmento existe), REL-006 (es de la
+ruta de la fila), REL-007 (el día existe en dias_semana) y VAL-007 (id_dia_semana es el día ISO de la fecha o, sin
+fecha, uno de los días en que cae su estacionalidad según las fechas de estacionalidades_anio:
+dias_por_estacionalidad). VAL-008: la hora es la del bloque que empieza en hora_inicio.
 """
 from __future__ import annotations
 
@@ -35,23 +48,40 @@ log = logging.getLogger("api_frecuencias.calidad")
 ZONA_OPERACION = "America/Bogota"
 COLUMNAS_HORA = ("hora", "hora_inicio", "hora_fin")
 
+_CONTEOS_CONSOLIDADO = ["subidas", "bajadas", "nro_viajes", "promedio_subidas", "promedio_bajadas"]
+_OBLIGATORIOS_SEGMENTO = ["id_segmento", "proceso", "id_ruta", "id_dia_semana", "hora", "hora_inicio", "hora_fin",
+                          "subidas", "bajadas", "pasajeros", "nro_viajes", "ultima_actualizacion"]
 ESQUEMAS = {
     "demanda": {
         "obligatorios": ["ruta", "fecha", "hora", "pasajeros", "ultima_actualizacion"],
-        "conteos": ["pasajeros", "salidas", "subidas", "bajadas"],
+        "conteos": ["pasajeros", "salidas", "subidas", "bajadas", "bajadas_viajes", "viajes_con_timbradas"],
         "llave": ["ruta", "fecha", "hora"],
         "hora": "entera",
     },
     "consolidado": {
         "obligatorios": ["proceso", "id_ruta", "id_dia_semana", "id_estacionalidad", "hora", "hora_inicio",
                          "hora_fin", "subidas", "bajadas", "nro_viajes", "ultima_actualizacion"],
-        "conteos": ["subidas", "bajadas", "nro_viajes", "promedio_subidas", "promedio_bajadas"],
+        "conteos": _CONTEOS_CONSOLIDADO,
         "llave": list(LLAVES["timbradas_consolidado"]),
+        "hora": "tiempo",
+    },
+    "segmentos_anio": {
+        "obligatorios": [*_OBLIGATORIOS_SEGMENTO, "ano", "id_estacionalidad_anio"],
+        "conteos": _CONTEOS_CONSOLIDADO,
+        "numericos": ["pasajeros", "promedio_pasajeros"],
+        "llave": list(LLAVES["timbradas_segmentos_anio"]),
+        "hora": "tiempo",
+    },
+    "segmentos_consolidado": {
+        "obligatorios": [*_OBLIGATORIOS_SEGMENTO, "id_estacionalidad"],
+        "conteos": _CONTEOS_CONSOLIDADO,
+        "numericos": ["pasajeros", "promedio_pasajeros"],
+        "llave": list(LLAVES["timbradas_segmentos_consolidado"]),
         "hora": "tiempo",
     },
 }
 
-RETRASO_MAXIMO = timedelta(days=2)          # §5.1: datos atrasados = 2 períodos de ingesta (ciclo diario)
+RETRASO_MAXIMO = timedelta(days=2)          # por omisión: §5.1 datos atrasados, 2 × 1.440 min (retraso_maximo_de)
 TOLERANCIA_PROMEDIO = 0.01                  # 1 % (y al menos 0,01) entre el promedio y subidas / nro_viajes
 MARGEN_FUTURO = timedelta(minutes=5)        # reloj del servidor de Extreme frente al de la API
 # Tipos de llegada (columna tipo_llegada de FuentePostgresSoloLectura) que no cuentan para OPOR-001: la marca dice
@@ -172,13 +202,64 @@ def catalogos_desde_fuente(fuente=None) -> dict:
     return cat
 
 
+def _fecha_o_nada(valor):
+    """date de una celda (date, datetime, Timestamp o texto ISO); None si falta o no es una fecha."""
+    if valor is None or valor is pd.NaT or (isinstance(valor, float) and math.isnan(valor)):
+        return None
+    try:
+        return pd.Timestamp(valor).date()
+    except (TypeError, ValueError):
+        return None
+
+
+def _dias_iso(desde, hasta) -> frozenset:
+    """Días ISO (1 = lunes … 7 = domingo) en que cae [desde, hasta]; los siete si el período dura una semana o más."""
+    if desde is None or hasta is None or hasta < desde:
+        return frozenset()
+    largo = (hasta - desde).days
+    if largo >= 6:
+        return frozenset(range(1, 8))
+    return frozenset((desde + timedelta(days=k)).isoweekday() for k in range(largo + 1))
+
+
+def dias_por_estacionalidad(vigencias: pd.DataFrame | None) -> dict:
+    """Catálogos de VAL-007 desde estacionalidades_anio (id_estacionalidad_anio, id_estacionalidad, fecha_inicio,
+    fecha_fin): {"dias_estacionalidad": {id_estacionalidad: días ISO de todas sus fechas}, "dias_estacionalidad_anio":
+    {id_estacionalidad_anio: días ISO de sus fechas}}. Un festivo de un día solo admite el día ISO de cada año; una
+    temporada de una semana o más, los siete. Vacío sin filas."""
+    if vigencias is None or not len(vigencias):
+        return {}
+    por_estacionalidad: dict[int, set] = {}
+    por_anio: dict[int, frozenset] = {}
+    for fila in vigencias.to_dict("records"):
+        dias = _dias_iso(_fecha_o_nada(fila.get("fecha_inicio")), _fecha_o_nada(fila.get("fecha_fin")))
+        if pd.notna(fila.get("id_estacionalidad_anio")):
+            por_anio[int(fila["id_estacionalidad_anio"])] = dias
+        if pd.notna(fila.get("id_estacionalidad")):
+            por_estacionalidad.setdefault(int(fila["id_estacionalidad"]), set()).update(dias)
+    return {"dias_estacionalidad": {k: frozenset(v) for k, v in por_estacionalidad.items()},
+            "dias_estacionalidad_anio": por_anio}
+
+
+def retraso_maximo_de(umbrales: dict | None) -> timedelta:
+    """Tolerancia de oportunidad (OPOR-001) gobernada: el umbral de §5.1 «datos atrasados» de la versión vigente de
+    threshold_config, periodos_atraso × periodo_ingesta_min (el mismo de ALT-009). Sin esos valores, o si no son
+    números positivos, rige RETRASO_MAXIMO (2 × 1.440 min, los valores sembrados por la migración 0001)."""
+    try:
+        minutos = float(umbrales["periodos_atraso"]) * float(umbrales["periodo_ingesta_min"])
+        return timedelta(minutes=minutos) if minutos > 0 else RETRASO_MAXIMO
+    except (KeyError, TypeError, ValueError, OverflowError):
+        return RETRASO_MAXIMO
+
+
 def validar_lote(df, lote_id, esquema=None, catalogos=None, ahora=None, retraso_maximo=RETRASO_MAXIMO):
     """Valida un lote y devuelve (df_validos, errores).
 
     catalogos: {"rutas", "idrutas", "procesos", "estacionalidades", "novedades", "segmentos": conjuntos de llaves
     existentes; "capacidades": {ruta: capacidad}} para la validación relacional y la capacidad > 0. Las claves que
     falten se toman del catálogo empaquetado. ahora: instante de la ejecución (marcas en el futuro; por omisión, el
-    reloj de la API). retraso_maximo: tolerancia de oportunidad entre el cierre del día del registro y su marca.
+    reloj de la API). retraso_maximo: tolerancia de oportunidad entre el cierre del día del registro y su marca (el
+    ciclo pasa la de threshold_config, retraso_maximo_de).
     """
     if df is None or len(df) == 0:
         return (df.copy() if df is not None else pd.DataFrame()), []
@@ -242,13 +323,15 @@ def _completitud(reg: _Registro, conf: dict) -> None:
 
 
 def _validez_conteos(reg: _Registro, conf: dict) -> None:
+    """Conteos numéricos y >= 0; las columnas «numericos» (pasajeros por segmento, H9) solo numéricas."""
     d = reg.d
-    for campo in conf["conteos"]:
+    for campo in (*conf["conteos"], *conf.get("numericos", ())):
         if campo in d.columns:
             num = pd.to_numeric(d[campo], errors="coerce")
             reg.registrar((num.isna() & d[campo].notna()).values, campo, VAL_TIPO, VALIDEZ,
                           f"'{campo}' no es numérico.")
-            reg.registrar((num < 0).fillna(False).values, campo, "VAL-001", VALIDEZ, f"'{campo}' es negativo.")
+            if campo in conf["conteos"]:
+                reg.registrar((num < 0).fillna(False).values, campo, "VAL-001", VALIDEZ, f"'{campo}' es negativo.")
 
 
 def _validez_horas(reg: _Registro, conf: dict) -> None:
@@ -315,10 +398,67 @@ def _validez_fechas(reg: _Registro):
     return marca, inicio_dia + np.timedelta64(1, "D")
 
 
+def _validez_hora_del_bloque(reg: _Registro) -> None:
+    """VAL-008 (rango horario, §7.3 paso 3): la hora de la fila es la del bloque que empieza en hora_inicio (la hora
+    entera, como en timbradas_consolidado, o el mismo inicio del bloque, como en timbradas_segmentos_anio). Solo en
+    las filas cuya hora y cuya franja ya son válidas (VAL-002, VAL-004 y VAL-006 reportan las demás)."""
+    d = reg.d
+    if not {"hora", "hora_inicio"} <= set(d.columns):
+        return
+    h, ini = horas(d["hora"]), horas(d["hora_inicio"])
+    validas = (h >= 0) & (h < 24) & (ini >= 0) & (ini < 24)
+    if "hora_fin" in d.columns:
+        fin = horas(d["hora_fin"])
+        validas &= ini <= fin.where(~((fin == 0) & (ini > 0)), 24.0)
+    reg.registrar((validas & (np.floor(h) != np.floor(ini))).fillna(False).values, "hora", "VAL-008", VALIDEZ,
+                  lambda i: f"La hora ({d.at[i, 'hora']}) no es la del bloque que empieza a las "
+                            f"{d.at[i, 'hora_inicio']}.")
+
+
+def _dia_iso_de_la_fecha(reg: _Registro, dia: pd.Series) -> None:
+    d = reg.d
+    iso = pd.to_datetime(d["fecha"], errors="coerce").dt.dayofweek + 1
+    malo = (iso.notna() & dia.notna() & (iso != dia)).values
+    reg.registrar(malo, "id_dia_semana", "VAL-007", VALIDEZ,
+                  lambda i: f"id_dia_semana = {d.at[i, 'id_dia_semana']} no es el día ISO de la fecha "
+                            f"{d.at[i, 'fecha']} ({int(iso.iloc[i])}).")
+
+
+def _dia_fuera_de_su_estacionalidad(reg: _Registro, dia: pd.Series, columna: str, dias: dict) -> None:
+    d = reg.d
+    posibles = pd.to_numeric(d[columna], errors="coerce").map(dias)
+    malo = np.array([isinstance(p, frozenset) and pd.notna(x) and int(x) not in p
+                     for p, x in zip(posibles, dia, strict=True)], dtype=bool)
+    reg.registrar(malo, "id_dia_semana", "VAL-007", VALIDEZ,
+                  lambda i: f"id_dia_semana = {d.at[i, 'id_dia_semana']} no cae en ninguna fecha de {columna} "
+                            f"{d.at[i, columna]} (días ISO posibles: {sorted(posibles.iloc[i])}).")
+
+
+def _validez_dia_semana(reg: _Registro, cat: dict) -> None:
+    """VAL-007 (día de la semana, §7.3 paso 3): id_dia_semana de Extreme frente a la fecha donde la fuente la trae: el
+    día ISO de `fecha` o, sin fecha, los días en que caen las fechas de su estacionalidad (estacionalidades_anio; un
+    festivo de un día solo admite el día ISO de sus fechas). Sin catálogo de fechas no se evalúa."""
+    d = reg.d
+    if "id_dia_semana" not in d.columns:
+        return
+    dia = pd.to_numeric(d["id_dia_semana"], errors="coerce")
+    if "fecha" in d.columns:
+        _dia_iso_de_la_fecha(reg, dia)
+        return
+    for columna, nombre in (("id_estacionalidad_anio", "dias_estacionalidad_anio"),
+                            ("id_estacionalidad", "dias_estacionalidad")):
+        if columna in d.columns and cat.get(nombre):
+            _dia_fuera_de_su_estacionalidad(reg, dia, columna, cat[nombre])
+            return
+
+
 def _validez(reg: _Registro, conf: dict, cat: dict):
-    """2. Validez: tipos, conteos >= 0, horas y franjas, fechas coherentes, capacidad > 0."""
+    """2. Validez: tipos, conteos >= 0, horas y franjas (y la hora del bloque), día de la semana coherente con su
+    fecha, fechas coherentes, capacidad > 0."""
     _validez_conteos(reg, conf)
     _validez_horas(reg, conf)
+    _validez_hora_del_bloque(reg)
+    _validez_dia_semana(reg, cat)
     _validez_capacidad(reg, cat)
     return _validez_fechas(reg)
 
@@ -345,19 +485,26 @@ def _unicidad(reg: _Registro, conf: dict) -> None:
                   "al responsable del consolidado, no se corrige.")
 
 
+TOLERANCIA_TECHO = 0.005                    # promedio = CEIL(Σ / nro_viajes) de fn_consolidar (H7), con 2 decimales
+
+
 def _consistencia_promedios(reg: _Registro, nv) -> None:
-    """4a. Los promedios de subidas y bajadas coinciden con el total / nro_viajes (tolerancia del 1 %)."""
+    """4a. Los promedios de subidas, bajadas y pasajeros coinciden con el total / nro_viajes: el exacto (tolerancia del
+    1 %) o el entero hacia arriba que escribe fn_consolidar_timbradas_historicas (CEIL, hallazgo H7)."""
     d = reg.d
-    for total, prom in (("subidas", "promedio_subidas"), ("bajadas", "promedio_bajadas")):
+    for total, prom in (("subidas", "promedio_subidas"), ("bajadas", "promedio_bajadas"),
+                        ("pasajeros", "promedio_pasajeros")):
         if {total, prom} <= set(d.columns):
             t = pd.to_numeric(d[total], errors="coerce")
             p = pd.to_numeric(d[prom], errors="coerce")
             esperado = t / nv.where(nv > 0)
-            incoh = ((p - esperado).abs() > np.maximum(TOLERANCIA_PROMEDIO * esperado.abs(), 0.01)).fillna(False)
+            lejos_exacto = (p - esperado).abs() > np.maximum(TOLERANCIA_PROMEDIO * esperado.abs(), 0.01)
+            lejos_techo = (p - np.ceil(esperado)).abs() > TOLERANCIA_TECHO
+            incoh = (lejos_exacto & lejos_techo).fillna(False)
             reg.registrar(incoh.values, prom, "CONS-001", CONSISTENCIA,
                           lambda i, t=t, nv=nv, prom=prom, total=total:
                           f"{prom} = {d.at[i, prom]} no coincide con {total} / nro_viajes = "
-                          f"{t.iloc[i]} / {nv.iloc[i]}.")
+                          f"{t.iloc[i]} / {nv.iloc[i]} (ni con su valor exacto ni con el entero hacia arriba).")
 
 
 def _consistencia(reg: _Registro) -> None:
@@ -421,16 +568,33 @@ _RELACIONES = (
     ("id_novedad_vial", "novedades", "REL-003", True, "novedades_viales"),
     ("id_segmento", "segmentos", "REL-004", True, "rutas_segmentos"),
     ("proceso", "procesos", "REL-005", False, "Procesos"),
+    ("id_dia_semana", "dias_semana", "REL-007", True, "dias_semana"),
 )
 
 
+def _segmento_de_su_ruta(reg: _Registro, cat: dict) -> None:
+    """REL-006 (segmento, §7.3 paso 3): el segmento de la fila es de su ruta (rutas_segmentos.idruta = id_ruta)."""
+    d = reg.d
+    mapa = cat.get("segmentos_ruta") or {}
+    if not mapa or not {"id_segmento", "id_ruta"} <= set(d.columns):
+        return
+    de_su_ruta = pd.to_numeric(d["id_segmento"], errors="coerce").map(mapa)
+    ruta = pd.to_numeric(d["id_ruta"], errors="coerce")
+    malo = (de_su_ruta.notna() & ruta.notna() & (de_su_ruta != ruta)).values
+    reg.registrar(malo, "id_segmento", "REL-006", RELACIONAL,
+                  lambda i: f"El segmento {d.at[i, 'id_segmento']} es de la ruta {int(de_su_ruta.iloc[i])} en "
+                            f"rutas_segmentos, no de id_ruta {d.at[i, 'id_ruta']}.")
+
+
 def _relacional(reg: _Registro, cat: dict) -> None:
-    """6. Relacional: llaves de ruta, estacionalidad, novedad, segmento y proceso existentes en los catálogos."""
+    """6. Relacional: llaves de ruta, estacionalidad, novedad, segmento, proceso y día existentes en los catálogos, y
+    el segmento de la ruta de la fila."""
     d = reg.d
     for columna, nombre, codigo, numerico, tabla in _RELACIONES:
         if columna in d.columns and cat.get(nombre):
             reg.registrar(_no_esta_en(d, columna, cat[nombre], numerico), columna, codigo, RELACIONAL,
                           lambda i, c=columna, t=tabla: f"{c} {d.at[i, c]!r} no existe en {t}.")
+    _segmento_de_su_ruta(reg, cat)
 
 
 def resumen(df, errores):

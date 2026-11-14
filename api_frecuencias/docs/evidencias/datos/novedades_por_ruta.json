@@ -1,0 +1,88 @@
+{
+ "prueba": "tests/integracion/test_novedades_por_ruta.py",
+ "fuente": "tablas de novedades de Extreme con filas sintéticas en un esquema de la base local, leídas con FuentePostgresSoloLectura (READ ONLY)",
+ "novedades": {
+  "11": "Carnaval, 06:00-08:30, SUBE 30 %",
+  "12": "Cierre de vía, 07:00-09:00, BAJA 80 %"
+ },
+ "con_novedades_viales_ruta": {
+  "filas": [
+   {
+    "id_novedad_vial_fecha": 12,
+    "id_ruta": 21
+   }
+  ],
+  "resumen": {
+   "novedades": 2,
+   "dias_con_novedad": 1,
+   "horas_con_novedad": 3,
+   "festivos_oficiales_en_rango": 1,
+   "procesos_estacionalidades": [
+    "sobusa"
+   ],
+   "filas_novedades_viales_ruta": 1,
+   "novedades_por_ruta": 1,
+   "novedades_todas_las_rutas": 1,
+   "rutas_fuera_del_catalogo": 0,
+   "filas_sin_novedad": 0,
+   "filas_novedades_por_ruta": 3
+  },
+  "nov_impacto_por_ruta_y_hora": {
+   "SILENCIO": {
+    "6": 30.0,
+    "7": 30.0,
+    "8": 30.0,
+    "9": 0.0
+   },
+   "CRA 54": {
+    "6": 30.0,
+    "7": 30.0,
+    "8": 30.0,
+    "9": 0.0
+   },
+   "CL 72": {
+    "6": 30.0,
+    "7": 80.0,
+    "8": 80.0,
+    "9": 80.0
+   }
+  }
+ },
+ "sin_filas_en_novedades_viales_ruta": {
+  "resumen": {
+   "novedades": 2,
+   "dias_con_novedad": 1,
+   "horas_con_novedad": 4,
+   "festivos_oficiales_en_rango": 1,
+   "procesos_estacionalidades": [
+    "sobusa"
+   ],
+   "filas_novedades_viales_ruta": 0,
+   "novedades_por_ruta": 0,
+   "novedades_todas_las_rutas": 2,
+   "rutas_fuera_del_catalogo": 0,
+   "filas_sin_novedad": 0,
+   "filas_novedades_por_ruta": 0
+  },
+  "nov_impacto_por_ruta_y_hora": {
+   "SILENCIO": {
+    "6": 30.0,
+    "7": 80.0,
+    "8": 80.0,
+    "9": 80.0
+   },
+   "CRA 54": {
+    "6": 30.0,
+    "7": 80.0,
+    "8": 80.0,
+    "9": 80.0
+   },
+   "CL 72": {
+    "6": 30.0,
+    "7": 80.0,
+    "8": 80.0,
+    "9": 80.0
+   }
+  }
+ }
+}

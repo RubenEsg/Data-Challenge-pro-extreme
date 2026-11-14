@@ -1,0 +1,42 @@
+{
+ "prueba": "tests/integracion/test_retencion.py::test_el_mismo_mes_archivado_dos_veces_no_choca_con_su_archivo",
+ "particion": "feature_snapshot_201907",
+ "primera": {
+  "grupo": "foto",
+  "objeto": "feature_snapshot_201907",
+  "accion": "separar_y_archivar",
+  "corte": "2025-10-11 05:16:31.653986-05:00",
+  "filas": 1,
+  "bytes": 98304,
+  "detalle": {
+   "desde": "2019-06-30 19:00:00-05:00",
+   "hasta": "2019-07-31 19:00:00-05:00",
+   "archivo": "feature_snapshot_201907_archivo",
+   "llaves_foraneas_quitadas": [
+    "feature_snapshot_execution_id_fkey",
+    "feature_snapshot_prediction_id_fkey"
+   ]
+  }
+ },
+ "segunda": {
+  "grupo": "foto",
+  "objeto": "feature_snapshot_201907",
+  "accion": "separar_y_archivar",
+  "corte": "2025-10-11 05:16:31.653986-05:00",
+  "filas": 2,
+  "bytes": 98304,
+  "detalle": {
+   "desde": "2019-06-30 19:00:00-05:00",
+   "hasta": "2019-07-31 19:00:00-05:00",
+   "archivo": "feature_snapshot_201907_archivo_2",
+   "llaves_foraneas_quitadas": [
+    "feature_snapshot_execution_id_fkey",
+    "feature_snapshot_prediction_id_fkey"
+   ]
+  }
+ },
+ "archivos": {
+  "feature_snapshot_201907_archivo": "1 fila, sin llaves foráneas",
+  "feature_snapshot_201907_archivo_2": "2 filas, sin llaves foráneas"
+ }
+}

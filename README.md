@@ -13,7 +13,7 @@ La especificación v1.5 de Extreme Technologies se revisa en cuatro documentos:
 
 - `MATRIZ_CUMPLIMIENTO.md`: cada requisito (RF, RNF, §4–§15 y los criterios de §16) con su estado y su evidencia.
 - `documentos/mapeo_especificacion.md`: cada frase de §1–§3 y §17–§20 con lo que hicimos, la evidencia y la prueba que
-  lo comprueba, más la respuesta a la pregunta final. Su sección 0 lista los supuestos (S0 a S13) con quién debe
+  lo comprueba, más la respuesta a la pregunta final. Su sección 0 lista los supuestos (S0 a S15) con quién debe
   validarlos, y su sección 9, las limitaciones declaradas.
 - `api_frecuencias/docs/evidencias/README.md`: índice de todas las evidencias, con qué demuestra cada archivo y cómo se
   regenera.
@@ -28,14 +28,14 @@ La especificación v1.5 de Extreme Technologies se revisa en cuatro documentos:
 |---|---|---|
 | E01 | Documento ejecutivo | `documentos/E01_documento_ejecutivo.pdf` |
 | E02 | Especificación técnica | `documentos/E02_especificacion_tecnica.pdf` |
-| E03 | Código fuente | `api_frecuencias/`: código en `app/`, dependencias en `pyproject.toml`, `requirements.txt` y `requisitos_congelados.txt`, pruebas en `tests/` y reporte de SonarQube en `docs/evidencias/sonarqube/` (`resumen.md`: puerta de calidad condición por condición; se repite con `scripts/sonar_local.py`). El historial está en el repositorio. |
+| E03 | Código fuente | `api_frecuencias/`: código en `app/`, dependencias en `pyproject.toml`, `requirements.txt` y `requisitos_congelados.txt`, pruebas en `tests/` y reporte de SonarQube en `docs/evidencias/sonarqube/` (`resumen.md`: puerta de calidad condición por condición; se repite con `scripts/sonar_local.py`). El historial de desarrollo, commit por commit, está en `HISTORIAL_DESARROLLO.md`, que genera `historial_desarrollo.py` desde el repositorio privado del equipo. |
 | E04 | Base de datos | `api_frecuencias/alembic/versions/` (DDL del esquema `ai_frecuencias`, índices y datos semilla de umbrales). El registro de modelos se siembra desde `api_frecuencias/datos/modelos/registro.json`. |
-| E05 | Modelo IA | `api_frecuencias/datos/modelos/hgb_fv2_20250831_s42/` (artefacto y manifiesto con SHA-256). Entrenamiento reproducible con `api_frecuencias/scripts/entrenar.py`; métricas en `api_frecuencias/docs/evidencias/modelo/`. |
+| E05 | Modelo IA | `api_frecuencias/datos/modelos/hgb_fv2_20250831_s42/` (artefacto y manifiesto con SHA-256). Entrenamiento reproducible con `api_frecuencias/scripts/entrenar.py`; métricas en `api_frecuencias/docs/evidencias/modelo/`. Por segmento y sentido, `api_frecuencias/datos/modelos/segmentos/` (modelo activo `seg_hgb_jerarquico_20230227_s42`), entrenado con `api_frecuencias/scripts/entrenar_segmentos.py` según el protocolo de `api_frecuencias/docs/evidencias/modelo/segmentos_protocolo.md`. |
 | E06 | Prototipo | API (`api_frecuencias/`) y tablero (`dash_app/`: las pantallas Alertas, Recomendaciones, Operación y Monitoreo, la sección «Modelo activo (API)» de Pronóstico y la tarjeta de Inicio con la respuesta del reto consumen la API). Capturas y recorrido en `api_frecuencias/docs/evidencias/tablero/`. |
 | E07 | Integración PostgreSQL | `api_frecuencias/docs/integracion_postgresql.md` (consultas de solo lectura, marca de agua, mapa de tablas y EXPLAIN), `api_frecuencias/docs/evidencias/replica/` y `api_frecuencias/docs/hallazgos_extreme.md`. |
 | E08 | Pruebas | `api_frecuencias/tests/` (unitarias, integración, contrato, datos/ML, réplica y Testcontainers), `api_frecuencias/k6/` (carga) y `api_frecuencias/docs/evidencias/pruebas/`. Integración continua: `.github/workflows/api_frecuencias.yml` en la raíz del repositorio de entrega (la misma definición está en `api_frecuencias/ci/github_actions_entrega.yml`). Los conteos de la suite, la cobertura y la carga con k6 están en la tabla «Cifras vigentes del backend», más abajo. |
 | E09 | Contenedores | `api_frecuencias/Dockerfile`, `api_frecuencias/docker-compose.yml` (más `docker-compose.replicas.yml` y `docker-compose.integracion.yml`) y `api_frecuencias/.env.example`. |
-| E10 | Documentación | `api_frecuencias/README.md`, `api_frecuencias/docs/openapi.json` (OpenAPI 3.1: 59 rutas y 62 operaciones, cada una con su rol mínimo y sus errores), `api_frecuencias/docs/manual_tecnico.md`, `api_frecuencias/docs/manual_usuario.md`, `api_frecuencias/docs/despliegue.md` y el índice de evidencias `api_frecuencias/docs/evidencias/README.md`. |
+| E10 | Documentación | `api_frecuencias/README.md`, `api_frecuencias/docs/openapi.json` (OpenAPI 3.1: 65 rutas y 69 operaciones, cada una con su rol mínimo y sus errores), `api_frecuencias/docs/manual_tecnico.md`, `api_frecuencias/docs/manual_usuario.md`, `api_frecuencias/docs/despliegue.md` y el índice de evidencias `api_frecuencias/docs/evidencias/README.md`. |
 | E11 | Demostración | Video de menos de 5 minutos: `documentos/video/E11_video_demostracion.mp4`, con subtítulos (`.srt`) y guion (`documentos/video/guion.md`); cómo se grabó y se verificó, en `api_frecuencias/docs/evidencias/video/`. Presentación final: `documentos/presentacion_final.pdf` y `documentos/presentacion_final.pptx` (notas del orador en `documentos/notas_orador.txt`). La demostración reproducible está abajo. |
 | E12 | Plan de evolución | `PLAN_EVOLUCION.md` |
 
@@ -52,7 +52,7 @@ docker compose -p sobusa_api up -d --build
 ```
 
 - **`verificar_despliegue.py` (de 15 a 25 minutos).** Levanta una pila aislada desde cero (proyecto `sobusa_limpio`,
-  puertos 8010 y 5440, volúmenes propios) y aplica las migraciones 0001 → 0007. Crea las claves de API y corre el ciclo
+  puertos 8010 y 5440, volúmenes propios) y aplica las migraciones 0001 → 0014. Crea las claves de API y corre el ciclo
   completo de §14.2 con `scripts/demo_ciclo_api.py`:
   1. **llegada de información nueva:** carga inicial hasta el 30-08-2025 (49.623 filas), un día nuevo (51 filas) y los
      días hasta el 30-11-2025 (4.641 filas);
@@ -79,8 +79,8 @@ docker compose -p sobusa_api up -d --build
 - **El mismo ciclo sin Docker para la API.** Con la API corriendo en el venv (`uvicorn`, ver «Cómo correrla» en
   `api_frecuencias/README.md`) y una clave de admin en `SOBUSA_API_KEY`:
   `.venv\Scripts\python scripts\demo_ciclo_api.py --base http://127.0.0.1:8000 --revertir` (por omisión,
-  `--hasta 2025-08-30 --corte 2025-09-30`). Se verificó el 9-11-2026 contra una base de pruebas nueva y una copia
-  temporal de los datos: dos corridas con código 0 (139 s y 125 s, según la carga de la máquina) y la misma salida, con
+  `--hasta 2025-08-30 --corte 2025-09-30`). Se verificó el 13-11-2026 contra una base de pruebas nueva y una copia
+  temporal de los datos: dos corridas con código 0 (120 s cada una) y la misma salida, con
   el mismo rechazo del candidato. La referencia está en
   `api_frecuencias/docs/evidencias/despliegue/demo_esperado.md`.
 
@@ -104,7 +104,7 @@ y abra http://127.0.0.1:8050. El recorrido por cada pantalla está en `api_frecu
 | `dash_app/` | **Laboratorio del modelo** (Dash, Python): el pronóstico y el optimizador corren en vivo. | En Windows, doble clic en `dash_app/iniciar_dash.bat`; en cualquier sistema, `python app.py` (abajo). |
 | `app_sobusa/app.html` | **App «Sobusa Despacho»**: nueve pantallas con todo el proyecto, la repetición de un día de 2025 en la consola (sin mandos sobre los buses) y la vista 3D. *Solo en el ZIP completo (`Entrega_final_Sobusa.zip`); no viene en el ZIP ligero.* | Doble clic, en Edge o Chrome, sin internet. |
 | `api_frecuencias/` | **Backend del reto** (FastAPI + PostgreSQL 14): ejecución incremental, pronóstico a 30/60/120 min, recomendación de frecuencia y flota, alertas y registro de modelos. | Con Docker, dos comandos (abajo). |
-| `MATRIZ_CUMPLIMIENTO.md` · `PLAN_EVOLUCION.md` | Cada requisito de la especificación v1.5 con dónde se cumple y su estado; plan de integración, escalabilidad, costos, riesgos, hoja de ruta y adopción. | Cualquier visor de Markdown. |
+| `MATRIZ_CUMPLIMIENTO.md` · `PLAN_EVOLUCION.md` · `HISTORIAL_DESARROLLO.md` | Cada requisito de la especificación v1.5 con dónde se cumple y su estado; plan de integración, escalabilidad, costos, riesgos, hoja de ruta y adopción; lista de los commits del desarrollo. | Cualquier visor de Markdown. |
 | `documentos/` | Documento ejecutivo (E01), especificación técnica (E02), presentación final y video de E11 (`video/`), la respuesta a la pregunta del reto (`respuesta_pregunta_reto.md`) y el mapeo de §1–§3 y §17–§20 de la especificación a la evidencia (`mapeo_especificacion.md`). | Lector de PDF, reproductor de video o visor de Markdown. |
 | `informe/` | Fuentes LaTeX del informe, figuras y `compilar.py`. | `python informe/compilar.py` (usa Tectonic). |
 | `requirements_cuaderno.txt` | Versiones exactas con que se ejecutó el cuaderno. | `pip install -r requirements_cuaderno.txt` |
@@ -154,10 +154,14 @@ tarjeta de Inicio con la respuesta a la pregunta del reto consumen la API del re
 ## Backend del reto (FastAPI + PostgreSQL)
 
 `api_frecuencias/` es el backend que pide la especificación de Extreme Technologies (Python, FastAPI y PostgreSQL 14 con
-PostGIS): lee los datos nuevos por marca de agua, valida su calidad, pronostica la demanda a 30, 60 y 120 minutos con su
-banda p10-p90, recomienda headway, buses por hora y vehículos (y dice si la flota alcanza), genera alertas ALT-001 a
-ALT-010 explicables y gestionables, y registra cada modelo con su hash para activarlo o revertirlo con auditoría. Guarda
-todo en su propio esquema `ai_frecuencias`; por omisión lee los datos del reto ya exportados a Parquet, así que nunca
+PostGIS): lee los datos nuevos por marca de agua, valida su calidad (también la de los consolidados de Extreme, que
+contrasta con su propia agregación), pronostica la demanda a 30, 60 y 120 minutos con su banda p10-p90, recomienda
+headway, buses por hora y vehículos (y dice si la flota alcanza), genera alertas ALT-001 a ALT-010 explicables y
+gestionables (con el viaje, el vehículo y el seudónimo del conductor cuando la regla mira un viaje), y registra cada
+modelo con su hash para activarlo o revertirlo con auditoría. Un modelo propio reparte el pronóstico de la ruta por
+segmento y sentido, una ejecución se puede partir en un trabajo por ruta (con marca de agua y candado por ruta) y los
+umbrales, los parámetros del plan, la flota y el ciclo se cambian por la API, versionados, sin recompilar. Guarda todo
+en su propio esquema `ai_frecuencias`; por omisión lee los datos del reto ya exportados a Parquet, así que nunca
 escribe en la base compartida. Con Docker Desktop abierto, desde `api_frecuencias/`:
 
 ```
@@ -176,13 +180,16 @@ Cifras vigentes del backend, cada una con su archivo en `api_frecuencias/docs/ev
 |---|---|---|
 | Modelo activo `hgb_fv2_20250831_s42` en la prueba reservada (nov.–dic. 2025) | WAPE 14,77 % (IC95 13,10–16,87) frente a 21,18 % (16,61–26,79) de la regla manual B1 | `modelo/evaluacion_modelo.md` |
 | Banda P10–P90 con la calibración v2 por bloque horario | Cobertura de 77,82 % (v1: 77,88 %) con un ancho medio de 303,4 pasajeros (v1: 312,9) | `modelo/calibracion_condicional.md` |
-| Volumen de alertas observadas (15-09 a 31-12-2025, 324 días-ruta) | 1,238 por ruta y día en total, con la ALT-002 observada (0,691) y la ruptura de RF-009 (0,012); las que ya medía la versión anterior (ALT-005 a ALT-009) bajan a 0,534, frente a 6,08 con las reglas anteriores | `alertas/backtest_alertas.md` |
-| Volumen de alertas de pronóstico (por hora, mismo periodo) | ALT-001 0,435, ALT-002 0,315, ALT-003 0,380 y ALT-004 0,031 por ruta y día (1,161); con las observadas, 2,399 por ruta y día | `alertas/backtest_alertas_pronostico.md` |
-| Revisión doble de 96 alertas | Kappa de 0,943 entre los dos revisores (automatizados) antes de conciliar; precisión reponderada de 0,839 (intervalo 95 %: 0,757–0,882). Falta la validación del área operativa | `alertas/revision_doble/conciliacion.json` |
-| Ciclo diario completo (con plan del día, foto de la respuesta y serie de la ruptura) | Carga inicial en 24,1 s y un día nuevo en 21,4 s | `rendimiento/ciclo_final.md` |
-| Pruebas | Suite completa final: 1.060 casos (567 unitarias, 106 de integración, 185 de réplica, 178 de contrato y 24 de datos/ML), 0 fallas, 0 errores y 5 omitidas a propósito (las que se activan con `PRUEBA_CAIDA=1`, `PRUEBA_PLANIFICADOR=1` o `REPLICA_PRUEBAS_ESCRITURA=1`); cobertura de `app/` (con `motor_d5/`) de 94,27 % (10.566 de 11.208 líneas) | `pruebas/suite_final.xml`, `pruebas/coverage_final.xml` (la misma corrida que importa SonarQube) |
-| Carga con k6 | Consultas paginadas: p95 de 451,3 ms con 0 % de errores (umbral: 2 s). Con un año de resultados sembrado (`scripts/sembrar_volumen.py`) y 50 usuarios: p95 de 627,5 ms y 0 % de errores. `/segmentos/estadisticas` pasa de 2 s (8,8 s en frío con `k6/en_frio.js` y 11,9 s en caliente; limitación declarada) | `rendimiento.txt`, `pruebas/k6_volumen.txt` |
-| Calidad de código | Puerta de SonarQube «Reto Sobusa v1.5» **aprobada (OK)** en el análisis del 9-11-2026, 12:49, sobre todo el código: 0 vulnerabilidades, 0 bugs, 0 hallazgos bloqueantes y 0 críticos (umbral: 0), duplicación de 0,0 % (umbral: 3 %) y cobertura de 94,3 % (umbral: 85 %); 1 hallazgo de mantenibilidad aceptado con su justificación (la copia literal del solver D5, app/servicios/motor_d5/milp.py) | `sonarqube/quality_gate.json`, `sonarqube/resumen.md` |
+| Modelo por segmento y sentido `seg_hgb_jerarquico_20230227_s42` en su prueba (18 a 27-02-2023) | WAPE por segmento y hora de 42,09 % frente a 43,06 % del reparto fijo (IC95 de la diferencia: −1,60 a −0,02 puntos); banda P10–P90 con cobertura de 78,31 % por segmento y 83,40 % por sentido. Solo hay subidas por segmento de ene.–feb. 2023, así que su error en 2025 no se puede medir | `modelo/segmentos_modelo.md`, `modelo/segmentos_banda_ventanas.json` |
+| Volumen de alertas observadas (15-09 a 31-12-2025, 324 días-ruta) | 1,265 por ruta y día en total, con la ALT-002 observada (0,710, con el factor de carga del ciclo) y la ruptura de RF-009 (0,012); las que ya medía la versión anterior (ALT-005 a ALT-009) quedan en 0,543, frente a 6,08 con las reglas anteriores | `alertas/backtest_alertas.md` |
+| Volumen de alertas de pronóstico (por hora, mismo periodo) | ALT-001 0,438, ALT-002 0,306, ALT-003 0,164 y ALT-004 0,031 por ruta y día (0,938); con las observadas, 2,203 por ruta y día (`scripts/cifras_vigentes.py`) | `alertas/backtest_alertas_pronostico.md` |
+| Revisión doble de 96 alertas | Kappa de 0,943 entre los dos revisores (automatizados) antes de conciliar; precisión reponderada de 0,839 (intervalo 95 %: 0,757–0,882). Falta la validación del área operativa; el kit para que la hagan dos personas del área operativa de Sobusa, a ciegas y sin red, está en `alertas/revision_doble/kit_humano/` | `alertas/revision_doble/conciliacion.json` |
+| Ciclo diario completo (con plan del día, foto de la respuesta y serie de la ruptura) | Carga inicial de 49.623 filas en 27,5 s, un día nuevo en 20,7 s y la repetición del mismo día en 0,2 s (13-11-2026, código final: con las alertas observadas de cada día del lote, la foto de variables por segmento y el plan con más detalle) | `rendimiento/ciclo_final.md` |
+| Consolidados de Extreme en el ciclo (réplica, solo lectura) | `timbradas_consolidado` se lee por su marca de agua sin falsos errores de calidad y se contrasta con el histórico propio por ruta, día ISO y estacionalidad; las diferencias groseras apuntan a los datos de Extreme (hallazgo H17). Las tablas por segmento no tienen filas de Sobusa (H4): su contraste, que no depende del bloque horario de Extreme (H10), se probó con filas reales de la liquidación de tres viajes en una transacción que se revierte, sin diferencias groseras | `consolidados/contraste_consolidados.md`, `consolidados/segmentos_filas_reales.json` |
+| Partición por ruta con dos réplicas (RNF-005) | 6 ejecuciones partidas en 18 trabajos de ruta: rutas distintas a la vez, la misma ruta nunca en paralelo, 0 duplicados y las mismas salidas que sin partir | `cola/replicas_por_ruta.txt` |
+| Pruebas | Suite completa final (14-11-2026): 1.770 casos (1.106 unitarias, 217 de integración, 209 de réplica, 197 de contrato y 41 de datos/ML), 0 fallas, 0 errores y 0 omitidas, en una sola sesión, con los procesos reales (`PRUEBA_CAIDA=1`, `PRUEBA_REPLICAS=1` y `PRUEBA_PLANIFICADOR=1`) y las pruebas de escritura en la réplica (`REPLICA_PRUEBAS_ESCRITURA=1`); cobertura de `app/` (con `motor_d5/`) de 95,70 % (14.656 de 15.314 líneas) | `pruebas/suite_final.xml`, `pruebas/coverage_final.xml` (la misma corrida que importa SonarQube) |
+| Carga con k6 | Consultas paginadas, corrida del 9-11-2026 con un mes de resultados: p95 de 451,3 ms con 0 % de errores (umbral: 2 s). Con el volumen sembrado desde el ciclo final (`scripts/sembrar_volumen.py`: 1.056 ejecuciones, más de un año del ciclo diario) y 50 usuarios, medido el 13-11-2026 sobre el código final: p95 de 864,1 ms y 0 % de errores (el 9-11-2026, con un año, 627,5 ms). `/segmentos/estadisticas` lee la agregación materializada de la migración 0008: con la API recién arrancada, 20,8 ms la primera petición y 18,3 ms la segunda (antes de la 0008, 8,8 s y 11,9 s); con hasta 50 usuarios sobre la capa de segmentos y un refresco completo en curso, p95 de 372,3 ms (332,4 ms durante el refresco) y 0,03 % de errores (una petición de 3.806; el umbral es 1 %). Ingesta integrada desde la réplica, «ok» con 30 usuarios consultando (p95 de 574,5 ms); la ingesta tardó 225,8 s, más que los 93,8 s del 9-11-2026, sin que la causa esté separada | `rendimiento.txt`, `pruebas/k6_segmentos.txt` (vigente), `pruebas/k6_volumen.txt` y `pruebas/revision_segmentos/` (anteriores) |
+| Calidad de código | Puerta de SonarQube «Reto Sobusa v1.5» **aprobada (OK)** en el análisis del 14-11-2026, 00:56, sobre todo el código: 0 vulnerabilidades, 0 bugs, 0 hallazgos bloqueantes y 0 críticos (umbral: 0), duplicación de 0,0 % (umbral: 3 %) y cobertura de 95,7 % (umbral: 85 %); 1 hallazgo de mantenibilidad aceptado con su justificación (la copia literal del solver D5, app/servicios/motor_d5/milp.py) | `sonarqube/quality_gate.json`, `sonarqube/resumen.md` |
 
 ## Las cifras principales
 

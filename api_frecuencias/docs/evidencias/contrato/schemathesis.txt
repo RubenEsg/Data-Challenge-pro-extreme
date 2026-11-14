@@ -1,13 +1,13 @@
 Schemathesis 4.33.1: contrato por propiedades en TODAS las operaciones del OpenAPI (spec v1.5 §14.1 «Contrato»)
-Corrida: 09-11-2026, 07:47:18 a 07:49:26 (hora de Bogotá), 127.7 s; base local de pruebas PostgreSQL 14 + PostGIS 3.4; clave admin; 5 ejemplos por operación (SCHEMATHESIS_EJEMPLOS=5, derandomize). Código de salida de pytest: 0.
+Corrida: 11-11-2026, 04:47:11 a 04:49:36 (hora de Bogotá), 145.1 s; base local de pruebas PostgreSQL 14 + PostGIS 3.4; clave admin; 5 ejemplos por operación (SCHEMATHESIS_EJEMPLOS=5, derandomize). Código de salida de pytest: 0.
 Prueba: tests/contrato/test_schemathesis.py::test_ninguna_entrada_produce_error_5xx_y_todo_cumple_el_contrato
 Chequeos en cada respuesta: not_a_server_error, status_code_conformance, content_type_conformance,
 response_schema_conformance y response_headers_conformance (un 503 con el error uniforme solo se acepta si la
 operación lo declara). Sin lista de defectos conocidos ni xfail.
 Regenerar: python docs/evidencias/contrato/generar_evidencia_contrato.py (junit en schemathesis_junit.xml).
 
-Resultado junit: 63 casos (1 prueba + 62 subpruebas, una por operación), 0 fallas, 0 errores, 0 omitidas.
-Operaciones sin ninguna falla: 62 de 62.
+Resultado junit: 70 casos (1 prueba + 69 subpruebas, una por operación), 0 fallas, 0 errores, 0 omitidas.
+Operaciones sin ninguna falla: 69 de 69.
 
 Operación                                                      Resultado
 POST /api/v1/frequency/executions                              ok
@@ -60,16 +60,23 @@ GET /api/v1/catalogos/despachos/export                         ok
 GET /api/v1/catalogos/capacidad                                ok
 PUT /api/v1/catalogos/capacidad                                ok
 GET /api/v1/catalogos/capacidad/historial                      ok
+GET /api/v1/catalogos/flota                                    ok
+PUT /api/v1/catalogos/flota                                    ok
+GET /api/v1/catalogos/flota/historial                          ok
 GET /api/v1/monitoring                                         ok
 GET /api/v1/monitoring/export                                  ok
 GET /api/v1/monitoring/policy                                  ok
 GET /api/v1/monitoring/feature-snapshots                       ok
+GET /api/v1/frequency/watermarks                               ok
 GET /api/v1/segmentos/estadisticas                             ok
 GET /api/v1/segmentos/estadisticas/export                      ok
+POST /api/v1/segmentos/estadisticas/refrescar                  ok
 GET /api/v1/segmentos/zonas                                    ok
 GET /api/v1/respuesta                                          ok
 POST /api/v1/respuesta/calcular                                ok
 GET /api/v1/respuesta/export                                   ok
+GET /api/v1/retencion                                          ok
+POST /api/v1/retencion/aplicar                                 ok
 GET /health                                                    ok
 GET /metrics                                                   ok
 

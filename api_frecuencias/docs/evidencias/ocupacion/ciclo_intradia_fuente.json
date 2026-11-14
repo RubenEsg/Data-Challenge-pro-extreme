@@ -1,0 +1,85 @@
+{
+ "generado_en": "2026-11-13T22:25:39-05:00",
+ "dia": "2023-02-08",
+ "repeticiones": 5,
+ "lecturas": {
+  "incremental_todas": {
+   "lectura": "incremental demanda_segmentos, todas las rutas, sin nada nuevo",
+   "mediana_s": 0.182,
+   "min_s": 0.164,
+   "max_s": 0.198,
+   "filas": 0,
+   "repeticiones": 5
+  },
+  "incremental_una_ruta": {
+   "lectura": "incremental demanda_segmentos, una ruta (RNF-005), sin nada nuevo",
+   "mediana_s": 0.167,
+   "min_s": 0.165,
+   "max_s": 0.172,
+   "filas": 0,
+   "repeticiones": 5
+  },
+  "ocupacion_en_curso": {
+   "lectura": "ocupación por segmento de 4 h × 3 rutas (ciclo intradía a las 10:05)",
+   "mediana_s": 0.418,
+   "min_s": 0.412,
+   "max_s": 0.473,
+   "filas": 16585,
+   "repeticiones": 5
+  },
+  "ocupacion_dia": {
+   "lectura": "ocupación por segmento de un día completo (51 franjas, ciclo de la madrugada)",
+   "mediana_s": 1.119,
+   "min_s": 1.068,
+   "max_s": 1.162,
+   "filas": 57108,
+   "repeticiones": 5
+  },
+  "viajes_del_dia": {
+   "lectura": "viajes del día de las 3 rutas (progvehiculos, §5.3)",
+   "mediana_s": 1.997,
+   "min_s": 1.973,
+   "max_s": 2.039,
+   "filas": 3,
+   "repeticiones": 5
+  },
+  "contexto": {
+   "lectura": "ubicación del despacho de las 3 rutas, Procesos y catálogos de la calidad",
+   "mediana_s": 0.094,
+   "min_s": 0.092,
+   "max_s": 0.109,
+   "filas": 5,
+   "repeticiones": 5
+  },
+  "consolidados": {
+   "lectura": "los 3 consolidados con su marca, sin nada nuevo (solo el ciclo diario)",
+   "mediana_s": 0.259,
+   "min_s": 0.245,
+   "max_s": 0.369,
+   "filas": 3,
+   "repeticiones": 5
+  },
+  "ventana_refresco": {
+   "lectura": "ventana del refresco de segmentos (solo el ciclo diario y PLAN_SEGMENTOS_CRON)",
+   "mediana_s": 0.107,
+   "min_s": 0.106,
+   "max_s": 0.13,
+   "filas": 0,
+   "repeticiones": 5
+  },
+  "filas_timbradas_segmentos": 2769692
+ },
+ "estimacion": {
+  "intradia_s": 3.11,
+  "diario_s": 6.87,
+  "intradia_dia_s": 46.6,
+  "fraccion_de_la_hora_intradia": 0.00086,
+  "intradia_sobre_diario": 0.452,
+  "dia_con_intradia_sobre_dia_sin_intradia": 7.78,
+  "proyeccion_historico_completo": {
+   "factor_filas": 20.9,
+   "intradia_s": 63.2,
+   "fraccion_de_la_hora_intradia": 0.0176
+  }
+ }
+}

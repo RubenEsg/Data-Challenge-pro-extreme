@@ -1,43 +1,48 @@
-Modo integrado con la réplica de la base operacional · 2026-11-09 03:38:37 -0500 (America/Bogota)
-Proyecto compose «sobusa_rep» (el de la réplica, para compartir su red); API en http://127.0.0.1:8302.
-Contenedor de la réplica ANTES: 9c5bc9a6f1240fd2e0baf17036228499ea70387e9de6f91c66911580b3b8f473 inicio=2026-11-09T05:50:28.024828147Z estado=running volumenes=sobusa_rep_datos_operacional
+Modo integrado con la réplica de la base operacional · 2026-11-13 22:13:12 -0500 (America/Bogota)
+Proyecto compose «sobusa_rep» (el de la réplica, para compartir su red); API en http://127.0.0.1:8360.
+Contenedor de la réplica ANTES: 9c5bc9a6f1240fd2e0baf17036228499ea70387e9de6f91c66911580b3b8f473 inicio=2026-11-13T23:19:45.926823434Z estado=running volumenes=sobusa_rep_datos_operacional
 
-1) build api migrar: 20.9 s
+1) build api migrar: 4.0 s
 2) run --rm --no-deps migrar (alembic upgrade head como escritor_ia en la base operacional, esquema ai_frecuencias):
    INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
    INFO  [alembic.runtime.migration] Will assume transactional DDL.
-3) Clave de rol analista creada dentro del contenedor (no se muestra); up -d --no-deps api: /health ok en 4.8 s (salud 3.5 s) -> {'estado': 'ok', 'base_datos': 'ok', 'version': '1.0.0', 'fuente': 'postgres', 'integraciones': {'fuente_postgres': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 3, 'reinicio_s': 60.0, 'reintento_en_s': None, 'ultimo_error': None}, 'notif_correo': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 5, 'reinicio_s': 120.0, 'reintento_en_s': None, 'ultimo_error': None}, 'notif_whatsapp': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 5, 'reinicio_s': 120.0, 'reintento_en_s': None, 'ultimo_error': None}}}
-4) POST /api/v1/frequency/executions -> 086e508f-a536-4632-a9b8-76459f11d937: ok en 3.3 s; filas leídas 0, marca de agua 2026-11-09T02:14:24.970371-05:00 -> 2026-11-09T02:14:24.970371-05:00; predicciones 0, recomendaciones 0, alertas 0
-   lectura incremental: tabla demanda_segmentos, desde 2026-11-09T01:59:24.970371-05:00, leídas 0, nuevas 0, repetidas por el solape 0
+3) Clave de rol analista creada dentro del contenedor (no se muestra); up -d --no-deps api: /health ok en 3.5 s (salud 2.6 s) -> {'estado': 'ok', 'base_datos': 'ok', 'version': '1.0.0', 'fuente': 'postgres', 'integraciones': {'fuente_postgres': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 3, 'reinicio_s': 60.0, 'reintento_en_s': None, 'ultimo_error': None}, 'notif_correo': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 5, 'reinicio_s': 120.0, 'reintento_en_s': None, 'ultimo_error': None}, 'notif_whatsapp': {'estado': 'cerrado', 'fallos_seguidos': 0, 'fallos_max': 5, 'reinicio_s': 120.0, 'reintento_en_s': None, 'ultimo_error': None}}}
+4) POST /api/v1/frequency/executions -> bb04b016-3915-4c5e-8d58-5ec496d49302: ok en 2.1 s; filas leídas 0, marca de agua 2026-11-13T21:20:32.416050-05:00 -> 2026-11-13T21:20:32.416050-05:00; predicciones 0, recomendaciones 0, alertas 0
+   lectura incremental: tabla demanda_segmentos, desde 2026-11-13T21:05:32.416050-05:00, leídas 0, nuevas 0, repetidas por el solape 0
 
 5) Sentencias que corrió cada usuario técnico durante la ejecución (pg_stat_statements, diferencia de llamadas antes/después):
-   lector_ia: {'BEGIN': 5, 'RELEASE': 1, 'ROLLBACK': 5, 'SAVEPOINT': 1, 'SELECT': 6, 'SET': 12, 'SHOW': 2, 'WITH': 1}
-         1 x SELECT typname AS name, oid, typarray AS array_oid, oid::regtype::text AS regtype, typdelim AS delimiter FROM pg_type t WHERE t.oid = to_regtype($1) O
+   lector_ia: {'BEGIN': 22, 'RELEASE': 3, 'ROLLBACK': 22, 'SAVEPOINT': 3, 'SELECT': 27, 'SET': 57, 'SHOW': 6, 'WITH': 1}
+         1 x SELECT * FROM timbradas_consolidado WHERE timbradas_consolidado.ultima_actualizacion > $1 AND timbradas_consolidado.proceso = $2 ORDER BY timbradas_co
+         1 x SELECT * FROM timbradas_segmentos_anio WHERE timbradas_segmentos_anio.ultima_actualizacion > $1 AND timbradas_segmentos_anio.proceso = $2 ORDER BY tim
+         1 x SELECT * FROM timbradas_segmentos_consolidado WHERE timbradas_segmentos_consolidado.ultima_actualizacion > $1 AND timbradas_segmentos_consolidado.proc
+         1 x SELECT id_dia_semana, dia_semana FROM dias_semana ORDER BY id_dia_semana
+         1 x SELECT id_estacionalidad, proceso, estacionalidad, nombre, descripcion FROM estacionalidades ORDER BY id_estacionalidad
+         1 x SELECT id_novedad_vial, proceso, novedad, nombre, descripcion FROM novedades_viales ORDER BY id_novedad_vial
+         1 x SELECT idruta, nombre, codigo, proceso, idempresa, frecuenciadespachos, primerdespacho, estado_ruta, idrutageo, tolerancia, tolsalida, maneja_zonas, i
+         1 x SELECT r.idruta, r.codigo, r.nombre, r.proceso, r.idempresa, r.estado_ruta, r.frecuenciadespachos, r.primerdespacho, r.tolsalida, r.tolerancia, r.tiem
+         1 x SELECT rs.id AS id_segmento, rs.id_config, rs.idruta, rs.idrutageo, rs.nro_segmento, rs.activo, rs.longitud_m FROM rutas_segmentos rs ORDER BY rs.idru
          1 x WITH cambiados AS ( SELECT DISTINCT ts.id_viaje FROM timbradas_segmentos ts WHERE ts.ultimaactualizacion > $1 ), franjas AS ( SELECT DISTINCT pv.idrut
-         1 x select current_schema()
-         1 x select pg_catalog.version()
-         3 x SELECT proceso, nombre, estado, toleranciatiempo, id_estacionalidad, ultima_estacionalidad FROM "Procesos" ORDER BY proceso
-   escritor_ia: {'BEGIN': 20, 'COMMIT': 11, 'INSERT': 4, 'RELEASE': 1, 'ROLLBACK': 9, 'SAVEPOINT': 1, 'SELECT': 45, 'SHOW': 2, 'UPDATE': 9, 'WITH': 3}
+   escritor_ia: {'BEGIN': 23, 'COMMIT': 15, 'INSERT': 6, 'RELEASE': 4, 'ROLLBACK': 8, 'SAVEPOINT': 4, 'SELECT': 50, 'SHOW': 2, 'UPDATE': 9, 'WITH': 4}
          3 x SELECT max(ai_frecuencias.demanda_observada.ultima_actualizacion) AS max_1 FROM ai_frecuencias.demanda_observada WHERE ai_frecuencias.demanda_observad
          1 x INSERT INTO ai_frecuencias.execution_attempt (execution_id, intento, worker_id) VALUES ($1, $2, $3)
          1 x INSERT INTO ai_frecuencias.execution_log (execution_id, tipo, estado, etapa, progreso, intentos, marca_agua_anterior, marca_agua_nueva, data_cutoff, f
-         1 x SELECT ai_frecuencias.execution_log.metricas FROM ai_frecuencias.execution_log WHERE ai_frecuencias.execution_log.tipo = $1::VARCHAR AND ai_frecuencia
+         1 x INSERT INTO ai_frecuencias.marca_agua_ruta (proceso, ruta, marca_agua, estado_fuente, execution_id, origen) VALUES ($1::VARCHAR, $2::VARCHAR, $3::TIME
+         1 x INSERT INTO ai_frecuencias.marca_agua_tabla (proceso, tabla, marca_agua, estado_fuente, execution_id, filas_leidas) VALUES ($1::VARCHAR, $2::VARCHAR, 
+         1 x SELECT ai_frecuencias.execution_log.particion FROM ai_frecuencias.execution_log WHERE ai_frecuencias.execution_log.execution_id = $1::UUID
+         1 x SELECT ai_frecuencias.marca_agua_ruta.proceso, ai_frecuencias.marca_agua_ruta.ruta, ai_frecuencias.marca_agua_ruta.marca_agua, ai_frecuencias.marca_ag
          1 x SELECT ai_frecuencias.model_registry.id, ai_frecuencias.model_registry.model_id, ai_frecuencias.model_registry.version, ai_frecuencias.model_registry.
          1 x SELECT ai_frecuencias.threshold_config.id, ai_frecuencias.threshold_config.nombre, ai_frecuencias.threshold_config.valor, ai_frecuencias.threshold_con
          1 x SELECT count(*) AS count_1 FROM ai_frecuencias.model_registry
-         1 x SELECT max(ai_frecuencias.execution_log.marca_agua_nueva) AS max_1 FROM ai_frecuencias.execution_log WHERE ai_frecuencias.execution_log.tipo = $1::VAR
-         1 x SELECT typname AS name, oid, typarray AS array_oid, oid::regtype::text AS regtype, typdelim AS delimiter FROM pg_type t WHERE t.oid = to_regtype($1) O
-         1 x UPDATE ai_frecuencias.execution_attempt SET resultado = $3, terminado_en = now() WHERE execution_id = $1 AND worker_id = $2 AND resultado = $4
       escrituras de escritor_ia fuera del esquema ai_frecuencias: 0
 
 6) Configuración de los roles en la réplica:
    escritor_ia: None
    lector_ia: ['default_transaction_read_only=on', 'statement_timeout=30s', 'idle_in_transaction_session_timeout=60s', 'lock_timeout=5s']
-   fila de la ejecución en operacional.ai_frecuencias.execution_log: ('ok', 0, datetime.datetime(2026, 11, 9, 2, 14, 24, 970371, tzinfo=zoneinfo.ZoneInfo(key='America/Bogota')))
+   fila de la ejecución en operacional.ai_frecuencias.execution_log: ('ok', 0, datetime.datetime(2026, 11, 13, 21, 20, 32, 416050, tzinfo=zoneinfo.ZoneInfo(key='America/Bogota')))
    intento de escritura como lector_ia (dentro de una transacción que se revierte): rechazado: ReadOnlySqlTransaction: cannot execute CREATE TABLE in a read-only transaction
 
 7) Retiro: rm -s -f api migrar. Contenedores que quedan en el proyecto: ['sobusa_rep-operacional-1']
-Contenedor de la réplica DESPUÉS: 9c5bc9a6f1240fd2e0baf17036228499ea70387e9de6f91c66911580b3b8f473 inicio=2026-11-09T05:50:28.024828147Z estado=running volumenes=sobusa_rep_datos_operacional
+Contenedor de la réplica DESPUÉS: 9c5bc9a6f1240fd2e0baf17036228499ea70387e9de6f91c66911580b3b8f473 inicio=2026-11-13T23:19:45.926823434Z estado=running volumenes=sobusa_rep_datos_operacional
    réplica intacta (mismo contenedor, mismo inicio, mismo volumen): True
 
 Resultado del modo integrado: OK

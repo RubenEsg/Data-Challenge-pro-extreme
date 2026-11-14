@@ -10,12 +10,17 @@ compuerta de cuatro criterios, criterio por criterio → reversión si se activ�
 
 Uso (con la API en http://127.0.0.1:8000 y la base ai_frecuencias recién migrada):
     python scripts/demo_ciclo.py --base http://127.0.0.1:8000 --salida docs/evidencias/demo_ciclo.txt
+Este guion solo habla por HTTP: no escribe en datos/. Quien escribe es la API que atiende: el reentrenamiento del paso
+de aprendizaje deja el candidato en su MODELOS_DIR. Con la pila de Docker eso queda dentro del contenedor
+(scripts/verificar_despliegue.py). Si la API es un uvicorn de este checkout, arránquela con DATA_DIR y MODELOS_DIR en
+una copia de datos/, para que el repositorio quede igual.
+La clave de API llega solo por el entorno (SOBUSA_API_KEY; la demo completa necesita el rol admin) y el cliente HTTP
+es el de scripts/cliente_http.py (keep-alive corto y un reintento solo en GET y HEAD).
 """
 from __future__ import annotations
 
 import argparse
 import collections
-import os
 import sys
 import time
 from datetime import date, datetime, timedelta
@@ -24,14 +29,11 @@ from zoneinfo import ZoneInfo
 
 import httpx
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cliente_http import cabeceras_api, crear_cliente  # noqa: E402
+
 ZONA = ZoneInfo("America/Bogota")
 _LINEAS: list[str] = []
-
-
-def cabeceras_api() -> dict[str, str]:
-    """§7.2: la clave de API llega SOLO por el entorno (SOBUSA_API_KEY; la demo completa necesita el rol admin)."""
-    clave = os.environ.get("SOBUSA_API_KEY", "").strip()
-    return {"X-API-Key": clave} if clave else {}
 
 
 def log(*partes) -> None:
@@ -217,7 +219,7 @@ def main() -> int:
     p.add_argument("--usuario", default="comite_operacion")
     p.add_argument("--salida", type=Path, default=None)
     a = p.parse_args()
-    c = httpx.Client(base_url=a.base, timeout=300, headers=cabeceras_api())
+    c = crear_cliente(a.base, timeout=300, headers=cabeceras_api())
     fallos: list[str] = []
     api = "/api/v1"
 
@@ -379,7 +381,7 @@ def anexar_notificaciones() -> int:
     p.add_argument("--salida", type=Path, default=None)
     a = p.parse_args()
     fallos: list[str] = []
-    paso_notificaciones(httpx.Client(base_url=a.base, timeout=300, headers=cabeceras_api()), a.hasta, fallos)
+    paso_notificaciones(crear_cliente(a.base, timeout=300, headers=cabeceras_api()), a.hasta, fallos)
     log("RESULTADO del paso 11:", "OK" if not fallos else f"con fallos: {fallos}")
     if a.salida:
         with a.salida.open("a", encoding="utf-8") as f:

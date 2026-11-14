@@ -45,6 +45,8 @@ FECHA_RESPUESTA = "2025-10-15"   # día laboral con variables del modelo en la s
 ERRORES_PROPIOS = [
     ("GET", "/api/v1/frequency/executions", "/api/v1/frequency/executions", None,
      {"desde": "2025-03-05", "hasta": "2025-03-01"}, 422, "rango_invalido"),
+    ("POST", "/api/v1/frequency/executions", "/api/v1/frequency/executions",          # RNF-005: partición por ruta
+     {"particion": "ruta", "rutas": ["RUTA-QUE-NO-EXISTE"]}, None, 422, "ruta_desconocida"),
     ("POST", "/api/v1/models/{model_id}/activate", "/api/v1/models/{otro}/activate", {"aprobado_por": "contrato"},
      {"forzar": "true"}, 422, "motivo_requerido"),
     ("POST", "/api/v1/models/{model_id}/activate", "/api/v1/models/{otro}/activate",
@@ -56,6 +58,9 @@ ERRORES_PROPIOS = [
      {"ruta": "CL 72", "fecha": "2025-06-02"}, 404, "sin_calcular"),
     ("POST", "/api/v1/respuesta/calcular", "/api/v1/respuesta/calcular", {"fecha": "2030-01-01"}, None, 404,
      "sin_datos"),
+    # sin la base operacional (FUENTE_DATABASE_URL vacía en el entorno de contrato) no hay refresco que encolar
+    ("POST", "/api/v1/segmentos/estadisticas/refrescar", "/api/v1/segmentos/estadisticas/refrescar",
+     {"modo": "auto"}, None, 503, "fuente_no_configurada"),
 ]
 
 
@@ -154,7 +159,10 @@ def _casos(s: dict) -> list[Caso]:
     e = "/api/v1/frequency/executions"
     return [
         Caso("crear_ejecucion", "POST", e, json={"hasta": "2025-03-03", "horizontes": [60]}, esperados=(202,)),
+        Caso("crear_ejecucion_partida", "POST", e, json={"hasta": "2025-03-03", "particion": "ruta",
+                                                         "rutas": ["CRA 54"]}, esperados=(202,)),
         Caso("listar_ejecuciones", "GET", e, params={"limite": 5, "orden": "-creado_en", "tipo": "frecuencia"}),
+        Caso("marcas_de_agua", "GET", "/api/v1/frequency/watermarks", params={"proceso": "sobusa"}),
         Caso("detalle_ejecucion", "GET", e + "/{execution_id}", f"{e}/{eid}"),
         Caso("errores_ejecucion", "GET", e + "/{execution_id}/errors", f"{e}/{eid}/errors", params={"limite": 10}),
         Caso("predecir", "POST", "/api/v1/predictions/run",
@@ -202,6 +210,13 @@ def _casos(s: dict) -> list[Caso]:
         Caso("quitar_ajuste_capacidad", "PUT", "/api/v1/catalogos/capacidad",
              json={"idruta": 2, "capacidad": None, "motivo": "contrato: quitar un ajuste que no existe"},
              esperados=(200, 404)),
+        # flota y tiempo de ciclo (§3.1, ajuste local versionado): consulta, retiro de un ajuste que no existe (404
+        # «ajuste_inexistente», o 200 si quedó uno) e historial
+        Caso("flota_y_ciclo", "GET", "/api/v1/catalogos/flota", params={"idruta": 16, "tipo_dia": "Laboral"}),
+        Caso("quitar_ajuste_flota", "PUT", "/api/v1/catalogos/flota",
+             json={"idruta": 16, "tipo_dia": "Laboral", "flota": None, "motivo": "contrato: quitar un ajuste que no "
+                                                                               "existe"}, esperados=(200, 404)),
+        Caso("historial_flota_y_ciclo", "GET", "/api/v1/catalogos/flota/historial", params={"idruta": 16}),
         Caso("respuesta_reto", "GET", "/api/v1/respuesta", esperados=(200, 404)),
         Caso("exportar_respuesta_reto", "GET", "/api/v1/respuesta/export", params={"formato": "csv"},
              esperados=(200, 404)),
@@ -211,6 +226,15 @@ def _casos(s: dict) -> list[Caso]:
              json={"fecha": FECHA_RESPUESTA, "rutas": ["SILENCIO"]}, esperados=(202,)),
         Caso("aprobar_umbrales", "POST", "/api/v1/thresholds/{version}/aprobar", "/api/v1/thresholds/1/aprobar",
              json={"comentario": "prueba de contrato"}),
+        # §7.1/RNF-004: el refresco de la agregación de segmentos va a la cola (202); sin base operacional, 503
+        Caso("refrescar_segmentos", "POST", "/api/v1/segmentos/estadisticas/refrescar", json={"modo": "auto"},
+             esperados=(202, 503)),
+        Caso("estadisticas_segmentos", "GET", "/api/v1/segmentos/estadisticas",
+             params={"idruta": 2, "desde": "2023-02-14", "hasta": "2023-02-14", "orden": "-max_subidas"}),
+        # §18 retención: la política vigente con su bitácora y la corrida bajo demanda (202, rol admin; simula)
+        Caso("politica_retencion", "GET", "/api/v1/retencion"),
+        Caso("aplicar_retencion", "POST", "/api/v1/retencion/aplicar",
+             json={"simular": True, "motivo": "prueba de contrato"}, esperados=(202,)),
     ]
 
 
@@ -342,6 +366,40 @@ def test_calcular_respuesta_202_analista_403_operador_404_sin_datos(contrato, an
     assert error["detalle"]["primera_fecha"] <= error["detalle"]["ultima_fecha"] < "2030-01-01"
     assert "sin_datos" in contrato.respuesta("post", plantilla, 404)["x-codigos-error"]
     assert _ejecuciones_respuesta() == antes, "una fecha sin datos no debe encolar ninguna ejecución"
+
+
+def test_refrescar_segmentos_202_analista_403_operador_y_sin_duplicar(contrato, anonimo, claves, sin_trabajos,
+                                                                     monkeypatch):
+    """POST /api/v1/segmentos/estadisticas/refrescar (§7.1, RNF-004): con la base operacional, 202 con la clave
+    analista (esquema RefrescoEnCola; el trabajo «segmentos» queda en la cola), el mismo trabajo si se repite el
+    pedido, 403 con la de operador y 422 uniforme con un rango mal formado."""
+    from sqlalchemy import text
+
+    from app.db import sesion_contexto
+    from app.servicios import segmentos
+
+    monkeypatch.setattr(segmentos, "fuente_configurada", lambda: True)
+    plantilla = "/api/v1/segmentos/estadisticas/refrescar"
+    analista = {"X-API-Key": claves["analista"]}
+    caso = Caso("refrescar_segmentos_analista", "POST", plantilla,
+                json={"modo": "rango", "desde": "2023-02-01", "hasta": "2023-02-07"}, esperados=(202,))
+    try:
+        r = _llamar(anonimo, caso, headers=analista)
+        fallas = verificar(contrato, caso, r)
+        assert not fallas, "\n".join(fallas)
+        cuerpo = r.json()
+        assert cuerpo["tipo"] == "segmentos" and cuerpo["nueva"] and cuerpo["modo"] == "rango"
+        assert cuerpo["consultar_estado"] == f"/api/v1/frequency/executions/{cuerpo['execution_id']}"
+        repetido = _llamar(anonimo, caso, headers=analista).json()
+        assert repetido["execution_id"] == cuerpo["execution_id"] and repetido["nueva"] is False
+        r = anonimo.post(plantilla, json={}, headers={"X-API-Key": claves["operador"]})
+        assert r.status_code == 403 and r.json()["error"]["detalle"] == {"rol": "operador",
+                                                                         "rol_requerido": "analista"}
+        r = anonimo.post(plantilla, json={"modo": "rango", "desde": "2023-02-07"}, headers=analista)
+        assert r.status_code == 422 and not contrato.errores_uniforme(r.json()), r.text[:300]
+    finally:
+        with sesion_contexto() as s:
+            s.execute(text("DELETE FROM ai_frecuencias.execution_log WHERE tipo = 'segmentos'"))
 
 
 def test_aprobar_umbrales_admin_idempotente_403_404_422(contrato, anonimo, claves):

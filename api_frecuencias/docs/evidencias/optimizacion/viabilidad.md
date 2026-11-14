@@ -1,6 +1,6 @@
 # Viabilidad de la recomendación por ruta, hora y tipo de día (2025)
 
-Generado por `scripts/viabilidad.py` el 2026-11-09T07:36:25-05:00 (244.2 s) con el modelo activo `hgb_fv2_20250831_s42` (P10/P50/P90 por hora, h = 60, sin factor intradía) y los umbrales de producción: headway 2 a 10 min (el máximo es min(headway_maximo_min, 2 × espera_max_min) con espera de 5 min), ocupación objetivo 65 % a 85 %, nivel de servicio 0,90 (P90 calibrado). Ciclo, flota e intervalo programado: mediana 2025 por ruta, tipo de día y hora (`datos/parametros_operativos_hora.parquet`); tipologías de `tipologias_flota.json`.
+Generado por `scripts/viabilidad.py` el 2026-11-11T05:55:19-05:00 (199.6 s) con el modelo activo `hgb_fv2_20250831_s42` (P10/P50/P90 por hora, h = 60, sin factor intradía) y los umbrales de producción: headway 2 a 10 min (el máximo es min(headway_maximo_min, 2 × espera_max_min) con espera de 5 min), ocupación objetivo 65 % a 85 %, nivel de servicio 0,90 (P90 calibrado). Ciclo, flota e intervalo programado: mediana 2025 por ruta, tipo de día y hora (`datos/parametros_operativos_hora.parquet`); tipologías de `tipologias_flota.json`.
 
 Una franja es **no viable** cuando ninguna mezcla de buses cumple a la vez el headway mínimo y máximo, la flota (repartida por tipología) con el ciclo de la hora y la capacidad para la carga crítica del P90 (§10.2). Entonces se informa la mejor aproximación ejecutable y su cobertura (§10.3, §18). Para cada franja no viable se cambia UNA condición a la vez; la causa es la que, sola, la vuelve viable:
 
@@ -32,7 +32,7 @@ Por ruta: CL 72 100,0 %; CRA 54 18,5 %; SILENCIO 19,4 %.
 
 **Lectura.** Las 175 franjas no viables están en CRA 54 laboral (73), CRA 54 sábado (15), SILENCIO laboral (73), SILENCIO sábado (14); CL 72 domingo/festivo, CL 72 laboral, CL 72 sábado, CRA 54 domingo/festivo, SILENCIO domingo/festivo son viables en todos los días. En CRA 54 laboral ninguna condición sola alcanza en 73 de 73: la hora pide más capacidad de la que sostienen juntas la flota, el ciclo y el headway mínimo (ver la hora pico de CRA 54). En CRA 54 sábado ninguna condición sola alcanza en 13 de 15: la hora pide más capacidad de la que sostienen juntas la flota, el ciclo y el headway mínimo (ver la hora pico de CRA 54). En SILENCIO laboral manda el reparto fijo de la flota entre tipologías: con la flota total como única cota se vuelven viables 73 de 73. En SILENCIO sábado manda el reparto fijo de la flota entre tipologías: con la flota total como única cota se vuelven viables 14 de 14.
 
-En las 175 franjas no viables la mejor aproximación ejecutable cubre en mediana el 65,9 % de la carga del nivel de servicio (mínimo 50,4 %).
+En las 175 franjas no viables la mejor aproximación ejecutable cubre en mediana el 66,1 % de la carga del nivel de servicio (mínimo 50,6 %).
 
 ## B. Todas las horas de servicio, semanas representativas
 
@@ -49,7 +49,7 @@ Semanas del 2025-03-12, 2025-06-11, 2025-09-10, 2025-11-19 (miércoles, sábado 
 | CRA 54 | Laboral | 66,2 % (45 de 68) | 13 h (0 % viable; reparto por tipología 4, banda P90 2); 14 h (0 % viable; combinada 2, reparto por tipología 2); 15 h (25 % viable; reparto por tipología 3, banda P90 2); 5 h (0 % viable; combinada 4); 6 h (0 % viable; combinada 4); 7 h (0 % viable; reparto por tipología 4, banda P90 3) |
 | CRA 54 | Sábado | 86,8 % (59 de 68) | 5 h (75 % viable; reparto por tipología 1, banda P90 1); 6 h (0 % viable; combinada 3, reparto por tipología 1); 7 h (0 % viable; reparto por tipología 4, banda P90 2) |
 | SILENCIO | Domingo/festivo | 52,9 % (36 de 68) | 10 h (0 % viable; reparto por tipología 4); 11 h (0 % viable; reparto por tipología 4); 12 h (0 % viable; reparto por tipología 4); 13 h (0 % viable; reparto por tipología 4); 14 h (0 % viable; reparto por tipología 4); 15 h (0 % viable; reparto por tipología 4); 16 h (0 % viable; reparto por tipología 4); 17 h (0 % viable; reparto por tipología 4) |
-| SILENCIO | Laboral | 66,2 % (45 de 68) | 12 h (75 % viable; reparto por tipología 1, banda P90 1); 13 h (0 % viable; reparto por tipología 4, banda P90 4); 14 h (0 % viable; reparto por tipología 3, combinada 1); 15 h (0 % viable; reparto por tipología 4, banda P90 3); 16 h (50 % viable; reparto por tipología 2, banda P90 2); 5 h (0 % viable; combinada 4); 6 h (0 % viable; reparto por tipología 4) |
+| SILENCIO | Laboral | 63,2 % (43 de 68) | 12 h (50 % viable; reparto por tipología 2, banda P90 2); 13 h (0 % viable; reparto por tipología 4, banda P90 4); 14 h (0 % viable; reparto por tipología 3, combinada 1); 15 h (0 % viable; reparto por tipología 4, banda P90 3); 16 h (50 % viable; reparto por tipología 2, banda P90 2); 5 h (0 % viable; combinada 4); 6 h (0 % viable; reparto por tipología 4); 7 h (75 % viable; reparto por tipología 1, banda P90 1) |
 | SILENCIO | Sábado | 89,7 % (61 de 68) | 5 h (25 % viable; reparto por tipología 3, banda P90 3); 6 h (0 % viable; reparto por tipología 4, banda P90 4) |
 
 ### Plan del día (MILP de D5) por hora
@@ -62,10 +62,10 @@ En el plan la capacidad no es una restricción dura (la sobrecarga esperada se p
 | CL 72 | Laboral | 100,0 % (68 de 68) | — | 4 h, 8 h, 9 h, 10 h, 11 h, 12 h, 15 h, 16 h, 17 h, 18 h, 19 h, 20 h |
 | CL 72 | Sábado | 100,0 % (68 de 68) | — | 4 h, 7 h, 8 h, 9 h, 10 h, 11 h, 12 h, 13 h, 14 h, 15 h, 16 h, 17 h, 18 h, 19 h, 20 h |
 | CRA 54 | Domingo/festivo | 100,0 % (68 de 68) | — | 4 h, 19 h, 20 h |
-| CRA 54 | Laboral | 94,1 % (64 de 68) | 5 h | 20 h |
+| CRA 54 | Laboral | 95,6 % (65 de 68) | 5 h | 20 h |
 | CRA 54 | Sábado | 100,0 % (68 de 68) | — | 20 h |
 | SILENCIO | Domingo/festivo | 100,0 % (68 de 68) | — | 4 h, 5 h, 6 h, 7 h, 8 h, 9 h, 10 h, 11 h, 12 h, 13 h, 14 h, 15 h, 16 h, 17 h, 18 h, 19 h, 20 h |
-| SILENCIO | Laboral | 100,0 % (68 de 68) | — | 10 h, 11 h, 17 h, 18 h, 19 h, 20 h |
+| SILENCIO | Laboral | 100,0 % (68 de 68) | — | 4 h, 10 h, 11 h, 17 h, 18 h, 19 h, 20 h |
 | SILENCIO | Sábado | 100,0 % (68 de 68) | — | 4 h, 11 h, 12 h, 13 h, 14 h, 15 h, 16 h, 17 h, 18 h, 19 h, 20 h |
 
 ## La hora pico de CRA 54 (hallazgo H13)

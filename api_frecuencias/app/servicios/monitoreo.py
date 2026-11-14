@@ -22,12 +22,16 @@ Por eso se reporta con su umbral calibrado, pero NO dispara el reentrenamiento (
 
 La foto de variables (feature snapshot) guarda, por predicción y hora, el vector exacto que vio el modelo
 (variables.matriz_x), con feature_version y data_cutoff, en la tabla particionada por mes
-ai_frecuencias.feature_snapshot.
+ai_frecuencias.feature_snapshot. Desde sv1 (§7.3 paso 4) guarda además, por predicción, una fila por segmento con
+sentido y segmento llenos: las variables y el pronóstico del modelo de segmentos activo para la ventana
+(app/servicios/modelo_segmentos.py, filas_foto). Si esas filas fallan, solo se omiten ellas: la foto de la ruta queda y
+las métricas lo dicen en feature_snapshot_segmentos (FOTO_SEGMENTOS=false las apaga).
 """
 from __future__ import annotations
 
 import logging
 import math
+import time
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
@@ -363,15 +367,19 @@ def registrar(s, *, execution_id, model_id: str | None, hasta: date, umbrales: d
 
 
 def en_ciclo(s, execution_id, model_id: str | None, validos, umbrales: dict, umbrales_version: int | None,
-             fallos: list) -> dict:
+             fallos: list, *, hasta: date | None = None) -> dict:
     """Paso de monitoreo del ciclo diario (antes de predecir, para que ALT-010 use el WAPE móvil por ruta).
 
     Guarda la fila del modelo activo y la de cada retador en sombra. Nunca detiene el ciclo: un fallo queda en
-    `fallos` y el ciclo sigue (la evaluación del error sobre lo nuevo ya quedó en las métricas).
+    `fallos` y el ciclo sigue (la evaluación del error sobre lo nuevo ya quedó en las métricas). La ventana termina en
+    el último día de `validos` o en `hasta` (la ejecución madre de una ejecución partida por ruta, RNF-005).
     """
-    if validos is None or len(validos) == 0 or not model_id:
+    if hasta is None:
+        if validos is None or len(validos) == 0:
+            return {}
+        hasta = max(validos["fecha"])
+    if not model_id:
         return {}
-    hasta = max(validos["fecha"])
     try:
         with s.begin_nested():
             fila, m = registrar(s, execution_id=execution_id, model_id=model_id, hasta=hasta, umbrales=umbrales,
@@ -396,6 +404,32 @@ def en_ciclo(s, execution_id, model_id: str | None, validos, umbrales: dict, umb
             "cobertura_p10_p90": m.get("cobertura_p10_p90"), "psi_max": m.get("psi_max"),
             "psi_variable_max": m.get("psi_variable_max"), "wape_por_ruta": m.get("wape_por_ruta") or {},
             "hasta": hasta, "sombra": sombras}
+
+
+def en_ciclo_de_ruta(s, model_id: str | None, validos, umbrales: dict, fallos: list, ruta: str) -> dict:
+    """El trabajo de UNA ruta de una ejecución partida (RNF-005): el WAPE móvil de SU ruta para ALT-010, con la misma
+    ventana y la misma serie validada que calcular() (la métrica de una ruta no depende de las demás), SIN guardar la
+    fila de monitoreo ni la del retador: la ejecución madre las guarda una vez por ejecución, así «las últimas n
+    ejecuciones» de la política siguen siendo días y no rutas."""
+    from app.servicios import inferencia
+
+    if validos is None or len(validos) == 0 or not model_id:
+        return {}
+    u = umbrales_monitoreo(umbrales)
+    hasta = pd.Timestamp(max(validos["fecha"])).date()
+    desde = hasta - timedelta(days=int(u["monitoreo_ventana_dias"]) - 1)
+    base = {"ruta": ruta, "desde": desde, "hasta": hasta, "sombra": [], "fila_guardada": False}
+    try:
+        with s.begin_nested():
+            ev = inferencia.evaluar(model_id, desde, hasta, sesion=s, rutas=[ruta])
+    except ValueError:      # sin datos observados de la ruta en la ventana (calcular: «sin_datos»)
+        return dict(base, estado="sin_datos", wape_por_ruta={})
+    except Exception as exc:  # noqa: BLE001 - sin monitoreo ALT-010 no se evalúa; el trabajo sigue
+        LOG.warning("monitoreo del trabajo de ruta no disponible: %s", exc, exc_info=True)
+        fallos.append({"etapa": "monitoreo", "ruta": ruta, "error": str(exc)})
+        return {}
+    wape = _frac(((ev.get("por_ruta") or {}).get(ruta) or {}).get("wape"))
+    return dict(base, wape_movil_ruta=wape, wape_por_ruta={} if wape is None else {ruta: wape})
 
 
 # ----------------------------------------------------------------------------------------------- foto de variables
@@ -441,12 +475,125 @@ def dimensiones_foto(ruta: str, fecha) -> dict:
     return {c: d.get(c) for c in CAMPOS_DIMENSIONES}
 
 
+def _inicio_foto_segmentos(segmentos: dict | None) -> tuple[dict, dict | None]:
+    """(estado de la foto por segmento, modelo de segmentos activo o None)."""
+    seg = {} if segmentos is None else segmentos
+    seg.update(estado="ok", filas=0)
+    return seg, _modelo_foto_segmentos(seg)
+
+
+def _modelo_foto_segmentos(estado: dict):
+    """Modelo de segmentos activo para la foto, o None (apagada por FOTO_SEGMENTOS o sin modelo: queda en estado).
+
+    Se llama fuera del punto de guardado de la foto: cualquier error al cargar el modelo (registro o manifiesto que no
+    son JSON válido, artefacto que no se puede deserializar) solo omite las filas por segmento, nunca el ciclo."""
+    from app.config import obtener_ajustes
+    from app.servicios import modelo_segmentos
+
+    if not obtener_ajustes().foto_segmentos:
+        estado["estado"] = "apagada"
+        return None
+    try:
+        modelo = modelo_segmentos.cargar()
+    except Exception as exc:  # noqa: BLE001 - la foto por segmento no debe tumbar el ciclo (§14.2)
+        estado.update(estado="omitida", avisos=[f"sin modelo de segmentos: {exc}"[:300]])
+        return None
+    estado["model_id"] = modelo["model_id"]
+    return modelo
+
+
+def _foto_segmentos(s, p, execution_id, data_cutoff, modelo: dict | None, tabla, estado: dict) -> int:
+    """Filas por segmento y sentido de la predicción `p` (§7.3 paso 4). Un fallo, al calcularlas o al escribirlas,
+    omite solo estas filas y queda en estado["avisos"]; la foto de la ruta no se toca: sus filas se envían antes y las
+    de los segmentos van en su propio punto de guardado."""
+    from sqlalchemy import insert
+    from sqlalchemy.exc import SQLAlchemyError
+
+    from app.modelos_db import FotoVariables
+    from app.servicios import modelo_segmentos
+
+    if modelo is None:
+        return 0
+    try:
+        valores = _valores_foto_segmentos(p, execution_id, data_cutoff, modelo_segmentos.filas_foto(p, tabla, modelo))
+    except Exception as exc:  # noqa: BLE001 - la foto por segmento no debe tumbar la de la ruta
+        return _fallo_foto_segmentos(p, exc, estado)
+    if not valores:
+        return 0
+    s.flush()      # las filas de la ruta de esta predicción quedan fuera del punto de guardado de los segmentos
+    try:
+        with s.begin_nested():
+            s.execute(insert(FotoVariables), valores)
+    except SQLAlchemyError as exc:
+        return _fallo_foto_segmentos(p, exc, estado)
+    return len(valores)
+
+
+def _valores_foto_segmentos(p, execution_id, data_cutoff, filas: list[dict]) -> list[dict]:
+    """Filas de feature_snapshot (con las dimensiones de §8.3) de las variables por segmento de la predicción `p`."""
+    from app.servicios.ejecucion import json_seguro
+
+    if not filas:
+        return []
+    dims = dimensiones_foto(p.ruta, filas[0]["fecha"])
+    return [{"execution_id": execution_id, "prediction_id": p.prediction_id, "model_id": f["model_id"], "ruta": p.ruta,
+             "sentido": f["sentido"], "segmento": f["segmento"], "horizonte_min": p.horizonte_min,
+             "ventana_inicio": p.instante, "ventana_fin": p.objetivo, "fecha": f["fecha"], "hora": f["hora"],
+             "features": json_seguro(f["features"]), "feature_version": f["feature_version"],
+             "data_cutoff": data_cutoff, **dims} for f in filas]
+
+
+def _fallo_foto_segmentos(p, exc: Exception, estado: dict) -> int:
+    """Registra que no quedaron las filas por segmento de `p` (aviso en las métricas de la ejecución); devuelve 0."""
+    LOG.warning("foto por segmento no guardada (%s, %s min): %s", p.ruta, p.horizonte_min, exc, exc_info=True)
+    estado["estado"] = "fallo"
+    estado.setdefault("avisos", []).append(f"{p.ruta} {p.horizonte_min} min: {exc}"[:300])
+    return 0
+
+
+ESPERA_LOCK_PARTICION = "500ms"      # menor que deadlock_timeout (1 s): cede antes de que PostgreSQL aborte a nadie
+
+
+def asegurar_particion_previa(instante: datetime, espera_s: float = 30.0) -> bool:
+    """RNF-005: crea (si falta) la partición mensual de feature_snapshot del instante de las predicciones en una
+    transacción CORTA y propia, ANTES de que el trabajo escriba predicciones. Crear una partición clona las llaves
+    foráneas de feature_snapshot y pide ShareRowExclusiveLock sobre prediction y execution_log: dentro de la
+    transacción larga de un trabajo, con el trabajo de otra ruta escribiendo a la vez, eso es un interbloqueo. Aquí
+    espera como mucho ESPERA_LOCK_PARTICION por intento (menos que deadlock_timeout: si un trabajo vecino tiene
+    predicciones sin confirmar, cede sin que PostgreSQL aborte a nadie) y reintenta hasta `espera_s`. True si la
+    partición existe al terminar; si no, guardar_snapshot la intenta crear dentro del ciclo, como antes."""
+    from sqlalchemy import text
+    from sqlalchemy.exc import DBAPIError
+
+    from app.db import motor
+
+    inicio = instante.astimezone(UTC)
+    nombre = f"ai_frecuencias.feature_snapshot_{inicio:%Y%m}"
+    limite = time.monotonic() + espera_s
+    while True:
+        try:
+            with motor().connect() as conexion:
+                if conexion.execute(text("SELECT to_regclass(:n)"), {"n": nombre}).scalar() is not None:
+                    return True
+                conexion.execute(text(f"SET LOCAL lock_timeout = '{ESPERA_LOCK_PARTICION}'"))   # constante
+                conexion.execute(text("SELECT ai_frecuencias.asegurar_particion_feature_snapshot(:t)"),
+                                 {"t": inicio})
+                conexion.commit()
+                return True
+        except DBAPIError as exc:     # candado ocupado (55P03) o carrera con otra réplica: se reintenta
+            if time.monotonic() >= limite:
+                LOG.warning("partición %s no creada antes del ciclo: %s", nombre, str(exc).splitlines()[0])
+                return False
+            time.sleep(0.3)
+
+
 def guardar_snapshot(s, execution_id, data_cutoff, fallos: list | None = None,
-                     advertencias: list | None = None) -> int:
+                     advertencias: list | None = None, segmentos: dict | None = None) -> int:
     """Escribe la foto de variables de todas las predicciones de la ejecución (§11.2), con las dimensiones de §8.3 y
-    las variables de la serie validada de `s` (las mismas que vio el modelo). Va en un punto de guardado: si falla,
-    se deshace solo la foto, el ciclo sigue y el fallo queda en `fallos` y en `advertencias` (métricas de la
-    ejecución). Devuelve las filas escritas."""
+    las variables de la serie validada de `s` (las mismas que vio el modelo), más una fila por segmento y sentido de
+    cada predicción (§7.3 paso 4; su conteo y su estado van en `segmentos`). Va en un punto de guardado: si falla, se
+    deshace solo la foto, el ciclo sigue y el fallo queda en `fallos` y en `advertencias` (métricas de la ejecución).
+    Devuelve las filas escritas (ruta y segmento)."""
     from sqlalchemy import select, text
 
     from app.modelos_db import FotoVariables, Prediccion
@@ -455,9 +602,11 @@ def guardar_snapshot(s, execution_id, data_cutoff, fallos: list | None = None,
 
     preds = s.scalars(select(Prediccion).where(Prediccion.execution_id == execution_id)).all()
     n = 0
+    seg, modelo_seg = _inicio_foto_segmentos(segmentos)
     try:
         with s.begin_nested(), inferencia.con_sesion(s):
             meses = set()
+            tabla_seg = inferencia.tabla_variables()
             for p in preds:
                 inicio = p.instante.astimezone(UTC)
                 mes = inicio.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -472,6 +621,9 @@ def guardar_snapshot(s, execution_id, data_cutoff, fallos: list | None = None,
                         features=json_seguro(f["features"]), feature_version=f["feature_version"] or "",
                         data_cutoff=data_cutoff, **dimensiones_foto(p.ruta, f["fecha"])))
                     n += 1
+                k = _foto_segmentos(s, p, execution_id, data_cutoff, modelo_seg, tabla_seg, seg)
+                seg["filas"] += k
+                n += k
             s.flush()
     except Exception as exc:  # noqa: BLE001 - la foto no debe tumbar el ciclo; queda como fallo parcial
         LOG.warning("feature snapshot no guardado: %s", exc, exc_info=True)
@@ -479,24 +631,40 @@ def guardar_snapshot(s, execution_id, data_cutoff, fallos: list | None = None,
             fallos.append({"etapa": "feature_snapshot", "error": str(exc)})
         if advertencias is not None:
             advertencias.append(f"foto de variables (§11.2) no guardada: {exc}"[:500])
+        seg.update(estado="fallo", filas=0)
         return 0
     return n
 
 
+def foto_del_ciclo(s, execution_id, data_cutoff, predicciones: int, fallos: list) -> dict[str, Any]:
+    """Filas de la foto de variables de las predicciones de la ejecución, con las de cada segmento y sentido (§7.3
+    paso 4; su conteo y su estado van en feature_snapshot_segmentos) y, si no quedó, la advertencia: la ejecución
+    termina «ok», pero sus métricas dicen que la foto no se guardó. En una ejecución partida (RNF-005) la llama cada
+    trabajo de ruta con SUS predicciones, así que cada fila (de la ruta o de un segmento) se escribe una sola vez."""
+    advertencias: list[str] = []
+    segmentos: dict[str, Any] = {}
+    out: dict[str, Any] = {"feature_snapshot_filas": (guardar_snapshot(s, execution_id, data_cutoff, fallos,
+                                                                       advertencias, segmentos) if predicciones else 0)}
+    if segmentos:   # §7.3 paso 4: filas por segmento y sentido (incluidas en feature_snapshot_filas)
+        out["feature_snapshot_segmentos"] = segmentos
+    if advertencias:
+        out.update(advertencias=advertencias, feature_snapshot_estado="fallo")
+    return out
+
+
 def cerrar_ciclo(s, execution_id, data_cutoff, predicciones: int, monitoreo: dict, umbrales: dict,
-                 umbrales_version: int | None, fallos: list) -> dict:
+                 umbrales_version: int | None, fallos: list, *, ejecuciones: list | None = None,
+                 foto: bool = True) -> dict:
     """Al final del ciclo (misma transacción que los resultados): foto de variables, volumen de predicciones de la
-    ejecución, predicciones del retador en sombra y decisiones de la política (reentreno, compuerta, reversión)."""
+    ejecución, predicciones del retador en sombra y decisiones de la política (reentreno, compuerta, reversión).
+
+    La madre de una ejecución partida (RNF-005) pasa `ejecuciones` (sus trabajos por ruta: el retador predice lo que
+    predijeron ellos) y foto=False (cada trabajo ya guardó la foto de sus predicciones)."""
     from app.modelos_db import MonitoreoModelo
     from app.servicios import politica
 
     out: dict[str, Any] = {k: v for k, v in (monitoreo or {}).items() if k != "wape_por_ruta"}
-    advertencias: list[str] = []
-    out["feature_snapshot_filas"] = (guardar_snapshot(s, execution_id, data_cutoff, fallos, advertencias)
-                                     if predicciones else 0)
-    if advertencias:   # la ejecución termina «ok», pero sus métricas dicen que la foto no quedó
-        out["advertencias"] = advertencias
-        out["feature_snapshot_estado"] = "fallo"
+    out.update(foto_del_ciclo(s, execution_id, data_cutoff, predicciones if foto else 0, fallos))
     if monitoreo.get("id"):
         fila = s.get(MonitoreoModelo, monitoreo["id"])
         if fila is not None:
@@ -506,7 +674,7 @@ def cerrar_ciclo(s, execution_id, data_cutoff, predicciones: int, monitoreo: dic
     for sm in monitoreo.get("sombra") or []:
         try:
             with s.begin_nested():
-                politica.predecir_en_sombra(s, execution_id, sm)
+                politica.predecir_en_sombra(s, execution_id, sm, ejecuciones=ejecuciones)
         except Exception as exc:  # noqa: BLE001
             fallos.append({"etapa": "prediccion_sombra", "model_id": sm.get("model_id"), "error": str(exc)})
     if monitoreo.get("hasta") is not None:

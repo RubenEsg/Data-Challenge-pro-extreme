@@ -8,31 +8,31 @@
  {
   "paso": "bandit (seguridad, severidad media o mayor)",
   "codigo": 0,
-  "segundos": 3.6,
+  "segundos": 6.3,
   "ok": true
  },
  {
   "paso": "alembic upgrade head",
   "codigo": 0,
-  "segundos": 2.5,
+  "segundos": 3.2,
   "ok": true
  },
  {
   "paso": "alembic downgrade base",
   "codigo": 0,
-  "segundos": 1.2,
+  "segundos": 1.9,
   "ok": true
  },
  {
   "paso": "alembic upgrade head",
   "codigo": 0,
-  "segundos": 1.6,
+  "segundos": 2.3,
   "ok": true
  },
  {
   "paso": "pytest con cobertura ≥ 85 % y junit",
   "codigo": 0,
-  "segundos": 282.4,
+  "segundos": 900.8,
   "ok": true
  },
  {

@@ -120,8 +120,10 @@ def test_ciclo_guarda_monitoreo_foto_y_columnas_nuevas(primera, entorno):
     assert len(fotos) == mon["feature_snapshot_filas"] > 9
     from app.servicios import variables
 
-    assert set(fotos[0].features) == set(variables.columnas(variables.FV2)) | {"_fraccion_ventana"}
-    assert fotos[0].feature_version == variables.FV2 and fotos[0].data_cutoff is not None
+    de_ruta = [f for f in fotos if f.segmento is None]      # las de segmento se prueban aparte (§7.3 paso 4)
+    assert 9 < len(de_ruta) == len(fotos) - mon["feature_snapshot_segmentos"]["filas"]
+    assert set(de_ruta[0].features) == set(variables.columnas(variables.FV2)) | {"_fraccion_ventana"}
+    assert de_ruta[0].feature_version == variables.FV2 and de_ruta[0].data_cutoff is not None
     # dimensiones de §8.3 en la foto: idruta del catálogo y día ISO de la fecha de la fila
     if hasattr(FotoVariables, "idruta"):
         from app.servicios import dimensiones
@@ -198,14 +200,24 @@ def test_evaluacion_e_importancia(cliente, primera):
 
 
 def test_pronostico_por_segmento_suma_la_ruta(cliente, primera, entorno):
+    """§3.1 y §9.1 por sentido y segmento: el modelo de segmentos activo reparte la predicción guardada (la suma es la
+    ruta), cada segmento y sentido trae su banda P10-P90 y la versión del modelo (model_id y SHA-256)."""
+    from app.servicios import modelo_segmentos
+
     s = entorno["sesion"]
     pred = s.scalars(select(Prediccion).where(Prediccion.execution_id == uuid.UUID(primera["execution_id"]))).first()
     r = cliente.get("/api/v1/predictions/segmentos", params={"prediction_id": str(pred.prediction_id)})
     assert r.status_code == 200, r.text
     d = r.json()
+    activo = modelo_segmentos.cargar()
+    assert d["modelo_segmentos"]["model_id"] == activo["model_id"] and d["modelo_segmentos"]["sha256"] == activo[
+        "sha256"]
+    assert d["modelo_segmentos"]["feature_version"] == modelo_segmentos.VERSION_VARIABLES
     assert d["suma_segmentos"] == pytest.approx(pred.pasajeros, abs=2e-3)
     assert len(d["segmentos"]) > 100 and {x["sentido"] for x in d["sentidos"]} == {"ida", "regreso"}
-    assert "2023" in d["periodo_reparto"] and "no es un modelo por segmento" in d["nota"]
+    assert all(x["p10"] <= x["pasajeros"] <= x["p90"] for x in d["segmentos"] + d["sentidos"])
+    assert all(0 <= x["fraccion_reparto"] <= 1 for x in d["segmentos"])
+    assert "2023" in d["periodo_reparto"] and "S9" in d["nota"] and "conformal" in d["banda_segmentos"]
     v = cliente.get("/api/v1/predictions/segmentos", params={"ruta": "CRA 54", "instante": "2025-09-16T07:00:00-05:00",
                                                              "horizonte_min": 120, "nivel": "sentido"}).json()
     assert v["segmentos"] == [] and sum(x["pasajeros"] for x in v["sentidos"]) == pytest.approx(v["pasajeros_ruta"],
@@ -213,6 +225,124 @@ def test_pronostico_por_segmento_suma_la_ruta(cliente, primera, entorno):
     assert cliente.get("/api/v1/predictions/segmentos", params={"ruta": "NO", "instante": "2025-09-16T07:00:00"}
                        ).status_code == 404
     assert cliente.get("/api/v1/predictions/segmentos").status_code == 422
+
+
+def test_pronostico_por_segmento_con_la_linea_base_y_modelo_desconocido(cliente, primera, entorno):
+    """?modelo_segmentos= elige otra versión registrada (el reparto fijo B0); un id que no está en el registro da 404
+    y no lee archivos fuera de datos/modelos/segmentos."""
+    from app.servicios import modelo_segmentos
+
+    s = entorno["sesion"]
+    pred = s.scalars(select(Prediccion).where(Prediccion.execution_id == uuid.UUID(primera["execution_id"]))).first()
+    reg = modelo_segmentos.registro()
+    b0 = next(k for k, m in reg["modelos"].items() if m["tipo"] == modelo_segmentos.TIPO_REPARTO)
+    params = {"prediction_id": str(pred.prediction_id)}
+    base = cliente.get("/api/v1/predictions/segmentos", params=params | {"modelo_segmentos": b0}).json()
+    activo = cliente.get("/api/v1/predictions/segmentos", params=params).json()
+    assert base["modelo_segmentos"]["model_id"] == b0 and "reparto fijo" in base["nota"]
+    assert base["suma_segmentos"] == pytest.approx(activo["suma_segmentos"], abs=2e-3)
+    assert all(x["fraccion"] == pytest.approx(x["fraccion_reparto"], abs=1e-5) for x in base["segmentos"])
+    if reg["activo"] != b0:
+        assert any(abs(x["fraccion"] - x["fraccion_reparto"]) > 1e-4 for x in activo["segmentos"])
+    for malo in ("no_existe", "../segmentos/registro"):
+        r = cliente.get("/api/v1/predictions/segmentos", params=params | {"modelo_segmentos": malo})
+        assert r.status_code == 404 and r.json()["error"]["codigo"] == "modelo_no_encontrado"
+    ida = cliente.get("/api/v1/predictions/segmentos", params=params | {"sentido": "ida"}).json()
+    assert {x["sentido"] for x in ida["segmentos"]} == {"ida"} and [x["sentido"] for x in ida["sentidos"]] == ["ida"]
+
+
+def test_pronostico_por_segmento_errores_declarados(cliente, primera, monkeypatch):
+    """Errores del contrato: horizonte fuera de 30/60/120 (422), modelo de ruta desconocido (404), ruta sin segmentos
+    en el modelo (404) y artefacto de segmentos que no pasa la verificación (503, degradación prevista)."""
+    from app.servicios import modelo_segmentos
+
+    al_vuelo = {"ruta": "SILENCIO", "instante": "2025-09-16T07:00:00-05:00"}
+    r = cliente.get("/api/v1/predictions/segmentos", params=al_vuelo | {"horizonte_min": 45})
+    assert r.status_code == 422 and r.json()["error"]["codigo"] == "horizonte_invalido"
+    r = cliente.get("/api/v1/predictions/segmentos", params=al_vuelo | {"model_id": "no_existe"})
+    assert r.status_code == 404 and r.json()["error"]["codigo"] == "modelo_no_encontrado"
+
+    def sin_segmentos(*_a, **_k):
+        raise modelo_segmentos.RutaSinSegmentos("No hay segmentos para la ruta SILENCIO (simulado)")
+
+    monkeypatch.setattr(modelo_segmentos, "desagregar_ventana", sin_segmentos)
+    r = cliente.get("/api/v1/predictions/segmentos", params=al_vuelo)
+    assert r.status_code == 404 and r.json()["error"]["codigo"] == "ruta_sin_segmentos"
+
+    def alterado(*_a, **_k):
+        raise modelo_segmentos.ErrorModeloSegmentos("el artefacto no coincide con el SHA-256 (simulado)")
+
+    monkeypatch.setattr(modelo_segmentos, "cargar", alterado)
+    r = cliente.get("/api/v1/predictions/segmentos", params=al_vuelo)
+    assert r.status_code == 503 and r.json()["error"]["codigo"] == "reparto_no_disponible"
+    assert "SHA-256" in r.json()["error"]["mensaje"]
+
+
+def test_ciclo_guarda_variables_por_segmento_y_sentido(cliente, primera, entorno):
+    """§7.3 paso 4: el ciclo programado genera y guarda en la foto (§11.2) las variables por segmento y sentido de cada
+    ventana, con sentido y segmento llenos; se mide cuánto crece la tabla por ejecución."""
+    from collections import Counter
+
+    from app.servicios import modelo_segmentos
+
+    s = entorno["sesion"]
+    eid = uuid.UUID(primera["execution_id"])
+    seg = primera["metricas"]["monitoreo"]["feature_snapshot_segmentos"]
+    activo = modelo_segmentos.cargar()
+    assert seg["estado"] == "ok" and seg["model_id"] == activo["model_id"]
+    filas = s.scalars(select(FotoVariables).where(FotoVariables.execution_id == eid,
+                                                  FotoVariables.segmento.is_not(None))).all()
+    assert len(filas) == seg["filas"] > 0
+    assert all(f.sentido in ("ida", "regreso") for f in filas)
+    assert {f.feature_version for f in filas} == {modelo_segmentos.VERSION_VARIABLES}
+    assert {f.model_id for f in filas} == {activo["model_id"]}
+    n_seg = activo["segmentos"].groupby("ruta").size().to_dict()
+    por_pred = Counter(f.prediction_id for f in filas)
+    preds = s.scalars(select(Prediccion).where(Prediccion.execution_id == eid)).all()
+    for p in preds:
+        assert por_pred[p.prediction_id] == n_seg[p.ruta]
+        suma = sum(f.features["pasajeros"] for f in filas if f.prediction_id == p.prediction_id)
+        assert suma == pytest.approx(p.pasajeros, abs=0.5)
+    assert {"nro_segmento", "fraccion", "fraccion_base", "subidas_celda", "p10", "p90"} <= set(filas[0].features)
+    api = cliente.get("/api/v1/monitoring/feature-snapshots",
+                      params={"prediction_id": str(preds[0].prediction_id), "limite": 500}).json()
+    assert sum(1 for i in api["items"] if i["segmento"] is not None and i["sentido"]) == n_seg[preds[0].ruta]
+    medida = {bool(k): (int(n), int(b)) for k, n, b in s.execute(text(
+        "SELECT segmento IS NOT NULL, count(*), sum(pg_column_size(t.*)) FROM ai_frecuencias.feature_snapshot t "
+        "WHERE execution_id = :e GROUP BY 1"), {"e": eid}).all()}
+    por_fila = medida[True][1] / medida[True][0]
+    assert por_fila < 600       # solo lo propio del segmento: unos 0,4 kB por fila (la de la ruta pesa unos 0,8 kB)
+    from tests.evidencia import guardar_evidencia
+
+    guardar_evidencia("monitoreo/foto_segmentos.json", {
+        "requisito": "§7.3 paso 4 (variables por ruta, sentido, segmento y ventana) y §11.2 (foto de variables)",
+        "prueba": "tests/integracion/test_monitoreo_api.py::test_ciclo_guarda_variables_por_segmento_y_sentido",
+        "ejecucion": "ciclo de frecuencia con datos hasta 2025-09-15 (3 rutas × 30/60/120 min = 9 predicciones)",
+        "modelo_segmentos": activo["model_id"], "feature_version": modelo_segmentos.VERSION_VARIABLES,
+        "filas_ruta": medida[False][0], "filas_segmento": medida[True][0],
+        "segmentos_por_ruta": n_seg, "bytes_datos_ruta": medida[False][1], "bytes_datos_segmento": medida[True][1],
+        "bytes_por_fila_segmento": round(por_fila, 1),
+        "megabytes_mes_una_ejecucion_diaria": round(medida[True][1] * 30 / 1e6, 2),
+        "medicion": "pg_column_size de las filas de la ejecución (datos de la fila; sin índices ni TOAST aparte)",
+        "contenido_fila_segmento": "solo lo propio del segmento (número, fracción B0 y subidas de su celda, fracción "
+                                   "prevista, pasajeros, P10 y P90); la hora y el calendario de la ventana están en "
+                                   "las filas de la ruta de la misma predicción",
+        "como_apagarla": "FOTO_SEGMENTOS=false (app/config.py): solo se guardan las filas de la ruta"})
+
+
+@pytest.mark.parametrize("limite", [50, 100])
+def test_foto_de_una_ejecucion_se_pagina_sin_repetir_ni_perder_filas(cliente, primera, limite):
+    """§11.2 y RNF-011: con la foto por segmento, las ~1.170 filas de una ejecución comparten ventana_inicio (el orden
+    por omisión). Sin desempate por la llave, LIMIT/OFFSET repetía filas entre páginas y saltaba otras."""
+    eid = primera["execution_id"]
+    total = primera["metricas"]["monitoreo"]["feature_snapshot_filas"]
+    vistos: list[int] = []
+    for desplazamiento in range(0, total, limite):
+        r = cliente.get("/api/v1/monitoring/feature-snapshots",
+                        params={"execution_id": eid, "limite": limite, "desplazamiento": desplazamiento})
+        assert r.status_code == 200 and r.json()["total"] == total
+        vistos += [i["id"] for i in r.json()["items"]]
+    assert total > 1000 and len(vistos) == total == len(set(vistos))
 
 
 def test_retador_en_sombra_compuerta_y_reversion(cliente, primera, entorno, monkeypatch):
@@ -508,6 +638,34 @@ def test_foto_que_falla_no_tumba_el_ciclo_y_queda_en_las_metricas(primera, entor
     assert "disco lleno" in out["advertencias"][0] and fallos[0]["etapa"] == "feature_snapshot"
     despues = s.scalar(select(text("count(*)")).select_from(FotoVariables).where(FotoVariables.execution_id == eid))
     assert despues == antes      # la sesión sigue usable y la foto anterior no se tocó
+    s.rollback()
+
+
+def test_foto_por_segmento_que_la_base_rechaza_no_deshace_la_de_la_ruta(primera, entorno, monkeypatch):
+    """§7.3 paso 4 y §11.2: si la BASE rechaza las filas por segmento (aquí, una hora fuera del CHECK 0-23), se deshace
+    solo su punto de guardado: las filas de la ruta quedan, la foto no se marca como fallida y las métricas lo dicen en
+    feature_snapshot_segmentos (estado «fallo»)."""
+    from app.servicios import modelo_segmentos, monitoreo
+
+    s = entorno["sesion"]
+    eid = uuid.UUID(primera["execution_id"])
+
+    def contar(con_segmento: bool) -> int:
+        cond = FotoVariables.segmento.is_not(None) if con_segmento else FotoVariables.segmento.is_(None)
+        return s.scalar(select(text("count(*)")).select_from(FotoVariables)
+                        .where(FotoVariables.execution_id == eid, cond))
+
+    ruta_antes, seg_antes = contar(False), contar(True)
+    original = modelo_segmentos.filas_foto
+    monkeypatch.setattr(modelo_segmentos, "filas_foto",
+                        lambda *a, **k: [dict(f, hora=99) for f in original(*a, **k)])
+    fallos: list = []
+    out = monitoreo.cerrar_ciclo(s, eid, None, 1, {}, {}, None, fallos)
+    seg = out["feature_snapshot_segmentos"]
+    assert seg["estado"] == "fallo" and seg["filas"] == 0 and "check" in seg["avisos"][0].lower()
+    assert "feature_snapshot_estado" not in out and "advertencias" not in out and not fallos
+    assert contar(True) == seg_antes                                   # ninguna fila por segmento nueva
+    assert contar(False) - ruta_antes == out["feature_snapshot_filas"] > 9     # las de la ruta sí quedaron
     s.rollback()
 
 

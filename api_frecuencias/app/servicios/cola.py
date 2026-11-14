@@ -6,10 +6,17 @@ Protocolo
 - Encolar: una fila con estado 'en_cola' (POST /frequency/executions, POST /models/train o el planificador).
 - Reclamar: SELECT … FOR UPDATE SKIP LOCKED LIMIT 1 y UPDATE a 'corriendo' con worker_id, intentos + 1 y una reserva
   lease_hasta = now() + LEASE_SEGUNDOS, en una transacción corta. Dos réplicas nunca toman la misma fila.
-- Orden: las ejecuciones de tipo 'frecuencia' corren de una en una en todo el clúster, porque la lectura
-  incremental parte de la marca de agua de la anterior. Un bloqueo de asesoría de transacción serializa los
-  reclamos (milisegundos), así que dos réplicas no pueden arrancar dos 'frecuencia' a la vez. Los entrenamientos
-  sí corren en paralelo.
+- Candado por ruta (RNF-005, migración 0009): cada trabajo de 'frecuencia' lee y procesa una partición, su ruta
+  (columna ruta) o todas (ruta NULL, la ejecución sin partir). Dos trabajos cuyas particiones se cruzan (la misma
+  ruta, o uno de todas las rutas) nunca corren a la vez, porque la lectura incremental de cada ruta parte de la marca
+  de agua de esa ruta (ai_frecuencias.marca_agua_ruta); los de rutas distintas sí corren a la vez, en réplicas
+  distintas. Los de una misma ruta van en orden de llegada. Un trabajo de todas las rutas espera a que no corra
+  ningún trabajo de ruta, y los de otras rutas que lleguen mientras espera pueden adelantársele: entonces lee cada
+  ruta desde la marca que ella tenga (nada se salta ni se entrega dos veces; fuentes.leer_particion). Un bloqueo de
+  asesoría de transacción serializa los reclamos (milisegundos), así que la regla no tiene carreras; dentro del ciclo,
+  un candado de asesoría por ruta lo garantiza aunque una réplica que perdió la reserva siga viva
+  (ejecucion.tomar_candados_particion). La ejecución madre de una ejecución partida (particion = 'ruta') no lee:
+  espera a que terminen sus trabajos y cierra lo que es del modelo. Los entrenamientos corren en paralelo.
 - Latido: mientras corre, un hilo renueva la reserva cada LEASE/3. Si la réplica muere (SIGKILL, corte de luz), la
   reserva vence y cualquier réplica devuelve la fila a la cola (liberar_vencidas) y la retoma. Una réplica que
   reinicia con la misma identidad recupera al instante lo que dejó su proceso anterior.
@@ -19,8 +26,10 @@ Protocolo
 - Reintento: un fallo reintentable deja la fila 'en_cola' con disponible_desde = now() + espera exponencial; al
   agotar MAX_REINTENTOS queda 'error'. La marca de agua solo avanza con una ejecución que termina 'ok'.
 - execution_attempt guarda cada intento (réplica, inicio, fin, resultado): evidencia de «exactamente una vez».
-- Tipos de trabajo: 'frecuencia' (ciclo diario), 'entrenamiento' (candidato en sombra) y 'respuesta' (foto de la
-  respuesta del reto con respuesta.precalcular).
+- Tipos de trabajo: 'frecuencia' (ciclo diario), 'entrenamiento' (candidato en sombra), 'respuesta' (foto de la
+  respuesta del reto con respuesta.precalcular), 'segmentos' (refresco de la agregación materializada de la capa
+  analítica, app/servicios/segmentos_refresco.py; migración 0008) y 'retencion' (política de retención de §18,
+  app/servicios/retencion.py; migración 0012).
 - Métricas Prometheus (/metrics): intentos terminados por tipo y resultado, su duración (los entrenamientos incluidos),
   reintentos por motivo y la profundidad de la cola por tipo y estado (ColectorCola, registrado en app/main.py).
 """
@@ -45,7 +54,7 @@ from app.config import obtener_ajustes
 from app.db import sesion_contexto
 
 log = logging.getLogger("api_frecuencias.cola")
-TIPOS = ("frecuencia", "entrenamiento", "respuesta")
+TIPOS = ("frecuencia", "entrenamiento", "respuesta", "segmentos", "retencion")
 EJECUCIONES = Counter("api_ejecuciones_total", "Intentos de ejecución terminados, por tipo de trabajo y resultado "
                       "(ok, reintento, error, reserva_perdida)", ["tipo", "resultado"])
 DURACION = Histogram("api_ejecucion_duracion_segundos", "Duración de cada intento por tipo de trabajo y resultado "
@@ -68,6 +77,7 @@ class Reclamo:
     tipo: str
     intentos: int
     worker_id: str
+    ruta: str | None = None      # partición del trabajo de frecuencia (None = todas las rutas o la ejecución madre)
 
 
 # ---------------------------------------------------------------- identidad y espera
@@ -88,6 +98,10 @@ def espera_reintento(intento: int, base: float = 2.0, tope: float = 60.0) -> flo
 
 
 # ---------------------------------------------------------------- SQL de la cola
+# Candado por ruta (RNF-005): un trabajo de frecuencia (no madre) se reclama solo si ningún otro cuya partición se
+# cruce con la suya (la misma ruta, o uno de todas las rutas) está corriendo o espera un reintento llegado antes; la
+# madre de una ejecución partida, solo cuando ya no le queda ningún trabajo en cola ni corriendo. Con solo
+# ejecuciones sin partir (ruta NULL) es la regla de siempre: una 'frecuencia' a la vez en todo el clúster.
 _RECLAMAR = text("""
 WITH c AS (
     SELECT e.execution_id
@@ -95,12 +109,17 @@ WITH c AS (
      WHERE e.estado = 'en_cola'
        AND coalesce(e.disponible_desde, now()) <= now()
        AND (CAST(:id AS uuid) IS NULL OR e.execution_id = CAST(:id AS uuid))
-       AND (e.tipo <> 'frecuencia' OR NOT EXISTS (
-             SELECT 1 FROM ai_frecuencias.execution_log x WHERE x.tipo = 'frecuencia' AND x.estado = 'corriendo'))
-       AND (e.tipo <> 'frecuencia' OR NOT EXISTS (
-             SELECT 1 FROM ai_frecuencias.execution_log y
-              WHERE y.tipo = 'frecuencia' AND y.estado = 'en_cola' AND y.creado_en < e.creado_en
-                AND y.disponible_desde > now()))
+       AND (e.tipo <> 'frecuencia'
+            OR (e.particion IS NOT NULL AND NOT EXISTS (
+                  SELECT 1 FROM ai_frecuencias.execution_log h
+                   WHERE h.padre_id = e.execution_id AND h.estado IN ('en_cola', 'corriendo')))
+            OR (e.particion IS NULL AND NOT EXISTS (
+                  SELECT 1 FROM ai_frecuencias.execution_log x
+                   WHERE x.tipo = 'frecuencia' AND x.particion IS NULL AND x.execution_id <> e.execution_id
+                     AND (x.ruta IS NULL OR e.ruta IS NULL OR x.ruta = e.ruta)
+                     AND (x.estado = 'corriendo'
+                          OR (x.estado = 'en_cola' AND x.creado_en < e.creado_en
+                              AND x.disponible_desde > now())))))
      ORDER BY e.creado_en, e.execution_id
      FOR UPDATE SKIP LOCKED
      LIMIT 1
@@ -112,7 +131,7 @@ UPDATE ai_frecuencias.execution_log t
        mensaje = 'Intento ' || (t.intentos + 1) || ' en ' || :w
   FROM c
  WHERE t.execution_id = c.execution_id
-RETURNING t.execution_id, t.tipo, t.intentos
+RETURNING t.execution_id, t.tipo, t.intentos, t.ruta
 """)
 
 _RENOVAR = text("""
@@ -168,7 +187,7 @@ def reclamar(worker_id: str, lease_s: float | None = None, execution_id: uuid.UU
         s.execute(text("INSERT INTO ai_frecuencias.execution_attempt (execution_id, intento, worker_id) "
                        "VALUES (:id, :n, :w)"), {"id": fila.execution_id, "n": fila.intentos, "w": worker_id})
         return Reclamo(execution_id=fila.execution_id, tipo=fila.tipo, intentos=int(fila.intentos),
-                       worker_id=worker_id)
+                       worker_id=worker_id, ruta=fila.ruta)
 
     if sesion is not None:
         r = _hacer(sesion)
@@ -234,7 +253,9 @@ def cerrar_ok(s: Session, execution_id: uuid.UUID, valores: dict[str, Any]) -> N
     if worker is not None and resultado.rowcount != 1:
         raise ReservaPerdida(f"La ejecución {execution_id} ya no está reservada por {worker}")
     if worker is not None:
-        s.execute(text("UPDATE ai_frecuencias.execution_attempt SET resultado = 'ok', terminado_en = now() "
+        # clock_timestamp(): el fin del intento es el momento del cierre, no el inicio de la transacción del ciclo
+        # (now()); así [reclamado_en, terminado_en] es el intervalo real del intento en el reloj de la base
+        s.execute(text("UPDATE ai_frecuencias.execution_attempt SET resultado = 'ok', terminado_en = clock_timestamp() "
                        "WHERE execution_id = :id AND worker_id = :w AND resultado = 'corriendo'"),
                   {"id": execution_id, "w": worker})
 
@@ -297,8 +318,8 @@ def correr_reclamo(r: Reclamo, *, lease_s: float | None = None, max_reintentos: 
     resultado = "error"
     try:
         _correr_segun_tipo(r)
-        log.info("Ejecución %s (%s) ok en %.1f s, intento %s, %s", r.execution_id, r.tipo,
-                 time.perf_counter() - t0, r.intentos, r.worker_id)
+        log.info("Ejecución %s (%s, ruta %s) ok en %.1f s, intento %s, %s", r.execution_id, r.tipo,
+                 r.ruta or "todas", time.perf_counter() - t0, r.intentos, r.worker_id)
         resultado = "ok"
     except ReservaPerdida as exc:
         log.warning("%s: el intento se revirtió completo", exc)
@@ -321,14 +342,11 @@ def correr_reclamo(r: Reclamo, *, lease_s: float | None = None, max_reintentos: 
 
 
 def _correr_segun_tipo(r: Reclamo) -> None:
-    from app.servicios import ejecucion
+    from app.servicios import ejecucion, retencion, segmentos_refresco
 
-    if r.tipo == "entrenamiento":
-        ejecucion._ciclo_entrenamiento(r.execution_id)
-    elif r.tipo == "respuesta":
-        ejecucion._ciclo_respuesta(r.execution_id)
-    else:
-        ejecucion._ciclo_frecuencia(r.execution_id)
+    ciclos = {"entrenamiento": ejecucion._ciclo_entrenamiento, "respuesta": ejecucion._ciclo_respuesta,
+              "segmentos": segmentos_refresco.ciclo_refresco, "retencion": retencion.ciclo_retencion}
+    ciclos.get(r.tipo, ejecucion._ciclo_frecuencia)(r.execution_id)
 
 
 def _estado(execution_id: uuid.UUID) -> str | None:
@@ -397,8 +415,8 @@ class Trabajador(threading.Thread):
                     r, lease_s=self.lease_s, max_reintentos=self.max_reintentos, base_espera=self.base_espera)))
             finally:
                 self.ocupado.clear()
-            # cede el turno un sondeo: como las de frecuencia van de una en una, sin esta pausa la réplica que
-            # termina reclamaría siempre la siguiente antes de que las demás despierten (reparto de carga)
+            # cede el turno un sondeo: como las de frecuencia de una misma ruta van de una en una, sin esta pausa la
+            # réplica que termina reclamaría siempre la siguiente antes de que las demás despierten (reparto de carga)
             self.parada.wait(self.sondeo_s)
 
 

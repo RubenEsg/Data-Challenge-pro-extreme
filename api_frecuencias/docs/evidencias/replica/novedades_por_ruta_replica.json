@@ -1,0 +1,29 @@
+{
+ "prueba": "tests/replica/test_integrado.py::test_novedades_viales_ruta_vacia_en_la_replica_cada_novedad_es_de_todas_las_rutas",
+ "rol": "lector_ia (solo lectura)",
+ "resumen": {
+  "novedades": 28,
+  "dias_con_novedad": 25,
+  "horas_con_novedad": 246,
+  "festivos_oficiales_en_rango": 72,
+  "procesos_estacionalidades": [
+   "sobusa"
+  ],
+  "filas_novedades_viales_ruta": 0,
+  "novedades_por_ruta": 0,
+  "novedades_todas_las_rutas": 28,
+  "rutas_fuera_del_catalogo": 0,
+  "filas_sin_novedad": 0,
+  "filas_novedades_por_ruta": 0
+ },
+ "filas_contexto_por_ruta": 0,
+ "comparacion_con_datos_contexto_operacional": {
+  "filas_bd": 24837,
+  "filas_archivo": 24837,
+  "filas_comunes": 24837,
+  "filas_iguales": 24837,
+  "identico": true,
+  "horas_con_novedad_bd": 246,
+  "horas_con_novedad_archivo": 246
+ }
+}

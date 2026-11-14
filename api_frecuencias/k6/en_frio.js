@@ -1,10 +1,13 @@
 // Prueba k6 de peticiones EN FRÍO (spec v1.5 §14.1 «Carga», RNF-002): la PRIMERA petición a cada ruta de lectura
 // justo después de arrancar la API, sin calentamiento ni caché, y luego una segunda pasada para comparar.
-// Incluye las consultas pesadas: segmentos/estadisticas (lee la réplica operacional), catálogos, monitoreo,
+// Incluye las consultas pesadas: segmentos/estadisticas (desde la migración 0008 lee la agregación materializada que
+// refresca el trabajo «segmentos» de la cola; antes agregaba la réplica en cada petición), catálogos, monitoreo,
 // exportaciones y, si INCLUIR_PLAN=1, el plan del día y la respuesta del reto (FECHA_PLAN, RUTA_PLAN).
 //
-// Cada petición lleva la etiqueta {ruta, pasada}; el umbral p95 < 2 s se evalúa por pasada. En frío hay una sola
-// muestra por ruta, así que el p95 de la pasada «frio» es, en la práctica, el máximo entre rutas.
+// Cada petición lleva las etiquetas {ruta, pasada, clase}: clase=consulta para las lecturas paginadas y
+// clase=exportacion para las descargas completas (/export), que no son consultas paginadas y quedan fuera de RNF-002
+// (se miden y se informan, sin umbral). El umbral p95 < 2 s se evalúa por pasada sobre las consultas. En frío hay una
+// sola muestra por ruta, así que el p95 de la pasada «frio» es, en la práctica, el máximo entre rutas.
 //
 // Uso (Docker, imagen grafana/k6:1.4.2; la clave SOLO por entorno):
 //   docker run --rm -e BASE=http://host.docker.internal:8507 -e SOBUSA_API_KEY \
@@ -25,8 +28,8 @@ export const options = {
     en_frio: { executor: 'per-vu-iterations', vus: 1, iterations: 1, maxDuration: '10m' },
   },
   thresholds: {
-    'http_req_duration{pasada:frio}': ['p(95)<2000'],
-    'http_req_duration{pasada:caliente}': ['p(95)<2000'],
+    'http_req_duration{pasada:frio,clase:consulta}': ['p(95)<2000'],
+    'http_req_duration{pasada:caliente,clase:consulta}': ['p(95)<2000'],
     'checks': ['rate>0.99'],
   },
   summaryTrendStats: ['avg', 'min', 'med', 'p(90)', 'p(95)', 'p(99)', 'max'],
@@ -63,12 +66,13 @@ if (__ENV.INCLUIR_PLAN === '1') {
 
 function pedir(nombre, ruta, pasada) {
   const cid = `k6-frio-${pasada}-${nombre}`;
+  const clase = ruta.includes('/export') ? 'exportacion' : 'consulta';
   const r = http.get(`${BASE}${ruta}`, {
     headers: { 'X-API-Key': CLAVE, 'X-Correlation-Id': cid },
-    tags: { ruta: nombre, pasada },
+    tags: { ruta: nombre, pasada, clase },
     timeout: '120s',
   });
-  duracion.add(r.timings.duration, { ruta: nombre, pasada });
+  duracion.add(r.timings.duration, { ruta: nombre, pasada, clase });
   // 200, o 503 declarado cuando la fuente de esa ruta no existe en la máquina (RNF-010), o 404 «sin_calcular»
   check(r, {
     'estado esperado': (x) => x.status === 200 || x.status === 503 || x.status === 404,

@@ -4,9 +4,11 @@
 Hoy datos/contexto_operacional.parquet sale de las exportaciones (scripts/preparar_datos_api.py). Este script lee las
 mismas tablas de la base operacional con lector_ia (FuentePostgresSoloLectura: READ ONLY, statement_timeout, TimeZone)
 — novedades_viales_fecha, novedades_viales_ruta, estacionalidades_anio y estacionalidades — y aplica EXACTAMENTE la
-misma función contexto_operacional() de preparar_datos_api.py, para que las variables del modelo puedan venir de la
-base en vez de los archivos. Compara el resultado con el parquet empaquetado (igualdad fila a fila) y, con --salida,
-escribe el parquet en otra carpeta (nunca sobre datos/ del repositorio).
+misma función de preparar_datos_api.py (contexto_y_novedades_por_ruta: las novedades de todas las rutas por fecha y
+hora y, si novedades_viales_ruta trae filas, las de rutas dadas por ruta, fecha y hora), para que las variables del
+modelo puedan venir de la base en vez de los archivos. Compara el resultado con el parquet empaquetado (igualdad fila
+a fila) y, con --salida, escribe el parquet en otra carpeta (nunca sobre datos/ del repositorio), con
+novedades_por_ruta.parquet al lado si hay novedades por ruta.
 
 Uso: .venv\\Scripts\\python -m scripts.replica_contexto [--salida C:/tmp/contexto_operacional.parquet]
 """
@@ -14,7 +16,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import tempfile
 from datetime import datetime
 from pathlib import Path
 
@@ -44,18 +45,15 @@ def leer_tablas(url: str | None = None) -> dict[str, pd.DataFrame]:
 
 
 def construir(tablas: dict[str, pd.DataFrame], desde: str = "2023-01-01", hasta: str = "2026-12-31"):
-    """Misma lógica que preparar_datos_api.contexto_operacional, alimentada con lo leído de la base."""
-    from scripts.preparar_datos_api import contexto_operacional
+    """Misma lógica que preparar_datos_api (contexto de todas las rutas, novedades de rutas dadas y resumen),
+    alimentada con lo leído de la base."""
+    from scripts.preparar_datos_api import contexto_y_novedades_por_ruta
 
-    with tempfile.TemporaryDirectory(prefix="contexto_bd_") as tmp:
-        carpeta = Path(tmp) / "datos"
-        carpeta.mkdir()
-        for nombre, df in tablas.items():
-            if nombre == "estacionalidades_anio":       # columnas de la tabla, sin las del catálogo unido
-                df = df[["id_estacionalidad_anio", "proceso", "id_estacionalidad", "ano", "fecha_inicio",
-                         "fecha_fin"]]
-            df.to_parquet(carpeta / f"{nombre}.parquet", index=False)
-        return contexto_operacional(Path(tmp), desde, hasta)
+    # columnas de la tabla, sin las del catálogo unido
+    ea = tablas["estacionalidades_anio"][["id_estacionalidad_anio", "proceso", "id_estacionalidad", "ano",
+                                          "fecha_inicio", "fecha_fin"]]
+    return contexto_y_novedades_por_ruta(tablas["novedades_viales_fecha"], tablas["novedades_viales_ruta"], ea,
+                                         tablas["estacionalidades"], desde, hasta)
 
 
 def comparar(ctx: pd.DataFrame, referencia: Path) -> dict:
@@ -83,7 +81,7 @@ def main(argv: list[str] | None = None) -> dict:
     p.add_argument("--sin-evidencia", action="store_true")
     a = p.parse_args(argv)
     tablas = leer_tablas(a.url)
-    ctx, info = construir(tablas)
+    ctx, por_ruta, info = construir(tablas)
     from app.servicios import datos
 
     informe = {"generado_en": datetime.now().astimezone().isoformat(), "rol": "lector_ia (solo lectura)",
@@ -96,6 +94,10 @@ def main(argv: list[str] | None = None) -> dict:
             raise SystemExit("No se escribe en datos/ del repositorio: elija otra carpeta.")
         ctx.to_parquet(destino, index=False)
         informe["salida"] = str(destino)
+        from scripts.preparar_datos_api import escribir_novedades_por_ruta
+
+        if escribir_novedades_por_ruta(destino.parent, por_ruta):
+            informe["salida_novedades_por_ruta"] = str(destino.parent / "novedades_por_ruta.parquet")
     if not a.sin_evidencia:
         EVIDENCIA.write_text(json.dumps(informe, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
     return informe

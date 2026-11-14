@@ -44,7 +44,8 @@ def test_contexto_normal_no_dispara_nada():
     ("ALT-001", dict(demanda_prevista=420, p90=520, p10=380, pasajeros_observados=None), "preventiva"),
     ("ALT-001", dict(demanda_prevista=480, p90=560, p10=420, pasajeros_observados=None), "critica"),
     ("ALT-002", dict(ocupacion_observada=0.95), "critica"),
-    ("ALT-003", dict(buses_hora_actual=8, buses_hora_recomendado=9), "preventiva"),   # 400 × 0,85 = 340 < 350
+    # 350 × 0,85 = 297,5 < P90 350 y P(carga crítica > 297,5) = 53 % ≥ alt003_probabilidad_minima (30 %)
+    ("ALT-003", dict(buses_hora_actual=7, buses_hora_recomendado=9), "preventiva"),
     ("ALT-004", dict(demanda_prevista=100, p10=80, p90=120, pasajeros_observados=None, demanda_patron=None,
                      buses_hora_recomendado=6), "informativa"),
     ("ALT-005", dict(pasajeros_observados=150, p10=200), "preventiva"),       # bajo 0,7 × patrón y bajo el P10

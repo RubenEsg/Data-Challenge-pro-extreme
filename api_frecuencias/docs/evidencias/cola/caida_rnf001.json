@@ -2,70 +2,72 @@
  "escenarios": [
   {
    "escenario": "sigkill_lectura_incremental",
-   "execution_id": "cf1a3294-dfc5-438c-a56f-cc6a7fe8244a",
+   "execution_id": "957eabd6-da30-40fe-aff5-9a4d086b1f5e",
    "api_de_vuelta_s": 3.4,
-   "ok_tras_kill_s": 16.9,
+   "ok_tras_kill_s": 21.7,
    "predicciones_visibles_antes_del_kill": 0,
    "intentos": 2,
    "traza": [
     [
      1,
-     "caida-a:28396:881e4f:t1",
+     "caida-a:29920:454714:t1",
      "abandonado"
     ],
     [
      2,
-     "caida-a:28384:e8f889:t1",
+     "caida-a:12284:d1c804:t1",
      "ok"
     ]
    ]
   },
   {
    "escenario": "sigkill_prediccion",
-   "execution_id": "d6838f5f-15dc-46d7-98ae-706b8757d34e",
-   "api_de_vuelta_s": 3.9,
-   "ok_tras_kill_s": 17.5,
+   "execution_id": "0ff06b66-4bf5-4cfd-8493-cc5850702965",
+   "api_de_vuelta_s": 3.4,
+   "ok_tras_kill_s": 22.1,
    "predicciones_visibles_antes_del_kill": 0,
    "intentos": 2,
    "traza": [
     [
      1,
-     "caida-a:28384:e8f889:t1",
+     "caida-a:12284:d1c804:t1",
      "abandonado"
     ],
     [
      2,
-     "caida-a:23996:605d69:t1",
+     "caida-a:35436:c8e048:t1",
      "ok"
     ]
    ]
   },
   {
    "escenario": "reserva_vencida_otra_replica",
-   "execution_id": "753bfd90-c356-40ab-b480-1a1d2c747b19",
-   "retomada_tras_kill_s": 7.3,
-   "ok_tras_kill_s": 20.4,
+   "execution_id": "f935af0a-2535-4ab9-ab32-f2a8fd295033",
+   "retomada_tras_kill_s": 6.7,
+   "ok_tras_kill_s": 26.1,
    "intentos": 2,
    "traza": [
     [
      1,
-     "caida-a:23996:605d69:t1",
+     "caida-a:35436:c8e048:t1",
      "abandonado"
     ],
     [
      2,
-     "caida-b:22392:60350e:t1",
+     "caida-b:22760:0a643a:t1",
      "ok"
     ]
    ]
   }
  ],
  "referencia": {
-  "execution_id": "b5009aa8-20ba-4d75-a595-f0154a4d3a9e",
+  "execution_id": "18b539e8-ade4-4daa-a893-13224599721f",
   "predicciones": 9,
-  "recomendaciones": 9,
-  "alertas": 25,
-  "intentos": 1
+  "recomendaciones": 60,
+  "alertas": 71,
+  "intentos": 1,
+  "foto_ruta": 12,
+  "foto_segmento": 1158
  },
  "ok": true,
  "fallas": []

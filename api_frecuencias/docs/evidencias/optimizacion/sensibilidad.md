@@ -1,6 +1,6 @@
 # Sensibilidad de la recomendación de frecuencia (§10.2, §10.3, RF-008)
 
-Generado por `scripts/sensibilidad.py` el 2026-11-09T06:23:49-05:00 (27.0 s). Datos: pronóstico por hora y banda P10-P90 calibrada del modelo activo; ciclo, flota e intervalo programado de la hora (D1); factor de carga crítica por ruta, tipo de día y hora (mediana 2025 de los insumos de D5); tipologías de `tipologias_flota.json`; umbrales de la versión 1 y pesos por omisión del código.
+Generado por `scripts/sensibilidad.py` el 2026-11-11T05:51:52-05:00 (20.5 s). Datos: pronóstico por hora y banda P10-P90 calibrada del modelo activo; ciclo, flota e intervalo programado de la hora (D1); factor de carga crítica por ruta, día de la semana y hora (mediana 2025 de los insumos de D5); tipologías de `tipologias_flota.json`; umbrales de la versión 1 y pesos por omisión del código.
 
 ## Formulación
 
@@ -24,12 +24,12 @@ Dos líneas base de §10.3: la **literal** (ceil(demanda puntual / capacidad efe
 | SILENCIO | Laboral 2025-03-11 | 17 | 536 (678) | 6 buses/h · 10,00 min · 26 veh. | sí | headway_maximo, flota_T4 | 13 buses/h (no viable) | 7 buses/h (viable) | sí | 8,4 buses/h | 3 de 23 | sí |
 | SILENCIO | Sábado 2025-03-15 | 7 | 721 (820) | 7 buses/h · 8,57 min · 31 veh. | sí | nivel_servicio, flota_T1, flota_T2, flota_T4 | 17 buses/h (no viable) | 9 buses/h (viable) | no | 9,9 buses/h | 6 de 23 | sí |
 | CRA 54 | Laboral 2025-03-11 | 7 | 1.751 (1.898) | 17 buses/h · 3,53 min · 72 veh. | no | — | 30 buses/h (no viable) | 23 buses/h (no viable) | no | 20,4 buses/h | 1 de 23 | sí |
-| CRA 54 | Laboral 2025-03-11 | 11 | 1.261 (1.420) | 10 buses/h · 6,00 min · 40 veh. | sí | nivel_servicio, flota_T4 | 30 buses/h (no viable) | 13 buses/h (viable) | no | 16,3 buses/h | 8 de 23 | sí |
-| CRA 54 | Laboral 2025-03-11 | 17 | 1.150 (1.283) | 10 buses/h · 6,00 min · 38 veh. | sí | nivel_servicio, flota_T4 | 28 buses/h (no viable) | 13 buses/h (viable) | no | 17,0 buses/h | 8 de 23 | sí |
+| CRA 54 | Laboral 2025-03-11 | 11 | 1.261 (1.420) | 10 buses/h · 6,00 min · 40 veh. | sí | nivel_servicio, flota_T4 | 30 buses/h (no viable) | 13 buses/h (viable) | no | 16,3 buses/h | 7 de 23 | sí |
+| CRA 54 | Laboral 2025-03-11 | 17 | 1.150 (1.283) | 11 buses/h · 5,45 min · 41 veh. | sí | nivel_servicio, flota_T3, flota_T4 | 28 buses/h (no viable) | 14 buses/h (viable) | no | 17,0 buses/h | 8 de 23 | sí |
 | CRA 54 | Sábado 2025-03-15 | 7 | 1.756 (1.938) | 17 buses/h · 3,53 min · 68 veh. | no | — | 30 buses/h (no viable) | 22 buses/h (no viable) | no | 24,3 buses/h | 1 de 23 | sí |
-| CL 72 | Laboral 2025-03-11 | 7 | 549 (636) | 7 buses/h · 8,57 min · 31 veh. | sí | nivel_servicio, flota_T2, flota_T3 | 13 buses/h (no viable) | 7 buses/h (viable) | sí | 5,8 buses/h | 5 de 23 | sí |
+| CL 72 | Laboral 2025-03-11 | 7 | 549 (636) | 6 buses/h · 10,00 min · 27 veh. | sí | headway_maximo, nivel_servicio, flota_T2, flota_T3 | 13 buses/h (no viable) | 7 buses/h (viable) | no | 5,8 buses/h | 7 de 23 | sí |
 | CL 72 | Laboral 2025-03-11 | 11 | 398 (486) | 6 buses/h · 10,00 min · 26 veh. | sí | headway_maximo, flota_T2, flota_T3 | 10 buses/h (viable) | 6 buses/h (viable) | sí | 4,2 buses/h | 1 de 23 | sí |
-| CL 72 | Laboral 2025-03-11 | 17 | 372 (478) | 6 buses/h · 10,00 min · 24 veh. | sí | headway_maximo, flota_T3, flota_T4 | 9 buses/h (viable) | 6 buses/h (viable) | sí | 5,0 buses/h | 1 de 23 | sí |
+| CL 72 | Laboral 2025-03-11 | 17 | 372 (478) | 6 buses/h · 10,00 min · 24 veh. | sí | headway_maximo, flota_T3, flota_T4 | 9 buses/h (viable) | 6 buses/h (viable) | sí | 5,0 buses/h | 2 de 23 | sí |
 | CL 72 | Sábado 2025-03-15 | 7 | 435 (552) | 6 buses/h · 10,00 min · 27 veh. | sí | headway_maximo, nivel_servicio, flota_T2, flota_T3 | 11 buses/h (no viable) | 6 buses/h (viable) | sí | 6,8 buses/h | 5 de 23 | sí |
 | SILENCIO | Domingo/festivo 2025-11-17 | 7 | 297 (399) | 6 buses/h · 10,00 min · 21 veh. | sí | headway_maximo, flota_T1, flota_T2, flota_T4 | 7 buses/h (viable) | 6 buses/h (viable) | sí | 7,9 buses/h | 0 de 23 | sí |
 
@@ -37,34 +37,34 @@ Dos líneas base de §10.3: la **literal** (ceil(demanda puntual / capacidad efe
 
 | Variación | SILENCIO 7 h 03-11 | SILENCIO 11 h 03-11 | SILENCIO 17 h 03-11 | SILENCIO 7 h 03-15 | CRA 54 7 h 03-11 | CRA 54 11 h 03-11 | CRA 54 17 h 03-11 | CRA 54 7 h 03-15 | CL 72 7 h 03-11 | CL 72 11 h 03-11 | CL 72 17 h 03-11 | CL 72 7 h 03-15 | SILENCIO 7 h 11-17 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| base | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
+| base | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
 | peso_costo_operativo × 0,0 | 7 | 8 | 8 | 7 | 17 nv | 17 | 17 | 17 nv | 8 | 8 | 8 | 8 | 6 |
-| peso_costo_operativo × 0,5 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| peso_costo_operativo × 2,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| peso_costo_operativo × 5,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| peso_tiempo_espera × 0,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| peso_tiempo_espera × 0,5 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| peso_tiempo_espera × 2,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
+| peso_costo_operativo × 0,5 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_costo_operativo × 2,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_costo_operativo × 5,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_tiempo_espera × 0,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_tiempo_espera × 0,5 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_tiempo_espera × 2,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
 | peso_tiempo_espera × 5,0 | 7 | 8 | 8 | 7 | 17 nv | 13 | 13 | 17 nv | 7 | 6 | 6 | 7 | 6 |
-| peso_sobreocupacion × 0,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| peso_sobreocupacion × 0,5 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| peso_sobreocupacion × 2,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| peso_sobreocupacion × 5,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| peso_desviacion_frecuencia × 0,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| peso_desviacion_frecuencia × 0,5 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| peso_desviacion_frecuencia × 2,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| peso_desviacion_frecuencia × 5,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| nivel_servicio = 0,80 | 7 | 6 | 6 | 7 | 17 nv | 9 | 10 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_sobreocupacion × 0,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_sobreocupacion × 0,5 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_sobreocupacion × 2,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_sobreocupacion × 5,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_desviacion_frecuencia × 0,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_desviacion_frecuencia × 0,5 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_desviacion_frecuencia × 2,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| peso_desviacion_frecuencia × 5,0 | 7 | 6 | 6 | 7 | 17 nv | 10 | 11 | 17 nv | 6 | 6 | 6 | 6 | 6 |
+| nivel_servicio = 0,80 | 7 | 6 | 6 | 7 | 17 nv | 10 | 10 | 17 nv | 6 | 6 | 6 | 6 | 6 |
 | nivel_servicio = 0,95 | 7 | 6 | 6 | 7 nv | 17 nv | 10 | 11 | 17 nv | 7 | 6 | 6 | 6 | 6 |
-| nivel_servicio = 0,99 | 7 nv | 6 | 6 | 7 nv | 17 nv | 11 | 11 | 17 nv | 7 | 6 | 6 | 7 | 6 |
+| nivel_servicio = 0,99 | 7 nv | 6 | 6 | 7 nv | 17 nv | 11 | 12 | 17 nv | 7 | 6 | 6 | 7 | 6 |
 | demanda × 0,80 | 6 | 6 | 6 | 6 | 16 | 8 | 8 | 15 | 6 | 6 | 6 | 6 | 6 |
 | demanda × 1,20 | 7 nv | 6 | 6 | 7 nv | 17 nv | 12 | 13 | 17 nv | 8 | 6 | 6 | 7 | 6 |
-| demanda × 1,50 | 7 nv | 8 | 8 | 7 nv | 17 nv | 16 | 16 | 17 nv | 8 nv | 6 | 6 | 8 | 6 |
+| demanda × 1,50 | 7 nv | 8 | 8 | 7 nv | 17 nv | 16 | 17 | 17 nv | 8 nv | 6 | 7 | 8 | 6 |
 | ocupacion_objetivo = 0,75 | 7 nv | 6 | 6 | 7 nv | 17 nv | 11 | 12 | 17 nv | 7 | 6 | 6 | 6 | 6 |
 
 ## Tiempo de cálculo: memoria de soluciones del MILP
 
-Las 51 franjas de un día del ciclo (2025-11-19, 3 rutas × 17 horas, demanda y banda del modelo activo) se resolvieron dos veces con `recomendacion_franja`: 3,94 s en frío y 0,11 s cuando cada franja ya estaba resuelta (35,5 veces más rápido). Resultados idénticos (sin contar los tiempos): sí. Casi todo el tiempo de una franja es arrancar el proceso de CBC; la memoria guarda la solución por los datos exactos del problema (límites, demanda, banda, flota, tipologías, pesos y costos) y solo los estados que no dependen del tiempo (óptimo o infactible).
+Las 51 franjas de un día del ciclo (2025-11-19, 3 rutas × 17 horas, demanda y banda del modelo activo) se resolvieron dos veces con `recomendacion_franja`: 3,16 s en frío y 0,16 s cuando cada franja ya estaba resuelta (19,2 veces más rápido). Resultados idénticos (sin contar los tiempos): sí. Casi todo el tiempo de una franja es arrancar el proceso de CBC; la memoria guarda la solución por los datos exactos del problema (límites, demanda, banda, flota, tipologías, pesos y costos) y solo los estados que no dependen del tiempo (óptimo o infactible).
 
 ## Lectura
 

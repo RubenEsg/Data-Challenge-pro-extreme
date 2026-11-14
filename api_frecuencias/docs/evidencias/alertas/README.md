@@ -74,18 +74,22 @@ la demanda **real** de su hora en las mismas unidades (carga crítica real = fac
 
 | Código | Por ruta y día | Precisión real | Tasa base | Lift | Antes (sin factor): por ruta y día |
 |---|---|---|---|---|---|
-| ALT-001 | **0,435** | 0,312 (44 de 141) | 0,176 | 1,77 | 0,889 |
-| ALT-002 | **0,315** | 0,794 (81 de 102) | 0,395 | 2,01 | 0,858 |
-| ALT-003 | **0,380** | 0,358 (44 de 123) | 0,478 | 0,75 | 0,318 (por número de buses) |
+| ALT-001 | **0,438** | 0,296 (42 de 142) | 0,164 | 1,81 | 0,889 |
+| ALT-002 | **0,306** | 0,808 (80 de 99) | 0,398 | 2,03 | 0,858 |
+| ALT-003 | **0,164** | 0,491 (26 de 53) | 0,469 (0,236 donde puede emitirse) | 1,05 (2,08 donde puede emitirse) | 0,318 (por número de buses) |
 | ALT-004 | **0,031** | 0,400 (4 de 10) | 0,052 | 7,62 | 0,000 |
-| Todas las de pronóstico | **1,161** | | | | 2,065 |
+| Todas las de pronóstico | **0,938** (304 alertas en 324 días-ruta) | | | | 2,065 |
 
-Lectura: con el factor de carga hay la mitad de alertas de pronóstico (1,161 frente a 2,065 por ruta y día) y
-discriminan más que la variante anterior por ventana (lift de ALT-001 1,09 → 1,77 y de ALT-002 1,08 → 2,01, tabla de
-confirmación de `backtest_alertas_pronostico.md`). ALT-003 se cumple por definición en las franjas donde la recomendación no es viable (el
-54 % de las franjas del ciclo de las 6:00: `recomendaciones_viables_pct` = 46,0 %); como alerta de riesgo sobre el
-P90 su lift es menor que 1, y se informa así. Antes de la comparación por hora (ventana de 30/60/120 min frente a la
-capacidad por hora) eran 2,552 / 2,358 alertas por ruta y día de ALT-001 / ALT-002.
+Regenerado con el código final de la ola B: el factor de carga crítica de la franja es el de ruta × día de la semana
+de operación × hora (`optimizacion.factor_carga_franja`, con el tipo de día como respaldo) y ALT-003 exige además la
+probabilidad mínima gobernada (`alt003_probabilidad_minima` = 0,30, migración 0014;
+`../../alertas_viajes_y_alt003.md`). Lectura: con el factor de carga hay menos de la mitad de alertas de pronóstico
+(0,938 frente a 2,065 por ruta y día) y discriminan más que la variante anterior por ventana (lift de ALT-001 1,09 →
+1,81 y de ALT-002 1,08 → 2,03, tabla de confirmación de `backtest_alertas_pronostico.md`). ALT-003 nunca se emite donde
+sale ALT-001 (§18, va incluida en ella), así que su tasa base es la de las franjas donde puede emitirse: con la
+probabilidad mínima su lift es 2,08 ahí y 1,05 sobre todas las franjas (el 54 % de las franjas del ciclo de las 6:00 no
+tiene una recomendación viable: `recomendaciones_viables_pct` = 46,0 %). Antes de la comparación por hora (ventana de
+30/60/120 min frente a la capacidad por hora) eran 2,552 / 2,358 alertas por ruta y día de ALT-001 / ALT-002.
 
 ## 3. Reglas con datos observados (`app/servicios/alertas.py`, `evaluar_observadas`)
 
@@ -131,24 +135,29 @@ sostiene 14 días (ruptura). Una alerta no confirmada cuenta como falso positivo
 
 | Código | Por ruta y día | Por día (3 rutas) | Precisión proxy | Lift | Reglas anteriores: por ruta y día |
 |---|---|---|---|---|---|
-| ALT-002 observada | 0,691 | 2,07 | 0,411 | 2,24 | 1,614 (sin persistencia) |
+| ALT-002 observada | 0,710 | 2,13 | 0,404 | 2,21 | 1,596 (sin persistencia) |
 | ALT-005 | 0,142 | 0,43 | 0,359 | 4,69 | 1,296 |
 | ALT-006 | 0,127 | 0,38 | 0,390 | 8,30 | 2,849 |
 | ALT-007 | 0,204 | 0,61 | 0,270 | 1,34 | 1,833 |
 | ALT-007 ruptura | 0,012 (4 detecciones) | 0,04 | 0,667 (2 de 3) | — | — |
-| ALT-008 | 0,062 | 0,18 | 0,700 | 3,78 | 0,099 |
-| ALT-005 a ALT-009 | **0,534** | 1,60 | | | **6,077** |
-| Todas las observadas | **1,238** | 3,71 | | | |
+| ALT-008 (con bajadas) | 0,071 | 0,21 | 0,652 | 3,52 | 0,105 |
+| ALT-005 a ALT-009 | **0,543** | 1,63 | | | **6,083** |
+| Todas las observadas | **1,265** (410 alertas) | 3,80 | | | |
 
-**Volumen total para el operador (§18)**: 1,238 observadas + 1,161 de pronóstico = **2,399 alertas por ruta y día**
-(unas 7,2 por día para las tres rutas), frente a 0,534 + 2,065 = 2,599 antes de medir con el factor de carga y antes de
-evaluar la ocupación observada y las rupturas. Con las reglas iniciales solo las observadas ALT-005 a ALT-009 ya eran
-6,077 por ruta y día («Reglas anteriores» de `backtest_alertas.md`).
+**Volumen total para el operador (§18)**: 1,265 observadas + 0,938 de pronóstico = **2,203 alertas por ruta y día**
+(unas 6,6 por día para las tres rutas; `scripts/cifras_vigentes.py` lo calcula de los dos JSON, con el conteo de
+alertas y los días-ruta), frente a 0,534 + 2,065 = 2,599 antes de medir con el factor de carga y antes de evaluar la
+ocupación observada y las rupturas. Con las reglas iniciales solo las observadas ALT-005 a ALT-009 ya eran 6,083 por
+ruta y día («Reglas anteriores» de `backtest_alertas.md`).
 
 ALT-002 observada es nueva: el 18,3 % de las horas medibles tiene una ocupación observada ≥ 90 % (tasa base), así que
-la sobreocupación es real en los picos; la persistencia de 2 h la baja de 1,614 a 0,691 alertas por ruta y día con el
-mismo lift (2,34 → 2,24; sensibilidad de `backtest_alertas.md`). Antes, con la banda v1, ALT-005 a ALT-009 daban 0,509
-por ruta y día.
+la sobreocupación es real en los picos; la persistencia de 2 h la baja de 1,596 a 0,710 alertas por ruta y día con un
+lift parecido (2,43 → 2,21; sensibilidad de `backtest_alertas.md`). El backtest estima la ocupación con el **mismo factor
+de carga que el ciclo** (`optimizacion.factor_carga_franja`: ruta × día de la semana de operación × hora, 7 = domingo o
+festivo, con el tipo de día como respaldo; `scripts/backtest_alertas.py::factores_de_las_franjas`, sin copiar el
+cálculo): 5.468 de las 5.508 horas evaluadas tienen el factor de su día de la semana y 40 no tienen factor. Con el
+factor por tipo de día que usaba antes el backtest eran 224 alertas (0,691), precisión 0,411 y lift 2,24; las demás
+reglas no cambian. Antes, con la banda v1, ALT-005 a ALT-009 daban 0,509 por ruta y día.
 
 **Detector de rupturas (RF-009)** — sección «Detector de rupturas» de `backtest_alertas.md`:
 
@@ -161,8 +170,12 @@ por ruta y día.
   es para cambios de nivel sostenidos; los desvíos de horas sueltas los cubren ALT-005 y ALT-007.
 
 **B. fv2 temporal con corte 31/12/2024 (15/01 a 31/12/2025, 1.053 días-ruta)**: `backtest_alertas_corte_2024-12-31.md`
-/ `.json`, con las reglas de ALT-005 a ALT-009 (0,451 por ruta y día frente a 5,702 con las reglas anteriores). No
-incluye ALT-002 observada ni rupturas.
+/ `.json`, regenerado con el código final (banda v2, el factor de carga del ciclo, ALT-002 observada, rupturas y
+ALT-008 con bajadas). Todas las observadas: 1,137 por ruta y día (ALT-002 observada 0,733 con lift 2,30; ALT-005 0,105;
+ALT-006 0,089; ALT-007 0,119; ALT-007 ruptura 0,026, 27 detecciones; ALT-008 0,066). Solo ALT-005 a ALT-009: 0,378 por
+ruta y día frente a 5,382 con las reglas anteriores. La corrida anterior de esta variante (banda v1, sin ALT-002
+observada ni rupturas, ALT-008 sin bajadas) daba 0,451 frente a 5,702; queda en «Antes del cambio» de su `.md`. El
+factor de carga es la mediana de 2025: en esta variante cubre el mismo año que se evalúa (no es fuera de muestra).
 
 **Umbrales afinados** (versión de `threshold_config` en la migración 0003; los nuevos de ALT-002 observada y de la
 ruptura pasan a `threshold_config` con la migración 0007, `../rendimiento/ciclo_final.md`, y se cambian con
@@ -171,11 +184,11 @@ ruptura pasan a `threshold_config` con la migración 0007, `../rendimiento/ciclo
 | Parámetro | Antes | Ahora | Por qué |
 |---|---|---|---|
 | `persistencia_horas` | — (1) | 2 | Con 1 h: ALT-005 1,068 y ALT-007 1,833 por ruta y día (lift 1,97 y 0,78). Con 2 h: 0,142 y 0,204 (lift 4,69 y 1,34) |
-| `persistencia_ocupacion_horas` | — | 2 | ALT-002 observada: 1,614 → 0,691 por ruta y día con el mismo lift; con 3 h, 0,284 |
+| `persistencia_ocupacion_horas` | — | 2 | ALT-002 observada: 1,596 → 0,710 por ruta y día con un lift parecido (2,43 → 2,21); con 3 h, 0,287 |
 | `ruptura_h`, `ruptura_cambio_minimo` | — | 6,0 y 8 % | falsas alarmas sin cambio por 100 días-ruta (50 permutaciones, `backtest_alertas.md`): h = 4 y 5 % 4,092; h = 5 y 5 % 3,342; h = 6 y 8 % 1,825 (1,644 con 200 permutaciones), y un −20 % se sigue detectando en el 100 % de los casos |
 | `alt005_exigir_p10` | — (0) | 1 | ALT-005 baja de 0,188 a 0,142 por ruta y día y el lift sube de 3,88 a 4,69 |
 | `tolerancia_salidas` | 0,20 | 0,50 | ALT-006 baja de 1,062 a 0,127 por ruta y día y el lift sube de 1,31 a 8,30 |
-| `z_anomalia` | 3,0 | 3,5 | ALT-008 baja de 0,099 a 0,062 por ruta y día y la precisión sube de 0,53 a 0,70 |
+| `z_anomalia` | 3,0 | 3,5 | ALT-008 (con bajadas) baja de 0,105 a 0,071 por ruta y día y la precisión sube de 0,50 a 0,65 |
 | `periodo_ingesta_min` | 60 en el código | 1.440 | el mismo valor de `threshold_config` (migración 0001): ALT-009 por frescura a los 2.880 min |
 
 ## 5. Limitaciones (dichas con claridad)
@@ -184,8 +197,10 @@ ruptura pasan a `threshold_config` con la migración 0007, `../rendimiento/ciclo
   por dos revisores está en `revision_doble/`.
 - La ocupación observada compara los abordajes de la hora con las salidas de la misma hora: un bus que sale a las
   6:55 lleva pasajeros que suben a las 7:10. La persistencia de 2 h reduce ese ruido de borde.
-- El factor de carga es la mediana 2025 por ruta, tipo de día y hora (insumos D5). Sin factor para una franja (menos
-  de 10 días con datos), las alertas comparan la demanda completa y lo dicen.
+- El factor de carga es la mediana 2025 (insumos D5) por ruta, día de la semana de operación (7 = domingo o festivo) y
+  hora, con el tipo de día como respaldo (`optimizacion.factor_carga_franja`, el mismo del ciclo y del optimizador).
+  Es del mismo año que se evalúa, así que en los backtests el factor no es fuera de muestra. Sin factor para una
+  franja (menos de 10 días con datos), la ocupación observada de esa hora no se mide (40 de las 5.508 horas de 4.A).
 - La ruptura necesita la serie diaria de la ruta (real y pronóstico por día) en el contexto observado; el backtest la
   arma con los mismos datos que el ciclo. Con menos de 29 días no se evalúa.
 - La serie empaquetada es horaria: ALT-006 «por tiempo» usa una **cota inferior** (60 min por cada hora cerrada sin
@@ -199,12 +214,19 @@ ruptura pasan a `threshold_config` con la migración 0007, `../rendimiento/ciclo
 ```
 cd EntregaFinal/api_frecuencias
 .venv/Scripts/python scripts/backtest_alertas.py                     # 4.A y el detector de rupturas (≈10 s)
-.venv/Scripts/python scripts/backtest_alertas.py --corte 2024-12-31  # 4.B (entrena en un directorio temporal)
-.venv/Scripts/python scripts/backtest_alertas.py --pronostico        # sección 2 (≈1,5 min: un MILP por franja)
-.venv/Scripts/python -m pytest tests/unit/test_alertas.py tests/unit/test_alertas_observadas.py tests/unit/test_alertas_pronostico.py tests/unit/test_alertas_optimizador.py tests/unit/test_alertas_ruptura.py
-TEST_DATABASE_NAME=ai_frecuencias_pruebas_alertas .venv/Scripts/python -m pytest tests/integracion/test_alertas_observadas.py tests/integracion/test_export_alertas.py
-.venv/Scripts/python -m pytest tests/datos_ml/test_backtest_alertas.py
+.venv/Scripts/python scripts/backtest_alertas.py --corte 2024-12-31  # 4.B (entrena en un directorio temporal, ≈1 min)
+.venv/Scripts/python scripts/backtest_alertas.py --pronostico        # sección 2 (≈1 min: un MILP por franja)
+.venv/Scripts/python scripts/backtest_alertas.py --alt003-todas-las-horas   # robustez de ALT-003 (≈20 min)
+.venv/Scripts/python scripts/evidencia_identificacion_alertas.py     # identificacion_viajes (réplica, lector_ia)
+GENERAR_EVIDENCIAS=1 .venv/Scripts/python -m pytest tests/unit/test_alertas_optimizador.py   # caso_silencio_7h.json
+# pytest_alertas_unitarias.txt: la salida literal de (la primera línea del archivo es el comando)
+.venv/Scripts/python -m pytest tests/unit/test_alertas.py tests/unit/test_alertas_alt003.py tests/unit/test_alertas_identificacion.py tests/unit/test_alertas_observadas.py tests/unit/test_alertas_ocupacion_segmentos.py tests/unit/test_alertas_optimizador.py tests/unit/test_alertas_pronostico.py tests/unit/test_alertas_ruptura.py tests/unit/test_variantes_alt003.py -vv
+# pytest_alertas_integracion.txt: la salida literal de (con la base local de pruebas propia en TEST_DATABASE_NAME)
+.venv/Scripts/python -m pytest tests/datos_ml/test_alt003_protocolo.py tests/datos_ml/test_backtest_alertas.py tests/datos_ml/test_identificacion_viajes_evidencia.py tests/integracion/test_alertas_identificacion.py tests/integracion/test_alertas_observadas.py tests/integracion/test_export_alertas.py tests/integracion/test_gobierno_alt003.py -vv
 ```
+
+`pyproject.toml` ya pone `-q` en `addopts`: con `-vv` queda una línea por prueba. Los dos archivos `pytest_alertas_*.txt`
+son la salida tal cual de esos dos comandos (stdout), sin editar.
 
 - `tests/unit/test_alertas_optimizador.py`: la alerta y la recomendación dicen la misma ocupación (optimizador real,
   SILENCIO 7 h), frontera de ALT-001 con el factor (P90 991 frente a 992), ALT-001 sin valor observado, ALT-003 por
@@ -223,7 +245,12 @@ TEST_DATABASE_NAME=ai_frecuencias_pruebas_alertas .venv/Scripts/python -m pytest
 - `tests/integracion/test_export_alertas.py`: orden por prioridad por omisión, filtro `idruta`, historial paginado y
   comentarios en -05:00, además de la exportación CSV y XLSX.
 - `tests/datos_ml/test_backtest_alertas.py`: el backtest reproduce `backtest_alertas.json` código por código y el
-  detector (mismas rupturas y misma tasa de falsas alarmas); la evidencia de pronóstico es la del factor de carga. El
+  detector (mismas rupturas y misma tasa de falsas alarmas); usa el factor de carga del ciclo
+  (`test_el_backtest_usa_el_factor_de_carga_del_ciclo`); la evidencia de pronóstico es la del factor de carga. El
   resumen de la reproducción se guarda con `tests/evidencia.guardar_evidencia` (en `docs/evidencias` solo con
   `GENERAR_EVIDENCIAS=1`).
-- Resultados de las corridas: `pytest_alertas_unitarias.txt` y `pytest_alertas_integracion.txt`.
+- `tests/datos_ml/test_identificacion_viajes_evidencia.py`: `identificacion_viajes.json` trae la tabla de
+  `alertas.IDENTIFICACION_5_3` con sus motivos y la variante `segmento_critico` de `alertas.VARIANTES_5_3` (con el
+  sentido), la medición de esa variante con la réplica y ningún seudónimo.
+- Resultados de las corridas: `pytest_alertas_unitarias.txt` y `pytest_alertas_integracion.txt` (salida literal de
+  los comandos de arriba).

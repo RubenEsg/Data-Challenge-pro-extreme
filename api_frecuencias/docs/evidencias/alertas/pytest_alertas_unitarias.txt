@@ -1,159 +1,219 @@
-Pruebas unitarias de alertas, corrida final de tests/unit (Mon Nov  9 06:52:13 HPS 2026; 548 casos en la carpeta, 0 fallos, 0 errores). Archivos de alertas: tests/unit/test_alertas.py 52, tests/unit/test_alertas_observadas.py 38, tests/unit/test_alertas_optimizador.py 12, tests/unit/test_alertas_pronostico.py 37, tests/unit/test_alertas_ruptura.py 18; 157 en total: 157 aprobadas, 0 fallidas.
+$ python -m pytest tests/unit/test_alertas.py tests/unit/test_alertas_alt003.py tests/unit/test_alertas_identificacion.py tests/unit/test_alertas_observadas.py tests/unit/test_alertas_ocupacion_segmentos.py tests/unit/test_alertas_optimizador.py tests/unit/test_alertas_pronostico.py tests/unit/test_alertas_ruptura.py tests/unit/test_variantes_alt003.py -vv
+============================= test session starts =============================
+platform win32 -- Python 3.13.3, pytest-9.2.0, pluggy-1.7.0 -- D:\Ruben\universidad\machine_learning\DATA CHALLENGE\EntregaFinal\api_frecuencias\.venv\Scripts\python.exe
+hypothesis profile 'default'
+rootdir: D:\Ruben\universidad\machine_learning\DATA CHALLENGE\.claude\worktrees\cierre-lectura\EntregaFinal\api_frecuencias
+configfile: pyproject.toml
+plugins: anyio-4.16.0, hypothesis-6.170.15, cov-7.1.0, schemathesis-4.33.1
+collecting ... collected 208 items
 
-PASSED tests/unit/test_alertas.py::test_contexto_normal_no_dispara_nada
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-001-cambios0-preventiva]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-001-cambios1-critica]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-002-cambios2-critica]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-003-cambios3-preventiva]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-004-cambios4-informativa]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-005-cambios5-preventiva]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-006-cambios6-critica]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-006-cambios7-critica]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-007-cambios8-preventiva]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-008-cambios9-preventiva]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-008-cambios10-preventiva]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-009-cambios11-critica]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-009-cambios12-critica]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-010-cambios13-critica]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-001-cambios0]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-002-cambios1]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-003-cambios2]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-004-cambios3]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-004-cambios4]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-005-cambios5]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-005-cambios6]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-006-cambios7]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-006-cambios8]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-005-cambios9]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-007-cambios10]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-008-cambios11]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-009-cambios12]
-PASSED tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-010-cambios13]
-PASSED tests/unit/test_alertas.py::test_alt002_calcula_la_ocupacion_esperada_si_falta
-PASSED tests/unit/test_alertas.py::test_periodo_de_ingesta_por_omision_es_el_de_la_base
-PASSED tests/unit/test_alertas.py::test_alt010_un_episodio_por_modelo_y_ruta_aunque_cambie_la_ventana
-PASSED tests/unit/test_alertas.py::test_alt007_por_debajo_del_intervalo
-PASSED tests/unit/test_alertas.py::test_umbrales_configurables
-PASSED tests/unit/test_alertas.py::test_explicacion_incluye_observado_esperado_y_umbral
-PASSED tests/unit/test_alertas.py::test_contexto_vacio_no_falla
-PASSED tests/unit/test_alertas.py::test_deduplicacion
-PASSED tests/unit/test_alertas.py::test_flujo_completo_de_estados_con_historial
-PASSED tests/unit/test_alertas.py::test_descartar_desde_cualquier_estado_abierto[nueva]
-PASSED tests/unit/test_alertas.py::test_descartar_desde_cualquier_estado_abierto[reconocida]
-PASSED tests/unit/test_alertas.py::test_descartar_desde_cualquier_estado_abierto[asignada]
-PASSED tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[nueva-asignar]
-PASSED tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[nueva-cerrar]
-PASSED tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[reconocida-reconocer]
-PASSED tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[reconocida-cerrar]
-PASSED tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[asignada-reconocer]
-PASSED tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[cerrada-reconocer]
-PASSED tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[cerrada-comentar]
-PASSED tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[descartada-asignar]
-PASSED tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[descartada-comentar]
-PASSED tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[nueva-volar]
-PASSED tests/unit/test_alertas.py::test_validaciones_de_datos_de_la_accion
-PASSED tests/unit/test_alertas_observadas.py::test_dia_tranquilo_no_alerta
-PASSED tests/unit/test_alertas_observadas.py::test_alt005_caida_sostenida_dos_horas_un_solo_episodio
-PASSED tests/unit/test_alertas_observadas.py::test_alt005_una_sola_hora_no_alerta_por_persistencia
-PASSED tests/unit/test_alertas_observadas.py::test_alt005_frontera_de_caida[70.0-False]
-PASSED tests/unit/test_alertas_observadas.py::test_alt005_frontera_de_caida[69.9-True]
-PASSED tests/unit/test_alertas_observadas.py::test_alt005_exige_estar_bajo_el_p10_calibrado
-PASSED tests/unit/test_alertas_observadas.py::test_alt005_patron_bajo_no_se_evalua
-PASSED tests/unit/test_alertas_observadas.py::test_horas_ya_evaluadas_no_vuelven_a_alertar
-PASSED tests/unit/test_alertas_observadas.py::test_episodio_que_continua_conserva_la_clave_y_crece
-PASSED tests/unit/test_alertas_observadas.py::test_alt007_sobre_p90_dos_horas
-PASSED tests/unit/test_alertas_observadas.py::test_alt007_frontera_p90[120.0-False]
-PASSED tests/unit/test_alertas_observadas.py::test_alt007_frontera_p90[120.5-True]
-PASSED tests/unit/test_alertas_observadas.py::test_alt007_exige_error_minimo_aunque_salga_de_la_banda
-PASSED tests/unit/test_alertas_observadas.py::test_alt007_sentidos_alternos_no_persisten
-PASSED tests/unit/test_alertas_observadas.py::test_alt007_por_debajo_si_alt005_no_lo_cubre
-PASSED tests/unit/test_alertas_observadas.py::test_alt006_hora_sin_salidas_dispara_por_tiempo
-PASSED tests/unit/test_alertas_observadas.py::test_alt006_usa_toleranciatiempo_de_procesos
-PASSED tests/unit/test_alertas_observadas.py::test_alt006_toleranciatiempo_cero_usa_el_umbral
-PASSED tests/unit/test_alertas_observadas.py::test_alt006_deficit_por_conteo_con_persistencia_y_frontera
-PASSED tests/unit/test_alertas_observadas.py::test_alt006_no_se_evalua_en_las_horas_de_borde[4]
-PASSED tests/unit/test_alertas_observadas.py::test_alt006_no_se_evalua_en_las_horas_de_borde[20]
-PASSED tests/unit/test_alertas_observadas.py::test_alt006_lleva_la_ubicacion_del_despacho
-PASSED tests/unit/test_alertas_observadas.py::test_alt008_z_robusto_en_la_frontera
-PASSED tests/unit/test_alertas_observadas.py::test_alt008_necesita_referencia_minima
-PASSED tests/unit/test_alertas_observadas.py::test_alt008_subidas_sin_viajes
-PASSED tests/unit/test_alertas_observadas.py::test_alt009_frescura_dos_periodos_de_ingesta[2879-False]
-PASSED tests/unit/test_alertas_observadas.py::test_alt009_frescura_dos_periodos_de_ingesta[2880-True]
-PASSED tests/unit/test_alertas_observadas.py::test_alt009_horas_faltantes_y_campos
-PASSED tests/unit/test_alertas_observadas.py::test_todas_las_observadas_traen_la_estructura_completa
-PASSED tests/unit/test_alertas_observadas.py::test_seudonimo_del_conductor
-PASSED tests/unit/test_alertas_observadas.py::test_tendencia[serie0-al_alza]
-PASSED tests/unit/test_alertas_observadas.py::test_tendencia[serie1-a_la_baja]
-PASSED tests/unit/test_alertas_observadas.py::test_tendencia[serie2-estable]
-PASSED tests/unit/test_alertas_observadas.py::test_tendencia[serie3-sin_datos]
-PASSED tests/unit/test_alertas_observadas.py::test_tendencia[serie4-sin_datos]
-PASSED tests/unit/test_alertas_observadas.py::test_probabilidad_con_la_banda
-PASSED tests/unit/test_alertas_observadas.py::test_z_robusto_con_mad_nula_usa_la_escala_minima
-PASSED tests/unit/test_alertas_observadas.py::test_punto_geojson_lee_hexewkb_y_ewkt
-PASSED tests/unit/test_alertas_optimizador.py::test_silencio_7h_la_alerta_y_la_recomendacion_dicen_la_misma_ocupacion
-PASSED tests/unit/test_alertas_optimizador.py::test_alt002_esperada_coincide_con_la_ocupacion_del_optimizador_cuando_dispara
-PASSED tests/unit/test_alertas_optimizador.py::test_alt001_frontera_con_el_factor_de_carga[991.0-False]
-PASSED tests/unit/test_alertas_optimizador.py::test_alt001_frontera_con_el_factor_de_carga[992.0-True]
-PASSED tests/unit/test_alertas_optimizador.py::test_alt001_sin_valor_observado_y_la_proyeccion_en_esperado
-PASSED tests/unit/test_alertas_optimizador.py::test_alt001_critica_si_la_carga_del_puntual_supera_la_capacidad
-PASSED tests/unit/test_alertas_optimizador.py::test_alt004_usa_la_misma_ocupacion_con_factor
-PASSED tests/unit/test_alertas_optimizador.py::test_alt003_en_franja_inviable_por_nivel_de_servicio
-PASSED tests/unit/test_alertas_optimizador.py::test_alt003_no_sale_si_la_actual_cumple_aunque_se_recomienden_mas_buses
-PASSED tests/unit/test_alertas_optimizador.py::test_alt003_sale_si_la_actual_no_cumple_aunque_se_recomienden_menos_buses
-PASSED tests/unit/test_alertas_optimizador.py::test_alt003_sin_optimizador_calcula_el_nivel_de_servicio_con_el_p90
-PASSED tests/unit/test_alertas_optimizador.py::test_alt003_queda_dentro_de_alt001_en_la_misma_franja
-PASSED tests/unit/test_alertas_pronostico.py::test_el_contexto_usa_la_demanda_por_hora_de_la_franja_y_su_hora
-PASSED tests/unit/test_alertas_pronostico.py::test_la_ventana_de_la_alerta_es_la_hora_recomendada[60]
-PASSED tests/unit/test_alertas_pronostico.py::test_la_ventana_de_la_alerta_es_la_hora_recomendada[120]
-PASSED tests/unit/test_alertas_pronostico.py::test_la_fecha_de_la_franja_puede_venir_como_texto
-PASSED tests/unit/test_alertas_pronostico.py::test_alt001_frontera_p90_por_hora_frente_a_capacidad_por_hora[500.0-False]
-PASSED tests/unit/test_alertas_pronostico.py::test_alt001_frontera_p90_por_hora_frente_a_capacidad_por_hora[500.1-True]
-PASSED tests/unit/test_alertas_pronostico.py::test_alt001_critica_solo_si_el_pronostico_puntual_por_hora_supera[500.0-preventiva]
-PASSED tests/unit/test_alertas_pronostico.py::test_alt001_critica_solo_si_el_pronostico_puntual_por_hora_supera[500.1-critica]
-PASSED tests/unit/test_alertas_pronostico.py::test_la_demanda_de_la_ventana_larga_ya_no_dispara_alt001
-PASSED tests/unit/test_alertas_pronostico.py::test_la_ventana_corta_no_esconde_la_sobreocupacion
-PASSED tests/unit/test_alertas_pronostico.py::test_alt002_frontera_ocupacion_por_hora[449.9-False]
-PASSED tests/unit/test_alertas_pronostico.py::test_alt002_frontera_ocupacion_por_hora[450.0-True]
-PASSED tests/unit/test_alertas_pronostico.py::test_alt004_frontera_baja_utilizacion_por_hora[149.9-True]
-PASSED tests/unit/test_alertas_pronostico.py::test_alt004_frontera_baja_utilizacion_por_hora[150.0-False]
-PASSED tests/unit/test_alertas_pronostico.py::test_alt001_explica_el_factor_real_de_buses_por_hora
-PASSED tests/unit/test_alertas_pronostico.py::test_alt002_explica_el_calculo_de_la_ocupacion_esperada
-PASSED tests/unit/test_alertas_pronostico.py::test_varios_horizontes_en_la_misma_franja_dan_una_sola_alerta
-PASSED tests/unit/test_alertas_pronostico.py::test_se_queda_el_horizonte_mas_corto_aunque_llegue_despues
-PASSED tests/unit/test_alertas_pronostico.py::test_franjas_distintas_dan_alertas_distintas
-PASSED tests/unit/test_alertas_pronostico.py::test_evaluar_pronostico_sin_contextos
-PASSED tests/unit/test_alertas_pronostico.py::test_alt010_se_evalua_una_vez_por_ruta
-PASSED tests/unit/test_alertas_pronostico.py::test_tendencia_por_horizonte_usa_tasas_horarias_sin_doble_conversion
-PASSED tests/unit/test_alertas_pronostico.py::test_tendencia_por_horizonte_sin_demanda_de_ventana_usa_la_horaria
-PASSED tests/unit/test_alertas_pronostico.py::test_deficit_de_salidas[4-2-2-False]
-PASSED tests/unit/test_alertas_pronostico.py::test_deficit_de_salidas[4-1-2-True]
-PASSED tests/unit/test_alertas_pronostico.py::test_deficit_de_salidas[1-0-2-False]
-PASSED tests/unit/test_alertas_pronostico.py::test_deficit_de_salidas[0-0-0-False]
-PASSED tests/unit/test_alertas_pronostico.py::test_deficit_de_salidas[None-1-0-False]
-PASSED tests/unit/test_alertas_pronostico.py::test_deficit_de_salidas[3-None-0-False]
-PASSED tests/unit/test_alertas_pronostico.py::test_horas_sin_salidas_seguidas_se_cortan_si_no_son_contiguas
-PASSED tests/unit/test_alertas_pronostico.py::test_minutos_sin_despacho_usa_la_cota_solo_si_se_esperaban_salidas
-PASSED tests/unit/test_alertas_pronostico.py::test_peor_z_toma_el_primer_campo_con_el_mayor_valor_absoluto
-PASSED tests/unit/test_alertas_pronostico.py::test_toda_accion_exige_usuario[None]
-PASSED tests/unit/test_alertas_pronostico.py::test_toda_accion_exige_usuario[]
-PASSED tests/unit/test_alertas_pronostico.py::test_toda_accion_exige_usuario[   ]
-PASSED tests/unit/test_alertas_pronostico.py::test_estado_desconocido_y_accion_desconocida
-PASSED tests/unit/test_alertas_pronostico.py::test_asignar_exige_a_quien_y_comentar_no_cambia_el_estado
-PASSED tests/unit/test_alertas_ruptura.py::test_ocupacion_observada_de_una_hora
-PASSED tests/unit/test_alertas_ruptura.py::test_alt002_observada_en_produccion_con_origen_observado
-PASSED tests/unit/test_alertas_ruptura.py::test_alt002_observada_una_hora_aislada_no_basta
-PASSED tests/unit/test_alertas_ruptura.py::test_alt002_observada_agrupa_horas_seguidas_en_un_episodio
-PASSED tests/unit/test_alertas_ruptura.py::test_alt002_observada_no_repite_episodios_viejos
-PASSED tests/unit/test_alertas_ruptura.py::test_alt002_observada_bajo_el_umbral_o_sin_salidas_suficientes
-PASSED tests/unit/test_alertas_ruptura.py::test_alt002_observada_toma_el_factor_del_optimizador_si_el_contexto_no_lo_trae
-PASSED tests/unit/test_alertas_ruptura.py::test_alt002_observada_usa_la_capacidad_del_catalogo_si_falta
-PASSED tests/unit/test_alertas_ruptura.py::test_cusum_no_detecta_en_una_serie_estable
-PASSED tests/unit/test_alertas_ruptura.py::test_cusum_detecta_una_caida_sostenida_y_estima_el_inicio
-PASSED tests/unit/test_alertas_ruptura.py::test_cusum_detecta_un_alza_sostenida
-PASSED tests/unit/test_alertas_ruptura.py::test_cusum_sin_dias_suficientes_no_evalua
-PASSED tests/unit/test_alertas_ruptura.py::test_cusum_ignora_un_cambio_menor_que_el_minimo
-PASSED tests/unit/test_alertas_ruptura.py::test_ruptura_genera_alt007_variante_con_su_metodo
-PASSED tests/unit/test_alertas_ruptura.py::test_ruptura_vieja_no_se_vuelve_a_alertar
-PASSED tests/unit/test_alertas_ruptura.py::test_serie_diaria_ruta_arma_real_y_pronostico_por_dia_completo
-PASSED tests/unit/test_alertas_ruptura.py::test_serie_diaria_ruta_sin_base_devuelve_vacio
-PASSED tests/unit/test_alertas_ruptura.py::test_alt002_observada_se_explica_con_lo_observado_aunque_la_esperada_sea_mayor
+tests/unit/test_alertas.py::test_contexto_normal_no_dispara_nada PASSED  [  0%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-001-cambios0-preventiva] PASSED [  0%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-001-cambios1-critica] PASSED [  1%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-002-cambios2-critica] PASSED [  1%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-003-cambios3-preventiva] PASSED [  2%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-004-cambios4-informativa] PASSED [  2%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-005-cambios5-preventiva] PASSED [  3%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-006-cambios6-critica] PASSED [  3%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-006-cambios7-critica] PASSED [  4%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-007-cambios8-preventiva] PASSED [  4%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-008-cambios9-preventiva] PASSED [  5%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-008-cambios10-preventiva] PASSED [  5%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-009-cambios11-critica] PASSED [  6%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-009-cambios12-critica] PASSED [  6%]
+tests/unit/test_alertas.py::test_cada_codigo_se_dispara_con_su_condicion[ALT-010-cambios13-critica] PASSED [  7%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-001-cambios0] PASSED [  7%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-002-cambios1] PASSED [  8%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-003-cambios2] PASSED [  8%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-004-cambios3] PASSED [  9%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-004-cambios4] PASSED [  9%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-005-cambios5] PASSED [ 10%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-005-cambios6] PASSED [ 10%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-006-cambios7] PASSED [ 11%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-006-cambios8] PASSED [ 11%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-005-cambios9] PASSED [ 12%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-007-cambios10] PASSED [ 12%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-008-cambios11] PASSED [ 12%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-009-cambios12] PASSED [ 13%]
+tests/unit/test_alertas.py::test_cada_codigo_no_se_dispara_bajo_el_umbral[ALT-010-cambios13] PASSED [ 13%]
+tests/unit/test_alertas.py::test_alt002_calcula_la_ocupacion_esperada_si_falta PASSED [ 14%]
+tests/unit/test_alertas.py::test_periodo_de_ingesta_por_omision_es_el_de_la_base PASSED [ 14%]
+tests/unit/test_alertas.py::test_alt010_un_episodio_por_modelo_y_ruta_aunque_cambie_la_ventana PASSED [ 15%]
+tests/unit/test_alertas.py::test_alt007_por_debajo_del_intervalo PASSED  [ 15%]
+tests/unit/test_alertas.py::test_umbrales_configurables PASSED           [ 16%]
+tests/unit/test_alertas.py::test_explicacion_incluye_observado_esperado_y_umbral PASSED [ 16%]
+tests/unit/test_alertas.py::test_contexto_vacio_no_falla PASSED          [ 17%]
+tests/unit/test_alertas.py::test_deduplicacion PASSED                    [ 17%]
+tests/unit/test_alertas.py::test_flujo_completo_de_estados_con_historial PASSED [ 18%]
+tests/unit/test_alertas.py::test_descartar_desde_cualquier_estado_abierto[nueva] PASSED [ 18%]
+tests/unit/test_alertas.py::test_descartar_desde_cualquier_estado_abierto[reconocida] PASSED [ 19%]
+tests/unit/test_alertas.py::test_descartar_desde_cualquier_estado_abierto[asignada] PASSED [ 19%]
+tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[nueva-asignar] PASSED [ 20%]
+tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[nueva-cerrar] PASSED [ 20%]
+tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[reconocida-reconocer] PASSED [ 21%]
+tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[reconocida-cerrar] PASSED [ 21%]
+tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[asignada-reconocer] PASSED [ 22%]
+tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[cerrada-reconocer] PASSED [ 22%]
+tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[cerrada-comentar] PASSED [ 23%]
+tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[descartada-asignar] PASSED [ 23%]
+tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[descartada-comentar] PASSED [ 24%]
+tests/unit/test_alertas.py::test_transiciones_invalidas_lanzan_error[nueva-volar] PASSED [ 24%]
+tests/unit/test_alertas.py::test_validaciones_de_datos_de_la_accion PASSED [ 25%]
+tests/unit/test_alertas_alt003.py::test_probabilidad_sobre_capacidad[300.0-0.12-300.0-0.5] PASSED [ 25%]
+tests/unit/test_alertas_alt003.py::test_probabilidad_sobre_capacidad[300.0-0.0-299.0-1.0] PASSED [ 25%]
+tests/unit/test_alertas_alt003.py::test_probabilidad_sobre_capacidad[300.0-0.0-301.0-0.0] PASSED [ 26%]
+tests/unit/test_alertas_alt003.py::test_probabilidad_sobre_capacidad[0.0-0.2-100.0-0.0] PASSED [ 26%]
+tests/unit/test_alertas_alt003.py::test_probabilidad_sobre_capacidad[None-0.1-100.0-None] PASSED [ 27%]
+tests/unit/test_alertas_alt003.py::test_probabilidad_sobre_capacidad[300.0-0.1-None-None] PASSED [ 27%]
+tests/unit/test_alertas_alt003.py::test_probabilidad_sobre_capacidad[300.0-0.1-0.0-None] PASSED [ 28%]
+tests/unit/test_alertas_alt003.py::test_probabilidad_con_la_lognormal_de_la_banda PASSED [ 28%]
+tests/unit/test_alertas_alt003.py::test_alt003_no_se_emite_si_el_riesgo_no_llega_al_minimo PASSED [ 29%]
+tests/unit/test_alertas_alt003.py::test_alt003_lleva_la_probabilidad_y_el_minimo_en_la_alerta PASSED [ 29%]
+tests/unit/test_alertas_alt003.py::test_alt003_sigue_exigiendo_que_no_se_cumpla_el_nivel_de_servicio PASSED [ 30%]
+tests/unit/test_alertas_alt003.py::test_alt003_usa_la_distribucion_del_optimizador_si_viene PASSED [ 30%]
+tests/unit/test_alertas_alt003.py::test_alt003_la_probabilidad_coincide_con_el_optimizador_real PASSED [ 31%]
+tests/unit/test_alertas_alt003.py::test_la_migracion_0014_siembra_el_valor_del_codigo PASSED [ 31%]
+tests/unit/test_alertas_identificacion.py::test_tabla_de_identificacion_cubre_las_diez_reglas PASSED [ 32%]
+tests/unit/test_alertas_identificacion.py::test_toda_alerta_dice_que_campos_de_identificacion_le_aplican PASSED [ 32%]
+tests/unit/test_alertas_identificacion.py::test_viaje_de_fila_estado_retraso_y_zona PASSED [ 33%]
+tests/unit/test_alertas_identificacion.py::test_el_conductor_solo_sale_como_seudonimo PASSED [ 33%]
+tests/unit/test_alertas_identificacion.py::test_sin_secreto_no_hay_conductor PASSED [ 34%]
+tests/unit/test_alertas_identificacion.py::test_alt006_identifica_el_despacho_cancelado_de_la_hora_vacia PASSED [ 34%]
+tests/unit/test_alertas_identificacion.py::test_alt006_sin_cancelados_toma_el_despacho_mas_tardio PASSED [ 35%]
+tests/unit/test_alertas_identificacion.py::test_alt006_tolerancia_de_procesos_decide_quien_es_tardio PASSED [ 35%]
+tests/unit/test_alertas_identificacion.py::test_alt006_deficit_de_programacion_no_inventa_un_viaje PASSED [ 36%]
+tests/unit/test_alertas_identificacion.py::test_alt006_sin_viajes_en_la_fuente_lo_dice PASSED [ 36%]
+tests/unit/test_alertas_identificacion.py::test_alt006_sin_despacho_antes_de_la_ventana_no_dice_que_el_dia_no_tiene_viajes PASSED [ 37%]
+tests/unit/test_alertas_identificacion.py::test_alt009_primero_los_viajes_de_las_horas_faltantes PASSED [ 37%]
+tests/unit/test_alertas_identificacion.py::test_alt009_una_hora_sin_viajes_programados_no_es_un_dato_que_falte PASSED [ 37%]
+tests/unit/test_alertas_identificacion.py::test_alt009_una_fuente_de_viajes_vacia_no_calla_las_horas_faltantes PASSED [ 38%]
+tests/unit/test_alertas_identificacion.py::test_alt009_conserva_solo_las_horas_con_servicio_y_explica_las_demas PASSED [ 38%]
+tests/unit/test_alertas_identificacion.py::test_alt009_solo_por_frescura_no_tiene_viaje PASSED [ 39%]
+tests/unit/test_alertas_identificacion.py::test_sql_de_viajes_es_un_select_de_lista_blanca_con_parametros[True] PASSED [ 39%]
+tests/unit/test_alertas_identificacion.py::test_sql_de_viajes_es_un_select_de_lista_blanca_con_parametros[False] PASSED [ 40%]
+tests/unit/test_alertas_identificacion.py::test_fuente_postgres_lee_viajes_en_solo_lectura_y_seudonimiza PASSED [ 40%]
+tests/unit/test_alertas_identificacion.py::test_catalogos_viajes_de_la_exportacion_sin_conductor_en_claro PASSED [ 41%]
+tests/unit/test_alertas_identificacion.py::test_la_redeteccion_del_episodio_toma_el_viaje_identificado PASSED [ 41%]
+tests/unit/test_alertas_identificacion.py::test_viajes_del_dia_prefiere_la_fuente_del_ciclo_y_no_falla_sin_viajes PASSED [ 42%]
+tests/unit/test_alertas_observadas.py::test_dia_tranquilo_no_alerta PASSED [ 42%]
+tests/unit/test_alertas_observadas.py::test_alt005_caida_sostenida_dos_horas_un_solo_episodio PASSED [ 43%]
+tests/unit/test_alertas_observadas.py::test_alt005_una_sola_hora_no_alerta_por_persistencia PASSED [ 43%]
+tests/unit/test_alertas_observadas.py::test_alt005_frontera_de_caida[70.0-False] PASSED [ 44%]
+tests/unit/test_alertas_observadas.py::test_alt005_frontera_de_caida[69.9-True] PASSED [ 44%]
+tests/unit/test_alertas_observadas.py::test_alt005_exige_estar_bajo_el_p10_calibrado PASSED [ 45%]
+tests/unit/test_alertas_observadas.py::test_alt005_patron_bajo_no_se_evalua PASSED [ 45%]
+tests/unit/test_alertas_observadas.py::test_horas_ya_evaluadas_no_vuelven_a_alertar PASSED [ 46%]
+tests/unit/test_alertas_observadas.py::test_episodio_que_continua_conserva_la_clave_y_crece PASSED [ 46%]
+tests/unit/test_alertas_observadas.py::test_alt007_sobre_p90_dos_horas PASSED [ 47%]
+tests/unit/test_alertas_observadas.py::test_alt007_frontera_p90[120.0-False] PASSED [ 47%]
+tests/unit/test_alertas_observadas.py::test_alt007_frontera_p90[120.5-True] PASSED [ 48%]
+tests/unit/test_alertas_observadas.py::test_alt007_exige_error_minimo_aunque_salga_de_la_banda PASSED [ 48%]
+tests/unit/test_alertas_observadas.py::test_alt007_sentidos_alternos_no_persisten PASSED [ 49%]
+tests/unit/test_alertas_observadas.py::test_alt007_por_debajo_si_alt005_no_lo_cubre PASSED [ 49%]
+tests/unit/test_alertas_observadas.py::test_alt006_hora_sin_salidas_dispara_por_tiempo PASSED [ 50%]
+tests/unit/test_alertas_observadas.py::test_alt006_usa_toleranciatiempo_de_procesos PASSED [ 50%]
+tests/unit/test_alertas_observadas.py::test_alt006_toleranciatiempo_cero_usa_el_umbral PASSED [ 50%]
+tests/unit/test_alertas_observadas.py::test_alt006_deficit_por_conteo_con_persistencia_y_frontera PASSED [ 51%]
+tests/unit/test_alertas_observadas.py::test_alt006_no_se_evalua_en_las_horas_de_borde[4] PASSED [ 51%]
+tests/unit/test_alertas_observadas.py::test_alt006_no_se_evalua_en_las_horas_de_borde[20] PASSED [ 52%]
+tests/unit/test_alertas_observadas.py::test_alt006_lleva_la_ubicacion_del_despacho PASSED [ 52%]
+tests/unit/test_alertas_observadas.py::test_alt008_z_robusto_en_la_frontera PASSED [ 53%]
+tests/unit/test_alertas_observadas.py::test_alt008_necesita_referencia_minima PASSED [ 53%]
+tests/unit/test_alertas_observadas.py::test_alt008_subidas_sin_viajes PASSED [ 54%]
+tests/unit/test_alertas_observadas.py::test_alt008_evalua_las_bajadas_con_el_mismo_z_robusto_en_su_frontera PASSED [ 54%]
+tests/unit/test_alertas_observadas.py::test_alt008_no_evalua_bajadas_sin_dato_ni_referencia_minima PASSED [ 55%]
+tests/unit/test_alertas_observadas.py::test_alt009_frescura_dos_periodos_de_ingesta[2879-False] PASSED [ 55%]
+tests/unit/test_alertas_observadas.py::test_alt009_frescura_dos_periodos_de_ingesta[2880-True] PASSED [ 56%]
+tests/unit/test_alertas_observadas.py::test_alt009_horas_faltantes_y_campos PASSED [ 56%]
+tests/unit/test_alertas_observadas.py::test_todas_las_observadas_traen_la_estructura_completa PASSED [ 57%]
+tests/unit/test_alertas_observadas.py::test_seudonimo_del_conductor PASSED [ 57%]
+tests/unit/test_alertas_observadas.py::test_tendencia[serie0-al_alza] PASSED [ 58%]
+tests/unit/test_alertas_observadas.py::test_tendencia[serie1-a_la_baja] PASSED [ 58%]
+tests/unit/test_alertas_observadas.py::test_tendencia[serie2-estable] PASSED [ 59%]
+tests/unit/test_alertas_observadas.py::test_tendencia[serie3-sin_datos] PASSED [ 59%]
+tests/unit/test_alertas_observadas.py::test_tendencia[serie4-sin_datos] PASSED [ 60%]
+tests/unit/test_alertas_observadas.py::test_probabilidad_con_la_banda PASSED [ 60%]
+tests/unit/test_alertas_observadas.py::test_z_robusto_con_mad_nula_usa_la_escala_minima PASSED [ 61%]
+tests/unit/test_alertas_observadas.py::test_punto_geojson_lee_hexewkb_y_ewkt PASSED [ 61%]
+tests/unit/test_alertas_ocupacion_segmentos.py::test_la_hora_con_segmento_critico_se_mide_ahi_y_la_alerta_dice_el_viaje PASSED [ 62%]
+tests/unit/test_alertas_ocupacion_segmentos.py::test_la_medida_por_segmento_bajo_el_umbral_no_alerta_aunque_el_factor_diera_mas PASSED [ 62%]
+tests/unit/test_alertas_ocupacion_segmentos.py::test_sin_segmento_o_con_pocos_viajes_medidos_rige_el_factor_de_carga PASSED [ 62%]
+tests/unit/test_alertas_ocupacion_segmentos.py::test_la_hora_de_borde_no_se_evalua_ni_con_el_segmento PASSED [ 63%]
+tests/unit/test_alertas_ocupacion_segmentos.py::test_el_ciclo_pone_el_segmento_critico_en_las_horas_cerradas_del_contexto PASSED [ 63%]
+tests/unit/test_alertas_optimizador.py::test_silencio_7h_la_alerta_y_la_recomendacion_dicen_la_misma_ocupacion PASSED [ 64%]
+tests/unit/test_alertas_optimizador.py::test_alt002_esperada_coincide_con_la_ocupacion_del_optimizador_cuando_dispara PASSED [ 64%]
+tests/unit/test_alertas_optimizador.py::test_alt001_frontera_con_el_factor_de_carga[991.0-False] PASSED [ 65%]
+tests/unit/test_alertas_optimizador.py::test_alt001_frontera_con_el_factor_de_carga[992.0-True] PASSED [ 65%]
+tests/unit/test_alertas_optimizador.py::test_alt001_sin_valor_observado_y_la_proyeccion_en_esperado PASSED [ 66%]
+tests/unit/test_alertas_optimizador.py::test_alt001_critica_si_la_carga_del_puntual_supera_la_capacidad PASSED [ 66%]
+tests/unit/test_alertas_optimizador.py::test_alt004_usa_la_misma_ocupacion_con_factor PASSED [ 67%]
+tests/unit/test_alertas_optimizador.py::test_alt003_en_franja_inviable_por_nivel_de_servicio PASSED [ 67%]
+tests/unit/test_alertas_optimizador.py::test_alt003_no_sale_si_la_actual_cumple_aunque_se_recomienden_mas_buses PASSED [ 68%]
+tests/unit/test_alertas_optimizador.py::test_alt003_sale_si_la_actual_no_cumple_aunque_se_recomienden_menos_buses PASSED [ 68%]
+tests/unit/test_alertas_optimizador.py::test_alt003_sin_optimizador_calcula_el_nivel_de_servicio_con_el_p90 PASSED [ 69%]
+tests/unit/test_alertas_optimizador.py::test_alt003_queda_dentro_de_alt001_en_la_misma_franja PASSED [ 69%]
+tests/unit/test_alertas_pronostico.py::test_el_contexto_usa_la_demanda_por_hora_de_la_franja_y_su_hora PASSED [ 70%]
+tests/unit/test_alertas_pronostico.py::test_la_ventana_de_la_alerta_es_la_hora_recomendada[60] PASSED [ 70%]
+tests/unit/test_alertas_pronostico.py::test_la_ventana_de_la_alerta_es_la_hora_recomendada[120] PASSED [ 71%]
+tests/unit/test_alertas_pronostico.py::test_la_fecha_de_la_franja_puede_venir_como_texto PASSED [ 71%]
+tests/unit/test_alertas_pronostico.py::test_alt001_frontera_p90_por_hora_frente_a_capacidad_por_hora[500.0-False] PASSED [ 72%]
+tests/unit/test_alertas_pronostico.py::test_alt001_frontera_p90_por_hora_frente_a_capacidad_por_hora[500.1-True] PASSED [ 72%]
+tests/unit/test_alertas_pronostico.py::test_alt001_critica_solo_si_el_pronostico_puntual_por_hora_supera[500.0-preventiva] PASSED [ 73%]
+tests/unit/test_alertas_pronostico.py::test_alt001_critica_solo_si_el_pronostico_puntual_por_hora_supera[500.1-critica] PASSED [ 73%]
+tests/unit/test_alertas_pronostico.py::test_la_demanda_de_la_ventana_larga_ya_no_dispara_alt001 PASSED [ 74%]
+tests/unit/test_alertas_pronostico.py::test_la_ventana_corta_no_esconde_la_sobreocupacion PASSED [ 74%]
+tests/unit/test_alertas_pronostico.py::test_alt002_frontera_ocupacion_por_hora[449.9-False] PASSED [ 75%]
+tests/unit/test_alertas_pronostico.py::test_alt002_frontera_ocupacion_por_hora[450.0-True] PASSED [ 75%]
+tests/unit/test_alertas_pronostico.py::test_alt004_frontera_baja_utilizacion_por_hora[149.9-True] PASSED [ 75%]
+tests/unit/test_alertas_pronostico.py::test_alt004_frontera_baja_utilizacion_por_hora[150.0-False] PASSED [ 76%]
+tests/unit/test_alertas_pronostico.py::test_alt001_explica_el_factor_real_de_buses_por_hora PASSED [ 76%]
+tests/unit/test_alertas_pronostico.py::test_alt002_explica_el_calculo_de_la_ocupacion_esperada PASSED [ 77%]
+tests/unit/test_alertas_pronostico.py::test_varios_horizontes_en_la_misma_franja_dan_una_sola_alerta PASSED [ 77%]
+tests/unit/test_alertas_pronostico.py::test_se_queda_el_horizonte_mas_corto_aunque_llegue_despues PASSED [ 78%]
+tests/unit/test_alertas_pronostico.py::test_franjas_distintas_dan_alertas_distintas PASSED [ 78%]
+tests/unit/test_alertas_pronostico.py::test_evaluar_pronostico_sin_contextos PASSED [ 79%]
+tests/unit/test_alertas_pronostico.py::test_alt010_se_evalua_una_vez_por_ruta PASSED [ 79%]
+tests/unit/test_alertas_pronostico.py::test_tendencia_por_horizonte_usa_tasas_horarias_sin_doble_conversion PASSED [ 80%]
+tests/unit/test_alertas_pronostico.py::test_tendencia_por_horizonte_sin_demanda_de_ventana_usa_la_horaria PASSED [ 80%]
+tests/unit/test_alertas_pronostico.py::test_deficit_de_salidas[4-2-2-False] PASSED [ 81%]
+tests/unit/test_alertas_pronostico.py::test_deficit_de_salidas[4-1-2-True] PASSED [ 81%]
+tests/unit/test_alertas_pronostico.py::test_deficit_de_salidas[1-0-2-False] PASSED [ 82%]
+tests/unit/test_alertas_pronostico.py::test_deficit_de_salidas[0-0-0-False] PASSED [ 82%]
+tests/unit/test_alertas_pronostico.py::test_deficit_de_salidas[None-1-0-False] PASSED [ 83%]
+tests/unit/test_alertas_pronostico.py::test_deficit_de_salidas[3-None-0-False] PASSED [ 83%]
+tests/unit/test_alertas_pronostico.py::test_horas_sin_salidas_seguidas_se_cortan_si_no_son_contiguas PASSED [ 84%]
+tests/unit/test_alertas_pronostico.py::test_minutos_sin_despacho_usa_la_cota_solo_si_se_esperaban_salidas PASSED [ 84%]
+tests/unit/test_alertas_pronostico.py::test_peor_z_toma_el_primer_campo_con_el_mayor_valor_absoluto PASSED [ 85%]
+tests/unit/test_alertas_pronostico.py::test_toda_accion_exige_usuario[None] PASSED [ 85%]
+tests/unit/test_alertas_pronostico.py::test_toda_accion_exige_usuario[] PASSED [ 86%]
+tests/unit/test_alertas_pronostico.py::test_toda_accion_exige_usuario[   ] PASSED [ 86%]
+tests/unit/test_alertas_pronostico.py::test_estado_desconocido_y_accion_desconocida PASSED [ 87%]
+tests/unit/test_alertas_pronostico.py::test_asignar_exige_a_quien_y_comentar_no_cambia_el_estado PASSED [ 87%]
+tests/unit/test_alertas_ruptura.py::test_ocupacion_observada_de_una_hora PASSED [ 87%]
+tests/unit/test_alertas_ruptura.py::test_alt002_observada_en_produccion_con_origen_observado PASSED [ 88%]
+tests/unit/test_alertas_ruptura.py::test_alt002_observada_una_hora_aislada_no_basta PASSED [ 88%]
+tests/unit/test_alertas_ruptura.py::test_alt002_observada_agrupa_horas_seguidas_en_un_episodio PASSED [ 89%]
+tests/unit/test_alertas_ruptura.py::test_alt002_observada_no_repite_episodios_viejos PASSED [ 89%]
+tests/unit/test_alertas_ruptura.py::test_alt002_observada_bajo_el_umbral_o_sin_salidas_suficientes PASSED [ 90%]
+tests/unit/test_alertas_ruptura.py::test_alt002_observada_toma_el_factor_del_optimizador_si_el_contexto_no_lo_trae PASSED [ 90%]
+tests/unit/test_alertas_ruptura.py::test_alt002_observada_usa_la_capacidad_del_catalogo_si_falta PASSED [ 91%]
+tests/unit/test_alertas_ruptura.py::test_cusum_no_detecta_en_una_serie_estable PASSED [ 91%]
+tests/unit/test_alertas_ruptura.py::test_cusum_detecta_una_caida_sostenida_y_estima_el_inicio PASSED [ 92%]
+tests/unit/test_alertas_ruptura.py::test_cusum_detecta_un_alza_sostenida PASSED [ 92%]
+tests/unit/test_alertas_ruptura.py::test_cusum_sin_dias_suficientes_no_evalua PASSED [ 93%]
+tests/unit/test_alertas_ruptura.py::test_cusum_ignora_un_cambio_menor_que_el_minimo PASSED [ 93%]
+tests/unit/test_alertas_ruptura.py::test_ruptura_genera_alt007_variante_con_su_metodo PASSED [ 94%]
+tests/unit/test_alertas_ruptura.py::test_ruptura_vieja_no_se_vuelve_a_alertar PASSED [ 94%]
+tests/unit/test_alertas_ruptura.py::test_serie_diaria_ruta_arma_real_y_pronostico_por_dia_completo PASSED [ 95%]
+tests/unit/test_alertas_ruptura.py::test_serie_diaria_ruta_sin_base_devuelve_vacio PASSED [ 95%]
+tests/unit/test_alertas_ruptura.py::test_alt002_observada_se_explica_con_lo_observado_aunque_la_esperada_sea_mayor PASSED [ 96%]
+tests/unit/test_variantes_alt003.py::test_corte_de_validacion PASSED     [ 96%]
+tests/unit/test_variantes_alt003.py::test_dispara_es_la_regla_de_la_alerta PASSED [ 97%]
+tests/unit/test_variantes_alt003.py::test_la_tasa_base_elegible_excluye_las_franjas_de_alt001 PASSED [ 97%]
+tests/unit/test_variantes_alt003.py::test_elige_el_mayor_lift_con_soporte_minimo_o_ninguno PASSED [ 98%]
+tests/unit/test_variantes_alt003.py::test_protocolo_adopta_si_supera_la_tasa_base_en_validacion PASSED [ 98%]
+tests/unit/test_variantes_alt003.py::test_protocolo_sin_senal_baja_a_informativa PASSED [ 99%]
+tests/unit/test_variantes_alt003.py::test_diagnostico_separa_las_franjas_de_alt001 PASSED [ 99%]
+tests/unit/test_variantes_alt003.py::test_la_tasa_base_elegible_del_backtest_excluye_las_franjas_con_alt001 PASSED [100%]
+
+============================= 208 passed in 5.25s =============================

@@ -7,7 +7,10 @@
      (la misma tolerancia de ALT-010);
    - deriva: alguna variable disparadora con PSI sobre su umbral de alerta (monitoreo.DISPARADORES_PSI);
    - cobertura: cobertura P10-P90 calibrada < cobertura_min.
-   No reentrena si ya hay un entrenamiento en cola o corriendo, o un retador en sombra.
+   No reentrena si ya hay un entrenamiento en cola o corriendo, o un retador en sombra. Tampoco si el corte no se
+   puede entrenar: la partición del entrenamiento (inferencia.corte_sin_datos) no deja filas útiles para entrenar
+   hasta el corte o para validar después, como al comienzo de la serie. Queda en los bloqueos de la decisión, con
+   «reentrenamiento omitido: datos insuficientes antes del corte» (_bloqueo_sin_datos).
 2. Entrenar el candidato con el histórico VALIDADO (ai_frecuencias.demanda_observada, que reemplaza a la serie
    empaquetada en las claves que comparten) hasta `datos_hasta`; corte = datos_hasta - 61 días, de modo que la
    validación temporal son los últimos 61 días de datos reales y no se usa nada posterior a datos_hasta.
@@ -143,8 +146,32 @@ def decidir_reentreno(s, umbrales: dict | None, hasta: date | None = None) -> di
     corte = hasta - timedelta(days=DIAS_VALIDACION)
     out["hasta"] = corte.isoformat()
     out["datos_hasta"] = hasta.isoformat()
+    if out["motivos"] and not out["bloqueos"]:       # solo si lo iba a pedir: la partición recorre toda la serie
+        out["bloqueos"] += _bloqueo_sin_datos(s, corte, hasta)
     out["reentrenar"] = bool(out["motivos"]) and not out["bloqueos"]
     return out
+
+
+OMITIDO_SIN_DATOS = "reentrenamiento omitido: datos insuficientes antes del corte"
+
+
+def _bloqueo_sin_datos(s, corte: date, datos_hasta: date) -> list[str]:
+    """No se pide un reentrenamiento cuyo corte no se puede entrenar. Lo decide la partición del entrenamiento
+    (inferencia.corte_sin_datos, la misma función que usa entrenar) sobre la serie validada hasta datos_hasta, la que
+    usaría entrenar_candidato: si no deja filas útiles para entrenar hasta el corte o para validar después, el trabajo
+    fallaría siempre. Pasaba al comienzo de la serie: cada ciclo veía deriva frente al modelo vigente y encolaba un
+    entrenamiento con el corte 61 días antes, anterior a los datos. El motivo queda en los bloqueos de la decisión
+    (metricas.monitoreo.politica.reentreno de la ejecución, GET /monitoring/policy y la revisión del planificador)."""
+    from app.servicios import inferencia
+
+    serie, _info = serie_validada(s, datos_hasta)
+    falta = inferencia.corte_sin_datos(serie, corte)
+    if falta is None:
+        return []
+    bloqueo = (f"{OMITIDO_SIN_DATOS} {corte} (la serie validada hasta {datos_hasta} deja "
+               f"{falta['filas_entrenamiento']} filas útiles para entrenar y {falta['filas_validacion']} para validar)")
+    LOG.info("política de aprendizaje: %s", bloqueo)
+    return [bloqueo]
 
 
 def antiguedad_de_datos(s, activo, hasta: date) -> dict[str, Any]:
@@ -549,8 +576,9 @@ def revisar_reversion(s, monitoreo: dict, umbrales: dict | None) -> dict | None:
     return out
 
 
-def predecir_en_sombra(s, execution_id, sombra: dict) -> int:
-    """El retador predice lo mismo que el activo en esta ejecución; se guarda en su fila de monitoreo (no decide)."""
+def predecir_en_sombra(s, execution_id, sombra: dict, ejecuciones: list | None = None) -> int:
+    """El retador predice lo mismo que el activo en esta ejecución; se guarda en su fila de monitoreo (no decide).
+    En una ejecución partida por ruta (RNF-005), `ejecuciones` son sus trabajos: el retador predice lo que ellos."""
     from sqlalchemy import select
 
     from app.modelos_db import MonitoreoModelo, Prediccion
@@ -561,8 +589,9 @@ def predecir_en_sombra(s, execution_id, sombra: dict) -> int:
     if fila is None:
         return 0
     filas = []
+    ids = list(ejecuciones) if ejecuciones else [execution_id]
     with inferencia.con_sesion(s):   # las mismas variables (serie validada) que vio el activo en este ciclo
-        for p in s.scalars(select(Prediccion).where(Prediccion.execution_id == execution_id)).all():
+        for p in s.scalars(select(Prediccion).where(Prediccion.execution_id.in_(ids))).all():
             r = inferencia.predecir(p.ruta, p.instante, p.horizonte_min, model_id=sombra["model_id"])
             filas.append({"ruta": p.ruta, "horizonte_min": p.horizonte_min, "instante": p.instante,
                           "pasajeros": r["pasajeros"], "p10": r["p10"], "p90": r["p90"],

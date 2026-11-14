@@ -1,0 +1,321 @@
+{
+ "generado_en": "2026-11-13T19:31:21.518592-05:00",
+ "rol": "lector_ia",
+ "tabla": "demanda_segmentos",
+ "rutas": {
+  "CL 72": {
+   "carga_inicial": {
+    "filas_ruta": 906,
+    "filas_de_la_ruta_en_la_completa": 906,
+    "iguales": true,
+    "solo_su_ruta": true
+   },
+   "desde_marca_intermedia": {
+    "marca": "2026-08-13T20:39:15.446600-05:00",
+    "filas_ruta": 906,
+    "filas_lectura_de_siempre_de_la_ruta": 906,
+    "iguales": true,
+    "explain_todas": {
+     "ms_ejecucion": 4297.69,
+     "ms_planificacion": 0.64,
+     "filas": 2757,
+     "buffers_hit": 84977,
+     "buffers_read": 197843,
+     "escaneos": [
+      "Seq Scan progvehiculos",
+      "Seq Scan timbradas_segmentos",
+      "Seq Scan Procesos",
+      "Seq Scan rutas",
+      "CTE Scan",
+      "Seq Scan progvehiculos",
+      "CTE Scan",
+      "Seq Scan estacionalidades_anio",
+      "CTE Scan",
+      "Subquery Scan",
+      "CTE Scan",
+      "Seq Scan timbradas_segmentos"
+     ]
+    },
+    "explain_ruta": {
+     "ms_ejecucion": 3497.06,
+     "ms_planificacion": 0.69,
+     "filas": 906,
+     "buffers_hit": 107842,
+     "buffers_read": 236927,
+     "escaneos": [
+      "Seq Scan progvehiculos",
+      "Seq Scan timbradas_segmentos",
+      "Seq Scan rutas",
+      "Seq Scan Procesos",
+      "Seq Scan progvehiculos",
+      "CTE Scan",
+      "CTE Scan",
+      "CTE Scan",
+      "Seq Scan estacionalidades_anio",
+      "Subquery Scan",
+      "CTE Scan",
+      "Seq Scan timbradas_segmentos"
+     ]
+    }
+   },
+   "desde_la_marca_mayor": {
+    "marca": "2026-08-14T00:52:39.363697-05:00",
+    "filas_ruta": 411,
+    "filas_lectura_de_siempre_de_la_ruta": 411,
+    "iguales": true,
+    "explain_todas": {
+     "ms_ejecucion": 3618.61,
+     "ms_planificacion": 0.6,
+     "filas": 1262,
+     "buffers_hit": 86622,
+     "buffers_read": 196048,
+     "escaneos": [
+      "Seq Scan progvehiculos",
+      "Seq Scan timbradas_segmentos",
+      "Seq Scan Procesos",
+      "Seq Scan rutas",
+      "CTE Scan",
+      "Seq Scan progvehiculos",
+      "CTE Scan",
+      "Seq Scan estacionalidades_anio",
+      "CTE Scan",
+      "Subquery Scan",
+      "CTE Scan",
+      "Seq Scan timbradas_segmentos"
+     ]
+    },
+    "explain_ruta": {
+     "ms_ejecucion": 3296.0,
+     "ms_planificacion": 0.61,
+     "filas": 411,
+     "buffers_hit": 105874,
+     "buffers_read": 238745,
+     "escaneos": [
+      "Seq Scan progvehiculos",
+      "Seq Scan timbradas_segmentos",
+      "Seq Scan rutas",
+      "Seq Scan Procesos",
+      "Seq Scan progvehiculos",
+      "CTE Scan",
+      "CTE Scan",
+      "CTE Scan",
+      "Seq Scan estacionalidades_anio",
+      "Subquery Scan",
+      "CTE Scan",
+      "Seq Scan timbradas_segmentos"
+     ]
+    }
+   }
+  },
+  "CRA 54": {
+   "carga_inicial": {
+    "filas_ruta": 938,
+    "filas_de_la_ruta_en_la_completa": 938,
+    "iguales": true,
+    "solo_su_ruta": true
+   },
+   "desde_marca_intermedia": {
+    "marca": "2026-08-13T20:39:15.446600-05:00",
+    "filas_ruta": 938,
+    "filas_lectura_de_siempre_de_la_ruta": 938,
+    "iguales": true,
+    "explain_todas": {
+     "ms_ejecucion": 4293.36,
+     "ms_planificacion": 0.6,
+     "filas": 2757,
+     "buffers_hit": 99231,
+     "buffers_read": 183589,
+     "escaneos": [
+      "Seq Scan progvehiculos",
+      "Seq Scan timbradas_segmentos",
+      "Seq Scan Procesos",
+      "Seq Scan rutas",
+      "CTE Scan",
+      "Seq Scan progvehiculos",
+      "CTE Scan",
+      "Seq Scan estacionalidades_anio",
+      "CTE Scan",
+      "Subquery Scan",
+      "CTE Scan",
+      "Seq Scan timbradas_segmentos"
+     ]
+    },
+    "explain_ruta": {
+     "ms_ejecucion": 3633.43,
+     "ms_planificacion": 0.67,
+     "filas": 938,
+     "buffers_hit": 115593,
+     "buffers_read": 229181,
+     "escaneos": [
+      "Seq Scan progvehiculos",
+      "Seq Scan timbradas_segmentos",
+      "Seq Scan rutas",
+      "Seq Scan Procesos",
+      "Seq Scan progvehiculos",
+      "CTE Scan",
+      "CTE Scan",
+      "CTE Scan",
+      "Seq Scan estacionalidades_anio",
+      "Subquery Scan",
+      "CTE Scan",
+      "Seq Scan timbradas_segmentos"
+     ]
+    }
+   },
+   "desde_la_marca_mayor": {
+    "marca": "2026-08-14T00:52:39.363697-05:00",
+    "filas_ruta": 436,
+    "filas_lectura_de_siempre_de_la_ruta": 436,
+    "iguales": true,
+    "explain_todas": {
+     "ms_ejecucion": 3523.17,
+     "ms_planificacion": 0.61,
+     "filas": 1262,
+     "buffers_hit": 93980,
+     "buffers_read": 188690,
+     "escaneos": [
+      "Seq Scan progvehiculos",
+      "Seq Scan timbradas_segmentos",
+      "Seq Scan Procesos",
+      "Seq Scan rutas",
+      "CTE Scan",
+      "Seq Scan progvehiculos",
+      "CTE Scan",
+      "Seq Scan estacionalidades_anio",
+      "CTE Scan",
+      "Subquery Scan",
+      "CTE Scan",
+      "Seq Scan timbradas_segmentos"
+     ]
+    },
+    "explain_ruta": {
+     "ms_ejecucion": 3218.43,
+     "ms_planificacion": 0.69,
+     "filas": 436,
+     "buffers_hit": 107457,
+     "buffers_read": 237167,
+     "escaneos": [
+      "Seq Scan progvehiculos",
+      "Seq Scan timbradas_segmentos",
+      "Seq Scan rutas",
+      "Seq Scan Procesos",
+      "Seq Scan progvehiculos",
+      "CTE Scan",
+      "CTE Scan",
+      "CTE Scan",
+      "Seq Scan estacionalidades_anio",
+      "Subquery Scan",
+      "CTE Scan",
+      "Seq Scan timbradas_segmentos"
+     ]
+    }
+   }
+  },
+  "SILENCIO": {
+   "carga_inicial": {
+    "filas_ruta": 913,
+    "filas_de_la_ruta_en_la_completa": 913,
+    "iguales": true,
+    "solo_su_ruta": true
+   },
+   "desde_marca_intermedia": {
+    "marca": "2026-08-13T20:39:15.446600-05:00",
+    "filas_ruta": 913,
+    "filas_lectura_de_siempre_de_la_ruta": 913,
+    "iguales": true,
+    "explain_todas": {
+     "ms_ejecucion": 4265.61,
+     "ms_planificacion": 0.59,
+     "filas": 2757,
+     "buffers_hit": 87831,
+     "buffers_read": 194989,
+     "escaneos": [
+      "Seq Scan progvehiculos",
+      "Seq Scan timbradas_segmentos",
+      "Seq Scan Procesos",
+      "Seq Scan rutas",
+      "CTE Scan",
+      "Seq Scan progvehiculos",
+      "CTE Scan",
+      "Seq Scan estacionalidades_anio",
+      "CTE Scan",
+      "Subquery Scan",
+      "CTE Scan",
+      "Seq Scan timbradas_segmentos"
+     ]
+    },
+    "explain_ruta": {
+     "ms_ejecucion": 3473.64,
+     "ms_planificacion": 0.6,
+     "filas": 913,
+     "buffers_hit": 108047,
+     "buffers_read": 236722,
+     "escaneos": [
+      "Seq Scan progvehiculos",
+      "Seq Scan timbradas_segmentos",
+      "Seq Scan rutas",
+      "Seq Scan Procesos",
+      "Seq Scan progvehiculos",
+      "CTE Scan",
+      "CTE Scan",
+      "CTE Scan",
+      "Seq Scan estacionalidades_anio",
+      "Subquery Scan",
+      "CTE Scan",
+      "Seq Scan timbradas_segmentos"
+     ]
+    }
+   },
+   "desde_la_marca_mayor": {
+    "marca": "2026-08-14T00:52:39.363697-05:00",
+    "filas_ruta": 415,
+    "filas_lectura_de_siempre_de_la_ruta": 415,
+    "iguales": true,
+    "explain_todas": {
+     "ms_ejecucion": 3620.14,
+     "ms_planificacion": 0.6,
+     "filas": 1262,
+     "buffers_hit": 99395,
+     "buffers_read": 183275,
+     "escaneos": [
+      "Seq Scan progvehiculos",
+      "Seq Scan timbradas_segmentos",
+      "Seq Scan Procesos",
+      "Seq Scan rutas",
+      "CTE Scan",
+      "Seq Scan progvehiculos",
+      "CTE Scan",
+      "Seq Scan estacionalidades_anio",
+      "CTE Scan",
+      "Subquery Scan",
+      "CTE Scan",
+      "Seq Scan timbradas_segmentos"
+     ]
+    },
+    "explain_ruta": {
+     "ms_ejecucion": 3201.99,
+     "ms_planificacion": 0.61,
+     "filas": 415,
+     "buffers_hit": 115477,
+     "buffers_read": 229142,
+     "escaneos": [
+      "Seq Scan progvehiculos",
+      "Seq Scan timbradas_segmentos",
+      "Seq Scan rutas",
+      "Seq Scan Procesos",
+      "Seq Scan progvehiculos",
+      "CTE Scan",
+      "CTE Scan",
+      "CTE Scan",
+      "Seq Scan estacionalidades_anio",
+      "Subquery Scan",
+      "CTE Scan",
+      "Seq Scan timbradas_segmentos"
+     ]
+    }
+   }
+  }
+ },
+ "filas_lectura_completa": 2757,
+ "nota_medicion": "equipo sin otras suites de pruebas ni otros procesos de Python mientras se midió; la réplica, sin otras sesiones"
+}

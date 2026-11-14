@@ -319,17 +319,17 @@
     h += '<div class="cifras">' +
       ficha('inicio_ahorro_operativo_plan', 'Ahorro en operación al año', { signo: true, nota: 'Kilómetros y horas de conductor que deja de pagar.' }) +
       ficha('inicio_pax_riesgo_plan', 'Pasajeros en riesgo por día', { variacion: esNum(riesgo) && esNum(paxDia) && paxDia.valor ? n(riesgo.valor / paxDia.valor * 100, 1) + FINO + '% de los ' + n(paxDia.valor) + ' pasajeros diarios de ' + ANIO : '', nota: 'Contabilidad conservadora: solo los perdidos donde se quitan salidas.' }) +
-      ficha('inicio_saldo_conservador', 'Saldo anual en el peor caso (contabilidad conservadora)', { signo: true, nota: 'Ahorro de operación menos pasajes perdidos donde se quitan salidas, sin contar ninguno ganado: es el piso, no lo que se espera.' }) +
-      ficha('inicio_saldo_simetrico', 'Saldo anual en el mejor caso (contabilidad simétrica)', { signo: true, nota: 'Suma también los pasajes ganados donde se añaden salidas: es el techo.' }) +
+      ficha('inicio_saldo_conservador', 'Saldo anual si las salidas nuevas no atraen a nadie (contabilidad conservadora)', { signo: true, nota: 'Ahorro de operación menos pasajes perdidos donde se quitan salidas, sin contar ninguno ganado. Es lo que dejaría aplicar el plan sin medir, y por eso se mide antes.' }) +
+      ficha('inicio_saldo_simetrico', 'Saldo anual si atraen lo mismo que se pierde al quitar (contabilidad simétrica)', { signo: true, nota: 'Suma también los pasajes ganados donde se añaden salidas, con la misma β, que al añadir salidas no se ha medido.' }) +
       '</div>';
     // Aviso de canje: las dos contabilidades.
     if (esNum(cons) && esNum(sim)) {
-      h += '<div class="aviso aviso--canje">' + icono('canje') + '<div class="aviso__cuerpo"><h3 class="aviso__titulo">Canje: el saldo queda entre un peor y un mejor caso</h3>' +
+      h += '<div class="aviso aviso--canje">' + icono('canje') + '<div class="aviso__cuerpo"><h3 class="aviso__titulo">Canje: el saldo depende de los pasajeros, y por eso se mide antes</h3>' +
         '<p>Conservadora: solo cuenta los pasajes perdidos donde se quitan salidas, y el saldo queda en ' + signoU(cons.valor, 0, unidad(cons)) + '. Simétrica: suma también los pasajeros ganados donde se añaden salidas' +
         (esNum(netos) ? ' (' + signoU(netos.valor, 0, 'pasajeros netos por día') + ')' : '') + ', y el saldo pasa a ' + signoU(sim.valor, 0, unidad(sim)) + '.' +
-        (esNum(ahorro) ? ' El ahorro de operación es el mismo en las dos: ' + conU(ahorro.valor, 0, unidad(ahorro)) + '.' : '') + (esNum(beta) ? ' Las dos usan β = ' + n(beta.valor, 2) + '.' : '') + '</p>' +
+        (esNum(ahorro) ? ' El ahorro de operación es el mismo en las dos: ' + conU(ahorro.valor, 0, unidad(ahorro)) + '.' : '') + (esNum(beta) ? ' Las dos usan β = ' + n(beta.valor, 2) + '.' : '') + ' Ninguna es un pronóstico, y no hay base para decir cuál es más probable: cuántos pasajeros atraen las salidas añadidas nunca se ha medido. Por eso el plan no se aplica a ciegas: primero el piloto, y solo se adopta si las salidas añadidas atraen suficientes pasajeros (el umbral y lo que cuesta el piloto están en el tablero, Inicio).</p>' +
         fuentesTexto([['inicio_saldo_conservador', 'conservadora'], ['inicio_saldo_simetrico', 'simétrica'], ['inicio_pax_netos_simetrica', 'pasajeros netos'], ['inicio_ahorro_operativo_plan', 'ahorro']]) + '</div></div>';
-    } else h += '<div class="aviso aviso--canje">' + icono('canje') + '<div class="aviso__cuerpo"><h3 class="aviso__titulo">Canje: el saldo queda entre un peor y un mejor caso</h3><p>' + textoPendiente('el aviso') + '</p></div></div>';
+    } else h += '<div class="aviso aviso--canje">' + icono('canje') + '<div class="aviso__cuerpo"><h3 class="aviso__titulo">Canje: el saldo depende de los pasajeros, y por eso se mide antes</h3><p>' + textoPendiente('el aviso') + '</p></div></div>';
     // Segundo aviso: con la contabilidad conservadora recortar no paga; al lado, el saldo simétrico del plan que recorta.
     if (esNum(d5) || esNum(s1) || esTexto(dom)) {
       let p = '';

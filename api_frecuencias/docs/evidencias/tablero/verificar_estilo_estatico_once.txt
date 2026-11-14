@@ -2,7 +2,7 @@
 == Bien (27) ==
   [Contraste] 33 pares con su mínimo (4,5:1 texto, 3:1 texto de 24 px o más y marcas); el más justo: --tinta-inversa sobre --insight-3 3.02:1
   [Roles] los 45 roles de ROL son tokens de :root (40 tokens distintos)
-  [CSS] 610 reglas sin colores, tamaños, pesos, interlineados, radios, sombras ni espaciados literales (salvo la lista blanca de la app); 97 var() definidas; 4 tokens retirados ausentes
+  [CSS] 611 reglas sin colores, tamaños, pesos, interlineados, radios, sombras ni espaciados literales (salvo la lista blanca de la app); 97 var() definidas; 4 tokens retirados ausentes
   [Python · ui.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
   [Python · tokens.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
   [Python · app.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
@@ -29,7 +29,7 @@
   [Paleta] Rutas en su orden (solo muestras): cvd PASS · normal PASS · contraste PASS
 
 == Notas (1) ==
-  [Python · ui.py] bloque de compatibilidad en las líneas 882–943; lo usan las páginas sin migrar: figura(
+  [Python · ui.py] bloque de compatibilidad en las líneas 1020–1081; lo usan las páginas sin migrar: figura(
 
 == Avisos (2) ==
   [Python · paginas/modelo.py] 18 números sueltos en cadenas (revisar que salgan de datos/): l. 19 «4»; l. 20 «8»; l. 23 «14»; l. 24 «4»; l. 25 «28»; l. 25 «8»; l. 27 «28»; l. 29 «10» …

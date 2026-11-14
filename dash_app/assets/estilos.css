@@ -212,6 +212,7 @@ body {
   letter-spacing: var(--ls-texto);
   font-feature-settings: "cv11", "ss03";
   -webkit-font-smoothing: antialiased;
+  overflow-wrap: break-word;   /* se hereda: una palabra que no cabe en su caja (un identificador, una ruta que llega de la API) se parte en vez de ensanchar la página */
 }
 h1, h2, h3, h4 { margin: 0; font-family: var(--fuente-titulos); font-weight: var(--peso-titulo); line-height: var(--lh-titulo); letter-spacing: var(--ls-titulo); text-wrap: balance; }
 h1 { font-size: var(--t-3xl); letter-spacing: var(--ls-h1); }
@@ -387,7 +388,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .cifra--mini .cifra__valor { font-size: var(--t-2xl); }
 .cifra--mini .cifra__unidad { font-size: var(--t-s); }
 
-/* Cifra protagonista (como «Gross Volume»): etiqueta → número enorme con su chip → línea → los dos saldos → pie */
+/* Cifra protagonista (como «Gross Volume»): etiqueta → número enorme con su chip → línea → los pasos de la decisión (fichas `saldo`) → aviso → pie */
 .heroe { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--e-5); min-width: 0; padding: var(--e-6); }
 .heroe__principal { display: grid; align-content: start; gap: var(--e-3); min-width: 0; padding-bottom: var(--e-5); border-bottom: 1px solid var(--linea-fuerte); }
 .heroe__etiqueta { color: var(--tinta); font-size: var(--t-xl); font-weight: var(--peso-normal); line-height: var(--lh-titulo); letter-spacing: var(--ls-titulo); text-wrap: pretty; }
@@ -405,6 +406,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .heroe:has(> .heroe__lado) > .heroe__pie { grid-area: pie; }
 }
 .saldos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-4); min-width: 0; }
+/* un solo saldo a todo lo ancho: el primer paso de una decisión en cadena (ui.decision_piloto) */
+.saldos--uno { grid-template-columns: minmax(0, 1fr); }
 .saldo { display: grid; align-content: start; justify-items: start; gap: var(--e-2); min-width: 0; padding: var(--e-4) var(--e-5); border: 1px solid var(--linea);
   border-radius: var(--radio-m); background: var(--blanco); }
 .saldo__titulo { color: var(--tinta-2); font-size: var(--t-m); font-weight: var(--peso-normal); line-height: var(--lh-compacto); text-wrap: pretty; }

@@ -1,5 +1,5 @@
-Archivo: D:\Ruben\universidad\machine_learning\DATA CHALLENGE\EntregaFinal\dash_app\datos\ahorro_anual.json
-Proyecto: D:\Ruben\universidad\machine_learning\DATA CHALLENGE
+Archivo: dash_app/datos/ahorro_anual.json
+Proyecto: la carpeta «DATA CHALLENGE» (--proyecto)
 
 1. Identidades dentro de ahorro_anual.json
 OK     hoy: todo lo que se mide frente a hoy vale cero
@@ -39,6 +39,15 @@ OK     reasigna: costo de km y conductor = el de hoy − ahorro en operación  [
 OK     reasigna: % de ahorro sobre lo que hoy cuestan los km y el conductor  [1.384440001 frente a 1.384440001]
 OK     reasigna: diferencia de regla = perdidos (conservadora) − perdidos (simétrica)  [173.2323581 frente a 173.2323581]
 OK     reasigna: saldo simétrico = saldo conservador + ganados (simétrica) + diferencia de regla  [1600.209141 frente a 1600.209141]
+OK     reasigna: la respuesta de equilibrio y el saldo con la respuesta central van juntos
+OK     reasigna: respuesta de equilibrio lineal = (perdidos − ahorro) × β central ÷ ganados (simétrica)  [0.4365666197 frente a 0.4365666197]
+OK     reasigna: respuesta de equilibrio mixta = −saldo conservador × β central ÷ ganados (simétrica)  [0.4650848831 frente a 0.4650848831]
+OK     reasigna: respuesta lineal con β bajo = (perdidos × β bajo ÷ β central − ahorro) × β central ÷ ganados (simétrica)  [0.3253385032 frente a 0.3253385032]
+OK     reasigna: respuesta mixta con β bajo = −saldo con β bajo × β central ÷ ganados (simétrica)  [0.3597493805 frente a 0.3597493805]
+OK     reasigna: respuesta lineal con β alto = (perdidos × β alto ÷ β central − ahorro) × β central ÷ ganados (simétrica)  [0.5848707751 frente a 0.5848707751]
+OK     reasigna: respuesta mixta con β alto = −saldo con β alto × β central ÷ ganados (simétrica)  [0.596723082 frente a 0.596723082]
+OK     reasigna: saldo con la respuesta central, forma lineal = saldo simétrico  [1600.209141 frente a 1600.209141]
+OK     reasigna: saldo con la respuesta central, forma mixta = saldo conservador + ganados (simétrica)  [1426.976783 frente a 1426.976783]
 OK     recorta: saldo conservador = ahorro en operación − pasajes perdidos  [-1029.115667 frente a -1029.115667]
 OK     recorta: saldo simétrico = saldo conservador + pasajes ganados  [1938.603743 frente a 1938.603743]
 OK     recorta: saldo simétrico = ahorro + ganados − perdidos (desglose simétrico)  [1938.603743 frente a 1938.603743]
@@ -71,6 +80,15 @@ OK     recorta: costo de km y conductor = el de hoy − ahorro en operación  [3
 OK     recorta: % de ahorro sobre lo que hoy cuestan los km y el conductor  [10.20834615 frente a 10.20834615]
 OK     recorta: diferencia de regla = perdidos (conservadora) − perdidos (simétrica)  [274.6448506 frente a 274.6448506]
 OK     recorta: saldo simétrico = saldo conservador + ganados (simétrica) + diferencia de regla  [1938.603743 frente a 1938.603743]
+OK     recorta: la respuesta de equilibrio y el saldo con la respuesta central van juntos
+OK     recorta: respuesta de equilibrio lineal = (perdidos − ahorro) × β central ÷ ganados (simétrica)  [0.196106554 frente a 0.196106554]
+OK     recorta: respuesta de equilibrio mixta = −saldo conservador × β central ÷ ganados (simétrica)  [0.2674938815 frente a 0.2674938815]
+OK     recorta: respuesta lineal con β bajo = (perdidos × β bajo ÷ β central − ahorro) × β central ÷ ganados (simétrica)  [-0.05172941684 frente a -0.05172941684]
+OK     recorta: respuesta mixta con β bajo = −saldo con β bajo × β central ÷ ganados (simétrica)  [0.03461517683 frente a 0.03461517683]
+OK     recorta: respuesta lineal con β alto = (perdidos × β alto ÷ β central − ahorro) × β central ÷ ganados (simétrica)  [0.5265545152 frente a 0.5265545152]
+OK     recorta: respuesta mixta con β alto = −saldo con β alto × β central ÷ ganados (simétrica)  [0.556131948 frente a 0.556131948]
+OK     recorta: saldo con la respuesta central, forma lineal = saldo simétrico  [1938.603743 frente a 1938.603743]
+OK     recorta: saldo con la respuesta central, forma mixta = saldo conservador + ganados (simétrica)  [1663.958892 frente a 1663.958892]
 OK     por ruta: las tres rutas suman las salidas al año de hoy  [167856 frente a 167856]
 OK     por ruta: las tres rutas suman las salidas por día de hoy  [459.8794521 frente a 459.8794521]
 OK     por hora: medias × días de cada tipo suman las salidas al año de hoy  [167856 frente a 167856]
@@ -130,6 +148,14 @@ OK     reasigna: pax en riesgo alto con pax × (1 − (x/n0)^β), β = 0.9  [355
 OK     reasigna: pax netos simétricos con pax × β × (x − n0)/n0  [946.3168695 frente a 946.3168695]
 OK     reasigna: pax ganados (simétrica)  [3661.09453 frente a 3661.09453]
 OK     reasigna: pax perdidos (simétrica, lineal)  [2714.777661 frente a 2714.777661]
+OK     reasigna: con la respuesta de potencia, saldo conservador + pax × ((x/n0)^r − 1) × tarifa = 0  [9.094947018e-13 frente a 0]
+OK     reasigna: con la respuesta de potencia de β bajo, saldo con β bajo + pax × ((x/n0)^r − 1) × tarifa = 0  [4.547473509e-13 frente a 0]
+OK     reasigna: con la respuesta de potencia de β alto, saldo con β alto + pax × ((x/n0)^r − 1) × tarifa = 0  [0 frente a 0]
+OK     reasigna: saldo con la respuesta central, forma de potencia = saldo conservador + pax × ((x/n0)^β − 1) × tarifa  [1056.124294 frente a 1056.124294]
+OK     reasigna: con la forma lineal y la respuesta central, los ganados son los de la simétrica  [4252.10502 frente a 4252.10502]
+OK     reasigna: con la respuesta lineal de β bajo, ahorro + pax × r × (x/n0 − 1) × tarifa − perdidos lineales = 0  [0 frente a 0]
+OK     reasigna: con la respuesta lineal de β central, ahorro + pax × r × (x/n0 − 1) × tarifa − perdidos lineales = 0  [-4.547473509e-13 frente a 0]
+OK     reasigna: con la respuesta lineal de β alto, ahorro + pax × r × (x/n0 − 1) × tarifa − perdidos lineales = 0  [-4.547473509e-13 frente a 0]
 OK     reasigna: salidas al año de SILENCIO  [43978 frente a 43978]
 OK     reasigna: salidas al año de CRA 54  [82757 frente a 82757]
 OK     reasigna: salidas al año de CL 72  [37845 frente a 37845]
@@ -148,6 +174,14 @@ OK     recorta: pax en riesgo alto con pax × (1 − (x/n0)^β), β = 0.9  [5023
 OK     recorta: pax netos simétricos con pax × β × (x − n0)/n0  [-1512.385962 frente a -1512.385962]
 OK     recorta: pax ganados (simétrica)  [2318.757531 frente a 2318.757531]
 OK     recorta: pax perdidos (simétrica, lineal)  [3831.143493 frente a 3831.143493]
+OK     recorta: con la respuesta de potencia, saldo conservador + pax × ((x/n0)^r − 1) × tarifa = 0  [0 frente a 0]
+OK     recorta: con la respuesta de potencia de β bajo, saldo con β bajo + pax × ((x/n0)^r − 1) × tarifa = 0  [-5.684341886e-14 frente a 0]
+OK     recorta: con la respuesta de potencia de β alto, saldo con β alto + pax × ((x/n0)^r − 1) × tarifa = 0  [-4.547473509e-13 frente a 0]
+OK     recorta: saldo con la respuesta central, forma de potencia = saldo conservador + pax × ((x/n0)^β − 1) × tarifa  [1433.369381 frente a 1433.369381]
+OK     recorta: con la forma lineal y la respuesta central, los ganados son los de la simétrica  [2693.074559 frente a 2693.074559]
+OK     recorta: con la respuesta lineal de β bajo, ahorro + pax × r × (x/n0 − 1) × tarifa − perdidos lineales = 0  [9.094947018e-13 frente a 0]
+OK     recorta: con la respuesta lineal de β central, ahorro + pax × r × (x/n0 − 1) × tarifa − perdidos lineales = 0  [0 frente a 0]
+OK     recorta: con la respuesta lineal de β alto, ahorro + pax × r × (x/n0 − 1) × tarifa − perdidos lineales = 0  [-9.094947018e-13 frente a 0]
 OK     recorta: salidas al año de SILENCIO  [40097 frente a 40097]
 OK     recorta: salidas al año de CRA 54  [74634 frente a 74634]
 OK     recorta: salidas al año de CL 72  [35377 frente a 35377]
@@ -277,6 +311,24 @@ OK     contexto: costos fijos anuales  [12991.09671 frente a 12991.09671]
 OK     contexto: km al año  [10436388.4 frente a 10436388.4]
 OK     contexto: buses-hora al año  [658822.8557 frente a 658822.8557]
 OK     contexto: pasajeros por día de 2025 = D5 resultados.json  [35266.85205 frente a 35266.85205]
+OK     pistas: elasticidad aparente de 2026 = E8 resultados.json (SILENCIO+CL 72 frente a CRA 54)  [0.6634 frente a 0.6634]
+OK     pistas: mínimo por ruta = E8 pendiente_simple_por_ruta  [0.4027 frente a 0.4027]
+OK     pistas: máximo por ruta = E8 pendiente_simple_por_ruta  [0.5985 frente a 0.5985]
+OK     pistas: elasticidad aparente sin limpiar las bandas = E8 verificacion.confirmado  [0.458 frente a 0.458]
+OK     pistas: la elasticidad aparente de 2026 es la que E8 da por confirmada (otra clave, 3 decimales)  [0.663 frente a 0.663]
+OK     pistas: la reserva de 2026 es una de las correcciones de E8 y dice que en los días especiales (Carnaval) los viajes suben y la elasticidad aparente es casi nula
+OK     pistas: el informe de resultados también dice que la elasticidad aparente es casi nula en festivos
+OK     pistas: una sola fila «Literatura (TCRP Report 95)» en documentos/informe_resultados.md
+OK     pistas: elasticidad de la literatura = la de la Tabla 2 del informe (TCRP Report 95)  [0.5 frente a 0.5]
+OK     piloto: pasajeros en riesgo, caso central = riesgo_costo.csv (pax_riesgo_dia_beta070 × días tratados → suma)  [22903.91526 frente a 22903.91526]
+OK     piloto: saldo si las salidas que se ponen no atraen a nadie, caso central = ahorro − pasajes − costo de refuerzos  [-51.91346322 frente a -51.91346322]
+OK     piloto: pasajeros en riesgo, caso alto = riesgo_costo.csv (pax_riesgo_dia_beta090 × días tratados → suma)  [28660.252 frente a 28660.247]
+OK     piloto: saldo si las salidas que se ponen no atraen a nadie, caso alto = ahorro − pasajes − costo de refuerzos  [-70.23012671 frente a -70.23011081]
+OK     piloto: pasajeros en riesgo, caso tope = riesgo_costo.csv (pax_riesgo_dia_beta100 × días tratados → suma)  [31419.64713 frente a 31419.64713]
+OK     piloto: saldo si las salidas que se ponen no atraen a nadie, caso tope = ahorro − pasajes − costo de refuerzos  [-79.01052201 frente a -79.01052201]
+OK     piloto: saldo si atraen con la β central = saldo sin respuesta + pasajes ganados en los refuerzos  [22.07726376 frente a 22.07726376]
+OK     piloto: saldo sin respuesta (central) = cifras_app.json piloto_totales (saldo conservador)  [-51.91346322 frente a -51.9135]
+OK     piloto: saldo con la respuesta central = cifras_app.json piloto_totales (saldo simétrico)  [22.07726376 frente a 22.0773]
 
 3. Inventario verificado: app/DATOS.md (valores leídos de su tabla) y datos/cifras_app.json
 OK     DATOS.md inicio_salidas_dia_hoy = planes.hoy.salidas_dia  [archivo 459.8794521; DATOS.md 459,879]
@@ -350,11 +402,24 @@ OK     con la contabilidad conservadora, los dos planes pierden con cualquier β
 OK     el plan que reasigna mueve más salidas de las que ahorra (quitadas + puestas > salidas de menos)
 OK     domingos y festivos: el único tramo positivo del plan que recorta
 OK     giro corto: paga en todo el rango (pesimista > 0)
+OK     umbral del plan que reasigna: forma lineal < mixta < de potencia < β central  [0.4365666197 < 0.4650848831 < 0.5339128148 < 0.7]
+OK     umbral del plan que reasigna: sube con la β de la pérdida (bajo < central < alto, formas mixta y de potencia)
+OK     si las salidas nuevas atraen con la β central, el plan que reasigna gana en las tres formas de cuenta  [lineal 1600.209141 · mixta 1426.976783 · potencia 1056.124294]
+OK     con la respuesta central, la forma de potencia da el saldo menor y la lineal el mayor (el «entre … y …» del paso 2)
+OK     con la β central las pistas caen a los dos lados del umbral: la menor, bajo la forma lineal; la mayor, sobre la de potencia  [0.4027 < 0.4365666197; 0.6634 > 0.5339128148]
+OK     las pistas caen en la misma franja que el umbral con todo el rango de β (al decimal que muestra la tarjeta)  [umbral 0.3253385032 a 0.6610864921; pistas 0.4027 a 0.6634]
+OK     la elasticidad de la literatura queda dentro de la banda del umbral (entre la forma lineal y la de potencia)
+OK     el umbral de un día de piloto (el del informe) es más alto que el del plan del año en sus tres formas  [0.616 > 0.5339128148]
+OK     el margen con que el piloto mide la respuesta es más ancho que la banda del umbral (por eso puede no decidir)  [±0.139206 frente a 0.0973461951]
+OK     cada pista queda a menos de un margen de la banda del umbral (con esas respuestas, 8 semanas pueden no bastar)  [margen ±0.139206; banda 0.4365666197 a 0.5339128148]
+OK     el piloto detecta una respuesta como la del umbral frente a ninguna con potencia de 0,99 o más
+OK     piloto: pérdida proporcional (β = 1) < β alta < β central < 0 < si las salidas nuevas atraen con la β central  [-79.01052201 · -70.23012671 · -51.91346322 · 22.07726376]
+OK     lo que cuesta el piloto con la pérdida proporcional (β = 1, el tope de pasajeros de la regla de parada 3) es menos del 3 % de lo que dejaría aplicar el plan sin medir  [-79.01052201 frente a -2825.128237]
 
 6. Origen de cada cifra
 OK     cada cifra del archivo tiene su entrada en «origen»
 OK     cada entrada de «origen» corresponde a una cifra del archivo
 OK     cada origen tiene archivo y clave
-OK     los 12 archivos de origen existen en el proyecto
+OK     los 15 archivos de origen existen en el proyecto
 
-342 OK, 0 FALLA
+407 OK, 0 FALLA

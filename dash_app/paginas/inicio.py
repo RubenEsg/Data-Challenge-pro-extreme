@@ -1,5 +1,5 @@
 """Inicio: ¿Qué proponemos? Un tablero de tarjetas como la referencia (DISENO.md): arriba, la tarjeta protagonista con el
-ahorro del plan que reasigna y sus dos saldos (datos/ahorro_anual.json) y, a su lado, las salidas que se mueven y la lectura
+ahorro del plan que reasigna y lo que se juega en pasajes, en tres pasos (datos/ahorro_anual.json), y, a su lado, las salidas que se mueven y la lectura
 por tipo de día; debajo, cuánto se equivoca el pronóstico y cómo cambia el horario (datos/cifras_app.json). El botón «…» de
 cada tarjeta guarda su tabla y sus fuentes. Ninguna cifra está escrita a mano.
 
@@ -70,48 +70,40 @@ def _tipos_dia(A):
     return filas
 
 
-# --- Fila 1, tarjeta ancha: el ahorro con sus dos saldos (como «Gross Volume») -------------------------------------------
+# --- Fila 1, tarjeta ancha: el ahorro y lo que se juega en pasajes (como «Gross Volume») -----------------------------------
 def _heroe(A, fuentes):
-    """+501 M COP de ahorro en operación y, justo debajo de la línea, sus dos saldos (nunca va solo); después, de qué sale
-    el ahorro, β y el enlace. Orden del DOM: título, valor, saldos, texto, β, enlace."""
+    """+501 M COP de ahorro en operación y, justo debajo de la línea, lo que se juega en pasajes como una decisión en tres
+    pasos (nunca va solo); después, de qué sale el ahorro, β y el enlace. Orden del DOM: título, valor, pasos, texto, β,
+    enlace."""
     h, r = A["planes"]["hoy"], A["planes"]["reasigna"]
     b, conv = A["convenciones"]["beta"], A["convenciones"]
-    piloto = D.valor("inicio", "inicio_piloto_resumen")
-    semanas = piloto["semanas"]
     rutas = D.valor("inicio", "inicio_rutas")
     costo_op = A["contexto"]["costo_operacion_anual_Mcop"]
 
-    valor = html.Div(html.P([
+    valor = html.Div([html.P([
         html.Span(con_signo(r["ahorro_operacion_Mcop"]), className="heroe__numero"),
         html.Span("M COP al año", className="heroe__unidad"),
         ui.chip_cambio(r["costo_km_conductor_Mcop"] - h["costo_km_conductor_Mcop"],
-                       f"{con_signo(-r['ahorro_pct_costo'], 1)} % de costo"),
-    ], className="heroe__valor"), className="heroe__principal")
+                       ui.pegar(f"{con_signo(-r['ahorro_pct_costo'], 1)} % en el costo de km y conductor")),
+    ], className="heroe__valor"),
+        # la frase puente entre el ahorro y los tres pasos, igual que en Resultado
+        html.P("No es ganancia: falta lo que se juega en pasajes. Eso no se apuesta; se mide antes, en tres pasos.",
+               className="heroe__texto")], className="heroe__principal")
 
-    # Los dos saldos son los bordes de un rango, no dos resultados: el piso solo, en rojo y con «saldo negativo», se leía
-    # como lo que Sobusa pierde si aplica la propuesta. Cada uno dice qué supone, y debajo va lo que de verdad se propone.
-    saldos = html.Div([
-        ui.saldo("Peor caso del año · las salidas nuevas no atraen a nadie", r["saldo_conservador_Mcop"],
-                 "Cuenta los pasajes que se pierden donde se quitan salidas y ninguno de los que se ganan donde se ponen "
-                 "(contabilidad conservadora). Es un supuesto extremo, no lo que se espera: es el piso.", extremo="peor caso"),
-        ui.saldo("Mejor caso del año · las salidas nuevas atraen pasajeros", r["saldo_simetrico_Mcop"],
-                 "Cuenta también los que se ganan donde se ponen, con la misma β (que no se ha medido al poner salidas), y "
-                 "mide los perdidos con una regla lineal (contabilidad simétrica): es el techo.", extremo="mejor caso"),
-    ], className="saldos")
-    entre = (f"El saldo del año queda entre esos dos casos, y dónde cae depende de cómo respondan los pasajeros. Por eso la "
-             f"propuesta no es cambiar el horario de una vez: es un piloto de {num(semanas)} semanas que lo mide antes. En el "
-             f"piloto se juega un saldo de entre {con_signo(piloto['saldo_min_Mcop'], 1)} y "
-             f"{con_signo(piloto['saldo_max_Mcop'], 1)} M COP, con el {num(piloto['pct_pax_anual_cra54'], 2)} % de los "
-             "pasajeros de un año de CRA 54.")
+    # Lo que se juega en pasajes va como la decisión que se propone (medir primero y aplicar solo si paga), no como dos
+    # saldos sueltos: uno negativo junto a uno positivo se promedian de un vistazo, y ese promedio no es lo que se propone.
+    # Debajo, el aviso que responde lo que la tarjeta deja en el aire: qué tan probable es cada caso (no se sabe, y se dice).
+    pasos, probable, detalles = ui.decision_piloto(r, b, D.piloto_decision(), A["pistas_respuesta"])
 
     texto = (f"El ahorro es lo que Sobusa deja de pagar en kilómetros ({con_signo(r['ahorro_km_Mcop'])} M COP) y en horas de "
              f"conductor ({con_signo(r['ahorro_conductor_Mcop'])}, si al conductor se le paga {conv.get('pago_conductor', 'por hora')}): "
              f"lo que hoy cuestan los kilómetros y las horas de conductor pasa de {num(h['costo_km_conductor_Mcop'])} a "
              f"{num(r['costo_km_conductor_Mcop'])} M COP al año (de un costo de operación de {num(costo_op)} M COP al año), un "
-             f"{num(r['ahorro_pct_costo'], 1)} % menos. No es ganancia: falta lo que se juega en pasajes.")
+             f"{num(r['ahorro_pct_costo'], 1)} % menos.")
     beta = (f"β = {num(b['central'], 2)}: si se quitan {QUITA} de cada {CADA} salidas de una hora, se pierden "
             f"{num(b['central'] * QUITA)} de cada {CADA} pasajeros de esa hora (rango creíble: {num(b['bajo'], 2)} a "
-            f"{num(b['alto'], 2)}). Se midió donde faltaron salidas; cuánto atraen las que se ponen es lo que falta medir.")
+            f"{num(b['alto'], 2)}). Se midió donde faltaron salidas sin aviso; con un recorte planificado puede ser otra, y "
+            "cuánto atraen las salidas nuevas no se ha medido.")
     # De qué sale el ahorro, como las barras rayadas de la referencia: partes de un total positivo (si alguna fuera
     # negativa, no se dibujan: una barra nunca lleva un saldo con signo)
     partes = [("Ahorro en kilómetros", r["ahorro_km_Mcop"]), ("Ahorro en horas de conductor", r["ahorro_conductor_Mcop"])]
@@ -120,18 +112,18 @@ def _heroe(A, fuentes):
     if total > 0 and all(v >= 0 for _, v in partes):
         rayas = [html.Div([ui.barra_rayas(et, f"{con_signo(v)} M COP", v / total, "modelo") for et, v in partes],
                           className="rayas-lista")]
-    pie = html.Div([html.P(entre, className="heroe__texto")] + rayas + [
-        html.P(texto, className="heroe__texto"),
-        ui.nota(beta),
+    pie = html.Div(rayas + [
+        html.P(ui.pegar(texto), className="heroe__texto"),
+        ui.nota(ui.pegar(beta)),
         # El enlace en píldora blanca, como los botones de la referencia (sin subrayado; navega dentro de la app)
         html.Div(dcc.Link(["Ver qué gana Sobusa", ui.icono("chevron-derecha", "glifo--s")], href="/resultado",
                           className="boton boton--secundario"), className="botonera"),
     ], className="heroe__pie")
 
-    tarjeta = ui.tarjeta([valor, saldos, pie], titulo="Ahorro en operación al año",
+    tarjeta = ui.tarjeta([valor, *pasos, probable, pie], titulo="Ahorro en operación al año",
                          subtitulo=f"Plan que reasigna frente a hoy, en millones de pesos (M COP): {_letras(len(rutas))} rutas, "
                                    "salidas de 2025 y precios de 2026.",
-                         fuentes=fuentes, clase="heroe cifra--hero", id="inicio-heroe")
+                         detalles=detalles, fuentes=fuentes, clase="heroe cifra--hero", id="inicio-heroe")
     # La rejilla estira la tarjeta hasta el alto de la columna de al lado; .tarjeta lleva align-content: start en
     # estilos.css, así el espacio sobrante va al final y no entre la cifra y sus saldos.
     return tarjeta
@@ -522,8 +514,12 @@ def layout(**_):
     fuentes_heroe = _rutas("datos/ahorro_anual.json", _de_ahorro(
         "planes.reasigna.ahorro_operacion_Mcop", "planes.reasigna.ahorro_km_Mcop", "planes.reasigna.ahorro_conductor_Mcop",
         "planes.hoy.costo_km_conductor_Mcop", "planes.reasigna.costo_km_conductor_Mcop", "planes.reasigna.saldo_conservador_Mcop",
-        "planes.reasigna.saldo_simetrico_Mcop", "contexto.costo_operacion_anual_Mcop", "convenciones.beta.central"),
-        _archivo("inicio", "inicio_piloto_resumen"))
+        "planes.reasigna.saldo_simetrico_Mcop", "planes.reasigna.saldo_conservador_por_beta_Mcop.alto",
+        "planes.reasigna.respuesta_equilibrio.lineal", "planes.reasigna.respuesta_equilibrio.potencia",
+        "planes.reasigna.respuesta_equilibrio.por_beta.alto.potencia", "planes.reasigna.saldo_respuesta_central_Mcop.potencia",
+        "pistas_respuesta.literatura", "pistas_respuesta.aparente_2026", "piloto.saldo_sin_respuesta_Mcop.alto",
+        "contexto.costo_operacion_anual_Mcop",
+        "convenciones.beta.central"), D.piloto_decision()["archivos"])
     fuentes_salidas = _rutas("datos/ahorro_anual.json", _de_ahorro(
         "planes.hoy.salidas_anio", "planes.reasigna.salidas_anio", "planes.reasigna.quitadas_anio", "planes.reasigna.puestas_anio",
         "por_hora.tipos_dia.Laboral.salidas_dia.reasigna"))

@@ -1,6 +1,7 @@
 """Verifica datos/ahorro_anual.json (lo escribe preparar_datos.py) sin usar el código que lo genera.
 
-1. Identidades dentro del archivo: saldos, pasajes, salidas, sumas por ruta y por hora, palancas.
+1. Identidades dentro del archivo: saldos, pasajes, salidas, sumas por ruta y por hora, palancas y la respuesta de
+   equilibrio (desde qué respuesta a las salidas que se ponen deja de perder el plan).
 2. Recalcula con código propio, desde los archivos de resultados del proyecto, cada cifra que el archivo toma o deriva
    (las salidas hora por hora de los parquets de decisiones, los pasajeros en riesgo con la fórmula de la fuente, las filas
    de los CSV de costos/, D5, simulacion_ahorro/ y D6).
@@ -208,6 +209,24 @@ def identidades(J):
               p["pasajes_perdidos_Mcop"] - s["perdidos_Mcop"], abs_=1e-6)
         igual(f"{nom}: saldo simétrico = saldo conservador + ganados (simétrica) + diferencia de regla", p["saldo_simetrico_Mcop"],
               p["saldo_conservador_Mcop"] + s["ganados_Mcop"] + p["dif_regla_perdidos_Mcop"], abs_=1e-6)
+        # desde qué respuesta a las salidas que se ponen deja de perder el plan (formas lineal y mixta; la de potencia se
+        # recalcula en la parte 2, hora por hora)
+        eq, sc, bc = p["respuesta_equilibrio"], p["saldo_respuesta_central_Mcop"], c["beta"]["central"]
+        informar(f"{nom}: la respuesta de equilibrio y el saldo con la respuesta central van juntos", (eq is None) == (sc is None))
+        if eq is not None and sc is not None:
+            igual(f"{nom}: respuesta de equilibrio lineal = (perdidos − ahorro) × β central ÷ ganados (simétrica)", eq["lineal"],
+                  (s["perdidos_Mcop"] - p["ahorro_operacion_Mcop"]) * bc / s["ganados_Mcop"])
+            igual(f"{nom}: respuesta de equilibrio mixta = −saldo conservador × β central ÷ ganados (simétrica)", eq["mixta"],
+                  -p["saldo_conservador_Mcop"] * bc / s["ganados_Mcop"])
+            for k in ("bajo", "alto"):
+                igual(f"{nom}: respuesta lineal con β {k} = (perdidos × β {k} ÷ β central − ahorro) × β central ÷ ganados (simétrica)",
+                      eq["por_beta"][k]["lineal"],
+                      (s["perdidos_Mcop"] * c["beta"][k] / bc - p["ahorro_operacion_Mcop"]) * bc / s["ganados_Mcop"])
+                igual(f"{nom}: respuesta mixta con β {k} = −saldo con β {k} × β central ÷ ganados (simétrica)",
+                      eq["por_beta"][k]["mixta"], -sb[k] * bc / s["ganados_Mcop"])
+            igual(f"{nom}: saldo con la respuesta central, forma lineal = saldo simétrico", sc["lineal"], p["saldo_simetrico_Mcop"])
+            igual(f"{nom}: saldo con la respuesta central, forma mixta = saldo conservador + ganados (simétrica)", sc["mixta"],
+                  p["saldo_conservador_Mcop"] + s["ganados_Mcop"], abs_=1e-6)
     for nom in PLANES:
         igual(f"por ruta: las tres rutas suman las salidas al año de {nom}",
               sum(J["por_ruta"][r][nom]["salidas_anio"] for r in RUTAS), P[nom]["salidas_anio"])
@@ -295,6 +314,33 @@ def fuentes(J, R):
             igual(f"{nom}: pax netos simétricos con pax × β × (x − n0)/n0", P[nom]["pax_netos_dia_simetrico"], dp.sum() / n)
             igual(f"{nom}: pax ganados (simétrica)", P[nom]["simetrica"]["pax_ganados_dia"], dp[dp > 0].sum() / n)
             igual(f"{nom}: pax perdidos (simétrica, lineal)", P[nom]["simetrica"]["pax_perdidos_dia"], -dp[dp < 0].sum() / n)
+            # la respuesta de equilibrio con la forma de potencia: pasajes ganados = pax × ((x/n0)^r − 1) donde x > n0 > 0
+            eq = P[nom]["respuesta_equilibrio"]
+            if eq is not None:
+                sube = (n0 > 0) & (x > n0)
+
+                def ganados(r):
+                    return float((pax[sube] * ((x[sube] / n0[sube]) ** r - 1)).sum()) * c["tarifa_neta_cop"] / 1e6
+
+                igual(f"{nom}: con la respuesta de potencia, saldo conservador + pax × ((x/n0)^r − 1) × tarifa = 0",
+                      P[nom]["saldo_conservador_Mcop"] + ganados(eq["potencia"]), 0.0, abs_=1e-6)
+                for k in ("bajo", "alto"):
+                    igual(f"{nom}: con la respuesta de potencia de β {k}, saldo con β {k} + pax × ((x/n0)^r − 1) × tarifa = 0",
+                          P[nom]["saldo_conservador_por_beta_Mcop"][k] + ganados(eq["por_beta"][k]["potencia"]), 0.0, abs_=1e-6)
+                igual(f"{nom}: saldo con la respuesta central, forma de potencia = saldo conservador + pax × ((x/n0)^β − 1) × tarifa",
+                      P[nom]["saldo_respuesta_central_Mcop"]["potencia"],
+                      P[nom]["saldo_conservador_Mcop"] + ganados(pl["elasticidad_beta"]["central"]), abs_=1e-6)
+                igual(f"{nom}: con la forma lineal y la respuesta central, los ganados son los de la simétrica",
+                      float((pax[sube] * pl["elasticidad_beta"]["central"] * (x[sube] / n0[sube] - 1)).sum()) * c["tarifa_neta_cop"] / 1e6,
+                      P[nom]["simetrica"]["ganados_Mcop"], abs_=1e-6)
+                # la forma lineal con la pérdida de cada β del rango, hora por hora: ahorro + ganados(r) − perdidos(β) = 0
+                baja = (n0 > 0) & (x < n0)
+                for k in ("bajo", "central", "alto"):
+                    perdidos = float((pax[baja] * pl["elasticidad_beta"][k] * (1 - x[baja] / n0[baja])).sum()) * c["tarifa_neta_cop"] / 1e6
+                    r = eq["lineal"] if k == "central" else eq["por_beta"][k]["lineal"]
+                    lineal = float((pax[sube] * r * (x[sube] / n0[sube] - 1)).sum()) * c["tarifa_neta_cop"] / 1e6
+                    igual(f"{nom}: con la respuesta lineal de β {k}, ahorro + pax × r × (x/n0 − 1) × tarifa − perdidos lineales = 0",
+                          P[nom]["ahorro_operacion_Mcop"] + lineal - perdidos, 0.0, abs_=1e-6)
         for r in RUTAS:
             igual(f"{nom}: salidas al año de {r}", J["por_ruta"][r][nom]["salidas_anio"], m.loc[m["ruta"] == r, cx].sum())
         for tdia, td in J["por_hora"]["tipos_dia"].items():
@@ -425,6 +471,56 @@ def fuentes(J, R):
     igual("contexto: buses-hora al año", cx["buses_hora_anio"], tres["buses_hora_anual"].sum())
     d5j = json.loads((R / "experimentos/D5_optimizacion_milp/resultados.json").read_text(encoding="utf-8"))
     igual("contexto: pasajeros por día de 2025 = D5 resultados.json", cx["pax_dia_2025"], d5j["complemento"]["pasajeros_dia_2025"])
+
+    # pistas de la respuesta a las salidas que se ponen: E8 (asociación entre rutas de 2026) y la literatura que cita el
+    # informe de resultados (Tabla 2)
+    pi = J["pistas_respuesta"]
+    e8 = json.loads((R / "experimentos/E8_validacion_2026/resultados.json").read_text(encoding="utf-8"))
+    ap = e8["elasticidad_aparente_2026"]
+    igual("pistas: elasticidad aparente de 2026 = E8 resultados.json (SILENCIO+CL 72 frente a CRA 54)", pi["aparente_2026"],
+          ap["SILENCIO+CL 72 vs CRA 54"])
+    igual("pistas: mínimo por ruta = E8 pendiente_simple_por_ruta", pi["aparente_2026_por_ruta"]["min"],
+          min(ap["pendiente_simple_por_ruta"].values()))
+    igual("pistas: máximo por ruta = E8 pendiente_simple_por_ruta", pi["aparente_2026_por_ruta"]["max"],
+          max(ap["pendiente_simple_por_ruta"].values()))
+    igual("pistas: elasticidad aparente sin limpiar las bandas = E8 verificacion.confirmado", pi["aparente_2026_sin_limpiar"],
+          e8["verificacion"]["confirmado"]["elasticidad_sin_limpiar_bandas"])
+    igual("pistas: la elasticidad aparente de 2026 es la que E8 da por confirmada (otra clave, 3 decimales)",
+          round(pi["aparente_2026"], 3), e8["verificacion"]["confirmado"]["elasticidad_aparente"])
+    informar("pistas: la reserva de 2026 es una de las correcciones de E8 y dice que en los días especiales (Carnaval) los "
+             "viajes suben y la elasticidad aparente es casi nula",
+             pi["reserva_2026"] in e8["verificacion"]["correcciones"] and "casi nula" in pi["reserva_2026"]
+             and "Carnaval" in pi["reserva_2026"] and "los viajes suben" in pi["reserva_2026"])
+    informe_res = (R / "documentos/informe_resultados.md").read_text(encoding="utf-8")
+    informar("pistas: el informe de resultados también dice que la elasticidad aparente es casi nula en festivos",
+             "casi nula en festivos" in informe_res)
+    filas = [x for x in informe_res.splitlines() if x.startswith("| Literatura (TCRP Report 95)")]
+    informar("pistas: una sola fila «Literatura (TCRP Report 95)» en documentos/informe_resultados.md", len(filas) == 1)
+    if len(filas) == 1:
+        cita = re.search(r"≈ [+]?([0-9]+(?:,[0-9]+)?)", filas[0].split("|")[2])
+        igual("pistas: elasticidad de la literatura = la de la Tabla 2 del informe (TCRP Report 95)", pi["literatura"],
+              num_es(cita.group(1))[0] if cita else None)
+
+    # el piloto dicho en saldo, recalculado desde su tabla por franja (riesgo_costo.csv), sin usar resultados.json
+    rc = pd.read_csv(R / "experimentos/P2_piloto_beta/riesgo_costo.csv")
+    rec, ref = rc[rc["rol"] == "recorte"], rc[rc["rol"] == "refuerzo"]
+    ahorro_rec, costo_ref = rec["ahorro_operativo_piloto_Mcop"].sum(), -ref["ahorro_operativo_piloto_Mcop"].sum()
+    pj = J["piloto"]
+    for k, col in (("central", "pax_riesgo_dia_beta070"), ("alto", "pax_riesgo_dia_beta090"), ("tope", "pax_riesgo_dia_beta100")):
+        pax_k = float((rec[col] * rec["dias_tratados_piloto"]).sum())
+        igual(f"piloto: pasajeros en riesgo, caso {k} = riesgo_costo.csv ({col} × días tratados → suma)", pj["pax_en_riesgo"][k],
+              pax_k, rel=1e-6)
+        igual(f"piloto: saldo si las salidas que se ponen no atraen a nadie, caso {k} = ahorro − pasajes − costo de refuerzos",
+              pj["saldo_sin_respuesta_Mcop"][k], ahorro_rec - pax_k * c["tarifa_neta_cop"] / 1e6 - costo_ref, abs_=1e-4)
+    ganados = float((ref["pax_ganados_dia_beta070"] * ref["dias_tratados_piloto"]).sum())
+    igual("piloto: saldo si atraen con la β central = saldo sin respuesta + pasajes ganados en los refuerzos",
+          pj["saldo_respuesta_central_Mcop"], pj["saldo_sin_respuesta_Mcop"]["central"] + ganados * c["tarifa_neta_cop"] / 1e6, abs_=1e-6)
+    if CIFRAS.exists():
+        tp = json.loads(CIFRAS.read_text(encoding="utf-8"))["pantallas"]["piloto"]["piloto_totales"]["valor"]
+        igual("piloto: saldo sin respuesta (central) = cifras_app.json piloto_totales (saldo conservador)",
+              pj["saldo_sin_respuesta_Mcop"]["central"], tp["neto_total_piloto_Mcop_conservador"], abs_=1e-4)
+        igual("piloto: saldo con la respuesta central = cifras_app.json piloto_totales (saldo simétrico)",
+              pj["saldo_respuesta_central_Mcop"], tp["neto_total_piloto_Mcop_simetrico"], abs_=1e-4)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -621,6 +717,48 @@ def lecturas(J):
              [k for k, x in J["palancas"]["domingos_festivos"]["plan_recorta_por_tipo_dia"].items() if x["saldo_conservador_Mcop"] > 0]
              == ["Domingo/festivo"])
     informar("giro corto: paga en todo el rango (pesimista > 0)", J["palancas"]["giro_corto_35"]["saldo_rango_Mcop"]["pesimista"] > 0)
+    # la decisión en tres pasos (ui.decision_piloto): lo que la tarjeta dice del umbral y de las pistas
+    eq, sc, pi, bc = a["respuesta_equilibrio"], a["saldo_respuesta_central_Mcop"], J["pistas_respuesta"], J["convenciones"]["beta"]["central"]
+    informar("umbral del plan que reasigna: forma lineal < mixta < de potencia < β central",
+             eq["lineal"] < eq["mixta"] < eq["potencia"] < bc,
+             f"{_det(eq['lineal'])} < {_det(eq['mixta'])} < {_det(eq['potencia'])} < {_det(bc)}")
+    informar("umbral del plan que reasigna: sube con la β de la pérdida (bajo < central < alto, formas mixta y de potencia)",
+             all(eq["por_beta"]["bajo"][k] < eq[k] < eq["por_beta"]["alto"][k] for k in ("mixta", "potencia")))
+    informar("si las salidas nuevas atraen con la β central, el plan que reasigna gana en las tres formas de cuenta",
+             all(v > 0 for v in sc.values()), " · ".join(f"{k} {_det(v)}" for k, v in sc.items()))
+    informar("con la respuesta central, la forma de potencia da el saldo menor y la lineal el mayor (el «entre … y …» del paso 2)",
+             sc["potencia"] == min(sc.values()) and sc["lineal"] == max(sc.values()))
+    pistas = [pi["literatura"], pi["aparente_2026"], pi["aparente_2026_sin_limpiar"], *pi["aparente_2026_por_ruta"].values()]
+    informar("con la β central las pistas caen a los dos lados del umbral: la menor, bajo la forma lineal; la mayor, sobre la de potencia",
+             min(pistas) < eq["lineal"] and max(pistas) > eq["potencia"],
+             f"{_det(min(pistas))} < {_det(eq['lineal'])}; {_det(max(pistas))} > {_det(eq['potencia'])}")
+    todos = [eq[f] for f in ("lineal", "mixta", "potencia")] + [v for k in ("bajo", "alto") for v in eq["por_beta"][k].values()]
+    informar("las pistas caen en la misma franja que el umbral con todo el rango de β (al decimal que muestra la tarjeta)",
+             round(min(todos) * 10, 1) <= round(min(pistas) * 10, 1) and round(max(pistas) * 10, 1) <= round(max(todos) * 10, 1),
+             f"umbral {_det(min(todos))} a {_det(max(todos))}; pistas {_det(min(pistas))} a {_det(max(pistas))}")
+    informar("la elasticidad de la literatura queda dentro de la banda del umbral (entre la forma lineal y la de potencia)",
+             eq["lineal"] < pi["literatura"] < eq["potencia"])
+    if CIFRAS.exists():
+        pil = json.loads(CIFRAS.read_text(encoding="utf-8"))["pantallas"]["piloto"]
+        dia = pil["piloto_totales"]["valor"]["reasignacion_R1_a_F1"]["beta_refuerzo_que_iguala_dinero"]
+        informar("el umbral de un día de piloto (el del informe) es más alto que el del plan del año en sus tres formas",
+                 dia > eq["potencia"], f"{_det(dia)} > {_det(eq['potencia'])}")
+        margen = [pil["piloto_potencia"]["valor"][f]["ic95_semiancho_2025"] for f in ("F1", "F2")]
+        informar("el margen con que el piloto mide la respuesta es más ancho que la banda del umbral (por eso puede no decidir)",
+                 min(margen) > eq["potencia"] - eq["lineal"], f"±{_det(min(margen))} frente a {_det(eq['potencia'] - eq['lineal'])}")
+        informar("cada pista queda a menos de un margen de la banda del umbral (con esas respuestas, 8 semanas pueden no bastar)",
+                 all(x - min(margen) < eq["potencia"] and x + min(margen) > eq["lineal"] for x in pistas),
+                 f"margen ±{_det(min(margen))}; banda {_det(eq['lineal'])} a {_det(eq['potencia'])}")
+        informar("el piloto detecta una respuesta como la del umbral frente a ninguna con potencia de 0,99 o más",
+                 min(pil["piloto_potencia"]["valor"][f]["potencia_beta053_vs_0"] for f in ("F1", "F2")) >= 0.99
+                 and abs(pil["piloto_parametros"]["valor"]["beta_equilibrio_costos_fuente"] - eq["potencia"]) < 0.01)
+    pj = J["piloto"]["saldo_sin_respuesta_Mcop"]
+    informar("piloto: pérdida proporcional (β = 1) < β alta < β central < 0 < si las salidas nuevas atraen con la β central",
+             pj["tope"] < pj["alto"] < pj["central"] < 0 < J["piloto"]["saldo_respuesta_central_Mcop"],
+             " · ".join(_det(v) for v in (pj["tope"], pj["alto"], pj["central"], J["piloto"]["saldo_respuesta_central_Mcop"])))
+    informar("lo que cuesta el piloto con la pérdida proporcional (β = 1, el tope de pasajeros de la regla de parada 3) es menos "
+             "del 3 % de lo que dejaría aplicar el plan sin medir",
+             abs(pj["tope"]) < 0.03 * abs(a["saldo_conservador_Mcop"]), f"{_det(pj['tope'])} frente a {_det(a['saldo_conservador_Mcop'])}")
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -641,7 +779,7 @@ def origen(J, R):
         elif not isinstance(o, str) and ruta not in org:
             faltan.append(ruta)
 
-    for sec in ("convenciones", "planes", "por_ruta", "por_hora", "contexto", "palancas"):
+    for sec in ("convenciones", "planes", "por_ruta", "por_hora", "contexto", "pistas_respuesta", "piloto", "palancas"):
         recorrer(J[sec], sec)
     informar("cada cifra del archivo tiene su entrada en «origen»", not faltan, ", ".join(faltan[:8]))
     sobran = [k for k in org if not _existe(J, k)]
@@ -677,7 +815,7 @@ def main():
         print(f"FALLA  no existe {ARCHIVO} (corra preparar_datos.py)")
         sys.exit(1)
     J = json.loads(ARCHIVO.read_text(encoding="utf-8"))
-    print(f"Archivo: {ARCHIVO}\nProyecto: {R}")
+    print(f"Archivo: dash_app/datos/{ARCHIVO.name}\nProyecto: la carpeta «{R.name}» (--proyecto)")
     identidades(J)
     fuentes(J, R)
     inventario(J, R)

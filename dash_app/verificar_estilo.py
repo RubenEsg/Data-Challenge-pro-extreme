@@ -514,7 +514,7 @@ def vivo(inf, puerto, capturas=None):
                     mal += 1
                 if d["heroes"] > 1 or (protagonista and (d["heroes"] != 1 or d["saldos_en_heroe"] < 2)):
                     inf.falla(g, f"cifra protagonista: {d['heroes']} (con {d['saldos_en_heroe']} saldos dentro); "
-                                 + ("se espera exactamente una con sus dos saldos" if protagonista else "como mucho una"))
+                                 + ("se espera exactamente una con al menos dos fichas de saldo" if protagonista else "como mucho una"))
                     mal += 1
                 if ancho == 400 and d["ancho"] > d["vista"] + 1:
                     inf.falla(g, f"desplazamiento horizontal: {d['ancho']} px de contenido en {d['vista']} px · " + "; ".join(d["anchos"]))

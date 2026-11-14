@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-09 06:04",
+ "generado": "2026-11-14 14:40",
  "generador": "dash_app/preparar_datos.py",
  "archivos": {
   "pronosticos_2025.parquet": {
@@ -71,10 +71,13 @@
     "costos/resultados/linea_base_2025.csv",
     "simulacion_ahorro/resultados/simulacion_por_fecha.csv",
     "simulacion_ahorro/resultados/sensibilidad_beta.csv",
-    "experimentos/D6_simulador/resultados_escenarios.json"
+    "experimentos/D6_simulador/resultados_escenarios.json",
+    "documentos/informe_resultados.md",
+    "experimentos/E8_validacion_2026/resultados.json",
+    "experimentos/P2_piloto_beta/resultados.json"
    ],
    "filas": null,
-   "bytes": 81042
+   "bytes": 102050
   },
   "despacho/indice.json": {
    "fuentes": [
@@ -184,5 +187,5 @@
    "bytes": 2067
   }
  },
- "total_bytes": 4314794
+ "total_bytes": 4335802
 }

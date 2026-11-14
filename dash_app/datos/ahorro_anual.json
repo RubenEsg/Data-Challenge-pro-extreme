@@ -63,6 +63,8 @@
     "perdidos_Mcop": 0
    },
    "beta_equilibrio": null,
+   "respuesta_equilibrio": null,
+   "saldo_respuesta_central_Mcop": null,
    "buses_hora_anio": 632067.7115277778,
    "km_anio": 9798151.1,
    "costo_km_conductor_Mcop": 36197.18724746481,
@@ -116,7 +118,29 @@
     "central": -2825.128237082335,
     "alto": -3624.7560176759184
    },
-   "beta_equilibrio": null
+   "beta_equilibrio": null,
+   "respuesta_equilibrio": {
+    "lineal": 0.4365666197193177,
+    "mixta": 0.46508488305170637,
+    "potencia": 0.5339128148210888,
+    "por_beta": {
+     "bajo": {
+      "lineal": 0.3253385031705551,
+      "mixta": 0.35974938053485656,
+      "potencia": 0.42527908468685294
+     },
+     "alto": {
+      "lineal": 0.584870775117668,
+      "mixta": 0.5967230819627544,
+      "potencia": 0.6610864920728354
+     }
+    }
+   },
+   "saldo_respuesta_central_Mcop": {
+    "lineal": 1600.2091410446096,
+    "mixta": 1426.9767829334914,
+    "potencia": 1056.124294093237
+   }
   },
   "recorta": {
    "salidas_dia": 411.25479452054793,
@@ -165,7 +189,29 @@
     "central": -1029.1156671403,
     "alto": -2139.5782869058353
    },
-   "beta_equilibrio": 0.528463472273316
+   "beta_equilibrio": 0.528463472273316,
+   "respuesta_equilibrio": {
+    "lineal": 0.1961065540346741,
+    "mixta": 0.26749388148863285,
+    "potencia": 0.3234496814415613,
+    "por_beta": {
+     "bajo": {
+      "lineal": -0.05172941684025511,
+      "mixta": 0.034615176833698365,
+      "potencia": 0.04477663624633223
+     },
+     "alto": {
+      "lineal": 0.5265545152012467,
+      "mixta": 0.5561319480283641,
+      "potencia": 0.6216690127482045
+     }
+    }
+   },
+   "saldo_respuesta_central_Mcop": {
+    "lineal": 1938.6037427336996,
+    "mixta": 1663.958892132639,
+    "potencia": 1433.3693814473231
+   }
   }
  },
  "por_ruta": {
@@ -708,6 +754,29 @@
   "pax_dia_2025": 35266.85205479452,
   "pax_anio_2025": 12872401
  },
+ "pistas_respuesta": {
+  "literatura": 0.5,
+  "aparente_2026": 0.6634,
+  "aparente_2026_por_ruta": {
+   "min": 0.4027,
+   "max": 0.5985
+  },
+  "aparente_2026_sin_limpiar": 0.458,
+  "reserva_2026": "Nueva reserva: en días especiales los viajes suben (Carnaval central +22 / +8 / +15 %) pero las subidas no (+0,3 / +3,7 / +1,4 %). La elasticidad aparente es casi nula en esos días, lo que debilita la lectura de 0,66."
+ },
+ "piloto": {
+  "pax_en_riesgo": {
+   "central": 22903.915264936117,
+   "alto": 28660.252,
+   "tope": 31419.647129896886
+  },
+  "saldo_sin_respuesta_Mcop": {
+   "central": -51.913463215540574,
+   "alto": -70.23012670651384,
+   "tope": -79.01052200984573
+  },
+  "saldo_respuesta_central_Mcop": 22.077263757381417
+ },
  "palancas": {
   "domingos_festivos": {
    "plan": "recorta",
@@ -812,6 +881,10 @@
   "saldo_conservador_por_beta_Mcop": "Saldo conservador del plan con cada β del rango (convenciones.beta), conductor por hora (M COP/año). La fuente no tiene el saldo simétrico con otras β",
   "simetrica": "La contabilidad simétrica de la fuente separada en pasajeros ganados (donde se añaden salidas) y perdidos (donde se quitan), con la forma lineal de costos/reoptimizar_d5.py (pasajeros/día y M COP/año)",
   "beta_equilibrio": "β por encima de la cual el saldo conservador del plan es negativo (pago por hora); null si la fuente no la calcula",
+  "respuesta_equilibrio": "Respuesta de los pasajeros a las salidas que se ponen (cuánto suben, en proporción, los pasajeros de una hora cuando suben sus salidas) desde la que el plan deja de perder en el año: con ella, el ahorro en operación más los pasajes ganados iguala los pasajes perdidos. Nunca se ha medido, así que va en tres formas de cuenta, todas con la pérdida al quitar de la β central. «lineal»: perdidos y ganados con la regla lineal de la contabilidad simétrica = (simetrica.perdidos_Mcop − ahorro_operacion_Mcop) × β central ÷ simetrica.ganados_Mcop. «mixta»: perdidos con la forma de potencia de la contabilidad conservadora y ganados lineales = −saldo_conservador_Mcop × β central ÷ simetrica.ganados_Mcop. «potencia»: perdidos y ganados con la forma de potencia, que es la elasticidad que estima el piloto = la r que anula saldo_conservador_Mcop + Σ real × ((x ÷ n_S0)^r − 1) × tarifa en las horas donde el plan pone salidas. «por_beta» repite las tres con la pérdida de los extremos del rango de β: la lineal escala los perdidos lineales (× β ÷ β central) y la mixta y la de potencia usan saldo_conservador_por_beta_Mcop. Un valor de cero o menos quiere decir que, con esa cuenta, el plan no pierde aunque las salidas que se ponen no atraigan a nadie. Es el umbral de todo el plan del año en las tres rutas; el 0,62 del informe (sección del piloto) es otra cuenta, la de un día de piloto en CRA 54 que pasa salidas de 9-11 h a 14-15 h. null si el saldo conservador no es negativo o el plan no pone salidas",
+  "saldo_respuesta_central_Mcop": "Saldo del año si las salidas que se ponen atraen pasajeros con la β central, la medida al quitar, en las tres formas de cuenta de respuesta_equilibrio (M COP/año): «lineal» es saldo_simetrico_Mcop; «mixta» = saldo_conservador_Mcop + simetrica.ganados_Mcop; «potencia» = saldo_conservador_Mcop + Σ real × ((x ÷ n_S0)^β − 1) × tarifa. null donde respuesta_equilibrio es null",
+  "pistas_respuesta": "Lo poco que se sabe de la respuesta de los pasajeros a las salidas que se ponen, que nunca se ha medido en Sobusa. «literatura»: la elasticidad de los pasajeros a las salidas que cita el informe de resultados (TCRP Report 95, promedio internacional). «aparente_2026»: la asociación entre rutas de E8 (en 2026 hubo más viajes y más subidas), que es descriptiva, no causal y frágil; «aparente_2026_por_ruta», su mínimo y su máximo mirando cada ruta sin comparar, y «aparente_2026_sin_limpiar», la misma antes de limpiar las bandas corruptas de CRA 54; «reserva_2026» es la reserva que E8 anota sobre esa lectura (en los días especiales los viajes suben y las subidas no). No son una medición ni dan una probabilidad",
+  "piloto": "El piloto de P2 dicho en saldo (M COP en sus 8 semanas). «saldo_sin_respuesta_Mcop»: lo que deja si las salidas que se ponen no atraen a nadie = ahorro de los recortes − pasajeros en riesgo × tarifa neta − costo de los refuerzos, con los pasajeros en riesgo de la β central («central»: es el saldo conservador de P2), de la β alta del rango («alto») y de la pérdida proporcional, β = 1, que es el tope de pasajeros de la regla de parada 3 («tope»: si se pierden más, el piloto se detiene). «saldo_respuesta_central_Mcop»: lo que deja si atraen con la β central (el saldo simétrico de P2). «pax_en_riesgo»: los pasajeros en riesgo de cada caso",
   "por_ruta": "Salidas por día y por año de cada plan en cada ruta",
   "por_hora": "Salidas medias por día de cada tipo de día, por hora de salida, tres rutas sumadas; «dias» = días de ese tipo en 2025",
   "contexto": "Línea base de 2025 (precios 2025, conductor por hora; incluye los viajes marcados cancelados que corrieron) y pasajeros de 2025. No es la base de las comparaciones de los planes",
@@ -994,6 +1067,14 @@
    "clave": "hoy es la referencia"
   },
   "planes.hoy.beta_equilibrio": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.respuesta_equilibrio": {
+   "archivo": "definición",
+   "clave": "hoy es la referencia"
+  },
+  "planes.hoy.saldo_respuesta_central_Mcop": {
    "archivo": "definición",
    "clave": "hoy es la referencia"
   },
@@ -1200,6 +1281,66 @@
    "archivo": "sin fuente",
    "clave": "costos/ no calcula la β de equilibrio del plan que reasigna (la Tabla 3 del informe deja «—»)"
   },
+  "planes.reasigna.respuesta_equilibrio.lineal": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "ahorro_operacion_Mcop; simetrica.perdidos_Mcop; simetrica.ganados_Mcop; convenciones.beta.central",
+   "calculo": "(simetrica.perdidos_Mcop − ahorro_operacion_Mcop) × convenciones.beta.central ÷ simetrica.ganados_Mcop"
+  },
+  "planes.reasigna.respuesta_equilibrio.mixta": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_Mcop; simetrica.ganados_Mcop; convenciones.beta.central",
+   "calculo": "−saldo_conservador_Mcop × convenciones.beta.central ÷ simetrica.ganados_Mcop"
+  },
+  "planes.reasigna.respuesta_equilibrio.potencia": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_Mcop; real, n_S0 y x_corrida_1 donde x_corrida_1 > n_S0 > 0",
+   "calculo": "la r que anula saldo_conservador_Mcop + Σ real × ((x ÷ n_S0)^r − 1) × convenciones.tarifa_neta_cop × 1e-06 (bisección)"
+  },
+  "planes.reasigna.respuesta_equilibrio.por_beta.bajo.lineal": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "ahorro_operacion_Mcop; simetrica.perdidos_Mcop; simetrica.ganados_Mcop; convenciones.beta.bajo; convenciones.beta.central",
+   "calculo": "(simetrica.perdidos_Mcop × convenciones.beta.bajo ÷ convenciones.beta.central − ahorro_operacion_Mcop) × convenciones.beta.central ÷ simetrica.ganados_Mcop"
+  },
+  "planes.reasigna.respuesta_equilibrio.por_beta.bajo.mixta": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_por_beta_Mcop.bajo; simetrica.ganados_Mcop; convenciones.beta.central",
+   "calculo": "−saldo_conservador_por_beta_Mcop.bajo × convenciones.beta.central ÷ simetrica.ganados_Mcop"
+  },
+  "planes.reasigna.respuesta_equilibrio.por_beta.bajo.potencia": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_por_beta_Mcop.bajo; real, n_S0 y x_corrida_1 donde x_corrida_1 > n_S0 > 0",
+   "calculo": "la r que anula saldo_conservador_por_beta_Mcop.bajo + Σ real × ((x ÷ n_S0)^r − 1) × convenciones.tarifa_neta_cop × 1e-06 (bisección)"
+  },
+  "planes.reasigna.respuesta_equilibrio.por_beta.alto.lineal": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "ahorro_operacion_Mcop; simetrica.perdidos_Mcop; simetrica.ganados_Mcop; convenciones.beta.alto; convenciones.beta.central",
+   "calculo": "(simetrica.perdidos_Mcop × convenciones.beta.alto ÷ convenciones.beta.central − ahorro_operacion_Mcop) × convenciones.beta.central ÷ simetrica.ganados_Mcop"
+  },
+  "planes.reasigna.respuesta_equilibrio.por_beta.alto.mixta": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_por_beta_Mcop.alto; simetrica.ganados_Mcop; convenciones.beta.central",
+   "calculo": "−saldo_conservador_por_beta_Mcop.alto × convenciones.beta.central ÷ simetrica.ganados_Mcop"
+  },
+  "planes.reasigna.respuesta_equilibrio.por_beta.alto.potencia": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_por_beta_Mcop.alto; real, n_S0 y x_corrida_1 donde x_corrida_1 > n_S0 > 0",
+   "calculo": "la r que anula saldo_conservador_por_beta_Mcop.alto + Σ real × ((x ÷ n_S0)^r − 1) × convenciones.tarifa_neta_cop × 1e-06 (bisección)"
+  },
+  "planes.reasigna.saldo_respuesta_central_Mcop.lineal": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 costos nuevos, pago por hora, e=0,5].neto_simetrico_pago_hora_beta070_Mcop",
+   "calculo": "= saldo_simetrico_Mcop"
+  },
+  "planes.reasigna.saldo_respuesta_central_Mcop.mixta": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_Mcop; simetrica.ganados_Mcop",
+   "calculo": "saldo_conservador_Mcop + simetrica.ganados_Mcop"
+  },
+  "planes.reasigna.saldo_respuesta_central_Mcop.potencia": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0) (x_corrida_1); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_Mcop; real, n_S0 y x_corrida_1 donde x_corrida_1 > n_S0 > 0; convenciones.beta.central",
+   "calculo": "saldo_conservador_Mcop + Σ real × ((x ÷ n_S0)^β central − 1) × convenciones.tarifa_neta_cop × 1e-06"
+  },
   "planes.recorta.salidas_dia": {
    "archivo": "costos/resultados/d5_reoptimizado.csv",
    "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].salidas_dia"
@@ -1379,6 +1520,66 @@
   "planes.recorta.beta_equilibrio": {
    "archivo": "costos/resultados/beta_equilibrio.csv",
    "clave": "[clave=D5][\"pago por hora\"]"
+  },
+  "planes.recorta.respuesta_equilibrio.lineal": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "ahorro_operacion_Mcop; simetrica.perdidos_Mcop; simetrica.ganados_Mcop; convenciones.beta.central",
+   "calculo": "(simetrica.perdidos_Mcop − ahorro_operacion_Mcop) × convenciones.beta.central ÷ simetrica.ganados_Mcop"
+  },
+  "planes.recorta.respuesta_equilibrio.mixta": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_Mcop; simetrica.ganados_Mcop; convenciones.beta.central",
+   "calculo": "−saldo_conservador_Mcop × convenciones.beta.central ÷ simetrica.ganados_Mcop"
+  },
+  "planes.recorta.respuesta_equilibrio.potencia": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_Mcop; real, n_S0 y x_D5 donde x_D5 > n_S0 > 0",
+   "calculo": "la r que anula saldo_conservador_Mcop + Σ real × ((x ÷ n_S0)^r − 1) × convenciones.tarifa_neta_cop × 1e-06 (bisección)"
+  },
+  "planes.recorta.respuesta_equilibrio.por_beta.bajo.lineal": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "ahorro_operacion_Mcop; simetrica.perdidos_Mcop; simetrica.ganados_Mcop; convenciones.beta.bajo; convenciones.beta.central",
+   "calculo": "(simetrica.perdidos_Mcop × convenciones.beta.bajo ÷ convenciones.beta.central − ahorro_operacion_Mcop) × convenciones.beta.central ÷ simetrica.ganados_Mcop"
+  },
+  "planes.recorta.respuesta_equilibrio.por_beta.bajo.mixta": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_por_beta_Mcop.bajo; simetrica.ganados_Mcop; convenciones.beta.central",
+   "calculo": "−saldo_conservador_por_beta_Mcop.bajo × convenciones.beta.central ÷ simetrica.ganados_Mcop"
+  },
+  "planes.recorta.respuesta_equilibrio.por_beta.bajo.potencia": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_por_beta_Mcop.bajo; real, n_S0 y x_D5 donde x_D5 > n_S0 > 0",
+   "calculo": "la r que anula saldo_conservador_por_beta_Mcop.bajo + Σ real × ((x ÷ n_S0)^r − 1) × convenciones.tarifa_neta_cop × 1e-06 (bisección)"
+  },
+  "planes.recorta.respuesta_equilibrio.por_beta.alto.lineal": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "ahorro_operacion_Mcop; simetrica.perdidos_Mcop; simetrica.ganados_Mcop; convenciones.beta.alto; convenciones.beta.central",
+   "calculo": "(simetrica.perdidos_Mcop × convenciones.beta.alto ÷ convenciones.beta.central − ahorro_operacion_Mcop) × convenciones.beta.central ÷ simetrica.ganados_Mcop"
+  },
+  "planes.recorta.respuesta_equilibrio.por_beta.alto.mixta": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_por_beta_Mcop.alto; simetrica.ganados_Mcop; convenciones.beta.central",
+   "calculo": "−saldo_conservador_por_beta_Mcop.alto × convenciones.beta.central ÷ simetrica.ganados_Mcop"
+  },
+  "planes.recorta.respuesta_equilibrio.por_beta.alto.potencia": {
+   "archivo": "simulacion_ahorro/resultados/sensibilidad_beta.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_por_beta_Mcop.alto; real, n_S0 y x_D5 donde x_D5 > n_S0 > 0",
+   "calculo": "la r que anula saldo_conservador_por_beta_Mcop.alto + Σ real × ((x ÷ n_S0)^r − 1) × convenciones.tarifa_neta_cop × 1e-06 (bisección)"
+  },
+  "planes.recorta.saldo_respuesta_central_Mcop.lineal": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv",
+   "clave": "[corrida=D5 original (60.000/1.500/3.000, e=0,5)].neto_simetrico_pago_hora_beta070_Mcop",
+   "calculo": "= saldo_simetrico_Mcop"
+  },
+  "planes.recorta.saldo_respuesta_central_Mcop.mixta": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_Mcop; simetrica.ganados_Mcop",
+   "calculo": "saldo_conservador_Mcop + simetrica.ganados_Mcop"
+  },
+  "planes.recorta.saldo_respuesta_central_Mcop.potencia": {
+   "archivo": "costos/resultados/d5_reoptimizado.csv; costos/resultados/d5_reoptimizado_decisiones.parquet (real, n_S0); experimentos/D5_optimizacion_milp/decisiones_2025.parquet (x_D5); costos/resultados/costos_para_planificador.json",
+   "clave": "saldo_conservador_Mcop; real, n_S0 y x_D5 donde x_D5 > n_S0 > 0; convenciones.beta.central",
+   "calculo": "saldo_conservador_Mcop + Σ real × ((x ÷ n_S0)^β central − 1) × convenciones.tarifa_neta_cop × 1e-06"
   },
   "por_ruta.SILENCIO.hoy.salidas_anio": {
    "archivo": "costos/resultados/d5_reoptimizado_decisiones.parquet",
@@ -1722,6 +1923,61 @@
   "convenciones.supuestos_iniciales.tarifa_cop": {
    "archivo": "experimentos/D5_optimizacion_milp/resultados.json",
    "clave": "parametros.TARIFA"
+  },
+  "pistas_respuesta.literatura": {
+   "archivo": "documentos/informe_resultados.md",
+   "clave": "Tabla 2 (elasticidad de los pasajeros a las salidas), fila «Literatura (TCRP Report 95)»"
+  },
+  "pistas_respuesta.aparente_2026": {
+   "archivo": "experimentos/E8_validacion_2026/resultados.json",
+   "clave": "elasticidad_aparente_2026[\"SILENCIO+CL 72 vs CRA 54\"]"
+  },
+  "pistas_respuesta.aparente_2026_por_ruta.min": {
+   "archivo": "experimentos/E8_validacion_2026/resultados.json",
+   "clave": "elasticidad_aparente_2026.pendiente_simple_por_ruta → mínimo"
+  },
+  "pistas_respuesta.aparente_2026_por_ruta.max": {
+   "archivo": "experimentos/E8_validacion_2026/resultados.json",
+   "clave": "elasticidad_aparente_2026.pendiente_simple_por_ruta → máximo"
+  },
+  "pistas_respuesta.aparente_2026_sin_limpiar": {
+   "archivo": "experimentos/E8_validacion_2026/resultados.json",
+   "clave": "verificacion.confirmado.elasticidad_sin_limpiar_bandas"
+  },
+  "pistas_respuesta.reserva_2026": {
+   "archivo": "experimentos/E8_validacion_2026/resultados.json",
+   "clave": "verificacion.correcciones: la que dice «elasticidad aparente es casi nula»"
+  },
+  "piloto.pax_en_riesgo.central": {
+   "archivo": "experimentos/P2_piloto_beta/resultados.json",
+   "clave": "riesgo_costo.totales_piloto.pax_riesgo_piloto_beta070"
+  },
+  "piloto.saldo_sin_respuesta_Mcop.central": {
+   "archivo": "experimentos/P2_piloto_beta/resultados.json",
+   "clave": "riesgo_costo.totales_piloto.ahorro_operativo_recortes_piloto_Mcop; riesgo_costo.totales_piloto.pax_riesgo_piloto_beta070; parametros.tarifa_neta; riesgo_costo.totales_piloto.costo_extra_refuerzos_piloto_Mcop",
+   "calculo": "ahorro de los recortes − pasajeros en riesgo × tarifa neta × 1e-06 − costo de los refuerzos"
+  },
+  "piloto.pax_en_riesgo.alto": {
+   "archivo": "experimentos/P2_piloto_beta/resultados.json",
+   "clave": "riesgo_costo.por_franja[rol=recorte]: pax_riesgo_dia_beta090 × dias_tratados_piloto → suma"
+  },
+  "piloto.saldo_sin_respuesta_Mcop.alto": {
+   "archivo": "experimentos/P2_piloto_beta/resultados.json",
+   "clave": "riesgo_costo.totales_piloto.ahorro_operativo_recortes_piloto_Mcop; riesgo_costo.por_franja[rol=recorte]: pax_riesgo_dia_beta090 × dias_tratados_piloto → suma; parametros.tarifa_neta; riesgo_costo.totales_piloto.costo_extra_refuerzos_piloto_Mcop",
+   "calculo": "ahorro de los recortes − pasajeros en riesgo × tarifa neta × 1e-06 − costo de los refuerzos"
+  },
+  "piloto.pax_en_riesgo.tope": {
+   "archivo": "experimentos/P2_piloto_beta/resultados.json",
+   "clave": "riesgo_costo.totales_piloto.pax_riesgo_piloto_beta100"
+  },
+  "piloto.saldo_sin_respuesta_Mcop.tope": {
+   "archivo": "experimentos/P2_piloto_beta/resultados.json",
+   "clave": "riesgo_costo.totales_piloto.ahorro_operativo_recortes_piloto_Mcop; riesgo_costo.totales_piloto.pax_riesgo_piloto_beta100; parametros.tarifa_neta; riesgo_costo.totales_piloto.costo_extra_refuerzos_piloto_Mcop",
+   "calculo": "ahorro de los recortes − pasajeros en riesgo × tarifa neta × 1e-06 − costo de los refuerzos"
+  },
+  "piloto.saldo_respuesta_central_Mcop": {
+   "archivo": "experimentos/P2_piloto_beta/resultados.json",
+   "clave": "riesgo_costo.totales_piloto.neto_total_piloto_Mcop_simetrico"
   },
   "palancas.domingos_festivos.saldo_conservador_Mcop": {
    "archivo": "simulacion_ahorro/resultados/simulacion_por_fecha.csv",

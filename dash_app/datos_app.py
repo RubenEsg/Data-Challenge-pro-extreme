@@ -31,6 +31,41 @@ def fuente(pantalla, clave):
 
 
 @lru_cache(maxsize=1)
+def piloto_decision():
+    """Lo que la tarjeta de la decisión (ui.decision_piloto) toma del piloto en cifras_app.json: el resumen (semanas, saldo
+    mínimo y máximo, pasajeros en juego), cuántas reglas de parada tiene y en qué rutas corre; «refuerzos», las franjas donde
+    pone salidas (ruta, horas, % de salidas de más, semiancho del intervalo del 95 % con que mide la respuesta y potencia para
+    distinguir la β central del umbral), de menor a mayor semiancho; «potencia_signo», con qué potencia detecta esa respuesta
+    frente a ninguna; «saldo_sin_respuesta_Mcop» y «saldo_respuesta_central_Mcop», lo que deja el piloto si las salidas nuevas
+    no atraen a nadie (con la β central, con la alta y con la pérdida proporcional, que es el tope de pasajeros de una regla de parada) o si atraen con la β central
+    (ahorro_anual.json, «piloto»); y «umbral_dia», la
+    respuesta que iguala dinero y pasajeros en un día de piloto que pasa salidas de una franja de recorte a una de refuerzo
+    (la cuenta del informe). «archivos» son los del proyecto de donde sale todo."""
+    franjas, potencia = valor("piloto", "piloto_franjas"), valor("piloto", "piloto_potencia")
+    refuerzos = [k for k, f in franjas.items() if f["rol"] == "refuerzo"]
+    dia, corte, refuerzo = valor("piloto", "piloto_totales")["reasignacion_R1_a_F1"], franjas["R1"], franjas["F1"]
+    claves = [("inicio", "inicio_piloto_resumen"), ("piloto", "piloto_reglas_de_parada"), ("piloto", "piloto_franjas"),
+              ("piloto", "piloto_potencia"), ("piloto", "piloto_totales"), ("piloto", "piloto_parametros")]
+
+    def horas(f):
+        return f"{f['horas'][0]}–{f['horas'][-1]} h"
+
+    return {**valor("inicio", "inicio_piloto_resumen"),
+            "reglas": len(valor("piloto", "piloto_reglas_de_parada")),
+            "rutas": list(dict.fromkeys(f["ruta"] for f in franjas.values() if f["rol"] != "control")),
+            "refuerzos": sorted(({"ruta": franjas[k]["ruta"], "horas": horas(franjas[k]),
+                                  "cambio_pct": potencia[k]["cambio_pct_salidas"], "semiancho": potencia[k]["ic95_semiancho_2025"],
+                                  "potencia_umbral": potencia[k]["potencia_070_vs_053_una_cola"]} for k in refuerzos),
+                                key=lambda f: f["semiancho"]),
+            **ahorro_anual()["piloto"],
+            "potencia_signo": {"respuesta": valor("piloto", "piloto_parametros")["beta_equilibrio_costos_fuente"],
+                               "potencia": min(potencia[k]["potencia_beta053_vs_0"] for k in refuerzos)},
+            "umbral_dia": {"dinero": dia["beta_refuerzo_que_iguala_dinero"], "pasajeros": dia["beta_refuerzo_que_iguala_pasajeros"],
+                           "ruta": corte["ruta"], "de": horas(corte), "a": horas(refuerzo)},
+            "archivos": list(dict.fromkeys(cifra(p, c).get("archivo", "") for p, c in claves))}
+
+
+@lru_cache(maxsize=1)
 def ficha_modelos():
     return json.loads((DATOS / "ficha_modelos.json").read_text(encoding="utf-8"))
 

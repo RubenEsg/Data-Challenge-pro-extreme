@@ -7,7 +7,7 @@ escribe ningún color ni tamaño de letra. Contenido:
   · la plantilla «sobusa» de Plotly y las ayudas de los gráficos (traza con las formas rayada, foco y escalon_rayado,
     barras_foco, banda_foco, etiquetas_columnas, hover, marcas, unidad_eje, linea_cero, referencia, franja, fuente_svg);
   · los componentes del catálogo (DISENO.md §5): encabezado, arriba, rejilla, seccion, tarjeta (con «…»), bloque, mas,
-    cifra, heroe, saldo, antes_despues, chip, chip_cambio, chip_valor, barra_rayas, puntos, tarjeta_insight, aviso, grafico,
+    cifra, saldo, paso, decision_piloto, antes_despues, chip, chip_cambio, chip_valor, barra_rayas, puntos, tarjeta_insight, aviso, grafico,
     leyenda, tabla, segmentado, control, desplegable, fuentes, destino, boton, boton_redondo, casilla, deslizador, delta,
     hora_chip, pie;
   · al final, el bloque «compatibilidad» con los nombres antiguos que las páginas sin migrar todavía usan.
@@ -530,8 +530,9 @@ def cifra(etiqueta, valor, unidad=None, variacion=None, tono=None, nota=None, *,
 def saldo(titulo, valor, definicion=None, unidad="M COP al año", d=0, palabras=("saldo positivo", "saldo negativo"),
           extremo=None):
     """Un saldo: cifra con su signo (--t-xl) + chip + definición de una línea. El chip dice el estado del saldo (positivo o
-    negativo, con icono y palabra). Con `extremo` («peor caso», «mejor caso») la cifra es el borde de un rango y no un
-    resultado, así que el chip va neutro y dice solo qué borde es: un piso en rojo se lee como una pérdida segura."""
+    negativo, con icono y palabra). Con `extremo` («conservadora», «simétrica») la cifra es lo que
+    sale con un supuesto y no un resultado, así que el chip va neutro y dice solo cuál es: un saldo negativo en rojo se lee
+    como una pérdida segura."""
     if extremo:
         estado = chip(extremo)
     else:
@@ -544,20 +545,151 @@ def saldo(titulo, valor, definicion=None, unidad="M COP al año", d=0, palabras=
     return html.Div(hijos, className="saldo")
 
 
-def heroe(etiqueta, valor, unidad, texto, saldos, lado=None, pie=None, id=None):
-    """Cifra protagonista (una por pantalla): etiqueta → valor a --t-hero (el signo del mismo tamaño) con su unidad → una
-    línea → los dos saldos → la columna de la segunda respuesta (a la derecha del valor en escritorio, debajo de los saldos
-    en el teléfono) → el pie (β y el enlace). Ese es también el orden del DOM: el ahorro nunca va sin sus saldos."""
-    principal = [html.P(etiqueta, className="heroe__etiqueta"),
-                 html.P([html.Span(valor, className="heroe__numero"), html.Span(unidad, className="heroe__unidad")], className="heroe__valor")]
-    for t in _lista(texto):
-        principal.append(html.P(t, className="heroe__texto") if isinstance(t, str) else t)
-    partes = [html.Div(principal, className="heroe__principal"), html.Div(_lista(saldos), className="saldos")]
-    if lado is not None:
-        partes.append(html.Div(_lista(lado), className="heroe__lado"))
-    if pie is not None:
-        partes.append(html.Div(_lista(pie), className="heroe__pie"))
-    return html.Div(partes, className="heroe cifra--hero", **_kw(id=id))
+ESPACIO_FIJO = "\u00a0"   # espacio de no separación
+FORMAS_UMBRAL = ("lineal", "mixta", "potencia")
+POR_CADA = 10   # la respuesta de los pasajeros se lee «por cada 10 % más de salidas», como β («si se quitan 10 de cada 100»)
+
+
+def pegar(texto):
+    """Espacio de no separación entre una cifra y su unidad («1,4 %», «501 M COP») y dentro de «β = 0,70», para que un salto
+    de línea no los parta. Lo que no es texto se devuelve igual."""
+    if not isinstance(texto, str):
+        return texto
+    f = ESPACIO_FIJO
+    return (texto.replace("M COP", f"M{f}COP").replace(f" M{f}COP", f"{f}M{f}COP").replace(" %", f"{f}%")
+            .replace("β = ", f"β{f}={f}"))
+
+
+def por_cada(r, d=1):
+    """Una respuesta de los pasajeros a las salidas (en proporción) dicha como % de pasajeros por cada 10 % de salidas."""
+    return num(r * POR_CADA, d)
+
+
+def umbral_plan(plan):
+    """El umbral del plan (plan["respuesta_equilibrio"]: desde qué respuesta a las salidas nuevas deja de perder), como un
+    diccionario: «bajo», «centro» y «alto» son el menor, el punto medio y el mayor de sus tres formas de cuenta con la β
+    central («cerca de un 5 %», «de 4,4 a 5,3 %»); «minimo» y «maximo», los de las tres formas con todo el rango de β."""
+    eq = plan["respuesta_equilibrio"]
+    centrales = [eq[f] for f in FORMAS_UMBRAL]
+    todos = centrales + [v for k in ("bajo", "alto") for v in eq["por_beta"][k].values()]
+    return {"bajo": min(centrales), "centro": (min(centrales) + max(centrales)) / 2, "alto": max(centrales),
+            "minimo": min(todos), "maximo": max(todos)}
+
+
+def paso(orden, titulo, valor, unidad, marca, definicion):
+    """Un paso de una decisión en cadena, con la forma de un saldo: título con su número de orden, cifra, chip neutro y
+    definición. `valor` llega ya escrito, porque puede ser un rango («0 a +1.600»); `unidad` dice también de qué depende la
+    cifra cuando es la de un supuesto («M COP, si las salidas nuevas no atraen a nadie»)."""
+    return html.Div([html.P(f"{orden} · {titulo}", className="saldo__titulo"),
+                     html.P([html.Span(valor), html.Span(pegar(unidad), className="saldo__unidad")], className="saldo__valor"),
+                     chip(marca), html.P(pegar(definicion), className="saldo__texto")], className="saldo")
+
+
+def decision_piloto(plan, beta, piloto, pistas):
+    """Lo que se juega en pasajes, contado como la decisión que de verdad se propone: primero se mide con el piloto, y el
+    plan solo se aplica si las salidas nuevas atraen suficientes pasajeros. Dos saldos sueltos, uno negativo y otro positivo,
+    invitan a promediarlos, y ese promedio (negativo) no es lo que se propone: el caso negativo es el que el piloto busca
+    evitar. No da una probabilidad de cada caso porque no hay con qué: la respuesta a las salidas nuevas nunca se ha medido.
+    Eso va dicho a la vista, con las pistas que hay, con lo que cuesta el piloto si sale mal y con lo que el piloto puede y
+    no puede decir en ocho semanas.
+
+    `plan` es el plan de ahorro_anual.json, `beta` su convención, `piloto` es datos_app.piloto_decision() y `pistas`,
+    ahorro_anual()["pistas_respuesta"]. Devuelve (pasos, aviso, detalles): los dos bloques de pasos (el piloto a todo lo ancho
+    y, debajo, las dos salidas posibles), el aviso «¿Qué tan probable es cada caso?» y lo que va en el «…» de la tarjeta (el
+    umbral en sus tres formas de cuenta y con todo el rango de β, y de dónde salen las pistas)."""
+    eq, sc, b = plan["respuesta_equilibrio"], plan["saldo_respuesta_central_Mcop"], beta["central"]
+    por10 = por_cada
+    u = umbral_plan(plan)
+    umbral = por10(u["centro"], 0)
+    sin = piloto["saldo_sin_respuesta_Mcop"]
+    semanas = num(piloto["semanas"])
+    rutas = [r.replace(" ", ESPACIO_FIJO) for r in piloto["rutas"]]
+    # lo que deja el plan si las salidas nuevas atraen lo mismo que se pierde al quitar, según la forma de la cuenta
+    saldos_b = f"entre {con_signo(min(sc.values()))} y {con_signo(max(sc.values()))}"
+    medir = paso(1, f"Primero se mide: un piloto de {semanas} semanas en {num(len(rutas))} rutas",
+                 con_signo(sin["central"], 1), "M COP, si las salidas nuevas no atraen a nadie", "lo que se propone",
+                 f"En {' y '.join(rutas)}, con días sorteados y {num(piloto['reglas'])} reglas de parada. Mide las dos cosas de "
+                 "las que depende el saldo: cuántos pasajeros se pierden con un recorte planificado y cuántos atraen las salidas "
+                 f"nuevas. Si atraen como se midió al quitar, deja {con_signo(piloto['saldo_respuesta_central_Mcop'], 1)}. La "
+                 f"cifra de arriba supone la pérdida medida (β = {num(b, 2)}); con β = {num(beta['alto'], 2)} serían "
+                 f"{con_signo(sin['alto'], 1)}, y una regla de parada detiene el piloto si se pierden más pasajeros que salidas "
+                 f"en proporción (β = {num(1)}: {con_signo(sin['tope'], 1)}).")
+    aplica = paso(2, "Si las salidas nuevas atraen suficientes pasajeros, el plan se aplica",
+                  f"{num(0)} a {con_signo(max(sc.values()))}", "M COP al año", "si el piloto lo confirma",
+                  f"Suficientes es cerca de un {umbral} % más de pasajeros por cada {num(POR_CADA)} % más de salidas en una hora: "
+                  f"con eso el plan ni gana ni pierde. Si atraen un {por10(b, 0)} %, lo mismo que se pierde al quitar, deja "
+                  f"{saldos_b} según cómo se haga la cuenta. Se aplica solo si la respuesta medida queda por encima del umbral "
+                  "con su margen.")
+    no = paso(3, "Si atraen menos, el plan no se aplica", num(0), "M COP al año", "el horario queda como hoy",
+              f"Lo gastado en el piloto (y en alargarlo, si {semanas} semanas no bastan) no se recupera, y la pérdida no pasa de "
+              "ahí. Aplicar el plan un año entero sin medir, y que no llegara ningún pasajero nuevo, dejaría "
+              f"{con_signo(plan['saldo_conservador_Mcop'])} M COP (contabilidad conservadora con β = {num(b, 2)}; "
+              f"{con_signo(plan['saldo_conservador_por_beta_Mcop']['alto'])} con {num(beta['alto'], 2)}). El piloto existe para "
+              "no llegar ahí.")
+    pasos = [html.Div(medir, className="saldos saldos--uno"), html.Div([aplica, no], className="saldos")]
+
+    # La pregunta que deja la tarjeta, respondida a la vista: no hay probabilidad; por qué la propuesta no la necesita; y lo
+    # que el piloto puede y no puede decir (un límite va en un aviso, nunca escondido en el «…»)
+    de_2026 = [pistas["aparente_2026"], pistas["aparente_2026_sin_limpiar"], *pistas["aparente_2026_por_ruta"].values()]
+    refuerzos, signo = piloto["refuerzos"], piloto["potencia_signo"]
+
+    def por_ruta(texto_de, unidad=""):
+        """«±1,4 puntos porcentuales en CL 72 y ±2,3 en CRA 54»: un valor por franja de refuerzo, la unidad solo en el primero."""
+        return " y ".join(f"{texto_de(f)}{unidad if i == 0 else ''} en {f['ruta'].replace(' ', ESPACIO_FIJO)}"
+                          for i, f in enumerate(refuerzos))
+
+    margen = por_ruta(lambda f: f"±{por10(f['semiancho'])}", " puntos porcentuales")
+    probable = aviso([pegar(t) for t in (
+        "Todavía no hay base para decirlo. Cuántos pasajeros atraen las salidas nuevas nunca se ha medido, y las pistas que hay "
+        f"caen en la misma franja que el umbral: cerca de {por10(pistas['literatura'], 0)} % en la literatura y entre "
+        f"{por10(min(de_2026))} y {por10(max(de_2026))} % en los datos de 2026, que son frágiles (en días especiales como "
+        f"Carnaval, casi nada). El umbral va de {por10(u['bajo'])} a {por10(u['alto'])} % según cómo se haga la cuenta, y de "
+        f"{por10(u['minimo'])} a {por10(u['maximo'])} % con todo el rango de β, que el piloto también mide.",
+        f"Por eso la propuesta no es aplicar el plan y esperar: es medir antes. El piloto cuesta unos {num(-sin['central'])} M COP "
+        f"si las salidas nuevas no atraen a nadie; el plan, si atraen lo mismo que se pierde al quitar, deja {saldos_b} M COP "
+        "cada año.",
+        f"Lo que el piloto puede decir: si las salidas nuevas atraen cerca de un {por10(signo['respuesta'], 0)} % o más, lo "
+        f"detecta casi con certeza; cuánto, lo mide con un margen de {margen}, ancho frente al umbral. Si la respuesta queda "
+        f"cerca de él, como sugieren las pistas, lo más probable es que {semanas} semanas no basten y haya que alargarlo antes "
+        "de decidir. Antes de aplicar el plan falta además poner en el optimizador un cupo de pasajeros por bus, que cambiará "
+        "estas cifras.")],
+        None, "¿Qué tan probable es cada caso?")
+
+    # el «…»: el umbral en sus tres formas de cuenta y con todo el rango de β, el del informe (otra cuenta), de dónde sale
+    # cada pista y con qué precisión mide el piloto
+    def umbrales(de):
+        return [f"{por10(de[f])} %" for f in FORMAS_UMBRAL]
+
+    dia = piloto["umbral_dia"]
+    tabla_ = tabla(["Umbral y saldo", "Lineal", "Mixta", "De potencia"], [
+        [f"Umbral con β = {num(b, 2)}", *umbrales(eq)],
+        [f"Umbral con β = {num(beta['bajo'], 2)}", *umbrales(eq["por_beta"]["bajo"])],
+        [f"Umbral con β = {num(beta['alto'], 2)}", *umbrales(eq["por_beta"]["alto"])],
+        [f"Saldo si atraen un {por10(b, 0)} %", *[con_signo(sc[f]) for f in FORMAS_UMBRAL]]], compacta=True)
+    franjas = " y ".join(f"{f['ruta'].replace(' ', ESPACIO_FIJO)} de {f['horas']}" for f in refuerzos)
+    detalles = [tabla_] + [nota(pegar(t)) for t in (
+        f"Umbral: los pasajeros de más, por cada {num(POR_CADA)} % más de salidas en una hora, desde los que el plan del año deja "
+        "de perder; depende de cuánto se pierda al quitar (β). Saldo: el del año, en M COP, si las salidas nuevas atraen lo mismo "
+        "que se pierde al quitar.",
+        "Lineal: regla lineal al quitar y al poner (la contabilidad simétrica). Mixta: potencia al quitar (la contabilidad "
+        "conservadora) y lineal al poner. De potencia: potencia al quitar y al poner, la forma que estima el piloto.",
+        f"El informe da un umbral más alto, {por10(dia['dinero'])} % ({por10(dia['pasajeros'])} % para no perder pasajeros). Es "
+        f"otra cuenta: un día de piloto en {dia['ruta']} que pasa salidas de {dia['de']} a {dia['a']}. Esta es la del plan del año "
+        f"en las tres rutas, que además ahorra {con_signo(plan['ahorro_operacion_Mcop'])} M COP en operación.",
+        f"Las pistas no son mediciones. La literatura (TCRP Report 95) da cerca de {por10(pistas['literatura'], 0)} %. En 2026, entre "
+        f"rutas, los pasajeros subieron {por10(pistas['aparente_2026'])} % por cada {num(POR_CADA)} % más de viajes "
+        f"({por10(pistas['aparente_2026_por_ruta']['min'])} a {por10(pistas['aparente_2026_por_ruta']['max'])} % mirando cada ruta "
+        f"y {por10(pistas['aparente_2026_sin_limpiar'])} % antes de limpiar los datos), sin relación causal; en los días "
+        "especiales los viajes subieron y las subidas no.",
+        f"El piloto detecta una respuesta de {por10(signo['respuesta'])} % frente a ninguna con potencia de "
+        f"{num(signo['potencia'], 2)} o más. La magnitud la mide con un intervalo del 95 % de {margen}, y distinguiría un "
+        f"{por10(b, 0)} % de un {por10(signo['respuesta'])} % con probabilidad de "
+        f"{por_ruta(lambda f: num(f['potencia_umbral'], 2))}. Mide la respuesta en dos franjas ({franjas}, con "
+        f"{' y '.join(num(f['cambio_pct']) for f in refuerzos)} % más de salidas); el umbral del año la supone igual en las tres "
+        "rutas y en subidas mayores.",
+        f"El piloto pone en juego {num(piloto['pax_riesgo'])} pasajeros, el {num(piloto['pct_pax_anual_cra54'], 2)} % de los de "
+        "un año de CRA 54.")]
+    return pasos, probable, detalles
 
 
 def antes_despues(etiqueta, hoy, plan, cambio=None, nota=None, plan_rotulo="Con el plan", hoy_rotulo="Hoy", clase=""):

@@ -70,16 +70,20 @@ tarjetas, `--sombra-4` chips y segmento elegido, `--sombra-3` panel «…». Esp
 - `rejilla(hijos, "2-1" | "1-2" | "1-1" | "3")`: el tablero de tarjetas.
 - `tarjeta(cuerpo, titulo=…, detalles=…, fuentes=…)` / `bloque(titulo, cuerpo, detalles=…)`: tarjeta con «…».
 - `grafico(id_o_fig, titulo, subtitulo, etiqueta, tabla, leyenda, nota, fuentes=…)`: el «…» trae la tabla gemela.
-- `cifra(…)`, `heroe(…)` (con sus dos `saldo`), `antes_despues(…)`, `cifras`, `cambios`. En Inicio y en «¿Qué gana
-  Sobusa?» la protagonista es una `tarjeta(…, clase="heroe cifra--hero", fuentes=…)` con las mismas partes
-  (`heroe__principal` con el número, la unidad y el chip → `saldos` → `heroe__pie`), así las dos llevan título y «…».
+- `cifra(…)`, `saldo(…, extremo=…)` (con `extremo` el chip va neutro y dice con qué contabilidad sale la cifra),
+  `paso(orden, titulo, valor, unidad, marca, definicion)`, `antes_despues(…)`, `cifras`, `cambios`. En Inicio y en «¿Qué
+  gana Sobusa?» la protagonista es una `tarjeta(…, clase="heroe cifra--hero", detalles=…, fuentes=…)`:
+  `heroe__principal` con el número, la unidad, el chip y una línea → los tres pasos de
+  `decision_piloto(plan, beta, piloto, pistas)` (el piloto a todo lo ancho en `saldos saldos--uno` y, debajo, las dos
+  salidas en `saldos`) → el aviso «¿Qué tan probable es cada caso?» → `heroe__pie`. `pegar(texto)` pone espacios de no
+  separación entre cifra y unidad; `umbral_plan` y `por_cada` dan el umbral como % de pasajeros por cada 10 % de salidas.
 - `chip(texto, tipo)`, `chip_cambio(valor, texto, tono)` (▲/▼), `chip_valor(rotulo, valor)`.
 - `barra_rayas(etiqueta, valor, fraccion, rol)`, `puntos(cuentas, foco, rol)`, `tarjeta_insight(valor, titulo, texto)`.
 - `segmentado`, `control`, `boton` (el primario es la píldora negra), `boton_redondo`, `desplegable`, `tabla`, `aviso`,
   `fuentes`, `destino`, `casilla`, `deslizador`.
 
 Reglas de disposición en `estilos.css`: `.tarjeta` y `.grafico` llevan `align-content: start` (la rejilla estira la
-tarjeta más corta de la fila y el alto sobrante queda abajo, no entre sus partes); los dos `saldo` lado a lado comparten
+tarjeta más corta de la fila y el alto sobrante queda abajo, no entre sus partes); las fichas `saldo` de una misma fila comparten
 filas con `subgrid`, así sus cifras quedan a la misma altura aunque un título ocupe dos líneas; en una tabla, el mejor
 valor de la fila va en negrita y debajo la palabra «mejor» en `.tabla__mejor-txt` (gris `--tinta-3`, 14 px: con 12 px Resultado pasaría de 8 tamaños), sin
 color de serie; por
@@ -97,10 +101,15 @@ eje y; leyenda HTML cuando hay dos series o más; gris y rosa nunca con la misma
 
 ## 6. Reglas que no cambian
 
-Las cifras salen de `datos/` (342 comprobaciones en `verificar_ahorro.py`); el ahorro en operación (+501 M COP) nunca va
-sin sus dos saldos (−2.825 conservador, +1.600 simétrico) ni se llama «ganancia»; los dos saldos son los bordes de un
-rango y se presentan así («peor caso» y «mejor caso», con chip neutro y lo que supone cada uno), nunca como un resultado en
-rojo, y junto a lo que se juega en el piloto que lo mide; el plan que recorta muestra su canje
+Las cifras salen de `datos/` (407 comprobaciones en `verificar_ahorro.py`); el ahorro en operación (+501 M COP) nunca va
+sin lo que se juega en pasajes (−2.825 con la contabilidad conservadora, si las salidas nuevas no atraen a nadie, y +1.600
+con la simétrica, si atraen lo mismo que se pierde al quitar) ni se llama «ganancia»; en la tarjeta protagonista eso se
+cuenta como la decisión que se propone, en tres pasos (`ui.decision_piloto`): primero el piloto que lo mide; si las salidas
+nuevas atraen suficientes pasajeros, el plan se aplica; si atraen menos, no se aplica. El saldo negativo nunca va como una
+cifra suelta ni en rojo, y dos saldos nunca se rotulan «peor caso» y «mejor caso»: lado a lado se promedian de un vistazo
+y piden una probabilidad que no existe. Lo que no se sabe se dice a la vista (el aviso «¿Qué tan probable es cada caso?»),
+no en un desplegable, y una cifra condicionada lleva su condición al lado («−51,9 M COP, si las salidas nuevas no atraen a
+nadie»), nunca un «hasta» que no sea un tope; el plan que recorta muestra su canje
 (más caja en las dos contabilidades, −1.512 pasajeros netos por día, 530 frente a 267 pasajeros por día sobre la
 capacidad); formato
 es-CO (miles «.», decimales «,», menos «−», también en Plotly); estados solo con icono y palabra; solo modo claro.
@@ -109,4 +118,4 @@ es-CO (miles «.», decimales «,», menos «−», también en Plotly); estados
 
 `python verificar_estilo.py` (en el código: contraste, roles, CSS sin literales, Python sin colores ni tamaños, paleta) y
 `python verificar_estilo.py --vivo PUERTO` (con Playwright: errores de consola, tamaños por pantalla, pesos, colores de la
-paleta, encabezados, una protagonista con sus dos saldos, nada se sale a 400 px). Nunca el puerto 8050.
+paleta, encabezados, una protagonista con sus fichas de saldo, nada se sale a 400 px). Nunca el puerto 8050.

@@ -253,7 +253,9 @@ donde se quitan salidas y cuántos se ganan donde se ponen. Con la elasticidad e
 0,55–0,90, sin validar en campo; el plan del día de la API usa 0,5 por prudencia y la sensibilidad está en
 `api_frecuencias/docs/evidencias/optimizacion/sensibilidad.md`) el saldo anual va de **−2.825 M COP** (contando solo los pasajeros perdidos: 2.864 al día en riesgo) a **+1.600 M COP** (contando
 también los ganados: +946 netos al día). Por eso la recomendación incluye un **piloto de ocho semanas** en CRA 54 y CL 72
-que mide β con días sorteados (potencia 0,89; arriesga 22.904 pasajeros, el 0,30 % del año de CRA 54).
+que mide β con días sorteados (potencia 0,89; arriesga 22.904 pasajeros, el 0,30 % del año de CRA 54). El plan no se
+aplica antes de esa medición: se adopta solo si las salidas añadidas atraen suficientes pasajeros (el tablero, en
+Inicio, da el umbral, lo que cuesta el piloto y lo que puede y no puede decir en ocho semanas).
 
 El plan que recorta (quita 31.267 salidas al año y pone 13.519 en otras horas: 9,6 % menos horas de bus) ahorra más
 en operación (+3.695 M COP al año) y deja más caja que reasignar en las dos contabilidades: **−1.029 M COP** contando

@@ -57,6 +57,8 @@ def leer_args():
                     help="solo los días de ejemplo de la pantalla Despacho (datos/despacho/) y su entrada en origen.json")
     ap.add_argument("--solo-producto", action="store_true",
                     help="solo datos/modelo_producto.json (el modelo activo de la API) y su entrada en origen.json")
+    ap.add_argument("--solo-ahorro", action="store_true",
+                    help="solo datos/ahorro_anual.json (las cifras de «¿Qué gana Sobusa?») y su entrada en origen.json")
     return ap.parse_args()
 
 
@@ -273,6 +275,13 @@ F_LB = "costos/resultados/linea_base_2025.csv"
 F_SIM = "simulacion_ahorro/resultados/simulacion_por_fecha.csv"
 F_SENS = "simulacion_ahorro/resultados/sensibilidad_beta.csv"
 F_D6 ="experimentos/D6_simulador/resultados_escenarios.json"
+F_INFORME = "documentos/informe_resultados.md"
+F_E8 = "experimentos/E8_validacion_2026/resultados.json"
+F_P2 = "experimentos/P2_piloto_beta/resultados.json"
+# los archivos de los que sale datos/ahorro_anual.json (su entrada en datos/origen.json)
+FUENTES_AHORRO = [F_REOPT, F_DEC_R, F_ESC, F_DEC_D5, F_D5J, F_PLAN, F_UNIT, F_AHO, F_BETA, F_LB, F_SIM, F_SENS, F_D6, F_INFORME, F_E8, F_P2]
+# la fila de la Tabla 2 del informe de resultados que cita la elasticidad de la literatura (el número va en el grupo 1)
+PATRON_LITERATURA = r"^\| Literatura \(TCRP Report 95\) \| ≈ (\d+,\d+) \|"
 # corridas de costos/reoptimizar_d5.py: el plan recomendado (reasigna) y D5 original revalorado con costos con fuente (recorta)
 CORRIDA = {"reasigna": "D5 costos nuevos, pago por hora, e=0,5", "recorta": "D5 original (60.000/1.500/3.000, e=0,5)"}
 ESCENARIO_HOY = "S0 oferta real"
@@ -323,6 +332,10 @@ CAMPOS = {
     "saldo_conservador_por_beta_Mcop": "Saldo conservador del plan con cada β del rango (convenciones.beta), conductor por hora (M COP/año). La fuente no tiene el saldo simétrico con otras β",
     "simetrica": "La contabilidad simétrica de la fuente separada en pasajeros ganados (donde se añaden salidas) y perdidos (donde se quitan), con la forma lineal de costos/reoptimizar_d5.py (pasajeros/día y M COP/año)",
     "beta_equilibrio": "β por encima de la cual el saldo conservador del plan es negativo (pago por hora); null si la fuente no la calcula",
+    "respuesta_equilibrio": "Respuesta de los pasajeros a las salidas que se ponen (cuánto suben, en proporción, los pasajeros de una hora cuando suben sus salidas) desde la que el plan deja de perder en el año: con ella, el ahorro en operación más los pasajes ganados iguala los pasajes perdidos. Nunca se ha medido, así que va en tres formas de cuenta, todas con la pérdida al quitar de la β central. «lineal»: perdidos y ganados con la regla lineal de la contabilidad simétrica = (simetrica.perdidos_Mcop − ahorro_operacion_Mcop) × β central ÷ simetrica.ganados_Mcop. «mixta»: perdidos con la forma de potencia de la contabilidad conservadora y ganados lineales = −saldo_conservador_Mcop × β central ÷ simetrica.ganados_Mcop. «potencia»: perdidos y ganados con la forma de potencia, que es la elasticidad que estima el piloto = la r que anula saldo_conservador_Mcop + Σ real × ((x ÷ n_S0)^r − 1) × tarifa en las horas donde el plan pone salidas. «por_beta» repite las tres con la pérdida de los extremos del rango de β: la lineal escala los perdidos lineales (× β ÷ β central) y la mixta y la de potencia usan saldo_conservador_por_beta_Mcop. Un valor de cero o menos quiere decir que, con esa cuenta, el plan no pierde aunque las salidas que se ponen no atraigan a nadie. Es el umbral de todo el plan del año en las tres rutas; el 0,62 del informe (sección del piloto) es otra cuenta, la de un día de piloto en CRA 54 que pasa salidas de 9-11 h a 14-15 h. null si el saldo conservador no es negativo o el plan no pone salidas",
+    "saldo_respuesta_central_Mcop": "Saldo del año si las salidas que se ponen atraen pasajeros con la β central, la medida al quitar, en las tres formas de cuenta de respuesta_equilibrio (M COP/año): «lineal» es saldo_simetrico_Mcop; «mixta» = saldo_conservador_Mcop + simetrica.ganados_Mcop; «potencia» = saldo_conservador_Mcop + Σ real × ((x ÷ n_S0)^β − 1) × tarifa. null donde respuesta_equilibrio es null",
+    "pistas_respuesta": "Lo poco que se sabe de la respuesta de los pasajeros a las salidas que se ponen, que nunca se ha medido en Sobusa. «literatura»: la elasticidad de los pasajeros a las salidas que cita el informe de resultados (TCRP Report 95, promedio internacional). «aparente_2026»: la asociación entre rutas de E8 (en 2026 hubo más viajes y más subidas), que es descriptiva, no causal y frágil; «aparente_2026_por_ruta», su mínimo y su máximo mirando cada ruta sin comparar, y «aparente_2026_sin_limpiar», la misma antes de limpiar las bandas corruptas de CRA 54; «reserva_2026» es la reserva que E8 anota sobre esa lectura (en los días especiales los viajes suben y las subidas no). No son una medición ni dan una probabilidad",
+    "piloto": "El piloto de P2 dicho en saldo (M COP en sus 8 semanas). «saldo_sin_respuesta_Mcop»: lo que deja si las salidas que se ponen no atraen a nadie = ahorro de los recortes − pasajeros en riesgo × tarifa neta − costo de los refuerzos, con los pasajeros en riesgo de la β central («central»: es el saldo conservador de P2), de la β alta del rango («alto») y de la pérdida proporcional, β = 1, que es el tope de pasajeros de la regla de parada 3 («tope»: si se pierden más, el piloto se detiene). «saldo_respuesta_central_Mcop»: lo que deja si atraen con la β central (el saldo simétrico de P2). «pax_en_riesgo»: los pasajeros en riesgo de cada caso",
     "por_ruta": "Salidas por día y por año de cada plan en cada ruta",
     "por_hora": "Salidas medias por día de cada tipo de día, por hora de salida, tres rutas sumadas; «dias» = días de ese tipo en 2025",
     "contexto": "Línea base de 2025 (precios 2025, conductor por hora; incluye los viajes marcados cancelados que corrieron) y pasajeros de 2025. No es la base de las comparaciones de los planes",
@@ -385,7 +398,7 @@ def ahorro_anual(R):
     out = {"descripcion": ("Ahorro anual frente a hoy (2025, tres rutas): el plan que reasigna (recomendado) y el que recorta, "
                            "con los pasajes en juego en las dos contabilidades. Las palancas van aparte y no se suman."),
            "convenciones": {}, "planes": {"hoy": {}, "reasigna": {}, "recorta": {}}, "por_ruta": {}, "por_hora": {},
-           "contexto": {}, "palancas": {}}
+           "contexto": {}, "pistas_respuesta": {}, "piloto": {}, "palancas": {}}
     org = {}
 
     def poner(ruta, valor, archivo, clave, calculo=None):
@@ -455,6 +468,8 @@ def ahorro_anual(R):
                 "saldo_conservador_por_beta_Mcop.alto", "simetrica.pax_ganados_dia", "simetrica.pax_perdidos_dia", "simetrica.ganados_Mcop", "simetrica.perdidos_Mcop"]:
         poner(p + col, 0, "definición", "hoy es la referencia")
     poner(p + "beta_equilibrio", None, "definición", "hoy es la referencia")
+    poner(p + "respuesta_equilibrio", None, "definición", "hoy es la referencia")
+    poner(p + "saldo_respuesta_central_Mcop", None, "definición", "hoy es la referencia")
     # lo que hoy cuestan los km y las horas de conductor (precios 2026, la misma base del ahorro): base del % de ahorro
     ckm, cbh = out["convenciones"]["costo_km_cop"], out["convenciones"]["costo_bus_hora_cop"]
     bh_hoy = poner(p + "buses_hora_anio", hoy["buses_hora_dia"] * n_dias, F_ESC, kh + ".buses_hora_dia",
@@ -575,6 +590,65 @@ def ahorro_anual(R):
         else:
             poner(p + "beta_equilibrio", None, "sin fuente",
                   "costos/ no calcula la β de equilibrio del plan que reasigna (la Tabla 3 del informe deja «—»)")
+        # Desde qué respuesta a las salidas que se ponen deja de perder el plan en el año. Esa respuesta no se ha medido, y el
+        # umbral cambia con la forma de la cuenta: lineal al quitar y al poner (la simétrica de punta a punta), mixta (la
+        # pérdida de potencia de la conservadora y la ganancia lineal) y de potencia en los dos lados (la que estima el piloto)
+        sube = (n0 > 0) & (x > n0)
+        razon, pax_sube = x[sube] / n0[sube], pax[sube]
+
+        def ganados_potencia(r):
+            """Pasajes al año (M COP) que se ganan donde el plan pone salidas si los pasajeros suben como (x ÷ n0)^r."""
+            return float((pax_sube * (razon ** r - 1)).sum()) * tarifa / 1e6
+
+        def raiz(saldo):
+            """La r que anula saldo + ganados_potencia(r), por bisección (los ganados crecen con r y el saldo es negativo)."""
+            lo, hi = 0.0, 4.0
+            if saldo + ganados_potencia(hi) < 0:
+                sys.exit(f"{nombre}: ni con una respuesta de {hi} cubren los pasajes ganados un saldo de {saldo} M COP.")
+            for _ in range(100):
+                medio = (lo + hi) / 2
+                lo, hi = (medio, hi) if saldo + ganados_potencia(medio) < 0 else (lo, medio)
+            return (lo + hi) / 2
+
+        pe, ps = p + "respuesta_equilibrio.", p + "saldo_respuesta_central_Mcop."
+        ksube = f"real, n_S0 y {col_x} donde {col_x} > n_S0 > 0"
+        if cons < 0 and g_m > 0 and pax_sube.size:
+            poner(pe + "lineal", (l_m - ahorro) * beta_c / g_m, f"{F_REOPT}; {kd}; {F_PLAN}",
+                  "ahorro_operacion_Mcop; simetrica.perdidos_Mcop; simetrica.ganados_Mcop; convenciones.beta.central",
+                  "(simetrica.perdidos_Mcop − ahorro_operacion_Mcop) × convenciones.beta.central ÷ simetrica.ganados_Mcop")
+            poner(pe + "mixta", -cons * beta_c / g_m, f"{F_REOPT}; {kd}; {F_PLAN}",
+                  "saldo_conservador_Mcop; simetrica.ganados_Mcop; convenciones.beta.central",
+                  "−saldo_conservador_Mcop × convenciones.beta.central ÷ simetrica.ganados_Mcop")
+            poner(pe + "potencia", raiz(cons), f"{F_REOPT}; {kd}; {F_PLAN}", f"saldo_conservador_Mcop; {ksube}",
+                  "la r que anula saldo_conservador_Mcop + Σ real × ((x ÷ n_S0)^r − 1) × convenciones.tarifa_neta_cop × 1e-06 "
+                  "(bisección)")
+            for k in ("bajo", "alto"):
+                sk = out["planes"][nombre]["saldo_conservador_por_beta_Mcop"][k]
+                if sk >= 0:
+                    sys.exit(f"{nombre}: el saldo conservador con β {k} no es negativo; revise respuesta_equilibrio.por_beta.")
+                # la pérdida lineal es proporcional a β: con la β del extremo vale simetrica.perdidos × β ÷ β central
+                bk = out["convenciones"]["beta"][k]
+                poner(pe + f"por_beta.{k}.lineal", (l_m * bk / beta_c - ahorro) * beta_c / g_m, f"{F_REOPT}; {kd}; {F_PLAN}",
+                      f"ahorro_operacion_Mcop; simetrica.perdidos_Mcop; simetrica.ganados_Mcop; convenciones.beta.{k}; "
+                      "convenciones.beta.central",
+                      f"(simetrica.perdidos_Mcop × convenciones.beta.{k} ÷ convenciones.beta.central − ahorro_operacion_Mcop) × "
+                      "convenciones.beta.central ÷ simetrica.ganados_Mcop")
+                poner(pe + f"por_beta.{k}.mixta", -sk * beta_c / g_m, f"{F_SENS}; {kd}; {F_PLAN}",
+                      f"saldo_conservador_por_beta_Mcop.{k}; simetrica.ganados_Mcop; convenciones.beta.central",
+                      f"−saldo_conservador_por_beta_Mcop.{k} × convenciones.beta.central ÷ simetrica.ganados_Mcop")
+                poner(pe + f"por_beta.{k}.potencia", raiz(sk), f"{F_SENS}; {kd}; {F_PLAN}",
+                      f"saldo_conservador_por_beta_Mcop.{k}; {ksube}",
+                      f"la r que anula saldo_conservador_por_beta_Mcop.{k} + Σ real × ((x ÷ n_S0)^r − 1) × "
+                      "convenciones.tarifa_neta_cop × 1e-06 (bisección)")
+            poner(ps + "lineal", sim, F_REOPT, kf + ".neto_simetrico_pago_hora_beta070_Mcop", "= saldo_simetrico_Mcop")
+            poner(ps + "mixta", cons + g_m, f"{F_REOPT}; {kd}; {F_PLAN}", "saldo_conservador_Mcop; simetrica.ganados_Mcop",
+                  "saldo_conservador_Mcop + simetrica.ganados_Mcop")
+            poner(ps + "potencia", cons + ganados_potencia(beta_c), f"{F_REOPT}; {kd}; {F_PLAN}",
+                  f"saldo_conservador_Mcop; {ksube}; convenciones.beta.central",
+                  "saldo_conservador_Mcop + Σ real × ((x ÷ n_S0)^β central − 1) × convenciones.tarifa_neta_cop × 1e-06")
+        else:
+            for campo in ("respuesta_equilibrio", "saldo_respuesta_central_Mcop"):
+                poner(p + campo, None, "definición", "el saldo conservador no es negativo o el plan no pone salidas")
 
     # por ruta
     for ruta in RUTAS:
@@ -642,6 +716,54 @@ def ahorro_anual(R):
     # los costos supuestos con los que D5 eligió el plan que recorta (para decir con qué costos elegía recortar)
     for k, kk in (("costo_bus_hora_cop", "COSTO_BUS_HORA"), ("costo_km_cop", "COSTO_KM"), ("tarifa_cop", "TARIFA")):
         poner(f"convenciones.supuestos_iniciales.{k}", d5j["parametros"][kk], F_D5J, f"parametros.{kk}")
+
+    # lo poco que se sabe de la respuesta a las salidas que se ponen (nunca se ha medido): la literatura que cita el informe
+    # de resultados y la asociación entre rutas de 2026 de E8, que es descriptiva y frágil
+    q = "pistas_respuesta."
+    lit = re.search(PATRON_LITERATURA, (R / F_INFORME).read_text(encoding="utf-8"), re.M)
+    if not lit:
+        sys.exit(f"No encuentro la fila «Literatura (TCRP Report 95)» en {F_INFORME}.")
+    poner(q + "literatura", float(lit.group(1).replace(",", ".")), F_INFORME,
+          "Tabla 2 (elasticidad de los pasajeros a las salidas), fila «Literatura (TCRP Report 95)»")
+    e8 = json.loads((R / F_E8).read_text(encoding="utf-8"))
+    ap, kap = e8["elasticidad_aparente_2026"], "elasticidad_aparente_2026"
+    poner(q + "aparente_2026", ap["SILENCIO+CL 72 vs CRA 54"], F_E8, kap + '["SILENCIO+CL 72 vs CRA 54"]')
+    poner(q + "aparente_2026_por_ruta.min", min(ap["pendiente_simple_por_ruta"].values()), F_E8,
+          kap + ".pendiente_simple_por_ruta → mínimo")
+    poner(q + "aparente_2026_por_ruta.max", max(ap["pendiente_simple_por_ruta"].values()), F_E8,
+          kap + ".pendiente_simple_por_ruta → máximo")
+    poner(q + "aparente_2026_sin_limpiar", e8["verificacion"]["confirmado"]["elasticidad_sin_limpiar_bandas"], F_E8,
+          "verificacion.confirmado.elasticidad_sin_limpiar_bandas")
+    reservas = [t for t in e8["verificacion"]["correcciones"] if "elasticidad aparente es casi nula" in t]
+    if len(reservas) != 1:
+        sys.exit(f"No encuentro la reserva de E8 sobre los días especiales en {F_E8} (verificacion.correcciones).")
+    poner(q + "reserva_2026", reservas[0], F_E8, "verificacion.correcciones: la que dice «elasticidad aparente es casi nula»")
+
+    # el piloto dicho en saldo: lo que deja si las salidas que se ponen no atraen a nadie, con la pérdida medida (el saldo
+    # conservador de P2), con la del extremo alto del rango de β y con la proporcional (β = 1: el tope de la regla de parada
+    # 3); y lo que deja si atraen como se midió al quitar (el saldo simétrico de P2)
+    p2 = json.loads((R / F_P2).read_text(encoding="utf-8"))
+    rc, q = p2["riesgo_costo"], "piloto."
+    tot, kp = rc["totales_piloto"], "riesgo_costo.totales_piloto."
+    tarifa_p2 = p2["parametros"]["tarifa_neta"]
+    _comprobar("la tarifa neta del piloto es la de las convenciones", tarifa_p2, tarifa)
+    _comprobar("la β del piloto es la central", p2["parametros"]["beta_e7"], beta_c)
+    _comprobar("el extremo alto de β del piloto es el de las convenciones", p2["parametros"]["beta_rango_e7"][1],
+               out["convenciones"]["beta"]["alto"])
+    recortes = [f for f in rc["por_franja"] if f["rol"] == "recorte"]
+    en_riesgo = {"central": (tot["pax_riesgo_piloto_beta070"], kp + "pax_riesgo_piloto_beta070"),
+                 "alto": (sum(f["pax_riesgo_dia_beta090"] * f["dias_tratados_piloto"] for f in recortes),
+                          "riesgo_costo.por_franja[rol=recorte]: pax_riesgo_dia_beta090 × dias_tratados_piloto → suma"),
+                 "tope": (tot["pax_riesgo_piloto_beta100"], kp + "pax_riesgo_piloto_beta100")}
+    for k, (pax_k, clave_k) in en_riesgo.items():
+        poner(q + f"pax_en_riesgo.{k}", pax_k, F_P2, clave_k)
+        poner(q + f"saldo_sin_respuesta_Mcop.{k}",
+              tot["ahorro_operativo_recortes_piloto_Mcop"] - pax_k * tarifa_p2 / 1e6 - tot["costo_extra_refuerzos_piloto_Mcop"], F_P2,
+              f"{kp}ahorro_operativo_recortes_piloto_Mcop; {clave_k}; parametros.tarifa_neta; {kp}costo_extra_refuerzos_piloto_Mcop",
+              "ahorro de los recortes − pasajeros en riesgo × tarifa neta × 1e-06 − costo de los refuerzos")
+    _comprobar("piloto: el saldo sin respuesta con la β central es el saldo conservador de P2",
+               out["piloto"]["saldo_sin_respuesta_Mcop"]["central"], tot["neto_total_piloto_Mcop_conservador"])
+    poner(q + "saldo_respuesta_central_Mcop", tot["neto_total_piloto_Mcop_simetrico"], F_P2, kp + "neto_total_piloto_Mcop_simetrico")
 
     # palancas que pagan solas (se muestran aparte; no se suman entre sí ni a un plan)
     simf = _csv_costos(R, F_SIM)
@@ -711,6 +833,20 @@ def ahorro_anual(R):
     return out
 
 
+def solo_ahorro(R):
+    """Escribe solo datos/ahorro_anual.json y actualiza su entrada en datos/origen.json (sin tocar las demás)."""
+    destino = DESTINO / "ahorro_anual.json"
+    destino.write_text(json.dumps(ahorro_anual(R), ensure_ascii=False, indent=1), encoding="utf-8")
+    p = DESTINO / "origen.json"
+    org = json.loads(p.read_text(encoding="utf-8")) if p.is_file() else {"generador": "dash_app/preparar_datos.py", "archivos": {}}
+    tam = destino.stat().st_size
+    org.setdefault("archivos", {})["ahorro_anual.json"] = {"fuentes": FUENTES_AHORRO, "filas": None, "bytes": tam}
+    org["generado"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+    org["total_bytes"] = sum(v["bytes"] for v in org["archivos"].values())
+    p.write_text(json.dumps(org, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"  {'ahorro_anual.json':28s} {tam / 1024:8.1f} KB")
+
+
 def main():
     a = leer_args()
     R = Path(a.proyecto).resolve()
@@ -725,6 +861,13 @@ def main():
         DESTINO.mkdir(exist_ok=True)
         print(f"Proyecto: {R} (solo el modelo del producto)")
         solo_producto(R)
+        return
+    if a.solo_ahorro:
+        if not (R / "experimentos").is_dir():
+            sys.exit(f"No encuentro la carpeta del proyecto en {R} (falta experimentos/). Use --proyecto.")
+        DESTINO.mkdir(exist_ok=True)
+        print(f"Proyecto: {R} (solo el ahorro anual)")
+        solo_ahorro(R)
         return
     if not (R / "experimentos").is_dir():
         sys.exit(f"No encuentro la carpeta del proyecto en {R} (falta experimentos/). Use --proyecto.")
@@ -758,7 +901,7 @@ def main():
         shutil.copyfile(R / rel, DESTINO / nombre)
         anotar(nombre, [rel])
     (DESTINO / "ahorro_anual.json").write_text(json.dumps(ahorro_anual(R), ensure_ascii=False, indent=1), encoding="utf-8")
-    anotar("ahorro_anual.json", [F_REOPT, F_DEC_R, F_ESC, F_DEC_D5, F_D5J, F_PLAN, F_UNIT, F_AHO, F_BETA, F_LB, F_SIM, F_SENS, F_D6])
+    anotar("ahorro_anual.json", FUENTES_AHORRO)
     (DESTINO / "modelo_producto.json").write_text(json.dumps(modelo_producto(R), ensure_ascii=False, indent=1), encoding="utf-8")
     anotar("modelo_producto.json", [F_REG, F_EVAL, F_CAL])
     if (R / F_REPLAY / "indice.js").is_file():

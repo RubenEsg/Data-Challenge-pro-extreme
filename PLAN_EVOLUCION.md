@@ -217,7 +217,7 @@ Los ocho riesgos de §18, con la mitigación implementada, su evidencia y su pru
 |---|---|---|
 | Fatiga de alertas | El despachador deja de mirar la bandeja. | Episodios y deduplicación (una alerta por episodio, no por hora); umbrales versionados que se ajustan con el backtest (`ev/alertas/backtest_alertas.md`); ALT-003 exige un mínimo de probabilidad elegido sin fuga (migración 0014). Meta: < 30 % de alertas descartadas (sección 6.3). |
 | Datos de Extreme con otra semántica | Las respuestas a H1–H17 cambian una variable, una regla, un umbral o un parámetro operativo (por ejemplo, H14 cambia el headway máximo de 10 a 5 min). | Variables versionadas: una versión nueva se reentrena y pasa por la compuerta sin tocar la anterior. Los umbrales y los parámetros operativos se cambian con una versión nueva de `threshold_config`, sin recompilar. Cada ejecución contrasta los consolidados con la agregación propia y deja las diferencias como incidencias, sin corregirlas (`api_frecuencias/docs/consolidados_ciclo.md`). |
-| Elasticidad sin medir | El saldo del plan depende de β (0,55–0,90): de −2.825 a +1.600 M COP al año (`README.md`, «Las cifras principales»). | El piloto con días sorteados mide β antes de cambiar horarios de forma permanente (sección 6). |
+| Elasticidad sin medir | El saldo del plan depende de cuántos pasajeros se pierden donde se quitan salidas (β ≈ 0,70; rango 0,55–0,90) y de cuántos atraen las que se ponen, que no se ha medido: −2.825 M COP al año si no atraen a nadie y +1.600 si atraen lo mismo que se pierde al quitar (`README.md`, «Las cifras principales»). | El piloto con días sorteados mide β antes de cambiar horarios de forma permanente (sección 6). |
 | Dependencia de la disponibilidad de la API | El tablero no muestra recomendaciones si la API cae. | El tablero lo dice («La API no responde») y no inventa cifras. La API se recupera sola de una caída (`ev/cola/caida_rnf001_docker.txt`) y `/health` se vigila con Prometheus. El horario vigente sigue siendo el de siempre. |
 | Parámetros operativos inconsistentes | El ciclo, la flota y el intervalo programado no cuadran en algunas franjas (`documentos/mapeo_especificacion.md`, sección 6). | La recomendación sale `viable = false` con el motivo y no fuerza una cifra; se pide a Extreme el ciclo y la flota por franja, y se cargan con `PUT /api/v1/catalogos/flota`, sin regenerar datos. |
 
@@ -252,7 +252,10 @@ Es el mismo calendario de la sección 1.1, contado en días. Las semanas mandan:
    un grupo de control (`Informe_tecnico_Sobusa.pdf`, sección 4 «Piloto para medir β»).
 3. **Semanas 1–8 del piloto (9–16 del plan):** operación con el tablero; reunión semanal de 30 minutos con los
    indicadores de la sección 6.3.
-4. **Semana 8 del piloto (16 del plan):** medición de β, informe al comité y decisión.
+4. **Semana 8 del piloto (16 del plan):** medición de β, informe al comité y decisión. El plan que reasigna se adopta
+   solo si las salidas añadidas atraen suficientes pasajeros (el umbral y su margen están en el tablero, Inicio; el de
+   la franja del piloto, en `Informe_tecnico_Sobusa.pdf`, sección 4) y con el cupo por bus añadido al optimizador; si
+   no, el horario queda como hoy.
 
 ### 6.3 Criterio de salida del modo sombra e indicadores de adopción
 

@@ -64,19 +64,27 @@ De las partes nuevas o revisadas:
 
 Cada pantalla tiene además su captura de página completa (`dash_<pantalla>_completa.png`).
 
-**Nota del 14-11-2026.** Las capturas de Inicio, Horario y Resultado son anteriores a un cambio de rótulos: las dos
-tarjetas del saldo, que se llamaban «contabilidad conservadora» y «contabilidad simétrica» y llevaban un chip de estado
-(«saldo negativo» en rojo), se presentan ahora como los bordes de un rango, «peor caso» y «mejor caso», con chip neutro,
-con lo que supone cada una y con lo que se juega en el piloto que lo mide. Las cifras son las mismas (−2.825 y +1.600
-M COP al año); las comprueba `dash_app/verificar_ahorro.py`.
+**Nota del 14-11-2026.** Las capturas de Inicio, Horario y Resultado son anteriores a un cambio de presentación. En
+Inicio y en Resultado, las dos tarjetas del saldo («contabilidad conservadora», con un chip rojo de «saldo negativo», y
+«contabilidad simétrica») pasaron a ser la decisión que se propone, en tres pasos: primero el piloto que lo mide (−51,9
+M COP en sus ocho semanas si las salidas nuevas no atraen a nadie); si atraen suficientes pasajeros, el plan se aplica
+(0 a +1.600 M COP al año); si atraen menos, no se aplica. Debajo va el aviso «¿Qué tan probable es cada caso?», que dice
+que no hay base para una probabilidad y lo que el piloto puede y no puede decir en ocho semanas. En Horario, cada uno
+de los dos saldos del día dice qué supone, con chip neutro. Las cifras son las mismas (−2.825 y +1.600 M COP al año) y
+hay nuevas: el umbral de la respuesta de los pasajeros a las salidas que se ponen (0,44 a 0,53 según la forma de la
+cuenta; 0,33 a 0,66 con todo el rango de β), las pistas que hay de esa respuesta y lo que deja el piloto con otras β
+(−70,2 con β = 0,90; −79,0 con la pérdida proporcional, β = 1, a partir de la cual una regla de parada lo detiene). Las
+comprueba `dash_app/verificar_ahorro.py`. Las capturas de la presentación nueva, tomadas el 14-11-2026 del tablero en
+marcha, son `dash_inicio_decision.png` (su «…», en `dash_inicio_decision_datos.png`; a 400 px, en
+`dash_inicio_decision_400.png`), `dash_resultado_decision.png` y `dash_horario_balance.png`.
 
 ## Estilo, cifras y funciones
 
 | Archivo | Resultado |
 |---|---|
-| `verificar_estilo_estatico_once.txt` | `python verificar_estilo.py`: PASA · 27 bien · 2 avisos · 0 fallas. Los dos avisos son números sueltos en El modelo y Pronóstico, y ya estaban |
-| `verificar_estilo_vivo_once.txt` | `python verificar_estilo.py --vivo PUERTO`: PASA · 49 bien · 2 avisos · 0 fallas en las once pantallas a 1366 y 400 px. Como mucho 8 tamaños de letra, solo colores de la paleta, encabezados sin saltos y nada se sale a 400 px |
-| `verificar_ahorro_once.txt` | `python verificar_ahorro.py`: 342 OK, 0 FALLA |
+| `verificar_estilo_estatico_once.txt` | `python verificar_estilo.py`: PASA · 27 bien · 2 avisos · 0 fallas (corrida del 14-11-2026). Los dos avisos son números sueltos en El modelo y Pronóstico, y ya estaban |
+| `verificar_estilo_vivo_once.txt` | `python verificar_estilo.py --vivo PUERTO`: PASA · 49 bien · 2 avisos · 0 fallas en las once pantallas a 1366 y 400 px (corrida del 14-11-2026, ya con la tarjeta de la decisión). Como mucho 8 tamaños de letra, solo colores de la paleta, encabezados sin saltos y nada se sale a 400 px. Antes de esta corrida, un mensaje de error de la API con una ruta larga ensanchaba «El modelo» a 400 px; ahora una palabra que no cabe en su caja se parte (`overflow-wrap` en `body`) |
+| `verificar_ahorro_once.txt` | `python verificar_ahorro.py`: 407 OK, 0 FALLA (corrida del 14-11-2026, con las comprobaciones del umbral, de las pistas y del saldo del piloto) |
 | `funciones_tablero.py` · `.txt` | 9 de 9: el orden de prioridad, el chip «Escalada» (con y sin «escalar» en la bitácora), los nombres «experimento 11 / 12» y lo real de una ventana (una hora, dos horas y fuera de 2025) |
 | `despacho_carga_en_frio.txt` · `.py` | Cinco cargas en frío de Despacho sin errores de consola y con los buses en el mapa. La corrida anterior al arreglo quedó en `../historial/tablero_estilo_vivo_intento_despacho_en_frio.txt` |
 | `barra_once_pestanas.txt` | Con once pestañas, la barra no se desborda de 1101 a 1920 px |

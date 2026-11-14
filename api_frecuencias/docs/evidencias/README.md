@@ -423,7 +423,7 @@ en `contrato/traza_entre_replicas.txt`. La corrida de la suite del 9-11-2026 a l
 | `despacho_carga_en_frio.txt` · `.py` | La consola Despacho en cinco cargas en frío (contexto nuevo, sin caché): 5 de 5 sin errores de consola y con los buses en el mapa. El mapa espera a que MapLibre cargue su estilo antes de recibir los buses; la corrida anterior al arreglo (2 errores «Style is not done loading») está en `historial/`. | RNF-012, E06 | `despacho_carga_en_frio.py` (el script está en la carpeta) |
 | `export_predicciones_dash.csv` · `.xlsx` | Los pronósticos del modelo activo exportados desde la sección «Modelo activo (API)» de Pronóstico (`GET /api/v1/predictions/export`), con el esquema vigente (`model_id`, `feature_version`, `data_cutoff`, banda y explicación). | RF-017, §9.2 | Recorrido del tablero contra la API |
 | `funciones_tablero.txt` · `.py` | Las funciones nuevas del tablero, sin servidor: el orden de prioridad y el aviso «Escalada» de Alertas, los nombres de los experimentos del informe en El modelo y la lectura de lo real por ventana en Pronóstico (9 de 9 bien). | E06, §7.2, RNF-012 | `funciones_tablero.py` (el script está en la carpeta) |
-| `verificar_ahorro_once.txt` | Las cifras de ahorro del tablero coinciden con sus archivos de origen: 342 comprobaciones bien, 0 fallas. | E06 | `dash_app/verificar_ahorro.py` |
+| `verificar_ahorro_once.txt` | Las cifras de ahorro del tablero coinciden con sus archivos de origen: 407 comprobaciones bien, 0 fallas. | E06 | `dash_app/verificar_ahorro.py` |
 
 ## `video/` · cómo se grabó el video de E11
 

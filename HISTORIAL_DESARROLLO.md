@@ -1,17 +1,17 @@
 # Historial de desarrollo
 
-Lista cronológica de **todos los commits** (243) del repositorio de desarrollo del equipo, desde el primero hasta `e8d4c2c`, el commit al que apuntaba `main` al generarla. Responde al «historial» del entregable E03 (fila E03.3 de `MATRIZ_CUMPLIMIENTO.md`): el repositorio de entrega se arma con `empaquetar_entrega.py` a partir de `EntregaFinal/` y solo guarda sus sincronizaciones.
+Lista cronológica de **todos los commits** (246) del repositorio de desarrollo del equipo, desde el primero hasta `c90b8f0`, el commit al que apuntaba `main` al generarla. Responde al «historial» del entregable E03 (fila E03.3 de `MATRIZ_CUMPLIMIENTO.md`): el repositorio de entrega se arma con `empaquetar_entrega.py` a partir de `EntregaFinal/` y solo guarda sus sincronizaciones.
 
 - **De dónde sale.** `historial_desarrollo.py` lee `git log` del repositorio de desarrollo, sin red, y escribe este archivo. Por cada commit publica la fecha y la hora del autor, el hash corto, el asunto, cuántos archivos y líneas cambia (`git log --numstat -M`) y cuántos de esos archivos están en `EntregaFinal/`, la carpeta que se convierte en el repositorio de entrega.
 - **Qué no publica.** Correos, nombres de autor (todo el historial es de un solo contribuyente), cuerpos de los mensajes ni rutas de archivos. La revisión automática de los asuntos (claves, contraseñas, tokens, credenciales en URL, cadenas largas con aspecto aleatorio) no omitió ninguno.
-- **Cómo verificarlo.** Los hashes son los del repositorio de desarrollo del equipo, que se muestra a quien evalúe si lo pide. Ahí, `git log --reverse --format="%h %aI %s" main` da la misma lista y `git show --numstat <hash>` las cifras de cada commit. Cada hash de git depende de todo lo anterior, así que el hash completo del último commit fija la cadena entera: `e8d4c2c19663ed25e69a94e39bf7aada5b426195`. El primer commit es `6f885e83cae939c90cfc2796c13cc433dfce643a`.
-- **Generado** el 16 de noviembre de 2026 a las 15:59 (−05:00), desde `main` (`e8d4c2c`). Al integrar commits nuevos se vuelve a correr el script.
+- **Cómo verificarlo.** Los hashes son los del repositorio de desarrollo del equipo, que se muestra a quien evalúe si lo pide. Ahí, `git log --reverse --format="%h %aI %s" main` da la misma lista y `git show --numstat <hash>` las cifras de cada commit. Cada hash de git depende de todo lo anterior, así que el hash completo del último commit fija la cadena entera: `c90b8f0a7da6360abc2dab97432bda02b89832cb`. El primer commit es `6f885e83cae939c90cfc2796c13cc433dfce643a`.
+- **Generado** el 16 de noviembre de 2026 a las 16:27 (−05:00), desde `main` (`c90b8f0`). Al integrar commits nuevos se vuelve a correr el script.
 
 ## Resumen
 
 | Commits | Días con commits | Primer commit | Último commit | Tocan `EntregaFinal/` | Archivos cambiados (suma) | Líneas agregadas / quitadas |
 |---|---|---|---|---|---|---|
-| 243 | 18 | 2026-10-07 | 2026-11-16 | 204 | 6.436 | +1.352.378 / −114.999 |
+| 246 | 18 | 2026-10-07 | 2026-11-16 | 206 | 6.451 | +1.352.427 / −115.022 |
 
 Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombrado cuenta una vez. Todas las horas tienen el mismo huso (−05:00). 13 commit(s) de fusión no traen cifras: git no muestra su diferencia.
 
@@ -342,8 +342,11 @@ Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombra
 | 17:58 | `4717a19` | El tablero como entrada única («Anexos» reúne el material de apoyo) y el simulador de ahorro con el plan recomendado y el saldo siempre en sus dos casos | 17 (1 binario) | +180 / −167 | sí (15) |
 | 17:59 | `603bed3` | Historial de desarrollo al día con la entrada única y el simulador de ahorro | 1 | +7 / −5 | sí (1) |
 
-## 2026-11-16 · lunes · 1 commit
+## 2026-11-16 · lunes · 4 commits
 
 | Hora | Commit | Asunto | Archivos | Líneas | En `EntregaFinal/` |
 |---|---|---|---|---|---|
 | 15:58 | `e8d4c2c` | Modelo candidato fv3 con el calendario escolar y universitario, registrado sin activar y con su evidencia | 65 (14 binarios) | +8.701 / −413 | sí (64) |
+| 15:59 | `b930aec` | Historial de desarrollo al día con el modelo candidato fv3 | 1 | +12 / −5 | sí (1) |
+| 16:23 | `379f59c` | Bitácora 5: el candidato fv3 publicado con el CI en verde | 1 | +21 / −6 | — |
+| 16:26 | `c90b8f0` | Entrega: la integración continua del commit del candidato fv3 (run 43956047348) en la evidencia, la matriz y los documentos | 13 (10 binarios) | +16 / −12 | sí (13) |

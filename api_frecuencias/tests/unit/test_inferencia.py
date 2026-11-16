@@ -225,22 +225,29 @@ def test_fraccion_hora_las_dos_medias_horas_suman_la_hora():
     assert [x[2] for x in completo] == pytest.approx([1.0, 1.0])
 
 
-# ------------------------------------------------------------------------------- versiones de variables (fv1 / fv2)
-def test_modelo_fv1_sigue_cargando_y_prediciendo_con_codigo_fv2(serie, tmp_path):
-    """Reversión (RF-019): el código registra fv1 y fv2; un modelo fv1 se carga y predice con sus columnas."""
-    assert variables.FEATURE_VERSION == variables.FV2
+# ------------------------------------------------------------------------------- versiones de variables (fv1 a fv3)
+def test_modelos_fv1_y_fv2_siguen_cargando_y_prediciendo_con_codigo_fv3(serie, tmp_path):
+    """Reversión (RF-019): el código registra fv1, fv2 y fv3; un modelo de una versión anterior se carga y predice
+    con sus columnas."""
+    assert variables.FEATURE_VERSION == variables.FV3
     r1 = inferencia.entrenar(date(2025, 4, 15), 42, serie=serie, dir_modelos=tmp_path, hiper=HIPER_RAPIDO,
                              version=variables.FV1)
-    r2 = _entrenar(serie, tmp_path)
+    r2 = inferencia.entrenar(date(2025, 4, 15), 42, serie=serie, dir_modelos=tmp_path, hiper=HIPER_RAPIDO,
+                             version=variables.FV2)
+    r3 = _entrenar(serie, tmp_path)
     assert r1["model_id"].startswith("hgb_fv1_") and r2["model_id"].startswith("hgb_fv2_")
+    assert r3["model_id"].startswith("hgb_fv3_")
     m1 = inferencia.cargar(r1["model_id"], tmp_path)
     m2 = inferencia.cargar(r2["model_id"], tmp_path)
+    m3 = inferencia.cargar(r3["model_id"], tmp_path)
     assert m1["feature_version"] == variables.FV1 and m2["feature_version"] == variables.FV2
+    assert m3["feature_version"] == variables.FV3
     assert m1["punto"].n_features_in_ == len(variables.COLUMNAS_FV1)
     assert m2["punto"].n_features_in_ == len(variables.COLUMNAS_FV2)
-    assert m1["shap_exacto"] is False and m2["shap_exacto"] is True
+    assert m3["punto"].n_features_in_ == len(variables.COLUMNAS_FV3)
+    assert m1["shap_exacto"] is False and m2["shap_exacto"] is True and m3["shap_exacto"] is True
     filas = inferencia._filas_utiles(variables.construir_variables(serie)).tail(50)
-    for m in (m1, m2):
+    for m in (m1, m2, m3):
         p, lo, hi = inferencia._predecir_filas(m, filas)
         assert len(p) == 50 and (lo <= p).all() and (p <= hi).all()
     man = json.loads((tmp_path / r1["model_id"] / "manifest.json").read_text(encoding="utf-8"))
@@ -275,14 +282,14 @@ def test_shap_base_por_factores_reconstruye_el_pronostico(serie, tmp_path):
     m = inferencia.cargar(r["model_id"], tmp_path)
     filas = inferencia._filas_utiles(variables.construir_variables(serie)).tail(40)
     e = inferencia.explicar_filas(m, filas)
-    assert e is not None and e["phi"].shape == (40, len(variables.COLUMNAS_FV2))
+    assert e is not None and e["phi"].shape == (40, len(variables.COLUMNAS_MODELO))
     reconstruido = np.exp(e["base_log"]) * np.prod(np.exp(e["phi"]), axis=1)
-    pred = m["punto"].predict(variables.matriz_x(filas, variables.FV2))
+    pred = m["punto"].predict(variables.matriz_x(filas, variables.FEATURE_VERSION))
     assert np.max(np.abs(reconstruido - pred) / np.maximum(pred, 1e-9)) < 1e-6
     man = json.loads(Path(r["manifiesto"]).read_text(encoding="utf-8"))
     assert man["explicabilidad"]["shap_local"] is True
     assert man["explicabilidad"]["error_reconstruccion_log_max"] < 1e-6
-    assert {x["variable"] for x in man["explicabilidad"]["media_abs_shap_log"]} == set(variables.COLUMNAS_FV2)
+    assert {x["variable"] for x in man["explicabilidad"]["media_abs_shap_log"]} == set(variables.COLUMNAS_MODELO)
 
 
 @requiere_modelo
@@ -382,7 +389,14 @@ def test_nowcast_no_usa_datos_posteriores_al_instante():
     pasado = obs.copy()
     pasado.loc[pasado["hora"].isin([7, 8]), "pasajeros"] *= 3
     r3 = inferencia.predecir("CRA 54", inst, 120, serie_observada=pasado)
-    assert r3["variables"]["factor_nowcast"] > r1["variables"]["factor_nowcast"]
+    # las horas cerradas (7 y 8) sí cuentan: la razón observado / esperado sube; el factor es 1 + peso x (razón - 1)
+    # recortado, con el peso que eligió la validación del modelo (0 en fv3: entonces el factor no se mueve)
+    assert r3["variables"]["razon_cruda"] > r1["variables"]["razon_cruda"]
+    peso = inferencia.cargar()["manifiesto"]["nowcast"]["peso"]
+    esperado = min(max(1 + peso * (r3["variables"]["razon_cruda"] - 1), inferencia.NOWCAST_MIN),
+                   inferencia.NOWCAST_MAX)
+    assert r3["variables"]["factor_nowcast"] == pytest.approx(esperado, abs=1e-3)
+    assert (r3["variables"]["factor_nowcast"] > r1["variables"]["factor_nowcast"]) == (peso > 0)
     assert r3["variables"]["factor_nowcast"] <= inferencia.NOWCAST_MAX
     assert all(h["hora"] < 9 for h in r1["variables"]["horas_nowcast"])
 
@@ -516,12 +530,21 @@ def test_huella_del_codigo_no_depende_del_fin_de_linea():
 @requiere_modelo
 def test_preprocesamiento_es_el_del_entrenamiento_del_activo():
     """§9.2: el preprocesamiento (variables.py, sin su docstring y con LF) es el mismo con el que se entrenó el
-    modelo activo; el manifiesto registra además el commit y la forma de normalizar."""
+    modelo activo, o, si cambió después (al registrar otra versión de variables), el manifiesto trae la verificación
+    de que ESE contenido da exactamente las mismas variables y los mismos pronósticos que el del entrenamiento
+    (scripts/evaluar_codigo_modelo.py --compatibilidad). El manifiesto registra además el commit y la forma de
+    normalizar."""
     activo = inferencia.modelo_activo()
     man = json.loads((datos.carpeta_modelos() / activo / "manifest.json").read_text(encoding="utf-8"))
     texto = Path(variables.__file__).read_text(encoding="utf-8")
-    assert man["codigo_sin_docstring_sha256"]["variables.py"] == inferencia.sha256_codigo(
-        inferencia.sin_docstring_de_modulo(texto))
+    actual = inferencia.sha256_codigo(inferencia.sin_docstring_de_modulo(texto))
+    if man["codigo_sin_docstring_sha256"]["variables.py"] != actual:
+        comp = man.get("compatibilidad_codigo") or {}
+        assert comp.get("variables_py_sin_docstring_sha256") == actual, "variables.py cambió sin verificar"
+        assert comp["referencia"]["variables_py_sin_docstring_sha256"] == man["codigo_sin_docstring_sha256"][
+            "variables.py"]
+        assert comp["mismas_filas_y_mismos_nan"] and comp["filas"] > 50_000 and comp["max_dif_variables"] == 0
+        assert all(v == 0 for v in comp["max_dif_pronostico"].values())
     assert "LF" in man["codigo_normalizacion"] and "codigo_commit" in man and "estado" not in man
 
 

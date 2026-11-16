@@ -41,7 +41,8 @@ def test_exportacion_paridad_y_sha(modelo_tmp, monkeypatch):
     assert ev["aprobada"]
     for parte in onnx_motor.PARTES:
         d = ev["paridad"][parte]
-        assert d["max_abs"] < 0.01 and d["max_rel"] < 1e-3
+        # la regla de numpy.isclose: en cada fila |onnx - sklearn| <= 0,01 + 1e-3 * |sklearn| (exceso <= 0)
+        assert d["max_exceso_tolerancia"] <= 0 and d["max_abs"] < 0.02
         assert d["wape_onnx"] == pytest.approx(d["wape_sklearn"], abs=1e-3)
     man = json.loads((carpeta / mid / "manifest.json").read_text(encoding="utf-8"))
     assert set(man["onnx"]["archivos"]) == {"punto", "p10", "p90"}

@@ -396,7 +396,8 @@ def test_dia_siguiente_al_ultimo_dato_con_el_modelo_activo():
     (ruta,) = r["rutas"]
     por_hora = {p["hora"]: p for p in ruta["pasajeros_esperados"]["por_hora"]}
     for h, fila in zip(plan["horas"], ruta["cada_cuanto_despachar"], strict=True):
-        assert h["pasajeros_previstos"] == pytest.approx(por_hora[h["hora"]]["esperado"], abs=0.05)
+        # «esperado» va con un decimal y «pasajeros_previstos» con dos: difieren a lo más en el redondeo (0,05)
+        assert h["pasajeros_previstos"] == pytest.approx(por_hora[h["hora"]]["esperado"], abs=0.05 + 1e-9)
         assert fila["buses_hora"] == h["salidas"] and fila["headway_min"] == h["headway_min"]
     assert any("mismo pronóstico" in x for x in r["limitaciones"])
 

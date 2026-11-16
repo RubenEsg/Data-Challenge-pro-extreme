@@ -1,8 +1,8 @@
 {
- "generado_en": "2026-11-09T05:51:33+00:00",
+ "generado_en": "2026-11-16T19:43:19+00:00",
  "protocolo": [
   "Protocolo (origen móvil):",
-  "- Modelo fv2 congelado con datos <= 2024-12-31 (semilla 42, hiperparámetros por defecto).",
+  "- Modelo congelado con las variables del modelo activo (o --version), datos <= 2024-12-31, semilla 42.",
   "- Peso del factor intradía (nowcast) calibrado en ene-feb 2025 con inferencia.calibrar_nowcast; evaluación mar-dic 2025.",
   "- Un origen en cada h:00 (h = 6..20): el factor usa solo las horas cerradas h-2 y h-1 (observado / esperado).",
   "  - 60 min: objetivo = pasajeros de la hora h.",
@@ -12,6 +12,7 @@
   "    crudo por minuto. El pronóstico reparte la hora con 0,5 (prorrateo anterior) o con el perfil intrahorario de 2024",
   "    (datos/perfil_intrahorario.parquet, sin datos de 2025: no hay fuga)."
  ],
+ "version_variables": "fv2-2026-11-09",
  "modelo": "fv2 congelado <= 2024-12-31 (semilla 42)",
  "peso_nowcast_calibrado_ene_feb_2025": 0.3,
  "calibracion_wape_por_peso": {
@@ -48,5 +49,5 @@
   "b1_perfil": 23.12,
   "nota": "observado de 30 min = pasajeros de la hora x fracción observada de subidas de los viajes que salen entre h:00 y h:29 (aproximación: no hay conteo crudo por minuto en las exportaciones)"
  },
- "segundos": 10.5
+ "segundos": 2.8
 }

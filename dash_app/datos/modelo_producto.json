@@ -29,7 +29,7 @@
   "B": 2000,
   "bloque_dias": 7
  },
- "generado_evaluacion": "2026-11-09T05:06:42-05:00",
+ "generado_evaluacion": "2026-11-16T14:44:27-05:00",
  "generado_calibracion": "2026-11-09T03:44:19-05:00",
  "origen": {
   "model_id": {
@@ -46,7 +46,7 @@
   },
   "wape_modelo_anterior": {
    "archivo": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.json",
-   "clave": "prueba_reservada.global.fv1.wape"
+   "clave": "prueba_reservada.global.anterior.wape"
   },
   "ic95_modelo": {
    "archivo": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.json",
@@ -63,6 +63,51 @@
   "cobertura_v1": {
    "archivo": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json",
    "clave": "resultados.prueba.v1.global.cobertura_pct"
+  },
+  "candidato": {
+   "archivo": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/candidato_fv3/evaluacion_modelo.json",
+   "clave": "prueba_reservada y robustez (cand frente a anterior)"
   }
+ },
+ "candidato": {
+  "model_id": "hgb_fv3_20250831_s42",
+  "estado": "candidato",
+  "version": "fv3-2026-11-16",
+  "wape_validacion": 12.963,
+  "wape_validacion_activo": 13.554,
+  "wape_prueba": 14.36,
+  "ic95_prueba": [
+   12.98,
+   16.13
+  ],
+  "ic95_diferencia_prueba": [
+   -1.02,
+   0.06
+  ],
+  "robustez": {
+   "2024": {
+    "wape": 15.76,
+    "wape_activo": 16.26,
+    "ic95_diferencia": [
+     -0.81,
+     -0.25
+    ],
+    "meses_mejor": 11,
+    "meses": 12,
+    "entrenado_hasta": "2023-12-31"
+   },
+   "2025": {
+    "wape": 14.08,
+    "wape_activo": 14.48,
+    "ic95_diferencia": [
+     -0.78,
+     -0.12
+    ],
+    "meses_mejor": 8,
+    "meses": 12,
+    "entrenado_hasta": "2024-12-31"
+   }
+  },
+  "decision": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/decision_fv3.md"
  }
 }

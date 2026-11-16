@@ -1,7 +1,7 @@
 """Evaluación sin fuga de los horizontes de 30, 60 y 120 minutos (RF-005, §9.3).
 
 Protocolo (origen móvil):
-- Modelo fv2 congelado con datos <= 2024-12-31 (semilla 42, hiperparámetros por defecto).
+- Modelo congelado con las variables del modelo activo (o --version), datos <= 2024-12-31, semilla 42.
 - Peso del factor intradía (nowcast) calibrado en ene-feb 2025 con inferencia.calibrar_nowcast; evaluación mar-dic 2025.
 - Un origen en cada h:00 (h = 6..20): el factor usa solo las horas cerradas h-2 y h-1 (observado / esperado).
   - 60 min: objetivo = pasajeros de la hora h.
@@ -63,9 +63,10 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Evaluación de horizontes 30/60/120 min sin fuga")
     ap.add_argument("--raiz-proyecto", type=Path, default=RAIZ.parents[1])
     ap.add_argument("--salida", type=Path, default=RAIZ / "docs" / "evidencias" / "modelo")
+    ap.add_argument("--version", default=None, help="versión de variables (por defecto, la del modelo activo)")
     a = ap.parse_args()
     t0 = time.perf_counter()
-    version = variables.FV2
+    version = variables.version_valida(a.version or inferencia.cargar()["feature_version"])
     t = inferencia._filas_utiles(inferencia.tabla_variables()).reset_index(drop=True)
     corte, ini_ev, fin = date(2024, 12, 31), date(2025, 3, 1), date(2025, 12, 31)
     tr = t[t["fecha"] <= corte]
@@ -98,7 +99,8 @@ def main() -> None:
     res: dict = {
         "generado_en": datetime.now(UTC).isoformat(timespec="seconds"),
         "protocolo": __doc__.strip().splitlines()[2:12],
-        "modelo": f"fv2 congelado <= {corte} (semilla 42)",
+        "version_variables": version,
+        "modelo": f"{version.split('-')[0]} congelado <= {corte} (semilla 42)",
         "peso_nowcast_calibrado_ene_feb_2025": peso,
         "calibracion_wape_por_peso": cal["wape_por_peso"],
         "evaluado": f"{ini_ev} a {fin}",

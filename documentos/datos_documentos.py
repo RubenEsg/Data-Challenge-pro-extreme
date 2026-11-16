@@ -53,6 +53,7 @@ COBERTURA, COBERTURA_ES_FINAL = _elegir("EVIDENCIA_COBERTURA", EVIDENCIA_COBERTU
 
 FUENTES = {
     "modelo": EVID / "modelo" / "evaluacion_modelo.json",
+    "candidato": EVID / "modelo" / "candidato_fv3" / "evaluacion_modelo.json",   # registrado sin activar
     "alertas": EVID / "alertas" / "backtest_alertas.json",
     "alertas2024": EVID / "alertas" / "backtest_alertas_corte_2024-12-31.json",
     "alertas_pron": EVID / "alertas" / "backtest_alertas_pronostico.json",
@@ -131,7 +132,7 @@ def cifras_modelo():
     macro("PruebaDesde", str(g(pr, "modelos", "desde", defecto="s. d.")), f)
     macro("PruebaHasta", str(g(pr, "modelos", "hasta", defecto="s. d.")), f)
     macro("Nprueba", num(g(glob, "cand", "n"), 0), f)
-    for nombre, k in (("act", "cand"), ("fvuno", "fv1"), ("buno", "b1"), ("bdos", "b2")):
+    for nombre, k in (("act", "cand"), ("fvuno", "anterior"), ("buno", "b1"), ("bdos", "b2")):
         macro(f"WAPE{nombre}", num(g(glob, k, "wape")), f)
         macro(f"MAE{nombre}", num(g(glob, k, "mae")), f)
         ic = g(boot, k, "ic95") or [None, None]
@@ -153,11 +154,30 @@ def cifras_modelo():
         macro(f"WAPERuta{nombre}Buno", num(g(pr, "por_ruta", ruta, "b1", "wape")), f)
     for anio, nombre in (("2024", "Dosmilveinticuatro"), ("2025", "Dosmilveinticinco")):
         rob = g(e, "robustez", anio) or {}
-        macro(f"Rob{nombre}", num(g(rob, "global", "fv2", "wape")), f)
-        ic = g(rob, "bootstrap", "fv2", "ic95") or [None, None]
+        macro(f"Rob{nombre}", num(g(rob, "global", "cand", "wape")), f)
+        ic = g(rob, "bootstrap", "cand", "ic95") or [None, None]
         macro(f"Rob{nombre}IC", f"{num(ic[0])}--{num(ic[1])}", f)
         macro(f"Rob{nombre}Buno", num(g(rob, "global", "b1", "wape")), f)
+    cifras_candidato()
     return e
+
+
+def cifras_candidato():
+    """El candidato fv3, registrado sin activar: su id, su prueba reservada (informativa) y los dos años congelados
+    frente al activo, con el IC95 de la diferencia y los meses en que mejora (candidato_fv3/evaluacion_modelo.json)."""
+    e = leer_json("candidato")
+    f = FUENTES["candidato"]
+    pr = g(e, "prueba_reservada") or {}
+    macro("ModeloCand", str(g(pr, "modelos", "activo", defecto="s. d.")).replace("_", "\\_"), f)
+    macro("WAPEcand", num(g(pr, "global", "cand", "wape")), f)
+    ic = g(pr, "bootstrap", "cand", "ic95") or [None, None]
+    macro("WAPEcandIC", f"{num(ic[0])}--{num(ic[1])}", f)
+    for anio, nombre in (("2024", "Dosmilveinticuatro"), ("2025", "Dosmilveinticinco")):
+        rob = g(e, "robustez", anio) or {}
+        macro(f"RobCand{nombre}", num(g(rob, "global", "cand", "wape")), f)
+        d = g(rob, "bootstrap", "cand_menos_anterior", "ic95") or [None, None]
+        macro(f"RobCand{nombre}DifIC", f"{num(d[0])} a {num(d[1])}", f)
+        macro(f"RobCand{nombre}Meses", num(g(rob, "meses_cand_mejor_que_anterior"), 0), f)
 
 
 def cifras_calibracion():
@@ -995,7 +1015,7 @@ def guardar(fig, nombre):
 
 def fig_wape(plt, e):
     pr = g(e, "prueba_reservada") or {}
-    filas = [("Modelo activo fv2", "cand", "modelo", True), ("Modelo anterior fv1", "fv1", "modelo", False),
+    filas = [("Modelo activo fv2", "cand", "modelo", True), ("Modelo anterior fv1", "anterior", "modelo", False),
              ("B1 · regla manual 8 semanas", "b1", "hoy", True), ("B2 · última semana", "b2", "hoy", False)]
     fig, ax = plt.subplots(figsize=(6.2, 2.3))
     for i, (txt, k, rol, lleno) in enumerate(filas):

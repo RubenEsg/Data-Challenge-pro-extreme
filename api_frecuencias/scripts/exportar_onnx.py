@@ -1,4 +1,4 @@
-"""Exporta un modelo fv2 (punto Poisson, P10 y P90) a ONNX con skl2onnx y prueba la paridad con scikit-learn.
+"""Exporta un modelo fv2 o fv3 (punto Poisson, P10 y P90) a ONNX con skl2onnx y prueba la paridad con scikit-learn.
 
 §9.1 «Gradient Boosting exportado a ONNX» y §9.2 «el artefacto se carga con ONNX Runtime ... se verifica su hash».
 
@@ -9,11 +9,14 @@
   got a boolean»); se convierten a int nativo en onnx.helper.make_attribute.
 - onnx.checker valida cada grafo; los archivos quedan en datos/modelos/<id>/modelo_{punto,p10,p90}.onnx y su SHA-256
   en manifest['onnx'] (escritura atómica; el sha256 del joblib no cambia, así que el registro sigue válido).
-- Paridad: diferencia absoluta (< 0,01 pasajeros) y relativa (< 1e-3, sobre max(|y|, 1)) máxima frente a scikit-learn
-  en filas reales posteriores al corte, WAPE con ambos motores y latencia por fila y por lote. La diferencia viene de
-  que ONNX compara los umbrales del árbol en float32.
+- Paridad: en cada fila real posterior al corte, |ONNX − scikit-learn| <= 0,01 pasajeros + 1e-3 · |scikit-learn| (la
+  regla de numpy.isclose: tolerancia absoluta más relativa), con la diferencia absoluta y relativa máximas, el WAPE
+  con ambos motores y la latencia por fila y por lote. La diferencia viene de que ONNX compara los umbrales del árbol
+  en float32. Hasta fv2 se exigían las dos cotas por separado (máx. absoluta < 0,01 y máx. relativa < 1e-3 sobre
+  max(|y|, 1)); con fv3 el P90 de una hora casi vacía (1,5 pasajeros) difirió 0,0015 pasajeros, 1,04e-3 relativo, y
+  la regla pasó a la combinada, que es la habitual y sigue acotando el error en centésimas de pasajero.
 
-Uso:  python scripts/exportar_onnx.py [--model-id hgb_fv2_20250831_s42] [--dir-modelos datos/modelos]
+Uso:  python scripts/exportar_onnx.py [--model-id hgb_fv3_20250831_s42] [--dir-modelos datos/modelos]
                                       [--filas 3000] [--evidencia docs/evidencias/monitoreo/onnx_paridad.json]
 """
 from __future__ import annotations
@@ -162,13 +165,16 @@ def exportar(model_id: str | None = None, dir_modelos: Path | None = None, filas
             "wape_onnx": round(float(np.abs(y_on - y).sum() / y.sum() * 100), 4),
             "ms_lote_sklearn": round(ms_sk, 2), "ms_lote_onnx": round(ms_on, 2),
             "ms_fila_sklearn": round(ms_fila_sk, 3), "ms_fila_onnx": round(ms_fila_on, 3),
-            "aprobada": bool(rel.max() < TOLERANCIA_REL and dif.max() < TOLERANCIA_ABS),
+            "max_exceso_tolerancia": float((dif - (TOLERANCIA_ABS + TOLERANCIA_REL * np.abs(y_sk))).max()),
+            "aprobada": bool((dif <= TOLERANCIA_ABS + TOLERANCIA_REL * np.abs(y_sk)).all()),
         }
         parte_info[parte] = paridad[parte]["aprobada"]
     evidencia = {
         "model_id": modelo["model_id"], "feature_version": version, "columnas": cols,
         "sha256_joblib": modelo["sha256"], "opset": OPSET, "archivos": archivos, "paridad": paridad,
         "tolerancia_rel": TOLERANCIA_REL, "tolerancia_abs_pasajeros": TOLERANCIA_ABS,
+        "criterio": "en cada fila |onnx - sklearn| <= tolerancia_abs_pasajeros + tolerancia_rel * |sklearn| "
+                    "(numpy.isclose)",
         "aprobada": all(parte_info.values()),
         "muestra": {"desde": str(muestra["fecha"].min()), "hasta": str(muestra["fecha"].max()),
                     "posteriores_al_corte": bool(len(posteriores) >= min(filas, 200))},

@@ -9,6 +9,11 @@ y dos modelos de cuantiles (P10 y P90). Variables `fv2-2026-11-09`, corte de dat
 `modelo.joblib` con SHA-256 `24c70b9c…` y exportación ONNX de las tres salidas
 (`datos/modelos/hgb_fv2_20250831_s42/manifest.json`, `datos/modelos/registro.json`).
 
+**Candidato registrado:** `hgb_fv3_20250831_s42`, el mismo modelo con cinco variables de calendario escolar y
+universitario (`fv3-2026-11-16`). Se equivoca menos que fv2 en la validación y en los dos años congelados, con el
+intervalo de la diferencia entero bajo cero (sección 5.1, `decision_fv3.md`). No se activó en esta entrega: espera
+la sombra y la compuerta de la API, y toda la evidencia de operación es de fv2.
+
 ## 1. Protocolo sin fuga (§9.3)
 
 | Partición | Fechas | Uso |
@@ -123,6 +128,31 @@ Modelos congelados un año antes de cada periodo evaluado, misma semilla (`evalu
 2023 no se puede evaluar fuera de muestra: es el primer año de la serie (el entrenamiento empieza el 2023-01-08) y no
 hay datos anteriores para entrenar un modelo que lo pronostique. En los dos años evaluables el modelo supera a B1 en
 las tres rutas, y la calibración conformal lleva la cobertura de 2024 de 67,67 % a 79,37 %.
+
+### 5.1 Candidato fv3: el calendario escolar y universitario
+
+Con el mismo protocolo y las mismas filas, las variables fv3 (fv2 más `vac_escolar`, `vac_univ` y la fracción de los
+4 días de referencia de los rezagos en receso escolar, vacaciones universitarias o festivo; fuente:
+`datos/calendario_academico.csv`) bajan el error en los dos años congelados (`candidato_fv3/evaluacion_modelo.md`):
+
+| Año evaluado | WAPE fv3 [IC95] | WAPE fv2 [IC95] | fv3 − fv2 [IC95] | Meses en que fv3 mejora | WAPE B1 |
+|---|---|---|---|---|---|
+| 2024 | 15,76 [14,63–17,21] | 16,26 [14,97–17,91] | −0,81 a −0,25 pp | 11 de 12 | 21,55 |
+| 2025 | 14,08 [13,52–14,69] | 14,48 [13,78–15,28] | −0,78 a −0,12 pp | 8 de 12 | 20,04 |
+| 2025 nov-dic (prueba informativa) | 14,36 [12,98–16,13] | 14,77 [13,10–16,87] | −1,02 a +0,06 pp (P 0,94) | — | 21,18 |
+
+- En la validación (2025-09-01 a 2025-10-31), 12,96 % frente a 13,55 %. Pasa la compuerta de entrenamiento.
+- La mejora está donde debe: en los recesos escolares el WAPE baja de 17,36 a 15,61 en 2025 y de 20,17 a 18,27 en
+  2024. En las horas con novedad vial de 2024 empeora (25,15 → 27,33, n = 246).
+- Su banda calibrada (Mondrian por ruta × bloque, elegida solo con su validación) cubre 77,95 % en la prueba. Su
+  ONNX da el mismo WAPE que scikit-learn y su explicación SHAP reconstruye el pronóstico con error relativo de
+  2,7e-14.
+- El peso del factor intradía que eligió su validación es 0,0: con los calendarios no corrige nada en septiembre y
+  octubre.
+- **Sigue activo fv2.** Activar fv3 cambiaría los pronósticos que usan el ciclo diario, las alertas, el monitoreo y
+  las respuestas al reto de esta entrega. La API lo pone en sombra 14 días y la compuerta de cuatro criterios decide
+  (sección 6.1). Registrar fv3 cambió `variables.py`; se comprobó que, para fv2, el código nuevo da las mismas
+  variables y los mismos pronósticos (diferencia 0 en 56.253 filas; manifiesto de fv2, clave `compatibilidad_codigo`).
 
 ## 6. Incertidumbre: banda P10-P90 y calibración conformal (§9.3, §9.4)
 
@@ -328,6 +358,11 @@ son 1,265 por ruta y día; ALT-005 a ALT-009, 0,543 (`scripts/cifras_vigentes.py
 | `calibracion_v2.json` de cada candidato nuevo | el propio entrenamiento (`inferencia.entrenar`, sección 6.1) |
 | `explicacion_local_y_bandas.json` | pruebas y precalentamiento del modelo (`app/servicios/inferencia.py`) |
 | `entrenamiento_fv2.json` | `python scripts/entrenar.py` (dos veces, mismo SHA-256) |
+| `entrenamiento_fv3.json` | `python scripts/entrenar.py --compuerta-activo --sin-activar --verificar-reproducible --salida-json docs/evidencias/modelo/entrenamiento_fv3.json` (la compuerta se registra sin activar) |
+| `candidato_fv3/evaluacion_modelo.md` y `.json` | `python scripts/evaluar_modelo.py --modelo hgb_fv3_20250831_s42 --anterior hgb_fv2_20250831_s42 --salida docs/evidencias/modelo/candidato_fv3` |
+| `candidato_fv3/horizontes.json` | `python scripts/evaluar_horizontes.py --version fv3-2026-11-16 --salida docs/evidencias/modelo/candidato_fv3` |
+| `candidato_fv3/explicacion_local_y_bandas.json` | `python scripts/evidencia_explicacion_local.py --model-id hgb_fv3_20250831_s42 --salida docs/evidencias/modelo/candidato_fv3/explicacion_local_y_bandas.json` |
+| `compatibilidad_codigo` del manifiesto de fv2 | `python scripts/evaluar_codigo_modelo.py --model-id hgb_fv2_20250831_s42 --compatibilidad --escribir` |
 | `predecir_horas_lote.json` | `python scripts/evaluar_lote_inferencia.py` |
 | `pytest_datos_recientes_y_activacion.txt` | las pruebas de integración del modelo (16) y las unitarias completas con datos/ML del modelo (567), con la lista de lo que demuestra cada prueba nueva |
 | claves `codigo_*` e `historial_prueba_reservada` de cada `manifest.json` | `python scripts/evaluar_codigo_modelo.py --escribir` (no toca el artefacto, los ONNX ni la calibración: verifica sus SHA-256 antes y después) |

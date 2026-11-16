@@ -1,0 +1,26 @@
+{
+  "version": "fv3-2026-11-16",
+  "hasta": "2025-08-31",
+  "semilla": 42,
+  "reproducibilidad": {
+    "sha256_1": "3e97dca70fc146e5702b87c9ccba78993c7423184986d95ee8802ee763c61190",
+    "sha256_2": "3e97dca70fc146e5702b87c9ccba78993c7423184986d95ee8802ee763c61190",
+    "identico": true
+  },
+  "model_id": "hgb_fv3_20250831_s42",
+  "sha256": "3e97dca70fc146e5702b87c9ccba78993c7423184986d95ee8802ee763c61190",
+  "decision_entrenamiento": "candidato: mejora a B1 en validación; la activación pasa por la gobernanza",
+  "compuerta": {
+    "activo_previo": "hgb_fv2_20250831_s42",
+    "candidato": "hgb_fv3_20250831_s42",
+    "wape_validacion": {
+      "candidato": 12.963,
+      "activo": 13.554,
+      "b1": 15.117
+    },
+    "decision": "activar: mejora a B1 y no empeora al modelo activo en validación",
+    "activado": false,
+    "nota": "registrado sin activar (--sin-activar): pasa por la sombra y la compuerta de la API",
+    "ventana_validacion": "2025-09-01 a 2025-10-31 (2025-09-01 en adelante)"
+  }
+}

@@ -73,9 +73,23 @@ def _modelo(c: list) -> None:
     ev = _json("modelo/evaluacion_modelo.json")
     g = (ev or {}).get("prueba_reservada", {}).get("global", {})
     for clave, nombre in (("cand", "modelo activo hgb_fv2_20250831_s42"), ("b1", "línea base B1 (regla manual)"),
-                          ("fv1", "versión anterior fv1")):
+                          ("anterior", "versión anterior fv1")):
         w = (g.get(clave) or {}).get("wape")
         c.append((f"WAPE en la prueba reservada (nov–dic 2025), {nombre}", _pct(w), "modelo/evaluacion_modelo.json"))
+    # el candidato registrado sin activar (fv3), con el mismo protocolo (modelo/decision_fv3.md)
+    rel = "modelo/candidato_fv3/evaluacion_modelo.json"
+    cand = _json(rel) or {}
+    pr = cand.get("prueba_reservada") or {}
+    mid = (pr.get("modelos") or {}).get("activo", "?")
+    w = ((pr.get("global") or {}).get("cand") or {}).get("wape")
+    c.append((f"WAPE en la prueba reservada (nov–dic 2025), candidato sin activar {mid}", _pct(w), rel))
+    for anio, r in (cand.get("robustez") or {}).items():
+        g_r, b_r = r.get("global") or {}, (r.get("bootstrap") or {}).get("cand_menos_anterior") or {}
+        a, b = (g_r.get("cand") or {}).get("wape"), (g_r.get("anterior") or {}).get("wape")
+        ic = b_r.get("ic95") or [None, None]
+        txt = SIN if a is None or b is None else (f"{_pct(a)} frente a {_pct(b)} (diferencia "
+                                                  f"{_num(ic[0], 2)} a {_num(ic[1], 2)} pp)".replace("-", "−"))
+        c.append((f"WAPE de {anio} con modelos congelados un año antes, candidato fv3 frente a fv2", txt, rel))
     prueba = ((_json("modelo/calibracion_condicional.json") or {}).get("resultados") or {}).get("prueba") or {}
     for version in ("v2", "v1"):
         glob = (prueba.get(version) or {}).get("global") or {}

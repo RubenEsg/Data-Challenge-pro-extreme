@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-14 14:40",
+ "generado": "2026-11-16 15:01",
  "generador": "dash_app/preparar_datos.py",
  "archivos": {
   "pronosticos_2025.parquet": {
@@ -181,11 +181,12 @@
    "fuentes": [
     "EntregaFinal/api_frecuencias/datos/modelos/registro.json",
     "EntregaFinal/api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.json",
-    "EntregaFinal/api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json"
+    "EntregaFinal/api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json",
+    "EntregaFinal/api_frecuencias/docs/evidencias/modelo/candidato_fv3/evaluacion_modelo.json"
    ],
    "filas": null,
-   "bytes": 2067
+   "bytes": 3104
   }
  },
- "total_bytes": 4335802
+ "total_bytes": 4336839
 }

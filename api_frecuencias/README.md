@@ -71,7 +71,7 @@ proceso y tabla, §6.1); las migraciones 0001 a 0014 están descritas en `docs/m
 | `cola.py` | Cola de trabajos en PostgreSQL para N réplicas (RNF-005): reclamo con `SELECT … FOR UPDATE SKIP LOCKED`, reserva (*lease*) que vence y se renueva con un latido, reintento con espera exponencial, cierre con cerca (solo confirma quien aún tiene la reserva) y traza de cada intento en `execution_attempt`. Tipos de trabajo: `frecuencia`, `entrenamiento`, `respuesta`, `segmentos` y `retencion`. Dos trabajos de frecuencia de la misma ruta (o uno de todas las rutas) nunca corren a la vez; los de rutas distintas sí, en réplicas distintas. Los entrenamientos corren en paralelo. |
 | `ingesta.py` | Ingesta al histórico propio con `COPY` a una tabla de paso + un `INSERT … ON CONFLICT … WHERE … IS DISTINCT FROM`, en la misma transacción de la ejecución (RNF-003). Desde la migración 0013 guarda también, si el lote las trae, las bajadas de los viajes válidos y las subidas, bajadas y cobertura de los segmentos; una medida que no llega no borra la guardada. |
 | `planificador.py` | Planificador interno con APScheduler (§7.2): ejecución diaria (partida por ruta con `PLAN_PARTICION=ruta`), revisión de reentrenamiento, retención de datos (`PLAN_RETENCION_CRON`) y, con la base operacional configurada (`FUENTE_DATABASE_URL`), refresco de la agregación de segmentos, cada uno con su cron; encola una sola fila por franja aunque haya N réplicas (`GET /api/v1/scheduler`). |
-| `variables.py` | Variables del modelo por versión (fv1 y fv2), sin información posterior al instante de predicción. |
+| `variables.py` | Variables del modelo por versión (fv1, fv2 y fv3, esta con el calendario escolar y universitario de `datos/calendario_academico.csv`), sin información posterior al instante de predicción. |
 | `monitoreo.py` · `politica.py` | Monitoreo por ejecución (error móvil, cobertura, PSI, volumen y alertas descartadas), foto de variables (por ruta y, además, una fila por segmento y sentido de cada predicción) y aprendizaje continuo: retador en sombra, compuerta, activación auditada y reversión automática. |
 | `onnx_motor.py` | Motor de inferencia ONNX Runtime alternativo (`MOTOR_INFERENCIA=onnx`). |
 | `modelo_segmentos.py` | Modelo de la demanda por segmento y sentido: HGB Poisson jerárquico con el reparto fijo B0 como línea base, banda P10–P90 conformal compuesta con la de la ruta, registro propio con SHA-256 (`datos/modelos/segmentos/`) y filas por segmento de la foto de variables (`docs/modelo_segmentos.md`). |
@@ -524,6 +524,13 @@ prueba se consultó al elegir fv2 frente a fv1, así que su cifra es informativa
 validación y los backtests con modelos congelados en 2024 y 2025, y se pide a Extreme un periodo de 2026 como prueba
 limpia.
 
+**Candidato registrado, sin activar:** `hgb_fv3_20250831_s42`, el mismo modelo con cinco variables de calendario
+escolar y universitario (versión fv3). Mejora a fv2 en la validación (12,96 % frente a 13,55 %) y en los dos años
+congelados: 2024, 15,76 % frente a 16,26 %, y 2025, 14,08 % frente a 14,48 %, con el intervalo de la diferencia
+entero bajo cero. En la prueba reservada (informativa), 14,36 % frente a 14,77 %. Queda para la sombra y la compuerta
+de la API: activarlo cambiaría los pronósticos de las evidencias de operación de esta entrega, que son de fv2
+(`docs/evidencias/modelo/decision_fv3.md`).
+
 Cada predicción trae dos añadidos:
 - la banda P10-P90 calibrada (`p10_modelo`/`p90_modelo` guardan la banda sin calibrar). La calibración vigente es la
   v2, conformal por bloque horario, versionada junto al modelo (`calibracion_v2.json`, con su SHA-256 en el
@@ -536,11 +543,12 @@ Las ventanas de 30/60/120 min se reparten con el perfil intrahorario de 2024.
 
 Para reproducir:
 - `scripts/entrenar.py --compuerta-activo --verificar-reproducible`;
-- `scripts/evaluar_modelo.py` y `scripts/evaluar_horizontes.py`;
+- `scripts/evaluar_modelo.py` y `scripts/evaluar_horizontes.py` (el candidato fv3: `--modelo hgb_fv3_20250831_s42
+  --anterior hgb_fv2_20250831_s42 --salida docs/evidencias/modelo/candidato_fv3` y `--version fv3-2026-11-16`);
 - el modelo por segmento y sentido: `scripts/entrenar_segmentos.py` y `scripts/evaluar_banda_ventanas_segmentos.py`
   (`docs/modelo_segmentos.md`).
 
-Las evidencias y la decisión están en `docs/evidencias/modelo/` (`decision_fv2.md`).
+Las evidencias y las decisiones están en `docs/evidencias/modelo/` (`decision_fv2.md` y `decision_fv3.md`).
 
 La regla de gobierno de §5.1 se cumple guardando los umbrales en `ai_frecuencias.threshold_config`, con versión. Eso
 incluye la tarifa, la elasticidad y la suavidad del plan del día (migración 0010), la flota y el tiempo de ciclo por
@@ -580,7 +588,9 @@ hasta que el área operativa la apruebe). Se cambian sin recompilar ni reiniciar
   - La decisión: la activación es auditada y se revierte sola si el modelo nuevo se degrada en sus primeros 7 días.
     El planificador semanal usa la misma política.
 - **ONNX (§9.1, §9.2).** `scripts/exportar_onnx.py` exporta el fv2 (punto con nodo Exp, P10 y P90) y registra su
-  SHA-256 en el manifiesto. `MOTOR_INFERENCIA=onnx` lo usa con ONNX Runtime.
+  SHA-256 en el manifiesto. `MOTOR_INFERENCIA=onnx` lo usa con ONNX Runtime. El candidato fv3 también está
+  exportado (`onnx_paridad_hgb_fv3_20250831_s42.json`); la paridad se mide en cada fila con la regla de
+  `numpy.isclose` (diferencia ≤ 0,01 pasajeros + 0,001 × valor).
   - Paridad: diferencia máxima de 0,003 pasajeros y el mismo WAPE con los dos motores.
   - Velocidad: unos 0,1 ms por fila, frente a 5-12 ms en scikit-learn (`onnx_paridad.json`).
 - **Segmento y sentido (§3.1, §9.1, §9.3; `GET /api/v1/predictions/segmentos`).** Hay un modelo supervisado propio

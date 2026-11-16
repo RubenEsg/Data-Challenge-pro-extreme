@@ -1,0 +1,53 @@
+{
+ "version": "v2",
+ "nombre": "conformal de Mondrian por ruta × bloque",
+ "model_id": "hgb_fv3_20250831_s42",
+ "metodo": "CQR de Mondrian (conformal partido por grupo)",
+ "puntaje": "s = max(P10 - y, y - P90) / max(P50, 1)",
+ "aplicacion": "P10' = max(0, min(P10 - q·max(P50, 1), P50)); P90' = max(P90 + q·max(P50, 1), P50)",
+ "grupos": [
+  "ruta",
+  "bloque"
+ ],
+ "cobertura_objetivo": 0.8,
+ "minimo_por_grupo": 30,
+ "ajustado_con": "validación 2025-09-01 a 2025-10-31 (3111 horas); la prueba reservada no se usa",
+ "q": {
+  "*": -0.011727,
+  "CL 72|04-05": 0.024606,
+  "CL 72|06-08 pico": -0.011987,
+  "CL 72|09-16 valle": -0.028449,
+  "CL 72|17-19 pico": -0.02645,
+  "CL 72|20": 0.0,
+  "CRA 54|04-05": 0.006269,
+  "CRA 54|06-08 pico": -0.01252,
+  "CRA 54|09-16 valle": -0.004491,
+  "CRA 54|17-19 pico": -0.003132,
+  "CRA 54|20": 0.0,
+  "SILENCIO|04-05": 0.0,
+  "SILENCIO|06-08 pico": -0.034523,
+  "SILENCIO|09-16 valle": -0.020388,
+  "SILENCIO|17-19 pico": -0.028534,
+  "SILENCIO|20": 0.0
+ },
+ "n_por_grupo": {
+  "CL 72|04-05": 122,
+  "CL 72|06-08 pico": 183,
+  "CL 72|09-16 valle": 488,
+  "CL 72|17-19 pico": 183,
+  "CL 72|20": 61,
+  "CRA 54|04-05": 122,
+  "CRA 54|06-08 pico": 183,
+  "CRA 54|09-16 valle": 488,
+  "CRA 54|17-19 pico": 183,
+  "CRA 54|20": 61,
+  "SILENCIO|04-05": 122,
+  "SILENCIO|06-08 pico": 183,
+  "SILENCIO|09-16 valle": 488,
+  "SILENCIO|17-19 pico": 183,
+  "SILENCIO|20": 61
+ },
+ "generado_en": "2026-11-16T15:13:28-05:00",
+ "script": "scripts/calibrar_por_grupo.py",
+ "evidencia": "docs/evidencias/modelo/calibracion_condicional_hgb_fv3_20250831_s42.json"
+}

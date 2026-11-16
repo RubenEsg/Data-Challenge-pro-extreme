@@ -1,0 +1,258 @@
+{
+ "precalentar": {
+  "model_id": "hgb_fv3_20250831_s42",
+  "segundos": 1.39
+ },
+ "modelo": {
+  "model_id": "hgb_fv3_20250831_s42",
+  "feature_version": "fv3-2026-11-16",
+  "sha256": "3e97dca70fc146e5702b87c9ccba78993c7423184986d95ee8802ee763c61190",
+  "estado": "candidato",
+  "shap_exacto": true
+ },
+ "reconstruccion_prueba_reservada": {
+  "desde": "2025-11-01",
+  "hasta": "2025-12-31",
+  "filas": 3111,
+  "error_rel_max": 2.7497550232920174e-14,
+  "error_rel_p99": 1.2784119845505708e-14,
+  "base_pasajeros": 544.4
+ },
+ "importancia_media_abs_shap_prueba": [
+  {
+   "variable": "b8",
+   "media_abs_log": 0.3722
+  },
+  {
+   "variable": "tipo_dia",
+   "media_abs_log": 0.0958
+  },
+  {
+   "variable": "m4",
+   "media_abs_log": 0.0833
+  },
+  {
+   "variable": "hora",
+   "media_abs_log": 0.0604
+  },
+  {
+   "variable": "festivo",
+   "media_abs_log": 0.0526
+  },
+  {
+   "variable": "nivel_7_13",
+   "media_abs_log": 0.0478
+  },
+  {
+   "variable": "sd8",
+   "media_abs_log": 0.046
+  },
+  {
+   "variable": "nivel_7_34",
+   "media_abs_log": 0.0344
+  },
+  {
+   "variable": "vac_univ",
+   "media_abs_log": 0.0225
+  },
+  {
+   "variable": "mes",
+   "media_abs_log": 0.0204
+  },
+  {
+   "variable": "vac_escolar",
+   "media_abs_log": 0.0196
+  },
+  {
+   "variable": "ruta_cod",
+   "media_abs_log": 0.0161
+  },
+  {
+   "variable": "dia_lag7",
+   "media_abs_log": 0.015
+  },
+  {
+   "variable": "frac_vac_univ_ventana",
+   "media_abs_log": 0.0128
+  },
+  {
+   "variable": "frac_especial_ventana",
+   "media_abs_log": 0.012
+  },
+  {
+   "variable": "lag7",
+   "media_abs_log": 0.0105
+  },
+  {
+   "variable": "frac_vac_escolar_ventana",
+   "media_abs_log": 0.01
+  },
+  {
+   "variable": "vispera_festivo",
+   "media_abs_log": 0.0083
+  },
+  {
+   "variable": "dia_semana",
+   "media_abs_log": 0.008
+  },
+  {
+   "variable": "lag14",
+   "media_abs_log": 0.0068
+  },
+  {
+   "variable": "navidad",
+   "media_abs_log": 0.0058
+  },
+  {
+   "variable": "carnaval",
+   "media_abs_log": 0.0039
+  },
+  {
+   "variable": "semana_santa",
+   "media_abs_log": 0.0037
+  },
+  {
+   "variable": "vacaciones",
+   "media_abs_log": 0.0035
+  },
+  {
+   "variable": "nov_impacto",
+   "media_abs_log": 0.0031
+  },
+  {
+   "variable": "post_festivo",
+   "media_abs_log": 0.0031
+  },
+  {
+   "variable": "primero_enero",
+   "media_abs_log": 0.0025
+  },
+  {
+   "variable": "nov_sube",
+   "media_abs_log": 0.0
+  }
+ ],
+ "latencia_shap_por_fila_ms": {
+  "n": 200,
+  "p50": 2.92,
+  "p95": 3.25,
+  "max": 3.45
+ },
+ "latencia_predecir_ms": {
+  "n": 75,
+  "p50": 30.4,
+  "p95": 40.75,
+  "max": 230.19
+ },
+ "ejemplo_CL72_2025_11_01_04h_60min": {
+  "pasajeros": 179.37,
+  "p10": 119.54,
+  "p90": 212.13,
+  "p10_modelo": 123.96,
+  "p90_modelo": 207.72,
+  "ajuste_conformal": 0.024606,
+  "explicacion": [
+   "Hora 4:00 del sábado (sábado)",
+   "Misma hora hace 7 días: 204 pasajeros",
+   "Regla manual (media de 8 semanas): 153 pasajeros",
+   "Sin observaciones suficientes en las 2 h previas: factor intradía 1,00",
+   "Ventana de 60 min repartida con el perfil intrahorario (subidas por media hora, 2024) sobre 1 hora(s) de servicio",
+   "Banda P10-P90 calibrada (conformal de Mondrian por ruta × bloque, versión v2, validación 2025-09-01 a 2025-10-31 (3111 horas); la prueba reservada no se usa): ajuste 0,025 x pronóstico en la hora principal; banda del modelo 124-208",
+   "Explicación local (SHAP) de la hora 4:00: base 544 pasajeros; La media de 8 semanas (regla manual) (153) reduce ×0,44; La hora (4) reduce ×0,84; La media de 4 semanas (134) reduce ×0,87",
+   "Variables más influyentes del modelo: b8, tipo_dia, m4"
+  ],
+  "explicacion_local": {
+   "metodo": "shap_tree_exacto",
+   "hora": 4,
+   "fecha": "2025-11-01",
+   "base_pasajeros": 544.41,
+   "pronostico_hora": 179.37,
+   "factores": [
+    {
+     "variable": "b8",
+     "descripcion": "la media de 8 semanas (regla manual)",
+     "valor": 153.12,
+     "phi_log": -0.823396,
+     "factor_multiplicativo": 0.4389,
+     "efecto_pasajeros": -270.7
+    },
+    {
+     "variable": "hora",
+     "descripcion": "la hora",
+     "valor": 4.0,
+     "phi_log": -0.170238,
+     "factor_multiplicativo": 0.8435,
+     "efecto_pasajeros": -56.0
+    },
+    {
+     "variable": "m4",
+     "descripcion": "la media de 4 semanas",
+     "valor": 133.75,
+     "phi_log": -0.142577,
+     "factor_multiplicativo": 0.8671,
+     "efecto_pasajeros": -46.9
+    },
+    {
+     "variable": "nivel_7_34",
+     "descripcion": "el nivel de las 4 semanas anteriores",
+     "valor": 174.25,
+     "phi_log": -0.071586,
+     "factor_multiplicativo": 0.9309,
+     "efecto_pasajeros": -23.5
+    },
+    {
+     "variable": "nivel_7_13",
+     "descripcion": "el nivel de la semana anterior",
+     "valor": 198.57,
+     "phi_log": -0.069561,
+     "factor_multiplicativo": 0.9328,
+     "efecto_pasajeros": -22.9
+    }
+   ],
+   "factor_resto": 1.1819,
+   "efecto_resto_pasajeros": 54.9,
+   "error_reconstruccion_rel": 4.436767604296226e-15,
+   "ventana_ponderada": [
+    {
+     "variable": "b8",
+     "factor_multiplicativo": 0.4389
+    },
+    {
+     "variable": "hora",
+     "factor_multiplicativo": 0.8435
+    },
+    {
+     "variable": "m4",
+     "factor_multiplicativo": 0.8671
+    },
+    {
+     "variable": "nivel_7_34",
+     "factor_multiplicativo": 0.9309
+    },
+    {
+     "variable": "nivel_7_13",
+     "factor_multiplicativo": 0.9328
+    }
+   ],
+   "frase": "La media de 8 semanas (regla manual) (153) reduce ×0,44; La hora (4) reduce ×0,84; La media de 4 semanas (134) reduce ×0,87"
+  }
+ },
+ "reversion_modelos_anteriores": [
+  {
+   "model_id": "hgb_fv2_20250831_s42",
+   "estado": "activo",
+   "feature_version": "fv2-2026-11-09",
+   "pasajeros": 194.96,
+   "explicacion_local": "shap_tree_exacto"
+  },
+  {
+   "model_id": "hgb_fv1_20250831_s42",
+   "estado": "candidato",
+   "feature_version": "fv1-2026-11-08",
+   "pasajeros": 203.9,
+   "explicacion_local": "importancia_global_permutacion"
+  }
+ ],
+ "generado_en": "2026-11-16T15:14:17-05:00",
+ "segundos": 12.7
+}

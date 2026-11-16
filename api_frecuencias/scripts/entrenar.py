@@ -12,6 +12,8 @@ Uso:
 Escribe datos/modelos/<model_id>/modelo.joblib, manifest.json y actualiza datos/modelos/registro.json.
 Sin --compuerta-activo, el candidato queda activo si mejora el WAPE de la regla manual (B1) en la validación temporal.
 Con --compuerta-activo, además debe tener WAPE de validación <= el del modelo activo en la misma ventana y filas.
+Con --compuerta-activo y --sin-activar, la compuerta se mide y se registra, pero el candidato no se activa: queda
+para la sombra y la compuerta de la API (así se registró fv3, docs/evidencias/modelo/decision_fv3.md).
 Todo se decide con la validación: este script no mide la prueba reservada (su informe es scripts/evaluar_modelo.py).
 """
 
@@ -48,9 +50,9 @@ def verificar_reproducible(hasta: date, semilla: int, version: str) -> dict:
     return {"sha256_1": shas[0], "sha256_2": shas[1], "identico": shas[0] == shas[1]}
 
 
-def compuerta_activo(r: dict, hasta: date) -> dict:
+def compuerta_activo(r: dict, hasta: date, activar: bool = True) -> dict:
     """Compara el candidato con el modelo activo en la MISMA ventana de validación y mismas filas (la prueba
-    reservada no entra en la decisión ni se imprime)."""
+    reservada no entra en la decisión ni se imprime). Con activar=False solo registra la decisión."""
     activo = inferencia.modelo_activo()
     val = r["metricas"]["validacion"]
     desde_v, hasta_v = date.fromisoformat(val["desde"]), date.fromisoformat(val["hasta"])
@@ -66,8 +68,11 @@ def compuerta_activo(r: dict, hasta: date) -> dict:
         else "conservar el activo: " + ("no mejora a B1" if not supera_b1 else "empeora al activo en validación")
         if activo != r["model_id"] else "el candidato ya es el activo"
     )
-    if out["decision"].startswith("activar"):
+    out["activado"] = bool(activar and out["decision"].startswith("activar"))
+    if out["activado"]:
         inferencia.activar(r["model_id"], "entrenamiento (compuerta)", out["decision"])
+    elif out["decision"].startswith("activar"):
+        out["nota"] = "registrado sin activar (--sin-activar): pasa por la sombra y la compuerta de la API"
     out["ventana_validacion"] = f"{desde_v} a {hasta_v} ({hasta + timedelta(days=1)} en adelante)"
     return out
 
@@ -78,7 +83,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Entrena y registra el modelo de demanda")
     ap.add_argument("--hasta", type=date.fromisoformat, default=date(2025, 8, 31), help="último día de entrenamiento")
     ap.add_argument("--semilla", type=int, default=42)
-    ap.add_argument("--version", default=None, help="versión de variables (fv1 o fv2; por defecto FEATURE_VERSION)")
+    ap.add_argument("--version", default=None,
+                    help="versión de variables (fv1, fv2 o fv3; por defecto FEATURE_VERSION)")
     ap.add_argument("--sin-activar", action="store_true", help="registrar sin activar aunque mejore")
     ap.add_argument("--compuerta-activo", action="store_true", help="activar solo si no empeora al modelo activo")
     ap.add_argument("--verificar-reproducible", action="store_true", help="entrenar dos veces y comparar el sha256")
@@ -107,7 +113,7 @@ def main() -> None:
     print(r["decision"])
     resumen.update({"model_id": r["model_id"], "sha256": r["sha256"], "decision_entrenamiento": r["decision"]})
     if args.compuerta_activo:
-        resumen["compuerta"] = compuerta_activo(r, args.hasta)
+        resumen["compuerta"] = compuerta_activo(r, args.hasta, activar=not args.sin_activar)
         print("compuerta:", json.dumps(resumen["compuerta"], ensure_ascii=False))
     print(
         json.dumps(

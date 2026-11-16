@@ -46,6 +46,20 @@
       "creado_en": "2026-11-09T05:43:25+00:00",
       "wape_validacion": 13.554,
       "wape_prueba": 14.77
+    },
+    "hgb_fv3_20250831_s42": {
+      "model_id": "hgb_fv3_20250831_s42",
+      "tipo": "candidato",
+      "algoritmo": "hist_gradient_boosting",
+      "estado": "candidato",
+      "artefacto": "modelo.joblib",
+      "sha256": "3e97dca70fc146e5702b87c9ccba78993c7423184986d95ee8802ee763c61190",
+      "feature_version": "fv3-2026-11-16",
+      "data_cutoff": "2025-08-31",
+      "semilla": 42,
+      "supera_linea_base_validacion": true,
+      "creado_en": "2026-11-16T20:13:08+00:00",
+      "wape_validacion": 12.963
     }
   },
   "historial_activacion": [
@@ -65,7 +79,7 @@
     }
   ],
   "referencias_proyecto": {
-    "nota": "Modelos publicados por el proyecto (WAPE horario 2025, horizonte de una semana, validación mensual expansiva). Se registran como referencia: no se ejecutan dentro de la API.",
+    "nota": "Modelos del informe académico (WAPE horario de todo 2025 con horizonte de una semana y validación mensual expansiva). Se registran como referencia y no se ejecutan dentro de la API; no se comparan número a número con el modelo de la API (hgb_fv2_20250831_s42, un solo corte y prueba de nov-dic 2025), porque el protocolo es otro.",
     "modelos": [
       {
         "model_id": "ref_B1_regla_manual",
@@ -78,14 +92,14 @@
         "fuente": "experimentos/E1_lgbm_salida/README.md"
       },
       {
-        "model_id": "ref_E11_modelo_final",
+        "model_id": "ref_experimento11_lightgbm",
         "wape_pct": 13.94,
-        "fuente": "app/DATOS.md (C1); experimentos/E11_modelo_mejorado"
+        "fuente": "app/DATOS.md (C1); experimentos/E11_modelo_mejorado (experimento 11 del informe académico)"
       },
       {
-        "model_id": "ref_E12_hibrido",
+        "model_id": "ref_experimento12_hibrido",
         "wape_pct": 13.62,
-        "fuente": "app/DATOS.md (C1, C18); experimentos/E12_comparacion_modelos"
+        "fuente": "app/DATOS.md (C1, C18); experimentos/E12_comparacion_modelos (experimento 12 del informe académico)"
       }
     ]
   }

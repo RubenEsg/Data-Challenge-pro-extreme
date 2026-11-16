@@ -126,6 +126,8 @@ def solo_despacho(R):
 F_EVAL = "EntregaFinal/api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.json"
 F_CAL = "EntregaFinal/api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json"
 F_REG = "EntregaFinal/api_frecuencias/datos/modelos/registro.json"
+# el candidato registrado sin activar (fv3), evaluado con el mismo protocolo frente al activo
+F_CAND = "EntregaFinal/api_frecuencias/docs/evidencias/modelo/candidato_fv3/evaluacion_modelo.json"
 
 
 def modelo_producto(R):
@@ -144,11 +146,11 @@ def modelo_producto(R):
     v2, v1 = res["v2"]["global"], res["v1"]["global"]
     out = {
         "model_id": activo,
-        "modelo_anterior": pr["modelos"].get("fv1"),
+        "modelo_anterior": pr["modelos"].get("anterior"),
         "prueba": {"desde": pr["modelos"]["desde"], "hasta": pr["modelos"]["hasta"], "franjas": pr["global"]["cand"]["n"],
                    "dias": pr["bootstrap"]["dias"]},
         "wape_modelo": pr["global"]["cand"]["wape"], "wape_regla_manual": pr["global"]["b1"]["wape"],
-        "wape_modelo_anterior": pr["global"]["fv1"]["wape"],
+        "wape_modelo_anterior": pr["global"]["anterior"]["wape"],
         "ic95_modelo": pr["bootstrap"]["cand"]["ic95"], "ic95_diferencia": pr["bootstrap"]["cand_menos_b1"]["ic95"],
         "sesgo_pct": pr["global"]["cand"]["sesgo_pct"], "mae": pr["global"]["cand"]["mae"],
         "cobertura_v2": v2["cobertura_pct"], "cobertura_v1": v1["cobertura_pct"],
@@ -160,13 +162,43 @@ def modelo_producto(R):
         "model_id": {"archivo": F_REG, "clave": "activo"},
         "wape_modelo": {"archivo": F_EVAL, "clave": "prueba_reservada.global.cand.wape"},
         "wape_regla_manual": {"archivo": F_EVAL, "clave": "prueba_reservada.global.b1.wape"},
-        "wape_modelo_anterior": {"archivo": F_EVAL, "clave": "prueba_reservada.global.fv1.wape"},
+        "wape_modelo_anterior": {"archivo": F_EVAL, "clave": "prueba_reservada.global.anterior.wape"},
         "ic95_modelo": {"archivo": F_EVAL, "clave": "prueba_reservada.bootstrap.cand.ic95"},
         "ic95_diferencia": {"archivo": F_EVAL, "clave": "prueba_reservada.bootstrap.cand_menos_b1.ic95"},
         "cobertura_v2": {"archivo": F_CAL, "clave": "resultados.prueba.v2.global.cobertura_pct"},
         "cobertura_v1": {"archivo": F_CAL, "clave": "resultados.prueba.v1.global.cobertura_pct"},
     }
+    candidato = _candidato(R, reg, activo)
+    if candidato:
+        out["candidato"] = candidato
+        out["origen"]["candidato"] = {"archivo": F_CAND, "clave": "prueba_reservada y robustez (cand frente a anterior)"}
     return out
+
+
+def _candidato(R, reg, activo):
+    """El candidato registrado sin activar: su error con el mismo protocolo que el activo (los dos años congelados y
+    la prueba de nov–dic 2025) y su validación. None si no hay evaluación del candidato. Se detiene si la evaluación
+    no lo compara con el activo o si el candidato ya es el activo."""
+    f = R / F_CAND
+    if not f.is_file():
+        return None
+    ev = json.loads(f.read_text(encoding="utf-8"))
+    pr = ev["prueba_reservada"]
+    mid = pr["modelos"]["activo"]
+    if mid == activo or pr["modelos"].get("anterior") != activo:
+        sys.exit(f"{F_CAND} evalúa {mid} frente a {pr['modelos'].get('anterior')}, no un candidato frente al activo {activo}.")
+    rob = {a: {"wape": r["global"]["cand"]["wape"], "wape_activo": r["global"]["anterior"]["wape"],
+               "ic95_diferencia": r["bootstrap"]["cand_menos_anterior"]["ic95"],
+               "meses_mejor": r["meses_cand_mejor_que_anterior"], "meses": len(r["por_mes"]),
+               "entrenado_hasta": r["entrenado_hasta"]}
+           for a, r in ev["robustez"].items()}
+    return {"model_id": mid, "estado": reg["modelos"].get(mid, {}).get("estado"),
+            "version": pr["modelos"]["version_activo"],
+            "wape_validacion": reg["modelos"].get(mid, {}).get("wape_validacion"),
+            "wape_validacion_activo": reg["modelos"].get(activo, {}).get("wape_validacion"),
+            "wape_prueba": pr["global"]["cand"]["wape"], "ic95_prueba": pr["bootstrap"]["cand"]["ic95"],
+            "ic95_diferencia_prueba": pr["bootstrap"]["cand_menos_anterior"]["ic95"], "robustez": rob,
+            "decision": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/decision_fv3.md"}
 
 
 def solo_producto(R):
@@ -175,7 +207,8 @@ def solo_producto(R):
     p = DESTINO / "origen.json"
     org = json.loads(p.read_text(encoding="utf-8")) if p.is_file() else {"generador": "dash_app/preparar_datos.py", "archivos": {}}
     tam = (DESTINO / "modelo_producto.json").stat().st_size
-    org.setdefault("archivos", {})["modelo_producto.json"] = {"fuentes": [F_REG, F_EVAL, F_CAL], "filas": None, "bytes": tam}
+    org.setdefault("archivos", {})["modelo_producto.json"] = {"fuentes": [F_REG, F_EVAL, F_CAL, F_CAND], "filas": None,
+                                                              "bytes": tam}
     org["generado"] = datetime.now().strftime("%Y-%m-%d %H:%M")
     org["total_bytes"] = sum(v["bytes"] for v in org["archivos"].values())
     p.write_text(json.dumps(org, ensure_ascii=False, indent=1), encoding="utf-8")

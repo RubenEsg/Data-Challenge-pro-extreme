@@ -1,17 +1,17 @@
 # Historial de desarrollo
 
-Lista cronológica de **todos los commits** (241) del repositorio de desarrollo del equipo, desde el primero hasta `4717a19`, el commit al que apuntaba `main` al generarla. Responde al «historial» del entregable E03 (fila E03.3 de `MATRIZ_CUMPLIMIENTO.md`): el repositorio de entrega se arma con `empaquetar_entrega.py` a partir de `EntregaFinal/` y solo guarda sus sincronizaciones.
+Lista cronológica de **todos los commits** (243) del repositorio de desarrollo del equipo, desde el primero hasta `e8d4c2c`, el commit al que apuntaba `main` al generarla. Responde al «historial» del entregable E03 (fila E03.3 de `MATRIZ_CUMPLIMIENTO.md`): el repositorio de entrega se arma con `empaquetar_entrega.py` a partir de `EntregaFinal/` y solo guarda sus sincronizaciones.
 
 - **De dónde sale.** `historial_desarrollo.py` lee `git log` del repositorio de desarrollo, sin red, y escribe este archivo. Por cada commit publica la fecha y la hora del autor, el hash corto, el asunto, cuántos archivos y líneas cambia (`git log --numstat -M`) y cuántos de esos archivos están en `EntregaFinal/`, la carpeta que se convierte en el repositorio de entrega.
 - **Qué no publica.** Correos, nombres de autor (todo el historial es de un solo contribuyente), cuerpos de los mensajes ni rutas de archivos. La revisión automática de los asuntos (claves, contraseñas, tokens, credenciales en URL, cadenas largas con aspecto aleatorio) no omitió ninguno.
-- **Cómo verificarlo.** Los hashes son los del repositorio de desarrollo del equipo, que se muestra a quien evalúe si lo pide. Ahí, `git log --reverse --format="%h %aI %s" main` da la misma lista y `git show --numstat <hash>` las cifras de cada commit. Cada hash de git depende de todo lo anterior, así que el hash completo del último commit fija la cadena entera: `4717a19beec083dd0b8afdf1522870ec279ea9c8`. El primer commit es `6f885e83cae939c90cfc2796c13cc433dfce643a`.
-- **Generado** el 14 de noviembre de 2026 a las 17:59 (−05:00), desde `main` (`4717a19`). Al integrar commits nuevos se vuelve a correr el script.
+- **Cómo verificarlo.** Los hashes son los del repositorio de desarrollo del equipo, que se muestra a quien evalúe si lo pide. Ahí, `git log --reverse --format="%h %aI %s" main` da la misma lista y `git show --numstat <hash>` las cifras de cada commit. Cada hash de git depende de todo lo anterior, así que el hash completo del último commit fija la cadena entera: `e8d4c2c19663ed25e69a94e39bf7aada5b426195`. El primer commit es `6f885e83cae939c90cfc2796c13cc433dfce643a`.
+- **Generado** el 16 de noviembre de 2026 a las 15:59 (−05:00), desde `main` (`e8d4c2c`). Al integrar commits nuevos se vuelve a correr el script.
 
 ## Resumen
 
 | Commits | Días con commits | Primer commit | Último commit | Tocan `EntregaFinal/` | Archivos cambiados (suma) | Líneas agregadas / quitadas |
 |---|---|---|---|---|---|---|
-| 241 | 17 | 2026-10-07 | 2026-11-14 | 202 | 6.370 | +1.343.670 / −114.581 |
+| 243 | 18 | 2026-10-07 | 2026-11-16 | 204 | 6.436 | +1.352.378 / −114.999 |
 
 Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombrado cuenta una vez. Todas las horas tienen el mismo huso (−05:00). 13 commit(s) de fusión no traen cifras: git no muestra su diferencia.
 
@@ -312,7 +312,7 @@ Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombra
 | 23:46 | `b17cc6b` | Documentos: la política no encola un reentrenamiento que no se puede entrenar y los guiones de réplicas corren sobre una copia temporal | 2 | +7 / −2 | sí (2) |
 | 23:48 | `22733b0` | Documentos: E02 y LEEME dicen el contraste por segmento con filas reales y la medición vigente de la capa de segmentos | 2 | +4 / −4 | sí (2) |
 
-## 2026-11-14 · sábado · 24 commits
+## 2026-11-14 · sábado · 25 commits
 
 | Hora | Commit | Asunto | Archivos | Líneas | En `EntregaFinal/` |
 |---|---|---|---|---|---|
@@ -340,3 +340,10 @@ Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombra
 | 14:44 | `96ce06d` | Tablero y app: lo que se juega en pasajes se cuenta como la decisión que se propone (primero el piloto; el plan solo se aplica si paga), sin «peor caso» ni «mejor caso» y diciendo que no hay base para una probabilidad | 28 (5 binarios) | +989 / −177 | sí (26) |
 | 14:45 | `c590b64` | Historial de desarrollo al día con la tarjeta de la decisión en tres pasos | 1 | +7 / −5 | sí (1) |
 | 17:58 | `4717a19` | El tablero como entrada única («Anexos» reúne el material de apoyo) y el simulador de ahorro con el plan recomendado y el saldo siempre en sus dos casos | 17 (1 binario) | +180 / −167 | sí (15) |
+| 17:59 | `603bed3` | Historial de desarrollo al día con la entrada única y el simulador de ahorro | 1 | +7 / −5 | sí (1) |
+
+## 2026-11-16 · lunes · 1 commit
+
+| Hora | Commit | Asunto | Archivos | Líneas | En `EntregaFinal/` |
+|---|---|---|---|---|---|
+| 15:58 | `e8d4c2c` | Modelo candidato fv3 con el calendario escolar y universitario, registrado sin activar y con su evidencia | 65 (14 binarios) | +8.701 / −413 | sí (64) |

@@ -1,0 +1,29 @@
+tipo,inicio,fin,periodo,fuente,fuente_url,confianza
+escolar_receso,2023-01-01,2023-01-29,2023 receso inicio de año,Resolución 06040 del 25-10-2022 (Secretaría Distrital de Educación),https://www.mineducacion.gov.co/1780/articles-413526_recurso_08.pdf,alta
+escolar_receso,2023-04-03,2023-04-09,2023 receso Semana Santa,Resolución 06040 del 25-10-2022,https://www.mineducacion.gov.co/1780/articles-413526_recurso_08.pdf,alta
+escolar_receso,2023-06-26,2023-07-16,2023 vacaciones mitad de año,Resolución 06040 del 25-10-2022,https://www.mineducacion.gov.co/1780/articles-413526_recurso_08.pdf,alta
+escolar_receso,2023-10-09,2023-10-15,2023 receso de octubre,Resolución 06040 del 25-10-2022,https://www.mineducacion.gov.co/1780/articles-413526_recurso_08.pdf,alta
+escolar_receso,2023-12-11,2023-12-31,2023 vacaciones fin de año,Resolución 06040 del 25-10-2022,https://www.mineducacion.gov.co/1780/articles-413526_recurso_08.pdf,alta
+escolar_receso,2024-01-01,2024-01-28,2024 receso inicio de año,Resolución 06182 del 30-10-2023,https://www.mineducacion.gov.co/1780/articles-419296_recurso_11.pdf,alta
+escolar_receso,2024-03-25,2024-03-31,2024 receso Semana Santa,Resolución 06182 del 30-10-2023,https://www.mineducacion.gov.co/1780/articles-419296_recurso_11.pdf,alta
+escolar_receso,2024-06-24,2024-07-14,2024 vacaciones mitad de año,Resolución 06182 del 30-10-2023,https://www.mineducacion.gov.co/1780/articles-419296_recurso_11.pdf,alta
+escolar_receso,2024-10-07,2024-10-13,2024 receso de octubre,Resolución 06182 del 30-10-2023,https://www.mineducacion.gov.co/1780/articles-419296_recurso_11.pdf,alta
+escolar_receso,2024-12-09,2024-12-29,2024 vacaciones fin de año,Resolución 06182 del 30-10-2023,https://www.mineducacion.gov.co/1780/articles-419296_recurso_11.pdf,alta
+escolar_receso,2024-12-30,2025-01-26,2025 receso inicio de año,Resolución 07036 del 28-10-2024,https://www.mineducacion.gov.co/1780/articles-423172_recurso_08.pdf,alta
+escolar_receso,2025-04-14,2025-04-20,2025 receso Semana Santa,Resolución 07036 del 28-10-2024,https://www.mineducacion.gov.co/1780/articles-423172_recurso_08.pdf,alta
+escolar_receso,2025-06-23,2025-07-13,2025 vacaciones mitad de año,Resolución 07036 del 28-10-2024,https://www.mineducacion.gov.co/1780/articles-423172_recurso_08.pdf,alta
+escolar_receso,2025-10-06,2025-10-12,2025 receso de octubre,Resolución 07036 del 28-10-2024,https://www.mineducacion.gov.co/1780/articles-423172_recurso_08.pdf,alta
+escolar_receso,2025-12-08,2025-12-31,2025 vacaciones fin de año,Resolución 07036 del 28-10-2024,https://www.mineducacion.gov.co/1780/articles-423172_recurso_08.pdf,media
+escolar_receso,2025-12-29,2026-01-25,receso inicio de año 2026,Resolución 07248 del 24-10-2025 (Secretaría Distrital de Educación de Barranquilla),https://www.mineducacion.gov.co/1780/articles-426215_recurso_03.pdf,alta
+escolar_receso,2026-03-30,2026-04-04,receso Semana Santa 2026,Resolución 07248 del 24-10-2025,https://www.mineducacion.gov.co/1780/articles-426215_recurso_03.pdf,alta
+escolar_receso,2026-06-22,2026-07-12,vacaciones mitad de año 2026,Resolución 07248 del 24-10-2025,https://www.mineducacion.gov.co/1780/articles-426215_recurso_03.pdf,alta
+escolar_receso,2026-10-05,2026-10-11,receso de octubre 2026,Resolución 07248 del 24-10-2025,https://www.mineducacion.gov.co/1780/articles-426215_recurso_03.pdf,alta
+escolar_receso,2026-12-07,2026-12-27,vacaciones fin de año 2026,Resolución 07248 del 24-10-2025,https://www.mineducacion.gov.co/1780/articles-426215_recurso_03.pdf,alta
+universitario_clases,2023-01-23,2023-05-27,2023-1,mediana de inicio y fin de clases de: Universidad del Norte,https://www.uninorte.edu.co/web/admisiones-pregrado/calendarios,baja
+universitario_clases,2023-07-31,2023-11-25,2023-2,mediana de inicio y fin de clases de: Universidad del Norte,https://www.uninorte.edu.co/web/admisiones-pregrado/calendarios,baja
+universitario_clases,2024-02-01,2024-05-25,2024-1,mediana de inicio y fin de clases de: Universidad de la Costa (CUC); Universidad del Atlántico; Universidad del Norte,https://cuc.edu.co/wp-content/uploads/2024/08/AC-No.-CD-314-CALENDARIO-ACADEMICO-2024.pdf https://www.uniatlantico.edu.co/wp-content/uploads/2023/12/37-Propuesta-de-borrador-finalizada-de-cupos-y-calendario-CORREGIDO-20-12-23.pdf https://www.uninorte.edu.co/web/admisiones-pregrado/calendarios,baja
+universitario_clases,2024-07-29,2024-11-27,2024-2,mediana de inicio y fin de clases de: Universidad Simón Bolívar; Universidad de la Costa (CUC); Universidad del Norte,https://cuc.edu.co/wp-content/uploads/2024/08/AC-No.-CD-314-CALENDARIO-ACADEMICO-2024.pdf https://exa.unne.edu.ar/cooperacion%20internacional/docs/Universidad%20Simon%20Bolivar%202024%202.pdf https://www.uninorte.edu.co/web/admisiones-pregrado/calendarios,baja
+universitario_clases,2025-02-03,2025-05-30,2025-1,mediana de inicio y fin de clases de: Universidad Libre (Barranquilla); Universidad del Atlántico; Universidad del Norte,https://portal.unilibre.edu.co/barranquilla/wp-content/uploads/sites/10/2025/01/CALENDARIO-DERECHO-BARRANQUILLA.pdf https://www.uniatlantico.edu.co/wp-content/uploads/2024/10/RESOLUCION-CALENDARIO-ACADEMICO-2025-OCT-15-DE-2024.pdf https://www.uninorte.edu.co/web/admisiones-pregrado/calendarios,baja
+universitario_clases,2025-08-01,2025-11-22,2025-2,mediana de inicio y fin de clases de: Universidad del Atlántico; Universidad del Norte,https://www.uniatlantico.edu.co/wp-content/uploads/2024/10/RESOLUCION-CALENDARIO-ACADEMICO-2025-OCT-15-DE-2024.pdf https://www.uninorte.edu.co/web/admisiones-pregrado/calendarios,baja
+universitario_clases,2026-02-02,2026-05-30,semestre 2026-1,supuesto E11: patrón del consenso 2023-2025 (inicio entre el 23-01 y el 03-02; fin a finales de mayo),,baja
+universitario_clases,2026-08-03,2026-11-28,semestre 2026-2,supuesto E11: patrón del consenso 2023-2025,,baja

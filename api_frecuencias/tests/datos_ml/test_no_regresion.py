@@ -100,8 +100,11 @@ def test_el_entrenamiento_del_activo_no_guarda_metricas_de_la_prueba(manifiesto_
 
 
 def test_validacion_no_empeora_entre_versiones_registradas(registro):
-    """Ningún modelo activado tiene peor WAPE de validación que el candidato anterior de la misma fecha de corte."""
+    """Ningún modelo activado tiene peor WAPE de validación que los candidatos ANTERIORES a él de la misma fecha de
+    corte. Un candidato posterior y mejor (fv3, registrado en sombra) no lo incumple: su activación es de la
+    gobernanza."""
     activo = registro["modelos"][registro["activo"]]
     mismos = [m for m in registro["modelos"].values() if m.get("tipo") == "candidato"
-              and m.get("data_cutoff") == activo.get("data_cutoff") and m.get("wape_validacion") is not None]
+              and m.get("data_cutoff") == activo.get("data_cutoff") and m.get("wape_validacion") is not None
+              and str(m.get("creado_en", "")) <= str(activo.get("creado_en", ""))]
     assert activo["wape_validacion"] <= min(m["wape_validacion"] for m in mismos) + 1e-9

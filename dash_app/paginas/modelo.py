@@ -67,6 +67,43 @@ def _partir(texto, largo=26):
 
 
 # --- El modelo del producto ---------------------------------------------------------------------------------------------
+def _candidato(P):
+    """Tarjeta del candidato registrado sin activar (fv3): su error con el mismo protocolo que el activo, en los dos
+    años congelados y en la prueba de nov–dic 2025, y por qué no está activo. None si no hay candidato evaluado."""
+    C = (P or {}).get("candidato")
+    if not C:
+        return None
+    fichas = []
+    for anio in ("2025", "2024"):
+        r = C["robustez"].get(anio)
+        if not r:
+            continue
+        dif, ic = r["wape"] - r["wape_activo"], r["ic95_diferencia"]
+        fichas.append(ui.cifra(
+            f"Error en {anio}, entrenado hasta el {ui.fecha_corta(r['entrenado_hasta'])} de {r['entrenado_hasta'][:4]}",
+            num(r["wape"], 2), "%",
+            tono="bien" if ic[1] < 0 else None, flecha=dif,
+            variacion=ui.pegar(f"{con_signo(dif, 2)} puntos frente al activo ({num(r['wape_activo'], 2)} %)"),
+            nota=ui.pegar(f"Intervalo del 95 % de la diferencia: {con_signo(ic[0], 2)} a {con_signo(ic[1], 2)} puntos; "
+                          f"mejora en {num(r['meses_mejor'])} de {num(r['meses'])} meses.")))
+    icp = C["ic95_prueba"]
+    fichas.append(ui.cifra("Error en la prueba de nov–dic 2025", num(C["wape_prueba"], 2), "%",
+                           nota=ui.pegar(f"Intervalo del 95 %: {num(icp[0], 2)} a {num(icp[1], 2)} %; el activo, "
+                                         f"{num(P['wape_modelo'], 2)} %. Es informativa, como la del activo.")))
+    cuerpo = [html.Div([ui.chip("Candidato, sin activar"), ui.chip_valor("model_id:", C["model_id"])], className="chips"),
+              ui.parrafo("El mismo modelo con el calendario escolar y universitario: los recesos de los colegios oficiales "
+                         "de Barranquilla, los periodos de clases de las universidades y cuánto de eso hay en las semanas que "
+                         "toma de referencia. Donde más mejora es en los recesos escolares."),
+              ui.cifras(fichas),
+              ui.aviso(["No está activo: activarlo cambiaría los pronósticos con los que se midieron el ciclo diario, las "
+                        "alertas y las respuestas de esta entrega.",
+                        "La API lo pone primero en sombra y su compuerta decide; para volver atrás basta con reactivar el "
+                        "modelo de hoy."], None, "Por qué no está activo")]
+    return ui.tarjeta(cuerpo, titulo=f"Candidato: {C['model_id']}",
+                      subtitulo="Un modelo mejor, registrado y evaluado con el mismo protocolo, a la espera de la sombra.",
+                      fuentes=D.fuentes_producto("candidato"), id="mo-candidato")
+
+
 def _producto(P):
     """Tarjeta del modelo que ejecuta la API: error en la prueba de nov–dic 2025 frente a la regla manual, intervalo
     bootstrap, cobertura de la banda calibrada y la declaración honesta del uso de esa prueba."""
@@ -302,7 +339,9 @@ def layout(**_):
                      subtitulo="La importancia global que calcula la API para el modelo que ejecuta.", fuentes=[FUENTE_IMP_API])
     return ui.pantalla([
         ui.arriba(cabecera),
-        ui.seccion("El modelo del producto", ui.rejilla([_producto(P), imp], "2-1"),
-                   subtitulo="El que la API usa para pronosticar, recomendar y alertar.", id="mo-del-producto"),
+        ui.seccion("El modelo del producto", [ui.rejilla([_producto(P), imp], "2-1")]
+                   + ([_candidato(P)] if _candidato(P) else []),
+                   subtitulo="El que la API usa para pronosticar, recomendar y alertar, y el candidato que espera la sombra.",
+                   id="mo-del-producto"),
         _laboratorio(P),
     ])

@@ -34,6 +34,19 @@ SHAP TreeExplainer es exacta y el modelo se puede exportar a ONNX.
   FESTIVO_NACIONAL de estacionalidades_anio; es calendario, no usa pasajeros).
 Se descartaron FIESTA_ATLANTICO (empeora el WAPE) y puente (no aporta): ver docs/evidencias/modelo.
 
+fv3 (fv3-2026-11-16) = fv2 + calendario académico (datos/calendario_academico.csv, con la fuente de cada periodo; es
+calendario publicado con antelación, no usa pasajeros), las variables de calendario de E11:
+- vac_escolar: el día cae en un receso de los colegios oficiales de Barranquilla.
+- vac_univ: el día cae fuera de los periodos de clases universitarias (mediana de inicio y fin entre universidades).
+- frac_vac_escolar_ventana, frac_vac_univ_ventana, frac_especial_ventana: fracción de los 4 días de referencia de los
+  rezagos (D-7, D-14, D-21 y D-28) que eran receso escolar, vacaciones universitarias o festivo / Carnaval / Semana
+  Santa. Le dicen al modelo si la base de las semanas anteriores viene de un periodo distinto al del día objetivo
+  (el regreso a clases, el inicio de vacaciones).
+Fuera de los años que cubre el calendario las dos primeras y sus fracciones quedan como dato faltante (el HGB los
+admite); hay que añadir las filas del año siguiente a calendario_academico.csv. Se eligió con la validación y los
+backtests congelados de 2024 y 2025 (docs/evidencias/modelo/decision_fv3.md). Los pesos a días atípicos de E11 no
+aportaron sobre los calendarios y no se usan.
+
 construir_variables() arma el superconjunto de columnas; matriz_x(tabla, version) elige las de cada versión, de modo
 que un modelo fv1 sigue cargando y prediciendo con el código actual (reversión, RF-019).
 """
@@ -47,13 +60,17 @@ import pandas as pd
 
 FV1 = "fv1-2026-11-08"
 FV2 = "fv2-2026-11-09"
-FEATURE_VERSION = FV2  # versión con la que se entrenan los modelos nuevos
+FV3 = "fv3-2026-11-16"
+FEATURE_VERSION = FV3  # versión con la que se entrenan los modelos nuevos
 CODIGO_RUTA = {"SILENCIO": 0, "CRA 54": 1, "CL 72": 2}
 CALENDARIO = ["tipo_dia", "festivo", "carnaval", "semana_santa", "vacaciones", "navidad", "primero_enero"]
 REZAGOS = ["lag7", "lag14", "b8", "m4", "sd8", "nivel_7_13", "nivel_7_34", "dia_lag7"]
 CONTEXTO = ["nov_impacto", "nov_sube", "vispera_festivo", "post_festivo"]
 COLUMNAS_FV1 = ["ruta_cod", "hora", "dia_semana", "mes"] + CALENDARIO + REZAGOS
 COLUMNAS_FV2 = COLUMNAS_FV1 + CONTEXTO
+ACADEMICO = ["vac_escolar", "vac_univ", "frac_vac_escolar_ventana", "frac_vac_univ_ventana", "frac_especial_ventana"]
+COLUMNAS_FV3 = COLUMNAS_FV2 + ACADEMICO
+DIAS_REFERENCIA = (7, 14, 21, 28)  # días de referencia de la ventana de rezagos (las 4 mismas semanas)
 VERSIONES: dict[str, dict] = {
     FV1: {
         "columnas": COLUMNAS_FV1,
@@ -64,6 +81,11 @@ VERSIONES: dict[str, dict] = {
         "columnas": COLUMNAS_FV2,
         "categoricas": [],
         "descripcion": "fv1 + novedades viales y víspera/día posterior a festivo; ruta_cod ordinal (SHAP exacto)",
+    },
+    FV3: {
+        "columnas": COLUMNAS_FV3,
+        "categoricas": [],
+        "descripcion": "fv2 + calendario escolar y universitario y su peso en la ventana de rezagos",
     },
 }
 COLUMNAS_MODELO = VERSIONES[FEATURE_VERSION]["columnas"]
@@ -133,13 +155,66 @@ def _agregar_contexto(largo: pd.DataFrame, s: pd.DataFrame, contexto: pd.DataFra
     return largo
 
 
+def _academico_por_defecto() -> pd.DataFrame | None:
+    try:
+        from . import datos
+
+        return datos.calendario_academico()
+    except Exception:  # noqa: BLE001 - sin calendario académico las variables fv3 quedan como dato faltante
+        return None
+
+
+def dias_academicos(calendario: pd.DataFrame | None, fechas: pd.DatetimeIndex) -> pd.DataFrame:
+    """vac_escolar y vac_univ de cada fecha de `fechas` (índice del resultado). Cada tipo del calendario cubre del 1 de
+    enero del año de su primer periodo al 31 de diciembre del año del último; fuera de eso el valor es NaN (no se
+    sabe)."""
+    out = pd.DataFrame(np.nan, index=fechas, columns=["vac_escolar", "vac_univ"])
+    if calendario is None or not len(calendario):
+        return out
+    c = calendario.copy()
+    c["inicio"], c["fin"] = pd.to_datetime(c["inicio"]), pd.to_datetime(c["fin"])
+    # (tipo, columna, valor dentro del periodo, valor fuera): un receso escolar es vacación; un periodo de clases no
+    for tipo, col, dentro, fuera in (("escolar_receso", "vac_escolar", 1.0, 0.0),
+                                     ("universitario_clases", "vac_univ", 0.0, 1.0)):
+        g = c[c["tipo"] == tipo]
+        if not len(g):
+            continue
+        desde = pd.Timestamp(year=int(g["inicio"].min().year), month=1, day=1)
+        hasta = pd.Timestamp(year=int(g["fin"].max().year), month=12, day=31)
+        v = np.where((fechas >= desde) & (fechas <= hasta), fuera, np.nan)
+        for r in g.itertuples():
+            v[(fechas >= r.inicio) & (fechas <= r.fin)] = dentro
+        out[col] = v
+    return out
+
+
+def _agregar_academico(largo: pd.DataFrame, calendario: pd.DataFrame | None) -> pd.DataFrame:
+    """Variables fv3: vac_escolar, vac_univ y la fracción de los 4 días de referencia de los rezagos (D-7, D-14, D-21,
+    D-28) en receso escolar, en vacaciones universitarias y especiales (festivo, Carnaval o Semana Santa). Un día de
+    referencia anterior a la serie o fuera del calendario deja la fracción en NaN. `largo` trae fecha como Timestamp y
+    el calendario de la serie ya completo."""
+    fechas = pd.DatetimeIndex(largo["fecha"])
+    todas = pd.date_range(fechas.min() - timedelta(days=max(DIAS_REFERENCIA)), fechas.max(), freq="D")
+    dias = dias_academicos(calendario, todas)
+    especial = (largo[["festivo", "carnaval", "semana_santa"]].max(axis=1) > 0).groupby(fechas).max()
+    dias["especial"] = especial.astype(float).reindex(todas)
+    for col, nuevo in (("vac_escolar", "frac_vac_escolar_ventana"), ("vac_univ", "frac_vac_univ_ventana"),
+                       ("especial", "frac_especial_ventana")):
+        dias[nuevo] = sum(dias[col].shift(k) for k in DIAS_REFERENCIA) / len(DIAS_REFERENCIA)
+    for c in ACADEMICO:
+        largo[c] = dias[c].reindex(fechas).to_numpy()
+    return largo
+
+
 def construir_variables(
-    serie: pd.DataFrame, dias_extra: int = DIAS_EXTRA, contexto: pd.DataFrame | None = None
+    serie: pd.DataFrame, dias_extra: int = DIAS_EXTRA, contexto: pd.DataFrame | None = None,
+    academico: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Tabla ruta x fecha x hora con el objetivo (pasajeros, puede faltar) y las variables de TODAS las versiones.
 
     `serie` necesita ruta, fecha, hora, pasajeros; si trae `excluido`, esas horas cuentan como dato faltante.
     `contexto` (fecha, hora, nov_impacto, nov_sube, festivo_oficial); por defecto datos.contexto_operacional().
+    `academico` (tipo, inicio, fin: el calendario de datos.calendario_academico(), que es el valor por defecto).
     Agrega `dias_extra` días después del último dato para poder pronosticar la semana siguiente.
     """
     s = serie.copy()
@@ -189,6 +264,7 @@ def construir_variables(
     largo["mes"] = largo["fecha"].dt.month.astype(int)
     for c in CALENDARIO:
         largo[c] = largo[c].astype(int)
+    largo = _agregar_academico(largo, _academico_por_defecto() if academico is None else academico)
     largo["fecha"] = largo["fecha"].dt.date
     return largo[["ruta", "fecha", "hora", "pasajeros"] + [c for c in TODAS if c not in ("hora",)]]
 

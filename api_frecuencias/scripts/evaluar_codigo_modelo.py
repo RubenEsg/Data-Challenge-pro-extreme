@@ -34,6 +34,13 @@ HISTORIAL_PRUEBA = (
     "(docs/evidencias/modelo/decision_fv2.md). Desde entonces entrenar() y la compuerta solo miden la validación; el "
     "informe de la prueba está en la clave «evaluacion» (scripts/evaluar_modelo.py)."
 )
+# modelos entrenados cuando entrenar() ya no medía la prueba: se consultó al comparar con el activo anterior
+HISTORIAL_PRUEBA_COMPARACION = (
+    "inferencia.entrenar() no midió la prueba reservada ({prueba}); sí se consultó al comparar este modelo con el "
+    "activo anterior (docs/evidencias/modelo/decision_{version}.md), así que es un reporte informativo, no una muestra "
+    "nunca vista. La elección se hizo con la validación y los backtests congelados de 2024 y 2025; el informe de la "
+    "prueba está en la clave «evaluacion» (scripts/evaluar_modelo.py)."
+)
 
 
 def _git(*args: str) -> str | None:
@@ -112,7 +119,9 @@ def actualizar(carpeta: Path, escribir: bool) -> dict:
     (man.get("nowcast") or {}).pop("prueba", None)
     if prueba is not None or "historial_prueba_reservada" not in man:
         rango = (man.get("particion") or {}).get("prueba") or "nov-dic"
-        man["historial_prueba_reservada"] = HISTORIAL_PRUEBA.format(prueba=rango)
+        plantilla = HISTORIAL_PRUEBA if prueba is not None else HISTORIAL_PRUEBA_COMPARACION
+        man["historial_prueba_reservada"] = plantilla.format(
+            prueba=rango, version=str(man.get("feature_version") or "").split("-")[0])
     man.setdefault("nota_prueba_reservada", "la prueba reservada no se evalúa al entrenar ni en la compuerta: su "
                                             "informe lo escribe scripts/evaluar_modelo.py en la clave «evaluacion»")
     if claves_antes != (man["sha256"], json.dumps(man.get("onnx"), sort_keys=True),
@@ -126,13 +135,93 @@ def actualizar(carpeta: Path, escribir: bool) -> dict:
             "protegidos_sin_cambio": sorted(antes), "escrito": escribir}
 
 
+def texto_de_entrenamiento(nombre: str, sha_sin_doc: str) -> tuple[str, str] | None:
+    """(commit, texto) más reciente de git en el que `nombre`, sin el docstring del módulo, tiene ese SHA-256 (LF)."""
+    log = _git("log", "--format=%H", "--", ":/" + RUTA_GIT + nombre) or ""
+    for commit in log.split():   # del más nuevo al más antiguo
+        texto = _git("show", f"{commit}:{RUTA_GIT}{nombre}")
+        if texto is not None and inferencia.sha256_codigo(inferencia.sin_docstring_de_modulo(texto)) == sha_sin_doc:
+            return commit, texto
+    return None
+
+
+def compatibilidad(carpeta: Path, escribir: bool) -> dict:
+    """Si variables.py cambió después de entrenar el modelo (por ejemplo, al registrar una versión de variables nueva),
+    comprueba que el código actual da EXACTAMENTE las mismas variables y los mismos pronósticos (punto, P10 y P90) que
+    el código con que se entrenó, tomado de git, en toda la serie empaquetada. Con --escribir y diferencia 0 lo deja en
+    manifest «compatibilidad_codigo» (no toca el artefacto, los ONNX ni la calibración)."""
+    import importlib.util
+    import tempfile
+    from datetime import UTC, datetime
+
+    import numpy as np
+    import pandas as pd
+
+    from app.servicios import variables
+
+    ruta_man = carpeta / inferencia.ARCHIVO_MANIFIESTO
+    man = json.loads(ruta_man.read_text(encoding="utf-8"))
+    antes = _hashes_protegidos(carpeta, man)
+    sha_ent = (man.get("codigo_sin_docstring_sha256") or {}).get("variables.py")
+    actual = sin_doc_actual("variables.py")
+    if sha_ent == actual:
+        return {"model_id": man["model_id"], "compatibilidad": "variables.py es el del entrenamiento"}
+    ref = texto_de_entrenamiento("variables.py", sha_ent) if sha_ent else None
+    if ref is None:
+        raise SystemExit(f"{man['model_id']}: no está en git la versión de variables.py con que se entrenó")
+    commit, texto = ref
+    with tempfile.TemporaryDirectory() as d:
+        archivo = Path(d) / "variables_entrenamiento.py"
+        archivo.write_text(texto, encoding="utf-8")
+        # dentro del paquete app.servicios, para que sus importaciones relativas (datos) sean las mismas
+        spec = importlib.util.spec_from_file_location("app.servicios._variables_entrenamiento", archivo)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+    serie = datos.demanda_horaria()
+    cols, clave = list(man["variables"]), ["ruta", "fecha", "hora"]
+    a = mod.construir_variables(serie).set_index(clave, drop=False)[cols].sort_index()
+    b = variables.construir_variables(serie).set_index(clave, drop=False)[cols].sort_index()
+    xa, xb = a.to_numpy(float), b.to_numpy(float)
+    mismos_nan = bool(a.index.equals(b.index) and (np.isnan(xa) == np.isnan(xb)).all())
+    dif = np.abs(np.nan_to_num(xa) - np.nan_to_num(xb))
+    modelo = inferencia.cargar(man["model_id"], carpeta.parent)
+    pred = {p: float(np.abs(modelo[p].predict(pd.DataFrame(xa, columns=cols))
+                            - modelo[p].predict(pd.DataFrame(xb, columns=cols))).max())
+            for p in ("punto", "p10", "p90")}
+    res = {
+        "variables_py_sin_docstring_sha256": actual,
+        # el blob de git es el contenido mismo (igual en cualquier clon que lo tenga: git cat-file -p <blob>)
+        "referencia": {"blob_git": (_git("rev-parse", f"{commit}:{RUTA_GIT}variables.py") or "").strip(),
+                       "variables_py_sin_docstring_sha256": sha_ent},
+        "filas": len(a), "columnas": len(cols), "mismas_filas_y_mismos_nan": mismos_nan,
+        "max_dif_variables": float(dif.max()) if dif.size else 0.0, "max_dif_pronostico": pred,
+        "verificado_en": datetime.now(UTC).isoformat(timespec="seconds"),
+        "nota": ("variables.py cambió después de entrenar este modelo (se registró otra versión de variables); con "
+                 "sus columnas, el código actual da las mismas variables y los mismos pronósticos que el del "
+                 "entrenamiento"),
+    }
+    ok = mismos_nan and res["max_dif_variables"] == 0 and all(v == 0 for v in pred.values())
+    if escribir and ok:
+        man["compatibilidad_codigo"] = res
+        ruta_man.write_text(json.dumps(man, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    if _hashes_protegidos(carpeta, man) != antes:
+        raise RuntimeError("cambió un archivo protegido (artefacto, ONNX o calibración)")
+    return {"model_id": man["model_id"], "compatible": ok, "escrito": bool(escribir and ok), **res}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--model-id", default=None)
     ap.add_argument("--escribir", action="store_true", help="escribe los manifest.json (sin esto, solo muestra)")
+    ap.add_argument("--compatibilidad", action="store_true",
+                    help="solo comprueba que el variables.py actual da las mismas variables y pronósticos que el del "
+                         "entrenamiento (manifest «compatibilidad_codigo»)")
     a = ap.parse_args()
     raiz = datos.carpeta_modelos()
     carpetas = [raiz / a.model_id] if a.model_id else sorted(p.parent for p in raiz.glob("*/manifest.json"))
+    if a.compatibilidad:
+        print(json.dumps([compatibilidad(c, a.escribir) for c in carpetas], ensure_ascii=False, indent=2))
+        return
     salida = [actualizar(c, a.escribir) for c in carpetas]
     print(json.dumps(salida, ensure_ascii=False, indent=2))
 

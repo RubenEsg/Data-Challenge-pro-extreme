@@ -1,28 +1,28 @@
 # Evaluación del modelo de demanda
 
-Generado 2026-11-09T05:06:42-05:00 con `scripts/evaluar_modelo.py` (mismo protocolo y mismas filas para todos).
+Generado 2026-11-16T14:44:27-05:00 con `scripts/evaluar_modelo.py` (mismo protocolo y mismas filas para todos).
 
 ## Prueba reservada 2025-11-01 a 2025-12-31
 
 | Modelo | n | MAE | RMSE | WAPE % | IC95 WAPE (bloques de 7 días) | sMAPE % | Sesgo % |
 |---|---|---|---|---|---|---|---|
 | activo (hgb_fv2_20250831_s42) | 3111 | 96,27 | 140,86 | 14,77 | 13,10–16,87 | 22,23 | 2,75 |
-| fv1 (hgb_fv1_20250831_s42) | 3111 | 98,20 | 146,02 | 15,07 | 13,22–17,43 | 22,44 | 2,54 |
+| anterior (hgb_fv1_20250831_s42) | 3111 | 98,20 | 146,02 | 15,07 | 13,22–17,43 | 22,44 | 2,54 |
 | B1 regla manual 8 sem | 3111 | 138,06 | 225,99 | 21,18 | 16,61–26,79 | 26,28 | 5,85 |
 | B2 última semana | 3111 | 172,05 | 279,22 | 26,40 | 22,77–30,57 | 33,72 | 3,84 |
 
 Diferencias de WAPE (puntos porcentuales, IC95 bootstrap; P(mejora) = fracción de réplicas < 0):
 
 - cand_menos_b1: -10,43 a -3,21 pp, P(mejora) 1.00
-- fv1_menos_b1: -9,88 a -3,06 pp, P(mejora) 1.00
+- anterior_menos_b1: -9,88 a -3,06 pp, P(mejora) 1.00
 - b2_menos_b1: 2,13 a 7,89 pp, P(mejora) 0.00
-- cand_menos_fv1: -0,64 a -0,04 pp, P(mejora) 0.99
-- b1_menos_fv1: 3,06 a 9,88 pp, P(mejora) 0.00
-- b2_menos_fv1: 8,20 a 14,26 pp, P(mejora) 0.00
+- cand_menos_anterior: -0,64 a -0,04 pp, P(mejora) 0.99
+- b1_menos_anterior: 3,06 a 9,88 pp, P(mejora) 0.00
+- b2_menos_anterior: 8,20 a 14,26 pp, P(mejora) 0.00
 
 ### Por ruta (WAPE %)
 
-| Ruta | activo (hgb_fv2_20250831_s42) | fv1 (hgb_fv1_20250831_s42) | B1 regla manual 8 sem | B2 última semana |
+| Ruta | activo (hgb_fv2_20250831_s42) | anterior (hgb_fv1_20250831_s42) | B1 regla manual 8 sem | B2 última semana |
 |---|---|---|---|---|
 | CL 72 | 19,23 | 19,48 | 25,27 | 33,12 |
 | CRA 54 | 13,04 | 13,33 | 19,79 | 24,31 |
@@ -42,7 +42,7 @@ Diferencias de WAPE (puntos porcentuales, IC95 bootstrap; P(mejora) = fracción 
 
 ### Por condición (WAPE %; * = menos de 100 filas)
 
-| Condición | n | activo | fv1 | B1 | sesgo activo |
+| Condición | n | activo | anterior | B1 | sesgo activo |
 |---|---|---|---|---|---|
 | laboral | 1989 | 14,38 | 14,80 | 17,89 | 2,90 |
 | sabado | 459 | 13,71 | 13,55 | 14,16 | 2,39 |
@@ -62,26 +62,32 @@ Cobertura % (bajo P10 % / sobre P90 %) y ancho medio P90 - P10 en pasajeros por 
 | Modelo | Banda del modelo | Calibración v1 | Calibración vigente | Ancho medio: modelo / v1 / vigente |
 |---|---|---|---|---|
 | activo (hgb_fv2_20250831_s42) | 79,49 (12,18 / 8,33) | 77,88 (13,28 / 8,84) | v2: 77,82 (12,95 / 9,23) | 318,9 / 312,9 / 303,4 |
-| fv1 (hgb_fv1_20250831_s42) | 80,94 (11,28 / 7,78) | 78,59 (12,86 / 8,55) | v1 (el modelo no trae calibración versionada) | 325,0 / 316,3 / — |
+| anterior (hgb_fv1_20250831_s42) | 80,94 (11,28 / 7,78) | 78,59 (12,86 / 8,55) | v1 (el modelo no trae calibración versionada) | 325,0 / 316,3 / — |
 
 Calibración vigente del activo: conformal de Mondrian por bloque (v2), archivo `calibracion_v2.json` (SHA-256 `dae6b1a616ee0d89…`, verificado al cargar el modelo), validación 2025-09-01 a 2025-10-31 (3111 horas); la prueba reservada no se usa. Cobertura por ruta con la calibración vigente: CL 72 78,40 %, CRA 54 73,67 %, SILENCIO 81,39 %. Detalle por hora, ruta y tipo de día: docs/evidencias/modelo/calibracion_condicional.md.
 
-## Robustez: modelos congelados un año (semilla 42)
+## Robustez: modelos congelados un año (semilla 42), fv2 (variables del activo) frente a fv1 (las del anterior)
 
-| Año | fv2 WAPE [IC95] | fv1 WAPE [IC95] | B1 WAPE | fv2 − fv1 IC95 (pp) | cobertura fv2 modelo → conformal |
-|---|---|---|---|---|---|
-| 2024 | 16,26 [14,97–17,91] | 16,25 [14,97–17,90] | 21,55 | -0,08 a 0,09 | 67,67 → 79,37 |
-| 2025 | 14,48 [13,78–15,28] | 14,53 [13,77–15,40] | 20,04 | -0,17 a 0,05 | 78,51 → 80,12 |
+| Año | fv2 WAPE [IC95] | fv1 WAPE [IC95] | B1 WAPE | fv2 − fv1 IC95 (pp) | meses fv2 mejor | cobertura fv2 modelo → conformal |
+|---|---|---|---|---|---|---|
+| 2024 | 16,26 [14,97–17,91] | 16,25 [14,97–17,90] | 21,55 | -0,08 a 0,09 | 5/12 | 67,67 → 79,37 |
+| 2025 | 14,48 [13,78–15,28] | 14,53 [13,77–15,40] | 20,04 | -0,17 a 0,05 | 6/12 | 78,51 → 80,12 |
 
-Horas afectadas por el contexto (WAPE %, fv1 → fv2):
+Horas afectadas por el contexto y el calendario académico (WAPE %, fv1 → fv2):
 
 - 2024 todas (n=18564): 16,25 → 16,26 (B1 21,55)
 - 2024 horas_con_novedad (n=246): 28,06 → 25,15 (B1 58,00)
 - 2024 vispera_festivo (n=918): 24,12 → 23,40 (B1 33,80)
 - 2024 post_festivo (n=918): 20,22 → 20,28 (B1 29,49)
+- 2024 receso_escolar (n=4386): 20,18 → 20,17 (B1 27,23)
+- 2024 vacaciones_universitarias (n=6579): 20,36 → 20,40 (B1 24,40)
+- 2024 cambio_de_periodo (n=7497): 17,69 → 17,61 (B1 26,79)
 - 2025 todas (n=18615): 14,53 → 14,48 (B1 20,04)
 - 2025 horas_con_novedad (n=255): 35,11 → 33,49 (B1 81,38)
 - 2025 vispera_festivo (n=867): 21,31 → 20,18 (B1 33,40)
 - 2025 post_festivo (n=867): 16,20 → 15,46 (B1 27,01)
+- 2025 receso_escolar (n=4335): 17,62 → 17,36 (B1 28,71)
+- 2025 vacaciones_universitarias (n=6834): 16,22 → 16,07 (B1 22,32)
+- 2025 cambio_de_periodo (n=8109): 15,30 → 15,28 (B1 22,60)
 
 Notas: la lluvia (clima_diario) es observada y diaria; aquí solo es condición de análisis. Las condiciones con menos de 100 filas tienen intervalos amplios.

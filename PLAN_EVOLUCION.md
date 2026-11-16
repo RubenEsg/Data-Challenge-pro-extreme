@@ -43,7 +43,10 @@ La API de frecuencias (`api_frecuencias/`) ya funciona y está medida:
 - **Calidad del pronóstico y de las alertas.** El modelo activo `hgb_fv2_20250831_s42` tiene un WAPE de 14,77 % (IC95
   13,10–16,87) en la prueba reservada, frente a 21,18 % de la regla manual B1 (`ev/modelo/evaluacion_modelo.md`). Su
   banda P10–P90 usa la calibración v2 por bloque horario: cobertura de 77,82 % con un ancho medio de 303,4 pasajeros
-  (`ev/modelo/calibracion_condicional.md`). Por segmento y sentido, el modelo propio `seg_hgb_jerarquico_20230227_s42`
+  (`ev/modelo/calibracion_condicional.md`). Registrado y sin activar, el candidato `hgb_fv3_20250831_s42` (el mismo
+  modelo con el calendario escolar y universitario) baja el error en los dos años congelados, 2024 de 16,26 % a
+  15,76 % y 2025 de 14,48 % a 14,08 %, con el IC95 de la diferencia entero bajo cero; en la prueba reservada,
+  14,36 % (`ev/modelo/decision_fv3.md`). Por segmento y sentido, el modelo propio `seg_hgb_jerarquico_20230227_s42`
   reparte el pronóstico de la ruta: en su prueba (18 a 27-02-2023) el WAPE por segmento y hora es 42,09 %, frente a
   43,06 % del reparto fijo, y su banda P10–P90 cubre 78,31 % por segmento y 83,40 % por sentido con el total real
   (`ev/modelo/segmentos_modelo.md`). Del 15-09 al 31-12-2025, las reglas sobre datos observados dejan 1,265
@@ -292,6 +295,14 @@ descartadas.
 
 ## 7. Lo que queda para la siguiente versión
 
+- Activar el candidato fv3 (`hgb_fv3_20250831_s42`): pasa por la sombra de 14 días y la compuerta de cuatro
+  criterios. Activarlo cambia los pronósticos con que se midieron el ciclo diario, las alertas y las respuestas al reto
+  de esta entrega, así que esas mediciones se repiten con él (`ev/modelo/decision_fv3.md`). El calendario académico
+  de 2027 se agrega a `api_frecuencias/datos/calendario_academico.csv` cuando se publiquen las resoluciones.
+- Contar como demanda los pasajeros de los viajes que corrieron aunque el sistema los marcó cancelados (E13): entre
+  5,6 % y 7,7 % más pasajeros por año y un WAPE cercano a 12,4 % con el candidato. Cambia qué se mide como demanda y,
+  con ella, el plan y las cifras de dinero, así que se decide con Sobusa y se recalcula toda la cadena
+  (`experimentos/E13_limpieza_datos`).
 - Autenticación con el directorio de Extreme (OAuth2 u OpenID Connect) en lugar de claves por rol.
 - Envío real de notificaciones por correo y WhatsApp; hoy es simulado y queda en `notification_log`. Por el mismo canal
   sale el reporte de las llaves duplicadas de cada lote (§6.3); su destinatario, el responsable del consolidado, lo

@@ -9,14 +9,17 @@ Todo sale de archivos del propio proyecto generados por scripts/preparar_datos_a
 - novedades_por_ruta.parquet: novedades viales de rutas dadas por ruta, fecha y hora (§11.2); solo existe si
   novedades_viales_ruta trae filas (en Sobusa no: cada novedad es de todas las rutas).
 - perfil_intrahorario.parquet: reparto de las subidas entre la primera y la segunda media hora (ventanas 30/60/120).
+- calendario_academico.csv: recesos de los colegios oficiales de Barranquilla y periodos de clases universitarias
+  (variables fv3, se conocen antes; cada fila con su fuente).
 - clima_diario.parquet: lluvia diaria observada, solo para evaluar por condición.
 - ocupacion_segmentos_hora.parquet: ocupación histórica por segmento, día de operación y hora (§10.1), la que arma
   scripts/preparar_ocupacion_segmentos.py con las subidas y bajadas por segmento de cada viaje (2023-01-01 a
   2023-02-27).
 - bajadas_horaria.parquet: bajadas_viajes (Σ numerobajadas de los viajes válidos) por ruta, fecha y hora de salida,
   2023-2025 (§6.1 Bajadas; la fuente offline la entrega con la serie y ALT-008 la usa).
-Los seis últimos son opcionales: si faltan, las variables de contexto valen 0, el reparto intrahorario es 0,5, la
-recomendación no nombra el segmento crítico histórico y el lote offline llega sin bajadas.
+Los siete últimos son opcionales: si faltan, las variables de contexto valen 0, las del calendario académico quedan
+como dato faltante, el reparto intrahorario es 0,5, la recomendación no nombra el segmento crítico histórico y el lote
+offline llega sin bajadas.
 
 La carpeta se puede cambiar con la variable de entorno DATA_DIR (la misma de app/config.py).
 No hay conexión a ninguna base de datos aquí: es la fuente offline y reproducible por defecto. La única excepción es
@@ -204,6 +207,32 @@ def _opcional(nombre: str) -> pd.DataFrame | None:
     mtime = archivo.stat().st_mtime if archivo.exists() else -1.0
     d = _cargar_parquet_opcional(str(archivo), mtime)
     return None if d is None else d.copy()
+
+
+COLUMNAS_CALENDARIO_ACADEMICO = ["tipo", "inicio", "fin", "periodo", "fuente", "fuente_url", "confianza"]
+TIPOS_CALENDARIO_ACADEMICO = ("escolar_receso", "universitario_clases")
+
+
+@lru_cache(maxsize=4)
+def _cargar_calendario_academico(ruta_archivo: str, mtime: float) -> pd.DataFrame | None:
+    if mtime < 0:
+        return None
+    d = pd.read_csv(ruta_archivo, encoding="utf-8")
+    d["inicio"] = pd.to_datetime(d["inicio"]).dt.date
+    d["fin"] = pd.to_datetime(d["fin"]).dt.date
+    return d
+
+
+def calendario_academico() -> pd.DataFrame:
+    """Calendario académico conocido por adelantado (variables fv3): una fila por periodo, con tipo `escolar_receso`
+    (recesos de los colegios oficiales de Barranquilla) o `universitario_clases` (clases universitarias: mediana de
+    inicio y fin entre las universidades de E10), sus fechas (inclusive) y su fuente. Tabla vacía con esas columnas si
+    falta datos/calendario_academico.csv."""
+    archivo = carpeta_datos() / "calendario_academico.csv"
+    d = _cargar_calendario_academico(str(archivo), archivo.stat().st_mtime if archivo.exists() else -1.0)
+    if d is None:
+        return pd.DataFrame({c: pd.Series(dtype="object") for c in COLUMNAS_CALENDARIO_ACADEMICO})
+    return d[COLUMNAS_CALENDARIO_ACADEMICO].copy()
 
 
 def huella_archivo(nombre: str) -> float:

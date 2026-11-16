@@ -105,6 +105,11 @@ DESCRIPCION_VARIABLE = {
     "nov_sube": "la novedad marcada SUBE",
     "vispera_festivo": "la víspera de festivo",
     "post_festivo": "el día posterior a festivo",
+    "vac_escolar": "el receso escolar",
+    "vac_univ": "las vacaciones universitarias",
+    "frac_vac_escolar_ventana": "el receso escolar en las 4 semanas de referencia",
+    "frac_vac_univ_ventana": "las vacaciones universitarias en las 4 semanas de referencia",
+    "frac_especial_ventana": "los festivos en las 4 semanas de referencia",
 }
 LEARNING_RATE_SKLEARN = 0.1   # valor por defecto de HistGradientBoostingRegressor
 HIPER_DEFECTO = {

@@ -579,7 +579,7 @@
     "perfil_intrahorario_mtime": 1794202419.106798
   },
   "evaluacion": {
-    "generado_en": "2026-11-09T05:06:42-05:00",
+    "generado_en": "2026-11-16T14:44:27-05:00",
     "evidencia": "docs/evidencias/modelo/evaluacion_modelo.json",
     "prueba_reservada": {
       "desde": "2025-11-01",
@@ -593,7 +593,7 @@
           "smape": 22.23,
           "sesgo_pct": 2.75
         },
-        "fv1": {
+        "anterior": {
           "n": 3111,
           "mae": 98.2,
           "rmse": 146.02,
@@ -629,7 +629,7 @@
             16.87
           ]
         },
-        "fv1": {
+        "anterior": {
           "ic95": [
             13.22,
             17.43
@@ -654,7 +654,7 @@
           ],
           "p_mejora": 1.0
         },
-        "fv1_menos_b1": {
+        "anterior_menos_b1": {
           "ic95": [
             -9.88,
             -3.06
@@ -668,21 +668,21 @@
           ],
           "p_mejora": 0.0005
         },
-        "cand_menos_fv1": {
+        "cand_menos_anterior": {
           "ic95": [
             -0.64,
             -0.04
           ],
           "p_mejora": 0.9935
         },
-        "b1_menos_fv1": {
+        "b1_menos_anterior": {
           "ic95": [
             3.06,
             9.88
           ],
           "p_mejora": 0.0
         },
-        "b2_menos_fv1": {
+        "b2_menos_anterior": {
           "ic95": [
             8.2,
             14.26
@@ -733,7 +733,7 @@
             "SILENCIO": 81.39
           }
         },
-        "fv1": {
+        "anterior": {
           "banda_modelo": {
             "cobertura_pct": 80.94,
             "bajo_p10_pct": 11.28,
@@ -777,7 +777,7 @@
             "smape": 27.05,
             "sesgo_pct": 3.15
           },
-          "fv1": {
+          "anterior": {
             "n": 1037,
             "mae": 68.36,
             "rmse": 90.74,
@@ -811,7 +811,7 @@
             "smape": 18.55,
             "sesgo_pct": 3.01
           },
-          "fv1": {
+          "anterior": {
             "n": 1037,
             "mae": 143.51,
             "rmse": 206.09,
@@ -845,7 +845,7 @@
             "smape": 21.11,
             "sesgo_pct": 1.96
           },
-          "fv1": {
+          "anterior": {
             "n": 1037,
             "mae": 82.74,
             "rmse": 115.15,
@@ -881,7 +881,7 @@
             "smape": 20.15,
             "sesgo_pct": 3.08
           },
-          "fv1": {
+          "anterior": {
             "n": 1098,
             "mae": 92.24,
             "rmse": 128.29,
@@ -915,7 +915,7 @@
             "smape": 23.37,
             "sesgo_pct": 2.59
           },
-          "fv1": {
+          "anterior": {
             "n": 2013,
             "mae": 101.46,
             "rmse": 154.84,
@@ -944,8 +944,12 @@
     },
     "robustez": {
       "2024": {
+        "versiones": {
+          "cand": "fv2-2026-11-09",
+          "anterior": "fv1-2026-11-08"
+        },
         "global": {
-          "fv2": {
+          "cand": {
             "n": 18564,
             "mae": 122.39,
             "rmse": 180.02,
@@ -953,7 +957,7 @@
             "smape": 24.53,
             "sesgo_pct": 4.3
           },
-          "fv1": {
+          "anterior": {
             "n": 18564,
             "mae": 122.31,
             "rmse": 179.77,
@@ -970,7 +974,7 @@
             "sesgo_pct": 0.66
           }
         },
-        "cobertura_fv2": {
+        "cobertura_cand": {
           "banda_modelo": {
             "cobertura_pct": 67.67,
             "bajo_p10_pct": 20.1,
@@ -994,8 +998,12 @@
         }
       },
       "2025": {
+        "versiones": {
+          "cand": "fv2-2026-11-09",
+          "anterior": "fv1-2026-11-08"
+        },
         "global": {
-          "fv2": {
+          "cand": {
             "n": 18615,
             "mae": 100.14,
             "rmse": 149.24,
@@ -1003,7 +1011,7 @@
             "smape": 21.6,
             "sesgo_pct": 2.23
           },
-          "fv1": {
+          "anterior": {
             "n": 18615,
             "mae": 100.45,
             "rmse": 151.04,
@@ -1020,7 +1028,7 @@
             "sesgo_pct": 0.98
           }
         },
-        "cobertura_fv2": {
+        "cobertura_cand": {
           "banda_modelo": {
             "cobertura_pct": 78.51,
             "bajo_p10_pct": 12.95,
@@ -1146,5 +1154,23 @@
     }
   },
   "historial_prueba_reservada": "Al entrenarse, inferencia.entrenar() también midió la prueba reservada (2025-11-01 a 2025-12-31) y esa cifra se consultó al comparar fv2 con fv1: la prueba quedó como reporte informativo, no como una muestra nunca vista (docs/evidencias/modelo/decision_fv2.md). Desde entonces entrenar() y la compuerta solo miden la validación; el informe de la prueba está en la clave «evaluacion» (scripts/evaluar_modelo.py).",
-  "nota_prueba_reservada": "la prueba reservada no se evalúa al entrenar ni en la compuerta: su informe lo escribe scripts/evaluar_modelo.py en la clave «evaluacion»"
+  "nota_prueba_reservada": "la prueba reservada no se evalúa al entrenar ni en la compuerta: su informe lo escribe scripts/evaluar_modelo.py en la clave «evaluacion»",
+  "compatibilidad_codigo": {
+    "variables_py_sin_docstring_sha256": "84512fda7c40dd5adf3bdf45c6ce72135bf9972e1bfeff97abbaea942500867e",
+    "referencia": {
+      "blob_git": "a02f804ff7e483589ac668c22076bcfaf2e82d81",
+      "variables_py_sin_docstring_sha256": "0ea7ce6e28de2dd0cce17dc98caae2cd400afecfe36fe2510544548205eee08b"
+    },
+    "filas": 56253,
+    "columnas": 23,
+    "mismas_filas_y_mismos_nan": true,
+    "max_dif_variables": 0.0,
+    "max_dif_pronostico": {
+      "punto": 0.0,
+      "p10": 0.0,
+      "p90": 0.0
+    },
+    "verificado_en": "2026-11-16T20:14:28+00:00",
+    "nota": "variables.py cambió después de entrenar este modelo (se registró otra versión de variables); con sus columnas, el código actual da las mismas variables y los mismos pronósticos que el del entrenamiento"
+  }
 }

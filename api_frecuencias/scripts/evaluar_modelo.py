@@ -1,21 +1,23 @@
 """Evaluación completa del modelo de demanda (especificación §9.3, criterio «Modelo predictivo»).
 
 Con el MISMO protocolo para todos los modelos (mismas filas: horas con dato real y regla manual disponible):
-1. Prueba reservada (días posteriores a la validación del corte 2025-08-31, nov-dic 2025): modelo activo, modelo fv1,
-   B1 (regla manual de 8 semanas) y B2 (última semana).
+1. Prueba reservada (días posteriores a la validación del corte 2025-08-31, nov-dic 2025): modelo activo («cand»),
+   modelo anterior («anterior», el activo previo), B1 (regla manual de 8 semanas) y B2 (última semana).
    - MAE, RMSE, WAPE, sMAPE y sesgo: global, por ruta, por franja (04-05, 06-08, 09-16, 17-19, 20), pico frente a
      valle y por condición (laboral, sábado, domingo/festivo, festivo, víspera, día posterior, vacaciones, Navidad,
      Semana Santa, Carnaval, novedad vial, lluvia >= 5 y >= 20 mm, seco). La lluvia es observada y diaria: solo es
      condición de análisis, nunca variable del pronóstico (sería fuga). Se marca n < 100 como «pocas filas».
    - Sesgo por ruta y condición.
-   - Bootstrap por bloques móviles de 7 días (B = 2000, semilla 42) del WAPE y de las diferencias frente a B1 y fv1.
+   - Bootstrap por bloques móviles de 7 días (B = 2000, semilla 42) del WAPE y de las diferencias frente a B1 y al
+     modelo anterior.
    - Cobertura P10-P90 (y % bajo P10 / sobre P90, ancho medio) con la banda del modelo, con la calibración v1
      (conformal móvil por ruta) y con la calibración VIGENTE del modelo (v2: el archivo calibracion_v2.json que la API
      verifica por SHA-256 y aplica en cada predicción), lado a lado.
-2. Robustez con modelos congelados un año (fv1 y fv2, semilla 42): <= 2023-12-31 -> 2024 y <= 2024-12-31 -> 2025,
-   con WAPE por mes, cobertura de la banda del modelo y calibrada, y fv1 frente a fv2 en las horas afectadas.
+2. Robustez con modelos congelados un año (las versiones de variables del activo y del anterior, semilla 42):
+   <= 2023-12-31 -> 2024 y <= 2024-12-31 -> 2025, con WAPE por mes, cobertura de la banda del modelo y calibrada, y el
+   activo frente al anterior en las horas afectadas por el contexto y el calendario académico.
 
-Uso:  python scripts/evaluar_modelo.py [--modelo ID] [--fv1 ID] [--salida docs/evidencias/modelo] [--sin-robustez]
+Uso:  python scripts/evaluar_modelo.py [--modelo ID] [--anterior ID] [--salida docs/evidencias/modelo] [--sin-robustez]
 Escribe evaluacion_modelo.json y evaluacion_modelo.md y guarda un resumen en manifest["evaluacion"] del modelo.
 """
 
@@ -201,22 +203,26 @@ def conformal(
     return lo_c, hi_c, float(ok.mean() * 100)
 
 
-def prueba_reservada(t: pd.DataFrame, activo: str, fv1: str | None) -> dict:
+def prueba_reservada(t: pd.DataFrame, activo: str, anterior: str | None) -> dict:
     mod = inferencia.cargar(activo)
     man = mod["manifiesto"]
     desde = date.fromisoformat(man["particion"]["prueba"].split(" a ")[0])
     te = t[t["fecha"] >= desde].copy()
     te["cand"], te["cand_lo"], te["cand_hi"] = inferencia._predecir_filas(mod, te)
-    cols, info = ["cand", "b1", "b2"], {"activo": activo, "desde": str(desde), "hasta": str(te["fecha"].max())}
-    if fv1:
-        m1 = inferencia.cargar(fv1)
-        te["fv1"], te["fv1_lo"], te["fv1_hi"] = inferencia._predecir_filas(m1, te)
-        cols.insert(1, "fv1")
-        info["fv1"] = fv1
+    cols = ["cand", "b1", "b2"]
+    estado = inferencia.registro()["modelos"].get(activo, {}).get("estado")
+    info = {"activo": activo, "estado": estado, "version_activo": mod["feature_version"], "desde": str(desde),
+            "hasta": str(te["fecha"].max())}
+    m_ant = inferencia.cargar(anterior) if anterior else None
+    if m_ant is not None:
+        te["anterior"], te["anterior_lo"], te["anterior_hi"] = inferencia._predecir_filas(m_ant, te)
+        cols.insert(1, "anterior")
+        info["anterior"] = anterior
+        info["version_anterior"] = m_ant["feature_version"]
     r = {"modelos": info, **resumen(te, cols)}
-    r["bootstrap"] = bootstrap(te, cols, ["b1"] + (["fv1"] if fv1 else []))
+    r["bootstrap"] = bootstrap(te, cols, ["b1"] + (["anterior"] if m_ant is not None else []))
     r["cobertura"] = {}
-    for c, m in (("cand", mod), ("fv1", inferencia.cargar(fv1) if fv1 else None)):
+    for c, m in (("cand", mod), ("anterior", m_ant)):
         if m is None:
             continue
         lo_c, hi_c, pct = conformal(te, inferencia._puntajes_conformal(m), c, f"{c}_lo", f"{c}_hi")
@@ -250,7 +256,24 @@ def _pred3(ms, df: pd.DataFrame, version: str):
     return inferencia._ordenar(ms[0].predict(x), ms[1].predict(x), ms[2].predict(x))
 
 
-def robustez(t: pd.DataFrame) -> dict:
+def horas_afectadas(ev: pd.DataFrame) -> dict[str, pd.Series]:
+    """Horas en que pesan las variables de contexto (fv2) y de calendario académico (fv3). «cambio_de_periodo»: el día
+    objetivo y sus 4 días de referencia caen en periodos distintos (regreso a clases, inicio de vacaciones)."""
+    cambio = ((ev["frac_vac_escolar_ventana"] - ev["vac_escolar"]).abs() >= 0.5) | (
+        (ev["frac_vac_univ_ventana"] - ev["vac_univ"]).abs() >= 0.5)
+    return {
+        "todas": ev["y"].notna(),
+        "horas_con_novedad": ev["nov_impacto"] > 0,
+        "vispera_festivo": ev["vispera_festivo"] == 1,
+        "post_festivo": ev["post_festivo"] == 1,
+        "receso_escolar": ev["vac_escolar"] == 1,
+        "vacaciones_universitarias": ev["vac_univ"] == 1,
+        "cambio_de_periodo": cambio.fillna(False),
+    }
+
+
+def robustez(t: pd.DataFrame, version_cand: str, version_anterior: str) -> dict:
+    """Modelos congelados un año con las versiones de variables del activo («cand») y del anterior («anterior»)."""
     out = {}
     for etq, corte, fin in (
         ("2024", date(2023, 12, 31), date(2024, 12, 31)),
@@ -259,11 +282,12 @@ def robustez(t: pd.DataFrame) -> dict:
         tr = t[t["fecha"] <= corte]
         ev = t[(t["fecha"] > corte) & (t["fecha"] <= fin)].copy()
         t0 = time.perf_counter()
-        for nombre, version in (("fv1", variables.FV1), ("fv2", variables.FV2)):
+        for nombre, version in (("anterior", version_anterior), ("cand", version_cand)):
             ms = _ajustar3(tr, version)
             ev[nombre], ev[f"{nombre}_lo"], ev[f"{nombre}_hi"] = _pred3(ms, ev, version)
         seg = round(time.perf_counter() - t0, 1)
         r = {
+            "versiones": {"cand": version_cand, "anterior": version_anterior},
             "entrenado_hasta": str(corte),
             "evaluado": f"{ev['fecha'].min()} a {ev['fecha'].max()}",
             "segundos_entrenar_6_modelos": seg,
@@ -271,15 +295,15 @@ def robustez(t: pd.DataFrame) -> dict:
         r.update(
             {
                 k: v
-                for k, v in resumen(ev, ["fv2", "fv1", "b1"]).items()
+                for k, v in resumen(ev, ["cand", "anterior", "b1"]).items()
                 if k in ("global", "por_ruta", "pico_valle", "por_franja")
             }
         )
-        r["bootstrap"] = bootstrap(ev, ["fv2", "fv1", "b1"], ["fv1", "b1"])
+        r["bootstrap"] = bootstrap(ev, ["cand", "anterior", "b1"], ["anterior", "b1"])
         mes = pd.to_datetime(ev["fecha"]).dt.month
         r["por_mes"] = {}
         r["cobertura"] = {}
-        for c in ("fv2", "fv1"):
+        for c in ("cand", "anterior"):
             pz = pd.DataFrame(
                 {
                     "ruta": ev["ruta"],
@@ -300,26 +324,21 @@ def robustez(t: pd.DataFrame) -> dict:
             }
         for k, g in ev.groupby(mes):
             r["por_mes"][str(k)] = {
-                "fv2": met(g["y"], g["fv2"])["wape"],
-                "fv1": met(g["y"], g["fv1"])["wape"],
+                "cand": met(g["y"], g["cand"])["wape"],
+                "anterior": met(g["y"], g["anterior"])["wape"],
                 "b1": met(g["y"], g["b1"])["wape"],
-                "cobertura_fv2_modelo": cobertura(g["y"], g["fv2_lo"], g["fv2_hi"])["cobertura_pct"],
-                "cobertura_fv2_conformal": cobertura(g["y"], g["fv2_lo_c"], g["fv2_hi_c"])["cobertura_pct"],
+                "cobertura_cand_modelo": cobertura(g["y"], g["cand_lo"], g["cand_hi"])["cobertura_pct"],
+                "cobertura_cand_conformal": cobertura(g["y"], g["cand_lo_c"], g["cand_hi_c"])["cobertura_pct"],
             }
-        afectadas = {
-            "todas": ev["y"].notna(),
-            "horas_con_novedad": ev["nov_impacto"] > 0,
-            "vispera_festivo": ev["vispera_festivo"] == 1,
-            "post_festivo": ev["post_festivo"] == 1,
-        }
-        r["fv1_vs_fv2_horas_afectadas"] = {
+        r["meses_cand_mejor_que_anterior"] = sum(v["cand"] < v["anterior"] for v in r["por_mes"].values())
+        r["horas_afectadas"] = {
             k: {
                 "n": int(m.sum()),
-                "fv1": met(ev.loc[m, "y"], ev.loc[m, "fv1"])["wape"],
-                "fv2": met(ev.loc[m, "y"], ev.loc[m, "fv2"])["wape"],
+                "anterior": met(ev.loc[m, "y"], ev.loc[m, "anterior"])["wape"],
+                "cand": met(ev.loc[m, "y"], ev.loc[m, "cand"])["wape"],
                 "b1": met(ev.loc[m, "y"], ev.loc[m, "b1"])["wape"],
             }
-            for k, m in afectadas.items()
+            for k, m in horas_afectadas(ev).items()
             if m.sum() > 0
         }
         out[etq] = r
@@ -338,10 +357,11 @@ def markdown(res: dict) -> str:
     pr = res["prueba_reservada"]
     g = pr["global"]
     bs = pr["bootstrap"]
-    cols = [c for c in ("cand", "fv1", "b1", "b2") if c in g]
+    cols = [c for c in ("cand", "anterior", "b1", "b2") if c in g]
     nombres = {
-        "cand": f"activo ({pr['modelos']['activo']})",
-        "fv1": f"fv1 ({pr['modelos'].get('fv1')})",
+        "cand": f"{'activo' if pr['modelos'].get('estado', 'activo') == 'activo' else 'candidato'} "
+                f"({pr['modelos']['activo']})",
+        "anterior": f"anterior ({pr['modelos'].get('anterior')})",
         "b1": "B1 regla manual 8 sem",
         "b2": "B2 última semana",
     }
@@ -395,14 +415,14 @@ def markdown(res: dict) -> str:
         "",
         "### Por condición (WAPE %; * = menos de 100 filas)",
         "",
-        "| Condición | n | activo | fv1 | B1 | sesgo activo |",
+        "| Condición | n | activo | anterior | B1 | sesgo activo |",
         "|---|---|---|---|---|---|",
     ]
     for k, d in pr["por_condicion"].items():
         marca = "*" if d["cand"].get("pocas_filas") else ""
         lineas.append(
             f"| {k}{marca} | {d['cand']['n']} | {_fmt(d['cand']['wape'])} | "
-            f"{_fmt(d.get('fv1', {}).get('wape'))} | {_fmt(d['b1']['wape'])} | "
+            f"{_fmt(d.get('anterior', {}).get('wape'))} | {_fmt(d['b1']['wape'])} | "
             f"{_fmt(d['cand']['sesgo_pct'])} |"
         )
     lineas += [
@@ -439,29 +459,34 @@ def markdown(res: dict) -> str:
             + ". Detalle por hora, ruta y tipo de día: docs/evidencias/modelo/calibracion_condicional.md.",
         ]
     if "robustez" in res:
+        vers = next(iter(res["robustez"].values()))["versiones"]
+        va, vn = vers["cand"].split("-")[0], vers["anterior"].split("-")[0]
         lineas += [
             "",
-            "## Robustez: modelos congelados un año (semilla 42)",
+            f"## Robustez: modelos congelados un año (semilla 42), {va} (variables del activo) frente a {vn} "
+            "(las del anterior)",
             "",
-            "| Año | fv2 WAPE [IC95] | fv1 WAPE [IC95] | B1 WAPE | fv2 − fv1 IC95 (pp) | cobertura fv2 modelo → "
-            "conformal |",
-            "|---|---|---|---|---|---|",
+            f"| Año | {va} WAPE [IC95] | {vn} WAPE [IC95] | B1 WAPE | {va} − {vn} IC95 (pp) | meses {va} mejor | "
+            f"cobertura {va} modelo → conformal |",
+            "|---|---|---|---|---|---|---|",
         ]
         for etq, r in res["robustez"].items():
             b = r["bootstrap"]
-            d = b.get("fv2_menos_fv1", {}).get("ic95", [None, None])
-            cb = r["cobertura"]["fv2"]
+            d = b.get("cand_menos_anterior", {}).get("ic95", [None, None])
+            cb = r["cobertura"]["cand"]
             lineas.append(
-                f"| {etq} | {_fmt(r['global']['fv2']['wape'])} [{_fmt(b['fv2']['ic95'][0])}–"
-                f"{_fmt(b['fv2']['ic95'][1])}] | {_fmt(r['global']['fv1']['wape'])} [{_fmt(b['fv1']['ic95'][0])}"
-                f"–{_fmt(b['fv1']['ic95'][1])}] | {_fmt(r['global']['b1']['wape'])} | {_fmt(d[0])} a "
-                f"{_fmt(d[1])} | {_fmt(cb['banda_modelo']['cobertura_pct'])} → "
-                f"{_fmt(cb['banda_conformal']['cobertura_pct'])} |"
+                f"| {etq} | {_fmt(r['global']['cand']['wape'])} [{_fmt(b['cand']['ic95'][0])}–"
+                f"{_fmt(b['cand']['ic95'][1])}] | {_fmt(r['global']['anterior']['wape'])} "
+                f"[{_fmt(b['anterior']['ic95'][0])}–{_fmt(b['anterior']['ic95'][1])}] | "
+                f"{_fmt(r['global']['b1']['wape'])} | {_fmt(d[0])} a {_fmt(d[1])} | "
+                f"{r['meses_cand_mejor_que_anterior']}/{len(r['por_mes'])} | "
+                f"{_fmt(cb['banda_modelo']['cobertura_pct'])} → {_fmt(cb['banda_conformal']['cobertura_pct'])} |"
             )
-        lineas += ["", "Horas afectadas por el contexto (WAPE %, fv1 → fv2):", ""]
+        lineas += ["", f"Horas afectadas por el contexto y el calendario académico (WAPE %, {vn} → {va}):", ""]
         for etq, r in res["robustez"].items():
-            for k, v in r["fv1_vs_fv2_horas_afectadas"].items():
-                lineas.append(f"- {etq} {k} (n={v['n']}): {_fmt(v['fv1'])} → {_fmt(v['fv2'])} (B1 {_fmt(v['b1'])})")
+            for k, v in r["horas_afectadas"].items():
+                lineas.append(f"- {etq} {k} (n={v['n']}): {_fmt(v['anterior'])} → {_fmt(v['cand'])} "
+                              f"(B1 {_fmt(v['b1'])})")
     lineas += [
         "",
         "Notas: la lluvia (clima_diario) es observada y diaria; aquí solo es condición de análisis. "
@@ -471,28 +496,42 @@ def markdown(res: dict) -> str:
     return "\n".join(lineas)
 
 
+def anterior_por_omision(model_id: str) -> str | None:
+    """El modelo con artefacto, el mismo corte y la misma semilla registrado justo antes que `model_id` (fv1 para fv2,
+    fv2 para fv3): la versión que el evaluado reemplaza o retaría."""
+    modelos = inferencia.registro()["modelos"]
+    ev = modelos.get(model_id) or {}
+    previos = [m for k, m in modelos.items() if k != model_id and m.get("artefacto")
+               and m.get("data_cutoff") == ev.get("data_cutoff") and m.get("semilla") == ev.get("semilla")
+               and str(m.get("creado_en", "")) < str(ev.get("creado_en", ""))]
+    return max(previos, key=lambda m: str(m.get("creado_en", "")))["model_id"] if previos else None
+
+
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser(description="Evaluación completa del modelo de demanda")
     ap.add_argument("--modelo", default=None, help="model_id a evaluar (por defecto el activo)")
-    ap.add_argument("--fv1", default="hgb_fv1_20250831_s42", help="modelo fv1 de referencia (vacío para omitir)")
+    ap.add_argument("--anterior", default=None,
+                    help="modelo de referencia (por omisión, el último registrado con el mismo corte antes del "
+                         "evaluado; vacío para omitir)")
     ap.add_argument("--salida", type=Path, default=RAIZ / "docs" / "evidencias" / "modelo")
     ap.add_argument("--sin-robustez", action="store_true")
     a = ap.parse_args()
     t0 = time.perf_counter()
     activo = a.modelo or inferencia.modelo_activo()
-    fv1 = a.fv1 or None
-    if fv1 == activo:
-        fv1 = None
+    anterior = anterior_por_omision(activo) if a.anterior is None else (a.anterior or None)
+    if anterior == activo:
+        anterior = None
     t = tabla_base()
     res = {
         "generado_en": datetime.now(ZONA).isoformat(timespec="seconds"),
         "protocolo": __doc__.strip().splitlines()[2:6],
     }
-    res["prueba_reservada"] = prueba_reservada(t, activo, fv1)
+    res["prueba_reservada"] = prueba_reservada(t, activo, anterior)
     if not a.sin_robustez:
-        res["robustez"] = robustez(t)
+        mods = res["prueba_reservada"]["modelos"]
+        res["robustez"] = robustez(t, mods["version_activo"], mods.get("version_anterior") or variables.FV1)
     res["segundos"] = round(time.perf_counter() - t0, 1)
     a.salida.mkdir(parents=True, exist_ok=True)
     (a.salida / "evaluacion_modelo.json").write_text(
@@ -518,7 +557,7 @@ def main() -> None:
                 "pico_valle": pr["pico_valle"],
             },
             "robustez": {
-                k: {"global": v["global"], "cobertura_fv2": v["cobertura"]["fv2"]}
+                k: {"versiones": v["versiones"], "global": v["global"], "cobertura_cand": v["cobertura"]["cand"]}
                 for k, v in res.get("robustez", {}).items()
             },
         }
@@ -535,7 +574,7 @@ def main() -> None:
                     for k, v in pr["cobertura"].items()
                 },
                 "robustez": {
-                    k: {m: v["global"][m]["wape"] for m in ("fv2", "fv1", "b1")}
+                    k: {m: v["global"][m]["wape"] for m in ("cand", "anterior", "b1")}
                     for k, v in res.get("robustez", {}).items()
                 },
                 "segundos": res["segundos"],

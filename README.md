@@ -186,6 +186,7 @@ Cifras vigentes del backend, cada una con su archivo en `api_frecuencias/docs/ev
 | Qué | Resultado | Archivo |
 |---|---|---|
 | Modelo activo `hgb_fv2_20250831_s42` en la prueba reservada (nov.–dic. 2025) | WAPE 14,77 % (IC95 13,10–16,87) frente a 21,18 % (16,61–26,79) de la regla manual B1 | `modelo/evaluacion_modelo.md` |
+| Candidato `hgb_fv3_20250831_s42` (fv2 + calendario escolar y universitario), registrado sin activar | Mejora a fv2 en los dos años congelados: 2024, 15,76 % frente a 16,26 %, y 2025, 14,08 % frente a 14,48 %, con el IC95 de la diferencia entero bajo cero; en la prueba reservada (informativa), 14,36 % (IC95 12,98–16,13) | `modelo/decision_fv3.md` y `modelo/candidato_fv3/evaluacion_modelo.md` |
 | Banda P10–P90 con la calibración v2 por bloque horario | Cobertura de 77,82 % (v1: 77,88 %) con un ancho medio de 303,4 pasajeros (v1: 312,9) | `modelo/calibracion_condicional.md` |
 | Modelo por segmento y sentido `seg_hgb_jerarquico_20230227_s42` en su prueba (18 a 27-02-2023) | WAPE por segmento y hora de 42,09 % frente a 43,06 % del reparto fijo (IC95 de la diferencia: −1,60 a −0,02 puntos); banda P10–P90 con cobertura de 78,31 % por segmento y 83,40 % por sentido. Solo hay subidas por segmento de ene.–feb. 2023, así que su error en 2025 no se puede medir | `modelo/segmentos_modelo.md`, `modelo/segmentos_banda_ventanas.json` |
 | Volumen de alertas observadas (15-09 a 31-12-2025, 324 días-ruta) | 1,265 por ruta y día en total, con la ALT-002 observada (0,710, con el factor de carga del ciclo) y la ruptura de RF-009 (0,012); las que ya medía la versión anterior (ALT-005 a ALT-009) quedan en 0,543, frente a 6,08 con las reglas anteriores | `alertas/backtest_alertas.md` |
@@ -216,6 +217,13 @@ Sobre la prueba reservada, con honestidad: la consultamos al elegir las variable
 selección fue la validación (sep.–oct. 2025) y los backtests con modelos congelados en 2024 y 2025. La cifra de
 nov.–dic. queda como reporte informativo, y pedimos a Extreme un periodo de 2026 como prueba limpia
 (`documentos/mapeo_especificacion.md`, sección 6).
+
+**Un modelo mejor, registrado y sin activar.** El candidato `hgb_fv3_20250831_s42` es el mismo modelo con cinco
+variables de calendario escolar y universitario (`api_frecuencias/datos/calendario_academico.csv`, cada periodo con
+su fuente). Con el mismo protocolo se equivoca menos que fv2 en la validación (12,96 % frente a 13,55 %) y en los
+dos años congelados, sobre todo en los recesos escolares (en 2025, de 17,36 % a 15,61 %). No lo activamos en esta
+entrega porque cambiaría los pronósticos que usan el ciclo diario, las alertas y las respuestas al reto, medidos con
+fv2. La API lo pone en sombra y su compuerta decide (`api_frecuencias/docs/evidencias/modelo/decision_fv3.md`).
 
 ### Los experimentos del informe académico
 

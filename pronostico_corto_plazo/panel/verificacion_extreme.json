@@ -1,0 +1,63 @@
+{
+ "generado": "2026-11-17 19:18",
+ "eventos": {
+  "eventos": 44185831,
+  "subidas": 44871167,
+  "sin_ruta": 0,
+  "sin_posicion": 0,
+  "fuera_de_fechas": 2,
+  "a_mas_de_100_m": 1152237,
+  "a_mas_de_500_m": 376815
+ },
+ "huella_eventos_sha256": "9ff9d2e74b0e1fda85be0527b132fa29c8a05a7dbd8710ba922f0d61a0ce379c",
+ "panel": {
+  "filas": 12300468,
+  "subidas": 44871165,
+  "desde": "2023-01-01",
+  "hasta": "2025-12-31",
+  "dias_con_subidas_por_ruta": {
+   "SILENCIO": 1090,
+   "CRA 54": 1094,
+   "CL 72": 1092
+  },
+  "segmentos": {
+   "SILENCIO": 135,
+   "CRA 54": 123,
+   "CL 72": 128
+  }
+ },
+ "verificacion_extreme": {
+  "regla": "cada evento de subida va al segmento activo más cercano de su ruta (distancia plana en grados)",
+  "periodo_tabla_extreme": [
+   "2023-01-01",
+   "2023-02-27"
+  ],
+  "viajes_en_la_tabla_de_extreme": 27025,
+  "viajes_con_eventos_propios": 26701,
+  "subidas_extreme": 2263584,
+  "subidas_propias_en_esos_viajes": 2263584,
+  "celdas_viaje_segmento_con_subidas": 1024273,
+  "celdas_identicas": 1023393,
+  "celdas_identicas_pct": 99.914,
+  "subidas_en_el_mismo_segmento_pct": 99.975,
+  "viajes_con_el_mismo_total_pct": 100.0,
+  "por_ruta": {
+   "SILENCIO": {
+    "subidas_extreme": 605557,
+    "subidas_propias": 605557,
+    "en_el_mismo_segmento_pct": 99.971
+   },
+   "CRA 54": {
+    "subidas_extreme": 1277494,
+    "subidas_propias": 1277494,
+    "en_el_mismo_segmento_pct": 99.976
+   },
+   "CL 72": {
+    "subidas_extreme": 380533,
+    "subidas_propias": 380533,
+    "en_el_mismo_segmento_pct": 99.981
+   }
+  }
+ },
+ "segundos": 64.8
+}

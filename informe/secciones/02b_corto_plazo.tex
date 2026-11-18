@@ -96,8 +96,12 @@ error, y el intervalo de la diferencia \CPRutaDifFraseLX. A 30 minutos el modelo
 \CPClModLX~\% en CL~72 (el promedio: \CPCraPromLX, \CPSilPromLX{} y \CPClPromLX~\%). En las horas pico el modelo
 falla \CPRutaPicoModLX~\% y en el valle \CPRutaValleModLX~\%, frente a \CPRutaPicoPromLX{} y \CPRutaVallePromLX~\% del
 promedio. En días laborales da \CPRutaLabModLX~\%, en sábados \CPRutaSabModLX~\% y en domingos y festivos
-\CPRutaDomModLX~\% (el promedio: \CPRutaLabPromLX, \CPRutaSabPromLX{} y \CPRutaDomPromLX~\%). El MAE a 60 minutos es
-de \CPRutaMAELX{} subidas sobre una media de \CPRutaMediaLX, el RMSE de \CPRutaRMSELX{} y el sMAPE de
+\CPRutaDomModLX~\% (el promedio: \CPRutaLabPromLX, \CPRutaSabPromLX{} y \CPRutaDomPromLX~\%). Ese último grupo mezcla dos
+casos, que un análisis posterior separa: en los \CPFestDias{} festivos el promedio pronostica un día corriente y
+falla \CPFestPromLX~\%, frente a \CPFestModLX~\% del modelo; en los \CPDomSoloDias{} domingos corrientes el modelo
+\emph{no} mejora al promedio (\CPDomSoloModLX{} frente a \CPDomSoloPromLX~\%; a 120 minutos, \CPDomSoloModCXX{}
+frente a \CPDomSoloPromCXX~\%), y la pérdida está en CRA~54 (\CPDomSoloCraModLX{} frente a \CPDomSoloCraPromLX~\%).
+El MAE a 60 minutos es de \CPRutaMAELX{} subidas sobre una media de \CPRutaMediaLX, el RMSE de \CPRutaRMSELX{} y el sMAPE de
 \CPRutaSMAPELX~\%; el sesgo es de \CPRutaSesgoLX~\%. Mes a mes, el error a 60 minutos va de \CPRutaMesMinLX{} a
 \CPRutaMesMaxLX~\%.
 

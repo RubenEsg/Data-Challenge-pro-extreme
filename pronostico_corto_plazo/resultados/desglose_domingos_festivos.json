@@ -1,0 +1,437 @@
+{
+ "generado": "2026-11-17 21:44",
+ "que_es": "análisis posterior a la prueba, no previsto en PROTOCOLO.md; las cifras de resultados/prueba.json no cambian",
+ "grupos": "festivo: el calendario lo marca como festivo (cualquier día de la semana); si no, domingo, sábado o laboral",
+ "nivel": "ruta",
+ "horizontes": {
+  "30": {
+   "todas_las_rutas": {
+    "laboral": {
+     "celdas": 12705,
+     "dias": 121,
+     "modelo": 7.649,
+     "promedio_dia_hora": 11.979,
+     "sesgo_del_modelo_pct": 0.536,
+     "gana_el_modelo": true
+    },
+    "sábado": {
+     "celdas": 2730,
+     "dias": 26,
+     "modelo": 11.297,
+     "promedio_dia_hora": 15.261,
+     "sesgo_del_modelo_pct": -2.077,
+     "gana_el_modelo": true
+    },
+    "domingo": {
+     "celdas": 2415,
+     "dias": 23,
+     "modelo": 12.425,
+     "promedio_dia_hora": 11.594,
+     "sesgo_del_modelo_pct": 1.77,
+     "gana_el_modelo": false
+    },
+    "festivo": {
+     "celdas": 840,
+     "dias": 8,
+     "modelo": 11.941,
+     "promedio_dia_hora": 101.79,
+     "sesgo_del_modelo_pct": 1.927,
+     "gana_el_modelo": true
+    }
+   },
+   "por_ruta": {
+    "SILENCIO": {
+     "laboral": {
+      "celdas": 4235,
+      "dias": 121,
+      "modelo": 7.892,
+      "promedio_dia_hora": 12.743,
+      "sesgo_del_modelo_pct": 0.862,
+      "gana_el_modelo": true
+     },
+     "sábado": {
+      "celdas": 910,
+      "dias": 26,
+      "modelo": 8.175,
+      "promedio_dia_hora": 9.155,
+      "sesgo_del_modelo_pct": 1.208,
+      "gana_el_modelo": true
+     },
+     "domingo": {
+      "celdas": 805,
+      "dias": 23,
+      "modelo": 10.123,
+      "promedio_dia_hora": 11.028,
+      "sesgo_del_modelo_pct": 0.908,
+      "gana_el_modelo": true
+     },
+     "festivo": {
+      "celdas": 280,
+      "dias": 8,
+      "modelo": 12.23,
+      "promedio_dia_hora": 87.961,
+      "sesgo_del_modelo_pct": 2.033,
+      "gana_el_modelo": true
+     }
+    },
+    "CRA 54": {
+     "laboral": {
+      "celdas": 4235,
+      "dias": 121,
+      "modelo": 6.647,
+      "promedio_dia_hora": 10.945,
+      "sesgo_del_modelo_pct": 0.412,
+      "gana_el_modelo": true
+     },
+     "sábado": {
+      "celdas": 910,
+      "dias": 26,
+      "modelo": 12.695,
+      "promedio_dia_hora": 19.103,
+      "sesgo_del_modelo_pct": -4.834,
+      "gana_el_modelo": true
+     },
+     "domingo": {
+      "celdas": 805,
+      "dias": 23,
+      "modelo": 13.213,
+      "promedio_dia_hora": 10.338,
+      "sesgo_del_modelo_pct": 2.181,
+      "gana_el_modelo": false
+     },
+     "festivo": {
+      "celdas": 280,
+      "dias": 8,
+      "modelo": 10.565,
+      "promedio_dia_hora": 110.483,
+      "sesgo_del_modelo_pct": 1.48,
+      "gana_el_modelo": true
+     }
+    },
+    "CL 72": {
+     "laboral": {
+      "celdas": 4235,
+      "dias": 121,
+      "modelo": 10.357,
+      "promedio_dia_hora": 13.99,
+      "sesgo_del_modelo_pct": 0.42,
+      "gana_el_modelo": true
+     },
+     "sábado": {
+      "celdas": 910,
+      "dias": 26,
+      "modelo": 11.417,
+      "promedio_dia_hora": 11.806,
+      "sesgo_del_modelo_pct": 2.083,
+      "gana_el_modelo": true
+     },
+     "domingo": {
+      "celdas": 805,
+      "dias": 23,
+      "modelo": 13.796,
+      "promedio_dia_hora": 16.035,
+      "sesgo_del_modelo_pct": 1.959,
+      "gana_el_modelo": true
+     },
+     "festivo": {
+      "celdas": 280,
+      "dias": 8,
+      "modelo": 15.425,
+      "promedio_dia_hora": 99.188,
+      "sesgo_del_modelo_pct": 3.042,
+      "gana_el_modelo": true
+     }
+    }
+   },
+   "grupos_y_rutas_en_que_no_gana": [
+    "CRA 54 · domingo"
+   ]
+  },
+  "60": {
+   "todas_las_rutas": {
+    "laboral": {
+     "celdas": 12705,
+     "dias": 121,
+     "modelo": 6.474,
+     "promedio_dia_hora": 10.898,
+     "sesgo_del_modelo_pct": 0.627,
+     "gana_el_modelo": true
+    },
+    "sábado": {
+     "celdas": 2730,
+     "dias": 26,
+     "modelo": 10.125,
+     "promedio_dia_hora": 13.8,
+     "sesgo_del_modelo_pct": -1.692,
+     "gana_el_modelo": true
+    },
+    "domingo": {
+     "celdas": 2415,
+     "dias": 23,
+     "modelo": 10.366,
+     "promedio_dia_hora": 9.719,
+     "sesgo_del_modelo_pct": 2.023,
+     "gana_el_modelo": false
+    },
+    "festivo": {
+     "celdas": 840,
+     "dias": 8,
+     "modelo": 10.629,
+     "promedio_dia_hora": 101.05,
+     "sesgo_del_modelo_pct": 2.51,
+     "gana_el_modelo": true
+    }
+   },
+   "por_ruta": {
+    "SILENCIO": {
+     "laboral": {
+      "celdas": 4235,
+      "dias": 121,
+      "modelo": 6.523,
+      "promedio_dia_hora": 11.607,
+      "sesgo_del_modelo_pct": 0.916,
+      "gana_el_modelo": true
+     },
+     "sábado": {
+      "celdas": 910,
+      "dias": 26,
+      "modelo": 6.592,
+      "promedio_dia_hora": 7.565,
+      "sesgo_del_modelo_pct": 1.486,
+      "gana_el_modelo": true
+     },
+     "domingo": {
+      "celdas": 805,
+      "dias": 23,
+      "modelo": 8.188,
+      "promedio_dia_hora": 8.918,
+      "sesgo_del_modelo_pct": 1.084,
+      "gana_el_modelo": true
+     },
+     "festivo": {
+      "celdas": 280,
+      "dias": 8,
+      "modelo": 10.352,
+      "promedio_dia_hora": 87.081,
+      "sesgo_del_modelo_pct": 2.093,
+      "gana_el_modelo": true
+     }
+    },
+    "CRA 54": {
+     "laboral": {
+      "celdas": 4235,
+      "dias": 121,
+      "modelo": 5.779,
+      "promedio_dia_hora": 10.075,
+      "sesgo_del_modelo_pct": 0.517,
+      "gana_el_modelo": true
+     },
+     "sábado": {
+      "celdas": 910,
+      "dias": 26,
+      "modelo": 11.981,
+      "promedio_dia_hora": 17.963,
+      "sesgo_del_modelo_pct": -4.184,
+      "gana_el_modelo": true
+     },
+     "domingo": {
+      "celdas": 805,
+      "dias": 23,
+      "modelo": 11.102,
+      "promedio_dia_hora": 8.928,
+      "sesgo_del_modelo_pct": 2.281,
+      "gana_el_modelo": false
+     },
+     "festivo": {
+      "celdas": 280,
+      "dias": 8,
+      "modelo": 9.849,
+      "promedio_dia_hora": 110.049,
+      "sesgo_del_modelo_pct": 2.599,
+      "gana_el_modelo": true
+     }
+    },
+    "CL 72": {
+     "laboral": {
+      "celdas": 4235,
+      "dias": 121,
+      "modelo": 8.528,
+      "promedio_dia_hora": 12.34,
+      "sesgo_del_modelo_pct": 0.526,
+      "gana_el_modelo": true
+     },
+     "sábado": {
+      "celdas": 910,
+      "dias": 26,
+      "modelo": 9.365,
+      "promedio_dia_hora": 9.502,
+      "sesgo_del_modelo_pct": 1.725,
+      "gana_el_modelo": true
+     },
+     "domingo": {
+      "celdas": 805,
+      "dias": 23,
+      "modelo": 11.694,
+      "promedio_dia_hora": 13.199,
+      "sesgo_del_modelo_pct": 2.762,
+      "gana_el_modelo": true
+     },
+     "festivo": {
+      "celdas": 280,
+      "dias": 8,
+      "modelo": 13.302,
+      "promedio_dia_hora": 97.841,
+      "sesgo_del_modelo_pct": 2.925,
+      "gana_el_modelo": true
+     }
+    }
+   },
+   "grupos_y_rutas_en_que_no_gana": [
+    "CRA 54 · domingo"
+   ]
+  },
+  "120": {
+   "todas_las_rutas": {
+    "laboral": {
+     "celdas": 12705,
+     "dias": 121,
+     "modelo": 5.567,
+     "promedio_dia_hora": 10.015,
+     "sesgo_del_modelo_pct": 0.602,
+     "gana_el_modelo": true
+    },
+    "sábado": {
+     "celdas": 2730,
+     "dias": 26,
+     "modelo": 9.415,
+     "promedio_dia_hora": 12.625,
+     "sesgo_del_modelo_pct": -1.444,
+     "gana_el_modelo": true
+    },
+    "domingo": {
+     "celdas": 2415,
+     "dias": 23,
+     "modelo": 11.674,
+     "promedio_dia_hora": 8.229,
+     "sesgo_del_modelo_pct": 4.48,
+     "gana_el_modelo": false
+    },
+    "festivo": {
+     "celdas": 840,
+     "dias": 8,
+     "modelo": 10.341,
+     "promedio_dia_hora": 100.251,
+     "sesgo_del_modelo_pct": 2.389,
+     "gana_el_modelo": true
+    }
+   },
+   "por_ruta": {
+    "SILENCIO": {
+     "laboral": {
+      "celdas": 4235,
+      "dias": 121,
+      "modelo": 5.598,
+      "promedio_dia_hora": 10.728,
+      "sesgo_del_modelo_pct": 1.061,
+      "gana_el_modelo": true
+     },
+     "sábado": {
+      "celdas": 910,
+      "dias": 26,
+      "modelo": 5.751,
+      "promedio_dia_hora": 6.434,
+      "sesgo_del_modelo_pct": 1.485,
+      "gana_el_modelo": true
+     },
+     "domingo": {
+      "celdas": 805,
+      "dias": 23,
+      "modelo": 6.919,
+      "promedio_dia_hora": 7.191,
+      "sesgo_del_modelo_pct": 1.184,
+      "gana_el_modelo": true
+     },
+     "festivo": {
+      "celdas": 280,
+      "dias": 8,
+      "modelo": 11.106,
+      "promedio_dia_hora": 86.062,
+      "sesgo_del_modelo_pct": 2.831,
+      "gana_el_modelo": true
+     }
+    },
+    "CRA 54": {
+     "laboral": {
+      "celdas": 4235,
+      "dias": 121,
+      "modelo": 4.977,
+      "promedio_dia_hora": 9.312,
+      "sesgo_del_modelo_pct": 0.372,
+      "gana_el_modelo": true
+     },
+     "sábado": {
+      "celdas": 910,
+      "dias": 26,
+      "modelo": 11.74,
+      "promedio_dia_hora": 17.038,
+      "sesgo_del_modelo_pct": -3.822,
+      "gana_el_modelo": true
+     },
+     "domingo": {
+      "celdas": 805,
+      "dias": 23,
+      "modelo": 15.108,
+      "promedio_dia_hora": 7.815,
+      "sesgo_del_modelo_pct": 6.938,
+      "gana_el_modelo": false
+     },
+     "festivo": {
+      "celdas": 280,
+      "dias": 8,
+      "modelo": 9.222,
+      "promedio_dia_hora": 109.61,
+      "sesgo_del_modelo_pct": 2.072,
+      "gana_el_modelo": true
+     }
+    },
+    "CL 72": {
+     "laboral": {
+      "celdas": 4235,
+      "dias": 121,
+      "modelo": 7.319,
+      "promedio_dia_hora": 11.081,
+      "sesgo_del_modelo_pct": 0.611,
+      "gana_el_modelo": true
+     },
+     "sábado": {
+      "celdas": 910,
+      "dias": 26,
+      "modelo": 7.342,
+      "promedio_dia_hora": 7.533,
+      "sesgo_del_modelo_pct": 1.92,
+      "gana_el_modelo": true
+     },
+     "domingo": {
+      "celdas": 805,
+      "dias": 23,
+      "modelo": 9.472,
+      "promedio_dia_hora": 11.006,
+      "sesgo_del_modelo_pct": 2.732,
+      "gana_el_modelo": true
+     },
+     "festivo": {
+      "celdas": 280,
+      "dias": 8,
+      "modelo": 12.282,
+      "promedio_dia_hora": 96.511,
+      "sesgo_del_modelo_pct": 2.579,
+      "gana_el_modelo": true
+     }
+    }
+   },
+   "grupos_y_rutas_en_que_no_gana": [
+    "CRA 54 · domingo"
+   ]
+  }
+ }
+}

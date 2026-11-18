@@ -23,6 +23,7 @@ Lo que se conserva y lo que falta:
 - **El pronóstico a siete días se conserva** porque es el que usa la programación semanal, pero ya no se presenta como el del enunciado. Con el protocolo nuevo, el modelo que solo usa lo que se sabe una semana antes falla 9,19 % por ruta a 60 minutos en la prueba; con lo observado en el mismo día, 7,34 %.
 - **La prueba no es ciega en sentido estricto:** los meses de 2025 se conocían por los experimentos anteriores, con otro objetivo. Ninguna decisión del experimento nuevo usa julio a diciembre.
 - **El sentido es una aproximación** (la mitad del ciclo), y se midió cuánto afecta (`pronostico_corto_plazo/panel/revision_sentido.json`).
+- **Donde no gana: los domingos corrientes.** Por ruta a 60 minutos, el modelo falla 10,37 % y el promedio por día y hora 9,72 %; la pérdida está en CRA 54 (11,10 frente a 8,93). La ventaja del grupo «domingo o festivo» viene de los festivos, en que el promedio falla 101,05 % y el modelo 10,63 % (`pronostico_corto_plazo/resultados/desglose_domingos_festivos.json`, análisis posterior a la prueba).
 - **Un registro imposible en la prueba.** La base trae 28.782 subidas en un solo segmento de CRA 54 en 15 minutos (05-07-2025, 07:45). El protocolo no previó filtrarlo, así que las cifras de la tabla lo incluyen; infla sobre todo el RMSE (303,9 por ruta a 60 minutos). En un análisis posterior, sin los 9 días que toca, el modelo falla 6,91 % y el promedio 12,51 %, con un RMSE de 73,7 (`pronostico_corto_plazo/resultados/sensibilidad_registro_anomalo.json`).
 - **Falta llevarlo a la API.** La API sigue pronosticando por hora de salida, y su modelo por segmento es el de 37 días. Integrar este pronóstico es el primer pendiente de `PLAN_EVOLUCION.md` (sección 7).
 
@@ -126,7 +127,7 @@ y abra http://127.0.0.1:8050. El recorrido por cada pantalla está en `api_frecu
 | Archivo o carpeta | Qué es | Cómo se abre |
 |---|---|---|
 | `Informe_tecnico_Sobusa.pdf` | **Informe técnico** (27 páginas): datos, el problema del enunciado (sección P), metodología, resultados, limitaciones, recomendaciones y referencias. | Cualquier lector de PDF. |
-| `entrega_final.html` | **Cuaderno final ejecutado**, en HTML: resuelve el problema del enunciado (sección P), entrena el modelo semanal, lo evalúa, resuelve el despacho de un día y comprueba 167 cifras. | Doble clic (navegador). |
+| `entrega_final.html` | **Cuaderno final ejecutado**, en HTML: resuelve el problema del enunciado (sección P), entrena el modelo semanal, lo evalúa, resuelve el despacho de un día y comprueba 169 cifras. | Doble clic (navegador). |
 | `entrega_final.ipynb` | El mismo cuaderno, con sus salidas. | Jupyter o VS Code. Para volver a ejecutarlo hace falta el proyecto completo (abajo). |
 | `dash_app/` | **Laboratorio del modelo** (Dash, Python): el pronóstico y el optimizador corren en vivo. | En Windows, doble clic en `dash_app/iniciar_dash.bat`; en cualquier sistema, `python app.py` (abajo). |
 | `app_sobusa/app.html` | **App «Sobusa Despacho»**: nueve pantallas con todo el proyecto, la repetición de un día de 2025 en la consola (sin mandos sobre los buses) y la vista 3D. *Solo en el ZIP completo (`Entrega_final_Sobusa.zip`); no viene en el ZIP ligero.* | Doble clic, en Edge o Chrome, sin internet. |
@@ -339,6 +340,6 @@ Parquet.
   `app/verificar_datos_app.py`; en el ZIP completo viajan copias en `app_sobusa/app/`, pero necesitan los resultados
   del proyecto para correr).
 
-Ninguna cifra está escrita a mano: cada una se lee de su archivo de resultados, y el cuaderno contrasta 167 de ellas al
+Ninguna cifra está escrita a mano: cada una se lee de su archivo de resultados, y el cuaderno contrasta 169 de ellas al
 ejecutarse. Semilla 42 en todo el proyecto. Ningún archivo de la entrega trae credenciales ni datos personales de
 conductores.

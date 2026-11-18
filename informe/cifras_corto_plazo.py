@@ -4,8 +4,8 @@ resultados: ninguna se escribe a mano.
     python EntregaFinal/informe/cifras_corto_plazo.py      -> informe/generado/corto_plazo.tex
 
 Fuentes (en EntregaFinal/pronostico_corto_plazo/): panel/verificacion_extreme.json, panel/revision_sentido.json,
-resultados/comprobacion_fuga.json, resultados/validacion.json, resultados/seleccion.json, resultados/prueba.json y
-resultados/figuras.json.
+resultados/comprobacion_fuga.json, resultados/validacion.json, resultados/seleccion.json, resultados/prueba.json,
+resultados/sensibilidad_registro_anomalo.json, resultados/desglose_domingos_festivos.json y resultados/figuras.json.
 Los nombres de las macros no pueden llevar cifras: los horizontes van en romanos (XXX = 30, LX = 60, CXX = 120 minutos).
 """
 from __future__ import annotations
@@ -195,6 +195,19 @@ def main() -> None:
             macro(f"CPSin{n}Dif{rom}", num(sin["modelo_menos_promedio_dia_hora"]["diferencia"]), f)
             ic = sin["modelo_menos_promedio_dia_hora"]["ic95"]
             macro(f"CPSin{n}DifIC{rom}", f"{num(ic[0])} a {num(ic[1])}", f)
+
+    # Domingos y festivos por separado (análisis posterior a la prueba, con las predicciones guardadas).
+    f = "resultados/desglose_domingos_festivos.json"
+    des = leer(f)["horizontes"]
+    for h, rom in ROMANO.items():
+        todas = des[h]["todas_las_rutas"]
+        for grupo, c in (("domingo", "DomSolo"), ("festivo", "Fest")):
+            macro(f"CP{c}Mod{rom}", num(todas[grupo]["modelo"]), f)
+            macro(f"CP{c}Prom{rom}", num(todas[grupo]["promedio_dia_hora"]), f)
+        macro(f"CPDomSoloCraMod{rom}", num(des[h]["por_ruta"]["CRA 54"]["domingo"]["modelo"]), f)
+        macro(f"CPDomSoloCraProm{rom}", num(des[h]["por_ruta"]["CRA 54"]["domingo"]["promedio_dia_hora"]), f)
+    macro("CPDomSoloDias", num(des["60"]["todas_las_rutas"]["domingo"]["dias"], 0), f)
+    macro("CPFestDias", num(des["60"]["todas_las_rutas"]["festivo"]["dias"], 0), f)
 
     f = "resultados/figuras.json"
     d = fig["dia_de_ejemplo"]

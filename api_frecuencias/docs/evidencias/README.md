@@ -462,6 +462,7 @@ cifras están en su `README.md`; los comandos se corren desde esa carpeta.
 | `resultados/prueba.json` | La prueba reservada: MAE, RMSE, WAPE, sMAPE y sesgo por nivel, horizonte, ruta, franja, sentido, mes y tipo de día; IC95 frente a las líneas base; cobertura de la banda P10–P90, y los análisis secundarios. | §2.2, §3.1, RF-005, §9.1, §9.3 | `python probar.py` (una sola vez) |
 | `resultados/segmentos_prueba.csv` · `resultados/predicciones_ruta.parquet` · `resultados/predicciones_sentido.parquet` | El detalle por segmento (subidas reales y pronosticadas, sesgo y WAPE) y las predicciones por ruta y por sentido con su banda. | §9.3 (sesgo por ruta, sentido y segmento) | `python probar.py` |
 | `resultados/sensibilidad_registro_anomalo.json` | Análisis posterior a la prueba, fuera del protocolo: las métricas por ruta y por sentido sin los nueve días que toca un registro imposible de la base (28.782 subidas en un segmento en 15 minutos). Las cifras de la prueba no cambian. | §9.3 (métricas), §3.1 (calidad del dato) | `python sensibilidad_registro_anomalo.py` |
+| `resultados/desglose_domingos_festivos.json` | Análisis posterior a la prueba, fuera del protocolo: el error por ruta con domingos y festivos por separado. En los festivos el modelo gana por mucho; en los domingos corrientes no mejora al promedio por día y hora. | §9.3 (métricas por condición) | `python desglose_domingos_festivos.py` |
 | `figuras/` | Las figuras del README de esa carpeta y del informe técnico. | — | `python figuras.py` |
 
 ## `historial/` · corridas reemplazadas

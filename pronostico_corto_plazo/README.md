@@ -131,6 +131,18 @@ Julio a diciembre de 2025: 184 días, de los que 178 tienen datos en cada ruta. 
 - **Por tipo de día** (60 minutos, por ruta): laboral, 6,47 % frente a 10,90 %; sábado, 10,13 % frente a 13,80 %; domingo o festivo, 10,43 % frente a 31,46 %.
 - **Por mes** (60 minutos, por ruta): el modelo va de 6,50 % a 9,68 % y gana al promedio en 6 de los 6 meses.
 
+**Domingos y festivos por separado** (análisis posterior a la prueba; `desglose_domingos_festivos.py`). El grupo «domingo o festivo» mezcla dos casos distintos. WAPE por ruta, modelo frente a promedio por día y hora:
+
+| Horizonte | Laboral | Sábado | Domingo corriente | Festivo |
+|---|---|---|---|---|
+| 30 min | 7,65 frente a 11,98 | 11,30 frente a 15,26 | **12,43 frente a 11,59** | 11,94 frente a 101,79 |
+| 60 min | 6,47 frente a 10,90 | 10,13 frente a 13,80 | **10,37 frente a 9,72** | 10,63 frente a 101,05 |
+| 120 min | 5,57 frente a 10,02 | 9,42 frente a 12,63 | **11,67 frente a 8,23** | 10,34 frente a 100,25 |
+
+- **En los festivos** (8 días) el promedio de las ocho semanas pronostica un día corriente y falla 101,05 %; el modelo, 10,63 %. De ahí sale casi toda la ventaja del grupo.
+- **En los domingos corrientes** (23 días) **el modelo no mejora al promedio**: 10,37 % frente a 9,72 % a 60 minutos, y a 120 minutos la diferencia es mayor (tabla). La pérdida está en CRA 54 (11,10 frente a 8,93); en las otras dos rutas el modelo sí gana (SILENCIO, 8,19 frente a 8,92; CL 72, 11,69 frente a 13,20).
+- No sabemos por qué pasa en CRA 54. Una posibilidad es el registro imposible del domingo 26-05-2024, que está en el entrenamiento de esa ruta (abajo); comprobarlo exige otro experimento, con su propio protocolo.
+
 ![Un día de la prueba](figuras/fig_cp_dia.png)
 
 El día de la figura es el 07-07-2025: el día laboral de la prueba con el error mediano del modelo en CRA 54 a 60 minutos (5,5 %; ese día el promedio por día y hora falla 10,3 %). Se eligió con esa regla para no escogerlo a ojo.
@@ -196,6 +208,7 @@ La conclusión no cambia. Sin esos días bajan el error del modelo y el del prom
 - **Las subidas son demanda observada.** Dependen de los buses que pasaron: si no pasa bus, no hay subida. El modelo pronostica lo que se va a contar, no la gente que espera.
 - **Supone que el conteo llega en vivo.** La especificación lo prevé (el disparador de conteo), pero la latencia real de la captura no se conoce; por eso se midió el efecto de 15 y 30 minutos de retraso.
 - **No está integrado en la API.** La API pronostica hoy por hora de salida con su propio modelo. Llevar este a la API es el siguiente paso (`../PLAN_EVOLUCION.md`, sección 7).
+- **En los domingos corrientes el modelo no mejora al promedio por día y hora** (tabla de «Domingos y festivos por separado»).
 - **Once días de 2025 sin eventos** (los últimos de mes) quedan fuera del entrenamiento y de la evaluación.
 - **Los registros imposibles siguen en los datos.** El protocolo no previó filtrarlos: uno cae en el entrenamiento y otro en la prueba. Su efecto en la prueba está medido arriba; filtrarlos antes de entrenar es un pendiente.
 
@@ -207,6 +220,8 @@ Con las versiones de `../requirements_cuaderno.txt` (LightGBM 4.7.0, semilla 42)
 python validar.py           # elige con la validación: resultados/validacion.json y seleccion.json
 python probar.py --repetir  # recalcula la prueba con lo elegido: resultados/prueba.json
 python comprobar_fuga.py    # comprueba que ninguna variable usa el futuro: resultados/comprobacion_fuga.json
+python sensibilidad_registro_anomalo.py   # análisis posterior: sin los días que toca el registro imposible
+python desglose_domingos_festivos.py      # análisis posterior: domingos y festivos por separado
 python figuras.py           # figuras/
 python escribir_readme.py   # este archivo
 ```
@@ -221,6 +236,7 @@ python escribir_readme.py   # este archivo
 | `revisar_sentido.py` | Mide cuánto confunde el sentido la regla del segmento más cercano |
 | `comprobar_fuga.py` | Cambia el futuro y comprueba que ninguna variable ni línea base anterior al cambio se mueve |
 | `sensibilidad_registro_anomalo.py` | Análisis posterior a la prueba: las métricas sin los días que toca un registro imposible |
+| `desglose_domingos_festivos.py` | Análisis posterior a la prueba: el error por tipo de día, con domingos y festivos por separado |
 | `comun.py` | Datos, variables, líneas base, modelo, métricas e intervalos |
 | `validar.py` · `probar.py` | La elección con la validación y el único cálculo de la prueba |
 | `figuras.py` · `escribir_readme.py` | Las figuras y este archivo, desde `resultados/` |

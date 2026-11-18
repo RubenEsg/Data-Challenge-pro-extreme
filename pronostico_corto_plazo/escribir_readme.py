@@ -264,6 +264,7 @@ def main() -> None:
       f"{pct(min(x['modelo'] for x in meses.values()))} a {pct(max(x['modelo'] for x in meses.values()))} y gana al promedio en "
       f"{sum(x['modelo'] < x['promedio_dia_hora'] for x in meses.values())} de los {len(meses)} meses.")
     a("")
+    domingos(a)
     a("![Un día de la prueba](figuras/fig_cp_dia.png)")
     a("")
     a(f"El día de la figura es el {'{2}-{1}-{0}'.format(*fig['fecha'].split('-'))}: el día laboral de la prueba con el error "
@@ -330,6 +331,8 @@ def main() -> None:
       "de la captura no se conoce; por eso se midió el efecto de 15 y 30 minutos de retraso.")
     a("- **No está integrado en la API.** La API pronostica hoy por hora de salida con su propio modelo. Llevar este a la "
       "API es el siguiente paso (`../PLAN_EVOLUCION.md`, sección 7).")
+    a("- **En los domingos corrientes el modelo no mejora al promedio por día y hora** (tabla de «Domingos y festivos por "
+      "separado»).")
     a("- **Once días de 2025 sin eventos** (los últimos de mes) quedan fuera del entrenamiento y de la evaluación.")
     if (C.AQUI / "resultados" / "sensibilidad_registro_anomalo.json").exists():
         a("- **Los registros imposibles siguen en los datos.** El protocolo no previó filtrarlos: uno cae en el entrenamiento y "
@@ -343,6 +346,8 @@ def main() -> None:
     a("python validar.py           # elige con la validación: resultados/validacion.json y seleccion.json")
     a("python probar.py --repetir  # recalcula la prueba con lo elegido: resultados/prueba.json")
     a("python comprobar_fuga.py    # comprueba que ninguna variable usa el futuro: resultados/comprobacion_fuga.json")
+    a("python sensibilidad_registro_anomalo.py   # análisis posterior: sin los días que toca el registro imposible")
+    a("python desglose_domingos_festivos.py      # análisis posterior: domingos y festivos por separado")
     a("python figuras.py           # figuras/")
     a("python escribir_readme.py   # este archivo")
     a("```")
@@ -358,6 +363,7 @@ def main() -> None:
     a("| `revisar_sentido.py` | Mide cuánto confunde el sentido la regla del segmento más cercano |")
     a("| `comprobar_fuga.py` | Cambia el futuro y comprueba que ninguna variable ni línea base anterior al cambio se mueve |")
     a("| `sensibilidad_registro_anomalo.py` | Análisis posterior a la prueba: las métricas sin los días que toca un registro imposible |")
+    a("| `desglose_domingos_festivos.py` | Análisis posterior a la prueba: el error por tipo de día, con domingos y festivos por separado |")
     a("| `comun.py` | Datos, variables, líneas base, modelo, métricas e intervalos |")
     a("| `validar.py` · `probar.py` | La elección con la validación y el único cálculo de la prueba |")
     a("| `figuras.py` · `escribir_readme.py` | Las figuras y este archivo, desde `resultados/` |")
@@ -367,6 +373,38 @@ def main() -> None:
     (C.AQUI / "README.md").write_text("\n".join(L), encoding="utf-8")
     print("README.md:", len(L), "líneas")
     actualizar_entrega(bloque_entrega(ver, val, pru))
+
+
+def domingos(a) -> None:
+    """Domingos y festivos por separado, si existe resultados/desglose_domingos_festivos.json."""
+    ruta = C.AQUI / "resultados" / "desglose_domingos_festivos.json"
+    if not ruta.exists():
+        return
+    d = json.loads(ruta.read_text(encoding="utf-8"))["horizontes"]
+    a("**Domingos y festivos por separado** (análisis posterior a la prueba; `desglose_domingos_festivos.py`). El grupo "
+      "«domingo o festivo» mezcla dos casos distintos. WAPE por ruta, modelo frente a promedio por día y hora:")
+    a("")
+    a("| Horizonte | Laboral | Sábado | Domingo corriente | Festivo |")
+    a("|---|---|---|---|---|")
+    for h in C.HORIZONTES:
+        x = d[str(h)]["todas_las_rutas"]
+        a(f"| {h} min | " + " | ".join(
+            ("" if x[g]["gana_el_modelo"] else "**") + f"{num(x[g]['modelo'])} frente a {num(x[g]['promedio_dia_hora'])}"
+            + ("" if x[g]["gana_el_modelo"] else "**") for g in ("laboral", "sábado", "domingo", "festivo")) + " |")
+    a("")
+    x = d["60"]
+    dom, fes = x["todas_las_rutas"]["domingo"], x["todas_las_rutas"]["festivo"]
+    cra = x["por_ruta"]["CRA 54"]["domingo"]
+    otras = "; ".join(f"{r}, {num(v['domingo']['modelo'])} frente a {num(v['domingo']['promedio_dia_hora'])}"
+                      for r, v in x["por_ruta"].items() if r != "CRA 54")
+    a(f"- **En los festivos** ({fes['dias']} días) el promedio de las ocho semanas pronostica un día corriente y falla "
+      f"{pct(fes['promedio_dia_hora'])}; el modelo, {pct(fes['modelo'])}. De ahí sale casi toda la ventaja del grupo.")
+    a(f"- **En los domingos corrientes** ({dom['dias']} días) **el modelo no mejora al promedio**: {pct(dom['modelo'])} frente a "
+      f"{pct(dom['promedio_dia_hora'])} a 60 minutos, y a 120 minutos la diferencia es mayor (tabla). La pérdida está en CRA 54 "
+      f"({num(cra['modelo'])} frente a {num(cra['promedio_dia_hora'])}); en las otras dos rutas el modelo sí gana ({otras}).")
+    a("- No sabemos por qué pasa en CRA 54. Una posibilidad es el registro imposible del domingo 26-05-2024, que está en el "
+      "entrenamiento de esa ruta (abajo); comprobarlo exige otro experimento, con su propio protocolo.")
+    a("")
 
 
 def anomalo(a, pru: dict) -> None:
@@ -421,6 +459,20 @@ def anomalo(a, pru: dict) -> None:
       f"todos los demás juntos. Por segmento no se recalculó, porque las predicciones por segmento no se guardan; el registro está en "
       f"el segmento {r['nro_segmento']} de {r['ruta']} y se ve en `resultados/segmentos_prueba.csv`.")
     a("")
+
+
+def vineta_domingos() -> list[str]:
+    """La viñeta de los domingos corrientes para el README de la entrega (vacía si no hay análisis)."""
+    ruta = C.AQUI / "resultados" / "desglose_domingos_festivos.json"
+    if not ruta.exists():
+        return []
+    x = json.loads(ruta.read_text(encoding="utf-8"))["horizontes"]["60"]
+    dom, fes, cra = x["todas_las_rutas"]["domingo"], x["todas_las_rutas"]["festivo"], x["por_ruta"]["CRA 54"]["domingo"]
+    return [f"- **Donde no gana: los domingos corrientes.** Por ruta a 60 minutos, el modelo falla {pct(dom['modelo'])} y el promedio "
+            f"por día y hora {pct(dom['promedio_dia_hora'])}; la pérdida está en CRA 54 ({num(cra['modelo'])} frente a "
+            f"{num(cra['promedio_dia_hora'])}). La ventaja del grupo «domingo o festivo» viene de los festivos, en que el promedio "
+            f"falla {pct(fes['promedio_dia_hora'])} y el modelo {pct(fes['modelo'])} "
+            f"(`pronostico_corto_plazo/resultados/desglose_domingos_festivos.json`, análisis posterior a la prueba)."]
 
 
 def vineta_anomalo() -> list[str]:
@@ -505,6 +557,7 @@ def bloque_entrega(ver: dict, val: dict, pru: dict) -> list[str]:
         "otro objetivo. Ninguna decisión del experimento nuevo usa julio a diciembre.",
         "- **El sentido es una aproximación** (la mitad del ciclo), y se midió cuánto afecta "
         "(`pronostico_corto_plazo/panel/revision_sentido.json`).",
+        *vineta_domingos(),
         *vineta_anomalo(),
         "- **Falta llevarlo a la API.** La API sigue pronosticando por hora de salida, y su modelo por segmento es el de 37 "
         "días. Integrar este pronóstico es el primer pendiente de `PLAN_EVOLUCION.md` (sección 7).",

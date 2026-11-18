@@ -51,7 +51,8 @@ y a sesenta minutos el modelo se equivoca {{CortoRutaSesenta}} %, frente a {{Cor
 día y hora, que es la línea base del enunciado. Para lo espacial asignamos a su segmento las {{CortoSubidas}} subidas
 de los tres años con la regla de Extreme. Por segmento el modelo se equivoca {{CortoSegmentoSesenta}} %, frente a
 {{CortoSegmentoSesentaBase}} % del promedio, y gana en {{CortoSegGana}} de los {{CortoSegTotal}} segmentos con subidas.
-Lo que falta es llevarlo a la API, que hoy pronostica por hora de salida.
+Y lo que no funcionó: en los domingos corrientes el modelo no mejora al promedio; la ventaja de «domingos y festivos»
+viene de los festivos. Lo que falta es llevarlo a la API, que hoy pronostica por hora de salida.
 
 === 6. Incertidumbre y ciclo de vida
 Cada pronóstico trae su banda P10 a P90; la cobertura está cerca del ochenta por ciento objetivo, y la calibración

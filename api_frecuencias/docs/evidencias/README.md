@@ -454,7 +454,7 @@ cifras están en su `README.md`; los comandos se corren desde esa carpeta.
 
 | Archivo | Qué demuestra | Requisito | Cómo se generó |
 |---|---|---|---|
-| `PROTOCOLO.md` | El problema, la partición, las líneas base, las reglas de elección y lo que se reporta, escrito y confirmado en git antes de entrenar. | §9.3 (partición y prueba reservada) | Documento del equipo; el orden lo prueba el historial de git |
+| `PROTOCOLO.md` | El problema, la partición, las líneas base, las reglas de elección y lo que se reporta, escrito y confirmado en git antes de correr la validación. | §9.3 (partición y prueba reservada) | Documento del equipo; el orden lo prueba el historial de git |
 | `panel/verificacion_extreme.json` | Las subidas por segmento de 2023 a 2025, asignadas con la regla de Extreme, coinciden con `timbradas_segmentos` en los 58 días que la base trae. | §3.1, §9.1 (segmento) | `python preparar_panel.py` (necesita las exportaciones de la base, de solo lectura) |
 | `panel/revision_sentido.json` | Cuánto confunde el sentido la regla del segmento más cercano. | §9.1, §9.3 (sentido) | `python revisar_sentido.py` |
 | `resultados/comprobacion_fuga.json` | Al cambiar todo lo posterior a un instante, ninguna variable ni línea base anterior cambia. | §9.3 (sin información posterior) | `python comprobar_fuga.py` |

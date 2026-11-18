@@ -13,6 +13,9 @@ import comun as C
 
 MENOS = "−"
 MARCA_INI, MARCA_FIN = "<!-- corto_plazo:inicio", "<!-- corto_plazo:fin -->"
+# Los tres commits del repositorio de entrega (RubenEsg/Data-Challenge-pro-extreme) que prueban el orden, con su hora
+# del 17-11-2026 (hora de Colombia). Se ven con: git log --format="%h %ad %s" -- pronostico_corto_plazo
+COMMITS = {"protocolo": ("9844dae", "19:26"), "validacion": ("fa04afb", "20:23"), "prueba": ("546cffa", "21:01")}
 NOMBRE_CONJUNTO = {"semanal": "semanal", "con_hoy": "con lo de hoy", "completo": "completo"}
 NOMBRE_NIVEL = {"ruta": "Ruta", "sentido": "Sentido", "segmento": "Segmento"}
 NOMBRE_HIPER = {"base": "base", "arboles_pequenos": "árboles pequeños", "arboles_grandes": "árboles grandes"}
@@ -87,7 +90,7 @@ def main() -> None:
       "siguientes 30, 60 y 120 minutos, en los tres niveles, con MAE, RMSE, WAPE y sMAPE por ruta y franja |")
     a("| Los modelos se eligieron y se reportaron sobre los mismos meses de 2025 | «División cronológica en entrenamiento, "
       "validación y prueba reservada» (§9.3) | Se entrena con 2023 y 2024, se elige con enero a junio de 2025 y se reporta "
-      "una vez con julio a diciembre de 2025. El protocolo se confirmó en git antes de entrenar |")
+      "una vez con julio a diciembre de 2025. El protocolo se confirmó en git antes de correr la validación |")
     a(f"| El modelo por segmento se entrenó con 37 días: lo espacial no quedó validado | Pronóstico y sesgo «por ruta, sentido, "
       f"segmento» (§9.1, §9.3) | Subidas por segmento de los tres años con la regla de Extreme, verificada contra su tabla. El "
       f"modelo por segmento se entrena con más de dos años y se prueba en seis meses: {num(seg60['modelo']['n'], 0)} celdas de "
@@ -153,7 +156,9 @@ def main() -> None:
     a("")
     a("## Protocolo")
     a("")
-    a("Está en [`PROTOCOLO.md`](PROTOCOLO.md), escrito antes de entrenar. En resumen:")
+    a("Está en [`PROTOCOLO.md`](PROTOCOLO.md), escrito y confirmado en git antes de correr la validación; hasta entonces solo "
+      "se había comprobado que el código corría (`validar.py --rapido`: el 20 % de las filas, a 60 minutos, en la validación). "
+      "En resumen:")
     a("")
     a("| Parte | Fechas | Para qué |")
     a("|---|---|---|")
@@ -161,11 +166,14 @@ def main() -> None:
         uso = {"entrenamiento": "ajustar los modelos", "validacion": "elegir todo", "prueba": "reportar, una sola vez"}[nombre]
         a(f"| {nombre.capitalize()} | {d} a {h} | {uso} |")
     a("")
-    a("El orden quedó en el historial de git del repositorio de entrega, en tres commits:")
+    a("El orden quedó en el historial de git del repositorio de entrega, en tres commits del 17 de noviembre de 2026 "
+      "(`git log -- pronostico_corto_plazo`):")
     a("")
-    a("1. el protocolo, el código y el panel, sin resultados;")
-    a("2. la validación y lo elegido (`resultados/validacion.json` y `resultados/seleccion.json`);")
-    a("3. la prueba (`resultados/prueba.json`), calculada una sola vez con lo elegido y reentrenado con todo lo anterior al "
+    a(f"1. `{COMMITS['protocolo'][0]}` ({COMMITS['protocolo'][1]}): el protocolo, el código y el panel, sin resultados;")
+    a(f"2. `{COMMITS['validacion'][0]}` ({COMMITS['validacion'][1]}): la validación y lo elegido "
+      "(`resultados/validacion.json` y `resultados/seleccion.json`);")
+    a(f"3. `{COMMITS['prueba'][0]}` ({COMMITS['prueba'][1]}): la prueba (`resultados/prueba.json`), calculada una sola vez "
+      "con lo elegido y reentrenado con todo lo anterior al "
       "1 de julio de 2025.")
     a("")
     a("**Lo que hay que decir de 2025.** El equipo ya había usado esos meses en experimentos anteriores, con otro objetivo "
@@ -344,7 +352,7 @@ def main() -> None:
     a("")
     a("| Archivo | Qué es |")
     a("|---|---|")
-    a("| `PROTOCOLO.md` | El problema, la partición, las reglas de elección y lo que se reporta, escrito antes de entrenar |")
+    a("| `PROTOCOLO.md` | El problema, la partición, las reglas de elección y lo que se reporta, escrito antes de la validación |")
     a("| `exportar_eventos_subida.py` | Exporta de la base, en solo lectura y por tramos, los eventos de conteo con subidas |")
     a("| `preparar_panel.py` | Asigna cada subida a su segmento y arma `panel/`; verifica contra la tabla de Extreme |")
     a("| `revisar_sentido.py` | Mide cuánto confunde el sentido la regla del segmento más cercano |")
@@ -471,8 +479,10 @@ def bloque_entrega(ver: dict, val: dict, pru: dict) -> list[str]:
         f"{num(ic[0], 2, True)} a {num(ic[1], 2, True)} puntos); {frente('ruta', 30)} a 30 minutos y {frente('ruta', 120)} "
         "a 120 | `pronostico_corto_plazo/resultados/prueba.json` |",
         "| Los modelos se eligieron y se reportaron sobre los mismos meses de 2025 | El protocolo se confirmó en git antes "
-        "de entrenar: se entrena con 2023 y 2024, **se elige todo con enero a junio de 2025** y **se reporta una sola vez "
-        "con julio a diciembre de 2025**, en tres commits ordenados (protocolo, validación y prueba) | En la validación, el "
+        "de correr la validación: se entrena con 2023 y 2024, **se elige todo con enero a junio de 2025** y **se reporta una sola vez "
+        "con julio a diciembre de 2025**, en tres commits ordenados del 17-11-2026: protocolo "
+        f"(`{COMMITS['protocolo'][0]}`, {COMMITS['protocolo'][1]}), validación (`{COMMITS['validacion'][0]}`, "
+        f"{COMMITS['validacion'][1]}) y prueba (`{COMMITS['prueba'][0]}`, {COMMITS['prueba'][1]}) | En la validación, el "
         f"modelo elegido falla {pct(val60)} por ruta a 60 minutos (el promedio, {pct(base_val60)}); en la prueba, que no se "
         f"usó para elegir nada, {pct(r60['modelo']['wape'])} (el promedio, {pct(r60['promedio_dia_hora']['wape'])}) | "
         "`pronostico_corto_plazo/PROTOCOLO.md`, `pronostico_corto_plazo/resultados/validacion.json`, "

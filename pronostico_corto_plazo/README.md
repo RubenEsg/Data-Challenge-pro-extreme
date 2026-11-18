@@ -11,7 +11,7 @@ La retroalimentación del curso del 17 de noviembre de 2026 señaló tres cosas 
 | Lo que se señaló | Lo que pide la especificación v1.5 | Lo que se hizo |
 |---|---|---|
 | El pronóstico era a siete días por ruta y hora de salida: no es el problema pedido, y sus cifras no se comparan con las de otros equipos | «Predecir la demanda para horizontes configurables de 30, 60 y 120 minutos» (§2.2, RF-005) «por ruta, sentido, segmento y franja horaria» (§3.1, §9.1) | Cada media hora se pronostican las subidas de los siguientes 30, 60 y 120 minutos, en los tres niveles, con MAE, RMSE, WAPE y sMAPE por ruta y franja |
-| Los modelos se eligieron y se reportaron sobre los mismos meses de 2025 | «División cronológica en entrenamiento, validación y prueba reservada» (§9.3) | Se entrena con 2023 y 2024, se elige con enero a junio de 2025 y se reporta una vez con julio a diciembre de 2025. El protocolo se confirmó en git antes de entrenar |
+| Los modelos se eligieron y se reportaron sobre los mismos meses de 2025 | «División cronológica en entrenamiento, validación y prueba reservada» (§9.3) | Se entrena con 2023 y 2024, se elige con enero a junio de 2025 y se reporta una vez con julio a diciembre de 2025. El protocolo se confirmó en git antes de correr la validación |
 | El modelo por segmento se entrenó con 37 días: lo espacial no quedó validado | Pronóstico y sesgo «por ruta, sentido, segmento» (§9.1, §9.3) | Subidas por segmento de los tres años con la regla de Extreme, verificada contra su tabla. El modelo por segmento se entrena con más de dos años y se prueba en seis meses: 2.404.780 celdas de segmento e instante |
 
 El pronóstico a siete días del informe se conserva: es el que usa la programación semanal. Sus cifras no se comparan con las de aquí, porque son otro objetivo (pasajeros por hora de salida) y otro horizonte.
@@ -51,7 +51,7 @@ Se conserva la regla de Extreme porque es la definición oficial de la tabla. La
 
 ## Protocolo
 
-Está en [`PROTOCOLO.md`](PROTOCOLO.md), escrito antes de entrenar. En resumen:
+Está en [`PROTOCOLO.md`](PROTOCOLO.md), escrito y confirmado en git antes de correr la validación; hasta entonces solo se había comprobado que el código corría (`validar.py --rapido`: el 20 % de las filas, a 60 minutos, en la validación). En resumen:
 
 | Parte | Fechas | Para qué |
 |---|---|---|
@@ -59,11 +59,11 @@ Está en [`PROTOCOLO.md`](PROTOCOLO.md), escrito antes de entrenar. En resumen:
 | Validacion | 2025-01-01 a 2025-06-30 | elegir todo |
 | Prueba | 2025-07-01 a 2025-12-31 | reportar, una sola vez |
 
-El orden quedó en el historial de git del repositorio de entrega, en tres commits:
+El orden quedó en el historial de git del repositorio de entrega, en tres commits del 17 de noviembre de 2026 (`git log -- pronostico_corto_plazo`):
 
-1. el protocolo, el código y el panel, sin resultados;
-2. la validación y lo elegido (`resultados/validacion.json` y `resultados/seleccion.json`);
-3. la prueba (`resultados/prueba.json`), calculada una sola vez con lo elegido y reentrenado con todo lo anterior al 1 de julio de 2025.
+1. `9844dae` (19:26): el protocolo, el código y el panel, sin resultados;
+2. `fa04afb` (20:23): la validación y lo elegido (`resultados/validacion.json` y `resultados/seleccion.json`);
+3. `546cffa` (21:01): la prueba (`resultados/prueba.json`), calculada una sola vez con lo elegido y reentrenado con todo lo anterior al 1 de julio de 2025.
 
 **Lo que hay que decir de 2025.** El equipo ya había usado esos meses en experimentos anteriores, con otro objetivo (pasajeros por hora de salida, a siete días). Ninguna decisión de este experimento usa julio a diciembre, pero no es una prueba ciega en sentido estricto. Se pidió a Extreme un periodo de 2026 para tenerla.
 
@@ -215,7 +215,7 @@ python escribir_readme.py   # este archivo
 
 | Archivo | Qué es |
 |---|---|
-| `PROTOCOLO.md` | El problema, la partición, las reglas de elección y lo que se reporta, escrito antes de entrenar |
+| `PROTOCOLO.md` | El problema, la partición, las reglas de elección y lo que se reporta, escrito antes de la validación |
 | `exportar_eventos_subida.py` | Exporta de la base, en solo lectura y por tramos, los eventos de conteo con subidas |
 | `preparar_panel.py` | Asigna cada subida a su segmento y arma `panel/`; verifica contra la tabla de Extreme |
 | `revisar_sentido.py` | Mide cuánto confunde el sentido la regla del segmento más cercano |

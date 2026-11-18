@@ -1,7 +1,7 @@
 # Matriz de cumplimiento · Especificación técnica v1.5 (Extreme Technologies)
 
 **Data Challenge Pro Extreme – Sobusa 2026** · Universidad del Norte · Equipo: Abrahan Basto Martínez, Rubén Esguerra
-Fernández y Paula Gómez · 14 de noviembre de 2026.
+Fernández y Paula Gómez · 14 de noviembre de 2026; actualizada el 17 de noviembre de 2026.
 
 La matriz recorre la especificación técnica v1.5 del reto en su orden, de §1 a §20, y termina con la pregunta que debe
 resolver el sistema. Tiene 427 filas, cada una con un requisito, el lugar donde se cumple, su estado y la prueba o el
@@ -132,9 +132,11 @@ Conteo de las filas de esta matriz por estado.
   sin depender del bloque horario de Extreme (H10). Eso se probó con filas sintéticas y, en la réplica, con filas reales
   de la liquidación de tres viajes dentro de una transacción que se revierte (ver Cifras vigentes); con la réplica tal
   como está, el resumen de cada ejecución dice «sin_filas_fuente» (6.1-16, 6.1-18, 6.1-19, 7.3-3, 11.2-05). Además,
-  `timbradas_segmentos` solo trae ene–feb 2023: el modelo por segmento, el perfil de ocupación y el sesgo por segmento
-  no se pueden medir en 2025 (§3.1-M3, 9.1-a, 9.3-f, 10.1-c). Extreme debe volver a ejecutar la segmentación para el
-  proceso de Sobusa.
+  `timbradas_segmentos` solo trae ene–feb 2023, y con esos datos están hechos el modelo por segmento que sirve la API
+  y el perfil de ocupación (10.1-c). Para el pronóstico, las subidas por segmento de 2023 a 2025 ya no dependen de
+  Extreme: el 17-11-2026 se reconstruyeron con su misma regla (`pronostico_corto_plazo/panel/verificacion_extreme.json`), y lo que
+  falta está en «Pendiente de nuestra parte» (§3.1-M3, 9.1-a, 9.3-f). Para que las tablas oficiales tengan esos años,
+  Extreme debe volver a ejecutar la segmentación del proceso de Sobusa.
 - Sentido de los segmentos. Las exportaciones no traen el sentido de cada segmento: se aproxima con la mitad del ciclo
   (supuesto S9 de `documentos/mapeo_especificacion.md`), y Extreme debe confirmarlo con el diccionario de datos (19-1;
   la pregunta está en H4). De eso dependen el pronóstico, las variables y el sesgo por sentido, el sentido de la ALT-002
@@ -226,8 +228,14 @@ Conteo de las filas de esta matriz por estado.
 
 **Pendiente de nuestra parte**
 
-- Nada. Cada fila en Parcial depende de información de Extreme o de la validación de Sobusa, y está en una de las dos
-  listas de arriba.
+- Llevar a la API el pronóstico de corto plazo por ruta, sentido y segmento (`pronostico_corto_plazo/`), validado el 17-11-2026 con
+  tres años de subidas por segmento, y reemplazar con él el modelo por segmento de ene–feb 2023 que la API sirve hoy.
+  De eso dependen §3.1-M3, 9.1-a y 9.3-f, que además dependen del sentido de cada segmento (lista de Extreme). Es el
+  primer pendiente de `PLAN_EVOLUCION.md` (sección 7).
+- Reconstruir también las bajadas por segmento de 2023 a 2025, con la misma regla, para ampliar el perfil histórico de
+  ocupación, que hoy solo tiene ene–feb 2023 (10.1-c, que además depende de la estacionalidad de Extreme).
+- Las demás filas en Parcial dependen de información de Extreme o de la validación de Sobusa, y están en una de las
+  dos listas de arriba.
 
 ## §1 Introducción
 

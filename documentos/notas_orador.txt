@@ -46,7 +46,7 @@ desde Python.
 Esta lámina responde a la retroalimentación del curso. El enunciado pide pronosticar la demanda de los siguientes
 treinta, sesenta y ciento veinte minutos por ruta, sentido y segmento, y así lo hicimos: cada media hora, con lo
 observado hasta ese instante. Para no elegir y reportar sobre los mismos meses, escribimos el protocolo antes de
-entrenar: todo se eligió con enero a junio de 2025 y la prueba, de julio a diciembre, se calculó una sola vez. Por ruta
+validar: todo se eligió con enero a junio de 2025 y la prueba, de julio a diciembre, se calculó una sola vez. Por ruta
 y a sesenta minutos el modelo se equivoca {{CortoRutaSesenta}} %, frente a {{CortoRutaSesentaBase}} % del promedio por
 día y hora, que es la línea base del enunciado. Para lo espacial asignamos a su segmento las {{CortoSubidas}} subidas
 de los tres años con la regla de Extreme. Por segmento el modelo se equivoca {{CortoSegmentoSesenta}} %, frente a

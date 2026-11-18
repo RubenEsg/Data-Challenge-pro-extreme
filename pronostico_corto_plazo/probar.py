@@ -73,19 +73,20 @@ def main() -> None:
     for nivel in C.NIVELES:
         for h in C.HORIZONTES:
             correr(nivel, h, sel["conjunto"][nivel], "final", guardar_importancia=True)
-    # estructura elegida: sentido como suma de segmentos y segmento conciliado con la ruta, si así se eligió
+    # estructura elegida: sentido como suma de segmentos y segmento conciliado con la ruta, si así se eligió. La suma
+    # va primero y usa el modelo directo por segmento, que es exactamente lo que midió validar.py.
     for h in C.HORIZONTES:
         for idruta, r in rutas.items():
             seg, rut = pred[("segmento", h, "final", idruta)], pred[("ruta", h, "final", idruta)]
-            if sel["estructura"]["segmento"] == "conciliado_con_la_ruta":
-                total = seg["p"].sum(axis=2, keepdims=True)
-                with np.errstate(invalid="ignore", divide="ignore"):
-                    seg["p"] = np.where(np.isnan(seg["y"]), np.nan, np.where(total > 0, seg["p"] * rut["p"] / total, seg["p"]))
             if sel["estructura"]["sentido"] == "suma_de_segmentos":
                 ida = (r.seg["sentido"] == "ida").to_numpy()
                 sen = pred[("sentido", h, "final", idruta)]
                 suma = np.stack([seg["p"][:, :, ida].sum(axis=2), seg["p"][:, :, ~ida].sum(axis=2)], axis=2)
                 sen["p"] = np.where(np.isnan(sen["y"]), np.nan, suma)
+            if sel["estructura"]["segmento"] == "conciliado_con_la_ruta":
+                total = seg["p"].sum(axis=2, keepdims=True)
+                with np.errstate(invalid="ignore", divide="ignore"):
+                    seg["p"] = np.where(np.isnan(seg["y"]), np.nan, np.where(total > 0, seg["p"] * rut["p"] / total, seg["p"]))
 
     def celdas(nivel, h, idruta, clave="final"):
         o = pred[(nivel, h, clave, idruta)]

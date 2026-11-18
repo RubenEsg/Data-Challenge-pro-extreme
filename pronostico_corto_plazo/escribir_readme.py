@@ -1,0 +1,422 @@
+"""Escribe README.md con las cifras de panel/ y resultados/: ninguna se escribe a mano. También reescribe, en el
+README de la entrega (la carpeta de arriba), la sección «Correcciones tras la retroalimentación del curso», que va
+entre las marcas corto_plazo.
+
+Uso (desde esta carpeta):  python escribir_readme.py
+"""
+from __future__ import annotations
+
+import json
+
+import comun as C
+
+MENOS = "−"
+MARCA_INI, MARCA_FIN = "<!-- corto_plazo:inicio", "<!-- corto_plazo:fin -->"
+NOMBRE_CONJUNTO = {"semanal": "semanal", "con_hoy": "con lo de hoy", "completo": "completo"}
+NOMBRE_NIVEL = {"ruta": "Ruta", "sentido": "Sentido", "segmento": "Segmento"}
+
+
+def num(x, dec: int = 2, signo: bool = False) -> str:
+    if x is None:
+        return "—"
+    s = f"{abs(x):,.{dec}f}".replace(",", "§").replace(".", ",").replace("§", ".")
+    cero = not (set(s) - set("0,."))
+    return (MENOS if x < 0 and not cero else "+" if signo and x > 0 and not cero else "") + s
+
+
+def pct(x, dec: int = 2) -> str:
+    return num(x, dec) + " %"
+
+
+def leer(rel: str) -> dict:
+    return json.loads((C.AQUI / rel).read_text(encoding="utf-8"))
+
+
+def main() -> None:
+    ver, sen = leer("panel/verificacion_extreme.json"), leer("panel/revision_sentido.json")
+    val, sel, pru = leer("resultados/validacion.json"), leer("resultados/seleccion.json"), leer("resultados/prueba.json")
+    fig = leer("resultados/figuras.json")["dia_de_ejemplo"]
+    v = ver["verificacion_extreme"]
+    niv = pru["niveles"]
+    r60 = niv["ruta"]["60"]
+    m60, p60 = r60["todas_las_rutas"]["modelo"], r60["todas_las_rutas"]["promedio_dia_hora"]
+    ic60 = r60["todas_las_rutas"]["ic95"]["modelo_menos_promedio_dia_hora"]["ic95"]
+    seg60, s60 = niv["segmento"]["60"]["todas_las_rutas"], pru["por_segmento"]["60"]
+    sec = pru["secundarios"]
+    geo, tv = sen["geometria"], sen["tiempo_de_viaje"]
+    L: list[str] = []
+    a = L.append
+
+    a("# Pronóstico de corto plazo por ruta, sentido y segmento")
+    a("")
+    a("Este es el pronóstico que pide el enunciado: las subidas de los siguientes **30, 60 y 120 minutos**, por **ruta, sentido "
+      "y segmento**, con lo observado hasta el instante del pronóstico. Se eligió con unos meses y se reportó, una sola vez, con "
+      "otros.")
+    a("")
+    a(f"**Resultado principal** (prueba de julio a diciembre de 2025, por ruta, a 60 minutos): el modelo se equivoca en "
+      f"**{pct(m60['wape'])}** de las subidas y el promedio por día y hora, la línea base del enunciado, en {pct(p60['wape'])}. "
+      f"La diferencia es de {num(m60['wape'] - p60['wape'], 2, True)} puntos, con IC del 95 % de {num(ic60[0], 2, True)} a "
+      f"{num(ic60[1], 2, True)}.")
+    a("")
+    a("## Por qué existe")
+    a("")
+    a("La retroalimentación del curso del 17 de noviembre de 2026 señaló tres cosas de la entrega. Esto es lo que se hizo con "
+      "cada una:")
+    a("")
+    a("| Lo que se señaló | Lo que pide la especificación v1.5 | Lo que se hizo |")
+    a("|---|---|---|")
+    a("| El pronóstico era a siete días por ruta y hora de salida: no es el problema pedido, y sus cifras no se comparan con "
+      "las de otros equipos | «Predecir la demanda para horizontes configurables de 30, 60 y 120 minutos» (§2.2, RF-005) "
+      "«por ruta, sentido, segmento y franja horaria» (§3.1, §9.1) | Cada media hora se pronostican las subidas de los "
+      "siguientes 30, 60 y 120 minutos, en los tres niveles, con MAE, RMSE, WAPE y sMAPE por ruta y franja |")
+    a("| Los modelos se eligieron y se reportaron sobre los mismos meses de 2025 | «División cronológica en entrenamiento, "
+      "validación y prueba reservada» (§9.3) | Se entrena con 2023 y 2024, se elige con enero a junio de 2025 y se reporta "
+      "una vez con julio a diciembre de 2025. El protocolo se confirmó en git antes de entrenar |")
+    a(f"| El modelo por segmento se entrenó con 37 días: lo espacial no quedó validado | Pronóstico y sesgo «por ruta, sentido, "
+      f"segmento» (§9.1, §9.3) | Subidas por segmento de los tres años con la regla de Extreme, verificada contra su tabla. El "
+      f"modelo por segmento se entrena con más de dos años y se prueba en seis meses: {num(seg60['modelo']['n'], 0)} celdas de "
+      f"segmento e instante |")
+    a("")
+    a("El pronóstico a siete días del informe se conserva: es el que usa la programación semanal. Sus cifras no se comparan "
+      "con las de aquí, porque son otro objetivo (pasajeros por hora de salida) y otro horizonte.")
+    a("")
+    a("## El problema")
+    a("")
+    a("- **Qué se pronostica.** En cada instante *t* (cada media hora, de 04:00 a 21:00: 35 instantes por día), las subidas de "
+      "las ventanas [*t*, *t* + 30), [*t*, *t* + 60) y [*t*, *t* + 120).")
+    a("- **A qué nivel.** La ruta (3), el sentido (ida y regreso) y el segmento: los 386 segmentos oficiales de 500 m de "
+      "`rutas_segmentos` (135 en SILENCIO, 123 en CRA 54 y 128 en CL 72).")
+    a("- **Con qué información.** Solo lo ocurrido antes de *t* y el calendario. Ninguna variable usa nada de *t* en adelante.")
+    a("- **Qué cuenta como subida.** Cada evento de conteo con subidas, en el bloque de 15 minutos del instante en que "
+      "ocurrió, de todos los viajes.")
+    a("")
+    a("## Los datos")
+    a("")
+    a(f"La tabla `timbradas_segmentos` de la base del reto solo cubre del {v['periodo_tabla_extreme'][0]} al "
+      f"{v['periodo_tabla_extreme'][1]}. Para tener los tres años se exportaron, en solo lectura, los "
+      f"{num(ver['eventos']['eventos'], 0)} eventos de conteo con subidas (`exportar_eventos_subida.py`) y a cada uno se le "
+      f"asignó el segmento con la regla de Extreme: el segmento activo más cercano de su ruta (`preparar_panel.py`).")
+    a("")
+    a("**La regla propia reproduce la tabla de Extreme** en los 58 días que la base trae (`panel/verificacion_extreme.json`):")
+    a("")
+    a("| Comprobación | Resultado |")
+    a("|---|---|")
+    a(f"| Subidas de los {num(v['viajes_en_la_tabla_de_extreme'], 0)} viajes de la tabla | {num(v['subidas_extreme'], 0)} en la "
+      f"tabla de Extreme y {num(v['subidas_propias_en_esos_viajes'], 0)} con la regla propia |")
+    a(f"| Subidas que caen en el mismo segmento | {pct(v['subidas_en_el_mismo_segmento_pct'], 3)} |")
+    a(f"| Celdas de viaje y segmento idénticas | {pct(v['celdas_identicas_pct'], 3)} de {num(v['celdas_viaje_segmento_con_subidas'], 0)} |")
+    a(f"| Viajes con el mismo total | {pct(v['viajes_con_el_mismo_total_pct'], 0)} |")
+    a("")
+    a(f"El panel (`panel/subidas_segmento_15min.parquet`) tiene {num(ver['panel']['subidas'], 0)} subidas en "
+      f"{num(ver['panel']['filas'], 0)} celdas de ruta, día, bloque de 15 minutos y segmento, del {ver['panel']['desde']} al "
+      f"{ver['panel']['hasta']}.")
+    a("")
+    a("- **Días sin datos.** Un día de una ruta con menos del 5 % de las subidas habituales no se entrena ni se evalúa. Son "
+      "11 días por ruta: el último día de cada mes de febrero a diciembre de 2025, que la base no trae.")
+    a(f"- **Sentido.** No viene en los datos. «Ida» es la primera mitad del ciclo y «regreso» la segunda, como en la API. "
+      f"En el {pct(min(g['regreso_con_la_ida_a_menos_de_30_m_pct'] for g in geo.values()), 0)}–"
+      f"{pct(max(g['regreso_con_la_ida_a_menos_de_30_m_pct'] for g in geo.values()), 0)} del regreso la ida pasa a menos de "
+      f"30 m, y la regla del segmento más cercano no mira en qué parte del viaje va el bus. Se midió cuánto afecta "
+      f"(`revisar_sentido.py`, `panel/revision_sentido.json`):")
+    a("")
+    a("| Ruta | Regreso con la ida a menos de 30 m | Subidas en un segmento coherente con el tiempo de viaje (±45 min) | "
+      "Subidas que quedarían mejor en el otro sentido |")
+    a("|---|---|---|---|")
+    for ruta in C.RUTAS.values():
+        a(f"| {ruta} | {pct(geo[ruta]['regreso_con_la_ida_a_menos_de_30_m_pct'], 1)} | "
+          f"{pct(tv[ruta]['subidas_a_menos_de_45_min_pct'], 1)} | "
+          f"{pct(tv[ruta]['de_ellas_cuadran_en_el_otro_sentido_pct_del_total'], 1)} |")
+    a("")
+    a("Se conserva la regla de Extreme porque es la definición oficial de la tabla. Las cifras por sentido llevan esa "
+      "aproximación.")
+    a("")
+    a("## Protocolo")
+    a("")
+    a("Está en [`PROTOCOLO.md`](PROTOCOLO.md), escrito antes de entrenar. En resumen:")
+    a("")
+    a("| Parte | Fechas | Para qué |")
+    a("|---|---|---|")
+    for nombre, (d, h) in C.PERIODOS.items():
+        uso = {"entrenamiento": "ajustar los modelos", "validacion": "elegir todo", "prueba": "reportar, una sola vez"}[nombre]
+        a(f"| {nombre.capitalize()} | {d} a {h} | {uso} |")
+    a("")
+    a("El orden quedó en el historial de git del repositorio de entrega, en tres commits:")
+    a("")
+    a("1. el protocolo, el código y el panel, sin resultados;")
+    a("2. la validación y lo elegido (`resultados/validacion.json` y `resultados/seleccion.json`);")
+    a("3. la prueba (`resultados/prueba.json`), calculada una sola vez con lo elegido y reentrenado con todo lo anterior al "
+      "1 de julio de 2025.")
+    a("")
+    a("**Lo que hay que decir de 2025.** El equipo ya había usado esos meses en experimentos anteriores, con otro objetivo "
+      "(pasajeros por hora de salida, a siete días). Ninguna decisión de este experimento usa julio a diciembre, pero no es "
+      "una prueba ciega en sentido estricto. Se pidió a Extreme un periodo de 2026 para tenerla.")
+    a("")
+    a("## Lo que se eligió, con la validación")
+    a("")
+    a("Líneas base: el **promedio por día y hora** (la misma ventana en el mismo día de la semana de las 8 semanas "
+      "anteriores) y la **última semana**, que son las del enunciado, y la **persistencia** (lo que subió en los mismos "
+      "minutos justo antes). Candidato: LightGBM con pérdida de Poisson, un modelo por nivel, ruta y horizonte.")
+    a("")
+    a("WAPE medio de los tres horizontes en la validación, en %:")
+    a("")
+    a("| Nivel | Promedio por día y hora | Modelo: semanal | Modelo: con lo de hoy | Modelo: completo | Elegido |")
+    a("|---|---|---|---|---|---|")
+    for nivel in C.NIVELES:
+        t = val["A_conjunto"][nivel]
+        a(f"| {NOMBRE_NIVEL[nivel]} | {num(val['lineas_base'][nivel]['promedio_dia_hora']['wape_medio'])} | "
+          f"{num(t['semanal']['wape_medio'])} | {num(t['con_hoy']['wape_medio'])} | {num(t['completo']['wape_medio'])} | "
+          f"{NOMBRE_CONJUNTO[sel['conjunto'][nivel]]} |")
+    a("")
+    a("- `semanal`: calendario y la misma ventana de las semanas anteriores. Es lo que se sabe con siete días de antelación.")
+    a("- `con lo de hoy`: además, ayer, la última semana y lo observado hoy hasta el instante.")
+    a("- `completo`: además, las salidas ya despachadas y, por segmento, lo observado en los segmentos vecinos y las "
+      "salidas que llegarán al segmento en la ventana.")
+    a("")
+    e = val["C_estructura"]
+    a(f"- **Hiperparámetros** (tres configuraciones fijadas de antemano): "
+      + "; ".join(f"{NOMBRE_NIVEL[n].lower()}, «{sel['hiper'][n]['nombre']}»" for n in C.NIVELES) + ".")
+    a(f"- **Sentido:** {'la suma de sus segmentos' if sel['estructura']['sentido'] == 'suma_de_segmentos' else 'modelo directo'} "
+      f"(directo {pct(e['sentido']['directo']['wape_medio'])}; suma de segmentos {pct(e['sentido']['suma_de_segmentos']['wape_medio'])}).")
+    a(f"- **Segmento:** {'conciliado con el pronóstico de la ruta' if sel['estructura']['segmento'] == 'conciliado_con_la_ruta' else 'modelo directo'} "
+      f"(directo {pct(e['segmento']['directo']['wape_medio'])}; conciliado {pct(e['segmento']['conciliado_con_la_ruta']['wape_medio'])}; "
+      f"repartir el pronóstico de la ruta con las fracciones históricas, {pct(e['segmento']['reparto_fijo_de_la_ruta']['wape_medio'])}).")
+    a("- **Banda P10–P90:** cuantiles conformales por tramo del pronóstico, ajustados con los errores de la validación.")
+    a("")
+    a("## Resultados de la prueba")
+    a("")
+    a(f"Julio a diciembre de 2025: {pru['dias_del_periodo']} días, de los que {min(pru['dias_con_datos_en_la_prueba'].values())} "
+      f"tienen datos en cada ruta. Todas las cifras salen de `resultados/prueba.json`.")
+    a("")
+    a("![WAPE por nivel y horizonte](figuras/fig_cp_niveles.png)")
+    a("")
+    a("**WAPE (%) de cada pronóstico sobre las mismas celdas**, con el IC del 95 % de la diferencia entre el modelo y el "
+      "promedio por día y hora (bootstrap de bloques de 7 días, 2.000 réplicas) y la cobertura de la banda P10–P90 (objetivo: 80 %):")
+    a("")
+    a("| Nivel | Horizonte | Promedio por día y hora | Última semana | Persistencia | **Modelo** | Modelo − promedio [IC 95 %] | Cobertura P10–P90 |")
+    a("|---|---|---|---|---|---|---|---|")
+    for nivel in C.NIVELES:
+        for h in C.HORIZONTES:
+            b = niv[nivel][str(h)]
+            t = b["todas_las_rutas"]
+            ic = t["ic95"]["modelo_menos_promedio_dia_hora"]["ic95"]
+            a(f"| {NOMBRE_NIVEL[nivel]} | {h} min | {num(t['promedio_dia_hora']['wape'])} | {num(t['ultima_semana']['wape'])} | "
+              f"{num(t['persistencia']['wape'])} | **{num(t['modelo']['wape'])}** | "
+              f"{num(t['modelo']['wape'] - t['promedio_dia_hora']['wape'], 2, True)} [{num(ic[0], 2, True)}; {num(ic[1], 2, True)}] | "
+              f"{pct(b['banda_p10_p90']['todas_las_rutas']['cobertura_pct'], 1)} |")
+    a("")
+    a("**Por ruta** (modelo; entre paréntesis, el promedio por día y hora):")
+    a("")
+    a("| Ruta | Subidas medias en 60 min | WAPE 30 min | WAPE 60 min | WAPE 120 min | MAE 60 min | RMSE 60 min | sMAPE 60 min | Sesgo 60 min |")
+    a("|---|---|---|---|---|---|---|---|---|")
+    for ruta in C.RUTAS.values():
+        celdas = []
+        for h in C.HORIZONTES:
+            x = niv["ruta"][str(h)]["por_ruta"][ruta]
+            celdas.append(f"{num(x['modelo']['wape'])} ({num(x['promedio_dia_hora']['wape'])})")
+        x = niv["ruta"]["60"]["por_ruta"][ruta]["modelo"]
+        a(f"| {ruta} | {num(x['media_real'], 0)} | " + " | ".join(celdas) + f" | {num(x['mae'], 1)} | {num(x['rmse'], 1)} | "
+          f"{pct(x['smape'], 1)} | {num(x['sesgo_pct'], 2, True)} % |")
+    a("")
+    a("**Por franja, a 60 minutos y por ruta** (las tres rutas juntas):")
+    a("")
+    a("| Franja | Modelo | Promedio por día y hora | Sesgo del modelo |")
+    a("|---|---|---|---|")
+    fr = r60["todas_las_rutas"]["por_franja"]
+    for nombre in [f[0] for f in C.FRANJAS] + ["pico", "valle"]:
+        etiqueta = {"pico": "**Pico** (06–08 y 17–19)", "valle": "**Valle** (el resto)"}.get(nombre, nombre)
+        a(f"| {etiqueta} | {pct(fr['modelo'][nombre]['wape'])} | {pct(fr['promedio_dia_hora'][nombre]['wape'])} | "
+          f"{num(fr['modelo'][nombre]['sesgo_pct'], 2, True)} % |")
+    a("")
+    tipos = r60["por_tipo_de_dia"]
+    meses = r60["por_mes"]
+    a("- **Por tipo de día** (60 minutos, por ruta): "
+      + "; ".join(f"{k}, {pct(x['modelo'])} frente a {pct(x['promedio_dia_hora'])}" for k, x in tipos.items()) + ".")
+    a("- **Por mes** (60 minutos, por ruta): el modelo va de "
+      f"{pct(min(x['modelo'] for x in meses.values()))} a {pct(max(x['modelo'] for x in meses.values()))} y gana al promedio en "
+      f"{sum(x['modelo'] < x['promedio_dia_hora'] for x in meses.values())} de los {len(meses)} meses.")
+    a("")
+    a("![Un día de la prueba](figuras/fig_cp_dia.png)")
+    a("")
+    a(f"El día de la figura es el {'{2}-{1}-{0}'.format(*fig['fecha'].split('-'))}: el día laboral de la prueba con el error "
+      f"mediano del modelo en CRA 54 a 60 minutos ({pct(fig['wape_modelo'], 1)}; ese día el promedio por día y hora falla "
+      f"{pct(fig['wape_promedio_ese_dia'], 1)}). Se eligió con esa regla para no escogerlo a ojo.")
+    a("")
+    a("![Error según la hora](figuras/fig_cp_instante.png)")
+    a("")
+    a("## Lo espacial: por sentido y por segmento")
+    a("")
+    a("![Subidas reales y pronosticadas por segmento](figuras/fig_cp_segmentos.png)")
+    a("")
+    a(f"- **Por segmento.** En las {num(seg60['modelo']['n'], 0)} celdas de segmento e instante de la prueba, a 60 minutos, el "
+      f"modelo se equivoca en {pct(seg60['modelo']['wape'])} y el promedio por día y hora en {pct(seg60['promedio_dia_hora']['wape'])}. "
+      f"El error es alto en los dos porque cada celda trae pocas subidas: {num(seg60['modelo']['media_real'], 1)} en promedio.")
+    a(f"- **Dónde gana.** El modelo gana al promedio en {s60['segmentos_en_que_gana_al_promedio']} de los "
+      f"{s60['segmentos_con_subidas']} segmentos con subidas, que llevan el {pct(s60['subidas_en_segmentos_en_que_gana_pct'], 1)} "
+      f"de las subidas.")
+    a(f"- **Sesgo por segmento.** Su valor absoluto mediano es {pct(s60['sesgo_abs_mediano_pct'], 1)}; ponderado por subidas, "
+      f"{pct(s60['sesgo_abs_medio_ponderado_pct'], 1)}. En {s60['segmentos_con_sesgo_abs_menor_de_5_pct']} segmentos queda por "
+      f"debajo del 5 %. El detalle de cada segmento está en `resultados/segmentos_prueba.csv`.")
+    a("")
+    a("**Por sentido, a 60 minutos:**")
+    a("")
+    a("| Ruta y sentido | Modelo | Promedio por día y hora | Sesgo del modelo |")
+    a("|---|---|---|---|")
+    for clave, x in pru["por_sentido"]["60"].items():
+        a(f"| {clave} | {pct(x['modelo']['wape'])} | {pct(x['promedio_dia_hora']['wape'])} | {num(x['modelo']['sesgo_pct'], 2, True)} % |")
+    a("")
+    a("## Cuánto aporta lo observado en el día y cuánto cuesta que la captura llegue tarde")
+    a("")
+    a("Dos análisis que el protocolo declaró de antemano, por ruta (WAPE en %):")
+    a("")
+    a("| Horizonte | Promedio por día y hora | Modelo con lo que se sabe 7 días antes | Modelo elegido | … con 15 min de retraso | … con 30 min de retraso |")
+    a("|---|---|---|---|---|---|")
+    for h in C.HORIZONTES:
+        ret = sec["retraso_de_la_captura"][str(h)]
+        a(f"| {h} min | {num(niv['ruta'][str(h)]['todas_las_rutas']['promedio_dia_hora']['wape'])} | "
+          f"{num(sec['informacion_del_dia'][str(h)]['semanal']['wape'])} | **{num(ret['0'])}** | {num(ret.get('15'))} | {num(ret.get('30'))} |")
+    a("")
+    a("![Información del día y retraso de la captura](figuras/fig_cp_informacion.png)")
+    a("")
+    i60 = sec["informacion_del_dia"]["60"]
+    a(f"- El mismo modelo con solo lo que se sabe una semana antes falla un {pct(i60['semanal']['wape'])} a 60 minutos; con lo "
+      f"observado hasta el instante, un {pct(i60['elegido']['wape'])}. Esa diferencia es lo que le faltaba al pronóstico a "
+      f"siete días para ser el del enunciado.")
+    if sec["retraso_de_la_captura"]["60"].get("30") is not None:
+        a(f"- Si la captura llega con 30 minutos de retraso, el error a 60 minutos sube a "
+          f"{pct(sec['retraso_de_la_captura']['60']['30'])}.")
+    imp = pru["importancia"]["ruta"]["60"]
+    a("- Las variables que más pesan en el modelo de ruta a 60 minutos (parte de la ganancia de los árboles): "
+      + ", ".join(f"`{k}` {pct(x * 100, 0)}" for k, x in list(imp.items())[:5]) + ".")
+    a("")
+    a("## Limitaciones")
+    a("")
+    a("- **El sentido es una aproximación** (la mitad del ciclo) y la regla del segmento más cercano deja una parte de las "
+      "subidas en el sentido contrario (tabla de «Los datos»).")
+    a("- **La prueba no es ciega en sentido estricto:** 2025 se conocía por los experimentos anteriores, aunque con otro "
+      "objetivo.")
+    a("- **Las subidas son demanda observada.** Dependen de los buses que pasaron: si no pasa bus, no hay subida. El "
+      "modelo pronostica lo que se va a contar, no la gente que espera.")
+    a("- **Supone que el conteo llega en vivo.** La especificación lo prevé (el disparador de conteo), pero la latencia real "
+      "de la captura no se conoce; por eso se midió el efecto de 15 y 30 minutos de retraso.")
+    a("- **No está integrado en la API.** La API pronostica hoy por hora de salida con su propio modelo. Llevar este a la "
+      "API es el siguiente paso (`PLAN_EVOLUCION.md`).")
+    a("- **Once días de 2025 sin eventos** (los últimos de mes) quedan fuera del entrenamiento y de la evaluación.")
+    a("")
+    a("## Cómo reproducirlo")
+    a("")
+    a("Con las versiones de `requirements_cuaderno.txt` (LightGBM " + pru["versiones"]["lightgbm"] + ", semilla 42), desde esta carpeta:")
+    a("")
+    a("```")
+    a("python validar.py           # elige con la validación: resultados/validacion.json y seleccion.json")
+    a("python probar.py --repetir  # recalcula la prueba con lo elegido: resultados/prueba.json")
+    a("python figuras.py           # figuras/")
+    a("python escribir_readme.py   # este archivo")
+    a("```")
+    a("")
+    a("`validar.py` y `probar.py` solo leen `panel/`, que viaja en la entrega. `exportar_eventos_subida.py` y "
+      "`preparar_panel.py` arman `panel/` desde la base del reto y necesitan el acceso de solo lectura.")
+    a("")
+    a("| Archivo | Qué es |")
+    a("|---|---|")
+    a("| `PROTOCOLO.md` | El problema, la partición, las reglas de elección y lo que se reporta, escrito antes de entrenar |")
+    a("| `exportar_eventos_subida.py` | Exporta de la base, en solo lectura y por tramos, los eventos de conteo con subidas |")
+    a("| `preparar_panel.py` | Asigna cada subida a su segmento y arma `panel/`; verifica contra la tabla de Extreme |")
+    a("| `revisar_sentido.py` | Mide cuánto confunde el sentido la regla del segmento más cercano |")
+    a("| `comun.py` | Datos, variables, líneas base, modelo, métricas e intervalos |")
+    a("| `validar.py` · `probar.py` | La elección con la validación y el único cálculo de la prueba |")
+    a("| `figuras.py` · `escribir_readme.py` | Las figuras y este archivo, desde `resultados/` |")
+    a("| `panel/` | Subidas por segmento y bloque de 15 minutos, salidas, segmentos, calendario y las dos verificaciones |")
+    a("| `resultados/` | `validacion.json`, `seleccion.json`, `prueba.json`, las predicciones por ruta y por sentido y el detalle por segmento |")
+    a("")
+    (C.AQUI / "README.md").write_text("\n".join(L), encoding="utf-8")
+    print("README.md:", len(L), "líneas")
+    actualizar_entrega(bloque_entrega(ver, val, pru))
+
+
+def bloque_entrega(ver: dict, val: dict, pru: dict) -> list[str]:
+    """La sección «Correcciones tras la retroalimentación del curso» del README de la entrega, con sus cifras."""
+    niv = pru["niveles"]
+
+    def fila(nivel: str, h: int) -> dict:
+        return niv[nivel][str(h)]["todas_las_rutas"]
+
+    def frente(nivel: str, h: int) -> str:
+        t = fila(nivel, h)
+        return f"{pct(t['modelo']['wape'])} frente a {pct(t['promedio_dia_hora']['wape'])}"
+
+    r60 = fila("ruta", 60)
+    ic = r60["ic95"]["modelo_menos_promedio_dia_hora"]["ic95"]
+    s60 = pru["por_segmento"]["60"]
+    v = ver["verificacion_extreme"]
+    val60 = val["elegidos_con_todas_las_filas"]["ruta"]["60"]["wape"]
+    base_val60 = val["lineas_base"]["ruta"]["promedio_dia_hora"]["60"]["wape"]
+    sem60 = pru["secundarios"]["informacion_del_dia"]["60"]["semanal"]["wape"]
+    return [
+        MARCA_INI + " (bloque generado por pronostico_corto_plazo/escribir_readme.py: no editar a mano) -->",
+        "## Correcciones tras la retroalimentación del curso (17 de noviembre de 2026)",
+        "",
+        "La retroalimentación señaló tres faltas de la entrega. Las tres se corrigieron en la carpeta "
+        "[`pronostico_corto_plazo/`](pronostico_corto_plazo/README.md), que resuelve el problema tal como lo pide la "
+        "especificación: **el pronóstico de las subidas de los siguientes 30, 60 y 120 minutos por ruta, sentido y "
+        "segmento**. En el informe y en el cuaderno es la sección P.",
+        "",
+        "| Lo que se señaló | Lo que se hizo | Resultado | Evidencia |",
+        "|---|---|---|---|",
+        "| Se pronosticaba a siete días por ruta y hora de salida: no es el problema que se pidió, y las cifras no se "
+        "pueden comparar con las de otros equipos | Cada media hora, de 04:00 a 21:00, se pronostican las subidas de los "
+        "siguientes 30, 60 y 120 minutos, con MAE, RMSE, WAPE y sMAPE por ruta y franja y frente a las líneas base del "
+        "enunciado (promedio por día y hora y última semana) | Por ruta, en la prueba: WAPE de "
+        f"**{frente('ruta', 60)}** del promedio por día y hora a 60 minutos (diferencia con IC del 95 % de "
+        f"{num(ic[0], 2, True)} a {num(ic[1], 2, True)} puntos); {frente('ruta', 30)} a 30 minutos y {frente('ruta', 120)} "
+        "a 120 | `pronostico_corto_plazo/resultados/prueba.json` |",
+        "| Los modelos se eligieron y se reportaron sobre los mismos meses de 2025 | El protocolo se confirmó en git antes "
+        "de entrenar: se entrena con 2023 y 2024, **se elige todo con enero a junio de 2025** y **se reporta una sola vez "
+        "con julio a diciembre de 2025**, en tres commits ordenados (protocolo, validación y prueba) | En la validación, el "
+        f"modelo elegido falla {pct(val60)} por ruta a 60 minutos (el promedio, {pct(base_val60)}); en la prueba, que no se "
+        f"usó para elegir nada, {pct(r60['modelo']['wape'])} (el promedio, {pct(r60['promedio_dia_hora']['wape'])}) | "
+        "`pronostico_corto_plazo/PROTOCOLO.md`, `resultados/validacion.json`, `resultados/seleccion.json` y el historial "
+        "de git |",
+        "| El modelo por segmento se entrenó con 37 días: lo espacial no quedó validado | Se asignaron a su segmento las "
+        f"subidas de los tres años ({num(ver['panel']['subidas'], 0)}) con la regla de Extreme, que reproduce su tabla "
+        f"en los 58 días que la base trae (el {pct(v['subidas_en_el_mismo_segmento_pct'], 3)} de las subidas en el mismo "
+        "segmento). El modelo por segmento se entrena con más de dos años y se prueba en seis meses | A 60 minutos: por "
+        f"sentido, {frente('sentido', 60)}; por segmento, {frente('segmento', 60)}, en "
+        f"{num(fila('segmento', 60)['modelo']['n'], 0)} celdas de segmento e instante. El modelo gana al promedio en "
+        f"{s60['segmentos_en_que_gana_al_promedio']} de los {s60['segmentos_con_subidas']} segmentos con subidas | "
+        "`pronostico_corto_plazo/panel/verificacion_extreme.json`, `resultados/segmentos_prueba.csv` |",
+        "",
+        "Lo que se conserva y lo que falta:",
+        "",
+        "- **El pronóstico a siete días se conserva** porque es el que usa la programación semanal, pero ya no se presenta "
+        "como el del enunciado. Con el protocolo nuevo, el modelo que solo usa lo que se sabe una semana antes falla "
+        f"{pct(sem60)} por ruta a 60 minutos en la prueba; lo observado en el mismo día lo baja a {pct(r60['modelo']['wape'])}.",
+        "- **La prueba no es ciega en sentido estricto:** los meses de 2025 se conocían por los experimentos anteriores, con "
+        "otro objetivo. Ninguna decisión del experimento nuevo usa julio a diciembre.",
+        "- **El sentido es una aproximación** (la mitad del ciclo), y se midió cuánto afecta "
+        "(`pronostico_corto_plazo/panel/revision_sentido.json`).",
+        "- **Falta llevarlo a la API.** La API sigue pronosticando por hora de salida, y su modelo por segmento es el de 37 "
+        "días. Integrar este pronóstico es el primer paso de `PLAN_EVOLUCION.md`.",
+        "",
+        MARCA_FIN,
+    ]
+
+
+def actualizar_entrega(lineas: list[str]) -> None:
+    """Reescribe, en el README de la entrega (la carpeta de arriba), el bloque que va entre las marcas corto_plazo."""
+    ruta = C.AQUI.parent / "README.md"
+    if not ruta.exists():
+        return
+    crudo = ruta.read_bytes()
+    fin = "\r\n" if b"\r\n" in crudo else "\n"
+    texto = crudo.decode("utf-8").replace("\r\n", "\n")
+    a, b = texto.find(MARCA_INI), texto.find(MARCA_FIN)
+    if a < 0 or b < a:
+        print("README de la entrega: no tiene las marcas corto_plazo; no se toca")
+        return
+    texto = texto[:a] + "\n".join(lineas) + texto[b + len(MARCA_FIN):]
+    ruta.write_bytes(texto.replace("\n", fin).encode("utf-8"))
+    print("README de la entrega: bloque de correcciones actualizado")
+
+
+if __name__ == "__main__":
+    main()

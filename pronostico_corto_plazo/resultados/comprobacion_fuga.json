@@ -1,0 +1,70 @@
+{
+ "generado": "2026-11-17 20:33",
+ "cambios_por_ruta": 3,
+ "latencias_min": [
+  0,
+  30
+ ],
+ "segmentos_en_el_nivel_de_segmento": "uno de cada 6",
+ "comprobaciones": 486,
+ "filas_comparadas": 72365238,
+ "valores_comparados": 2792508924,
+ "diferencias": 0,
+ "objetivo_sin_cambiar": 0,
+ "cambios": {
+  "SILENCIO": [
+   {
+    "dia": "2023-05-28",
+    "bloque": 70,
+    "hora": "17:30"
+   },
+   {
+    "dia": "2024-12-30",
+    "bloque": 46,
+    "hora": "11:30"
+   },
+   {
+    "dia": "2024-05-16",
+    "bloque": 76,
+    "hora": "19:00"
+   }
+  ],
+  "CRA 54": [
+   {
+    "dia": "2023-05-25",
+    "bloque": 64,
+    "hora": "16:00"
+   },
+   {
+    "dia": "2023-09-21",
+    "bloque": 22,
+    "hora": "05:30"
+   },
+   {
+    "dia": "2024-08-20",
+    "bloque": 84,
+    "hora": "21:00"
+   }
+  ],
+  "CL 72": [
+   {
+    "dia": "2025-03-25",
+    "bloque": 68,
+    "hora": "17:00"
+   },
+   {
+    "dia": "2025-03-06",
+    "bloque": 70,
+    "hora": "17:30"
+   },
+   {
+    "dia": "2024-08-07",
+    "bloque": 24,
+    "hora": "06:00"
+   }
+  ]
+ },
+ "detalle": [],
+ "segundos": 278.3,
+ "conclusion": "ninguna variable ni línea base cambia al alterar el futuro"
+}

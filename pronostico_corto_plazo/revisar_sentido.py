@@ -37,7 +37,7 @@ def main() -> None:
                     on=["idruta", "nro_segmento"])
     out: dict = {"cerca_m": CERCA_M, "lejos_min": LEJOS_MIN, "geometria": {}, "tiempo_de_viaje": {}}
     otro = {}
-    for idruta, (arbol, de, x, y) in arboles.items():
+    for idruta, (_, de, x, y) in arboles.items():
         s = seg[seg["idruta"] == idruta].set_index("nro_segmento")
         regreso = (s["sentido"] == "regreso").reindex(de).to_numpy()
         ida = cKDTree(np.c_[x[~regreso], y[~regreso]])

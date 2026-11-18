@@ -14,6 +14,13 @@ MENOS = "−"
 MARCA_INI, MARCA_FIN = "<!-- corto_plazo:inicio", "<!-- corto_plazo:fin -->"
 NOMBRE_CONJUNTO = {"semanal": "semanal", "con_hoy": "con lo de hoy", "completo": "completo"}
 NOMBRE_NIVEL = {"ruta": "Ruta", "sentido": "Sentido", "segmento": "Segmento"}
+NOMBRE_HIPER = {"base": "base", "arboles_pequenos": "árboles pequeños", "arboles_grandes": "árboles grandes"}
+# qué es cada variable, para las que más pesan (las demás salen con su nombre en el código)
+QUE_ES = {"p15": "lo que subió en los 15 minutos anteriores", "p30": "en los 30 anteriores", "p60": "en los 60 anteriores",
+          "p120": "en los 120 anteriores", "m8": "el promedio de las 8 semanas anteriores", "m4": "el de las 4 semanas",
+          "m7d": "la media de los 7 días anteriores", "l7": "la misma ventana 7 días antes", "ayer": "la misma ventana ayer",
+          "hoy": "lo acumulado hoy", "rhoy": "lo acumulado hoy frente a lo habitual", "r120": "las últimas 2 horas frente a lo habitual",
+          "sal60": "las salidas de la última hora", "tipo_dia": "el tipo de día", "instante": "la hora"}
 
 
 def num(x, dec: int = 2, signo: bool = False) -> str:
@@ -86,7 +93,12 @@ def main() -> None:
       "las ventanas [*t*, *t* + 30), [*t*, *t* + 60) y [*t*, *t* + 120).")
     a("- **A qué nivel.** La ruta (3), el sentido (ida y regreso) y el segmento: los 386 segmentos oficiales de 500 m de "
       "`rutas_segmentos` (135 en SILENCIO, 123 en CRA 54 y 128 en CL 72).")
-    a("- **Con qué información.** Solo lo ocurrido antes de *t* y el calendario. Ninguna variable usa nada de *t* en adelante.")
+    fuga = leer("resultados/comprobacion_fuga.json") if (C.AQUI / "resultados" / "comprobacion_fuga.json").exists() else None
+    a("- **Con qué información.** Solo lo ocurrido antes de *t* y el calendario. Ninguna variable usa nada de *t* en adelante."
+      + (f" Se comprobó cambiando el futuro: en {num(fuga['comprobaciones'], 0)} comprobaciones "
+         f"({num(fuga['valores_comparados'], 0)} valores comparados), las variables y las líneas base de las filas anteriores "
+         f"al cambio tuvieron {num(fuga['diferencias'], 0)} diferencias (`comprobar_fuga.py`, "
+         f"`resultados/comprobacion_fuga.json`)." if fuga else ""))
     a("- **Qué cuenta como subida.** Cada evento de conteo con subidas, en el bloque de 15 minutos del instante en que "
       "ocurrió, de todos los viajes.")
     a("")
@@ -173,8 +185,8 @@ def main() -> None:
       "salidas que llegarán al segmento en la ventana.")
     a("")
     e = val["C_estructura"]
-    a(f"- **Hiperparámetros** (tres configuraciones fijadas de antemano): "
-      + "; ".join(f"{NOMBRE_NIVEL[n].lower()}, «{sel['hiper'][n]['nombre']}»" for n in C.NIVELES) + ".")
+    a("- **Hiperparámetros** (tres configuraciones fijadas de antemano): "
+      + "; ".join(f"{NOMBRE_NIVEL[n].lower()}, «{NOMBRE_HIPER[sel['hiper'][n]['nombre']]}»" for n in C.NIVELES) + ".")
     a(f"- **Sentido:** {'la suma de sus segmentos' if sel['estructura']['sentido'] == 'suma_de_segmentos' else 'modelo directo'} "
       f"(directo {pct(e['sentido']['directo']['wape_medio'])}; suma de segmentos {pct(e['sentido']['suma_de_segmentos']['wape_medio'])}).")
     a(f"- **Segmento:** {'conciliado con el pronóstico de la ruta' if sel['estructura']['segmento'] == 'conciliado_con_la_ruta' else 'modelo directo'} "
@@ -282,12 +294,13 @@ def main() -> None:
       f"observado hasta el instante, un {pct(i60['elegido']['wape'])}. Esa diferencia es lo que le faltaba al pronóstico a "
       f"siete días para ser el del enunciado.")
     if sec["retraso_de_la_captura"]["60"].get("30") is not None:
-        a(f"- Si la captura llega con 30 minutos de retraso, el error a 60 minutos sube a "
-          f"{pct(sec['retraso_de_la_captura']['60']['30'])}.")
+        a(f"- Con 30 minutos de retraso en la captura, el error a 60 minutos es de "
+          f"{pct(sec['retraso_de_la_captura']['60']['30'])}; con 15 minutos, de {pct(sec['retraso_de_la_captura']['60'].get('15'))}.")
     imp = pru["importancia"]["ruta"]["60"]
     a("- Las variables que más pesan en el modelo de ruta a 60 minutos (parte de la ganancia de los árboles): "
-      + ", ".join(f"`{k}` {pct(x * 100, 0)}" for k, x in list(imp.items())[:5]) + ".")
+      + "; ".join(f"`{k}` ({QUE_ES.get(k, k)}), {pct(x * 100, 0)}" for k, x in list(imp.items())[:5]) + ".")
     a("")
+    anomalo(a, pru)
     a("## Limitaciones")
     a("")
     a("- **El sentido es una aproximación** (la mitad del ciclo) y la regla del segmento más cercano deja una parte de las "
@@ -299,16 +312,20 @@ def main() -> None:
     a("- **Supone que el conteo llega en vivo.** La especificación lo prevé (el disparador de conteo), pero la latencia real "
       "de la captura no se conoce; por eso se midió el efecto de 15 y 30 minutos de retraso.")
     a("- **No está integrado en la API.** La API pronostica hoy por hora de salida con su propio modelo. Llevar este a la "
-      "API es el siguiente paso (`PLAN_EVOLUCION.md`).")
+      "API es el siguiente paso (`../PLAN_EVOLUCION.md`, sección 7).")
     a("- **Once días de 2025 sin eventos** (los últimos de mes) quedan fuera del entrenamiento y de la evaluación.")
+    if (C.AQUI / "resultados" / "sensibilidad_registro_anomalo.json").exists():
+        a("- **Los registros imposibles siguen en los datos.** El protocolo no previó filtrarlos: uno cae en el entrenamiento y "
+          "otro en la prueba. Su efecto en la prueba está medido arriba; filtrarlos antes de entrenar es un pendiente.")
     a("")
     a("## Cómo reproducirlo")
     a("")
-    a("Con las versiones de `requirements_cuaderno.txt` (LightGBM " + pru["versiones"]["lightgbm"] + ", semilla 42), desde esta carpeta:")
+    a("Con las versiones de `../requirements_cuaderno.txt` (LightGBM " + pru["versiones"]["lightgbm"] + ", semilla 42), desde esta carpeta:")
     a("")
     a("```")
     a("python validar.py           # elige con la validación: resultados/validacion.json y seleccion.json")
     a("python probar.py --repetir  # recalcula la prueba con lo elegido: resultados/prueba.json")
+    a("python comprobar_fuga.py    # comprueba que ninguna variable usa el futuro: resultados/comprobacion_fuga.json")
     a("python figuras.py           # figuras/")
     a("python escribir_readme.py   # este archivo")
     a("```")
@@ -322,6 +339,8 @@ def main() -> None:
     a("| `exportar_eventos_subida.py` | Exporta de la base, en solo lectura y por tramos, los eventos de conteo con subidas |")
     a("| `preparar_panel.py` | Asigna cada subida a su segmento y arma `panel/`; verifica contra la tabla de Extreme |")
     a("| `revisar_sentido.py` | Mide cuánto confunde el sentido la regla del segmento más cercano |")
+    a("| `comprobar_fuga.py` | Cambia el futuro y comprueba que ninguna variable ni línea base anterior al cambio se mueve |")
+    a("| `sensibilidad_registro_anomalo.py` | Análisis posterior a la prueba: las métricas sin los días que toca un registro imposible |")
     a("| `comun.py` | Datos, variables, líneas base, modelo, métricas e intervalos |")
     a("| `validar.py` · `probar.py` | La elección con la validación y el único cálculo de la prueba |")
     a("| `figuras.py` · `escribir_readme.py` | Las figuras y este archivo, desde `resultados/` |")
@@ -331,6 +350,79 @@ def main() -> None:
     (C.AQUI / "README.md").write_text("\n".join(L), encoding="utf-8")
     print("README.md:", len(L), "líneas")
     actualizar_entrega(bloque_entrega(ver, val, pru))
+
+
+def anomalo(a, pru: dict) -> None:
+    """La sección del registro imposible, si existe resultados/sensibilidad_registro_anomalo.json."""
+    ruta = C.AQUI / "resultados" / "sensibilidad_registro_anomalo.json"
+    if not ruta.exists():
+        return
+    s = json.loads(ruta.read_text(encoding="utf-8"))
+    en_prueba = [r for r in s["registros_imposibles"] if r["periodo"] == "prueba"]
+    otros = [r for r in s["registros_imposibles"] if r["periodo"] != "prueba"]
+    if not en_prueba:
+        return
+
+    def fecha(x: str) -> str:
+        return "{2}-{1}-{0}".format(*x.split("-"))
+
+    r = en_prueba[0]
+    r60 = pru["niveles"]["ruta"]["60"]["todas_las_rutas"]["modelo"]
+    a("## Un registro imposible en los datos (análisis posterior a la prueba)")
+    a("")
+    a(f"Al revisar la prueba, el RMSE por ruta salió varias veces mayor que el MAE (a 60 minutos, {num(r60['rmse'], 1)} frente a "
+      f"{num(r60['mae'], 1)} subidas). La causa es un registro de conteo imposible que está en la base: el {fecha(r['fecha'])} a las "
+      f"{r['hora']}, **{num(r['subidas'], 0)} subidas en un solo segmento de {r['ruta']} en 15 minutos** (lo habitual en toda la ruta en "
+      f"ese bloque son {num(r['mediana_de_la_ruta_en_ese_bloque'], 0)})."
+      + (" Hay otro en el entrenamiento: " + "; ".join(f"{num(o['subidas'], 0)} subidas en {o['ruta']} el {fecha(o['fecha'])}" for o in otros) + "."
+         if otros else "")
+      + " El panel conserva los registros tal como están en la base y el protocolo no previó filtrarlos, así que **las cifras de "
+        "arriba lo incluyen y no se cambian**.")
+    a("")
+    a(f"Para saber cuánto pesa, `sensibilidad_registro_anomalo.py` recalcula las métricas con las predicciones guardadas, sin entrenar "
+      f"ni pronosticar de nuevo. Les quita a todos los pronósticos los {len(s['dias_de_ruta_excluidos'])} días de {r['ruta']} en que el "
+      f"registro entra en el objetivo o en el promedio de ocho semanas: el {fecha(r['fecha'])} y los ocho mismos días de la semana "
+      f"siguientes. No estaba en el protocolo: es un análisis posterior (`resultados/sensibilidad_registro_anomalo.json`).")
+    a("")
+    a("| Nivel | Horizonte | Modelo: con el registro → sin esos días | Promedio por día y hora: con → sin | Modelo − promedio sin esos días [IC 95 %] | RMSE del modelo: con → sin |")
+    a("|---|---|---|---|---|---|")
+    for nivel in ("ruta", "sentido"):
+        for h in C.HORIZONTES:
+            x = s["niveles"][nivel][str(h)]
+            con, sin = x["con_el_registro"], x["sin_esos_dias"]
+            d = sin["modelo_menos_promedio_dia_hora"]
+            a(f"| {NOMBRE_NIVEL[nivel]} | {h} min | {num(con['modelo']['wape'])} → **{num(sin['modelo']['wape'])}** | "
+              f"{num(con['promedio_dia_hora']['wape'])} → {num(sin['promedio_dia_hora']['wape'])} | "
+              f"{num(d['diferencia'], 2, True)} [{num(d['ic95'][0], 2, True)}; {num(d['ic95'][1], 2, True)}] | "
+              f"{num(con['modelo']['rmse'], 1)} → {num(sin['modelo']['rmse'], 1)} |")
+    a("")
+    x = s["niveles"]["ruta"]["60"]
+    con_dif = x["con_el_registro"]["modelo"]["wape"] - x["con_el_registro"]["promedio_dia_hora"]["wape"]
+    a(f"La conclusión no cambia. Sin esos días bajan el error del modelo y el del promedio, y la diferencia por ruta a 60 minutos "
+      f"queda en {num(x['sin_esos_dias']['modelo_menos_promedio_dia_hora']['diferencia'], 2, True)} puntos (con el registro, "
+      f"{num(con_dif, 2, True)}). El RMSE sí cambia mucho, porque un solo error de unas {num(round(r['subidas'], -3), 0)} subidas pesa más que "
+      f"todos los demás juntos. Por segmento no se recalculó, porque las predicciones por segmento no se guardan; el registro está en "
+      f"el segmento {r['nro_segmento']} de {r['ruta']} y se ve en `resultados/segmentos_prueba.csv`.")
+    a("")
+
+
+def vineta_anomalo() -> list[str]:
+    """La viñeta del registro imposible para el README de la entrega (vacía si no hay análisis)."""
+    ruta = C.AQUI / "resultados" / "sensibilidad_registro_anomalo.json"
+    if not ruta.exists():
+        return []
+    s = json.loads(ruta.read_text(encoding="utf-8"))
+    en_prueba = [r for r in s["registros_imposibles"] if r["periodo"] == "prueba"]
+    if not en_prueba:
+        return []
+    r, x = en_prueba[0], s["niveles"]["ruta"]["60"]
+    con, sin = x["con_el_registro"], x["sin_esos_dias"]
+    return [f"- **Un registro imposible en la prueba.** La base trae {num(r['subidas'], 0)} subidas en un solo segmento de {r['ruta']} en "
+            f"15 minutos ({'{2}-{1}-{0}'.format(*r['fecha'].split('-'))}, {r['hora']}). El protocolo no previó filtrarlo, así que las "
+            f"cifras de la tabla lo incluyen; infla sobre todo el RMSE ({num(con['modelo']['rmse'], 1)} por ruta a 60 minutos). En un "
+            f"análisis posterior, sin los {len(s['dias_de_ruta_excluidos'])} días que toca, el modelo falla {pct(sin['modelo']['wape'])} "
+            f"y el promedio {pct(sin['promedio_dia_hora']['wape'])}, con un RMSE de {num(sin['modelo']['rmse'], 1)} "
+            f"(`pronostico_corto_plazo/resultados/sensibilidad_registro_anomalo.json`)."]
 
 
 def bloque_entrega(ver: dict, val: dict, pru: dict) -> list[str]:
@@ -374,8 +466,8 @@ def bloque_entrega(ver: dict, val: dict, pru: dict) -> list[str]:
         "con julio a diciembre de 2025**, en tres commits ordenados (protocolo, validación y prueba) | En la validación, el "
         f"modelo elegido falla {pct(val60)} por ruta a 60 minutos (el promedio, {pct(base_val60)}); en la prueba, que no se "
         f"usó para elegir nada, {pct(r60['modelo']['wape'])} (el promedio, {pct(r60['promedio_dia_hora']['wape'])}) | "
-        "`pronostico_corto_plazo/PROTOCOLO.md`, `resultados/validacion.json`, `resultados/seleccion.json` y el historial "
-        "de git |",
+        "`pronostico_corto_plazo/PROTOCOLO.md`, `pronostico_corto_plazo/resultados/validacion.json`, "
+        "`pronostico_corto_plazo/resultados/seleccion.json` y el historial de git |",
         "| El modelo por segmento se entrenó con 37 días: lo espacial no quedó validado | Se asignaron a su segmento las "
         f"subidas de los tres años ({num(ver['panel']['subidas'], 0)}) con la regla de Extreme, que reproduce su tabla "
         f"en los 58 días que la base trae (el {pct(v['subidas_en_el_mismo_segmento_pct'], 3)} de las subidas en el mismo "
@@ -383,17 +475,18 @@ def bloque_entrega(ver: dict, val: dict, pru: dict) -> list[str]:
         f"sentido, {frente('sentido', 60)}; por segmento, {frente('segmento', 60)}, en "
         f"{num(fila('segmento', 60)['modelo']['n'], 0)} celdas de segmento e instante. El modelo gana al promedio en "
         f"{s60['segmentos_en_que_gana_al_promedio']} de los {s60['segmentos_con_subidas']} segmentos con subidas | "
-        "`pronostico_corto_plazo/panel/verificacion_extreme.json`, `resultados/segmentos_prueba.csv` |",
+        "`pronostico_corto_plazo/panel/verificacion_extreme.json`, `pronostico_corto_plazo/resultados/segmentos_prueba.csv` |",
         "",
         "Lo que se conserva y lo que falta:",
         "",
         "- **El pronóstico a siete días se conserva** porque es el que usa la programación semanal, pero ya no se presenta "
         "como el del enunciado. Con el protocolo nuevo, el modelo que solo usa lo que se sabe una semana antes falla "
-        f"{pct(sem60)} por ruta a 60 minutos en la prueba; lo observado en el mismo día lo baja a {pct(r60['modelo']['wape'])}.",
+        f"{pct(sem60)} por ruta a 60 minutos en la prueba; con lo observado en el mismo día, {pct(r60['modelo']['wape'])}.",
         "- **La prueba no es ciega en sentido estricto:** los meses de 2025 se conocían por los experimentos anteriores, con "
         "otro objetivo. Ninguna decisión del experimento nuevo usa julio a diciembre.",
         "- **El sentido es una aproximación** (la mitad del ciclo), y se midió cuánto afecta "
         "(`pronostico_corto_plazo/panel/revision_sentido.json`).",
+        *vineta_anomalo(),
         "- **Falta llevarlo a la API.** La API sigue pronosticando por hora de salida, y su modelo por segmento es el de 37 "
         "días. Integrar este pronóstico es el primer paso de `PLAN_EVOLUCION.md`.",
         "",

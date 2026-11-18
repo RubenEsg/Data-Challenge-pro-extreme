@@ -68,7 +68,7 @@ def fig_niveles(res: dict) -> None:
                 eje.text(xi, wi + hi_i + max(w) * 0.02, num(wi), ha="center", va="bottom", fontsize=8, color=TINTA)
         eje.set_xticks(x, [f"{h} min" for h in C.HORIZONTES])
         eje.set_title(NOMBRE_NIVEL[nivel], loc="left")
-        eje.set_ylim(0, None)
+        eje.set_ylim(0, eje.get_ylim()[1] * 1.12)       # aire para los rótulos de las barras más altas
         eje.grid(axis="x", visible=False)
     ejes[0].set_ylabel("WAPE (%)")
     ejes[0].legend(loc="upper center", bbox_to_anchor=(1.7, -0.14), ncol=2)

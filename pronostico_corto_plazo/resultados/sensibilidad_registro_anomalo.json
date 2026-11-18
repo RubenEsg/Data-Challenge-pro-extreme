@@ -1,0 +1,609 @@
+{
+ "generado": "2026-11-17 20:55",
+ "que_es": "análisis posterior a la prueba, no previsto en PROTOCOLO.md; las cifras de resultados/prueba.json no cambian",
+ "regla": "registro imposible: más de 1000 subidas en un segmento en 15 minutos",
+ "registros_imposibles": [
+  {
+   "ruta": "CRA 54",
+   "fecha": "2024-05-26",
+   "hora": "12:45",
+   "nro_segmento": 1,
+   "subidas": 97157,
+   "subidas_de_la_ruta_en_ese_bloque": 97323,
+   "periodo": "entrenamiento",
+   "mediana_de_la_ruta_en_ese_bloque": 332.0
+  },
+  {
+   "ruta": "CRA 54",
+   "fecha": "2025-07-05",
+   "hora": "07:45",
+   "nro_segmento": 4,
+   "subidas": 28782,
+   "subidas_de_la_ruta_en_ese_bloque": 29038,
+   "periodo": "prueba",
+   "mediana_de_la_ruta_en_ese_bloque": 405.0
+  }
+ ],
+ "dias_de_ruta_excluidos": [
+  "CRA 54 2025-07-05",
+  "CRA 54 2025-07-12",
+  "CRA 54 2025-07-19",
+  "CRA 54 2025-07-26",
+  "CRA 54 2025-08-02",
+  "CRA 54 2025-08-09",
+  "CRA 54 2025-08-16",
+  "CRA 54 2025-08-23",
+  "CRA 54 2025-08-30"
+ ],
+ "por_que_esos_dias": "el día del registro y los 8 mismos días de la semana siguientes: en ellos el registro entra en el objetivo o en el promedio por día y hora",
+ "niveles": {
+  "ruta": {
+   "30": {
+    "celdas": 18690,
+    "celdas_excluidas": 315,
+    "con_el_registro": {
+     "modelo": {
+      "n": 18690,
+      "mae": 30.343,
+      "rmse": 214.514,
+      "wape": 8.582,
+      "smape": 15.934,
+      "sesgo_pct": 0.288,
+      "media_real": 353.564
+     },
+     "promedio_dia_hora": {
+      "n": 18690,
+      "mae": 50.763,
+      "rmse": 236.976,
+      "wape": 14.358,
+      "smape": 19.624,
+      "sesgo_pct": 0.925,
+      "media_real": 353.564
+     },
+     "ultima_semana": {
+      "n": 18690,
+      "mae": 61.201,
+      "rmse": 312.971,
+      "wape": 17.31,
+      "smape": 21.297,
+      "sesgo_pct": 0.838,
+      "media_real": 353.564
+     },
+     "persistencia": {
+      "n": 18690,
+      "mae": 60.1,
+      "rmse": 309.958,
+      "wape": 16.998,
+      "smape": 24.769,
+      "sesgo_pct": -1.655,
+      "media_real": 353.564
+     },
+     "modelo_menos_promedio_dia_hora": {
+      "diferencia": -5.776,
+      "ic95": [
+       -7.8,
+       -4.08
+      ]
+     }
+    },
+    "sin_esos_dias": {
+     "modelo": {
+      "n": 18375,
+      "mae": 28.519,
+      "rmse": 46.892,
+      "wape": 8.179,
+      "smape": 15.98,
+      "sesgo_pct": 0.707,
+      "media_real": 348.678
+     },
+     "promedio_dia_hora": {
+      "n": 18375,
+      "mae": 47.685,
+      "rmse": 80.558,
+      "wape": 13.676,
+      "smape": 19.672,
+      "sesgo_pct": 0.926,
+      "media_real": 348.678
+     },
+     "ultima_semana": {
+      "n": 18375,
+      "mae": 58.174,
+      "rmse": 103.236,
+      "wape": 16.684,
+      "smape": 21.404,
+      "sesgo_pct": 0.859,
+      "media_real": 348.678
+     },
+     "persistencia": {
+      "n": 18375,
+      "mae": 56.676,
+      "rmse": 88.08,
+      "wape": 16.255,
+      "smape": 24.767,
+      "sesgo_pct": -1.665,
+      "media_real": 348.678
+     },
+     "modelo_menos_promedio_dia_hora": {
+      "diferencia": -5.497,
+      "ic95": [
+       -7.5,
+       -3.77
+      ]
+     }
+    }
+   },
+   "60": {
+    "celdas": 18690,
+    "celdas_excluidas": 315,
+    "con_el_registro": {
+     "modelo": {
+      "n": 18690,
+      "mae": 52.194,
+      "rmse": 303.944,
+      "wape": 7.344,
+      "smape": 9.638,
+      "sesgo_pct": 0.442,
+      "media_real": 710.696
+     },
+     "promedio_dia_hora": {
+      "n": 18690,
+      "mae": 93.663,
+      "rmse": 347.746,
+      "wape": 13.179,
+      "smape": 14.979,
+      "sesgo_pct": 0.919,
+      "media_real": 710.696
+     },
+     "ultima_semana": {
+      "n": 18690,
+      "mae": 110.611,
+      "rmse": 458.698,
+      "wape": 15.564,
+      "smape": 18.486,
+      "sesgo_pct": 0.84,
+      "media_real": 710.696
+     },
+     "persistencia": {
+      "n": 18690,
+      "mae": 163.32,
+      "rmse": 488.442,
+      "wape": 22.98,
+      "smape": 35.205,
+      "sesgo_pct": -3.099,
+      "media_real": 710.696
+     },
+     "modelo_menos_promedio_dia_hora": {
+      "diferencia": -5.835,
+      "ic95": [
+       -7.95,
+       -4.08
+      ]
+     }
+    },
+    "sin_esos_dias": {
+     "modelo": {
+      "n": 18375,
+      "mae": 48.43,
+      "rmse": 73.684,
+      "wape": 6.91,
+      "smape": 9.637,
+      "sesgo_pct": 0.838,
+      "media_real": 700.89
+     },
+     "promedio_dia_hora": {
+      "n": 18375,
+      "mae": 87.656,
+      "rmse": 151.38,
+      "wape": 12.506,
+      "smape": 14.998,
+      "sesgo_pct": 0.92,
+      "media_real": 700.89
+     },
+     "ultima_semana": {
+      "n": 18375,
+      "mae": 104.672,
+      "rmse": 193.489,
+      "wape": 14.934,
+      "smape": 18.606,
+      "sesgo_pct": 0.86,
+      "media_real": 700.89
+     },
+     "persistencia": {
+      "n": 18375,
+      "mae": 156.459,
+      "rmse": 249.008,
+      "wape": 22.323,
+      "smape": 35.228,
+      "sesgo_pct": -3.123,
+      "media_real": 700.89
+     },
+     "modelo_menos_promedio_dia_hora": {
+      "diferencia": -5.596,
+      "ic95": [
+       -7.69,
+       -3.82
+      ]
+     }
+    }
+   },
+   "120": {
+    "celdas": 18690,
+    "celdas_excluidas": 315,
+    "con_el_registro": {
+     "modelo": {
+      "n": 18690,
+      "mae": 94.407,
+      "rmse": 440.522,
+      "wape": 6.634,
+      "smape": 7.515,
+      "sesgo_pct": 0.626,
+      "media_real": 1423.108
+     },
+     "promedio_dia_hora": {
+      "n": 18690,
+      "mae": 173.893,
+      "rmse": 524.141,
+      "wape": 12.219,
+      "smape": 12.935,
+      "sesgo_pct": 0.899,
+      "media_real": 1423.108
+     },
+     "ultima_semana": {
+      "n": 18690,
+      "mae": 201.177,
+      "rmse": 689.991,
+      "wape": 14.136,
+      "smape": 15.795,
+      "sesgo_pct": 0.84,
+      "media_real": 1423.108
+     },
+     "persistencia": {
+      "n": 18690,
+      "mae": 496.875,
+      "rmse": 952.488,
+      "wape": 34.915,
+      "smape": 46.797,
+      "sesgo_pct": -5.339,
+      "media_real": 1423.108
+     },
+     "modelo_menos_promedio_dia_hora": {
+      "diferencia": -5.585,
+      "ic95": [
+       -7.73,
+       -3.8
+      ]
+     }
+    },
+    "sin_esos_dias": {
+     "modelo": {
+      "n": 18375,
+      "mae": 86.427,
+      "rmse": 144.371,
+      "wape": 6.158,
+      "smape": 7.451,
+      "sesgo_pct": 1.006,
+      "media_real": 1403.507
+     },
+     "promedio_dia_hora": {
+      "n": 18375,
+      "mae": 162.156,
+      "rmse": 285.324,
+      "wape": 11.554,
+      "smape": 12.885,
+      "sesgo_pct": 0.9,
+      "media_real": 1403.507
+     },
+     "ultima_semana": {
+      "n": 18375,
+      "mae": 189.552,
+      "rmse": 364.96,
+      "wape": 13.506,
+      "smape": 15.862,
+      "sesgo_pct": 0.861,
+      "media_real": 1403.507
+     },
+     "persistencia": {
+      "n": 18375,
+      "mae": 482.079,
+      "rmse": 733.012,
+      "wape": 34.348,
+      "smape": 46.799,
+      "sesgo_pct": -5.387,
+      "media_real": 1403.507
+     },
+     "modelo_menos_promedio_dia_hora": {
+      "diferencia": -5.396,
+      "ic95": [
+       -7.52,
+       -3.58
+      ]
+     }
+    }
+   }
+  },
+  "sentido": {
+   "30": {
+    "celdas": 37380,
+    "celdas_excluidas": 630,
+    "con_el_registro": {
+     "modelo": {
+      "n": 37380,
+      "mae": 21.443,
+      "rmse": 167.041,
+      "wape": 12.129,
+      "smape": 20.392,
+      "sesgo_pct": -0.242,
+      "media_real": 176.782
+     },
+     "promedio_dia_hora": {
+      "n": 37380,
+      "mae": 31.429,
+      "rmse": 165.025,
+      "wape": 17.778,
+      "smape": 22.557,
+      "sesgo_pct": 0.925,
+      "media_real": 176.782
+     },
+     "ultima_semana": {
+      "n": 37380,
+      "mae": 38.132,
+      "rmse": 217.814,
+      "wape": 21.57,
+      "smape": 25.838,
+      "sesgo_pct": 0.838,
+      "media_real": 176.782
+     },
+     "persistencia": {
+      "n": 37380,
+      "mae": 35.704,
+      "rmse": 216.234,
+      "wape": 20.197,
+      "smape": 28.232,
+      "sesgo_pct": -1.655,
+      "media_real": 176.782
+     },
+     "modelo_menos_promedio_dia_hora": {
+      "diferencia": -5.649,
+      "ic95": [
+       -7.51,
+       -3.99
+      ]
+     }
+    },
+    "sin_esos_dias": {
+     "modelo": {
+      "n": 36750,
+      "mae": 20.535,
+      "rmse": 77.916,
+      "wape": 11.779,
+      "smape": 20.458,
+      "sesgo_pct": 0.241,
+      "media_real": 174.339
+     },
+     "promedio_dia_hora": {
+      "n": 36750,
+      "mae": 29.874,
+      "rmse": 47.73,
+      "wape": 17.136,
+      "smape": 22.62,
+      "sesgo_pct": 0.926,
+      "media_real": 174.339
+     },
+     "ultima_semana": {
+      "n": 36750,
+      "mae": 36.589,
+      "rmse": 60.211,
+      "wape": 20.987,
+      "smape": 25.995,
+      "sesgo_pct": 0.859,
+      "media_real": 174.339
+     },
+     "persistencia": {
+      "n": 36750,
+      "mae": 33.964,
+      "rmse": 51.528,
+      "wape": 19.481,
+      "smape": 28.267,
+      "sesgo_pct": -1.665,
+      "media_real": 174.339
+     },
+     "modelo_menos_promedio_dia_hora": {
+      "diferencia": -5.357,
+      "ic95": [
+       -7.18,
+       -3.67
+      ]
+     }
+    }
+   },
+   "60": {
+    "celdas": 37380,
+    "celdas_excluidas": 630,
+    "con_el_registro": {
+     "modelo": {
+      "n": 37380,
+      "mae": 35.699,
+      "rmse": 214.545,
+      "wape": 10.046,
+      "smape": 13.228,
+      "sesgo_pct": -0.452,
+      "media_real": 355.348
+     },
+     "promedio_dia_hora": {
+      "n": 37380,
+      "mae": 57.205,
+      "rmse": 239.463,
+      "wape": 16.098,
+      "smape": 18.56,
+      "sesgo_pct": 0.919,
+      "media_real": 355.348
+     },
+     "ultima_semana": {
+      "n": 37380,
+      "mae": 67.88,
+      "rmse": 315.217,
+      "wape": 19.102,
+      "smape": 22.923,
+      "sesgo_pct": 0.84,
+      "media_real": 355.348
+     },
+     "persistencia": {
+      "n": 37380,
+      "mae": 91.979,
+      "rmse": 328.339,
+      "wape": 25.884,
+      "smape": 38.648,
+      "sesgo_pct": -3.099,
+      "media_real": 355.348
+     },
+     "modelo_menos_promedio_dia_hora": {
+      "diferencia": -6.052,
+      "ic95": [
+       -7.8,
+       -4.6
+      ]
+     }
+    },
+    "sin_esos_dias": {
+     "modelo": {
+      "n": 36750,
+      "mae": 33.939,
+      "rmse": 49.6,
+      "wape": 9.685,
+      "smape": 13.278,
+      "sesgo_pct": -0.005,
+      "media_real": 350.445
+     },
+     "promedio_dia_hora": {
+      "n": 36750,
+      "mae": 54.155,
+      "rmse": 88.138,
+      "wape": 15.453,
+      "smape": 18.64,
+      "sesgo_pct": 0.92,
+      "media_real": 350.445
+     },
+     "ultima_semana": {
+      "n": 36750,
+      "mae": 64.84,
+      "rmse": 110.521,
+      "wape": 18.502,
+      "smape": 23.077,
+      "sesgo_pct": 0.86,
+      "media_real": 350.445
+     },
+     "persistencia": {
+      "n": 36750,
+      "mae": 88.391,
+      "rmse": 139.39,
+      "wape": 25.222,
+      "smape": 38.673,
+      "sesgo_pct": -3.123,
+      "media_real": 350.445
+     },
+     "modelo_menos_promedio_dia_hora": {
+      "diferencia": -5.768,
+      "ic95": [
+       -7.52,
+       -4.25
+      ]
+     }
+    }
+   },
+   "120": {
+    "celdas": 37380,
+    "celdas_excluidas": 630,
+    "con_el_registro": {
+     "modelo": {
+      "n": 37380,
+      "mae": 62.009,
+      "rmse": 306.378,
+      "wape": 8.715,
+      "smape": 10.189,
+      "sesgo_pct": -0.308,
+      "media_real": 711.554
+     },
+     "promedio_dia_hora": {
+      "n": 37380,
+      "mae": 104.407,
+      "rmse": 353.458,
+      "wape": 14.673,
+      "smape": 15.905,
+      "sesgo_pct": 0.899,
+      "media_real": 711.554
+     },
+     "ultima_semana": {
+      "n": 37380,
+      "mae": 121.19,
+      "rmse": 463.397,
+      "wape": 17.032,
+      "smape": 19.368,
+      "sesgo_pct": 0.84,
+      "media_real": 711.554
+     },
+     "persistencia": {
+      "n": 37380,
+      "mae": 269.515,
+      "rmse": 586.278,
+      "wape": 37.877,
+      "smape": 50.182,
+      "sesgo_pct": -5.339,
+      "media_real": 711.554
+     },
+     "modelo_menos_promedio_dia_hora": {
+      "diferencia": -5.958,
+      "ic95": [
+       -7.76,
+       -4.46
+      ]
+     }
+    },
+    "sin_esos_dias": {
+     "modelo": {
+      "n": 36750,
+      "mae": 58.545,
+      "rmse": 84.359,
+      "wape": 8.343,
+      "smape": 10.206,
+      "sesgo_pct": 0.148,
+      "media_real": 701.754
+     },
+     "promedio_dia_hora": {
+      "n": 36750,
+      "mae": 98.424,
+      "rmse": 162.666,
+      "wape": 14.025,
+      "smape": 15.93,
+      "sesgo_pct": 0.9,
+      "media_real": 701.754
+     },
+     "ultima_semana": {
+      "n": 36750,
+      "mae": 115.245,
+      "rmse": 203.475,
+      "wape": 16.422,
+      "smape": 19.48,
+      "sesgo_pct": 0.861,
+      "media_real": 701.754
+     },
+     "persistencia": {
+      "n": 36750,
+      "mae": 261.739,
+      "rmse": 400.983,
+      "wape": 37.298,
+      "smape": 50.181,
+      "sesgo_pct": -5.387,
+      "media_real": 701.754
+     },
+     "modelo_menos_promedio_dia_hora": {
+      "diferencia": -5.682,
+      "ic95": [
+       -7.48,
+       -4.15
+      ]
+     }
+    }
+   }
+  }
+ }
+}

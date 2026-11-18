@@ -60,6 +60,7 @@ antelación, todo 2025 y reentrenamiento mensual) y no son cifras de este produc
 
 | Requisito de la especificación | Dónde está la evidencia |
 |---|---|
+| §2.2 «30, 60 y 120 minutos» · §3.1 M3 · RF-005 · §9.1 · §9.3: el pronóstico por ruta, sentido y segmento, con validación y prueba en meses distintos | `../../../pronostico_corto_plazo/` (abajo, «Fuera de esta carpeta») |
 | §3.1 Acceso y calidad · RF-001, RF-002, RF-004, RF-013, RF-014 · §8.2, §8.3, §11 · E07 | `replica/`, `catalogos/fidelidad_y_relaciones.txt`, `../integracion_postgresql.md`, `datos/` |
 | §6.3 · §14.2 «errores por lote, con causa y fila» | `datos/errores_lote.txt`; el reporte de unicidad al responsable del consolidado, `datos/reporte_unicidad.json` |
 | §5.2 ALT-008 con bajadas · §6.1 bajadas y consolidados (`nro_viajes`, promedios, `ultima_actualizacion`) · §6.3 consistencia de los promedios · §7.3 paso 3 · §11.2 | `consolidados/` (`../consolidados_ciclo.md`), `alertas/backtest_alertas.md` |
@@ -443,6 +444,25 @@ El video está en `../../../documentos/video/E11_video_demostracion.mp4` (menos 
 | `verificacion_video.json` | La verificación del archivo final: duración, resolución, audio, número de cuadros y los cuadros revisados por escena. | E11 | `ffmpeg` sobre el MP4 final |
 | `plan_mezcla.json` | El montaje: de qué toma y de qué tramo sale cada escena, y su duración frente a la de la narración. | E11 | Script de montaje del video |
 | `cuadros` (carpeta) | Un cuadro por escena (14 PNG), para revisar el contenido sin reproducir el video. | E11 | Extraídos del MP4 final |
+
+## Fuera de esta carpeta · el pronóstico de corto plazo que pide el enunciado
+
+Está en `../../../pronostico_corto_plazo/`, y las rutas de esta tabla son relativas a esa carpeta. Es el pronóstico de
+las subidas de los siguientes 30, 60 y 120 minutos por ruta, sentido y segmento, elegido con ene.–jun. de 2025 y
+probado una sola vez con jul.–dic. de 2025 (retroalimentación del curso del 17-11-2026). No pasa por la API. Sus
+cifras están en su `README.md`; los comandos se corren desde esa carpeta.
+
+| Archivo | Qué demuestra | Requisito | Cómo se generó |
+|---|---|---|---|
+| `PROTOCOLO.md` | El problema, la partición, las líneas base, las reglas de elección y lo que se reporta, escrito y confirmado en git antes de entrenar. | §9.3 (partición y prueba reservada) | Documento del equipo; el orden lo prueba el historial de git |
+| `panel/verificacion_extreme.json` | Las subidas por segmento de 2023 a 2025, asignadas con la regla de Extreme, coinciden con `timbradas_segmentos` en los 58 días que la base trae. | §3.1, §9.1 (segmento) | `python preparar_panel.py` (necesita las exportaciones de la base, de solo lectura) |
+| `panel/revision_sentido.json` | Cuánto confunde el sentido la regla del segmento más cercano. | §9.1, §9.3 (sentido) | `python revisar_sentido.py` |
+| `resultados/comprobacion_fuga.json` | Al cambiar todo lo posterior a un instante, ninguna variable ni línea base anterior cambia. | §9.3 (sin información posterior) | `python comprobar_fuga.py` |
+| `resultados/validacion.json` · `resultados/seleccion.json` | Las líneas base y las variantes del modelo en la validación, y lo que se eligió con ella. | §9.1, §9.3 | `python validar.py` |
+| `resultados/prueba.json` | La prueba reservada: MAE, RMSE, WAPE, sMAPE y sesgo por nivel, horizonte, ruta, franja, sentido, mes y tipo de día; IC95 frente a las líneas base; cobertura de la banda P10–P90, y los análisis secundarios. | §2.2, §3.1, RF-005, §9.1, §9.3 | `python probar.py` (una sola vez) |
+| `resultados/segmentos_prueba.csv` · `resultados/predicciones_ruta.parquet` · `resultados/predicciones_sentido.parquet` | El detalle por segmento (subidas reales y pronosticadas, sesgo y WAPE) y las predicciones por ruta y por sentido con su banda. | §9.3 (sesgo por ruta, sentido y segmento) | `python probar.py` |
+| `resultados/sensibilidad_registro_anomalo.json` | Análisis posterior a la prueba, fuera del protocolo: las métricas por ruta y por sentido sin los nueve días que toca un registro imposible de la base (28.782 subidas en un segmento en 15 minutos). Las cifras de la prueba no cambian. | §9.3 (métricas), §3.1 (calidad del dato) | `python sensibilidad_registro_anomalo.py` |
+| `figuras/` | Las figuras del README de esa carpeta y del informe técnico. | — | `python figuras.py` |
 
 ## `historial/` · corridas reemplazadas
 

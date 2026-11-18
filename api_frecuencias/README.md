@@ -651,8 +651,11 @@ Método, cifras y limitaciones: `docs/ocupacion_segmentos.md`; evidencias en `do
   de 2024 y un factor intradía que solo usa horas ya cerradas. Los experimentos 11 y 12 del informe académico se
   evaluaron a 7 días, sobre todo 2025 y reentrenando cada mes; aquí son una referencia, y el 12 queda como opción del
   plan del día (`pronostico=E12`).
-- El modelo por segmento y sentido solo tiene subidas por segmento de ene-feb 2023, porque los triggers de
-  segmentación no se volvieron a ejecutar: su error en 2025 no se puede medir. El sentido es una aproximación, porque
+- El modelo por segmento y sentido se entrenó con las subidas de `timbradas_segmentos`, que solo cubren ene-feb 2023
+  porque los triggers de segmentación no se volvieron a ejecutar: su error en 2025 no está medido. El 17-11-2026 se
+  reconstruyeron las subidas por segmento de 2023 a 2025 con la misma regla, y con ellas se validó aparte el
+  pronóstico por ruta, sentido y segmento a 30, 60 y 120 minutos (`../pronostico_corto_plazo/README.md`); reentrenar este modelo
+  con ese panel está pendiente (`../PLAN_EVOLUCION.md`, sección 7). El sentido es una aproximación, porque
   las exportaciones no lo traen. La banda por segmento cubre algo menos del 80 % (78 % por hora y 76 a 77 % en
   ventanas de 2 y 3 horas), y de punta a punta depende de la banda de la ruta. Las alertas se calculan por ruta y hora.
 - La ocupación por segmento tiene el mismo límite de datos: el perfil histórico es de ene.–feb. 2023 y la estacionalidad

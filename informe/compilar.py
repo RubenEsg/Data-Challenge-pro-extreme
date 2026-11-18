@@ -3,6 +3,7 @@
     python EntregaFinal/informe/compilar.py         -> EntregaFinal/informe/main.pdf y EntregaFinal/Informe_tecnico_Sobusa.pdf
 
 Antes, si cambió algo de los experimentos: python EntregaFinal/informe/figuras_extra.py
+Y si cambió pronostico_corto_plazo/resultados/: python EntregaFinal/informe/cifras_corto_plazo.py (macros de la sección P).
 
 Tectonic se busca en el PATH, en la variable TECTONIC o en machine_learning/entrega 3/articulo/herramientas/tectonic.exe;
 descarga los paquetes de LaTeX la primera vez. Después de compilar, el guion:

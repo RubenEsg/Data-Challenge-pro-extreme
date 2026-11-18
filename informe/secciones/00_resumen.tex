@@ -1,11 +1,16 @@
-% Resumen. Cifras: documentos/informe_resultados.md (sexta versión) y app/DATOS.md.
+% Resumen. Cifras: documentos/informe_resultados.md (sexta versión) y app/DATOS.md; las del pronóstico de corto plazo
+% son macros \CP... de generado/corto_plazo.tex (informe/cifras_corto_plazo.py).
 % Plan que recorta con la simétrica (+1.939 M COP, -1.512 pasajeros netos al día) y sobre la capacidad (530):
 % costos/resultados/d5_reoptimizado.csv, corrida «D5 original (60.000/1.500/3.000, e=0,5)».
 \begin{abstract}
 \noindent Sobusa programa las salidas de cada ruta y hora con el promedio de las ocho semanas anteriores. Con 1.096
 días de su operación (2023--2025: 520.639 viajes válidos y 175,9 millones de eventos GPS) construimos un pronóstico
 de pasajeros por ruta, día y hora de salida, una medición causal de cuántos pasajeros se pierden cuando salen menos
-buses, un optimizador entero de salidas por hora con costos de fuente pública y un motor de despacho en tiempo real. A
+buses, un optimizador entero de salidas por hora con costos de fuente pública y un motor de despacho en tiempo real. El
+pronóstico que pide el enunciado, las subidas de los siguientes 30, 60 y 120 minutos por ruta, sentido y segmento, se
+eligió con enero a junio de 2025 y se probó una sola vez con julio a diciembre: a 60 minutos falla un
+\CPRutaModLX~\% por ruta, un \CPSentModLX~\% por sentido y un \CPSegModLX~\% por segmento, frente a \CPRutaPromLX,
+\CPSentPromLX{} y \CPSegPromLX~\% del promedio por día y hora. Para la programación semanal, a
 una semana de antelación, la regla manual tiene un WAPE de 20,04~\%, el primer LightGBM 14,40~\%, el modelo final
 13,94~\% y el híbrido con Chronos-2 que recomendamos 13,62~\%, una ventaja que se repite en 2024. La elasticidad de
 los pasajeros a las salidas es $\beta \approx 0{,}70$ (0,55--0,90), así que, contando solo los pasajeros perdidos,

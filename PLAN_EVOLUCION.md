@@ -295,6 +295,14 @@ descartadas.
 
 ## 7. Lo que queda para la siguiente versión
 
+- **Llevar a la API el pronóstico de corto plazo por ruta, sentido y segmento** (`pronostico_corto_plazo/`). Es el que pide el
+  enunciado (30, 60 y 120 minutos) y ya está elegido y probado con meses distintos, pero corre fuera de la API. Falta:
+  (1) que la lectura incremental agregue los eventos de conteo por bloque de 15 minutos y segmento, con la regla de
+  Extreme que usa `pronostico_corto_plazo/preparar_panel.py`; (2) registrar los modelos por nivel y horizonte con su
+  manifiesto y su SHA-256, y pasarlos por la sombra y la compuerta como cualquier candidato; (3) servirlos en
+  `POST /api/v1/predictions/run` y en `GET /api/v1/predictions/segmentos`, en lugar del reparto con el perfil
+  intrahorario y del modelo `seg_hgb_jerarquico_20230227_s42`, que se entrenó con 37 días, y (4) medir con Extreme
+  la latencia real de la captura (H10, H11): el efecto de 15 y 30 minutos de retraso está medido en `pronostico_corto_plazo/README.md`.
 - Activar el candidato fv3 (`hgb_fv3_20250831_s42`): pasa por la sombra de 14 días y la compuerta de cuatro
   criterios. Activarlo cambia los pronósticos con que se midieron el ciclo diario, las alertas y las respuestas al reto
   de esta entrega, así que esas mediciones se repiten con él (`ev/modelo/decision_fv3.md`). El calendario académico

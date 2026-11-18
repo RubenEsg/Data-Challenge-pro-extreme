@@ -3,7 +3,9 @@
 \section{Discusión y limitaciones}
 \label{sec:discusion}
 
-El pronóstico mejora a la regla manual en unos seis puntos de WAPE, con una ventaja que resiste la antelación, la
+El pronóstico de corto plazo, que es el del enunciado, quita el \CPRutaQuitaLX~\% del error del promedio por día y
+hora por ruta a 60 minutos, en meses que no se usaron para elegir nada (sección~\ref{sec:corto-plazo}). El
+pronóstico semanal mejora a la regla manual en unos seis puntos de WAPE, con una ventaja que resiste la antelación, la
 ruta y el año. Pero cuántos buses despachar lo decide lo que cuesta quitar una salida: con $\beta \approx 0{,}70$,
 con la conservadora no paga ningún plan y con la simétrica pagan los dos; recortar deja más caja a costa de pasajeros y
 sobrecarga. Las limitaciones principales:
@@ -19,9 +21,16 @@ sobrecarga. Las limitaciones principales:
         oferta real, y no ve el hacinamiento por bus; el simulador llena los buses más que la realidad y no tiene
         elasticidad.
   \item \textbf{Selección y objetivo}: elegir entre 51 candidatos en los mismos meses infla algo la ventaja del ganador
-        (Holm y la prueba en 2024 lo acotan), y los pronósticos de E1 a E12, y el plan del motor, usan el objetivo
+        (Holm y la prueba en 2024 lo acotan; el pronóstico de la sección~\ref{sec:corto-plazo} no tiene ese
+        problema, porque se eligió y se reportó con meses distintos), y los pronósticos de E1 a E12, y el plan del
+        motor, usan el objetivo
         viejo, que subestima lo que sube a los buses entre un 5,6 y un 7,7~\%.
   \item \textbf{Datos y tiempo real}: 2026 está sin confirmar; once de los doce últimos días de mes de 2025 siguen sin
         eventos de conteo; no se conoce la latencia de los datos de Sobusa, y la corrida vigente del backtest y el modelo
         persona a persona no tuvieron revisor independiente (sí la corrida anterior, con el mismo código del motor).
+  \item \textbf{Pronóstico de corto plazo}: el sentido es una aproximación (la mitad del ciclo) y la regla del
+        segmento más cercano deja parte de las subidas en el sentido contrario; la prueba de julio a diciembre de
+        2025 no es ciega en sentido estricto, porque esos meses se conocían por los experimentos anteriores, con
+        otro objetivo; el modelo supone que el conteo llega en vivo, y todavía no está integrado en la API, cuyo
+        modelo por segmento sigue siendo el de 37 días.
 \end{itemize}

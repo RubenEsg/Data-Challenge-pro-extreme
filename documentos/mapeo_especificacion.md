@@ -127,7 +127,7 @@ las de cada día están en `ev/respuesta/respuesta_reto.md`.
 |---|---|---|---|
 | Consumir, validar y completar los datos de rutas, viajes, timbradas, estacionalidades y novedades viales. | Lectura de solo lectura de los catálogos y del contexto (procesos, rutas, estacionalidades, novedades con sus rutas, segmentos, vehículos, viajes y despachos). Las novedades se cruzan por fecha, rango horario y ruta (S15). Validación de las 6 dimensiones de §6.3; las llaves duplicadas de un lote no se corrigen: el reporte va al responsable del consolidado por el canal de notificaciones (simulado) y, mientras Extreme no defina el destinatario, queda «pendiente_destinatario» en `notification_log`. Los consolidados de Extreme pasan por las mismas validaciones y se contrastan con la agregación propia (sección 7). Lo que no existe en el DDL (máximos y mínimos por segmento) se deriva en la capa analítica propia: una agregación materializada en `ai_frecuencias` (migración 0008) que refresca un trabajo de la cola y da los mismos resultados que la agregación directa. Desde la migración 0012, si la fuente no cambió, el refresco no relee ninguna fecha ni escribe. | `ev/catalogos/fidelidad_y_relaciones.txt`, `ev/replica/replica_contexto.json`, `api/app/servicios/novedades.py`, `api/app/servicios/calidad.py`, `ev/datos/reporte_unicidad.json`, `api/app/servicios/segmentos.py`, `api/app/servicios/segmentos_refresco.py`, `ev/pruebas/segmentos_equivalencia.json`, `ev/pruebas/segmentos_sin_cambios.json` | `api/tests/unit/test_calidad.py`, `api/tests/unit/test_novedades.py::test_una_novedad_con_rutas_afecta_solo_a_sus_rutas_y_una_sin_rutas_a_todas`, `api/tests/integracion/test_errores_lote.py::test_el_lote_con_duplicados_se_reporta_al_responsable_sin_corregir`, `api/tests/replica/test_segmentos.py::test_agregacion_materializada_identica_a_la_directa`, `api/tests/replica/test_segmentos.py::test_refresco_sin_cambios_no_relee_la_ventana_de_solape_y_mide_la_diferencia`, `api/tests/integracion/test_segmentos_materializados.py`, `api/tests/integracion/test_catalogos_api.py` |
 | Construir variables analíticas reproducibles para el entrenamiento y la inferencia. | Variables versionadas (`VERSIONES` fv1 y fv2), con el mismo código para entrenar y predecir. La foto exacta de variables de cada predicción se guarda en `feature_snapshot`. Dos entrenamientos con la misma semilla dan el mismo SHA-256. | `api/app/servicios/variables.py`, `ev/modelo/entrenamiento_fv2.json` | `api/tests/datos_ml/test_distribucion.py`, `api/tests/datos_ml/test_fuga_temporal.py::test_variables_no_usan_datos_posteriores_al_corte` |
-| Predecir la demanda a 30, 60 y 120 minutos. | `POST /api/v1/predictions/run` y el ciclo diario predicen los tres horizontes, con el perfil intrahorario. | `ev/modelo/horizontes.json`, `ev/optimizacion/ejemplo_prediccion_12_3.json` | `api/tests/unit/test_inferencia.py` |
+| Predecir la demanda a 30, 60 y 120 minutos. | `POST /api/v1/predictions/run` y el ciclo diario predicen los tres horizontes, con el perfil intrahorario. El pronóstico directo de esas ventanas por ruta, sentido y segmento, con lo observado en el día y prueba reservada de jul.–dic. de 2025, está en `pronostico_corto_plazo/README.md` (todavía fuera de la API). | `ev/modelo/horizontes.json`, `ev/optimizacion/ejemplo_prediccion_12_3.json`, `pronostico_corto_plazo/resultados/prueba.json` | `api/tests/unit/test_inferencia.py` |
 | Calcular la frecuencia recomendada por franja y el número mínimo de vehículos bajo restricciones. | `optimizar` con capacidad por tipología, flota, ciclo y headway mínimo y máximo. | `ev/optimizacion/ejemplo_calculate.json`, `ev/optimizacion/sensibilidad.md` | `api/tests/unit/test_optimizacion_objetivo.py` |
 | Detectar desviaciones, datos anómalos, sobreocupación, baja utilización y ausencia de información. | Desviación ALT-007 (y caída ALT-005), consolidado anómalo ALT-008 (subidas, bajadas y viajes), sobreocupación ALT-002, baja utilización ALT-004 y datos ausentes o atrasados ALT-009. | `ev/alertas/README.md`, `ev/alertas/backtest_alertas.md` | `api/tests/unit/test_alertas.py`, `api/tests/unit/test_alertas_observadas.py` |
 | Exponer los resultados mediante una API REST y un tablero operativo con historial y gestión de alertas. | Los endpoints de `/api/v1` y las pantallas Alertas, Recomendaciones, Operación y Monitoreo del tablero, con bitácora y acciones. | `api/README.md` («Endpoints»), `ev/tablero/e2e_tablero_completo.txt` (135 de 135 comprobaciones, 0 fallas), `ev/tablero/alertas_detalle_1366x768.png` | `api/tests/integracion/test_api_integracion.py::test_alertas_deduplicadas_y_bitacora` |
@@ -154,9 +154,12 @@ de la ruta, así que la suma de los segmentos es la ruta. Se eligió con un prot
 diferencia de −1,60 a −0,02 puntos (`ev/modelo/segmentos_banda_ventanas.json`). La banda P10–P90 es conformal y se
 compone con la de la ruta. Con el total real, por hora cubre 78,31 % por segmento y 83,40 % por sentido; en ventanas de
 2 y 3 horas, entre 76 y 77 % por segmento y cerca del 80 % por sentido (`ev/modelo/segmentos_banda_ventanas.json`). De
-punta a punta depende de la banda de la ruta. Límites: las subidas por segmento solo existen del 1-1-2023 al 27-2-2023,
-así que no se puede medir el error en 2025, y el sentido es una aproximación geométrica (S9), porque las exportaciones
-no lo traen.
+punta a punta depende de la banda de la ruta. Límites: la tabla de Extreme solo trae subidas por segmento del 1-1-2023 al 27-2-2023,
+así que el error de este modelo en 2025 no está medido, y el sentido es una aproximación geométrica (S9), porque las
+exportaciones no lo traen. El 17-11-2026 se reconstruyeron las subidas por segmento de 2023 a 2025 con la regla de
+Extreme, y con ellas se entrenó y se probó aparte el pronóstico a 30, 60 y 120 minutos por ruta, sentido y segmento,
+eligiendo con unos meses y reportando con otros (`pronostico_corto_plazo/README.md`). Llevarlo a la API es el primer pendiente de
+`PLAN_EVOLUCION.md` (sección 7).
 
 **Ocupación por segmento (§10.1).** La carga a bordo al salir de cada segmento se deriva de las subidas y bajadas de
 cada viaje (S8, `api/docs/ocupacion_segmentos.md`). Frente a la ocupación máxima del dispositivo en 21.511 viajes, la
@@ -286,8 +289,9 @@ ruta, cada trabajo guarda la de su ruta con la versión de umbrales fijada al cr
 
 ## 9. Limitaciones declaradas
 
-- **Segmento y sentido.** El modelo de segmentos se ajusta con ene.–feb. 2023, el único periodo con subidas por
-  segmento, y el sentido es aproximado (S9): su error en 2025 no se puede medir (sección 3.1). El histórico propio
+- **Segmento y sentido.** El modelo de segmentos de la API se ajusta con ene.–feb. 2023, el único periodo que trae la
+  tabla de Extreme, y el sentido es aproximado (S9): su error en 2025 no está medido (sección 3.1). El pronóstico por
+  segmento validado con tres años (`pronostico_corto_plazo/`) todavía no está en la API. El histórico propio
   (`demanda_observada`) y las alertas siguen por ruta y hora.
 - **Consolidados por segmento (H4).** `timbradas_segmentos_anio` y `timbradas_segmentos_consolidado` no tienen filas
   de Sobusa: el ciclo las lee con su marca y lo registra («sin_filas_fuente» en `metricas.calidad.consolidados`), pero

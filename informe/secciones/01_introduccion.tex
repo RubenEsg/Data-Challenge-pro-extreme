@@ -14,19 +14,30 @@ la oferta coincidió con la que pide la carga del tramo más cargado en solo el 
 salidas en el 44,7~\% y faltaron en el 40,0~\%. Un día laboral de CRA~54 programa 288 salidas y su carga pide
 282, pero 31 sobran en los valles y 29 faltan en los picos: el problema es la hora, no el total.
 
-La pregunta del reto es cuántos buses despachar en cada ruta y hora, y cada cuánto. Tiene las tres etapas
-clásicas de la planeación, la operación y el control del transporte en bus \citep{ibarra2015review}:
+La pregunta del reto es cuántos buses despachar en cada ruta y hora, y cada cuánto. La especificación pide un
+pronóstico concreto: la demanda de los siguientes 30, 60 y 120 minutos por ruta, sentido y segmento, que es el que
+permite corregir el despacho del mismo día (sección~\ref{sec:corto-plazo}). La programación, además, tiene las tres
+etapas clásicas de la planeación, la operación y el control del transporte en bus \citep{ibarra2015review}:
 pronosticar los pasajeros de cada ruta, día y hora de salida con una semana de antelación, porque el horario se
 arma cada semana; convertir el pronóstico en salidas por hora \citep{ceder1984frequency,ceder2016transit} que
 equilibren operación, espera, hacinamiento y pasajes perdidos, y ejecutar el plan en el día \citep{daganzo2009bunching}.
 
-\paragraph{Aporte.} Una cadena completa, de los datos a la decisión: (i) un pronóstico LightGBM de Poisson con la
+\paragraph{Aporte.} Una cadena completa, de los datos a la decisión: (i) el pronóstico que pide el enunciado, a 30,
+60 y 120 minutos por ruta, sentido y cada uno de los 386 segmentos oficiales, con las subidas de tres años asignadas
+a su segmento con la regla de Extreme y con validación y prueba reservada en meses distintos; (ii) un pronóstico
+semanal LightGBM de Poisson con la
 serie de referencia corregida por fallas de registro y pesos para los datos corruptos, comparado con 51
-candidatos, y un híbrido con el modelo fundacional Chronos-2; (ii) una medición causal de la elasticidad de los
-pasajeros a las salidas, $\beta$, con un experimento natural; (iii) un optimizador entero de salidas por hora con
-costos de fuente pública, evaluado con la demanda real de 2025; (iv) un simulador, un motor de despacho en tiempo
-real y un modelo persona a persona del mismo día con nuestro plan; (v) el diseño de un piloto para medir $\beta$, y
-(vi) una aplicación sin conexión, \comi{Sobusa Despacho}, que lee cada cifra de su archivo de resultados. Los
+candidatos, y un híbrido con el modelo fundacional Chronos-2; (iii) una medición causal de la elasticidad de los
+pasajeros a las salidas, $\beta$, con un experimento natural; (iv) un optimizador entero de salidas por hora con
+costos de fuente pública, evaluado con la demanda real de 2025; (v) un simulador, un motor de despacho en tiempo
+real y un modelo persona a persona del mismo día con nuestro plan; (vi) el diseño de un piloto para medir $\beta$, y
+(vii) una aplicación sin conexión, \comi{Sobusa Despacho}, que lee cada cifra de su archivo de resultados. Los
 experimentos se citan por el código de su carpeta: E1--E13 para la demanda (E11 es el modelo final y E12 la
 comparación de modelos), D1--D6 para el despacho (D5 es el optimizador y D6 el simulador) y P1--P2 para el
 planificador y el piloto. Revisores independientes recalcularon sus cifras en tres rondas.
+
+\paragraph{Versión revisada.} La retroalimentación del curso del 17 de noviembre de 2026 señaló tres faltas de la
+primera versión: el pronóstico a siete días por ruta y hora de salida no es el problema que se pidió; los modelos se
+eligieron y se reportaron sobre los mismos meses de 2025, y el modelo por segmento se entrenó con 37 días. La
+sección~\ref{sec:corto-plazo} es nueva y responde a las tres. Las demás secciones conservan sus cifras; las
+siguientes llevan el mismo número que antes, porque otros documentos de la entrega las citan así.

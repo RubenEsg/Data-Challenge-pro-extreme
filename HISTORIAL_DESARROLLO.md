@@ -1,17 +1,17 @@
 # Historial de desarrollo
 
-Lista cronológica de **todos los commits** (246) del repositorio de desarrollo del equipo, desde el primero hasta `c90b8f0`, el commit al que apuntaba `main` al generarla. Responde al «historial» del entregable E03 (fila E03.3 de `MATRIZ_CUMPLIMIENTO.md`): el repositorio de entrega se arma con `empaquetar_entrega.py` a partir de `EntregaFinal/` y solo guarda sus sincronizaciones.
+Lista cronológica de **todos los commits** (253) del repositorio de desarrollo del equipo, desde el primero hasta `138e291`, el commit al que apuntaba `main` al generarla. Responde al «historial» del entregable E03 (fila E03.3 de `MATRIZ_CUMPLIMIENTO.md`): el repositorio de entrega se arma con `empaquetar_entrega.py` a partir de `EntregaFinal/` y solo guarda sus sincronizaciones.
 
 - **De dónde sale.** `historial_desarrollo.py` lee `git log` del repositorio de desarrollo, sin red, y escribe este archivo. Por cada commit publica la fecha y la hora del autor, el hash corto, el asunto, cuántos archivos y líneas cambia (`git log --numstat -M`) y cuántos de esos archivos están en `EntregaFinal/`, la carpeta que se convierte en el repositorio de entrega.
 - **Qué no publica.** Correos, nombres de autor (todo el historial es de un solo contribuyente), cuerpos de los mensajes ni rutas de archivos. La revisión automática de los asuntos (claves, contraseñas, tokens, credenciales en URL, cadenas largas con aspecto aleatorio) no omitió ninguno.
-- **Cómo verificarlo.** Los hashes son los del repositorio de desarrollo del equipo, que se muestra a quien evalúe si lo pide. Ahí, `git log --reverse --format="%h %aI %s" main` da la misma lista y `git show --numstat <hash>` las cifras de cada commit. Cada hash de git depende de todo lo anterior, así que el hash completo del último commit fija la cadena entera: `c90b8f0a7da6360abc2dab97432bda02b89832cb`. El primer commit es `6f885e83cae939c90cfc2796c13cc433dfce643a`.
-- **Generado** el 16 de noviembre de 2026 a las 16:27 (−05:00), desde `main` (`c90b8f0`). Al integrar commits nuevos se vuelve a correr el script.
+- **Cómo verificarlo.** Los hashes son los del repositorio de desarrollo del equipo, que se muestra a quien evalúe si lo pide. Ahí, `git log --reverse --format="%h %aI %s" main` da la misma lista y `git show --numstat <hash>` las cifras de cada commit. Cada hash de git depende de todo lo anterior, así que el hash completo del último commit fija la cadena entera: `138e291236e082f08aba82f0681d4d55dfc3f2ad`. El primer commit es `6f885e83cae939c90cfc2796c13cc433dfce643a`.
+- **Generado** el 17 de noviembre de 2026 a las 21:16 (−05:00), desde `main` (`138e291`). Al integrar commits nuevos se vuelve a correr el script.
 
 ## Resumen
 
 | Commits | Días con commits | Primer commit | Último commit | Tocan `EntregaFinal/` | Archivos cambiados (suma) | Líneas agregadas / quitadas |
 |---|---|---|---|---|---|---|
-| 246 | 18 | 2026-10-07 | 2026-11-16 | 206 | 6.451 | +1.352.427 / −115.022 |
+| 253 | 19 | 2026-10-07 | 2026-11-17 | 212 | 6.541 | +1.374.317 / −115.551 |
 
 Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombrado cuenta una vez. Todas las horas tienen el mismo huso (−05:00). 13 commit(s) de fusión no traen cifras: git no muestra su diferencia.
 
@@ -342,7 +342,7 @@ Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombra
 | 17:58 | `4717a19` | El tablero como entrada única («Anexos» reúne el material de apoyo) y el simulador de ahorro con el plan recomendado y el saldo siempre en sus dos casos | 17 (1 binario) | +180 / −167 | sí (15) |
 | 17:59 | `603bed3` | Historial de desarrollo al día con la entrada única y el simulador de ahorro | 1 | +7 / −5 | sí (1) |
 
-## 2026-11-16 · lunes · 4 commits
+## 2026-11-16 · lunes · 6 commits
 
 | Hora | Commit | Asunto | Archivos | Líneas | En `EntregaFinal/` |
 |---|---|---|---|---|---|
@@ -350,3 +350,15 @@ Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombra
 | 15:59 | `b930aec` | Historial de desarrollo al día con el modelo candidato fv3 | 1 | +12 / −5 | sí (1) |
 | 16:23 | `379f59c` | Bitácora 5: el candidato fv3 publicado con el CI en verde | 1 | +21 / −6 | — |
 | 16:26 | `c90b8f0` | Entrega: la integración continua del commit del candidato fv3 (run 43956047348) en la evidencia, la matriz y los documentos | 13 (10 binarios) | +16 / −12 | sí (13) |
+| 16:27 | `0a42200` | Historial de desarrollo al día con la integración continua del candidato fv3 | 1 | +8 / −5 | sí (1) |
+| 16:49 | `ae4275a` | Bitácora 5 cerrada: entrega c6108fa con el CI en verde | 1 | +6 / −0 | — |
+
+## 2026-11-17 · martes · 5 commits
+
+| Hora | Commit | Asunto | Archivos | Líneas | En `EntregaFinal/` |
+|---|---|---|---|---|---|
+| 19:23 | `0756bfe` | Pronóstico de corto plazo por ruta, sentido y segmento: protocolo, código y panel de 2023 a 2025, antes de validar | 12 (2 binarios) | +2.927 / −0 | sí (11) |
+| 19:24 | `14fead2` | Paquete de entrega: incluye la carpeta pronostico_corto_plazo | 1 | +1 / −1 | sí (1) |
+| 20:20 | `aabe619` | Pronóstico de corto plazo: validación de enero a junio de 2025 y lo elegido, antes de calcular la prueba | 7 | +3.258 / −5 | sí (7) |
+| 20:58 | `7adea6d` | Pronóstico de corto plazo: la prueba reservada de julio a diciembre de 2025, calculada una sola vez | 23 (12 binarios) | +11.723 / −14 | sí (23) |
+| 21:15 | `138e291` | Entrega corregida tras la retroalimentación del curso: el pronóstico que pide el enunciado en el informe, el cuaderno y los documentos | 45 (14 binarios) | +3.967 / −504 | sí (45) |

@@ -1,0 +1,154 @@
+% Sección P (añadida en la versión revisada del 17-11-2026). Lleva la letra P, como en el cuaderno, para que las
+% secciones siguientes conserven su número: otros documentos de la entrega las citan por número.
+% Todas las cifras son macros de generado/corto_plazo.tex, que informe/cifras_corto_plazo.py lee de
+% pronostico_corto_plazo/panel/ y pronostico_corto_plazo/resultados/ (ninguna está escrita a mano). Los horizontes van
+% en romanos en el nombre de la macro: XXX = 30, LX = 60 y CXX = 120 minutos.
+\renewcommand{\thesection}{P}\renewcommand{\theHsection}{P}
+\section{El problema del enunciado: pronóstico a 30, 60 y 120 minutos por ruta, sentido y segmento}
+\label{sec:corto-plazo}
+\renewcommand{\thesection}{\arabic{section}}\renewcommand{\theHsection}{\arabic{section}}
+\addtocounter{section}{-1}
+% Sus tablas y figuras se numeran P.1, P.2...: las del resto del informe conservan también su número.
+\newcounter{cptabla}\newcounter{cpfigura}
+\setcounter{cptabla}{\value{table}}\setcounter{cpfigura}{\value{figure}}
+\setcounter{table}{0}\setcounter{figure}{0}
+\renewcommand{\thetable}{P.\arabic{table}}\renewcommand{\theHtable}{P.\arabic{table}}
+\renewcommand{\thefigure}{P.\arabic{figure}}\renewcommand{\theHfigure}{P.\arabic{figure}}
+
+La especificación del reto pide \comi{predecir la demanda para horizontes configurables de 30, 60 y 120 minutos}
+\comi{por ruta, sentido, segmento y franja horaria}, con \comi{división cronológica en entrenamiento, validación y
+prueba reservada}. La primera versión de este informe resolvía otro problema: el pronóstico a una semana por ruta y
+hora de salida, que es el que necesita la programación semanal (secciones~\ref{sec:metodologia} y
+\ref{sec:resultados}). La retroalimentación del curso señaló tres faltas: ese no era el problema pedido; los modelos
+se habían elegido y reportado sobre los mismos meses de 2025, y el modelo por segmento se había entrenado con 37 días.
+Esta sección resuelve el problema pedido y corrige las tres. El código, el protocolo y los resultados están en
+\texttt{pronostico\_corto\_plazo/}.
+
+\paragraph{Datos.} La tabla \texttt{timbradas\_segmentos} de la base solo cubre 58 días de 2023; de ahí los 37 días
+de entrenamiento. Para tener los tres años exportamos, en solo lectura, los \CPEventos{} eventos de conteo con subidas
+y asignamos cada uno al segmento oficial más cercano de su ruta, que es la regla con que Extreme llena esa tabla. En
+los 58 días comunes la regla propia da las mismas \CPVerSubidas{} subidas, con el \CPVerMismoSegmento~\% en el mismo
+segmento y el \CPVerMismoTotal~\% de los viajes con el mismo total. El panel tiene \CPSubidas{} subidas por ruta, día,
+bloque de 15 minutos y segmento, en los 386 segmentos de 500~m de las tres rutas. Un día de una ruta con menos del
+5~\% de las subidas habituales se trata como día sin datos: son los once últimos días de mes de 2025 que la base no
+trae. El sentido no viene en los datos: \comi{ida} es la primera mitad del ciclo y \comi{regreso} la segunda. La
+regla del segmento más cercano no mira en qué parte del viaje va el bus y, donde la ida y el regreso comparten calle,
+deja una parte de las subidas en el sentido contrario: cerca del \CPSentOtroSil~\% en SILENCIO, del \CPSentOtroCra~\%
+en CRA~54 y del \CPSentOtroCl~\% en CL~72, medido con el tiempo de viaje que lleva el bus en cada subida.
+
+\paragraph{Problema y protocolo.} Cada media hora, de 04:00 a 21:00, se pronostican las subidas de los 30, 60 y 120
+minutos siguientes con lo ocurrido hasta ese instante, en tres niveles: la ruta, el sentido y el segmento. Ninguna
+variable usa nada posterior: una comprobación automática cambia todo lo que ocurre después de un instante y verifica
+que las variables y las líneas base anteriores no se mueven (\CPFugaComprobaciones{} comprobaciones,
+\CPFugaDiferencias{} diferencias). El
+protocolo se escribió y se confirmó en el repositorio antes de entrenar. Se entrena con 2023 y 2024; todo se elige
+con enero a junio de 2025 (variables, hiperparámetros, estructura y banda), y la prueba, de julio a diciembre de 2025,
+se calcula una sola vez con lo elegido, reentrenado hasta junio. Las líneas base son las del enunciado, el promedio
+por día y hora (la misma ventana del mismo día de la semana en las ocho semanas anteriores) y la última semana, más la
+persistencia (lo que subió en los mismos minutos justo antes). El candidato es un LightGBM con pérdida de Poisson por
+nivel, ruta y horizonte. Los meses de 2025 ya se conocían por los experimentos anteriores, con otro objetivo, así que
+la prueba no es ciega en sentido estricto; ninguna decisión de este experimento usa julio a diciembre.
+
+\paragraph{Lo elegido.} En la validación y por ruta, el WAPE medio de los tres horizontes es \CPValRutaProm~\% con el
+promedio por día y hora; \CPValRutaSemanal~\% con el modelo que solo usa el calendario y las semanas anteriores, que es
+lo que se sabe con siete días de antelación; \CPValRutaConHoy~\% al añadir lo observado en el día, y
+\CPValRutaCompleto~\% al añadir las salidas ya despachadas. Se eligió \CPEligeConjuntos{} y, entre tres
+configuraciones de árboles fijadas de antemano, \CPEligeHiper. Por sentido se eligió \CPEligeSentEstructura{}
+(\CPValSentDirecto~\% con el modelo directo y \CPValSentSuma~\% sumando segmentos) y por segmento,
+\CPEligeSegEstructura{} (\CPValSegDirecto~\% directo, \CPValSegConciliado~\% conciliado con el pronóstico de la ruta y
+\CPValSegReparto~\% repartiendo el pronóstico de la ruta con las fracciones históricas).
+
+\begin{table}[t]
+  \centering\footnotesize
+  \setlength{\tabcolsep}{3.5pt}
+  \caption{Prueba reservada (julio a diciembre de 2025): WAPE en \% de cada pronóstico sobre las mismas celdas.
+  \comi{Promedio} es el promedio por día y hora. La diferencia es la del modelo con ese promedio, en puntos, con IC
+  del 95~\% por \emph{bootstrap} de bloques de siete días. La banda P10--P90 es conformal y su cobertura objetivo es
+  80~\%.}
+  \label{tab:cp-prueba}
+  \begin{tabular}{@{}l r r r r r l r@{}}
+    \toprule
+    Nivel & Horizonte & Promedio & Últ.\ semana & Persistencia & \textbf{Modelo} & Diferencia [IC 95~\%] & Cobertura \\
+    \midrule
+    Ruta & 30 min & \CPRutaPromXXX & \CPRutaSemXXX & \CPRutaPersXXX & \textbf{\CPRutaModXXX} & \CPRutaDifXXX{} [\CPRutaDifICXXX] & \CPRutaCobXXX \\
+    Ruta & 60 min & \CPRutaPromLX & \CPRutaSemLX & \CPRutaPersLX & \textbf{\CPRutaModLX} & \CPRutaDifLX{} [\CPRutaDifICLX] & \CPRutaCobLX \\
+    Ruta & 120 min & \CPRutaPromCXX & \CPRutaSemCXX & \CPRutaPersCXX & \textbf{\CPRutaModCXX} & \CPRutaDifCXX{} [\CPRutaDifICCXX] & \CPRutaCobCXX \\
+    \midrule
+    Sentido & 30 min & \CPSentPromXXX & \CPSentSemXXX & \CPSentPersXXX & \textbf{\CPSentModXXX} & \CPSentDifXXX{} [\CPSentDifICXXX] & \CPSentCobXXX \\
+    Sentido & 60 min & \CPSentPromLX & \CPSentSemLX & \CPSentPersLX & \textbf{\CPSentModLX} & \CPSentDifLX{} [\CPSentDifICLX] & \CPSentCobLX \\
+    Sentido & 120 min & \CPSentPromCXX & \CPSentSemCXX & \CPSentPersCXX & \textbf{\CPSentModCXX} & \CPSentDifCXX{} [\CPSentDifICCXX] & \CPSentCobCXX \\
+    \midrule
+    Segmento & 30 min & \CPSegPromXXX & \CPSegSemXXX & \CPSegPersXXX & \textbf{\CPSegModXXX} & \CPSegDifXXX{} [\CPSegDifICXXX] & \CPSegCobXXX \\
+    Segmento & 60 min & \CPSegPromLX & \CPSegSemLX & \CPSegPersLX & \textbf{\CPSegModLX} & \CPSegDifLX{} [\CPSegDifICLX] & \CPSegCobLX \\
+    Segmento & 120 min & \CPSegPromCXX & \CPSegSemCXX & \CPSegPersCXX & \textbf{\CPSegModCXX} & \CPSegDifCXX{} [\CPSegDifICCXX] & \CPSegCobCXX \\
+    \bottomrule
+  \end{tabular}
+  \fuente{\texttt{pronostico\_corto\_plazo/resultados/prueba.json}. \CPDiasPrueba{} días, de los que
+  \CPDiasPruebaConDatos{} tienen datos en cada ruta; 35 instantes por día.}
+\end{table}
+
+\paragraph{Resultados.} En la prueba, por ruta y a 60 minutos, el modelo se equivoca en \CPRutaModLX~\% de las
+subidas y el promedio por día y hora en \CPRutaPromLX~\% (tabla~\ref{tab:cp-prueba}): quita el \CPRutaQuitaLX~\% del
+error, y el intervalo de la diferencia \CPRutaDifFraseLX. A 30 minutos el modelo da \CPRutaModXXX~\% y a 120,
+\CPRutaModCXX~\%. Por ruta, a 60 minutos, el error es \CPCraModLX~\% en CRA~54, \CPSilModLX~\% en SILENCIO y
+\CPClModLX~\% en CL~72 (el promedio: \CPCraPromLX, \CPSilPromLX{} y \CPClPromLX~\%). En las horas pico el modelo
+falla \CPRutaPicoModLX~\% y en el valle \CPRutaValleModLX~\%, frente a \CPRutaPicoPromLX{} y \CPRutaVallePromLX~\% del
+promedio. En días laborales da \CPRutaLabModLX~\%, en sábados \CPRutaSabModLX~\% y en domingos y festivos
+\CPRutaDomModLX~\% (el promedio: \CPRutaLabPromLX, \CPRutaSabPromLX{} y \CPRutaDomPromLX~\%). El MAE a 60 minutos es
+de \CPRutaMAELX{} subidas sobre una media de \CPRutaMediaLX, el RMSE de \CPRutaRMSELX{} y el sMAPE de
+\CPRutaSMAPELX~\%; el sesgo es de \CPRutaSesgoLX~\%. Mes a mes, el error a 60 minutos va de \CPRutaMesMinLX{} a
+\CPRutaMesMaxLX~\%.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.98\linewidth]{fig_cp_segmentos}
+  \caption{Subidas por ventana de 60 minutos en cada segmento de 500~m a lo largo del recorrido, en la prueba: lo que
+  subió (barras) y lo pronosticado (línea). La línea punteada separa la ida del regreso. En CRA~54, la barra sin línea
+  cerca del km~2 es el registro imposible del \CPAnomFecha.}
+  \label{fig:cp-segmentos}
+  \fuente{\texttt{pronostico\_corto\_plazo/resultados/segmentos\_prueba.csv} (\texttt{figuras.py}).}
+\end{figure}
+
+\paragraph{Lo espacial.} El modelo por segmento se entrenó con todo lo anterior a julio de 2025 y se probó en
+\CPSegFilasLX{} celdas de segmento e instante que no vio. A 60 minutos se equivoca en \CPSegModLX~\% y el promedio por
+día y hora en \CPSegPromLX~\%; el error es alto en los dos porque cada celda trae pocas subidas, \CPSegMediaLX{} en
+promedio. El modelo gana al promedio en \CPSegGanaLX{} de los \CPSegConSubidasLX{} segmentos con subidas, que llevan
+el \CPSegGanaSubidasLX~\% de las subidas. El valor absoluto del sesgo por segmento tiene una mediana de
+\CPSegSesgoMedianoLX~\% y, ponderado por subidas, una media de \CPSegSesgoPonderadoLX~\%
+(figura~\ref{fig:cp-segmentos}). Por sentido el modelo da \CPSentModLX~\% frente a \CPSentPromLX~\% del promedio.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.72\linewidth]{fig_cp_informacion}
+  \caption{WAPE por ruta en la prueba según la información que usa el pronóstico: el promedio por día y hora, el
+  modelo con lo que se sabe siete días antes y el modelo elegido, sin retraso y con 15 y 30 minutos de retraso en la
+  captura.}
+  \label{fig:cp-informacion}
+  \fuente{\texttt{pronostico\_corto\_plazo/resultados/prueba.json}, clave \texttt{secundarios}.}
+\end{figure}
+
+\paragraph{Lo observado en el día.} El protocolo declaró de antemano dos análisis por ruta. El mismo modelo con solo
+lo que se sabe siete días antes se equivoca en \CPSemanalLX~\% a 60 minutos; con lo observado hasta el instante, en
+\CPRutaModLX~\% (IC del 95~\% de la diferencia: \CPSemanalDifICLX{} puntos). Esa diferencia es lo que le faltaba al
+pronóstico a una semana para ser el del enunciado. Con 15 y 30 minutos de retraso en la captura, el error a 60
+minutos es de \CPRetrasoQuinceLX{} y \CPRetrasoTreintaLX~\% (figura~\ref{fig:cp-informacion}).
+
+\paragraph{Un registro imposible.} El RMSE por ruta es varias veces mayor que el MAE por un registro de conteo
+imposible que está en la base: el \CPAnomFecha{} a las \CPAnomHora, \CPAnomSubidas{} subidas en un solo segmento de
+\CPAnomRuta{} en 15 minutos (lo habitual en toda la ruta en ese bloque son \CPAnomMediana). Hay otro, de
+\CPAnomOtroSubidas{} subidas, en el entrenamiento (\CPAnomOtroFecha). El protocolo no previó filtrarlos, así que las
+cifras de la tabla~\ref{tab:cp-prueba} lo incluyen y no se cambian. En un análisis posterior, con las predicciones
+guardadas y sin los \CPAnomDias{} días de \CPAnomRuta{} en que ese registro entra en el objetivo o en el promedio de
+ocho semanas, el modelo se equivoca por ruta a 60 minutos en \CPSinRutaModLX~\% y el promedio en \CPSinRutaPromLX~\%
+(diferencia de \CPSinRutaDifLX{} puntos, con IC del 95~\% de \CPSinRutaDifICLX), y el RMSE baja de \CPRutaRMSELX{} a
+\CPSinRutaRMSELX. La conclusión no cambia.
+
+\paragraph{Lo que falta.} Las subidas son demanda observada: dependen de los buses que pasaron. El modelo supone que
+el conteo llega en vivo, y la latencia real de la captura no se conoce. Los dos registros imposibles siguen en los
+datos: filtrarlos antes de entrenar es un pendiente. Tampoco está integrado en la API, que hoy pronostica por hora de
+salida con su propio modelo: llevarlo ahí es el siguiente paso.
+
+% Fin de la sección P: las tablas y figuras siguientes retoman la numeración del informe.
+\setcounter{table}{\value{cptabla}}\setcounter{figure}{\value{cpfigura}}
+\renewcommand{\thetable}{\arabic{table}}\renewcommand{\theHtable}{\arabic{table}}
+\renewcommand{\thefigure}{\arabic{figure}}\renewcommand{\theHfigure}{\arabic{figure}}

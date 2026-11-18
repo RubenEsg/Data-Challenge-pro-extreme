@@ -8,7 +8,8 @@ Escribe:
   - figuras/*.pdf y figuras/*.png: los gráficos, con los colores por rol del tablero (dash_app/tokens.py) y la letra
     Inter de documentos/fuentes.
 
-Ninguna cifra se escribe a mano aquí: todas salen de api_frecuencias/docs/evidencias/ (rutas en FUENTES).
+Ninguna cifra se escribe a mano aquí: todas salen de api_frecuencias/docs/evidencias/ y, las del pronóstico de corto
+plazo, de pronostico_corto_plazo/ (rutas en FUENTES).
 Necesita matplotlib (requisitos_documentos.txt). No escribe fuera de documentos/.
 """
 from __future__ import annotations
@@ -54,6 +55,9 @@ COBERTURA, COBERTURA_ES_FINAL = _elegir("EVIDENCIA_COBERTURA", EVIDENCIA_COBERTU
 FUENTES = {
     "modelo": EVID / "modelo" / "evaluacion_modelo.json",
     "candidato": EVID / "modelo" / "candidato_fv3" / "evaluacion_modelo.json",   # registrado sin activar
+    # el pronóstico de corto plazo que pide el enunciado: su prueba reservada y la verificación de su panel
+    "corto": ENTREGA / "pronostico_corto_plazo" / "resultados" / "prueba.json",
+    "corto_panel": ENTREGA / "pronostico_corto_plazo" / "panel" / "verificacion_extreme.json",
     "alertas": EVID / "alertas" / "backtest_alertas.json",
     "alertas2024": EVID / "alertas" / "backtest_alertas_corte_2024-12-31.json",
     "alertas_pron": EVID / "alertas" / "backtest_alertas_pronostico.json",
@@ -178,6 +182,29 @@ def cifras_candidato():
         d = g(rob, "bootstrap", "cand_menos_anterior", "ic95") or [None, None]
         macro(f"RobCand{nombre}DifIC", f"{num(d[0])} a {num(d[1])}", f)
         macro(f"RobCand{nombre}Meses", num(g(rob, "meses_cand_mejor_que_anterior"), 0), f)
+
+
+def cifras_corto_plazo():
+    """El pronóstico de corto plazo que pide el enunciado (30, 60 y 120 minutos por ruta, sentido y segmento): WAPE del
+    modelo y del promedio por día y hora en la prueba reservada de jul.–dic. de 2025, el IC95 de la diferencia por ruta
+    a 60 minutos, los segmentos en que gana y la verificación del panel contra la tabla de Extreme."""
+    p = leer_json("corto") or {}
+    f = FUENTES["corto"]
+    for nivel, n in (("ruta", "Ruta"), ("sentido", "Sentido"), ("segmento", "Segmento")):
+        for h, nombre in (("30", "Treinta"), ("60", "Sesenta"), ("120", "Cientoveinte")):
+            fila = g(p, "niveles", nivel, h, "todas_las_rutas") or {}
+            macro(f"Corto{n}{nombre}", num(g(fila, "modelo", "wape")), f)
+            macro(f"Corto{n}{nombre}Base", num(g(fila, "promedio_dia_hora", "wape")), f)
+    ic = g(p, "niveles", "ruta", "60", "todas_las_rutas", "ic95", "modelo_menos_promedio_dia_hora", "ic95") or [None, None]
+    macro("CortoDifIC", f"{num(ic[0])} a {num(ic[1])}", f)
+    macro("CortoCobertura", num(g(p, "niveles", "ruta", "60", "banda_p10_p90", "todas_las_rutas", "cobertura_pct"), 1), f)
+    macro("CortoSegGana", num(g(p, "por_segmento", "60", "segmentos_en_que_gana_al_promedio"), 0), f)
+    macro("CortoSegTotal", num(g(p, "por_segmento", "60", "segmentos_con_subidas"), 0), f)
+    macro("CortoSemanal", num(g(p, "secundarios", "informacion_del_dia", "60", "semanal", "wape")), f)
+    v = leer_json("corto_panel") or {}
+    fv = FUENTES["corto_panel"]
+    macro("CortoSubidas", num(g(v, "panel", "subidas"), 0), fv)
+    macro("CortoMismoSegmento", num(g(v, "verificacion_extreme", "subidas_en_el_mismo_segmento_pct"), 3), fv)
 
 
 def cifras_calibracion():
@@ -1175,6 +1202,7 @@ def fig_plan_reasigna(plt):
 def main():
     estricto = "--estricto" in sys.argv
     e = cifras_modelo()
+    cifras_corto_plazo()
     cifras_calibracion()
     cifras_horizontes()
     a = cifras_alertas()

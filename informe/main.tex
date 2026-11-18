@@ -64,12 +64,14 @@
 % Bibliografía en letra pequeña y con poco espacio entre entradas.
 \renewcommand{\bibfont}{\footnotesize}
 \setlength{\bibsep}{0.5pt plus 0.5pt}
+% Cifras del pronóstico de corto plazo (sección P): macros \CP... que escribe cifras_corto_plazo.py.
+\input{generado/corto_plazo}
 
 \title{\textbf{\textquestiondown Cuántos buses y cada cuánto? Pronóstico de demanda y despacho para las rutas SILENCIO, CRA~54 y CL~72 de Sobusa}\\[4pt]
 \large Informe técnico final}
 \author{Abrahan Basto Martínez \and Rubén Esguerra Fernández \and Paula Gómez\\[4pt]
 \small Data Challenge Pro Extreme -- Sobusa 2026. Machine Learning, Universidad del Norte}
-\date{8 de noviembre de 2026}
+\date{8 de noviembre de 2026\\[2pt] \small Versión revisada el 17 de noviembre de 2026}
 
 \begin{document}
 \maketitle
@@ -77,6 +79,7 @@
 \input{secciones/00_resumen}
 \input{secciones/01_introduccion}
 \input{secciones/02_datos}
+\input{secciones/02b_corto_plazo}
 \input{secciones/03_metodologia}
 \input{secciones/04_resultados}
 \input{secciones/05_discusion}

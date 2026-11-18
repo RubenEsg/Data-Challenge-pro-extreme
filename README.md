@@ -7,6 +7,27 @@
 > Un modelo pronostica cuántos pasajeros habrá en cada ruta y hora con una semana de antelación, y un optimizador reparte
 > las salidas: menos en el valle y más en los picos, con casi las mismas horas de bus.
 
+<!-- corto_plazo:inicio (bloque generado por pronostico_corto_plazo/escribir_readme.py: no editar a mano) -->
+## Correcciones tras la retroalimentación del curso (17 de noviembre de 2026)
+
+La retroalimentación señaló tres faltas de la entrega. Las tres se corrigieron en la carpeta [`pronostico_corto_plazo/`](pronostico_corto_plazo/README.md), que resuelve el problema tal como lo pide la especificación: **el pronóstico de las subidas de los siguientes 30, 60 y 120 minutos por ruta, sentido y segmento**. En el informe y en el cuaderno es la sección P.
+
+| Lo que se señaló | Lo que se hizo | Resultado | Evidencia |
+|---|---|---|---|
+| Se pronosticaba a siete días por ruta y hora de salida: no es el problema que se pidió, y las cifras no se pueden comparar con las de otros equipos | Cada media hora, de 04:00 a 21:00, se pronostican las subidas de los siguientes 30, 60 y 120 minutos, con MAE, RMSE, WAPE y sMAPE por ruta y franja y frente a las líneas base del enunciado (promedio por día y hora y última semana) | Por ruta, en la prueba: WAPE de **7,34 % frente a 13,18 %** del promedio por día y hora a 60 minutos (diferencia con IC del 95 % de −7,95 a −4,08 puntos); 8,58 % frente a 14,36 % a 30 minutos y 6,63 % frente a 12,22 % a 120 | `pronostico_corto_plazo/resultados/prueba.json` |
+| Los modelos se eligieron y se reportaron sobre los mismos meses de 2025 | El protocolo se confirmó en git antes de entrenar: se entrena con 2023 y 2024, **se elige todo con enero a junio de 2025** y **se reporta una sola vez con julio a diciembre de 2025**, en tres commits ordenados (protocolo, validación y prueba) | En la validación, el modelo elegido falla 7,58 % por ruta a 60 minutos (el promedio, 16,21 %); en la prueba, que no se usó para elegir nada, 7,34 % (el promedio, 13,18 %) | `pronostico_corto_plazo/PROTOCOLO.md`, `pronostico_corto_plazo/resultados/validacion.json`, `pronostico_corto_plazo/resultados/seleccion.json` y el historial de git |
+| El modelo por segmento se entrenó con 37 días: lo espacial no quedó validado | Se asignaron a su segmento las subidas de los tres años (44.871.165) con la regla de Extreme, que reproduce su tabla en los 58 días que la base trae (el 99,975 % de las subidas en el mismo segmento). El modelo por segmento se entrena con más de dos años y se prueba en seis meses | A 60 minutos: por sentido, 10,05 % frente a 16,10 %; por segmento, 37,63 % frente a 43,61 %, en 2.404.780 celdas de segmento e instante. El modelo gana al promedio en 332 de los 384 segmentos con subidas | `pronostico_corto_plazo/panel/verificacion_extreme.json`, `pronostico_corto_plazo/resultados/segmentos_prueba.csv` |
+
+Lo que se conserva y lo que falta:
+
+- **El pronóstico a siete días se conserva** porque es el que usa la programación semanal, pero ya no se presenta como el del enunciado. Con el protocolo nuevo, el modelo que solo usa lo que se sabe una semana antes falla 9,19 % por ruta a 60 minutos en la prueba; con lo observado en el mismo día, 7,34 %.
+- **La prueba no es ciega en sentido estricto:** los meses de 2025 se conocían por los experimentos anteriores, con otro objetivo. Ninguna decisión del experimento nuevo usa julio a diciembre.
+- **El sentido es una aproximación** (la mitad del ciclo), y se midió cuánto afecta (`pronostico_corto_plazo/panel/revision_sentido.json`).
+- **Un registro imposible en la prueba.** La base trae 28.782 subidas en un solo segmento de CRA 54 en 15 minutos (05-07-2025, 07:45). El protocolo no previó filtrarlo, así que las cifras de la tabla lo incluyen; infla sobre todo el RMSE (303,9 por ruta a 60 minutos). En un análisis posterior, sin los 9 días que toca, el modelo falla 6,91 % y el promedio 12,51 %, con un RMSE de 73,7 (`pronostico_corto_plazo/resultados/sensibilidad_registro_anomalo.json`).
+- **Falta llevarlo a la API.** La API sigue pronosticando por hora de salida, y su modelo por segmento es el de 37 días. Integrar este pronóstico es el primer pendiente de `PLAN_EVOLUCION.md` (sección 7).
+
+<!-- corto_plazo:fin -->
+
 ## Guía para el jurado
 
 **Empieza aquí: el tablero** (`dash_app/`; en Windows, doble clic en `dash_app/iniciar_dash.bat`, y en cualquier sistema,
@@ -36,7 +57,7 @@ La especificación v1.5 de Extreme Technologies se revisa en cuatro documentos:
 | E02 | Especificación técnica | `documentos/E02_especificacion_tecnica.pdf` |
 | E03 | Código fuente | `api_frecuencias/`: código en `app/`, dependencias en `pyproject.toml`, `requirements.txt` y `requisitos_congelados.txt`, pruebas en `tests/` y reporte de SonarQube en `docs/evidencias/sonarqube/` (`resumen.md`: puerta de calidad condición por condición; se repite con `scripts/sonar_local.py`). El historial de desarrollo, commit por commit, está en `HISTORIAL_DESARROLLO.md`, que genera `historial_desarrollo.py` desde el repositorio de desarrollo del equipo. |
 | E04 | Base de datos | `api_frecuencias/alembic/versions/` (DDL del esquema `ai_frecuencias`, índices y datos semilla de umbrales). El registro de modelos se siembra desde `api_frecuencias/datos/modelos/registro.json`. |
-| E05 | Modelo IA | `api_frecuencias/datos/modelos/hgb_fv2_20250831_s42/` (artefacto y manifiesto con SHA-256). Entrenamiento reproducible con `api_frecuencias/scripts/entrenar.py`; métricas en `api_frecuencias/docs/evidencias/modelo/`. Por segmento y sentido, `api_frecuencias/datos/modelos/segmentos/` (modelo activo `seg_hgb_jerarquico_20230227_s42`), entrenado con `api_frecuencias/scripts/entrenar_segmentos.py` según el protocolo de `api_frecuencias/docs/evidencias/modelo/segmentos_protocolo.md`. |
+| E05 | Modelo IA | `api_frecuencias/datos/modelos/hgb_fv2_20250831_s42/` (artefacto y manifiesto con SHA-256). Entrenamiento reproducible con `api_frecuencias/scripts/entrenar.py`; métricas en `api_frecuencias/docs/evidencias/modelo/`. Por segmento y sentido, `api_frecuencias/datos/modelos/segmentos/` (modelo activo `seg_hgb_jerarquico_20230227_s42`), entrenado con `api_frecuencias/scripts/entrenar_segmentos.py` según el protocolo de `api_frecuencias/docs/evidencias/modelo/segmentos_protocolo.md`. El pronóstico de corto plazo que pide el enunciado (30, 60 y 120 minutos por ruta, sentido y segmento) se elige con `pronostico_corto_plazo/validar.py` y se prueba con `pronostico_corto_plazo/probar.py`; sus modelos se vuelven a entrenar con esos dos guiones desde `pronostico_corto_plazo/panel/` y no dejan artefacto en la API. |
 | E06 | Prototipo | API (`api_frecuencias/`) y tablero (`dash_app/`: las pantallas Alertas, Recomendaciones, Operación y Monitoreo, la sección «Modelo activo (API)» de Pronóstico y la tarjeta de Inicio con la respuesta del reto consumen la API). Capturas y recorrido en `api_frecuencias/docs/evidencias/tablero/`. |
 | E07 | Integración PostgreSQL | `api_frecuencias/docs/integracion_postgresql.md` (consultas de solo lectura, marca de agua, mapa de tablas y EXPLAIN), `api_frecuencias/docs/evidencias/replica/` y `api_frecuencias/docs/hallazgos_extreme.md`. |
 | E08 | Pruebas | `api_frecuencias/tests/` (unitarias, integración, contrato, datos/ML, réplica y Testcontainers), `api_frecuencias/k6/` (carga) y `api_frecuencias/docs/evidencias/pruebas/`. Integración continua: `.github/workflows/api_frecuencias.yml` en la raíz del repositorio de entrega (la misma definición está en `api_frecuencias/ci/github_actions_entrega.yml`). Los conteos de la suite, la cobertura y la carga con k6 están en la tabla «Cifras vigentes del backend», más abajo. |
@@ -104,11 +125,12 @@ y abra http://127.0.0.1:8050. El recorrido por cada pantalla está en `api_frecu
 
 | Archivo o carpeta | Qué es | Cómo se abre |
 |---|---|---|
-| `Informe_tecnico_Sobusa.pdf` | **Informe técnico** (23 páginas): datos, metodología, resultados, limitaciones, recomendaciones y referencias. | Cualquier lector de PDF. |
-| `entrega_final.html` | **Cuaderno final ejecutado**, en HTML: entrena el modelo, lo evalúa, resuelve el despacho de un día y comprueba 151 cifras. | Doble clic (navegador). |
+| `Informe_tecnico_Sobusa.pdf` | **Informe técnico** (27 páginas): datos, el problema del enunciado (sección P), metodología, resultados, limitaciones, recomendaciones y referencias. | Cualquier lector de PDF. |
+| `entrega_final.html` | **Cuaderno final ejecutado**, en HTML: resuelve el problema del enunciado (sección P), entrena el modelo semanal, lo evalúa, resuelve el despacho de un día y comprueba 167 cifras. | Doble clic (navegador). |
 | `entrega_final.ipynb` | El mismo cuaderno, con sus salidas. | Jupyter o VS Code. Para volver a ejecutarlo hace falta el proyecto completo (abajo). |
 | `dash_app/` | **Laboratorio del modelo** (Dash, Python): el pronóstico y el optimizador corren en vivo. | En Windows, doble clic en `dash_app/iniciar_dash.bat`; en cualquier sistema, `python app.py` (abajo). |
 | `app_sobusa/app.html` | **App «Sobusa Despacho»**: nueve pantallas con todo el proyecto, la repetición de un día de 2025 en la consola (sin mandos sobre los buses) y la vista 3D. *Solo en el ZIP completo (`Entrega_final_Sobusa.zip`); no viene en el ZIP ligero.* | Doble clic, en Edge o Chrome, sin internet. |
+| `pronostico_corto_plazo/` | **El pronóstico que pide el enunciado**: las subidas de los siguientes 30, 60 y 120 minutos por ruta, sentido y segmento, con el protocolo escrito antes de entrenar, la validación, la prueba reservada y las subidas por segmento de 2023 a 2025. | Su `README.md`; para repetirlo, `python validar.py` y `python probar.py --repetir`. |
 | `api_frecuencias/` | **Backend del reto** (FastAPI + PostgreSQL 14): ejecución incremental, pronóstico a 30/60/120 min, recomendación de frecuencia y flota, alertas y registro de modelos. | Con Docker, dos comandos (abajo). |
 | `MATRIZ_CUMPLIMIENTO.md` · `PLAN_EVOLUCION.md` · `HISTORIAL_DESARROLLO.md` | Cada requisito de la especificación v1.5 con dónde se cumple y su estado; plan de integración, escalabilidad, costos, riesgos, hoja de ruta y adopción; lista de los commits del desarrollo. | Cualquier visor de Markdown. |
 | `documentos/` | Documento ejecutivo (E01), especificación técnica (E02), presentación final y video de E11 (`video/`), la respuesta a la pregunta del reto (`respuesta_pregunta_reto.md`) y el mapeo de §1–§3 y §17–§20 de la especificación a la evidencia (`mapeo_especificacion.md`). | Lector de PDF, reproductor de video o visor de Markdown. |
@@ -117,7 +139,7 @@ y abra http://127.0.0.1:8050. El recorrido por cada pantalla está en `api_frecu
 
 **Orden sugerido:**
 
-1. Lo que pide la especificación: `MATRIZ_CUMPLIMIENTO.md` y `documentos/mapeo_especificacion.md`.
+1. Lo que pide la especificación: `MATRIZ_CUMPLIMIENTO.md` y `documentos/mapeo_especificacion.md`; y el pronóstico tal como lo pide, en `pronostico_corto_plazo/README.md`.
 2. El producto: E01 y E02 (`documentos/`), la API con la demostración de arriba y el tablero (`dash_app/`).
 3. La parte académica: el informe técnico (10 minutos para el resumen, las tablas 1 y 3 y las recomendaciones) y el
    cuaderno, que es su prueba técnica: cada cifra se calcula ahí mismo o se lee de su archivo de resultados y se
@@ -188,7 +210,7 @@ Cifras vigentes del backend, cada una con su archivo en `api_frecuencias/docs/ev
 | Modelo activo `hgb_fv2_20250831_s42` en la prueba reservada (nov.–dic. 2025) | WAPE 14,77 % (IC95 13,10–16,87) frente a 21,18 % (16,61–26,79) de la regla manual B1 | `modelo/evaluacion_modelo.md` |
 | Candidato `hgb_fv3_20250831_s42` (fv2 + calendario escolar y universitario), registrado sin activar | Mejora a fv2 en los dos años congelados: 2024, 15,76 % frente a 16,26 %, y 2025, 14,08 % frente a 14,48 %, con el IC95 de la diferencia entero bajo cero; en la prueba reservada (informativa), 14,36 % (IC95 12,98–16,13) | `modelo/decision_fv3.md` y `modelo/candidato_fv3/evaluacion_modelo.md` |
 | Banda P10–P90 con la calibración v2 por bloque horario | Cobertura de 77,82 % (v1: 77,88 %) con un ancho medio de 303,4 pasajeros (v1: 312,9) | `modelo/calibracion_condicional.md` |
-| Modelo por segmento y sentido `seg_hgb_jerarquico_20230227_s42` en su prueba (18 a 27-02-2023) | WAPE por segmento y hora de 42,09 % frente a 43,06 % del reparto fijo (IC95 de la diferencia: −1,60 a −0,02 puntos); banda P10–P90 con cobertura de 78,31 % por segmento y 83,40 % por sentido. Solo hay subidas por segmento de ene.–feb. 2023, así que su error en 2025 no se puede medir | `modelo/segmentos_modelo.md`, `modelo/segmentos_banda_ventanas.json` |
+| Modelo por segmento y sentido `seg_hgb_jerarquico_20230227_s42` en su prueba (18 a 27-02-2023) | WAPE por segmento y hora de 42,09 % frente a 43,06 % del reparto fijo (IC95 de la diferencia: −1,60 a −0,02 puntos); banda P10–P90 con cobertura de 78,31 % por segmento y 83,40 % por sentido. La tabla de Extreme solo trae subidas por segmento de ene.–feb. 2023, y el error de este modelo en 2025 no está medido; el pronóstico por segmento validado con tres años está en `pronostico_corto_plazo/` | `modelo/segmentos_modelo.md`, `modelo/segmentos_banda_ventanas.json` |
 | Volumen de alertas observadas (15-09 a 31-12-2025, 324 días-ruta) | 1,265 por ruta y día en total, con la ALT-002 observada (0,710, con el factor de carga del ciclo) y la ruptura de RF-009 (0,012); las que ya medía la versión anterior (ALT-005 a ALT-009) quedan en 0,543, frente a 6,08 con las reglas anteriores | `alertas/backtest_alertas.md` |
 | Volumen de alertas de pronóstico (por hora, mismo periodo) | ALT-001 0,438, ALT-002 0,306, ALT-003 0,164 y ALT-004 0,031 por ruta y día (0,938); con las observadas, 2,203 por ruta y día (`scripts/cifras_vigentes.py`) | `alertas/backtest_alertas_pronostico.md` |
 | Revisión doble de 96 alertas | Kappa de 0,943 entre los dos revisores (automatizados) antes de conciliar; precisión reponderada de 0,839 (intervalo 95 %: 0,757–0,882). Falta la validación del área operativa; el kit para que la hagan dos personas del área operativa de Sobusa, a ciegas y sin red, está en `alertas/revision_doble/kit_humano/` | `alertas/revision_doble/conciliacion.json` |
@@ -317,6 +339,6 @@ Parquet.
   `app/verificar_datos_app.py`; en el ZIP completo viajan copias en `app_sobusa/app/`, pero necesitan los resultados
   del proyecto para correr).
 
-Ninguna cifra está escrita a mano: cada una se lee de su archivo de resultados, y el cuaderno contrasta 151 de ellas al
+Ninguna cifra está escrita a mano: cada una se lee de su archivo de resultados, y el cuaderno contrasta 167 de ellas al
 ejecutarse. Semilla 42 en todo el proyecto. Ningún archivo de la entrega trae credenciales ni datos personales de
 conductores.

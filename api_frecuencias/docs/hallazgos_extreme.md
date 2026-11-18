@@ -90,7 +90,8 @@ ejecutados tal cual», los conteos de filas son los mismos antes y después de c
 `timbradas_segmentos` se cargó desde la exportación, que es lo que esos scripts produjeron en la base de Extreme.
 
 Esa exportación solo trae subidas por segmento del 2023-01-01 al 2023-02-27. Con ellas se entrenó el modelo por
-segmento y sentido, así que su error en 2025 no se puede medir (`docs/modelo_segmentos.md`, «Límites»), y con sus
+segmento y sentido, así que su error en 2025 no está medido (`docs/modelo_segmentos.md`, «Límites»; el 17-11-2026
+las subidas por segmento de 2023 a 2025 se reconstruyeron con la misma regla: `../../pronostico_corto_plazo/README.md`), y con sus
 subidas y bajadas se armó el perfil histórico de ocupación por segmento, que no ve otros meses
 (`docs/ocupacion_segmentos.md`). El sentido del
 segmento tampoco viene en las exportaciones: se aproxima con la mitad de la longitud del ciclo (supuesto S9).

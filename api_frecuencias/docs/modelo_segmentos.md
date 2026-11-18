@@ -89,8 +89,12 @@ artefacto pase la verificación y que reentrenar reproduzca la validación regis
 
 ## Límites
 
-- Solo hay subidas por segmento del 2023-01-01 al 2023-02-27 (los triggers de segmentación no se volvieron a
-  ejecutar): el error del modelo en 2025 no se puede medir.
+- La tabla `timbradas_segmentos` solo trae subidas por segmento del 2023-01-01 al 2023-02-27 (los triggers de
+  segmentación no se volvieron a ejecutar), y este modelo se entrenó con ellas: su error en 2025 no está medido.
+- El 17-11-2026 se reconstruyeron las subidas por segmento de 2023 a 2025 aplicando la misma regla a los eventos de
+  conteo, y con ese panel se entrenó y se probó aparte el pronóstico por segmento a 30, 60 y 120 minutos
+  (`../../pronostico_corto_plazo/README.md`). Reentrenar este modelo con el panel es el primer pendiente de
+  `../../PLAN_EVOLUCION.md` (sección 7).
 - El sentido es una aproximación geométrica (supuesto S9): mitad de la longitud acumulada del ciclo.
 - No hay pronósticos fuera de muestra del modelo de ruta activo para 2023: la cobertura de punta a punta se midió con
   B2 (la misma hora de la semana anterior) y, como análisis adicional, con errores reales del modelo de ruta de 2025.

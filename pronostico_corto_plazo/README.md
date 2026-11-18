@@ -2,7 +2,7 @@
 
 Este es el pronóstico que pide el enunciado: las subidas de los siguientes **30, 60 y 120 minutos**, por **ruta, sentido y segmento**, con lo observado hasta el instante del pronóstico. Se eligió con unos meses y se reportó, una sola vez, con otros.
 
-**Resultado principal** (prueba de julio a diciembre de 2025, por ruta, a 60 minutos): el modelo se equivoca en **7,34 %** de las subidas y el promedio por día y hora, la línea base del enunciado, en 13,18 %. La diferencia es de −5,83 puntos, con IC del 95 % de −7,95 a −4,08.
+**Resultado principal** (prueba de julio a diciembre de 2025, por ruta, a 60 minutos): el modelo se equivoca en **7,34 %** de las subidas y el promedio por día y hora, la línea base del enunciado, en 13,18 %. La diferencia es de −5,84 puntos, con IC del 95 % de −7,95 a −4,08.
 
 ## Por qué existe
 
@@ -77,7 +77,7 @@ WAPE medio de los tres horizontes en la validación, en %:
 |---|---|---|---|---|---|
 | Ruta | 16,27 | 10,93 | 7,70 | 7,58 | completo |
 | Sentido | 18,83 | 13,22 | 10,56 | 10,49 | completo |
-| Segmento | 45,67 | 41,62 | 38,32 | 38,20 | completo |
+| Segmento | 45,67 | 41,62 | 38,32 | 38,21 | completo |
 
 - `semanal`: calendario y la misma ventana de las semanas anteriores. Es lo que se sabe con siete días de antelación.
 - `con lo de hoy`: además, ayer, la última semana y lo observado hoy hasta el instante.
@@ -99,13 +99,13 @@ Julio a diciembre de 2025: 184 días, de los que 178 tienen datos en cada ruta. 
 | Nivel | Horizonte | Promedio por día y hora | Última semana | Persistencia | **Modelo** | Modelo − promedio [IC 95 %] | Cobertura P10–P90 |
 |---|---|---|---|---|---|---|---|
 | Ruta | 30 min | 14,36 | 17,31 | 17,00 | **8,58** | −5,78 [−7,80; −4,08] | 81,4 % |
-| Ruta | 60 min | 13,18 | 15,56 | 22,98 | **7,34** | −5,83 [−7,95; −4,08] | 82,8 % |
-| Ruta | 120 min | 12,22 | 14,14 | 34,91 | **6,63** | −5,58 [−7,73; −3,80] | 83,8 % |
+| Ruta | 60 min | 13,18 | 15,56 | 22,98 | **7,34** | −5,84 [−7,95; −4,08] | 82,8 % |
+| Ruta | 120 min | 12,22 | 14,14 | 34,92 | **6,63** | −5,59 [−7,73; −3,80] | 83,8 % |
 | Sentido | 30 min | 17,78 | 21,57 | 20,20 | **12,13** | −5,65 [−7,51; −3,99] | 80,8 % |
 | Sentido | 60 min | 16,10 | 19,10 | 25,88 | **10,05** | −6,05 [−7,80; −4,60] | 81,3 % |
-| Sentido | 120 min | 14,67 | 17,03 | 37,88 | **8,71** | −5,96 [−7,76; −4,46] | 83,2 % |
+| Sentido | 120 min | 14,67 | 17,03 | 37,88 | **8,72** | −5,96 [−7,76; −4,46] | 83,2 % |
 | Segmento | 30 min | 56,69 | 69,05 | 70,12 | **51,08** | −5,61 [−7,18; −4,18] | 79,4 % |
-| Segmento | 60 min | 43,61 | 52,80 | 59,36 | **37,63** | −5,98 [−7,47; −4,74] | 79,7 % |
+| Segmento | 60 min | 43,61 | 52,81 | 59,36 | **37,63** | −5,98 [−7,47; −4,74] | 79,7 % |
 | Segmento | 120 min | 34,59 | 41,18 | 61,72 | **28,56** | −6,03 [−7,60; −4,76] | 80,0 % |
 
 **Por ruta** (modelo; entre paréntesis, el promedio por día y hora):
@@ -114,7 +114,7 @@ Julio a diciembre de 2025: 184 días, de los que 178 tienen datos en cada ruta. 
 |---|---|---|---|---|---|---|---|---|
 | SILENCIO | 580 | 8,20 (13,90) | 6,75 (12,64) | 5,85 (11,66) | 39,2 | 56,5 | 9,2 % | +1,03 % |
 | CRA 54 | 1.171 | 8,03 (14,14) | 7,11 (13,20) | 6,71 (12,40) | 83,3 | 521,4 | 8,2 % | 0,00 % |
-| CL 72 | 381 | 10,86 (15,73) | 8,97 (13,93) | 7,59 (12,51) | 34,2 | 45,7 | 11,6 % | +0,90 % |
+| CL 72 | 381 | 10,86 (15,74) | 8,98 (13,93) | 7,59 (12,51) | 34,2 | 45,7 | 11,6 % | +0,90 % |
 
 **Por franja, a 60 minutos y por ruta** (las tres rutas juntas):
 
@@ -128,7 +128,7 @@ Julio a diciembre de 2025: 184 días, de los que 178 tienen datos en cada ruta. 
 | **Pico** (06–08 y 17–19) | 7,75 % | 14,32 % | +0,06 % |
 | **Valle** (el resto) | 7,07 % | 12,40 % | +0,70 % |
 
-- **Por tipo de día** (60 minutos, por ruta): laboral, 6,47 % frente a 10,90 %; sábado, 10,12 % frente a 13,80 %; domingo o festivo, 10,43 % frente a 31,46 %.
+- **Por tipo de día** (60 minutos, por ruta): laboral, 6,47 % frente a 10,90 %; sábado, 10,13 % frente a 13,80 %; domingo o festivo, 10,43 % frente a 31,46 %.
 - **Por mes** (60 minutos, por ruta): el modelo va de 6,50 % a 9,68 % y gana al promedio en 6 de los 6 meses.
 
 ![Un día de la prueba](figuras/fig_cp_dia.png)
@@ -149,12 +149,12 @@ El día de la figura es el 07-07-2025: el día laboral de la prueba con el error
 
 | Ruta y sentido | Modelo | Promedio por día y hora | Sesgo del modelo |
 |---|---|---|---|
-| SILENCIO · ida | 10,21 % | 16,34 % | −0,16 % |
+| SILENCIO · ida | 10,22 % | 16,35 % | −0,16 % |
 | SILENCIO · regreso | 11,69 % | 17,14 % | +0,91 % |
 | CRA 54 · ida | 9,57 % | 17,32 % | −1,88 % |
 | CRA 54 · regreso | 8,20 % | 13,66 % | +0,02 % |
 | CL 72 · ida | 12,17 % | 16,96 % | −0,20 % |
-| CL 72 · regreso | 12,65 % | 17,28 % | −0,10 % |
+| CL 72 · regreso | 12,66 % | 17,28 % | −0,10 % |
 
 ## Cuánto aporta lo observado en el día y cuánto cuesta que la captura llegue tarde
 
@@ -185,9 +185,9 @@ Para saber cuánto pesa, `sensibilidad_registro_anomalo.py` recalcula las métri
 | Ruta | 120 min | 6,63 → **6,16** | 12,22 → 11,55 | −5,40 [−7,52; −3,58] | 440,5 → 144,4 |
 | Sentido | 30 min | 12,13 → **11,78** | 17,78 → 17,14 | −5,36 [−7,18; −3,67] | 167,0 → 77,9 |
 | Sentido | 60 min | 10,05 → **9,69** | 16,10 → 15,45 | −5,77 [−7,52; −4,25] | 214,5 → 49,6 |
-| Sentido | 120 min | 8,71 → **8,34** | 14,67 → 14,03 | −5,68 [−7,48; −4,15] | 306,4 → 84,4 |
+| Sentido | 120 min | 8,72 → **8,34** | 14,67 → 14,03 | −5,68 [−7,48; −4,15] | 306,4 → 84,4 |
 
-La conclusión no cambia. Sin esos días bajan el error del modelo y el del promedio, y la diferencia por ruta a 60 minutos queda en −5,60 puntos (con el registro, −5,83). El RMSE sí cambia mucho, porque un solo error de unas 29.000 subidas pesa más que todos los demás juntos. Por segmento no se recalculó, porque las predicciones por segmento no se guardan; el registro está en el segmento 4 de CRA 54 y se ve en `resultados/segmentos_prueba.csv`.
+La conclusión no cambia. Sin esos días bajan el error del modelo y el del promedio, y la diferencia por ruta a 60 minutos queda en −5,60 puntos (con el registro, −5,84). El RMSE sí cambia mucho, porque un solo error de unas 29.000 subidas pesa más que todos los demás juntos. Por segmento no se recalculó, porque las predicciones por segmento no se guardan; el registro está en el segmento 4 de CRA 54 y se ve en `resultados/segmentos_prueba.csv`.
 
 ## Limitaciones
 

@@ -218,6 +218,48 @@ Poisson y \NVariables{} variables. fv3: candidato sin activar, con el calendario
 \end{frame}
 
 % 5 ---------------------------------------------------------------------------------------------------------------
+\fte{\path{pronostico_corto_plazo/README.md}, \path{PROTOCOLO.md}, \path{resultados/prueba.json} y \path{panel/verificacion_extreme.json}}
+\begin{frame}[t]
+\cabecera{El pronóstico del enunciado}{Modelo predictivo · 20 \%}
+\begin{columns}[T]
+\begin{column}{0.5\linewidth}
+\begin{tarjeta}
+\titulotarjeta{WAPE en la prueba reservada (jul.–dic. de 2025)}
+{\scriptsize\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\linewidth}{@{}Xrrr@{}}
+& 30 min & 60 min & 120 min \\
+\midrule
+Ruta & \textcolor{rol-modelo}{\CortoRutaTreinta} \gris{(\CortoRutaTreintaBase)} & \textcolor{rol-modelo}{\CortoRutaSesenta} \gris{(\CortoRutaSesentaBase)} & \textcolor{rol-modelo}{\CortoRutaCientoveinte} \gris{(\CortoRutaCientoveinteBase)} \\
+Sentido & \textcolor{rol-modelo}{\CortoSentidoTreinta} \gris{(\CortoSentidoTreintaBase)} & \textcolor{rol-modelo}{\CortoSentidoSesenta} \gris{(\CortoSentidoSesentaBase)} & \textcolor{rol-modelo}{\CortoSentidoCientoveinte} \gris{(\CortoSentidoCientoveinteBase)} \\
+Segmento & \textcolor{rol-modelo}{\CortoSegmentoTreinta} \gris{(\CortoSegmentoTreintaBase)} & \textcolor{rol-modelo}{\CortoSegmentoSesenta} \gris{(\CortoSegmentoSesentaBase)} & \textcolor{rol-modelo}{\CortoSegmentoCientoveinte} \gris{(\CortoSegmentoCientoveinteBase)} \\
+\end{tabularx}}
+\vspace{2pt}\gris{En \%: \textcolor{rol-modelo}{modelo} y, entre paréntesis, el promedio por día y hora, la línea base del
+enunciado. Cada media hora, de 04:00 a 21:00, se pronostican las subidas de los siguientes 30, 60 y 120 minutos con
+lo observado hasta ese instante (LightGBM con pérdida Poisson). Por ruta a 60 min, la diferencia tiene un IC95 de
+\CortoDifIC{} puntos y la banda P10--P90 cubre el \CortoCobertura~\%.}
+\end{tarjeta}
+\end{column}
+\begin{column}{0.47\linewidth}
+\begin{tarjeta}
+\scriptsize\titulotarjeta{Validación y prueba separadas}
+Protocolo confirmado en git antes de entrenar: todo se eligió con \textbf{ene.--jun. de 2025} y la prueba de
+\textbf{jul.--dic.} se calculó una sola vez.
+\end{tarjeta}
+\begin{tarjeta}
+\scriptsize\titulotarjeta{Lo espacial, con tres años}
+\CortoSubidas{} subidas asignadas a los 386 segmentos con la regla de Extreme (antes, 37 días). El modelo gana al
+promedio en \CortoSegGana{} de \CortoSegTotal{} segmentos.
+\end{tarjeta}
+\begin{tarjeta}
+\scriptsize\titulotarjeta{Lo que falta}
+Llevarlo a la API, que hoy pronostica por hora de salida. El sentido es una aproximación y 2025 ya se conocía, con
+otro objetivo.
+\end{tarjeta}
+\end{column}
+\end{columns}
+\end{frame}
+
+% 6 ---------------------------------------------------------------------------------------------------------------
 \fte{\path{api_frecuencias/docs/evidencias/modelo/} (con \path{segmentos_modelo.json}), \path{.../monitoreo/compuerta_ejemplo.json}, \path{.../monitoreo/onnx_paridad.json}, \path{.../tablero/}\pantalla{dash_monitoreo.png}{operacion_monitoreo_1366x768.png}}
 \begin{frame}[t]
 \cabecera{Incertidumbre y ciclo de vida}{Modelo predictivo · 20 \%}
@@ -248,13 +290,14 @@ rechazar; reversión automática en 7 días. Ejemplo: candidato \GateWAPECand~\%
 \scriptsize\titulotarjeta{Por segmento y sentido (§3.1, §9.1)}
 Un modelo propio reparte el pronóstico de la ruta. Prueba de feb.~2023: WAPE por segmento y hora de
 \textbf{\SegWAPEact~\%} (reparto fijo: \SegWAPEbcero~\%); banda P10--P90 con \SegCobSegmento~\% de cobertura por
-segmento. Solo hay subidas por segmento de ene.--feb.~2023.
+segmento. La tabla de Extreme solo trae subidas por segmento de ene.--feb.~2023: el pronóstico por segmento con
+tres años es el de la lámina anterior.
 \end{tarjeta}
 \end{column}
 \end{columns}
 \end{frame}
 
-% 6 ---------------------------------------------------------------------------------------------------------------
+% 7 ---------------------------------------------------------------------------------------------------------------
 \fte{\path{api_frecuencias/docs/evidencias/optimizacion/sensibilidad.md}, \path{ejemplo_calculate_no_viable.json}, \path{.../tablero/}\pantalla{dash_recomendaciones.png}{recomendaciones_1366x768.png}}
 \begin{frame}[t]
 \cabecera{Recomendaciones viables}{Optimización y alertas · 20 \%}
@@ -295,7 +338,7 @@ ocupación actual, el plan pone un piso de salidas en los ciclos intradía de ca
 \end{columns}
 \end{frame}
 
-% 7 ---------------------------------------------------------------------------------------------------------------
+% 8 ---------------------------------------------------------------------------------------------------------------
 \fte{\path{api_frecuencias/docs/evidencias/alertas/}: \path{backtest_alertas.md}, \path{backtest_alertas_pronostico.md}, \path{identificacion_viajes.md}; \path{.../tablero/}\pantalla{dash_alertas.png}{alertas_detalle_1366x768.png}}
 \begin{frame}[t]
 \cabecera{Alertas que se pueden creer}{Optimización y alertas · 20 \%}
@@ -326,7 +369,7 @@ conductor.}
 \end{columns}
 \end{frame}
 
-% 8 ---------------------------------------------------------------------------------------------------------------
+% 9 ---------------------------------------------------------------------------------------------------------------
 \fte{\path{api_frecuencias/docs/evidencias/replica/}: \path{replica_roles.txt}, \path{replica_llegada.txt}, \path{explain_incremental.txt}; intentos: \FuenteIntentos; \path{.../cola/replicas_por_ruta.json}, \path{.../pruebas/k6_segmentos_consultas.json}, \path{.../pruebas/k6_segmentos.txt}}
 \begin{frame}[t]
 \cabecera{Se conecta sin interferir}{Integración y rendimiento · 15 \%}
@@ -362,7 +405,7 @@ p95 de \SegCarga{} ms con hasta \SegCargaUsuarios{} usuarios durante un refresco
 \end{columns}
 \end{frame}
 
-% 9 ---------------------------------------------------------------------------------------------------------------
+% 10 ---------------------------------------------------------------------------------------------------------------
 \fte{\FuentePruebas; \FuenteCobertura; \path{api_frecuencias/docs/evidencias/sonarqube/measures.json}; \path{api_frecuencias/ci/github_actions_entrega.yml}}
 \begin{frame}[t]
 \cabecera{Ingeniería que se puede auditar}{Ingeniería de software · 15 \%}
@@ -394,7 +437,7 @@ p95 de \SegCarga{} ms con hasta \SegCargaUsuarios{} usuarios durante un refresco
 \end{columns}
 \end{frame}
 
-% 10 --------------------------------------------------------------------------------------------------------------
+% 11 --------------------------------------------------------------------------------------------------------------
 \fte{\path{api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt} (\path{scripts/demo_ciclo_api.py} contra la API en Docker)}
 \begin{frame}[t]
 \cabecera{Demostración del ciclo de §14.2}{Presentación y adopción · 10 \%}
@@ -424,7 +467,7 @@ en el registro de modelos, auditada y reversible};
 cada paso deja su ejecución en \texttt{execution\_log} y su decisión en \texttt{model\_registry}.}}
 \end{frame}
 
-% 11 --------------------------------------------------------------------------------------------------------------
+% 12 --------------------------------------------------------------------------------------------------------------
 \fte{\path{api_frecuencias/docs/evidencias/respuesta/}: \RespuestaFuente{} y \RespuestaEjemploFuente; alertas: \path{.../alertas/backtest_alertas.md} y \path{backtest_alertas_pronostico.md}; detalle: \path{documentos/respuesta_pregunta_reto.md}}
 \begin{frame}[t]
 \cabecera{La respuesta a la pregunta}{§20 · \RespuestaTipoDia{} \RespuestaFecha}
@@ -451,7 +494,7 @@ gris, lo programado hoy. Una hora no viable programa la mejor aproximación ejec
 modelo \RespuestaModelo; recaudo con tarifa pública de referencia (§19).}}
 \end{frame}
 
-% 12 --------------------------------------------------------------------------------------------------------------
+% 13 --------------------------------------------------------------------------------------------------------------
 \fte{\path{Informe_tecnico_Sobusa.pdf}, §4 (tabla 8 de escenarios y figura del plan que reasigna; sus datos están en el repositorio del proyecto, no en esta entrega)}
 \begin{frame}[t]
 \cabecera{Qué gana Sobusa}{Valor para la operación}
@@ -485,7 +528,7 @@ calcula el plan con el modelo activo.}}
 \end{columns}
 \end{frame}
 
-% 13 --------------------------------------------------------------------------------------------------------------
+% 14 --------------------------------------------------------------------------------------------------------------
 \fte{\path{PLAN_EVOLUCION.md} (§1.1 calendario y criterio, §3.1 costos, §4 riesgos); \path{Informe_tecnico_Sobusa.pdf}, §4 (piloto); sensibilidad de β: \path{api_frecuencias/docs/evidencias/optimizacion/sensibilidad.md}}
 \begin{frame}[t]
 \cabecera{Plan de implementación}{Presentación y adopción · 10 \%}
@@ -524,7 +567,7 @@ compuerta y reversión.
 \end{columns}
 \end{frame}
 
-% 14 --------------------------------------------------------------------------------------------------------------
+% 15 --------------------------------------------------------------------------------------------------------------
 \fte{\path{api_frecuencias/docs/hallazgos_extreme.md}; \path{README.md}; \path{PLAN_EVOLUCION.md}; E01 y E02}
 \begin{frame}[t]
 \vspace{10pt}

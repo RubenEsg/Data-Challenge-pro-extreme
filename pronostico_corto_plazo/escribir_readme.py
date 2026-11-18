@@ -7,6 +7,7 @@ Uso (desde esta carpeta):  python escribir_readme.py
 from __future__ import annotations
 
 import json
+from decimal import ROUND_HALF_UP, Decimal
 
 import comun as C
 
@@ -24,11 +25,19 @@ QUE_ES = {"p15": "lo que subió en los 15 minutos anteriores", "p30": "en los 30
 
 
 def num(x, dec: int = 2, signo: bool = False) -> str:
+    """Formato es-CO. Una sola regla de redondeo, la del informe: la mitad hacia arriba sobre el decimal escrito en el
+    archivo de resultados (8.715 -> «8,72», no el 8,71 que daría el binario de 8.715)."""
     if x is None:
         return "—"
+    x = Decimal(str(x)).quantize(Decimal(1).scaleb(-dec), rounding=ROUND_HALF_UP)
     s = f"{abs(x):,.{dec}f}".replace(",", "§").replace(".", ",").replace("§", ".")
     cero = not (set(s) - set("0,."))
     return (MENOS if x < 0 and not cero else "+" if signo and x > 0 and not cero else "") + s
+
+
+def resta(a, b) -> Decimal:
+    """a − b con los decimales tal como están escritos en el archivo (sin el error del binario)."""
+    return Decimal(str(a)) - Decimal(str(b))
 
 
 def pct(x, dec: int = 2) -> str:
@@ -62,7 +71,7 @@ def main() -> None:
     a("")
     a(f"**Resultado principal** (prueba de julio a diciembre de 2025, por ruta, a 60 minutos): el modelo se equivoca en "
       f"**{pct(m60['wape'])}** de las subidas y el promedio por día y hora, la línea base del enunciado, en {pct(p60['wape'])}. "
-      f"La diferencia es de {num(m60['wape'] - p60['wape'], 2, True)} puntos, con IC del 95 % de {num(ic60[0], 2, True)} a "
+      f"La diferencia es de {num(resta(m60['wape'], p60['wape']), 2, True)} puntos, con IC del 95 % de {num(ic60[0], 2, True)} a "
       f"{num(ic60[1], 2, True)}.")
     a("")
     a("## Por qué existe")
@@ -213,7 +222,7 @@ def main() -> None:
             ic = t["ic95"]["modelo_menos_promedio_dia_hora"]["ic95"]
             a(f"| {NOMBRE_NIVEL[nivel]} | {h} min | {num(t['promedio_dia_hora']['wape'])} | {num(t['ultima_semana']['wape'])} | "
               f"{num(t['persistencia']['wape'])} | **{num(t['modelo']['wape'])}** | "
-              f"{num(t['modelo']['wape'] - t['promedio_dia_hora']['wape'], 2, True)} [{num(ic[0], 2, True)}; {num(ic[1], 2, True)}] | "
+              f"{num(resta(t['modelo']['wape'], t['promedio_dia_hora']['wape']), 2, True)} [{num(ic[0], 2, True)}; {num(ic[1], 2, True)}] | "
               f"{pct(b['banda_p10_p90']['todas_las_rutas']['cobertura_pct'], 1)} |")
     a("")
     a("**Por ruta** (modelo; entre paréntesis, el promedio por día y hora):")
@@ -397,7 +406,7 @@ def anomalo(a, pru: dict) -> None:
               f"{num(con['modelo']['rmse'], 1)} → {num(sin['modelo']['rmse'], 1)} |")
     a("")
     x = s["niveles"]["ruta"]["60"]
-    con_dif = x["con_el_registro"]["modelo"]["wape"] - x["con_el_registro"]["promedio_dia_hora"]["wape"]
+    con_dif = resta(x["con_el_registro"]["modelo"]["wape"], x["con_el_registro"]["promedio_dia_hora"]["wape"])
     a(f"La conclusión no cambia. Sin esos días bajan el error del modelo y el del promedio, y la diferencia por ruta a 60 minutos "
       f"queda en {num(x['sin_esos_dias']['modelo_menos_promedio_dia_hora']['diferencia'], 2, True)} puntos (con el registro, "
       f"{num(con_dif, 2, True)}). El RMSE sí cambia mucho, porque un solo error de unas {num(round(r['subidas'], -3), 0)} subidas pesa más que "
@@ -488,7 +497,7 @@ def bloque_entrega(ver: dict, val: dict, pru: dict) -> list[str]:
         "(`pronostico_corto_plazo/panel/revision_sentido.json`).",
         *vineta_anomalo(),
         "- **Falta llevarlo a la API.** La API sigue pronosticando por hora de salida, y su modelo por segmento es el de 37 "
-        "días. Integrar este pronóstico es el primer paso de `PLAN_EVOLUCION.md`.",
+        "días. Integrar este pronóstico es el primer pendiente de `PLAN_EVOLUCION.md` (sección 7).",
         "",
         MARCA_FIN,
     ]

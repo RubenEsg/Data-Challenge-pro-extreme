@@ -42,7 +42,18 @@ prueba limpia. Las cifras de 13,94 y 13,62 % del informe académico, los experim
 sobre todo 2025, así que no se comparan con esta. El modelo es un Gradient Boosting con pérdida Poisson, reproducible
 desde Python.
 
-=== 5. Incertidumbre y ciclo de vida
+=== 5. El pronóstico del enunciado
+Esta lámina responde a la retroalimentación del curso. El enunciado pide pronosticar la demanda de los siguientes
+treinta, sesenta y ciento veinte minutos por ruta, sentido y segmento, y así lo hicimos: cada media hora, con lo
+observado hasta ese instante. Para no elegir y reportar sobre los mismos meses, escribimos el protocolo antes de
+entrenar: todo se eligió con enero a junio de 2025 y la prueba, de julio a diciembre, se calculó una sola vez. Por ruta
+y a sesenta minutos el modelo se equivoca {{CortoRutaSesenta}} %, frente a {{CortoRutaSesentaBase}} % del promedio por
+día y hora, que es la línea base del enunciado. Para lo espacial asignamos a su segmento las {{CortoSubidas}} subidas
+de los tres años con la regla de Extreme. Por segmento el modelo se equivoca {{CortoSegmentoSesenta}} %, frente a
+{{CortoSegmentoSesentaBase}} % del promedio, y gana en {{CortoSegGana}} de los {{CortoSegTotal}} segmentos con subidas.
+Lo que falta es llevarlo a la API, que hoy pronostica por hora de salida.
+
+=== 6. Incertidumbre y ciclo de vida
 Cada pronóstico trae su banda P10 a P90; la cobertura está cerca del ochenta por ciento objetivo, y la calibración
 conformal está versionada: se ajustó solo con la validación y la API verifica su hash. Cada pronóstico se explica con
 SHAP. El modelo no se reemplaza solo: el monitoreo mide deriva y error, el candidato pasa catorce días en sombra y una
@@ -50,10 +61,10 @@ compuerta de cuatro criterios decide; la activación manual pasa por la misma co
 candidato sacó {{GateWAPECand}} % frente a {{GateWAPEAct}} % del activo y la compuerta lo dejó {{GateDecision}}. A la
 derecha, la pantalla de monitoreo del tablero. Debajo, el segmento y el sentido: un modelo propio reparte el pronóstico
 de la ruta. En su prueba de febrero de 2023 se equivoca {{SegWAPEact}} % por segmento y hora, frente a
-{{SegWAPEbcero}} % del reparto fijo, y su banda cubre {{SegCobSegmento}} % por segmento. Solo hay subidas por segmento
-de enero y febrero de 2023, así que su error en 2025 no se puede medir.
+{{SegWAPEbcero}} % del reparto fijo, y su banda cubre {{SegCobSegmento}} % por segmento. La tabla de Extreme solo trae
+subidas por segmento de enero y febrero de 2023; el pronóstico por segmento con tres años es el de la lámina anterior.
 
-=== 6. Recomendaciones viables
+=== 7. Recomendaciones viables
 El optimizador resuelve la función objetivo de la sección 10.2: costo, espera, sobreocupación y desviación, con las
 restricciones de headway mínimo y máximo, nivel de servicio, flota y ciclo. La espera máxima de la sección 5.1 la
 leemos como espera media, así que el headway máximo efectivo es el menor entre el máximo y dos veces esa espera; es
@@ -66,7 +77,7 @@ correlaciona {{OcupCorrelacion}}. Con la ocupación actual, el plan pone un piso
 el segmento crítico se llena. Ese piso actúa en los ciclos intradía que el planificador encola cada hora; cuánto actúa depende
 de la latencia con que llegan los conteos de Extreme.
 
-=== 7. Alertas que se pueden creer
+=== 8. Alertas que se pueden creer
 Las diez alertas del catálogo están implementadas con la estructura completa de la sección 5.3. El riesgo de la
 sección 18 son las alertas excesivas: con persistencia de dos horas y una alerta por episodio, las observadas de
 ALT-005 a ALT-009 pasan de {{AlertasAntes}} a {{AlertasAhora}} por ruta y día; contando todas las familias, también la
@@ -78,7 +89,7 @@ agrava, la alerta escala de severidad. Cada alerta muestra el valor real, el esp
 recomendación, y dice qué campos de identificación le aplican: el despacho ausente y los datos incompletos llevan el
 viaje, el vehículo y el seudónimo del conductor. El operador la gestiona y queda en la bitácora.
 
-=== 8. Se conecta sin interferir
+=== 9. Se conecta sin interferir
 Integración vale el quince por ciento. Montamos una réplica con los scripts y el trigger de Extreme. En
 {{NIntentosTotal}} intentos de escritura indebida, {{NIntentosLector}} del usuario de lectura y {{NIntentosEscritor}}
 del de resultados sobre las tablas de Extreme, no pasó ninguno. Una llegada real pasa por el trigger y la API entrega
@@ -89,21 +100,21 @@ el p95 queda muy por debajo de dos segundos. Las estadísticas por segmento ya n
 agregación materializada responde en {{SegFrio}} ms, y con hasta {{SegCargaUsuarios}} usuarios durante un refresco el
 p95 es de {{SegCarga}} ms.
 
-=== 9. Ingeniería que se puede auditar
+=== 10. Ingeniería que se puede auditar
 Ingeniería vale el quince por ciento. Hay {{Ntotal}} pruebas en seis niveles: unitarias, integración, réplica,
 contrato, datos y Testcontainers, con {{Nfallan}} fallidas y una cobertura de {{Cobertura}} %. El flujo de integración
 continua corre lint, seguridad, migraciones de ida y vuelta, pruebas y deriva del contrato. El estado de SonarQube está
 al pie, tal como lo dejó el último análisis. La observabilidad está completa: logs JSON con correlation id, métricas
 Prometheus y trazas OpenTelemetry.
 
-=== 10. Demostración del ciclo de §14.2
+=== 11. Demostración del ciclo de §14.2
 Este es el ciclo que pide la sección 14.2 y que mostramos en el video: llega información nueva, la lectura incremental
 toma solo lo nuevo y no reprocesa, se mide el error del modelo activo, se entrena un candidato en la cola, se compara
 con el activo en la misma ventana y se decide. En esta corrida el candidato sacó {{DemoWapeCand}} % frente a
 {{DemoWapeAct}} % del activo y fue {{DemoDecision}}; la decisión queda auditada y es reversible. Se reproduce con el
 script de demostración contra la API en Docker.
 
-=== 11. La respuesta a la pregunta del reto
+=== 12. La respuesta a la pregunta del reto
 Y esta es la respuesta, tal como la entrega el endpoint de respuesta para el día laboral {{RespuestaFecha}}. El ciclo
 diario la deja calculada con el modelo activo, y la API solo la lee. Por ruta: las salidas del plan frente a las de hoy,
 cada cuánto despachar en el pico de la mañana, el valle y el pico de la tarde, con la misma definición del documento de
@@ -112,7 +123,7 @@ operación no puede cumplir, y lo dice. Después vienen los
 pasajeros esperados con su banda, los buses en ruta frente a la flota, el recaudo y el costo. Para la atención
 inmediata, con los umbrales vigentes se esperan {{AlertasTotal}} alertas por ruta y día, las críticas primero.
 
-=== 12. Qué gana Sobusa
+=== 13. Qué gana Sobusa
 El valor: el plan reasigna buses en lugar de recortarlos. Estas cifras son del informe académico, con todo 2025 y el
 pronóstico a siete días del experimento 12; el producto calcula el plan con el modelo activo. Menos salidas, menos
 espera y menos pasajeros por encima de la capacidad. El ahorro en operación es pequeño, y el saldo anual depende de
@@ -120,14 +131,14 @@ cuántos pasajeros se pierdan o se ganen: entre menos dos mil ochocientos y más
 Recortar deja más caja, pero pierde pasajeros y casi duplica la sobrecarga. Por eso proponemos medir esa elasticidad
 antes de cambiar horarios.
 
-=== 13. Plan de implementación
+=== 14. Plan de implementación
 El plan sale de PLAN_EVOLUCION. Semanas {{PlanSemanasConexion}}: conexión, con las respuestas a los hallazgos, una
 réplica de lectura y los dos usuarios; la flota y el ciclo oficiales se cargan por la API, sin regenerar datos. Semanas {{PlanSemanasSombra}}: modo sombra, donde nadie despacha con el sistema;
 pasamos si se cumple: {{PlanCriterioSombra}}. Semanas {{PlanSemanasPiloto}}: piloto de ocho semanas en CRA 54 y CL 72
 con días sorteados. La infraestructura cuesta del orden de {{PlanCostoTotalA}} dólares al mes en la plataforma de
 Extreme, todo es software libre, y los riesgos principales tienen su mitigación.
 
-=== 14. La decisión que pedimos
+=== 15. La decisión que pedimos
 Pedimos tres cosas: una réplica de lectura con los dos usuarios, las respuestas a los hallazgos más urgentes sobre sus
 datos con los parámetros oficiales de operación, y la aprobación del piloto con el despachador al mando. Todo lo que
 vieron es reproducible: Docker Compose levanta la API y las cifras de estos documentos salen de las evidencias.

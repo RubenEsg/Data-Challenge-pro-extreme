@@ -126,4 +126,4 @@ Cifras narradas y su evidencia
   - Integración continua en verde en GitHub, en un runner limpio: api_frecuencias/docs/evidencias/pruebas/ci_github.txt
   - k6 con 50 usuarios virtuales: p95 451,3 ms en consultas y 627,5 ms con un año de resultados, 0,00 % de errores: api_frecuencias/docs/evidencias/pruebas/k6_consultas.json y api_frecuencias/docs/evidencias/pruebas/k6_volumen.json
   - Docker Compose desde volúmenes nuevos, con la comprobación completa en OK: api_frecuencias/docs/evidencias/despliegue/arranque_limpio.txt («Resultado global: OK»)
-  - Plan: 4 semanas de conexión, 4 en modo sombra y piloto de 8 semanas en CRA 54 y CL 72: documentos/notas_orador.txt (diapositiva 13) y PLAN_EVOLUCION.md
+  - Plan: 4 semanas de conexión, 4 en modo sombra y piloto de 8 semanas en CRA 54 y CL 72: documentos/notas_orador.txt (diapositiva 14) y PLAN_EVOLUCION.md

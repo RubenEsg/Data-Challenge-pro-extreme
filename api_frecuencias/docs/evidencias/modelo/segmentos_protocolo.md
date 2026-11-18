@@ -1,5 +1,15 @@
 # Modelo por segmento y sentido: protocolo fijado antes de mirar la prueba
 
+> **Nota agregada el 18 de noviembre de 2026, después de la retroalimentación del curso.** El protocolo de abajo no
+> cambió. Es el del modelo por segmento que hoy sirve la API, entrenado con 37 días porque `timbradas_segmentos` solo
+> cubre enero y febrero de 2023; con eso, lo espacial no quedó validado. La validación con más datos es el experimento
+> E14 (`../../../../pronostico_corto_plazo/README.md`). A los eventos de conteo de 2023 a 2025 se les asignó el segmento
+> con la regla de Extreme (en los 58 días que trae la tabla, el 99,975 % de las subidas cae en el mismo segmento). El
+> modelo se entrenó con 2023 y 2024, se eligió con enero a junio de 2025 y se probó una sola vez con julio a diciembre
+> de 2025. A 60 minutos, el error por segmento (WAPE) es 37,63 % frente a 43,61 % del promedio por día y hora, y el
+> modelo gana en 332 de los 384 segmentos con subidas. Ese modelo todavía no está en la API: llevarlo es el primer
+> pendiente de `PLAN_EVOLUCION.md` (sección 7).
+
 Especificación v1.5: §3.1 «Predicción de demanda: por ruta, sentido, segmento y franja horaria → pronóstico e intervalo
 de confianza», §9.1 «pronóstico supervisado … por ruta, sentido, segmento y ventana temporal», §9.3 (división
 cronológica, sin fuga, línea base, cuantiles y sesgo por sentido, segmento y condición) y §7.3 paso 4.

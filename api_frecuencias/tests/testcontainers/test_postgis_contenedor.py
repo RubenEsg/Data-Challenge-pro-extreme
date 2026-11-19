@@ -162,8 +162,12 @@ def test_api_ciclo_incremental_completo_en_contenedor(cliente_tc, monkeypatch):
     assert detalle["filas_leidas"] > 0 and detalle["predicciones"] > 0 and detalle["recomendaciones"] > 0
     assert detalle["correlation_id"] == "tc-ciclo"
 
-    predicciones = cliente_tc.get("/api/v1/predictions", params={"execution_id": detalle["execution_id"]}).json()
+    predicciones = cliente_tc.get("/api/v1/predictions", params={"execution_id": detalle["execution_id"],
+                                                                 "modelo": "horario"}).json()
     assert predicciones["total"] == detalle["predicciones"]
+    # sin «modelo», la lista une las del modelo horario y las de corto plazo (RF-005) de la misma ejecución
+    todas = cliente_tc.get("/api/v1/predictions", params={"execution_id": detalle["execution_id"]}).json()
+    assert todas["total"] == detalle["predicciones"] + detalle["metricas"]["corto_plazo"]["pronosticos"]
     p = predicciones["items"][0]
     assert p["horizonte_min"] in (30, 60, 120) and p["model_id"] and p["p10"] <= p["pasajeros"] <= p["p90"]
 

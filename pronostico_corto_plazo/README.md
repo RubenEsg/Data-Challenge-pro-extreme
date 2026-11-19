@@ -207,10 +207,10 @@ La conclusión no cambia. Sin esos días bajan el error del modelo y el del prom
 - **La prueba no es ciega en sentido estricto:** 2025 se conocía por los experimentos anteriores, aunque con otro objetivo.
 - **Las subidas son demanda observada.** Dependen de los buses que pasaron: si no pasa bus, no hay subida. El modelo pronostica lo que se va a contar, no la gente que espera.
 - **Supone que el conteo llega en vivo.** La especificación lo prevé (el disparador de conteo), pero la latencia real de la captura no se conoce; por eso se midió el efecto de 15 y 30 minutos de retraso.
-- **Lee el panel empaquetado, no la captura en vivo.** La API ya sirve este modelo (`POST /api/v1/predictions/corto-plazo`) y reproduce las 168.210 predicciones guardadas de esta prueba (`../api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.md`), pero pronostica con este panel de 2023 a 2025. Alimentarlo con la lectura incremental es el primer pendiente de `../PLAN_EVOLUCION.md` (sección 7).
+- **En la API lo alimenta la lectura incremental.** La API sirve este modelo (`POST /api/v1/predictions/run` por omisión, `/api/v1/predictions/corto-plazo`) y reproduce las 168.210 predicciones guardadas de esta prueba (`../api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.md`). Cada ciclo lee los días nuevos en bloques de 15 minutos (de `timbradas_segmentos` en modo integrado) y el pronóstico solo usa lo ya leído; esa lectura se probó con la réplica y con una fuente de prueba, no con la captura real de Extreme.
 - **En los domingos corrientes el modelo no mejora al promedio por día y hora** (tabla de «Domingos y festivos por separado»).
 - **Once días de 2025 sin eventos** (los últimos de mes) quedan fuera del entrenamiento y de la evaluación.
-- **Los registros imposibles siguen en los datos.** El protocolo no previó filtrarlos: uno cae en el entrenamiento y otro en la prueba. Su efecto en la prueba está medido arriba; filtrarlos antes de entrenar es un pendiente.
+- **Los registros imposibles siguen en los datos con que se entrenó y se midió.** El protocolo no previó filtrarlos: uno cae en el entrenamiento y otro en la prueba, y las cifras de arriba los incluyen. Al servir, la API los excluye con la regla de calidad VAL-009 (más de 1.000 subidas de un segmento en 15 minutos) y lo registra; filtrarlos antes de entrenar es otro experimento, con su propio protocolo.
 
 ## Cómo reproducirlo
 

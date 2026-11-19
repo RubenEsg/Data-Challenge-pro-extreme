@@ -124,6 +124,11 @@ CONSERVADAS = {
     "marca_agua_ruta": "estado de la lectura incremental por ruta (RNF-005)",
     "marca_agua_tabla": "estado de la lectura incremental de los consolidados de Extreme por tabla (§6.1), sin datos "
                         "personales",
+    "subidas_15min": "lo leído para el pronóstico de corto plazo (subidas por segmento y bloque de 15 minutos, sin "
+                     "datos personales): su historia de 8 semanas son las variables del modelo y la serie para "
+                     "reentrenarlo (RF-018)",
+    "salidas_15min": "las salidas por bloque de 15 minutos que acompañan a subidas_15min",
+    "lectura_15min": "hasta dónde se leyó cada día para el corto plazo (estado de la lectura, como las marcas de agua)",
     "alert (abiertas)": "trabajo pendiente de la operación",
     "retencion_registro": "bitácora de esta tarea",
 }
@@ -204,7 +209,7 @@ _PLANTILLA_SIN_REFERENCIA = ("NOT EXISTS (SELECT 1 FROM ai_frecuencias.{tabla} r
                              "t.execution_id)")
 _REFERENCIAS_EJECUCION = ("marca_agua_ruta", "marca_agua_tabla", "model_registry", "demanda_observada", "prediction",
                           "prediction_corto_plazo", "recommendation", "alert", "notification_log", "respuesta_reto",
-                          "segmento_estadistica_refresco")
+                          "segmento_estadistica_refresco", "lectura_15min")
 _PLANTILLA_EJECUCIONES = """WITH base AS (
     SELECT t.execution_id FROM ai_frecuencias.execution_log t
      WHERE t.creado_en < :corte AND t.estado IN ('ok', 'error') AND {sin_referencias}

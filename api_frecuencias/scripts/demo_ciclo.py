@@ -336,7 +336,8 @@ def main() -> int:
     if e2["estado"] != "ok" or (e2["filas_leidas"] or 0) >= (e1["filas_leidas"] or 0):
         fallos.append("lectura incremental")
 
-    activo_antes = next((m for m in c.get(f"{api}/models").json()["items"] if m["estado"] == "activo"), None)
+    activo_antes = next((m for m in c.get(f"{api}/models", params={"familia": "horario"}).json()["items"]
+                         if m["estado"] == "activo" and m.get("familia", "horario") == "horario"), None)
     marca = reentrenar_y_decidir(c, fecha_api(e2["marca_agua_nueva"]) or siguiente, a.corte, a.usuario, fallos)
     gobierno(c, a.usuario, fallos, marca)
     log(f"   (activo antes de la decisión: {activo_antes and activo_antes['model_id']})")

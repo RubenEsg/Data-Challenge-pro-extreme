@@ -198,6 +198,44 @@ SELECT v.nombre AS ruta, v.idruta, v.proceso, v.idempresa, CAST(v.franja AS date
  LIMIT :limite
 """
 
+# Panel de 15 minutos del pronóstico de corto plazo (RF-005, app/servicios/panel_corto_plazo.py): los viajes de la
+# ruta que salieron entre :desde y :fin, sus subidas por segmento y bloque de 15 minutos de timbradas_segmentos (el
+# bloque de hora_inicio, como lo escribe tg_timbrada_segmento) en los días pedidos, solo lo actualizado antes de
+# :hasta (la marca de agua de la ejecución; sin marca, la fila de la carga inicial cuenta), y los viajes que iniciaron
+# en cada bloque (progvehiculos.fechainicio: la oferta ya observada). Valores siempre enlazados.
+_SQL_SUBIDAS_15MIN = """
+WITH viajes AS (
+    SELECT pv.idprogramacion
+      FROM progvehiculos pv
+     WHERE pv.idruta = :idruta AND pv.fechasalida >= :desde AND pv.fechasalida < :fin
+)
+SELECT ts.id_segmento, ts.fecha,
+       CAST(EXTRACT(HOUR FROM ts.hora_inicio) AS integer) * 4
+         + CAST(FLOOR(EXTRACT(MINUTE FROM ts.hora_inicio) / 15) AS integer) AS bloque,
+       CAST(SUM(ts.subidas) AS double precision) AS subidas
+  FROM viajes v
+  JOIN timbradas_segmentos ts ON ts.id_viaje = v.idprogramacion
+ WHERE ts.id_segmento = ANY(CAST(:segmentos AS bigint[]))
+   AND ts.fecha = ANY(CAST(:fechas AS date[]))
+   AND ts.subidas > 0
+   AND COALESCE(ts.ultimaactualizacion < CAST(:hasta AS timestamptz), true)
+ GROUP BY ts.id_segmento, ts.fecha, bloque
+ ORDER BY ts.fecha, bloque, ts.id_segmento
+ LIMIT :limite
+"""
+_SQL_SALIDAS_15MIN = """
+SELECT CAST(pv.fechainicio AS date) AS fecha,
+       CAST(EXTRACT(HOUR FROM pv.fechainicio) AS integer) * 4
+         + CAST(FLOOR(EXTRACT(MINUTE FROM pv.fechainicio) / 15) AS integer) AS bloque,
+       CAST(COUNT(*) AS double precision) AS salidas
+  FROM progvehiculos pv
+ WHERE pv.idruta = :idruta AND pv.fechainicio >= :desde AND pv.fechainicio < :fin
+   AND CAST(pv.fechainicio AS date) = ANY(CAST(:fechas AS date[]))
+ GROUP BY 1, 2
+ ORDER BY 1, 2
+ LIMIT :limite
+"""
+
 # Variantes fijas del SELECT de la lista blanca (RNF-005): fin de la ventana (`hasta`) y rutas del trabajo. Con rutas,
 # solo las franjas de esas rutas se re-agregan (viajes, segmentos y estacionalidad): la misma búsqueda de lo cambiado
 # por marca de agua y menos trabajo después (docs/evidencias/cola/lectura_por_ruta_replica.txt, EXPLAIN como
@@ -976,6 +1014,28 @@ class FuentePostgresSoloLectura:
         if not len(d):
             return pd.DataFrame(columns=list(COLUMNAS_CARGA_SEGMENTOS))
         return seudonimizar_conductores(d)
+
+    # ------------------------------------------------------------------ panel de 15 minutos (corto plazo, RF-005)
+    def leer_panel_15min(self, idruta: int, segmentos: list[int], fechas: list, hasta=None):
+        """(subidas, salidas) de la ruta en esos días, en la transacción READ ONLY de siempre: las subidas por
+        id_segmento, día y bloque de 15 minutos de timbradas_segmentos (lo que escribe el trigger de conteo de Extreme,
+        con su regla del segmento más cercano; solo lo actualizado antes de `hasta`) y los viajes que iniciaron en cada
+        bloque (progvehiculos.fechainicio). app/servicios/panel_corto_plazo.py los valida y los guarda."""
+        if not fechas or not segmentos:
+            return (pd.DataFrame(columns=["id_segmento", "fecha", "bloque", "subidas"]),
+                    pd.DataFrame(columns=["fecha", "bloque", "salidas"]))
+        desde = min(fechas) - timedelta(days=1)
+        fin = max(fechas) + timedelta(days=1)
+        base = {"idruta": int(idruta), "desde": desde, "fin": fin, "fechas": list(fechas), "limite": self.limite}
+        sub = self.consultar(_SQL_SUBIDAS_15MIN, dict(base, segmentos=[int(s) for s in segmentos], hasta=hasta))
+        sal = self.consultar(_SQL_SALIDAS_15MIN, base)
+        if not len(sub):
+            sub = pd.DataFrame(columns=["id_segmento", "fecha", "bloque", "subidas"])
+        if not len(sal):
+            sal = pd.DataFrame(columns=["fecha", "bloque", "salidas"])
+        self.resumen_panel = {"idruta": int(idruta), "dias": len(fechas), "celdas": len(sub),
+                              "truncada": len(sub) >= self.limite or len(sal) >= self.limite}
+        return sub, sal
 
     # ------------------------------------------------------------------ contexto operacional y catálogos (RF-003)
     def leer_contexto(self, nombre):

@@ -129,7 +129,7 @@ def test_todos_los_umbrales_que_usa_el_codigo_estan_en_postgresql(migrada, sesio
     de aprendizaje, los pesos y costos de §10.2, los parámetros del plan y la tolerancia de oportunidad de la calidad
     están en la versión vigente de threshold_config, con su descripción (el código solo guarda el valor por omisión de
     una instalación sin migrar)."""
-    from app.servicios import consolidados, monitoreo, politica, retencion
+    from app.servicios import consolidados, monitoreo, panel_corto_plazo, politica, retencion
     from app.servicios.alertas import UMBRALES_POR_DEFECTO
     from app.servicios.optimizacion import PARAMETROS_OBJETIVO, PARAMETROS_PLAN
 
@@ -143,7 +143,8 @@ def test_todos_los_umbrales_que_usa_el_codigo_estan_en_postgresql(migrada, sesio
               "oportunidad de la calidad §6.3 (calidad.retraso_maximo_de)": {"periodos_atraso", "periodo_ingesta_min"},
               "retención de datos §18 (retencion.PARAMETROS)": set(retencion.PARAMETROS),
               "contraste de los consolidados §6.3 y §11.2 (consolidados.TOLERANCIAS_POR_DEFECTO)":
-                  set(consolidados.TOLERANCIAS_POR_DEFECTO)}
+                  set(consolidados.TOLERANCIAS_POR_DEFECTO),
+              "calidad del corto plazo VAL-009 (panel_corto_plazo.PARAMETRO_TOPE)": {panel_corto_plazo.PARAMETRO_TOPE}}
     faltan = {g: sorted(n - set(filas)) for g, n in grupos.items() if n - set(filas)}
     assert not faltan, faltan
     assert all(filas[n].descripcion for g in grupos.values() for n in g)

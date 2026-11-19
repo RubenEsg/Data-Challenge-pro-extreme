@@ -1,5 +1,5 @@
 Schemathesis 4.33.1: contrato por propiedades en TODAS las operaciones del OpenAPI (spec v1.5 §14.1 «Contrato»)
-Corrida: 18-11-2026, 21:34:50 a 21:37:40 (hora de Bogotá), 170.0 s; base local de pruebas PostgreSQL 14 + PostGIS 3.4; clave admin; 5 ejemplos por operación (SCHEMATHESIS_EJEMPLOS=5, derandomize). Código de salida de pytest: 0.
+Corrida: 19-11-2026, 01:57:04 a 02:00:28 (hora de Bogotá), 204.3 s; base local de pruebas PostgreSQL 14 + PostGIS 3.4; clave admin; 5 ejemplos por operación (SCHEMATHESIS_EJEMPLOS=5, derandomize). Código de salida de pytest: 0.
 Prueba: tests/contrato/test_schemathesis.py::test_ninguna_entrada_produce_error_5xx_y_todo_cumple_el_contrato
 Chequeos en cada respuesta: not_a_server_error, status_code_conformance, content_type_conformance,
 response_schema_conformance y response_headers_conformance (un 503 con el error uniforme solo se acepta si la

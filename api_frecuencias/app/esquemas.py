@@ -240,13 +240,26 @@ class EjecucionDetalle(EjecucionCreada):
 
 
 # ---------------------------------------------------------------- predicciones
+MODELO_RUN = Literal["auto", "corto_plazo", "horario"]
+DESC_MODELO_RUN = (
+    "Qué modelo responde. «auto» (por omisión): el de corto plazo, que pronostica las subidas de los próximos 30, 60 o "
+    "120 minutos con lo observado hasta el instante (RF-005, el elegido y medido en el experimento E14), si cubre la "
+    "ruta, la fecha y la hora (medias horas de 04:00 a 21:00); si no, el horario, que pronostica con siete días de "
+    "antelación (el del plan del día siguiente). «corto_plazo» u «horario» lo fijan; un model_id registrado manda "
+    "sobre este campo.")
+
+
 class SolicitudPrediccion(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
     ruta: str
     instante: datetime
     horizonte_min: Horizonte = 60
-    model_id: str | None = None
+    model_id: str | None = Field(None, description="Versión registrada (del registro horario o del de corto plazo); "
+                                                   "la activa si falta")
+    modelo: MODELO_RUN = Field("auto", description=DESC_MODELO_RUN)
     incluir_recomendacion: bool = True
+    incluir_segmentos: bool = Field(True, description="Con el modelo de corto plazo: incluir el pronóstico de cada "
+                                                      "segmento de 500 m (los sentidos van siempre)")
 
 
 class RecomendacionSalida(Salida):
@@ -272,8 +285,11 @@ class RecomendacionSalida(Salida):
     detalle: dict = Field(default_factory=dict)
     creado_en: datetime
     # migración 0006: origen de la fila y dimensiones de §8.3
-    origen: str = Field("franja", description="franja (§10.2, ligada a su predicción) o plan_dia (plan del día "
-                                              "siguiente que guarda el ciclo, sin predicción)")
+    origen: str = Field("franja", description="franja (§10.2, ligada a su predicción horaria), plan_dia (plan del día "
+                                              "siguiente que guarda el ciclo, sin predicción) o corto_plazo (§10.2 "
+                                              "con el pronóstico de corto plazo de la ventana)")
+    prediction_corto_plazo_id: uuid.UUID | None = Field(None, description="origen corto_plazo: la fila de la ruta del "
+                                                                          "pronóstico de corto plazo")
     idruta: int | None = Field(None, description=DESC_IDRUTA)
     idempresa: int | None = Field(None, description=DESC_IDEMPRESA)
     idproceso: str | None = Field(None, description=DESC_IDPROCESO)
@@ -315,6 +331,13 @@ class PrediccionSalida(Salida):
     idproceso: str | None = Field(None, description=DESC_IDPROCESO)
     id_dia_semana: int | None = Field(None, description=DESC_DIA_SEMANA)
     id_estacionalidad: int | None = Field(None, description=DESC_ESTACIONALIDAD)
+    # migración 0016: qué modelo hizo el pronóstico
+    modelo: Literal["horario", "corto_plazo"] = Field(
+        "horario", description="corto_plazo: las subidas de la ventana con lo observado hasta el instante (RF-005); "
+                               "horario: el modelo del plan del día siguiente, con siete días de antelación")
+    grupo_id: uuid.UUID | None = Field(None, description="Con el modelo de corto plazo: el pronóstico guardado en "
+                                                         "prediction_corto_plazo (la ruta, sus sentidos y sus "
+                                                         "segmentos; GET /predictions/corto-plazo?grupo_id=)")
 
 
 class IntervaloConfianza(BaseModel):
@@ -335,6 +358,12 @@ class RecomendacionResumen(BaseModel):
 
 class PrediccionRespuesta(PrediccionSalida):
     recomendacion: RecomendacionSalida | None = None
+    motivo_modelo: str | None = Field(None, description="Por qué respondió ese modelo")
+    ventana: VentanaCortoPlazo | None = Field(None, description="Con el modelo de corto plazo: [instante, instante + "
+                                                                "horizonte)")
+    franja: str | None = None
+    sentidos: list[SentidoCortoPlazo] | None = Field(None, description="Con el modelo de corto plazo: por sentido")
+    segmentos: list[SegmentoCortoPlazo] | None = Field(None, description="Con el modelo de corto plazo: por segmento")
     # §12.3 «Ejemplo de respuesta de predicción»: las mismas claves del ejemplo, además de los campos anteriores
     predictionId: uuid.UUID | None = None
     routeId: str | None = None
@@ -382,6 +411,7 @@ class SentidoCortoPlazo(CeldaCortoPlazo):
 
 class SegmentoCortoPlazo(CeldaCortoPlazo):
     nro_segmento: int
+    id_segmento: int | None = Field(None, description="rutas_segmentos.id del segmento")
     sentido: str
     km_inicio: float = Field(..., description="Kilómetro del ciclo en que empieza el segmento")
     lat: float | None = None
@@ -441,6 +471,9 @@ class PronosticoCortoPlazo(Salida, CeldaCortoPlazo):
     segmentos: list[SegmentoCortoPlazo] = Field(default_factory=list)
     observado: ObservadoCortoPlazo
     explicacion: ExplicacionCortoPlazo
+    datos_hasta: datetime | None = Field(None, description="Hasta dónde hay datos leídos del día (nulo: un día del "
+                                                           "panel empaquetado)")
+    calidad: dict | None = Field(None, description="VAL-009: celdas excluidas en el día o en sus 8 semanas de historia")
     recomendacion: dict | None = Field(None, description="§10.2 con este pronóstico llevado a ritmo por hora")
     # §12.3 «Ejemplo de respuesta de predicción»
     predictionId: uuid.UUID | None = None
@@ -460,6 +493,9 @@ class PuntoDiaCortoPlazo(CeldaCortoPlazo):
     sentidos: list[SentidoCortoPlazo] = Field(default_factory=list)
 
 
+PrediccionRespuesta.model_rebuild()   # usa las clases del pronóstico de corto plazo, definidas después
+
+
 class DiaCortoPlazo(Salida):
     """La curva del día: el pronóstico de cada media hora de 04:00 a 21:00, por ruta y por sentido."""
     ruta: str
@@ -469,6 +505,9 @@ class DiaCortoPlazo(Salida):
     model_id: str
     en_muestra: bool
     dia_con_datos: bool
+    datos_hasta: datetime | None = Field(None, description="Un día leído o posterior al panel: hasta dónde hay datos "
+                                                           "(los instantes posteriores no se pronostican)")
+    calidad: dict | None = Field(None, description="VAL-009: celdas excluidas en el día o en sus 8 semanas de historia")
     instantes: list[PuntoDiaCortoPlazo]
 
 
@@ -500,6 +539,12 @@ class PrediccionCortoPlazoSalida(Salida):
     variables: dict = Field(default_factory=dict)
     recomendacion: dict | None = None
     creado_en: datetime
+    # migración 0016: dimensiones de §8.3 y el segmento de rutas_segmentos
+    idempresa: int | None = Field(None, description=DESC_IDEMPRESA)
+    idproceso: str | None = Field(None, description=DESC_IDPROCESO)
+    id_dia_semana: int | None = Field(None, description=DESC_DIA_SEMANA)
+    id_estacionalidad: int | None = Field(None, description=DESC_ESTACIONALIDAD)
+    id_segmento: int | None = Field(None, description="rutas_segmentos.id (nivel segmento)")
 
 
 class ModeloCortoPlazo(Salida):
@@ -521,7 +566,14 @@ class ModeloCortoPlazo(Salida):
     evaluacion: str | None = None
     activo: str | None = None
     historial_activacion: list = Field(default_factory=list)
-    cobertura: dict = Field(default_factory=dict, description="Fechas que se pueden pronosticar y las de la prueba")
+    cobertura: dict = Field(default_factory=dict, description="Fechas que se pueden pronosticar (el panel empaquetado "
+                                                              "y lo leído) y las de la prueba")
+    importancia_global: dict = Field(default_factory=dict, description=(
+        "§9.4: importancia global por nivel y horizonte (ganancia de LightGBM normalizada, promedio de las tres "
+        "rutas), con lo que significa cada variable"))
+    calidad: dict = Field(default_factory=dict, description="VAL-009: el tope vigente y las celdas excluidas del panel")
+    motor: str | None = Field(None, description="lightgbm o onnx (MOTOR_INFERENCIA): con qué se calculan las "
+                                                "predicciones")
 
 
 class EscenarioRecomendacion(BaseModel):
@@ -781,6 +833,8 @@ class ModeloSalida(Salida):
     motivo: str | None = None
     auditoria: list = Field(default_factory=list)
     creado_en: datetime
+    familia: str = Field("horario", description="horario (el del plan del día siguiente) o corto_plazo (30, 60 y 120 "
+                                                "minutos); cada familia tiene a lo sumo un activo")
 
     @field_validator("auditoria", mode="after")
     @classmethod
@@ -800,6 +854,7 @@ class SolicitudActivacion(BaseModel):
 class SolicitudReversion(BaseModel):
     usuario: str | None = Field(None, min_length=1, description=AUDITORIA_OPCIONAL)
     motivo: str | None = None
+    familia: Literal["horario", "corto_plazo"] = Field("horario", description="La familia cuyo activo se revierte")
 
 
 class SolicitudEntrenamiento(BaseModel):

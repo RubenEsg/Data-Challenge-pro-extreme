@@ -83,6 +83,12 @@ def comprobar(pg, ruta, fecha, hora, h, segmentos):
        f1["variable"] in porque and es(f1["factor"], 3) in porque, f"{f1['variable']} × {f1['factor']}")
     trazas = pg.locator("#cp-dia .scatterlayer .trace").count()
     ok(f"{ruta}: la curva dibuja banda, pronóstico, promedio y real", trazas >= 4, f"{trazas} trazas")
+    m = api("predictions/corto-plazo/modelo")
+    tarjeta = pg.locator("#cp-modelo").inner_text()
+    primera = m["importancia_global"]["por_nivel"]["ruta"][str(h)][0]
+    ok(f"{ruta} {h} min: «El modelo» trae la importancia global y el activo de GET /modelo (§9.4, RF-019)",
+       primera["descripcion"][1:] in tarjeta and m["activo"] in tarjeta and es(100 * primera["ganancia"], 1) in tarjeta,
+       f"{primera['variable']} {primera['ganancia']} · activo {m['activo']}")
 
 
 with sync_playwright() as p:

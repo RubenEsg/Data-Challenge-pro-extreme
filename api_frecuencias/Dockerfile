@@ -31,6 +31,9 @@ COPY app ./app
 COPY scripts ./scripts
 # Modelo activo, registro y Parquet de ejecución (el .dockerignore deja fuera pruebas, evidencias y cachés)
 COPY datos ./datos
+# Segunda copia de los modelos, de solo lectura: al actualizar una instalación, el volumen «modelos» tapa
+# /app/datos/modelos, y la API copia de aquí lo que le falta (app/servicios/modelos_imagen.py)
+COPY datos/modelos ./modelos_imagen
 
 RUN useradd --create-home --uid 10001 --shell /usr/sbin/nologin sobusa \
     && chown -R sobusa:sobusa /app/datos

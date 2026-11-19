@@ -67,7 +67,7 @@ DESCRIPCIONES = {
 # parámetro de ruta). tests/contrato/test_contrato_openapi.py comprueba que todo código que lanza el código del
 # router está aquí o en las reglas generales.
 ERRORES_POR_OPERACION: dict[tuple[str, str], set[int]] = {
-    ("post", "/api/v1/predictions/run"): {404},
+    ("post", "/api/v1/predictions/run"): {404, 503},
     ("get", RUTA_PRONOSTICO_SEGMENTOS): {404, 503},
     ("post", RUTA_CORTO_PLAZO): {404, 503},
     ("get", RUTA_CORTO_PLAZO + "/calcular"): {404, 503},
@@ -107,11 +107,12 @@ CODIGOS_POR_OPERACION: dict[tuple[str, str], dict[int, tuple[str, ...]]] = {
     ("get", "/api/v1/frequency/executions"): {422: ("rango_invalido",)},
     ("post", "/api/v1/frequency/executions"): {422: ("ruta_desconocida",)},     # RNF-005: partición por ruta
     ("post", "/api/v1/predictions/run"): {404: ("ruta_desconocida", "modelo_no_encontrado"),
-                                          422: ("parametros_invalidos", "prediccion_invalida")},
+                                          422: ("parametros_invalidos", "prediccion_invalida", "fuera_de_cobertura"),
+                                          503: ("pronostico_no_disponible",)},
     ("get", RUTA_PRONOSTICO_SEGMENTOS): {
         404: ("no_encontrado", "ruta_desconocida", "modelo_no_encontrado", "ruta_sin_segmentos"),
-        422: ("parametros_requeridos", "horizonte_invalido", "prediccion_invalida"),
-        503: ("reparto_no_disponible",)},
+        422: ("parametros_requeridos", "horizonte_invalido", "prediccion_invalida", "fuera_de_cobertura"),
+        503: ("reparto_no_disponible", "pronostico_no_disponible")},
     ("post", RUTA_CORTO_PLAZO): _CODIGOS_CORTO_PLAZO,
     ("get", RUTA_CORTO_PLAZO + "/calcular"): _CODIGOS_CORTO_PLAZO,
     ("get", RUTA_CORTO_PLAZO + "/dia"): {404: ("ruta_desconocida", "modelo_no_encontrado"),

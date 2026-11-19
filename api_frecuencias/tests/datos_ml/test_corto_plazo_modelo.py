@@ -69,8 +69,9 @@ def test_reproduce_la_muestra_de_la_prueba_reservada(cp):
     m = pd.read_csv(cp.carpeta_datos() / "muestra_prueba_e14.csv")
     assert len(m) == 120 and set(m["nivel"]) == {"ruta", "sentido"}
     for fila in m.itertuples():
-        dia = cp._dia(cp.MODEL_ID_E14, cp.idruta_de(fila.ruta), cp.dia_de_fecha(date.fromisoformat(fila.fecha)),
-                      int(fila.horizonte_min))
+        with cp.sin_calidad():      # la prueba se midió con los datos tal cual, sin la regla VAL-009
+            dia = cp._dia(cp.MODEL_ID_E14, cp.idruta_de(fila.ruta), cp.dia_de_fecha(date.fromisoformat(fila.fecha)),
+                          int(fila.horizonte_min))
         j = int(np.flatnonzero(V.INSTANTES == fila.instante)[0])
         g = 0 if fila.nivel == "ruta" else ["ida", "regreso"].index(fila.sentido)
         n = dia[fila.nivel]
@@ -101,6 +102,44 @@ def test_el_pronostico_de_un_instante(cp):
     assert r["observado"]["ultimos_15_min"] is not None and r["latencia_ms"] >= 0
     sin = cp.pronosticar("CRA 54", datetime(2025, 7, 7, 7, tzinfo=BOGOTA), 60, incluir_segmentos=False)
     assert "segmentos" not in sin and sin["pasajeros"] == r["pasajeros"]
+
+
+def test_la_regla_de_calidad_excluye_los_dos_registros_imposibles(cp):
+    """RF-004 y §6.3 (VAL-009): con el tope de 1.000 subidas por segmento y bloque de 15 minutos solo caen los dos
+    registros imposibles de la base (los dos en CRA 54) y el pronóstico ya no los usa; sin la regla, el de la prueba
+    reservada."""
+    excluidas = [c for idr in (2, 16, 21) for c in cp.serie_completa(idr).excluidas]
+    assert [(c["idruta"], c["fecha"], c["subidas"]) for c in excluidas] == [
+        (16, "2024-05-26", 97157.0), (16, "2025-07-05", 28782.0)]
+    instante = datetime(2025, 7, 5, 8, tzinfo=BOGOTA)
+    con = cp.pronosticar("CRA 54", instante, 30, incluir_segmentos=False)
+    with cp.sin_calidad():
+        sin = cp.pronosticar("CRA 54", instante, 30, incluir_segmentos=False)
+    assert sin["observado"]["ultimos_15_min"] > 28_000 > 1_000 > con["observado"]["ultimos_15_min"]
+    assert abs(con["pasajeros"] - con["real"]) < abs(sin["pasajeros"] - sin["real"])
+    assert con["calidad"]["regla"] == "VAL-009" and con["calidad"]["celdas_excluidas"][0]["nro_segmento"] == 4
+    assert sin["calidad"] is None
+
+
+def test_la_marca_de_agua_oculta_lo_no_leido(cp):
+    """En el ciclo, lo que la ejecución todavía no leyó del día no existe: a las 04:00 con la marca del día anterior
+    el pronóstico es el mismo (antes de las 04:00 no sube nadie), pero lo real de la ventana no se muestra."""
+    instante = datetime(2025, 10, 15, 4, tzinfo=BOGOTA)
+    leido = cp.pronosticar("CRA 54", instante, 60, incluir_segmentos=False,
+                           hasta=datetime(2025, 10, 14, 23, 59, 59, tzinfo=BOGOTA))
+    todo = cp.pronosticar("CRA 54", instante, 60, incluir_segmentos=False)
+    assert leido["pasajeros"] == todo["pasajeros"] and leido["real"] is None and todo["real"] is not None
+    assert leido["datos_hasta"].startswith("2025-10-14T23:59:59")
+    assert cp.bloques_leidos(date(2025, 10, 15), datetime(2025, 10, 15, 9, 14, tzinfo=BOGOTA)) == 36
+    assert cp.bloques_leidos(date(2025, 10, 15), datetime(2025, 10, 15, 9, 15, tzinfo=BOGOTA)) == 37
+
+
+def test_la_importancia_global(cp):
+    imp = cp.importancia_global(cp.cargar())["por_nivel"]
+    assert set(imp) == {"ruta", "segmento"} and set(imp["ruta"]) == {"30", "60", "120"}
+    ruta60 = imp["ruta"]["60"]
+    assert sum(x["ganancia"] for x in ruta60) == pytest.approx(1.0, abs=0.01)
+    assert ruta60[0]["variable"] == "p15" and ruta60[0]["descripcion"].startswith("lo que subió")
 
 
 def test_la_curva_del_dia_y_la_cobertura(cp):
@@ -151,3 +190,27 @@ def test_ninguna_variable_mira_el_futuro_con_la_serie_real(cp):
         b = V.variables(alterada, nivel, 120, "completo")
         mira = (a["dia"] < V.ARRANQUE) | (a["instante"] <= 40)
         assert np.array_equal(a["x"][mira], b["x"][mira], equal_nan=True), nivel
+
+
+def test_el_modelo_en_onnx_da_lo_mismo_que_lightgbm(cp, monkeypatch):
+    """§9.1 y §9.2: la exportación a ONNX de los 18 artefactos está íntegra (SHA-256 de manifest_onnx.json) y, con
+    MOTOR_INFERENCIA=onnx, el pronóstico de un día entero (ruta, sentidos y segmentos) es el de LightGBM en la
+    precisión de float32."""
+    activo = cp.modelo_activo()
+    man = json.loads((cp.carpeta_modelos() / activo / cp.CARPETA_ONNX / cp.ARCHIVO_ONNX).read_text(encoding="utf-8"))
+    assert man["paridad"] and len(man["artefactos"]) == 18
+    for a in man["artefactos"].values():
+        assert _sha256(cp.carpeta_modelos() / activo / cp.CARPETA_ONNX / a["archivo"]) == a["sha256"]
+    with cp.sin_calidad():
+        lgb = cp._dia(activo, 21, cp.dia_de_fecha(date(2025, 9, 17)), 120)
+        monkeypatch.setenv("MOTOR_INFERENCIA", "onnx")
+        cp.limpiar_cache()
+        try:
+            assert cp.cargar()["motor"] == "onnx"
+            onx = cp._dia(activo, 21, cp.dia_de_fecha(date(2025, 9, 17)), 120)
+        finally:
+            monkeypatch.delenv("MOTOR_INFERENCIA")
+            cp.limpiar_cache()
+    for nivel in ("ruta", "sentido", "segmento"):
+        np.testing.assert_allclose(onx[nivel]["p"], lgb[nivel]["p"], rtol=1e-5, atol=1e-4)
+        np.testing.assert_allclose(onx[nivel]["p90"], lgb[nivel]["p90"], rtol=1e-5, atol=1e-4)

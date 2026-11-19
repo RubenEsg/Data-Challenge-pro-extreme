@@ -501,7 +501,9 @@ def test_la_madre_y_sus_trabajos_usan_la_misma_version_de_umbrales_y_de_parametr
             f"SELECT origen, umbrales_version, detalle -> 'entradas' -> 'parametros' -> 'elasticidad' AS elasticidad "
             f"FROM {E}.recommendation WHERE execution_id = ANY(CAST(:ids AS uuid[]))"), {"ids": trabajos}).all()
         s.rollback()
-        assert {f.origen for f in filas} == {"franja", "plan_dia"} and {f.umbrales_version for f in filas} == {version}
+        # franja y plan del modelo horario; corto_plazo, la recomendación de cada pronóstico de 30, 60 y 120 min
+        assert {f.origen for f in filas} == {"franja", "plan_dia", "corto_plazo"}
+        assert {f.umbrales_version for f in filas} == {version}
         plan = [f.elasticidad for f in filas if f.origen == "plan_dia"]
         assert plan and all(e == {"valor": float(elasticidad), "fuente": f"threshold_config v{version}"} for e in plan)
         # la foto de la respuesta de cada trabajo, también con esa versión y con las mismas salidas que su plan

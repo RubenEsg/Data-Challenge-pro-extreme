@@ -8,6 +8,7 @@ OK    CRA 54: un segmento por fila en el perfil · 123 filas · API 123
 OK    CRA 54: ida y regreso = API · [('ida', 761.1), ('regreso', 1219.4)]
 OK    CRA 54: la variable que más mueve el pronóstico y su factor = API (TreeSHAP) · p15 × 1.168
 OK    CRA 54: la curva dibuja banda, pronóstico, promedio y real · 4 trazas
+OK    CRA 54 60 min: «El modelo» trae la importancia global y el activo de GET /modelo (§9.4, RF-019) · p15 0.4051 · activo cp_lgbm_20250630_s42
 OK    la prueba reservada = datos/corto_plazo.json (sin API) · ruta 60 min 7.344 frente a 13.179
 OK    está el aviso «Lo que no funcionó» con los domingos corrientes · 
 OK    SILENCIO 17:00 30 min: pronóstico y banda = GET /calcular · 511.8 [450.9; 563.1]
@@ -18,6 +19,7 @@ OK    SILENCIO: un segmento por fila en el perfil · 135 filas · API 135
 OK    SILENCIO: ida y regreso = API · [('ida', 230.7), ('regreso', 248.5)]
 OK    SILENCIO: la variable que más mueve el pronóstico y su factor = API (TreeSHAP) · p15 × 1.327
 OK    SILENCIO: la curva dibuja banda, pronóstico, promedio y real · 4 trazas
+OK    SILENCIO 30 min: «El modelo» trae la importancia global y el activo de GET /modelo (§9.4, RF-019) · p15 0.5127 · activo cp_lgbm_20250630_s42
 OK    400 px: carga sin errores de consola y sin desplazamiento horizontal · errores [] · ancho del contenido 400
 
-21 de 21 comprobaciones bien
+23 de 23 comprobaciones bien

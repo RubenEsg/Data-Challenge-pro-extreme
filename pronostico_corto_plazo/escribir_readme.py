@@ -13,6 +13,7 @@ import comun as C
 
 MENOS = "−"
 MARCA_INI, MARCA_FIN = "<!-- corto_plazo:inicio", "<!-- corto_plazo:fin -->"
+FRASE: list[str] = []      # la frase de apertura del README de la entrega (frase_entrega)
 # Los tres commits del repositorio de entrega (RubenEsg/Data-Challenge-pro-extreme) que prueban el orden, con su hora
 # del 17-11-2026 (hora de Colombia). Se ven con: git log --format="%h %ad %s" -- pronostico_corto_plazo
 COMMITS = {"protocolo": ("9844dae", "19:26"), "validacion": ("fa04afb", "20:23"), "prueba": ("546cffa", "21:01")}
@@ -342,11 +343,12 @@ def main() -> None:
       "de la captura no se conoce; por eso se midió el efecto de 15 y 30 minutos de retraso.")
     rep = reproduccion()
     if rep and rep["coincide"]:
-        a("- **Lee el panel empaquetado, no la captura en vivo.** La API ya sirve este modelo "
-          "(`POST /api/v1/predictions/corto-plazo`) y reproduce las "
+        a("- **En la API lo alimenta la lectura incremental.** La API sirve este modelo (`POST /api/v1/predictions/run` "
+          "por omisión, `/api/v1/predictions/corto-plazo`) y reproduce las "
           f"{num(rep['filas'], 0)} predicciones guardadas de esta prueba "
-          "(`../api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.md`), pero pronostica con este panel de "
-          "2023 a 2025. Alimentarlo con la lectura incremental es el primer pendiente de `../PLAN_EVOLUCION.md` (sección 7).")
+          "(`../api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.md`). Cada ciclo lee los días nuevos en "
+          "bloques de 15 minutos (de `timbradas_segmentos` en modo integrado) y el pronóstico solo usa lo ya leído; esa "
+          "lectura se probó con la réplica y con una fuente de prueba, no con la captura real de Extreme.")
     else:
         a("- **No está integrado en la API.** La API pronostica hoy por hora de salida con su propio modelo. Llevar este a "
           "la API es el siguiente paso (`../PLAN_EVOLUCION.md`, sección 7).")
@@ -354,8 +356,10 @@ def main() -> None:
       "separado»).")
     a("- **Once días de 2025 sin eventos** (los últimos de mes) quedan fuera del entrenamiento y de la evaluación.")
     if (C.AQUI / "resultados" / "sensibilidad_registro_anomalo.json").exists():
-        a("- **Los registros imposibles siguen en los datos.** El protocolo no previó filtrarlos: uno cae en el entrenamiento y "
-          "otro en la prueba. Su efecto en la prueba está medido arriba; filtrarlos antes de entrenar es un pendiente.")
+        a("- **Los registros imposibles siguen en los datos con que se entrenó y se midió.** El protocolo no previó "
+          "filtrarlos: uno cae en el entrenamiento y otro en la prueba, y las cifras de arriba los incluyen. Al servir, la API "
+          "los excluye con la regla de calidad VAL-009 (más de 1.000 subidas de un segmento en 15 minutos) y lo registra; "
+          "filtrarlos antes de entrenar es otro experimento, con su propio protocolo.")
     a("")
     a("## Cómo reproducirlo")
     a("")
@@ -391,6 +395,7 @@ def main() -> None:
     a("")
     (C.AQUI / "README.md").write_text("\n".join(L), encoding="utf-8")
     print("README.md:", len(L), "líneas")
+    FRASE[:] = frase_entrega(pru)
     actualizar_entrega(bloque_entrega(ver, val, pru))
 
 
@@ -592,13 +597,41 @@ def vineta_api(rep: dict | None) -> list[str]:
     if not rep or not rep["coincide"]:
         return ["- **Falta llevarlo a la API.** La API sigue pronosticando por hora de salida, y su modelo por segmento es "
                 "el de 37 días. Integrar este pronóstico es el primer pendiente de `PLAN_EVOLUCION.md` (sección 7)."]
-    return ["- **Ya está en la API y en el tablero** (18 de noviembre de 2026). `POST /api/v1/predictions/corto-plazo` lo "
-            "calcula y lo guarda por ruta, sentido y segmento, con su banda, sus líneas base, su explicación y la "
-            "recomendación de §10.2; el ciclo diario también lo genera. La API usa los mismos árboles, verificados con "
+    return ["- **Es el pronóstico del producto** (18 y 19 de noviembre de 2026). `POST /api/v1/predictions/run` responde "
+            "con él por omisión (y `/api/v1/predictions/corto-plazo`), por ruta, sentido y segmento, con su banda, sus líneas "
+            "base, su explicación y la recomendación de §10.2. Dentro del ciclo diario e intradía lo alimenta la lectura "
+            "incremental en bloques de 15 minutos, con una regla de calidad que excluye los registros imposibles; su "
+            "recomendación queda en `recommendation`, sus alertas de atención inmediata salen en los ciclos intradía, se "
+            "monitorea (error móvil, cobertura, deriva, ALT-010), se activa y se revierte con la misma compuerta del modelo "
+            "horario y está exportado a ONNX. La API usa los mismos árboles, verificados con "
             f"SHA-256, y reproduce las {num(rep['filas'], 0)} predicciones guardadas de la prueba "
             "(`api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.md`). En el tablero es lo primero de "
-            "Pronóstico. Falta alimentarlo con la captura en vivo: hoy lee el panel de 2023 a 2025 "
-            "(`PLAN_EVOLUCION.md`, sección 7)."]
+            "Pronóstico."]
+
+
+MARCA_FRASE_INI, MARCA_FRASE_FIN = "<!-- corto_plazo_frase:inicio", "<!-- corto_plazo_frase:fin -->"
+
+
+def frase_entrega(pru: dict) -> list[str]:
+    """La frase de apertura del README de la entrega, con las cifras de la prueba reservada."""
+    niv = pru["niveles"]
+
+    def w(nivel: str, h: int, quien: str) -> str:
+        return pct(niv[nivel][str(h)]["todas_las_rutas"][quien]["wape"])
+
+    return [
+        "> " + MARCA_FRASE_INI + " (generado por pronostico_corto_plazo/escribir_readme.py) -->",
+        "> El sistema pronostica cuántos pasajeros subirán en los siguientes 30, 60 y 120 minutos por ruta, sentido y "
+        "segmento,",
+        "> con lo observado hasta ese instante, y la API lo sirve dentro del ciclo diario e intradía. En la prueba reservada",
+        f"> (julio a diciembre de 2025), por ruta, falla {w('ruta', 30, 'modelo')}, {w('ruta', 60, 'modelo')} y "
+        f"{w('ruta', 120, 'modelo')} (WAPE a 30, 60 y 120 minutos), frente a",
+        f"> {w('ruta', 30, 'promedio_dia_hora')}, {w('ruta', 60, 'promedio_dia_hora')} y "
+        f"{w('ruta', 120, 'promedio_dia_hora')} del promedio por día y hora; a 60 minutos, por sentido, "
+        f"{w('sentido', 60, 'modelo')} frente a {w('sentido', 60, 'promedio_dia_hora')}, y por segmento,",
+        f"> {w('segmento', 60, 'modelo')} frente a {w('segmento', 60, 'promedio_dia_hora')}.",
+        "> " + MARCA_FRASE_FIN,
+    ]
 
 
 def actualizar_entrega(lineas: list[str]) -> None:
@@ -614,6 +647,10 @@ def actualizar_entrega(lineas: list[str]) -> None:
         print("README de la entrega: no tiene las marcas corto_plazo; no se toca")
         return
     texto = texto[:a] + "\n".join(lineas) + texto[b + len(MARCA_FIN):]
+    fa, fb = texto.find(MARCA_FRASE_INI), texto.find(MARCA_FRASE_FIN)
+    if FRASE and fa >= 0 and fb > fa:
+        inicio = texto.rfind("\n", 0, fa) + 1             # la línea de la marca (puede empezar con «> »)
+        texto = texto[:inicio] + "\n".join(FRASE) + texto[fb + len(MARCA_FRASE_FIN):]
     ruta.write_bytes(texto.replace("\n", fin).encode("utf-8"))
     print("README de la entrega: bloque de correcciones actualizado")
 

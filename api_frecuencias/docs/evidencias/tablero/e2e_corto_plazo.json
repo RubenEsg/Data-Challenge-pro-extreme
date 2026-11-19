@@ -1,5 +1,5 @@
 {
- "inicio": "2026-11-18 20:08:05",
+ "inicio": "2026-11-19 01:54:43",
  "pruebas": [
   {
    "prueba": "1600 px: carga sin errores de consola y sin desplazamiento horizontal",
@@ -52,6 +52,11 @@
    "detalle": "4 trazas"
   },
   {
+   "prueba": "CRA 54 60 min: «El modelo» trae la importancia global y el activo de GET /modelo (§9.4, RF-019)",
+   "ok": true,
+   "detalle": "p15 0.4051 · activo cp_lgbm_20250630_s42"
+  },
+  {
    "prueba": "la prueba reservada = datos/corto_plazo.json (sin API)",
    "ok": true,
    "detalle": "ruta 60 min 7.344 frente a 13.179"
@@ -102,11 +107,16 @@
    "detalle": "4 trazas"
   },
   {
+   "prueba": "SILENCIO 30 min: «El modelo» trae la importancia global y el activo de GET /modelo (§9.4, RF-019)",
+   "ok": true,
+   "detalle": "p15 0.5127 · activo cp_lgbm_20250630_s42"
+  },
+  {
    "prueba": "400 px: carga sin errores de consola y sin desplazamiento horizontal",
    "ok": true,
    "detalle": "errores [] · ancho del contenido 400"
   }
  ],
- "fin": "2026-11-18 20:08:31",
- "resumen": "21 de 21 comprobaciones bien"
+ "fin": "2026-11-19 01:55:14",
+ "resumen": "23 de 23 comprobaciones bien"
 }

@@ -1,0 +1,35 @@
+{
+ "solicitud": {
+  "ruta": "CRA 54",
+  "instante": "2025-10-15T10:00:00-05:00",
+  "horizonte_min": 60,
+  "modelo": "horario"
+ },
+ "modelo": "horario",
+ "claves_12_3": {
+  "predictionId": "7ec4f397-0f8c-4553-8c4f-fca9cc11e997",
+  "routeId": "CRA 54",
+  "generatedAt": "2026-11-19T01:56:44-05:00",
+  "horizonMinutes": 60,
+  "predictedPassengers": 1158,
+  "confidenceInterval": {
+   "lower": 944,
+   "upper": 1379
+  },
+  "modelVersion": "hgb_fv2_20250831_s42",
+  "recommendation": {
+   "headwayMinutes": 6.0,
+   "busesPerHour": 10,
+   "vehiclesRequired": 40,
+   "viable": true,
+   "reason": null
+  },
+  "explanation": [
+   "b8",
+   "m4",
+   "nivel_7_13",
+   "tipo_dia",
+   "mes"
+  ]
+ }
+}

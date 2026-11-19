@@ -9185,7 +9185,7 @@ Nada de esto usó los meses de julio a diciembre.</p>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output" data-mime-type="text/markdown" tabindex="0">
-<p><strong>Lectura.</strong> Los tres modelos de ruta se entrenaron aquí en 19,2 s y
+<p><strong>Lectura.</strong> Los tres modelos de ruta se entrenaron aquí en 10,7 s y
 dan el mismo error que quedó guardado:
 en la prueba, a 60 minutos, el modelo falla un <strong>7,34 %</strong> de las subidas y el promedio por día y hora, un 13,18 %.
 El día de la figura es el laboral de error mediano (5,5 %).</p>
@@ -10764,7 +10764,7 @@ cambiar todo lo posterior al corte no mueve ninguna variable de antes) pasó.</p
 </tr>
 <tr>
 <th>Tiempo de entrenamiento</th>
-<td>7,2 s</td>
+<td>5,8 s</td>
 </tr>
 <tr>
 <th>Diferencia máxima con la predicción guardada</th>
@@ -10958,7 +10958,7 @@ cambiar todo lo posterior al corte no mueve ninguna variable de antes) pasó.</p
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output" data-mime-type="text/markdown" tabindex="0">
-<p><strong>Lectura.</strong> El pliegue de junio se entrenó en 7,2 s con 44.522 filas y sus
+<p><strong>Lectura.</strong> El pliegue de junio se entrenó en 5,8 s con 44.522 filas y sus
 1.530 predicciones son <strong>las mismas</strong> que guardó E11 (diferencia máxima 0 pasajeros), con un WAPE del mes de
 15,97 %. No hizo falta cambiar <code>n_jobs</code>: con los 2 hilos de E11 tarda segundos.</p>
 <p>Qué aprende el modelo: la media de las 4 mismas semanas (<code>pasajeros_total_m4sem</code>, 58,7 % de la ganancia) y la regla de 8 semanas
@@ -12992,7 +12992,7 @@ El motivo, tal como lo dejó E12: <em>«Única mejora frente a V4 confirmada fue
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output" data-mime-type="text/markdown" tabindex="0">
-<p><strong>Lectura.</strong> El MILP de las tres rutas se resolvió en vivo en 1,6 s y reproduce hora a hora el plan guardado por
+<p><strong>Lectura.</strong> El MILP de las tres rutas se resolvió en vivo en 1,4 s y reproduce hora a hora el plan guardado por
 <code>costos/reoptimizar_d5.py</code> (sí en las 51 horas). Ese martes el plan pone
 <strong>507 salidas válidas</strong> frente a 565 que hizo Sobusa (hay que programar
 576 porque una parte de las salidas no queda válida). No recorta parejo: en CRA 54 pone más salidas que hoy
@@ -15196,9 +15196,10 @@ moderados pagan; si ronda 0,70, solo se reasigna; y los refuerzos dirán cuál d
 <span class="s2">   detectar fallas de datos, no en cambiar cuántos buses salen.</span>
 <span class="s2">6. **Aclarar los datos y los costos**: la marca `cancelada` (muchos viajes «cancelados» sí corrieron y llevaron pasajeros), los costos reales de</span>
 <span class="s2">   combustible y mantenimiento, la forma de pago de los conductores y `progvehiculos` de 2026.</span>
-<span class="s2">7. **Alimentar en vivo el pronóstico de 30, 60 y 120 minutos y llevarlo a la consola de despacho**, y medir la latencia real de la</span>
+<span class="s2">7. **Llevar el pronóstico de 30, 60 y 120 minutos a la consola de despacho** y medir la latencia real de la</span>
 <span class="s2">   captura: es el pronóstico que pide el enunciado y el que permite corregir el despacho del mismo día. La API ya lo sirve</span>
-<span class="s2">   (`POST /api/v1/predictions/corto-plazo`) y el tablero lo muestra en Pronóstico, pero con el panel de 2023 a 2025."""</span><span class="p">)</span>
+<span class="s2">   por omisión (`POST /api/v1/predictions/run`), lo alimenta en cada ciclo con la lectura incremental en bloques de 15 minutos,</span>
+<span class="s2">   lo monitorea y lo activa con la misma compuerta del modelo horario; el tablero lo muestra en Pronóstico."""</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -15223,7 +15224,7 @@ sentido y segmento. En la prueba reservada (julio a diciembre de 2025) y a 60 mi
 20,04 % de los pasajeros por hora de salida; el primer modelo (E1), en 14,40 %; el <strong>modelo final</strong> (LightGBM de Poisson,
 variante V4 de E11), en <strong>13,94 %</strong>, y el <strong>híbrido</strong> con Chronos-2 (E12), en <strong>13,62 %</strong>. El modelo final quita
 30 % del error y donde más ayuda es en domingos y festivos (48,6 % → 19,7 %).</li>
-<li><strong>El modelo es reproducible y sencillo de entender.</strong> Entrenado aquí para junio de 2025 en 7,2 s, da las mismas
+<li><strong>El modelo es reproducible y sencillo de entender.</strong> Entrenado aquí para junio de 2025 en 5,8 s, da las mismas
 predicciones que guardó E11. Es la demanda reciente de la misma franja (la media de las 4 mismas semanas y la regla de 8 semanas suman
 83 % de la ganancia) corregida por el calendario y entrenada sin aprender de los datos rotos.</li>
 <li><strong>Para producción se recomienda el híbrido.</strong> De 51 candidatos de E12, ningún modelo solo supera al LightGBM; el ganador
@@ -15258,9 +15259,10 @@ solo se reasigna.</li>
 detectar fallas de datos, no en cambiar cuántos buses salen.</li>
 <li><strong>Aclarar los datos y los costos</strong>: la marca <code>cancelada</code> (muchos viajes «cancelados» sí corrieron y llevaron pasajeros), los costos reales de
 combustible y mantenimiento, la forma de pago de los conductores y <code>progvehiculos</code> de 2026.</li>
-<li><strong>Alimentar en vivo el pronóstico de 30, 60 y 120 minutos y llevarlo a la consola de despacho</strong>, y medir la latencia real de la
+<li><strong>Llevar el pronóstico de 30, 60 y 120 minutos a la consola de despacho</strong> y medir la latencia real de la
 captura: es el pronóstico que pide el enunciado y el que permite corregir el despacho del mismo día. La API ya lo sirve
-(<code>POST /api/v1/predictions/corto-plazo</code>) y el tablero lo muestra en Pronóstico, pero con el panel de 2023 a 2025.</li>
+por omisión (<code>POST /api/v1/predictions/run</code>), lo alimenta en cada ciclo con la lectura incremental en bloques de 15 minutos,
+lo monitorea y lo activa con la misma compuerta del modelo horario; el tablero lo muestra en Pronóstico.</li>
 </ol>
 </div>
 </div>
@@ -16042,7 +16044,7 @@ python -m nbconvert --to html entrega_final.ipynb
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-OutputArea-output" data-mime-type="text/markdown" tabindex="0">
-<p>Cuaderno ejecutado completo en <strong>47 s</strong> (entrenamiento del pliegue: 7,2 s; MILP del día: 1,6 s). Semilla 42. 169 de 169 cifras contrastadas coinciden con su referencia.</p>
+<p>Cuaderno ejecutado completo en <strong>31 s</strong> (entrenamiento del pliegue: 5,8 s; MILP del día: 1,4 s). Semilla 42. 169 de 169 cifras contrastadas coinciden con su referencia.</p>
 </div>
 </div>
 </div>

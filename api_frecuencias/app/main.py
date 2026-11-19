@@ -42,6 +42,15 @@ async def ciclo_de_vida(_app: FastAPI):
     from app.servicios import planificador as plan_interno
 
     registro = logging.getLogger("api_frecuencias")
+    sembrados: dict = {}
+    try:   # RNF-008: al actualizar una instalación, los modelos nuevos de la imagen llegan al volumen de modelos
+        from app.servicios import modelos_imagen
+
+        sembrados = modelos_imagen.sembrar()
+        if sembrados:
+            registro.info("Modelos de la imagen copiados al volumen: %s", sembrados)
+    except Exception:  # noqa: BLE001 - la API arranca aunque la copia falle (queda en el log)
+        registro.exception("No se pudieron copiar los modelos de la imagen al volumen")
     if base_disponible():
         from app.servicios import ejecucion
 
@@ -50,6 +59,11 @@ async def ciclo_de_vida(_app: FastAPI):
             pendientes = ejecucion.recuperar_interrumpidas()
             with sesion_contexto() as s:
                 ejecucion.sembrar_registro(s)
+                if sembrados.get("horarios"):
+                    ejecucion.registrar_sembrados(s, sembrados["horarios"])
+                from app.servicios import gobierno_corto_plazo
+
+                gobierno_corto_plazo.sembrar(s)     # la familia corto_plazo en model_registry (RF-019)
             registro.info("Arranque: %s ejecuciones reencoladas", len(pendientes))
         except Exception:  # noqa: BLE001 - la API arranca aunque la recuperación falle (queda en el log)
             registro.exception("No se pudo recuperar el estado al arrancar")

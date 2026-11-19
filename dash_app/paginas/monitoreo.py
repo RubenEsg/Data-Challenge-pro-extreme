@@ -274,7 +274,7 @@ def _historial_monitoreo(items):
           Output("mo-historial", "children"),
           Input("mo-actualizar", "n_clicks"))
 def monitoreo_modelo(_clic):
-    datos, err = A.obtener("monitoring", limite=10, orden="-creado_en")
+    datos, err = A.obtener("monitoring", limite=10, orden="-creado_en", familia="horario")
     if err:
         return aviso_api(err), None, None, None, None, None, None
     items = datos.get("items") or []

@@ -105,6 +105,8 @@ class RegistroModelo(Base):
     auditoria: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
     execution_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     creado_en: Mapped[datetime] = _ahora()
+    # migración 0016: horario (el del plan del día siguiente) o corto_plazo (30, 60 y 120 min); un activo por familia
+    familia: Mapped[str] = mapped_column(Text, nullable=False, default="horario", server_default="horario")
 
 
 class Ejecucion(Base):
@@ -306,6 +308,46 @@ class PrediccionCortoPlazo(Base):
     variables: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     recomendacion: Mapped[dict | None] = mapped_column(JSONB)
     creado_en: Mapped[datetime] = _ahora()
+    # migración 0016: dimensiones de §8.3 y el id_segmento de rutas_segmentos
+    idempresa: Mapped[int | None] = mapped_column(Integer)
+    idproceso: Mapped[str | None] = mapped_column(Text)
+    id_dia_semana: Mapped[int | None] = mapped_column(Integer)
+    id_estacionalidad: Mapped[int | None] = mapped_column(Integer)
+    id_segmento: Mapped[int | None] = mapped_column(BigInteger)
+
+
+class Subidas15Min(Base):
+    """migración 0016: subidas por ruta, día, bloque de 15 minutos y segmento que leyó el ciclo (corto plazo)."""
+    __tablename__ = "subidas_15min"
+    idruta: Mapped[int] = mapped_column(Integer, primary_key=True)
+    fecha: Mapped[date] = mapped_column(Date, primary_key=True)
+    bloque: Mapped[int] = mapped_column(Integer, primary_key=True)
+    nro_segmento: Mapped[int] = mapped_column(Integer, primary_key=True)
+    subidas: Mapped[float] = mapped_column(Float, nullable=False)
+
+
+class Salidas15Min(Base):
+    """migración 0016: viajes que iniciaron en cada bloque de 15 minutos (la oferta ya observada)."""
+    __tablename__ = "salidas_15min"
+    idruta: Mapped[int] = mapped_column(Integer, primary_key=True)
+    fecha: Mapped[date] = mapped_column(Date, primary_key=True)
+    bloque: Mapped[int] = mapped_column(Integer, primary_key=True)
+    salidas: Mapped[float] = mapped_column(Float, nullable=False)
+
+
+class Lectura15Min(Base):
+    """migración 0016: por ruta y día, hasta qué instante se leyó, de dónde, en qué ejecución y qué se excluyó."""
+    __tablename__ = "lectura_15min"
+    idruta: Mapped[int] = mapped_column(Integer, primary_key=True)
+    fecha: Mapped[date] = mapped_column(Date, primary_key=True)
+    hasta: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    fuente: Mapped[str] = mapped_column(Text, nullable=False)
+    execution_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete=AL_BORRAR_NULO))
+    celdas: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    subidas: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    excluidas: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    leido_en: Mapped[datetime] = _ahora()
 
 
 class Recomendacion(Base):
@@ -337,6 +379,9 @@ class Recomendacion(Base):
     creado_en: Mapped[datetime] = _ahora()
     # migración 0006: franja (§10.2, de una predicción) o plan_dia (plan del día siguiente que persiste el ciclo)
     origen: Mapped[str] = mapped_column(Text, nullable=False, default="franja", server_default="franja")
+    # migración 0016: origen 'corto_plazo' -> la fila de la ruta del pronóstico de corto plazo
+    prediction_corto_plazo_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.prediction_corto_plazo.prediction_id", ondelete=AL_BORRAR_NULO))
     # dimensiones de §8.3 (app/servicios/dimensiones.py)
     idruta: Mapped[int | None] = mapped_column(Integer)
     idempresa: Mapped[int | None] = mapped_column(Integer)

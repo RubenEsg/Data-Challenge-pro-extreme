@@ -6,7 +6,8 @@ de las evidencias (la ruta está al pie de cada diapositiva).
 === 1. Portada
 Buenos días. Somos Abrahan, Rubén y Paula. Venimos a responder la pregunta que Extreme Technologies le hizo a este reto:
 cada cuánto despachar buses en SILENCIO, CRA 54 y CL 72. A la derecha están las tres cifras que vamos a defender: el
-error del pronóstico, {{WAPEact}} % frente a {{WAPEbuno}} % de la regla de hoy; {{AlertasAhora}} alertas observadas por
+error del pronóstico de la próxima hora por ruta, {{CortoRutaSesenta}} % frente a {{CortoRutaSesentaBase}} % del
+promedio por día y hora, que es la línea base del enunciado; {{AlertasAhora}} alertas observadas por
 ruta y día en las familias que ya medíamos ({{AlertasTotal}} con todas); y el tiempo de respuesta de la API,
 {{Kpnoventaycinco}} ms en el
 p95. Todo corre en Python, FastAPI y PostgreSQL 14, que es la condición habilitante de la evaluación.
@@ -17,7 +18,8 @@ como el promedio de las ocho semanas anteriores, nuestro supuesto S0, a confirma
 carga de la hora,
 arrastra los festivos y no avisa cuando algo se sale de lo normal. La pregunta del reto está en el centro, tal como la
 escribió Extreme. A la derecha, lo que entregamos: una API con roles, un esquema propio en PostgreSQL con migraciones,
-un ciclo diario incremental, el modelo, el optimizador, diez alertas, el tablero y Docker Compose. Los parámetros que
+un ciclo diario e intradía incremental, el pronóstico a treinta, sesenta y ciento veinte minutos, el modelo horario del
+plan del día siguiente, el optimizador, diez alertas, el tablero y Docker Compose. Los parámetros que
 Extreme aún no entrega (capacidad, ciclo, flota) los derivamos de los datos y quedaron versionados.
 
 === 3. Datos validados, sin fuga y trazables
@@ -32,28 +34,29 @@ salen {{ConsGroseras}} diferencias groseras que apuntan a sus datos, y las repor
 entran a nuestro histórico desde la migración 0013. Las novedades viales se cruzan por fecha, rango horario y ruta, y
 una tarea de la cola aplica la retención de nuestros propios datos: {{RetencionMeses}} meses en caliente, con bitácora.
 
-=== 4. El modelo le gana a la regla actual
-Este es el veinte por ciento del modelo. En la prueba reservada de noviembre y diciembre de 2025, el modelo activo
-tiene un error de {{WAPEact}} % frente a {{WAPEbuno}} % de la regla manual, y el intervalo de confianza de la diferencia
-no toca el cero. Gana en las tres rutas, en pico y en valle, en los tres horizontes, y repite congelado un año entero
-en 2024 y en 2025. Seamos honestos con la prueba: la consultamos al elegir la versión fv2 frente a la fv1, así que es
-informativa; la selección se hizo con la validación y los años congelados, y pedimos a Extreme un periodo de 2026 como
-prueba limpia. Las cifras de 13,94 y 13,62 % del informe académico, los experimentos 11 y 12, se miden a siete días y
-sobre todo 2025, así que no se comparan con esta. El modelo es un Gradient Boosting con pérdida Poisson, reproducible
-desde Python.
+=== 4. El pronóstico del enunciado
+Este es el veinte por ciento del modelo, y responde a lo que pide el enunciado: la demanda de los siguientes treinta,
+sesenta y ciento veinte minutos por ruta, sentido y segmento. Cada media hora pronosticamos las subidas de esas
+ventanas con lo observado hasta ese instante. Para no elegir y reportar sobre los mismos meses, escribimos el protocolo
+antes de validar: todo se eligió con enero a junio de 2025 y la prueba, de julio a diciembre, se calculó una sola vez.
+Por ruta, el modelo se equivoca {{CortoRutaTreinta}}, {{CortoRutaSesenta}} y {{CortoRutaCientoveinte}} % a treinta,
+sesenta y ciento veinte minutos, frente a {{CortoRutaTreintaBase}}, {{CortoRutaSesentaBase}} y
+{{CortoRutaCientoveinteBase}} % del promedio por día y hora, que es la línea base del enunciado. Para lo espacial
+asignamos a su segmento las {{CortoSubidas}} subidas de los tres años con la regla de Extreme. Por segmento, a sesenta
+minutos, se equivoca {{CortoSegmentoSesenta}} % frente a {{CortoSegmentoSesentaBase}} %, y gana en {{CortoSegGana}} de
+los {{CortoSegTotal}} segmentos con subidas. Ya es el pronóstico del producto: cada ciclo, diario e intradía, lo
+alimenta con la lectura incremental, una regla de calidad excluye las celdas imposibles, y deja su recomendación, sus
+alertas y su monitoreo, con la misma compuerta y la misma reversión del otro modelo. La API reproduce las
+{{CortoReproducidas}} predicciones de la prueba. Lo que no funcionó: en los domingos corrientes no mejora al promedio,
+y la pérdida está en CRA 54.
 
-=== 5. El pronóstico del enunciado
-Esta lámina responde a la retroalimentación del curso. El enunciado pide pronosticar la demanda de los siguientes
-treinta, sesenta y ciento veinte minutos por ruta, sentido y segmento, y así lo hicimos: cada media hora, con lo
-observado hasta ese instante. Para no elegir y reportar sobre los mismos meses, escribimos el protocolo antes de
-validar: todo se eligió con enero a junio de 2025 y la prueba, de julio a diciembre, se calculó una sola vez. Por ruta
-y a sesenta minutos el modelo se equivoca {{CortoRutaSesenta}} %, frente a {{CortoRutaSesentaBase}} % del promedio por
-día y hora, que es la línea base del enunciado. Para lo espacial asignamos a su segmento las {{CortoSubidas}} subidas
-de los tres años con la regla de Extreme. Por segmento el modelo se equivoca {{CortoSegmentoSesenta}} %, frente a
-{{CortoSegmentoSesentaBase}} % del promedio, y gana en {{CortoSegGana}} de los {{CortoSegTotal}} segmentos con subidas.
-Y lo que no funcionó: en los domingos corrientes el modelo no mejora al promedio; la ventaja de «domingos y festivos»
-viene de los festivos. Ya está en la API y en el tablero, en la pantalla Pronóstico; lo que falta es alimentarlo
-con la captura en vivo.
+=== 5. El modelo horario del plan
+El segundo modelo pronostica los pasajeros por ruta y hora de salida del día siguiente, y con él se arma el plan del
+día. En su prueba reservada de noviembre y diciembre de 2025 se equivoca {{WAPEact}} % frente a {{WAPEbuno}} % de la
+regla manual, y el intervalo de confianza de la diferencia no toca el cero. Gana en las tres rutas, en pico y en valle,
+y repite congelado un año entero en 2024 y en 2025. Seamos honestos con esa prueba: la consultamos al elegir la versión
+fv2 frente a la fv1, así que es informativa, y pedimos a Extreme un periodo de 2026 como prueba limpia. Es un Gradient
+Boosting con pérdida Poisson, reproducible desde Python.
 
 === 6. Incertidumbre y ciclo de vida
 Cada pronóstico trae su banda P10 a P90; la cobertura está cerca del ochenta por ciento objetivo, y la calibración
@@ -61,10 +64,10 @@ conformal está versionada: se ajustó solo con la validación y la API verifica
 SHAP. El modelo no se reemplaza solo: el monitoreo mide deriva y error, el candidato pasa catorce días en sombra y una
 compuerta de cuatro criterios decide; la activación manual pasa por la misma compuerta. En el ejemplo real, el
 candidato sacó {{GateWAPECand}} % frente a {{GateWAPEAct}} % del activo y la compuerta lo dejó {{GateDecision}}. A la
-derecha, la pantalla de monitoreo del tablero. Debajo, el segmento y el sentido: un modelo propio reparte el pronóstico
-de la ruta. En su prueba de febrero de 2023 se equivoca {{SegWAPEact}} % por segmento y hora, frente a
-{{SegWAPEbcero}} % del reparto fijo, y su banda cubre {{SegCobSegmento}} % por segmento. La tabla de Extreme solo trae
-subidas por segmento de enero y febrero de 2023; el pronóstico por segmento con tres años es el de la lámina anterior.
+derecha, la pantalla de monitoreo del tablero. Debajo, el reparto del pronóstico horario por segmento: en su prueba de
+febrero de 2023 se equivoca {{SegWAPEact}} % por segmento y hora, frente a {{SegWAPEbcero}} % del reparto fijo. La
+tabla de Extreme solo trae subidas por segmento de enero y febrero de 2023; el pronóstico por segmento del producto es
+el de corto plazo, el de la lámina cuatro.
 
 === 7. Recomendaciones viables
 El optimizador resuelve la función objetivo de la sección 10.2: costo, espera, sobreocupación y desviación, con las
@@ -113,12 +116,12 @@ Prometheus y trazas OpenTelemetry.
 Este es el ciclo que pide la sección 14.2 y que mostramos en el video: llega información nueva, la lectura incremental
 toma solo lo nuevo y no reprocesa, se mide el error del modelo activo, se entrena un candidato en la cola, se compara
 con el activo en la misma ventana y se decide. En esta corrida el candidato sacó {{DemoWapeCand}} % frente a
-{{DemoWapeAct}} % del activo y fue {{DemoDecision}}; la decisión queda auditada y es reversible. Se reproduce con el
-script de demostración contra la API en Docker.
+{{DemoWapeAct}} % del activo y fue {{DemoDecision}}; la decisión queda auditada y es reversible, y la demostración la
+revierte para dejar el modelo activo como estaba. Se reproduce con el script de demostración contra la API en Docker.
 
 === 12. La respuesta a la pregunta del reto
 Y esta es la respuesta, tal como la entrega el endpoint de respuesta para el día laboral {{RespuestaFecha}}. El ciclo
-diario la deja calculada con el modelo activo, y la API solo la lee. Por ruta: las salidas del plan frente a las de hoy,
+diario la deja calculada con el modelo horario activo, y la API solo la lee. Por ruta: las salidas del plan frente a las de hoy,
 cada cuánto despachar en el pico de la mañana, el valle y el pico de la tarde, con la misma definición del documento de
 la respuesta, y las horas no viables. En {{RespEjRuta}}, {{RespEjNoViables}}: el plan no fuerza una cifra que la
 operación no puede cumplir, y lo dice. Después vienen los

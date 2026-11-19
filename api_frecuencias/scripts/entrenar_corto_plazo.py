@@ -15,7 +15,13 @@ Uso (desde api_frecuencias/):
     python scripts/entrenar_corto_plazo.py                       # panel y selección del experimento de la entrega
     python scripts/entrenar_corto_plazo.py --solo-registrar      # rehace manifiesto y registro sin reentrenar
 Opciones: --panel CARPETA (panel de 15 minutos; se copia a datos/corto_plazo), --seleccion y --prueba (resultados del
-experimento), --model-id.
+experimento), --model-id, --activar.
+
+Ciclo de vida (RF-018, RF-019): una versión nueva queda como CANDIDATA en el registro de artefactos; la API la lleva a
+model_registry (familia corto_plazo) y solo se activa con la compuerta de cuatro criterios de POST
+/api/v1/models/{model_id}/activate, en una ventana posterior a su fecha de corte
+(app/servicios/gobierno_corto_plazo.py).
+--activar la deja activa en el registro de artefactos (solo para la primera versión, cuando no hay otra).
 """
 from __future__ import annotations
 
@@ -140,6 +146,8 @@ def main() -> None:
     ap.add_argument("--prueba", type=Path, default=EXPERIMENTO / "resultados" / "prueba.json")
     ap.add_argument("--model-id", default=CP.MODEL_ID_E14)
     ap.add_argument("--solo-registrar", action="store_true")
+    ap.add_argument("--activar", action="store_true",
+                    help="dejarla activa en el registro de artefactos (sin compuerta: solo si no hay otra activa)")
     a = ap.parse_args()
     t0 = time.time()
     sel = json.loads(a.seleccion.read_text(encoding="utf-8"))
@@ -181,8 +189,13 @@ def main() -> None:
         "generado_en": datetime.now(UTC).isoformat(timespec="seconds"),
     }
     previo.write_text(json.dumps(man, ensure_ascii=False, indent=1), encoding="utf-8")
-    CP.registrar(man, activar=True, motivo="modelo elegido en la validación de E14 y medido una vez en su prueba "
-                                           "reservada (julio-diciembre de 2025)")
+    activa = CP.modelo_activo()
+    if a.activar and activa not in (None, a.model_id):
+        sys.exit(f"Ya hay un modelo de corto plazo activo ({activa}): la versión nueva queda candidata y se activa con "
+                 "la compuerta de POST /api/v1/models/{model_id}/activate (familia corto_plazo)")
+    CP.registrar(man, activar=a.activar or activa is None or activa == a.model_id,
+                 motivo="modelo elegido en la validación de E14 y medido una vez en su prueba reservada "
+                        "(julio-diciembre de 2025)")
     origen = {"generado_en": man["generado_en"], "script": "scripts/entrenar_corto_plazo.py",
               "fuente": "pronostico_corto_plazo/panel (experimento E14): eventos de conteo con subidas 2023-2025, "
                         "exportados en solo lectura y asignados al segmento oficial de 500 m con la regla de Extreme",

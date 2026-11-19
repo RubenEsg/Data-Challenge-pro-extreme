@@ -16,8 +16,9 @@ de la petición HTTP:
 - el trabajador de la cola calcula la respuesta con el modelo activo y los umbrales vigentes, y la guarda como una foto
   por ruta en `ai_frecuencias.respuesta_reto`;
 - el ciclo diario hace lo mismo al cerrar, para el día siguiente al último dato;
-- `GET /api/v1/respuesta` solo lee esa foto. Si no existe para la fecha, el modelo y los umbrales vigentes, responde
-  404 `sin_calcular` con la pista `POST /api/v1/respuesta/calcular`.
+- `GET /api/v1/respuesta` lee esa foto y le agrega las «próximas dos horas», que calcula al leer con el pronóstico de
+  corto plazo, sin MILP (sección «Las próximas dos horas»). Si la foto no existe para la fecha, el modelo y los
+  umbrales vigentes, responde 404 `sin_calcular` con la pista `POST /api/v1/respuesta/calcular`.
 
 **Con los datos históricos y recientes.** Sin `fecha`, la respuesta es para el día siguiente al último dato que tiene
 la API: el último día de la serie empaquetada o de lo que el ciclo diario incorporó en
@@ -35,7 +36,8 @@ son:
 - `api_frecuencias/docs/evidencias/respuesta/respuesta_2025-11-19.json`, `respuesta_2025-11-22.json`,
   `respuesta_2025-11-23.json` y `respuesta_2026-01-01.json`: la respuesta completa de la API de cada día, con el
   `execution_id` que la calculó;
-- `api_frecuencias/docs/evidencias/respuesta/api_en_vivo.txt`: la misma respuesta por HTTP.
+- `api_frecuencias/docs/evidencias/respuesta/api_en_vivo.txt` y `api_respuesta_CRA54_2025-11-19.json`: la misma
+  respuesta por HTTP, con las próximas dos horas.
 
 Además del 1-ene-2026 se muestran un laboral, un sábado y un domingo de noviembre de 2025: el miércoles 19, el sábado
 22 y el domingo 23. Son posteriores al corte del modelo (31-ago-2025) y tienen datos observados, así que el pronóstico
@@ -44,7 +46,7 @@ se puede contrastar con lo que pasó.
 ## Respuesta corta
 
 **Mañana (1-ene-2026, festivo).** Cifras de `respuesta_2026-01-01.json`, calculado en la ejecución
-`c90ed32c-30b4-49c9-b4f3-3dd4f139b4e7`:
+`956f72a0-4cec-4e7c-89bb-ececaa840d24`:
 
 - **SILENCIO.** Despachar cada 10 min en el pico de la mañana y en el valle (hoy se programa cada 7,60 y 8,55 min): 92
   salidas en el día (hoy 109,7). Se esperan 4.609 pasajeros (P10–P90: 2.933–5.874); bastan 21 de los 27 buses
@@ -54,26 +56,26 @@ se puede contrastar con lo que pasó.
 - **CL 72.** Cada 10 min hasta las 16 h y cada 8,79 min en el pico de la tarde (hoy, entre 9,17 y 16,53 min): 93
   salidas (hoy 65,6). Se esperan 3.007 pasajeros (1.771–4.340), con 23 de los 27 buses.
 - **Recaudo esperado del día:** 48.126.159 COP en las tres rutas, con la tarifa neta de 3.182 COP por pasajero.
-- **Atención inmediata:** al consultar, había 21 alertas abiertas en las tres rutas, 7 críticas. Para el propio
+- **Atención inmediata:** al consultar, había 39 alertas abiertas en las tres rutas, 16 críticas. Para el propio
   1-ene-2026 hay una alerta crítica ALT-010 (modelo degradado) en CL 72 (sección 5).
 
 **Un día laboral típico (19-nov-2025).** Cifras de `respuesta_2025-11-19.json`:
 
-- **SILENCIO.** Cada 2,40 min a las 5 h, la hora de más demanda (1.881 pasajeros esperados), y cada 8,18 y 8,00 min
-  en el pico de la mañana y el valle (hoy 6,86 y 6,77): 135 salidas (hoy 158,5). Se esperan 11.469 pasajeros
-  (8.458–14.160); se observaron 10.548. A las 8 h hay 44 buses en ruta de 45. El plan ahorra 93,4 vehículos-hora
-  (5,40 millones COP de costo operativo) a cambio de 0,9 min más de espera media.
-- **CRA 54.** Cada 3,00 min en el pico de la mañana (hoy 2,87), 4,00 en el valle (hoy 3,50) y 7,46 en el pico de la
-  tarde (hoy 3,93): 247 salidas (hoy 290,2). Se esperan 22.800 pasajeros (19.054–26.560); se observaron 22.492. Usa
-  los 79 buses de la flota a las 8 h. Ahorra 152,4 vehículos-hora (8,87 millones COP) con la misma sobreocupación
-  esperada (267,2 frente a 266,7 pasajeros). La hora de las 5 sale no viable: la demanda pide 34 salidas (una cada
-  1,76 min) y el headway mínimo gobernado de 2 min permite 30, que es lo que programa el plan.
+- **SILENCIO.** Cada 2,40 min a las 5 h, la hora de más demanda (1.881 pasajeros esperados), y cada 8,18 y 8,13 min
+  en el pico de la mañana y el valle (hoy 6,86 y 6,77): 133 salidas (hoy 158,5). Se esperan 11.469 pasajeros
+  (8.458–14.160); se observaron 10.548. A las 8 h hay 44 buses en ruta de 45. El plan ahorra 101,2 vehículos-hora
+  (5,86 millones COP de costo operativo) a cambio de 1,0 min más de espera media.
+- **CRA 54.** Cada 3,00 min en el pico de la mañana (hoy 2,87), 4,07 en el valle (hoy 3,50) y 7,46 en el pico de la
+  tarde (hoy 3,93): 245 salidas (hoy 290,2). Se esperan 22.800 pasajeros (19.054–26.560); se observaron 22.492. Usa
+  los 79 buses de la flota a las 8 h. Ahorra 160,4 vehículos-hora (9,31 millones COP) con casi la misma
+  sobreocupación esperada (248,1 frente a 246,9 pasajeros). La hora de las 5 sale no viable: la demanda pide 32
+  salidas (una cada 1,88 min) y el headway mínimo gobernado de 2 min permite 30, que es lo que programa el plan.
 - **CL 72.** Cada 10,00 min en el pico de la mañana (hoy 10,13), 9,41 en el valle (hoy 11,61) y 9,97 en el pico de la
-  tarde (hoy 12,03): 110 salidas (hoy 96,5). Se esperan 7.525 pasajeros (5.320–9.628); se observaron 7.115. Usa 54,7
-  vehículos-hora más (2,97 millones COP) y a cambio baja la espera media de 6,76 a 5,85 min y la sobreocupación
-  esperada de 27,5 a 12,3 pasajeros.
-- **Balance del día en las tres rutas:** 191,1 vehículos-hora menos que lo programado, 11,30 millones COP menos de costo
-  operativo (108,10 frente a 119,40) y un recaudo esperado de 132.985.644 COP.
+  tarde (hoy 12,03): 109 salidas (hoy 96,5). Se esperan 7.525 pasajeros (5.320–9.628); se observaron 7.115. Usa 51,6
+  vehículos-hora más (2,77 millones COP) y a cambio baja la espera media de 6,76 a 5,88 min y la sobreocupación
+  esperada de 26,4 a 14,1 pasajeros.
+- **Balance del día en las tres rutas:** 210,0 vehículos-hora menos que lo programado, 12,40 millones COP menos de costo
+  operativo (107,01 frente a 119,41) y un recaudo esperado de 132.985.644 COP.
 
 ## Cómo se arma cada parte de la respuesta
 
@@ -85,6 +87,7 @@ se puede contrastar con lo que pasó.
 | Cuántos vehículos | Máximo de buses en ruta a la vez con el plan, frente a la flota disponible; al lado, la fórmula de §10.3, ceil(ciclo / headway) | `api_frecuencias/docs/evidencias/respuesta/respuesta_reto.md` |
 | Flota y recaudo | Vehículos-hora, costo operativo (26.400 COP por bus-hora y 1.991 COP por km), espera media y sobreocupación esperada del plan frente a lo programado, con las fórmulas del MILP; recaudo = pasajeros esperados × tarifa neta de 3.182 COP | `api_frecuencias/datos/costos_fuente.json` |
 | Atención inmediata | Las alertas **abiertas ahora** en `ai_frecuencias.alert` (nueva, reconocida o asignada en el instante de la consulta), las críticas primero, y aparte las alertas detectadas en la fecha consultada | `api_frecuencias/docs/evidencias/alertas/` |
+| Próximas dos horas | Bloque `proximas_dos_horas`: el pronóstico de corto plazo `cp_lgbm_20250630_s42` (RF-005) de las subidas de los siguientes 30, 60 y 120 minutos de cada ruta, con lo observado hasta el instante, su banda P10–P90, los dos sentidos y los 5 segmentos con más subidas previstas en la próxima hora; para cada horizonte, el headway recomendado de su franja (§10.2) o «no viable» con su motivo. Se calcula al leer, en el instante pedido o en el último día con datos leídos | `api_frecuencias/docs/evidencias/respuesta/api_respuesta_CRA54_2025-11-19.json`; `pronostico_corto_plazo/README.md` |
 | Trazabilidad | `model_id`, `calibracion_version`, `fuente_pronostico`, `umbrales_version`, `execution_id` de la ejecución que calculó la foto, último ciclo diario, último día con datos y la fuente de cada cifra (RNF-011) | `api_frecuencias/docs/evidencias/respuesta/respuesta_<fecha>.json` |
 
 ## 1. ¿Cada cuánto despachar?
@@ -97,7 +100,7 @@ devuelve en `resumen_despacho.por_franja` y el detalle hora por hora en `cada_cu
 
 | Tipo de día | Madrugada (4-5 h) | Pico mañana (6-8 h) | Valle (9-16 h) | Pico tarde (17-19 h) | Salidas del día |
 |---|---|---|---|---|---|
-| Laboral (19-nov-2025) | cada 2,99 min (hoy 3,00) | cada 8,18 min (hoy 6,86) | cada 8,00 min (hoy 6,77) | cada 9,97 min (hoy 7,26) | 135 (hoy 158,5) |
+| Laboral (19-nov-2025) | cada 3,10 min (hoy 3,00) | cada 8,18 min (hoy 6,86) | cada 8,13 min (hoy 6,77) | cada 9,97 min (hoy 7,26) | 133 (hoy 158,5) |
 | Sábado (22-nov-2025) | cada 6,92 min (hoy 4,00) | cada 7,50 min (hoy 6,05) | cada 9,80 min (hoy 7,16) | cada 10,00 min (hoy 8,04) | 109 (hoy 145,9) |
 | Domingo (23-nov-2025) | cada 8,60 min (hoy 5,59) | cada 10,00 min (hoy 7,60) | cada 10,00 min (hoy 8,55) | cada 9,91 min (hoy 9,60) | 92 (hoy 109,7) |
 | Festivo (1-ene-2026) | cada 8,60 min (hoy 5,59) | cada 10,00 min (hoy 7,60) | cada 10,00 min (hoy 8,55) | cada 9,91 min (hoy 9,60) | 92 (hoy 109,7) |
@@ -106,7 +109,7 @@ devuelve en `resumen_despacho.por_franja` y el detalle hora por hora en `cada_cu
 
 | Tipo de día | Madrugada (4-5 h) | Pico mañana (6-8 h) | Valle (9-16 h) | Pico tarde (17-19 h) | Salidas del día |
 |---|---|---|---|---|---|
-| Laboral (19-nov-2025) | cada 2,43 min (hoy 2,51) | cada 3,00 min (hoy 2,87) | cada 4,00 min (hoy 3,50) | cada 7,46 min (hoy 3,93) | 247 (hoy 290,2) |
+| Laboral (19-nov-2025) | cada 2,43 min (hoy 2,51) | cada 3,00 min (hoy 2,87) | cada 4,07 min (hoy 3,50) | cada 7,46 min (hoy 3,93) | 245 (hoy 290,2) |
 | Sábado (22-nov-2025) | cada 3,22 min (hoy 3,26) | cada 3,11 min (hoy 2,78) | cada 5,00 min (hoy 3,76) | cada 8,57 min (hoy 5,06) | 208 (hoy 260,7) |
 | Domingo (23-nov-2025) | cada 5,86 min (hoy 4,14) | cada 7,20 min (hoy 4,46) | cada 8,73 min (hoy 4,67) | cada 8,53 min (hoy 7,03) | 114 (hoy 185,2) |
 | Festivo (1-ene-2026) | cada 7,17 min (hoy 4,14) | cada 9,00 min (hoy 4,46) | cada 9,60 min (hoy 4,67) | cada 9,43 min (hoy 7,03) | 100 (hoy 185,2) |
@@ -115,7 +118,7 @@ devuelve en `resumen_despacho.por_franja` y el detalle hora por hora en `cada_cu
 
 | Tipo de día | Madrugada (4-5 h) | Pico mañana (6-8 h) | Valle (9-16 h) | Pico tarde (17-19 h) | Salidas del día |
 |---|---|---|---|---|---|
-| Laboral (19-nov-2025) | cada 4,99 min (hoy 4,93) | cada 10,00 min (hoy 10,13) | cada 9,41 min (hoy 11,61) | cada 9,97 min (hoy 12,03) | 110 (hoy 96,5) |
+| Laboral (19-nov-2025) | cada 5,28 min (hoy 4,93) | cada 10,00 min (hoy 10,13) | cada 9,41 min (hoy 11,61) | cada 9,97 min (hoy 12,03) | 109 (hoy 96,5) |
 | Sábado (22-nov-2025) | cada 7,54 min (hoy 6,16) | cada 10,00 min (hoy 9,09) | cada 10,00 min (hoy 11,81) | cada 10,00 min (hoy 13,31) | 101 (hoy 91,4) |
 | Domingo (23-nov-2025) | cada 10,00 min (hoy 9,17) | cada 10,00 min (hoy 12,67) | cada 10,00 min (hoy 14,12) | cada 8,79 min (hoy 16,53) | 93 (hoy 65,6) |
 | Festivo (1-ene-2026) | cada 10,00 min (hoy 9,17) | cada 10,00 min (hoy 12,67) | cada 10,00 min (hoy 14,12) | cada 8,79 min (hoy 16,53) | 93 (hoy 65,6) |
@@ -129,18 +132,20 @@ Lectura operativa:
   114 salidas), porque se esperan 7.509 pasajeros frente a 10.130.
 - **CL 72 tiene menos servicio del que pide la regla de espera.** Hoy se programan intervalos de 11,61 a 12,03 min en el
   valle y la tarde del día laboral, y de 12,67 a 16,53 min el domingo. Todos superan el máximo efectivo de 10 min que
-  sale de la espera máxima de 5 min (§5.1, leída como espera media = headway / 2, supuesto S12). El plan sube a 110
+  sale de la espera máxima de 5 min (§5.1, leída como espera media = headway / 2, supuesto S12). El plan sube a 109
   salidas en el laboral (hoy 96,5) y a 93 en domingo y festivo (hoy 65,6).
 - **En domingo y festivo manda el nivel de servicio, no la demanda.** SILENCIO y CL 72 tienen el mismo plan el
   23-nov-2025 y el 1-ene-2026: casi todas las horas quedan en el headway máximo efectivo de 10 min, porque la demanda
   esperada cabe con menos buses. Si el área operativa confirma otro máximo para esos días, basta con cambiar
   `headway_maximo_min` o `espera_max_min` con `PUT /api/v1/thresholds` (versión nueva) y volver a calcular.
-- **Una hora no viable de 204 horas-ruta, explicada.** En CRA 54, a las 5 h del laboral, la demanda pide 34 salidas
-  (una cada 1,76 min), más de las 30 que permite el headway mínimo gobernado de 2 min. El plan programa 30, cada
+- **Una hora no viable de 204 horas-ruta, explicada.** En CRA 54, a las 5 h del laboral, la demanda pide 32 salidas
+  (una cada 1,88 min), más de las 30 que permite el headway mínimo gobernado de 2 min. El plan programa 30, cada
   2,00 min (la mejor aproximación ejecutable), y la respuesta marca la hora `viable = false` con el motivo, sin forzar
-  una cifra (§10.3 y §18). En SILENCIO, a las 4 h del domingo y del festivo, la hora tiene 0,2 minutos operados y una
-  sola salida: es viable, porque con una salida no hay intervalo entre salidas que medir dentro de la hora, y el plan del
-  día y la respuesta aplican ahora la misma regla. Fuente: `respuesta_reto.md`, columna «Horas no viables».
+  una cifra (§10.3 y §18). Las 7 horas del domingo y del festivo con una sola salida (por ejemplo, SILENCIO a las 4 h,
+  con 0,2 minutos operados) son viables, porque con una salida no hay intervalo entre salidas que medir dentro de la
+  hora; el plan del día y la respuesta aplican la misma regla. Fuente: `respuesta_reto.md`, columna «Horas no
+  viables», que lista las horas (el «5» de CRA 54 en el laboral es la hora de las 5), y el `motivo` de cada hora en
+  `respuesta_<fecha>.json`.
 
 ## 2. ¿Cuántos pasajeros se esperan?
 
@@ -180,7 +185,7 @@ salidas programadas hoy. Fuente: `respuesta_reto.md` y `respuesta_<fecha>.json` 
 |---|---|---|---|---|---|---|
 | Laboral 19-nov-2025 | SILENCIO | 44 | 8 h | 45 | 86 | 47 |
 | Laboral 19-nov-2025 | CRA 54 | 79 | 8 h | 79 | 106 | 80 |
-| Laboral 19-nov-2025 | CL 72 | 30 | 18 h | 45 | 47 | 29 |
+| Laboral 19-nov-2025 | CL 72 | 30 | 18 h | 45 | 44 | 29 |
 | Sábado 22-nov-2025 | SILENCIO | 31 | 9 h | 43 | 44 | 42 |
 | Sábado 22-nov-2025 | CRA 54 | 67 | 7 h | 75 | 91 | 73 |
 | Sábado 22-nov-2025 | CL 72 | 27 | 13 h | 43 | 27 | 25 |
@@ -209,9 +214,9 @@ Costos con fuente pública de 2026: 26.400 COP por bus-hora de conductor y 1.991
 
 | Día | Ruta | Vehículos-hora ahorrados | Costo operativo plan / hoy (millones COP) | Espera media plan / hoy (min) | Sobreocupación plan / hoy (pasajeros) | Recaudo esperado (millones COP) |
 |---|---|---|---|---|---|---|
-| Laboral 19-nov-2025 | SILENCIO | 93,4 | 31,28 / 36,68 | 5,29 / 4,41 | 50,2 / 33,5 | 36,49 |
-| Laboral 19-nov-2025 | CRA 54 | 152,4 | 52,88 / 61,75 | 3,02 / 2,48 | 267,2 / 266,7 | 72,55 |
-| Laboral 19-nov-2025 | CL 72 | −54,7 | 23,94 / 20,97 | 5,85 / 6,76 | 12,3 / 27,5 | 23,94 |
+| Laboral 19-nov-2025 | SILENCIO | 101,2 | 30,82 / 36,68 | 5,37 / 4,41 | 62,3 / 37,8 | 36,49 |
+| Laboral 19-nov-2025 | CRA 54 | 160,4 | 52,44 / 61,75 | 3,06 / 2,48 | 248,1 / 246,9 | 72,55 |
+| Laboral 19-nov-2025 | CL 72 | −51,6 | 23,75 / 20,97 | 5,88 / 6,76 | 14,1 / 26,4 | 23,94 |
 | Sábado 22-nov-2025 | SILENCIO | 145,9 | 24,98 / 33,45 | 6,45 / 4,83 | 14,6 / 7,7 | 28,97 |
 | Sábado 22-nov-2025 | CRA 54 | 191,3 | 43,45 / 54,42 | 3,53 / 2,73 | 61,8 / 94,1 | 60,83 |
 | Sábado 22-nov-2025 | CL 72 | −37,5 | 21,63 / 19,55 | 6,29 / 6,98 | 4,0 / 2,2 | 19,10 |
@@ -226,20 +231,20 @@ Vehículos-hora ahorrados = programado − recomendado; un valor negativo signif
 
 El balance que propone el sistema:
 
-- **SILENCIO y CRA 54: menos flota con un costo de espera acotado.** En el día laboral el plan ahorra 93,4 y 152,4
-  vehículos-hora (5,40 y 8,87 millones COP de costo operativo). La espera media sube 0,9 y 0,5 min. En CRA 54 la
-  sobreocupación esperada queda igual (267,2 frente a 266,7 pasajeros), porque el plan reparte las salidas según la
-  demanda de cada hora; en SILENCIO sube de 33,5 a 50,2. En el festivo el ahorro de CRA 54 es mayor (243,1
+- **SILENCIO y CRA 54: menos flota con un costo de espera acotado.** En el día laboral el plan ahorra 101,2 y 160,4
+  vehículos-hora (5,86 y 9,31 millones COP de costo operativo). La espera media sube 1,0 y 0,6 min. En CRA 54 la
+  sobreocupación esperada queda casi igual (248,1 frente a 246,9 pasajeros), porque el plan reparte las salidas según
+  la demanda de cada hora; en SILENCIO sube de 37,8 a 62,3. En el festivo el ahorro de CRA 54 es mayor (243,1
   vehículos-hora, 15,98 millones COP), pero la espera media pasa de 3,39 a 6,24 min y la sobreocupación esperada de
   28,1 a 80,6 pasajeros. El valor del tiempo de espera (7.000 COP por hora) y la penalidad por sobreocupación (10.000
   COP por pasajero) deciden ese punto; son parámetros que debe validar el área operativa (§5.1), y con una penalidad
   mayor el plan programaría más salidas.
-- **CL 72: más servicio donde hoy falta.** El plan agrega 54,7 vehículos-hora en el laboral (2,97 millones COP más de
-  costo) y 89,0 en domingo y festivo (5,47 millones COP más). A cambio, la espera media baja de 6,76 a 5,85 min en el
-  laboral y de 8,73 a 6,01 min en el festivo, y la sobreocupación esperada baja a menos de la mitad en el laboral, el
-  domingo y el festivo (en el sábado sube de 2,2 a 4,0 pasajeros).
-- **Balance del día laboral en las tres rutas:** 191,1 vehículos-hora y 11,30 millones COP menos de costo operativo
-  (108,10 frente a 119,40 millones), con 0,9 min más de espera en SILENCIO, 0,5 en CRA 54 y 0,9 menos en CL 72.
+- **CL 72: más servicio donde hoy falta.** El plan agrega 51,6 vehículos-hora en el laboral (2,77 millones COP más de
+  costo) y 89,0 en domingo y festivo (5,46 millones COP más). A cambio, la espera media baja de 6,76 a 5,88 min en el
+  laboral y de 8,73 a 6,01 min en el festivo, y la sobreocupación esperada baja de 26,4 a 14,1 pasajeros en el laboral
+  y a menos de la mitad en el domingo y el festivo (en el sábado sube de 2,2 a 4,0 pasajeros).
+- **Balance del día laboral en las tres rutas:** 210,0 vehículos-hora y 12,40 millones COP menos de costo operativo
+  (107,01 frente a 119,41 millones), con 1,0 min más de espera en SILENCIO, 0,6 en CRA 54 y 0,9 menos en CL 72.
 - **Recaudo.** Extreme no suministró la tarifa (§19). La respuesta usa la tarifa pública 2026 del Área Metropolitana
   (3.700 COP) por 0,86 que retiene el operador: 3.182 COP netos por pasajero, la misma que usa el MILP del plan. Desde la
   migración 0010 esa tarifa se versiona en `threshold_config` como `tarifa_cop`, sembrada con la de
@@ -259,9 +264,9 @@ La respuesta trae dos listas por ruta, rotuladas:
 - `alertas_de_la_fecha`: las detectadas en la fecha consultada (día de Bogotá), en cualquier estado.
 
 `atencion_resumen` da los conteos completos por severidad. En la evidencia, después de una corrida del ciclo diario
-hasta el 31-dic-2025, había abiertas ahora 8 alertas en SILENCIO (3 críticas y 5 preventivas), 6 en CRA 54 (2 y 4) y 7
-en CL 72 (2 y 5): 21 en total, 7 críticas. Para el 1-ene-2026 hay una alerta crítica ALT-010 (modelo degradado) en
-CL 72 (`respuesta_2026-01-01.json`).
+hasta el 31-dic-2025, había abiertas ahora 12 alertas en SILENCIO (6 críticas y 6 preventivas), 14 en CRA 54 (4 y 10)
+y 13 en CL 72 (6 y 7): 39 en total, 16 críticas. Para el 1-ene-2026 hay una alerta crítica ALT-010 (modelo
+degradado) en CL 72 (`respuesta_2026-01-01.json`).
 
 Situaciones que vigila el sistema, con sus umbrales vigentes (`app/servicios/alertas.py`, versionados en
 `threshold_config`; la migración 0007 agrega los de la ALT-002 observada y de la ruptura, y la 0014, el mínimo de
@@ -307,6 +312,43 @@ Sin incidentes etiquetados por Extreme, la precisión real no se puede medir tod
 el lift son aproximaciones con la persistencia de la condición. La muestra etiquetada por dos revisores está en
 `api_frecuencias/docs/evidencias/alertas/revision_doble/`.
 
+## Las próximas dos horas (30, 60 y 120 minutos)
+
+`GET /api/v1/respuesta` trae ahora `proximas_dos_horas`: por ruta, el pronóstico de corto plazo del modelo
+`cp_lgbm_20250630_s42`, el que pide el enunciado (30, 60 y 120 minutos por ruta, sentido y segmento, con lo observado
+hasta el instante), con su banda P10–P90 y, para cada horizonte, el headway recomendado de su franja (§10.2) o «no
+viable» con su motivo. Trae además los dos sentidos y los 5 segmentos con más subidas previstas en la próxima hora.
+Esta parte no sale de la foto: el GET la calcula al leer.
+
+- Con `instante`, toma ese instante.
+- Sin él, toma el último día con datos leídos a la hora actual del día (entre 04:00 y 21:00). Por eso la evidencia sin
+  instante depende de la hora en que corrió: en `api_en_vivo.txt` la consulta fue a las 03:06 (`consultado_en`) y
+  tomó el 2025-12-30 a las 04:00, cuando los siguientes 30 minutos casi no tienen pasajeros (0 a 2 por ruta) y las
+  tres rutas salen cada 10 min.
+
+El caso pedido de la evidencia es CRA 54, el 2025-11-19 a las 07:00 (`instante=2025-11-19T07:00:00-05:00`;
+`api_en_vivo.txt` y `api_respuesta_CRA54_2025-11-19.json`):
+
+| Horizonte | Ventana | Pasajeros esperados (P10–P90) | Observados | Headway recomendado | Hoy |
+|---|---|---|---|---|---|
+| 30 min | 7:00–7:30 | 901 (816–993) | 862 | no viable (mejor aproximación: 17 buses/h, cada 3,53 min) | cada 2,94 min |
+| 60 min | 7:00–8:00 | 1.690 (1.546–1.841) | 1.720 | no viable (mejor aproximación: 17 buses/h, cada 3,53 min) | cada 2,94 min |
+| 120 min | 7:00–9:00 | 3.204 (2.956–3.448) | 3.272 | cada 4,00 min (15 buses/h, 63 vehículos) | cada 3,82 min |
+
+Lo observado cae dentro de la banda en los tres horizontes. A 30 y 60 minutos la recomendación sale no viable por la
+flota: según el `motivo`, los 79 vehículos disponibles, con un ciclo de 249,1 min, solo sostienen 826 pasajeros/h de
+capacidad efectiva, y la carga del nivel de servicio es de 991 a 30 minutos y de 919 a 60 minutos. La respuesta informa
+la mejor aproximación ejecutable, 17 buses/h cada 3,53 min, que cubre el 83,4 % y el 89,9 % de esa carga, sin forzar
+una cifra (§10.3 y §18). Son el ciclo y la flota de la pregunta H13 a Extreme
+(`api_frecuencias/docs/hallazgos_extreme.md`). A 120 minutos, con la ventana hasta las 9:00, la recomendación es
+viable. El segmento con más subidas previstas en la próxima hora es el 12 de ida (km 5,5): 68 subidas esperadas
+(53–85); se observaron 82.
+
+La precisión del modelo de corto plazo (experimento E14) está en `pronostico_corto_plazo/README.md`: en su prueba de
+julio a diciembre de 2025, por ruta y a 60 minutos, se equivoca en 7,34 % de las subidas, frente a 13,18 % del promedio
+por día y hora. La prueba del bloque es
+`api_frecuencias/tests/integracion/test_corto_plazo_api.py::test_la_respuesta_del_reto_dice_las_proximas_dos_horas`.
+
 ## Limitaciones
 
 Son las que la misma respuesta declara en `limitaciones` (`respuesta_2026-01-01.json`):
@@ -342,19 +384,20 @@ temporal, con la autenticación encendida, un trabajador de la cola y el ciclo d
   ruta fuera de la lista da 422;
 - para una fecha sin foto (2025-03-04), 404 `sin_calcular` con la pista `POST /api/v1/respuesta/calcular`, el cuerpo
   sugerido y el rol analista;
-- `POST /api/v1/respuesta/calcular {"fecha": "2026-01-01"}` (analista) responde 202 en 249 ms. La ejecución queda «ok»
-  64,9 s después del POST, en segundo plano: el proceso recién arrancado carga el modelo, arma las variables con la
-  serie validada, pronostica 51 horas-ruta, resuelve tres MILP y guarda la foto y las 51 filas del plan del día, con
-  otros procesos de prueba corriendo en el mismo equipo de 6 núcleos. Con el proceso ya caliente, el cálculo de CRA 54
-  del 19-nov-2025 queda «ok» 2,1 s después del POST, y en el proceso del script cada día de tres rutas tarda de 0,8 a
-  2,7 s (`respuesta_reto.md`);
-- después, 21 lecturas de `GET /api/v1/respuesta?fecha=2026-01-01` desde la foto tardan 32 ms de mediana y 60 ms como
-  máximo; las de CRA 54 del 19-nov-2025, 17 ms de mediana;
+- `POST /api/v1/respuesta/calcular {"fecha": "2026-01-01"}` (analista) responde 202 en 54 ms. La ejecución queda «ok»
+  19,8 s después del POST, en segundo plano: el proceso recién arrancado carga el modelo, arma las variables con la
+  serie validada, pronostica 51 horas-ruta, resuelve tres MILP y guarda la foto y las 51 filas del plan del día. Con el
+  proceso ya caliente, el cálculo de CRA 54 del 19-nov-2025 queda «ok» 2,1 s después del POST, y en el proceso del
+  script cada día de tres rutas tarda de 0,8 a 2,3 s (`respuesta_reto.md`);
+- después, 21 lecturas de `GET /api/v1/respuesta?fecha=2026-01-01` tardan 212 ms de mediana y 7.261 ms como máximo, y
+  las de CRA 54 del 19-nov-2025 con `instante`, 76 ms de mediana y 922 ms como máximo. Cada lectura lee la foto y
+  calcula las próximas dos horas (de las tres rutas en la primera serie, de CRA 54 en la segunda);
 - la trazabilidad trae `model_id` `hgb_fv2_20250831_s42`, `calibracion_version` `v2`, `fuente_pronostico`
-  `modelo_activo`, la versión de umbrales (5 en la base de la evidencia), el `execution_id` del cálculo y `datos_hasta`
-  2025-12-31;
-- la exportación CSV del 1-ene-2026 trae 51 filas (3 rutas × 17 horas) y la XLSX, 10.650 bytes;
-- `api_respuesta_CRA54_2025-11-19.json` es una respuesta completa por HTTP, con las alertas abiertas ahora.
+  `modelo_activo`, la versión de umbrales (10 en la base de la evidencia), el `execution_id` del cálculo
+  (`890a7fc8-a172-4943-8fa0-0bc9f3fea0ac` para el 1-ene-2026) y `datos_hasta` 2025-12-31;
+- la exportación CSV del 1-ene-2026 trae 51 filas (3 rutas × 17 horas) y la XLSX, 10.658 bytes;
+- `api_respuesta_CRA54_2025-11-19.json` es una respuesta completa por HTTP, con las alertas abiertas ahora y las
+  próximas dos horas desde las 07:00 de ese día.
 
 ## Cómo reproducirlo
 
@@ -374,8 +417,8 @@ curl -H "X-API-Key: $CLAVE_OPERADOR" -o respuesta.xlsx "http://localhost:8000/ap
 - la viabilidad y que bajar `espera_max_min` baja el headway máximo efectivo;
 - la fecha por omisión con los datos recientes;
 - las alertas abiertas ahora y las de la fecha;
-- los permisos: sin clave 401, operador 403 en el POST, analista 202 y lectura 200 desde la foto, sin pronóstico ni
-  MILP dentro del GET;
+- los permisos: sin clave 401, operador 403 en el POST, analista 202 y lectura 200 desde la foto, sin el pronóstico
+  del día ni MILP dentro del GET;
 - el 404 `sin_calcular` y que todo instante sale en America/Bogota (-05:00).
 
 El resultado está en `api_frecuencias/docs/evidencias/respuesta/pytest_respuesta.txt`.

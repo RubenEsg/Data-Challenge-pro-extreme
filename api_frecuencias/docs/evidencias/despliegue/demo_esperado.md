@@ -170,6 +170,30 @@ corrida no hay nada que revertir, y el script lo dice.
 (RNF-001) sigue desde la última marca de agua de la demostración (2025-12-14) con un día nuevo por escenario
 (2025-12-15 y 2025-12-16), que todavía están dentro de la serie empaquetada.
 
+## Desde el 19-11-2026: el corto plazo dentro de cada ciclo
+
+Con la migración 0016, cada ejecución de la demostración hace también lo que pide RF-005 para el pronóstico de 30, 60
+y 120 minutos, y `demo_ciclo_api.txt` lo imprime bajo cada ejecución:
+
+- **la lectura de 15 minutos** de los días que trajo la ejecución, en días-ruta: en la carga inicial, 2.919 días-ruta
+  y 11.012.701 celdas, con las 2 celdas imposibles excluidas por VAL-009. Son días del panel empaquetado, así que no se
+  copian a `subidas_15min` («0 guardadas»): `lectura_15min` dice hasta dónde se leyó cada uno. El día nuevo
+  (2025-08-31) trae 1 celda válida en las tres rutas porque la fuente casi no tiene eventos de conteo de ese domingo,
+  aunque sí tiene sus salidas;
+- **9 pronósticos de corto plazo** (3 rutas × 3 horizontes) con su recomendación, en el primer instante del día
+  siguiente a lo leído (04:00);
+- **el monitoreo del corto plazo**: el WAPE móvil de 7 días y la cobertura P10-P90 del modelo `cp_lgbm_20250630_s42`.
+
+El ciclo de vida que demuestra §14.2 sigue siendo el del modelo horario: el script toma el activo de la familia
+`horario` (`GET /models?familia=horario`), y la compuerta compara al candidato con ese activo. En la corrida vigente
+(19-11-2026, 03:20, en Docker), el candidato `hgb_fv3_20250930_s42` gana 13,578 % frente a 13,982 % de
+`hgb_fv2_20250831_s42` en 2025-12-01..14 (714 filas), la compuerta lo activa y `--revertir` lo devuelve. El activo de
+corto plazo no cambia. El registro del final muestra la familia de cada modelo. Cada ejecución tarda ahora entre 51 y
+73 s (antes, unos 20 s), y el ciclo completo 294 s.
+
+La corrida de referencia de abajo es del 13-11-2026, de antes de fv3 y del corto plazo dentro del ciclo: por eso
+entrena `hgb_fv2_20250930_s42`, que la compuerta rechaza, y no imprime las líneas del corto plazo.
+
 ## La demostración ampliada (`scripts/demo_ciclo.py`)
 
 `scripts/demo_ciclo.py` recorre además las predicciones, las recomendaciones, las alertas y su ciclo de vida, la

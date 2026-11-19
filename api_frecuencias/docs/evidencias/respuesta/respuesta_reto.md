@@ -5,16 +5,16 @@ Generado con `scripts/respuesta_reto.py` con el código de producción: base tem
 > con los datos históricos y recientes, ¿cada cuánto despachar buses para optimizar la flota y el recaudo? ¿Cuántos pasajeros y vehículos se esperan, y qué situaciones requieren atención inmediata?
 
 - Modelo: `hgb_fv2_20250831_s42` (variables `fv2-2026-11-09`, corte 2025-08-31, calibración de la banda P10–P90 `v2`).
-- Pronóstico del plan: `modelo_activo`; versión de umbrales 9; datos hasta 2025-12-31.
-- Ciclo diario previo: ejecución `709dd479-7c82-465d-9bea-ff14fae136c7`, estado ok, 28,6 s.
-- Tiempo total de los cálculos de la respuesta en la cola: 5,8 s.
+- Pronóstico del plan: `modelo_activo`; versión de umbrales 10; datos hasta 2025-12-31.
+- Ciclo diario previo: ejecución `30f83a9d-c73a-481d-81e2-89cc29d392f0`, estado ok, 52,0 s.
+- Tiempo total de los cálculos de la respuesta en la cola: 6,6 s.
 
 | Fecha | Tipo de día | Ejecución «respuesta» | Estado | Segundos | Generada |
 |---|---|---|---|---|---|
-| 2025-11-19 | Laboral | `b686506f-f5e9-44d4-8c73-436e5b11f800` | ok | 1,9 | 2026-11-13T22:26:53-05:00 |
-| 2025-11-22 | Sábado | `0d6bf0f0-8e54-4abc-93c4-958333d37768` | ok | 1,6 | 2026-11-13T22:26:55-05:00 |
-| 2025-11-23 | Domingo/festivo | `c43d62dc-1378-401f-bbcf-60bd39631d9a` | ok | 1,6 | 2026-11-13T22:26:56-05:00 |
-| 2026-01-01 | Domingo/festivo | `c6696633-23f0-4d82-a936-aea036362b04` | ok | 0,7 | 2026-11-13T22:26:58-05:00 |
+| 2025-11-19 | Laboral | `72fb9d1d-62ec-4a84-8174-ae13368ceaa4` | ok | 2,3 | 2026-11-19T03:05:47-05:00 |
+| 2025-11-22 | Sábado | `132cc349-9457-4415-9666-18c6368071eb` | ok | 1,8 | 2026-11-19T03:05:49-05:00 |
+| 2025-11-23 | Domingo/festivo | `75d801af-099f-428a-b2da-5462167d9164` | ok | 1,7 | 2026-11-19T03:05:51-05:00 |
+| 2026-01-01 | Domingo/festivo | `956f72a0-4cec-4e7c-89bb-ececaa840d24` | ok | 0,8 | 2026-11-19T03:05:53-05:00 |
 
 ## Resumen por día y ruta
 

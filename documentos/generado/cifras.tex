@@ -70,8 +70,18 @@
 \newcommand{\CortoSegGana}{332}% pronostico_corto_plazo/resultados/prueba.json
 \newcommand{\CortoSegTotal}{384}% pronostico_corto_plazo/resultados/prueba.json
 \newcommand{\CortoSemanal}{9,19}% pronostico_corto_plazo/resultados/prueba.json
+\newcommand{\CortoMejoraRel}{44}% pronostico_corto_plazo/resultados/prueba.json
+\newcommand{\CortoLightGBM}{4.7.0}% pronostico_corto_plazo/resultados/prueba.json
 \newcommand{\CortoSubidas}{44.871.165}% pronostico_corto_plazo/panel/verificacion_extreme.json
 \newcommand{\CortoMismoSegmento}{99,975}% pronostico_corto_plazo/panel/verificacion_extreme.json
+\newcommand{\CortoModelo}{cp\_lgbm\_20250630\_s42}% api_frecuencias/docs/evidencias/modelo/corto_plazo_onnx.json
+\newcommand{\CortoArtefactos}{18}% api_frecuencias/docs/evidencias/modelo/corto_plazo_onnx.json
+\newcommand{\CortoOnnxFilas}{490.140}% api_frecuencias/docs/evidencias/modelo/corto_plazo_onnx.json
+\newcommand{\CortoOnnxDifRel}{4,9\,\ensuremath{\times}\,10\textsuperscript{−7}}% api_frecuencias/docs/evidencias/modelo/corto_plazo_onnx.json
+\newcommand{\CortoOnnxTol}{10\textsuperscript{−5}}% api_frecuencias/docs/evidencias/modelo/corto_plazo_onnx.json
+\newcommand{\CortoOnnxParidad}{sí}% api_frecuencias/docs/evidencias/modelo/corto_plazo_onnx.json
+\newcommand{\CortoReproducidas}{168.210}% api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.json
+\newcommand{\CortoReproduce}{coinciden}% api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.json
 \newcommand{\CobVdos}{77,82}% api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json
 \newcommand{\BajoPdiezVdos}{12,95}% api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json
 \newcommand{\SobrePnoventaVdos}{9,23}% api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json
@@ -193,20 +203,20 @@
 \newcommand{\IngestaSegundos}{4,07}% api_frecuencias/docs/evidencias/rendimiento.txt
 \newcommand{\IngestaTasa}{27.469}% api_frecuencias/docs/evidencias/rendimiento.txt
 \newcommand{\IngestaMemoria}{53}% api_frecuencias/docs/evidencias/rendimiento.txt
-\newcommand{\Ntotal}{1.810}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
-\newcommand{\Npasan}{1.800}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
+\newcommand{\Ntotal}{1.833}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
+\newcommand{\Npasan}{1.823}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
 \newcommand{\Nfallan}{0}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
 \newcommand{\Nomitidas}{10}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
-\newcommand{\NUnit}{1.121}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
-\newcommand{\NInteg}{223}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
-\newcommand{\NReplica}{209}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
+\newcommand{\NUnit}{1.131}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
+\newcommand{\NInteg}{229}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
+\newcommand{\NReplica}{212}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
 \newcommand{\NContrato}{209}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
-\newcommand{\NDatos}{48}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
+\newcommand{\NDatos}{52}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
 \newcommand{\NTcont}{8}% api_frecuencias/docs/evidencias/pruebas/ci/pytest.xml
 \newcommand{\NTcontNota}{ (en su trabajo del CI)}% api_frecuencias/docs/evidencias/pruebas/ci/pytest.xml
-\newcommand{\FechaPruebas}{2026-11-18 20:51}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
-\newcommand{\CorridaPruebas}{corrida final de la suite completa (2026-11-18 20:51)}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
-\newcommand{\Cobertura}{95,8}% api_frecuencias/docs/evidencias/pruebas/coverage_final.xml
+\newcommand{\FechaPruebas}{2026-11-19 03:45}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
+\newcommand{\CorridaPruebas}{corrida final de la suite completa (2026-11-19 03:45)}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
+\newcommand{\Cobertura}{95,2}% api_frecuencias/docs/evidencias/pruebas/coverage_final.xml
 \newcommand{\NIntentosLector}{32}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
 \newcommand{\NIntentosEscritor}{84}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
 \newcommand{\NIntentosTotal}{116}% api_frecuencias/docs/evidencias/pruebas/suite_final.xml
@@ -235,10 +245,10 @@
 \newcommand{\PlanHeadwayPico}{2,0}% api_frecuencias/docs/evidencias/optimizacion/ejemplo_plan_d5.json
 \newcommand{\PlanSalidasPico}{30}% api_frecuencias/docs/evidencias/optimizacion/ejemplo_plan_d5.json
 \newcommand{\PlanHeadwayMax}{8,5}% api_frecuencias/docs/evidencias/optimizacion/ejemplo_plan_d5.json
-\newcommand{\SonarResumen}{SonarQube: puerta de calidad aprobada (vulnerabilidades: 0; errores: 0; bloqueantes: 0; críticos: 0; duplicación: 0,0~\%; cobertura: 95,8~\%)}% api_frecuencias/docs/evidencias/sonarqube/measures.json
+\newcommand{\SonarResumen}{SonarQube: puerta de calidad aprobada (vulnerabilidades: 0; errores: 0; bloqueantes: 0; críticos: 0; duplicación: 0,0~\%; cobertura: 95,2~\%)}% api_frecuencias/docs/evidencias/sonarqube/measures.json
 \newcommand{\SonarCorto}{SonarQube: puerta de calidad aprobada (vulnerabilidades: 0; errores: 0; bloqueantes: 0; críticos: 0)}% api_frecuencias/docs/evidencias/sonarqube/measures.json
 \newcommand{\SonarPuerta}{puerta de calidad aprobada}% api_frecuencias/docs/evidencias/sonarqube/measures.json
-\newcommand{\SonarPruebas}{1.800}% api_frecuencias/docs/evidencias/sonarqube/measures.json
+\newcommand{\SonarPruebas}{1.823}% api_frecuencias/docs/evidencias/sonarqube/measures.json
 \newcommand{\DemoFilasInicial}{49.623}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
 \newcommand{\DemoFilasNuevas}{51}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
 \newcommand{\DemoFilasRepeticion}{0}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
@@ -246,20 +256,20 @@
 \newcommand{\DemoMarcaDespues}{2025-08-31}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
 \newcommand{\DemoWapeNuevo}{26,5}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
 \newcommand{\DemoCandidato}{hgb\_fv3\_20250930\_s42}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
-\newcommand{\DemoEntrenoSeg}{20}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
+\newcommand{\DemoEntrenoSeg}{56}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
 \newcommand{\DemoWapeCand}{13,58}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
 \newcommand{\DemoWapeAct}{13,98}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
 \newcommand{\DemoVentana}{2025-12-01 a 2025-12-14}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
 \newcommand{\DemoDecision}{activado}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
 \newcommand{\DemoDecisionLamina}{activado por la compuerta, auditado; la demostración lo revierte con \texttt{POST /models/rollback}}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
-\newcommand{\DemoTotalSeg}{182}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
+\newcommand{\DemoTotalSeg}{294}% api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt
 \newcommand{\PlanSemanasConexion}{1--4}% PLAN_EVOLUCION.md
 \newcommand{\PlanSemanasSombra}{5--8}% PLAN_EVOLUCION.md
 \newcommand{\PlanSemanasPiloto}{9--16}% PLAN_EVOLUCION.md
 \newcommand{\PlanSemanasSombraTexto}{las semanas 5 a 8}% PLAN_EVOLUCION.md
 \newcommand{\PlanSemanasPilotoTexto}{las semanas 9 a 16}% PLAN_EVOLUCION.md
 \newcommand{\PlanHallazgosUrgentes}{H3, H6, H7, H9, H13 y H14}% PLAN_EVOLUCION.md
-\newcommand{\PlanCriterioSombra}{WAPE \ensuremath{\le} 15 \% a 60 min, \ensuremath{\le} 20 \% a 30 min y \ensuremath{\le} 15 \% a 120 min, y por debajo de B1, en las cuatro semanas; menos del 30 \% de alertas descartadas}% PLAN_EVOLUCION.md
+\newcommand{\PlanCriterioSombra}{WAPE \ensuremath{\le} 13,18 \% a 60 min, \ensuremath{\le} 14,36 \% a 30 min y \ensuremath{\le} 12,22 \% a 120 min, y por debajo de B1, en las cuatro semanas; menos del 30 \% de alertas descartadas}% PLAN_EVOLUCION.md
 \newcommand{\PlanCostoComputo}{50--80}% PLAN_EVOLUCION.md
 \newcommand{\PlanCostoBase}{(A) 0 · (B) 70--150}% PLAN_EVOLUCION.md
 \newcommand{\PlanCostoReplica}{(A) 0 · (B) 70--150}% PLAN_EVOLUCION.md

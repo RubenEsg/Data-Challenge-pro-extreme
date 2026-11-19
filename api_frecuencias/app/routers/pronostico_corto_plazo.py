@@ -66,12 +66,32 @@ def _horizonte(h: int) -> int:
     return h
 
 
-def _calcular(ruta: str, instante: datetime, horizonte_min: int, model_id: str | None,
-              incluir_segmentos: bool) -> dict:
-    """El pronóstico del servicio, con los errores en el formato uniforme de la API."""
+def modelo_de_la_familia(sesion: Session, model_id: str | None) -> str | None:
+    """El model_id pedido o, si falta, el activo de la familia corto_plazo en model_registry (la fuente de verdad del
+    ciclo de vida, RF-019); sin registro en la base, el activo del registro en disco."""
+    if model_id:
+        return model_id
     try:
+        activo = servicio.modelo_activo(sesion, "corto_plazo")
+    except Exception:  # noqa: BLE001 - sin la tabla (base vieja) rige el registro en disco
+        return None
+    return activo.model_id if activo else None
+
+
+def _calcular(ruta: str, instante: datetime, horizonte_min: int, model_id: str | None,
+              incluir_segmentos: bool, sesion: Session | None = None) -> dict:
+    """El pronóstico del servicio, con lo leído por la lectura incremental y los errores en el formato uniforme de la
+    API."""
+    pedido = model_id
+    try:
+        if sesion is not None:
+            model_id = modelo_de_la_familia(sesion, model_id)
+            with cp.con_sesion(sesion):
+                return cp.pronosticar(ruta, instante, horizonte_min, model_id=model_id,
+                                      incluir_segmentos=incluir_segmentos)
         return cp.pronosticar(ruta, instante, horizonte_min, model_id=model_id, incluir_segmentos=incluir_segmentos)
     except cp.ModeloCortoPlazoNoEncontrado as exc:
+        model_id = pedido
         if model_id is None:
             raise _no_disponible(exc) from exc
         raise ErrorApi(404, "modelo_no_encontrado", str(exc).strip("'\""), {"model_id": model_id}) from exc
@@ -113,11 +133,25 @@ def _claves_12_3(r: dict, grupo_id: uuid.UUID | None) -> dict:
 def pronosticar(solicitud: SolicitudCortoPlazo, sesion: Session = Depends(obtener_sesion)):
     info = _info_ruta(solicitud.ruta)
     r = _calcular(info["ruta"], solicitud.instante, solicitud.horizonte_min, solicitud.model_id,
-                  solicitud.incluir_segmentos)
+                  solicitud.incluir_segmentos, sesion)
     r["generated_at"] = servicio.ahora().astimezone(cp.ZONA).isoformat(timespec="seconds")
+    rec_d = None
     if solicitud.incluir_recomendacion:
-        _con_recomendacion(sesion, r, info)
+        try:
+            franja, rec_d, entradas, version_u = cp.recomendacion_completa(sesion, r, info)
+        except ValueError as exc:
+            raise ErrorApi(422, "parametros_invalidos", str(exc)) from exc
+        rec_d["franja_prediccion"] = franja
+        r["recomendacion"] = cp.resumen_recomendacion(franja, rec_d, version_u)
     grupo = cp.guardar(sesion, r)
+    if rec_d is not None:            # la recomendación de §10.2 también queda en recommendation (origen corto_plazo)
+        sesion.flush()
+        sesion.add(servicio.construir_recomendacion(
+            rec_d, ruta=info["ruta"], fecha=franja["fecha"], hora=franja["hora"], demanda_hora=franja["demanda_hora"],
+            demanda_p90=franja["p90_hora"], execution_id=None, prediction_id=None, umbrales_version=version_u,
+            entradas=dict(entradas, prediccion_corto_plazo={"grupo_id": str(grupo),
+                                                            "prediction_id": str(r["prediction_id"])}),
+            origen="corto_plazo", prediction_corto_plazo_id=r["prediction_id"]))
     sesion.commit()
     return _claves_12_3(r, grupo)
 
@@ -130,7 +164,7 @@ def calcular(ruta: Annotated[str, Query(description=DESC_CP_RUTA)],
              incluir_segmentos: bool = True, incluir_recomendacion: bool = True,
              sesion: Session = Depends(obtener_sesion)):
     info = _info_ruta(ruta)
-    r = _calcular(info["ruta"], instante, _horizonte(horizonte_min), model_id, incluir_segmentos)
+    r = _calcular(info["ruta"], instante, _horizonte(horizonte_min), model_id, incluir_segmentos, sesion)
     r["generated_at"] = servicio.ahora().astimezone(cp.ZONA).isoformat(timespec="seconds")
     if incluir_recomendacion:
         _con_recomendacion(sesion, r, info)
@@ -140,11 +174,16 @@ def calcular(ruta: Annotated[str, Query(description=DESC_CP_RUTA)],
 @router.get(f"{RUTA}/dia", response_model=DiaCortoPlazo,
             summary="La curva del día: el pronóstico de cada media hora de 04:00 a 21:00, por ruta y sentido")
 def dia(ruta: Annotated[str, Query(description=DESC_CP_RUTA)], fecha: date,
-        horizonte_min: HorizonteObligatorio = 60, model_id: str | None = None):
+        horizonte_min: HorizonteObligatorio = 60, model_id: str | None = None,
+        sesion: Session = Depends(obtener_sesion)):
     info = _info_ruta(ruta)
+    pedido = model_id
     try:
-        return cp.pronosticar_dia(info["ruta"], fecha, _horizonte(horizonte_min), model_id=model_id)
+        model_id = modelo_de_la_familia(sesion, model_id)
+        with cp.con_sesion(sesion):
+            return cp.pronosticar_dia(info["ruta"], fecha, _horizonte(horizonte_min), model_id=model_id)
     except cp.ModeloCortoPlazoNoEncontrado as exc:
+        model_id = pedido
         if model_id is None:
             raise _no_disponible(exc) from exc
         raise ErrorApi(404, "modelo_no_encontrado", str(exc).strip("'\""), {"model_id": model_id}) from exc
@@ -156,12 +195,19 @@ def dia(ruta: Annotated[str, Query(description=DESC_CP_RUTA)], fecha: date,
 
 @router.get(f"{RUTA}/modelo", response_model=ModeloCortoPlazo,
             summary="Versión activa del modelo de corto plazo: artefactos, datos, prueba reservada y cobertura")
-def modelo():
+def modelo(sesion: Session = Depends(obtener_sesion)):
     try:
-        m = cp.cargar()
+        m = cp.cargar(modelo_de_la_familia(sesion, None))
         reg = cp.registro()
-        return dict(cp.ficha(m), activo=reg.get("activo"), historial_activacion=reg.get("historial_activacion") or [],
-                    cobertura={k: v.isoformat() for k, v in cp.cobertura().items()})
+        with cp.con_sesion(sesion):
+            cob = cp.cobertura()
+            excluidas = [c for idr in cp.V.RUTAS for c in cp.serie_completa(idr).excluidas]
+            tope = cp.tope_actual()
+        return dict(cp.ficha(m), activo=m["model_id"], historial_activacion=reg.get("historial_activacion") or [],
+                    cobertura={k: (v.isoformat() if hasattr(v, "isoformat") else v) for k, v in cob.items()},
+                    importancia_global=cp.importancia_global(m),
+                    calidad={"regla": "VAL-009", "tope_subidas_bloque_segmento": tope,
+                             "celdas_excluidas_del_panel": excluidas})
     except (cp.ErrorCortoPlazo, cp.ModeloCortoPlazoNoEncontrado, OSError) as exc:
         raise _no_disponible(exc) from exc
 

@@ -6,6 +6,8 @@ RF-005, §3.1 M3 «por ruta, sentido, segmento y franja horaria → pronóstico 
   ruta, sentidos, segmentos, banda P10–P90, líneas base, explicación local y recomendación) y la curva del día (GET
   /api/v1/predictions/corto-plazo/dia). Sin API lo dice y no inventa nada.
 - La prueba reservada (julio a diciembre de 2025, calculada una sola vez) sale de datos/corto_plazo.json y se ve sin API.
+- «El modelo»: la importancia global, el último monitoreo y quién lo activó (GET /api/v1/predictions/corto-plazo/modelo,
+  GET /api/v1/monitoring?familia=corto_plazo); y un aviso cuando la regla de calidad VAL-009 excluyó una celda.
 El modelo es el del experimento E14 (pronostico_corto_plazo/), el mismo que sirve la API."""
 import pandas as pd
 import plotly.graph_objects as go
@@ -23,6 +25,8 @@ PRIMERA, ULTIMA = (4, 0), (21, 0)              # el modelo se eligió y se midi�
 HORAS = [f"{h:02d}:{m:02d}" for h in range(PRIMERA[0], ULTIMA[0] + 1) for m in (0, 30) if (h, m) <= ULTIMA]
 FUENTES_API = ["GET /api/v1/predictions/corto-plazo/calcular (ruta, instante, horizonte_min)",
                "GET /api/v1/predictions/corto-plazo/dia (ruta, fecha, horizonte_min)"]
+FUENTES_MODELO = ["GET /api/v1/predictions/corto-plazo/modelo", "GET /api/v1/monitoring?familia=corto_plazo"]
+VARIABLES_IMPORTANCIA = 8
 FACTORES = 5
 HORA_INICIAL = "17:00"
 
@@ -127,6 +131,9 @@ def seccion():
     sentidos = ui.tarjeta(html.Div(id="cp-sentidos", **{"aria-live": "polite"}), titulo="Por sentido",
                           subtitulo="Ida y regreso: la suma de sus segmentos, con su propia banda; y lo que ya subió.",
                           fuentes=FUENTES_API[:1])
+    modelo = ui.tarjeta(html.Div(id="cp-modelo", **{"aria-live": "polite"}), titulo="El modelo",
+                        subtitulo=("Lo que más pesa en el pronóstico, cómo le va con lo que ya se leyó y quién lo "
+                                   "activó."), fuentes=FUENTES_MODELO)
     como = ui.desplegable("Cómo se lee esta parte", [
         ui.parrafo("En cada instante (cada media hora, de 04:00 a 21:00) el modelo pronostica las subidas de la ventana que "
                    "empieza en ese instante y dura el horizonte. Usa solo lo que pasó antes: lo que subió en los últimos "
@@ -147,6 +154,7 @@ def seccion():
         html.Div(id="cp-cifras"),
         ui.rejilla([dia, porque], "2-1"),
         ui.rejilla([segmentos, sentidos], "2-1"),
+        modelo,
         _prueba(),
         como,
     ], subtitulo=("Con lo que ya subió hoy, cuántos pasajeros subirán en los próximos 30, 60 y 120 minutos, por ruta, "
@@ -314,6 +322,53 @@ def _sentidos(r):
                      chips], className="api-resumen")
 
 
+def _modelo(ficha, monitoreo, h):
+    """La importancia global (ganancia de LightGBM a nivel de ruta, para el horizonte elegido), el último monitoreo del
+    corto plazo y el ciclo de vida (el activo del registro de modelos y su historial)."""
+    imp = (((ficha.get("importancia_global") or {}).get("por_nivel") or {}).get("ruta") or {}).get(str(h)) or []
+    filas = [[num(i), html.Span([html.Span(x["descripcion"][0].upper() + x["descripcion"][1:]), html.Br(),
+                                  html.Span(x["variable"], className="api-tenue")]), f"{num(100 * x['ganancia'], 1)} %"]
+             for i, x in enumerate(imp[:VARIABLES_IMPORTANCIA], 1)]
+    partes = [html.H4(f"Lo que más pesa a {h} minutos (toda la ruta)", className="api-grupo__titulo"),
+              ui.tabla(["#", "Variable", "Peso"], filas, compacta=True, num=[True, False, True]) if filas else
+              ui.nota("Sin importancia publicada."),
+              ui.nota("Ganancia de LightGBM de cada variable, normalizada y promediada en las tres rutas.")]
+    mon = ((monitoreo or {}).get("items") or [None])[0]
+    if mon:
+        partes += [html.H4(f"Cómo le va: los {num(mon.get('ventana_dias'))} días hasta el {ui.fecha_larga(mon.get('hasta'))}",
+                           className="api-grupo__titulo"),
+                   html.Div([ui.chip_valor("Estado:", mon.get("estado") or "—"),
+                             ui.chip_valor("WAPE móvil:", f"{num(100 * (mon.get('wape_movil') or 0), 1)} %"),
+                             ui.chip_valor("Cobertura P10–P90:", f"{num(100 * (mon.get('cobertura_p10_p90') or 0), 1)} %"),
+                             ui.chip_valor("PSI máximo:", f"{num(mon.get('psi_max'), 3)} ({mon.get('psi_variable_max') or '—'})"),
+                             ui.chip_valor("Pronósticos guardados:", num(mon.get("predicciones_ventana")))],
+                            className="api-chips")]
+    else:
+        partes.append(ui.nota("Todavía no hay monitoreo del corto plazo: lo deja cada ciclo diario con datos nuevos."))
+    hist = ficha.get("historial_activacion") or []
+    ultimo = hist[-1] if hist else {}
+    partes += [html.H4("Quién lo activó", className="api-grupo__titulo"),
+               html.P([ui.chip_valor("Activo:", ficha.get("activo") or "—"),
+                       ui.chip_valor("Motor:", ficha.get("motor") or "—"),
+                       ui.chip_valor("Activado:", (ultimo.get("en") or "—")[:10]),
+                       ui.chip_valor("Motivo:", ultimo.get("motivo") or "—")], className="api-chips"),
+               ui.nota("Se activa y se revierte con la misma compuerta de cuatro criterios del modelo horario "
+                       "(POST /api/v1/models/{model_id}/activate y /models/rollback con familia=corto_plazo).")]
+    return html.Div(partes, className="api-resumen")
+
+
+def _aviso_calidad(r):
+    c = r.get("calidad") or {}
+    celdas = c.get("celdas_excluidas") or []
+    if not celdas:
+        return None
+    textos = [f"{ui.fecha_larga(x['fecha'])}, segmento {num(x['nro_segmento'])}: {num(x['subidas'])} subidas en 15 minutos"
+              for x in celdas[:3]]
+    return ui.aviso(f"La regla de calidad VAL-009 excluyó {num(len(celdas))} celda(s) imposible(s) de lo que usa este "
+                    f"pronóstico ({'; '.join(textos)}): cuentan como no observadas.", None, "Datos excluidos",
+                    rol="status")
+
+
 SIN = (ui.figura_vacia("Sin pronóstico"), "Sin pronóstico", "", None, None, "Sin pronóstico", None)
 
 
@@ -324,6 +379,7 @@ SIN = (ui.figura_vacia("Sin pronóstico"), "Sin pronóstico", "", None, None, "S
           Output("cp-seg", "figure"), Output("cp-seg-titulo", "children"), Output("cp-seg-sub", "children"),
           Output("cp-seg-leyenda", "children"), Output("cp-seg-tabla", "children"), Output("cp-seg-lienzo", "aria-label"),
           Output("cp-seg-nota", "children"), Output("cp-porque", "children"), Output("cp-sentidos", "children"),
+          Output("cp-modelo", "children"),
           Input("cp-ruta", "value"), Input("cp-fecha", "date"), Input("cp-hora", "value"), Input("cp-h", "value"),
           Input("cp-fecha-ant", "n_clicks"), Input("cp-fecha-sig", "n_clicks"))
 def actualizar(ruta, fecha, hora, h, _ant, _sig):
@@ -342,7 +398,7 @@ def actualizar(ruta, fecha, hora, h, _ant, _sig):
 
     def vacio(aviso):
         nada = ui.nota("Sin datos: la API no está disponible.")
-        return (salida_fecha, aviso, None, *SIN, *SIN, nada, nada)
+        return (salida_fecha, aviso, None, *SIN, *SIN, nada, nada, nada)
 
     instante = f"{fecha}T{hora}:00-05:00"
     r, err = API.obtener("predictions/corto-plazo/calcular", ruta=ruta, instante=instante, horizonte_min=h)
@@ -351,13 +407,15 @@ def actualizar(ruta, fecha, hora, h, _ant, _sig):
     d, err = API.obtener("predictions/corto-plazo/dia", ruta=ruta, fecha=fecha, horizonte_min=h)
     if err:
         return vacio(ui.aviso([err, API.ayuda_error(err)], "atencion", API.titulo_error(err), rol="status"))
-    aviso = None
-    if not r.get("dia_con_datos"):
+    ficha, _e1 = API.obtener("predictions/corto-plazo/modelo")
+    monitoreo, _e2 = API.obtener("monitoring", familia="corto_plazo", limite=1, orden="-creado_en")
+    aviso = _aviso_calidad(r)          # la regla de calidad primero: cambia lo que usa el pronóstico
+    if aviso is None and not r.get("dia_con_datos"):
         aviso = ui.aviso(f"El {ui.fecha_larga(fecha)} no trae eventos de conteo de {ruta}: el pronóstico sale, pero no hay "
                          "con qué compararlo.", None, "Día sin datos", rol="status")
-    elif r.get("en_muestra"):
+    elif aviso is None and r.get("en_muestra"):
         aviso = ui.aviso("Esa fecha está dentro del periodo de entrenamiento del modelo.", None, "Dentro de la muestra",
                          rol="status")
     return (salida_fecha, aviso, _cifras(r, h), *_figura_dia(d, r, h), *_figura_segmentos(r, h), _porque(r),
-            _sentidos(r))
+            _sentidos(r), _modelo(ficha or {}, monitoreo, h))
 

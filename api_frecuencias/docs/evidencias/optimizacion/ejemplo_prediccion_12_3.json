@@ -1,44 +1,136 @@
 {
  "solicitud": {
   "ruta": "CRA 54",
-  "instante": "2025-03-04T06:30:00-05:00",
+  "instante": "2025-10-15T10:00:00-05:00",
   "horizonte_min": 60
  },
+ "modelo": "corto_plazo",
  "claves_12_3": {
-  "predictionId": "d6dd8cc4-9a25-432b-b97e-772459e553f3",
+  "predictionId": "b668e2de-a9c5-49a4-be73-8f8a99b0393e",
   "routeId": "CRA 54",
-  "generatedAt": "2026-11-11T05:03:06-05:00",
+  "generatedAt": "2026-11-19T01:56:41-05:00",
   "horizonMinutes": 60,
-  "predictedPassengers": 533,
+  "predictedPassengers": 1318,
   "confidenceInterval": {
-   "lower": 479,
-   "upper": 1504
+   "lower": 1199,
+   "upper": 1424
   },
-  "modelVersion": "hgb_fv2_20250831_s42",
+  "modelVersion": "cp_lgbm_20250630_s42",
   "recommendation": {
-   "headwayMinutes": 4.62,
-   "busesPerHour": 13,
-   "vehiclesRequired": 55,
+   "headwayMinutes": 6.0,
+   "busesPerHour": 10,
+   "vehiclesRequired": 40,
    "viable": true,
    "reason": null
   },
   "explanation": [
-   "b8",
-   "nov_impacto",
-   "carnaval",
-   "nivel_7_13",
-   "dia_semana"
+   "p15",
+   "p30",
+   "tipo_dia",
+   "sal60",
+   "m8"
   ]
  },
  "recomendacion_viable": true,
  "motivo": null,
  "franja": {
-  "fecha": "2025-03-04",
-  "hora": 7,
-  "demanda_hora": 458.4,
-  "p10_hora": 357.0,
-  "p90_hora": 1276.5,
-  "fraccion_ventana": 0.534,
-  "fuente": "variables.por_hora (hora principal de la ventana)"
- }
+  "fecha": "2025-10-15",
+  "hora": 10,
+  "demanda_hora": 1317.9,
+  "p10_hora": 1199.6,
+  "p90_hora": 1424.0,
+  "fuente": "pronóstico de corto plazo de la ventana llevado a ritmo por hora (× 60 / horizonte)"
+ },
+ "sentidos": [
+  {
+   "pasajeros": 565.3,
+   "p10": 491.9,
+   "p90": 650.1,
+   "promedio_dia_hora": 558.4,
+   "ultima_semana": 519.0,
+   "real": 574.0,
+   "sentido": "ida"
+  },
+  {
+   "pasajeros": 696.3,
+   "p10": 623.3,
+   "p90": 785.4,
+   "promedio_dia_hora": 720.1,
+   "ultima_semana": 740.0,
+   "real": 745.0,
+   "sentido": "regreso"
+  }
+ ],
+ "segmentos_primeros_5": [
+  {
+   "pasajeros": 6.5,
+   "p10": 2.3,
+   "p90": 11.3,
+   "promedio_dia_hora": 5.5,
+   "ultima_semana": 5.0,
+   "real": 11.0,
+   "nro_segmento": 1,
+   "id_segmento": 1132,
+   "sentido": "ida",
+   "km_inicio": 0.0,
+   "lat": 10.887514,
+   "lon": -74.804973
+  },
+  {
+   "pasajeros": 0.0,
+   "p10": 0.0,
+   "p90": 0.2,
+   "promedio_dia_hora": 0.0,
+   "ultima_semana": 0.0,
+   "real": 0.0,
+   "nro_segmento": 2,
+   "id_segmento": 1133,
+   "sentido": "ida",
+   "km_inicio": 0.5,
+   "lat": 10.88647,
+   "lon": -74.808476
+  },
+  {
+   "pasajeros": 0.0,
+   "p10": 0.0,
+   "p90": 0.2,
+   "promedio_dia_hora": 0.0,
+   "ultima_semana": 0.0,
+   "real": 0.0,
+   "nro_segmento": 3,
+   "id_segmento": 1134,
+   "sentido": "ida",
+   "km_inicio": 1.0,
+   "lat": 10.883247,
+   "lon": -74.809333
+  },
+  {
+   "pasajeros": 0.1,
+   "p10": 0.0,
+   "p90": 0.3,
+   "promedio_dia_hora": 0.0,
+   "ultima_semana": 0.0,
+   "real": 0.0,
+   "nro_segmento": 4,
+   "id_segmento": 1135,
+   "sentido": "ida",
+   "km_inicio": 1.5,
+   "lat": 10.886353,
+   "lon": -74.807617
+  },
+  {
+   "pasajeros": 4.7,
+   "p10": 1.0,
+   "p90": 8.9,
+   "promedio_dia_hora": 3.4,
+   "ultima_semana": 7.0,
+   "real": 2.0,
+   "nro_segmento": 5,
+   "id_segmento": 1136,
+   "sentido": "ida",
+   "km_inicio": 2.0,
+   "lat": 10.887954,
+   "lon": -74.804207
+  }
+ ]
 }

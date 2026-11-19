@@ -58,6 +58,9 @@ FUENTES = {
     # el pronóstico de corto plazo que pide el enunciado: su prueba reservada y la verificación de su panel
     "corto": ENTREGA / "pronostico_corto_plazo" / "resultados" / "prueba.json",
     "corto_panel": ENTREGA / "pronostico_corto_plazo" / "panel" / "verificacion_extreme.json",
+    # el mismo modelo dentro de la API: su exportación a ONNX con la paridad y la reproducción de la prueba reservada
+    "corto_onnx": EVID / "modelo" / "corto_plazo_onnx.json",
+    "corto_repro": EVID / "modelo" / "corto_plazo_reproduccion.json",
     "alertas": EVID / "alertas" / "backtest_alertas.json",
     "alertas2024": EVID / "alertas" / "backtest_alertas_corte_2024-12-31.json",
     "alertas_pron": EVID / "alertas" / "backtest_alertas_pronostico.json",
@@ -201,10 +204,53 @@ def cifras_corto_plazo():
     macro("CortoSegGana", num(g(p, "por_segmento", "60", "segmentos_en_que_gana_al_promedio"), 0), f)
     macro("CortoSegTotal", num(g(p, "por_segmento", "60", "segmentos_con_subidas"), 0), f)
     macro("CortoSemanal", num(g(p, "secundarios", "informacion_del_dia", "60", "semanal", "wape")), f)
+    # Cuánto menos se equivoca que el promedio por día y hora, por ruta a 60 minutos (como MejoraRelBuno del horario)
+    w = g(p, "niveles", "ruta", "60", "todas_las_rutas", "modelo", "wape")
+    b = g(p, "niveles", "ruta", "60", "todas_las_rutas", "promedio_dia_hora", "wape")
+    macro("CortoMejoraRel", num(100 * (b - w) / b, 0) if w and b else "s.\\,d.", f)
+    macro("CortoLightGBM", str(g(p, "versiones", "lightgbm", defecto="s. d.")), f)
     v = leer_json("corto_panel") or {}
     fv = FUENTES["corto_panel"]
     macro("CortoSubidas", num(g(v, "panel", "subidas"), 0), fv)
     macro("CortoMismoSegmento", num(g(v, "verificacion_extreme", "subidas_en_el_mismo_segmento_pct"), 3), fv)
+    cifras_corto_plazo_api()
+    return p
+
+
+def _potencia(x) -> str:
+    """1e-05 -> «10^{−5}»; 4.87e-07 -> «4,9 × 10^{−7}» (una cifra decimal en la mantisa); «s. d.» si falta."""
+    if not isinstance(x, (int, float)) or x <= 0:
+        return "s.\\,d."
+    exponente = Decimal(str(x)).adjusted()
+    mantisa = Decimal(str(x)).scaleb(-exponente)
+    potencia = f"10\\textsuperscript{{{'−' if exponente < 0 else ''}{abs(exponente)}}}"
+    return potencia if mantisa == 1 else f"{num(mantisa, 1)}\\,\\ensuremath{{\\times}}\\,{potencia}"
+
+
+def cifras_corto_plazo_api():
+    """El mismo modelo de corto plazo dentro de la API: su id, sus artefactos, la exportación a ONNX con la paridad
+    frente a LightGBM (modelo/corto_plazo_onnx.json) y la reproducción de la prueba reservada por la API
+    (modelo/corto_plazo_reproduccion.json)."""
+    o = leer_json("corto_onnx") or {}
+    fo = FUENTES["corto_onnx"]
+    artefactos = g(o, "artefactos") or {}
+    macro("CortoModelo", str(g(o, "model_id", defecto="s. d.")).replace("_", "\\_"), fo)
+    macro("CortoArtefactos", num(len(artefactos), 0) if artefactos else "s.\\,d.", fo)
+    filas = [a.get("filas_paridad") for a in artefactos.values()]
+    macro("CortoOnnxFilas", num(sum(filas), 0) if filas and None not in filas else "s.\\,d.", fo)
+    difs = [a.get("diferencia_relativa_maxima") for a in artefactos.values()]
+    macro("CortoOnnxDifRel", _potencia(max(difs)) if difs and None not in difs else "s.\\,d.", fo)
+    macro("CortoOnnxTol", _potencia(g(o, "tolerancia_relativa")), fo)
+    paridad = g(o, "paridad")
+    macro("CortoOnnxParidad", "sí" if paridad is True else ("no" if paridad is False else "s.\\,d."), fo)
+    r = leer_json("corto_repro") or {}
+    fr = FUENTES["corto_repro"]
+    niveles = g(r, "predicciones") or {}
+    n = [x.get("filas_en_las_dos") for x in niveles.values()]
+    macro("CortoReproducidas", num(sum(n), 0) if n and None not in n else "s.\\,d.", fr)
+    coincide = g(r, "coincide")
+    macro("CortoReproduce", "coinciden" if coincide is True else ("no coinciden" if coincide is False else "s.\\,d."),
+          fr)
 
 
 def cifras_calibracion():
@@ -855,10 +901,14 @@ def respuesta_reto():
         ruta, a, p = ejemplo
         lineas.append(f"\\newcommand{{\\RespuestaEjemplo}}{{{ruta}: {_texto_alerta(a)}}}")
         lineas.append(f"\\newcommand{{\\RespuestaEjemploFuente}}{{\\path{{{p.name}}}}}")
+        # Las fuentes de la lámina: una sola si el ejemplo sale de la misma respuesta (sin repetir el archivo)
+        fuentes = f"\\path{{{elegido.name}}}" + ("" if p == elegido else f" y \\path{{{p.name}}}")
+        lineas.append(f"\\newcommand{{\\RespuestaFuentes}}{{{fuentes}}}")
     else:
         avisos.append("sin un ejemplo de alerta en la evidencia de la respuesta")
         lineas.append("\\newcommand{\\RespuestaEjemplo}{s.\\,d.}")
         lineas.append("\\newcommand{\\RespuestaEjemploFuente}{}")
+        lineas.append(f"\\newcommand{{\\RespuestaFuentes}}{{\\path{{{elegido.name}}}}}")
     destino.write_text("\n".join(lineas) + "\n", encoding="utf-8")
 
 
@@ -1098,6 +1148,44 @@ def fig_rutas(plt, e):
     plt.close(fig)
 
 
+def fig_corto(plt, p):
+    """WAPE del pronóstico de corto plazo y del promedio por día y hora en la prueba reservada (jul.–dic. de 2025), por
+    nivel y horizonte (pronostico_corto_plazo/resultados/prueba.json). Un panel por nivel con su propia escala: el
+    error por segmento es de otro orden que el de la ruta. Mismas marcas que wape_rutas (gris rayado: la línea base)."""
+    import numpy as np
+    niveles = [("ruta", "Por ruta"), ("sentido", "Por sentido"), ("segmento", "Por segmento")]
+    horizontes = ["30", "60", "120"]
+    datos = {nv: ([g(p, "niveles", nv, h, "todas_las_rutas", "promedio_dia_hora", "wape") for h in horizontes],
+                  [g(p, "niveles", nv, h, "todas_las_rutas", "modelo", "wape") for h in horizontes])
+             for nv, _ in niveles}
+    if any(None in b or None in m for b, m in datos.values()):
+        return
+    x = np.arange(len(horizontes))
+    fig, ejes = plt.subplots(1, 3, figsize=(5.4, 1.75))
+    for ax, (nv, titulo) in zip(ejes, niveles):
+        base, modelo = datos[nv]
+        ax.bar(x - 0.2, base, 0.36, color=ROL["hoy_tinte"], edgecolor=ROL["hoy"], hatch="////", linewidth=0.8,
+               label="Promedio por día y hora (línea base)")
+        ax.bar(x + 0.2, modelo, 0.36, color=ROL["modelo"], label="Modelo de corto plazo")
+        tope = max(base) * 1.22
+        for xi, v in zip(x - 0.2, base):
+            ax.text(xi, v + tope * 0.015, num(v, 1), ha="center", fontsize=6, color=ROL["tinta_2"])
+        for xi, v in zip(x + 0.2, modelo):
+            ax.text(xi, v + tope * 0.015, num(v, 1), ha="center", fontsize=6, color=ROL["tinta"])
+        ax.set_xticks(x, [f"{h} min" for h in horizontes], fontsize=7.5)
+        ax.set_ylim(0, tope)
+        ax.tick_params(axis="y", labelsize=7)
+        ax.yaxis.set_major_formatter(lambda v, _: f"{num(v, 0)} %")
+        ax.grid(axis="x", visible=False)
+        ax.set_title(titulo, fontsize=8.5, color=ROL["tinta"])
+    manijas, etiquetas = ejes[0].get_legend_handles_labels()
+    fig.legend(manijas, etiquetas, loc="upper center", ncols=2, frameon=False, bbox_to_anchor=(0.5, 1.07),
+               fontsize=7.5, handlelength=1.2)
+    fig.tight_layout(rect=(0, 0, 1, 0.93), w_pad=1.2)
+    guardar(fig, "wape_corto_plazo")
+    plt.close(fig)
+
+
 def fig_alertas(plt, a):
     import numpy as np
     codigos = ["ALT-005", "ALT-006", "ALT-007", "ALT-008"]
@@ -1209,7 +1297,7 @@ def fig_plan_reasigna(plt):
 def main():
     estricto = "--estricto" in sys.argv
     e = cifras_modelo()
-    cifras_corto_plazo()
+    corto = cifras_corto_plazo()
     cifras_calibracion()
     cifras_horizontes()
     a = cifras_alertas()
@@ -1246,6 +1334,8 @@ def main():
     if e:
         fig_wape(plt, e)
         fig_rutas(plt, e)
+    if corto:
+        fig_corto(plt, corto)
     if a:
         fig_alertas(plt, a)
     if k:

@@ -62,7 +62,7 @@
 \footnotesize
 
 % 1 ---------------------------------------------------------------------------------------------------------------
-\fte{\path{api_frecuencias/docs/evidencias/}: \path{modelo/evaluacion_modelo.json}, \path{alertas/backtest_alertas.json}, \path{pruebas/k6_segmentos_consultas.json}}
+\fte{\path{pronostico_corto_plazo/resultados/prueba.json}; \path{api_frecuencias/docs/evidencias/}: \path{alertas/backtest_alertas.json}, \path{pruebas/k6_segmentos_consultas.json}}
 \begin{frame}[t]
 \vspace{14pt}
 {\scriptsize\color{rol-tinta-3}DATA CHALLENGE 2026 · EXTREME TECHNOLOGIES · UNIVERSIDAD DEL NORTE}\par\vspace{10pt}
@@ -72,11 +72,12 @@
 {\normalsize\gris{Pronóstico de demanda, frecuencias de despacho y alertas explicables para las rutas SILENCIO, CRA~54
 y CL~72 de Sobusa}}\par\vspace{14pt}
 {\small Abrahan Basto Martínez · Rubén Esguerra Fernández · Paula Gómez}\par\vspace{3pt}
-{\scriptsize\gris{Python · FastAPI · PostgreSQL 14 + PostGIS · 14 de noviembre de 2026}}
+{\scriptsize\gris{Python · FastAPI · PostgreSQL 14 + PostGIS · 19 de noviembre de 2026}}
 \end{column}
 \begin{column}{0.36\linewidth}
 \begin{tarjeta}
-\cifraazul{\WAPEact~\%}{error del pronóstico (WAPE), frente a \WAPEbuno~\% de la regla actual}\vspace{6pt}
+\cifraazul{\CortoRutaSesenta~\%}{error (WAPE) del pronóstico de la próxima hora por ruta, frente a
+\CortoRutaSesentaBase~\% del promedio por día y hora}\vspace{6pt}
 \cifraazul{\AlertasAhora}{alertas observadas ALT-005 a 009 por ruta y día (antes \AlertasAntes); con todas las
 familias, \AlertasTotal}\vspace{6pt}
 \cifraazul{\Kpnoventaycinco~ms}{p95 de las consultas con \Kvus{} usuarios (límite 2.000 ms)}
@@ -121,8 +122,8 @@ versionados hasta que Extreme los confirme.}
 \begin{itemize}
 \item API FastAPI: \NOperacionesVuno{} operaciones en \texttt{/api/v1}, con roles;
 \item PostgreSQL 14 + PostGIS (\texttt{ai\_frecuencias}, Alembic);
-\item ciclo diario incremental en cola;
-\item modelo con banda P10--P90;
+\item ciclo diario e intradía incremental en cola;
+\item pronóstico a 30, 60 y 120 min y plan del día siguiente, con banda P10--P90;
 \item optimizador entero y 10 alertas;
 \item tablero y Docker Compose.
 \end{itemize}
@@ -142,7 +143,7 @@ versionados hasta que Extreme los confirme.}
 \scriptsize
 \begin{tabularx}{\linewidth}{@{}lX@{}}
 Completitud & COMP-001, 002 → cuarentena \\
-Validez & VAL-001 a 008 → código y detalle \\
+Validez & VAL-001 a 009 → código y detalle \\
 Unicidad & UNI-001 → al responsable, sin corregir \\
 Consistencia & CONS-001, 002, CONTR → se excluyen \\
 Oportunidad & OPOR-001, 002 → ALT-009 y latencia \\
@@ -178,47 +179,7 @@ el corte + 7 días. Cada predicción guarda \texttt{model\_id}, \texttt{feature\
 \end{frame}
 
 % 4 ---------------------------------------------------------------------------------------------------------------
-\fte{\path{api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.md} y \path{horizontes.json}}
-\begin{frame}[t]
-\cabecera{El modelo le gana a la regla actual}{Modelo predictivo · 20 \%}
-\begin{columns}[T]
-\begin{column}{0.6\linewidth}
-\begin{tarjeta}
-\titulotarjeta{WAPE en la prueba reservada (\PruebaDesde{} a \PruebaHasta, \Nprueba{} horas-ruta) e IC95}
-\includegraphics[width=\linewidth]{wape_modelos}
-\gris{Diferencia con la regla manual: IC95 de \DifActBunoIC{} puntos (bootstrap de bloques de 7 días). La prueba se
-consultó al elegir fv2 frente a fv1: es informativa; la selección usó la validación y los años congelados, y pedimos a
-Extreme un periodo de 2026 como prueba limpia. El 13,94 y el 13,62~\% del informe (experimentos 11 y 12) son otra
-métrica: a 7 días y sobre todo 2025.}
-\end{tarjeta}
-\end{column}
-\begin{column}{0.37\linewidth}
-\begin{tarjeta}
-\titulotarjeta{Robusto}
-\begin{tabularx}{\linewidth}{@{}Xrr@{}}
-& \textcolor{rol-modelo}{Modelo} & \gris{B1} \\
-\midrule
-SILENCIO & \WAPERutaSilencio & \WAPERutaSilencioBuno \\
-CRA 54 & \WAPERutaCra & \WAPERutaCraBuno \\
-CL 72 & \WAPERutaCl & \WAPERutaClBuno \\
-Pico / valle & \WAPEPico{} / \WAPEValle & \\
-Año 2024 & \RobDosmilveinticuatro & \RobDosmilveinticuatroBuno \\
-Año 2025 & \RobDosmilveinticinco & \RobDosmilveinticincoBuno \\
-2025 (fv3) & \RobCandDosmilveinticinco & \RobDosmilveinticincoBuno \\
-\midrule
-30 min & \HorTreinta & \HorTreintaBuno \\
-60 min & \HorSesenta & \HorSesentaBuno \\
-120 min & \HorCientoveinte & \HorCientoveinteBuno \\
-\end{tabularx}
-\vspace{2pt}\gris{WAPE en \%. Años completos con el modelo congelado al cierre del año anterior. HGB con pérdida
-Poisson y \NVariables{} variables. fv3: candidato sin activar, con el calendario escolar.}
-\end{tarjeta}
-\end{column}
-\end{columns}
-\end{frame}
-
-% 5 ---------------------------------------------------------------------------------------------------------------
-\fte{\path{pronostico_corto_plazo/README.md}, \path{PROTOCOLO.md}, \path{resultados/prueba.json} y \path{panel/verificacion_extreme.json}}
+\fte{\path{pronostico_corto_plazo/}: \path{README.md}, \path{PROTOCOLO.md}, \path{resultados/prueba.json}, \path{panel/verificacion_extreme.json}; \path{api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.json}}
 \begin{frame}[t]
 \cabecera{El pronóstico del enunciado}{Modelo predictivo · 20 \%}
 \begin{columns}[T]
@@ -251,9 +212,45 @@ Protocolo confirmado en git antes de validar: todo se eligió con \textbf{ene.--
 promedio en \CortoSegGana{} de \CortoSegTotal{} segmentos.
 \end{tarjeta}
 \begin{tarjeta}
-\scriptsize\titulotarjeta{Lo que falta}
-Ya está en la API y en el tablero; falta alimentarlo en vivo. En los domingos corrientes no mejora al promedio.
-El sentido es una aproximación y 2025 ya se conocía, con otro objetivo.
+\scriptsize\titulotarjeta{En el producto, y sus límites}
+Pronóstico por omisión de \texttt{POST /predictions/run}: cada ciclo, diario e intradía, lo alimenta con la lectura
+incremental (VAL-009 excluye las celdas imposibles) y deja recomendación, alertas y monitoreo (ALT-010), con
+compuerta, reversión y ONNX. No mejora al promedio en los domingos corrientes (CRA~54); el sentido es una aproximación
+y 2025 ya se conocía, con otro objetivo.
+\end{tarjeta}
+\end{column}
+\end{columns}
+\end{frame}
+
+% 5 ---------------------------------------------------------------------------------------------------------------
+\fte{\path{api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.md}}
+\begin{frame}[t]
+\cabecera{El modelo horario del plan}{Modelo predictivo · 20 \%}
+\begin{columns}[T]
+\begin{column}{0.6\linewidth}
+\begin{tarjeta}
+\titulotarjeta{WAPE en la prueba reservada (\PruebaDesde{} a \PruebaHasta, \Nprueba{} horas-ruta) e IC95}
+\includegraphics[width=\linewidth]{wape_modelos}
+\gris{Pasajeros por ruta y hora de salida del día siguiente: con este pronóstico se arma el plan del día. Diferencia
+con la regla manual: IC95 de \DifActBunoIC{} puntos (bootstrap de bloques de 7 días). La prueba se consultó al
+elegir fv2 frente a fv1: es informativa, y pedimos a Extreme un periodo de 2026 como prueba limpia.}
+\end{tarjeta}
+\end{column}
+\begin{column}{0.37\linewidth}
+\begin{tarjeta}
+\titulotarjeta{Robusto}
+\begin{tabularx}{\linewidth}{@{}Xrr@{}}
+& \textcolor{rol-modelo}{Modelo} & \gris{B1} \\
+\midrule
+SILENCIO & \WAPERutaSilencio & \WAPERutaSilencioBuno \\
+CRA 54 & \WAPERutaCra & \WAPERutaCraBuno \\
+CL 72 & \WAPERutaCl & \WAPERutaClBuno \\
+Pico / valle & \WAPEPico{} / \WAPEValle & \\
+Año 2024 & \RobDosmilveinticuatro & \RobDosmilveinticuatroBuno \\
+Año 2025 & \RobDosmilveinticinco & \RobDosmilveinticincoBuno \\
+\end{tabularx}
+\vspace{2pt}\gris{WAPE en \%. Años completos con el modelo congelado al cierre del año anterior. HGB con pérdida
+Poisson y \NVariables{} variables.}
 \end{tarjeta}
 \end{column}
 \end{columns}
@@ -287,11 +284,10 @@ rechazar; reversión automática en 7 días. Ejemplo: candidato \GateWAPECand~\%
 {\scriptsize\gris{Tablero, pantalla Monitoreo: error, sesgo, cobertura y deriva del modelo activo, desde la API.}}
 \par\vspace{2pt}
 \begin{tarjeta}
-\scriptsize\titulotarjeta{Por segmento y sentido (§3.1, §9.1)}
-Un modelo propio reparte el pronóstico de la ruta. Prueba de feb.~2023: WAPE por segmento y hora de
-\textbf{\SegWAPEact~\%} (reparto fijo: \SegWAPEbcero~\%); banda P10--P90 con \SegCobSegmento~\% de cobertura por
-segmento. La tabla de Extreme solo trae subidas por segmento de ene.--feb.~2023: el pronóstico por segmento con
-tres años es el de la lámina anterior.
+\scriptsize\titulotarjeta{Reparto horario por segmento (§3.1, §9.1)}
+Un modelo propio reparte el pronóstico horario de la ruta. Prueba de feb.~2023: WAPE por segmento y hora de
+\textbf{\SegWAPEact~\%} (reparto fijo: \SegWAPEbcero~\%). La tabla de Extreme solo trae subidas por segmento de
+ene.--feb.~2023: el pronóstico por segmento del producto es el de corto plazo (lámina 4).
 \end{tarjeta}
 \end{column}
 \end{columns}
@@ -467,7 +463,7 @@ cada paso deja su ejecución en \texttt{execution\_log} y su decisión en \textt
 \end{frame}
 
 % 12 --------------------------------------------------------------------------------------------------------------
-\fte{\path{api_frecuencias/docs/evidencias/respuesta/}: \RespuestaFuente{} y \RespuestaEjemploFuente; alertas: \path{.../alertas/backtest_alertas.md} y \path{backtest_alertas_pronostico.md}; detalle: \path{documentos/respuesta_pregunta_reto.md}}
+\fte{\path{api_frecuencias/docs/evidencias/respuesta/}: \RespuestaFuentes; alertas: \path{.../alertas/backtest_alertas.md} y \path{backtest_alertas_pronostico.md}; detalle: \path{documentos/respuesta_pregunta_reto.md}}
 \begin{frame}[t]
 \cabecera{La respuesta a la pregunta}{§20 · \RespuestaTipoDia{} \RespuestaFecha}
 \begin{tarjeta}

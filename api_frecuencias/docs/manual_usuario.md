@@ -8,11 +8,11 @@ cómo gestionar una alerta, cómo leer una recomendación y cómo usar la API di
 
 | Quiero saber… | En el tablero | En la API | Qué mirar |
 |---|---|---|---|
-| Cuántos pasajeros vienen | Pronóstico (arriba: los próximos 30, 60 y 120 minutos) · Recomendaciones | `GET /api/v1/predictions/corto-plazo/calcular`, `POST /api/v1/predictions/corto-plazo`, `GET /api/v1/predictions`, `POST /api/v1/predictions/run` | subidas esperadas por ruta, sentido y segmento, banda P10–P90, líneas base, `model_id` y explicación |
+| Cuántos pasajeros vienen | Pronóstico (arriba: los próximos 30, 60 y 120 minutos) · Recomendaciones | `POST /api/v1/predictions/run` (por omisión, el pronóstico de corto plazo), `GET /api/v1/predictions/corto-plazo/calcular`, `POST /api/v1/predictions/corto-plazo`, `GET /api/v1/predictions` | subidas esperadas por ruta, sentido y segmento, banda P10–P90, líneas base, `model_id`, `modelo` (`corto_plazo` u `horario`) y explicación |
 | Cada cuánto despachar | Recomendaciones · Horario | `GET /api/v1/recommendations`, `POST /api/v1/recommendations/calculate`, `GET /api/v1/recommendations/plan` | `headway_min` y `buses_hora` frente a la frecuencia programada (`frecuencia_actual_min`) |
 | Cuántos buses necesito | Recomendaciones · Inicio | las mismas y `GET /api/v1/respuesta` | por franja, `vehiculos_requeridos` (⌈ciclo / headway⌉) frente a la flota disponible, y `viable` con su `motivo`; para el día, `vehiculos.requeridos_pico` de la respuesta (los buses en ruta a la vez en el momento más cargado) frente a `flota_disponible` |
-| Qué requiere atención ya | Alertas · Operación | `GET /api/v1/alerts?estado=nueva` | severidad, explicación, observado frente a esperado y umbral, y recomendación |
-| Todo lo anterior junto: la pregunta del reto | Inicio (tarjeta «Respuesta a la pregunta del reto») | `GET /api/v1/respuesta` (`ruta` y `fecha` opcionales) | por ruta: cada cuánto despachar por hora frente a lo programado, pasajeros esperados con P10–P90, vehículos frente a la flota, flota y recaudo, y las alertas que piden atención, con la trazabilidad (modelo, datos, umbrales) |
+| Qué requiere atención ya | Alertas · Operación | `GET /api/v1/alerts?estado=nueva`; las próximas dos horas, en `proximas_dos_horas` de `GET /api/v1/respuesta` | severidad, explicación, observado frente a esperado y umbral, y recomendación; para las próximas dos horas, las subidas a 30, 60 y 120 minutos de cada ruta con su recomendación y los segmentos más cargados |
+| Todo lo anterior junto: la pregunta del reto | Inicio (tarjeta «Respuesta a la pregunta del reto») | `GET /api/v1/respuesta` (`ruta`, `fecha` e `instante` opcionales) | por ruta: cada cuánto despachar por hora frente a lo programado, pasajeros esperados con P10–P90, vehículos frente a la flota, flota y recaudo, y las alertas que piden atención, con la trazabilidad (modelo, datos, umbrales); además, las próximas dos horas con el pronóstico de corto plazo (`proximas_dos_horas`) |
 
 Severidades: **crítica** (actuar ahora), **preventiva** (revisar en la hora) e **informativa** (para planear).
 
@@ -68,12 +68,31 @@ sentido y en cada segmento de 500 m.
    primera suele ser lo que subió en los 15 minutos anteriores.
 5. «A lo largo de la ruta» muestra las subidas previstas en cada segmento, en el orden del recorrido; la línea vertical
    marca dónde empieza el regreso. «Por sentido» da ida y regreso y lo que ya subió en el día frente a lo habitual.
-6. Abajo, «Cómo le fue en la prueba reservada» trae el error del modelo y de las líneas base por nivel y horizonte, y
+6. «El modelo» dice qué hay detrás del número, en tres partes:
+   - **Lo que más pesa** a ese horizonte en toda la ruta: las variables con su peso (la importancia global, la
+     ganancia de LightGBM normalizada y promediada en las tres rutas). A 60 minutos encabezan lo que subió en los 15
+     minutos anteriores (`p15`, 40,5 %), el promedio de la misma ventana en las 8 semanas anteriores (`m8`, 12,7 %), el
+     de las 4 semanas anteriores (`m4`, 11,4 %) y lo que subió en los 30 minutos anteriores (`p30`, 8,2 %).
+   - **Cómo le va** con lo que ya se leyó: la última fila de monitoreo del corto plazo, con su estado, el WAPE móvil, la
+     cobertura P10–P90, el PSI máximo con su variable y los pronósticos guardados en esos días. La deja cada ciclo
+     diario con datos nuevos; mientras no haya ninguna, la tarjeta lo dice.
+   - **Quién lo activó**: la versión activa, el motor con que se calcula (LightGBM u ONNX) y la fecha y el motivo de su
+     última activación. Se activa y se revierte con la misma compuerta de cuatro criterios del modelo horario (sección
+     7, «Qué responde la activación»).
+7. Abajo, «Cómo le fue en la prueba reservada» trae el error del modelo y de las líneas base por nivel y horizonte, y
    «La lectura» dice dónde no gana: en los domingos corrientes.
 
-Esta parte pide el pronóstico a la API (`GET /api/v1/predictions/corto-plazo/calcular` y `/dia`); sin API lo dice y no
-muestra cifras. La tabla de la prueba se ve siempre. Para guardar un pronóstico, `POST /api/v1/predictions/corto-plazo`
-(rol analista, sección 7).
+**Aviso «Datos excluidos».** Si la regla de calidad VAL-009 excluyó alguna celda de lo que usa el pronóstico (el día y
+sus 8 semanas de historia), arriba aparece un aviso con la fecha, el segmento y las subidas de hasta tres de esas
+celdas. Una celda es un segmento en 15 minutos, y se excluye cuando trae más subidas que el tope gobernado (1.000 por
+omisión): esas celdas cuentan como no observadas. Con ese tope solo caen los dos registros imposibles de la base, los
+dos en CRA 54: 97.157 subidas el 26-05-2024 y 28.782 el 05-07-2025. Por ejemplo, para CRA 54 el 05-07-2025 a las 08:00, a 30 minutos, el pronóstico es
+de 584,9 subidas con la regla; sin ella habría sido de 837,5, y lo real fue 450.
+
+Esta parte pide el pronóstico a la API (`GET /api/v1/predictions/corto-plazo/calcular` y `/dia`) y, para «El modelo»,
+`GET /api/v1/predictions/corto-plazo/modelo` y `GET /api/v1/monitoring?familia=corto_plazo`; sin API lo dice y no
+muestra cifras. La tabla de la prueba se ve siempre. Para guardar un pronóstico, `POST /api/v1/predictions/run` (por
+omisión responde con este modelo) o `POST /api/v1/predictions/corto-plazo` (rol analista, sección 7).
 
 ### 3.2 Alertas · ¿Qué pide atención ahora?
 
@@ -234,7 +253,9 @@ hace falta (`evidencias/tablero/operacion_403_operador_1366x768.png`).
 
 ![Monitoreo](evidencias/tablero/dash_monitoreo.png)
 
-Lee `GET /api/v1/monitoring`, `GET /api/v1/monitoring/policy`, `GET /api/v1/models` y los umbrales vigentes:
+Lee `GET /api/v1/monitoring?familia=horario`, `GET /api/v1/monitoring/policy`, `GET /api/v1/models` y los umbrales
+vigentes. Es el monitoreo del modelo horario; el del corto plazo está en la tarjeta «El modelo» de Pronóstico (sección
+3.1).
 
 | Sección o tarjeta | Qué responde |
 |---|---|
@@ -255,10 +276,10 @@ Los estados siempre van con icono y palabra («Sin novedad», «Aviso», «Alert
 | Pantalla | Pregunta que responde | Qué mirar |
 |---|---|---|
 | Inicio | ¿Qué proponemos? | La propuesta en una frase, el ahorro en operación con lo que se juega en pasajes contado en tres pasos (primero el piloto que lo mide; si las salidas nuevas atraen suficientes pasajeros, el plan se aplica; si atraen menos, no se aplica), el error de la regla manual frente al modelo y el servicio (pasajeros sobre la capacidad y espera). La tarjeta «Respuesta a la pregunta del reto» trae, desde la API, cada cuánto despachar, cuántos pasajeros y vehículos se esperan y qué alertas piden atención, por ruta. |
-| Pronóstico | ¿Cuántos pasajeros habrá? | Arriba, «Lo que pide el enunciado» (sección 3.1). Después, «Modelo horario de la API: el plan del día siguiente»: los pronósticos horarios que guarda la API con su modelo (`GET /api/v1/predictions`), con la banda P10–P90 calibrada frente a lo real, las variables que más mueven cada pronóstico (SHAP) y la exportación. Debajo, los experimentos del informe: pasajeros reales frente a pronosticados hora por hora para una ruta y un día de 2025, con la banda de la hora pico y la regla manual, hechos con 7 días de antelación. |
+| Pronóstico | ¿Cuántos pasajeros habrá? | Arriba, «Lo que pide el enunciado» (sección 3.1). Después, «Modelo horario de la API: el plan del día siguiente»: los pronósticos horarios que guarda la API con su modelo (`GET /api/v1/predictions?modelo=horario`), con la banda P10–P90 calibrada frente a lo real, las variables que más mueven cada pronóstico (SHAP) y la exportación. Debajo, los experimentos del informe: pasajeros reales frente a pronosticados hora por hora para una ruta y un día de 2025, con la banda de la hora pico y la regla manual, hechos con 7 días de antelación. |
 | Horario | ¿Cuántos buses y cada cuánto? | El optimizador D5 resuelto en el momento con los costos, la elasticidad y el intervalo que usted elija: salidas por hora frente a las de hoy, carga del punto más lleno, balance del día y horario minuto a minuto (CSV). |
 | Despacho | ¿Qué sale ahora y en qué bus? | Un día de 2025 repetido como si fuera en vivo: reloj, fichas (salidas frente al plan, buses en la calle, próximo despacho), mapa con los buses, alertas y próximos despachos. Es una repetición sin mandos: no controla ningún bus (§3.2). |
-| El modelo | ¿Qué modelo es y por qué? | El error de los modelos del informe académico (experimentos 1, 11 y 12, a 7 días y sobre todo 2025) frente a la regla manual, su ficha y las variables que más pesan. No es el modelo que corre en la API: ese es `hgb_fv2_20250831_s42`, y su error está en `evidencias/modelo/evaluacion_modelo.md`. |
+| El modelo | ¿Qué modelo es y por qué? | El error de los modelos del informe académico (experimentos 1, 11 y 12, a 7 días y sobre todo 2025) frente a la regla manual, su ficha y las variables que más pesan. No son los modelos que corren en la API: esos son `hgb_fv2_20250831_s42` (horario, con su error en `evidencias/modelo/evaluacion_modelo.md`) y `cp_lgbm_20250630_s42` (corto plazo, tarjeta «El modelo» de Pronóstico). |
 | Resultado | ¿Qué gana Sobusa? | Dónde se quitan y se ponen salidas, la cascada del ahorro al saldo, la comparación entre reasignar y recortar, y la sensibilidad a la elasticidad. |
 | Anexos | ¿Qué más hay, aparte de este tablero? | El material de apoyo: el informe técnico, el cuaderno, la app sin conexión y los documentos del proyecto. No hace falta abrirlo para entender la propuesta. |
 
@@ -271,7 +292,7 @@ El detalle de cada tarjeta está en `../../dash_app/README.md`.
 | Al empezar el turno | Despachador | En Inicio, leer la tarjeta «Respuesta a la pregunta del reto» de su ruta: headway por franja, pasajeros esperados, vehículos y alertas abiertas. En Alertas, filtrar `estado = nueva` y `nivel = crítica`. |
 | Durante el turno | Despachador | Reconocer cada alerta crítica en cuanto la vea, asignarla a quien la atiende y comentar lo que se hizo. Antes de un refuerzo, revisar en Recomendaciones la franja y su viabilidad. |
 | Cada hora pico | Supervisor de turno | Revisar las franjas no viables y decidir el refuerzo o el cambio de tipología. Dejar en el comentario de la alerta por qué se siguió o no la recomendación. |
-| Una vez al día | Analista | En Operación, confirmar que la ejecución diaria terminó en `ok` y revisar los errores de calidad. En Monitoreo, mirar el estado del modelo y si la política pide reentrenar. |
+| Una vez al día | Analista | En Operación, confirmar que la ejecución diaria terminó en `ok` y revisar los errores de calidad. En Monitoreo, mirar el estado del modelo horario y si la política pide reentrenar; en Pronóstico, la tarjeta «El modelo» para el de corto plazo. |
 | Una vez a la semana | Analista y supervisor | Revisar las alertas descartadas (posibles falsos positivos) y proponer, con su motivo, una versión nueva de umbrales si hace falta. |
 
 ## 4. Cómo gestionar una alerta
@@ -344,6 +365,13 @@ El estado puede ser `ok`, `aviso` o `alerta`. `GET /api/v1/monitoring/policy` di
 hay un candidato en sombra. Si el error móvil de una ruta pasa la tolerancia, aparece la alerta ALT-010 «Modelo
 degradado». Activar o revertir un modelo es una decisión del administrador (sección 3.3).
 
+Hay dos modelos, y cada fila de monitoreo es de uno: `GET /api/v1/monitoring?familia=horario` (el del plan del día
+siguiente, lo de arriba) o `?familia=corto_plazo`. El del corto plazo lo deja cada ciclo diario con los últimos 7 días
+completos leídos: WAPE, MAE y sesgo móviles por horizonte y por ruta, cobertura P10–P90, pronósticos guardados y PSI de
+las variables de lo observado frente a las 4 semanas anteriores a la fecha de corte del modelo; si el WAPE móvil de una
+ruta supera `wape_max`, abre ALT-010 para esa ruta. El corto plazo no tiene sombra: una versión nueva se activa con la
+compuerta (sección 7).
+
 ## 7. Usar la API directamente (curl)
 
 Cada petición a `/api/v1` lleva la cabecera `X-API-Key`. Swagger (http://localhost:8000/docs, solo en ambientes local,
@@ -396,15 +424,32 @@ curl -X POST http://localhost:8000/api/v1/retencion/aplicar -H "X-API-Key: %CLAV
      -H "Content-Type: application/json" -d "{\"simular\": true, \"motivo\": \"Revisión antes de aplicar\"}"
 
 rem Lo que pide el enunciado: las subidas de los próximos 60 minutos por ruta, sentido y segmento (rol analista; se
-rem guarda). Sin guardar, con rol operador: GET /api/v1/predictions/corto-plazo/calcular?ruta=...&instante=...
-curl -X POST http://localhost:8000/api/v1/predictions/corto-plazo -H "X-API-Key: %CLAVE%" ^
-     -H "Content-Type: application/json" ^
-     -d "{\"ruta\": \"CRA 54\", \"instante\": \"2025-10-01T07:00:00-05:00\", \"horizonte_min\": 60}"
-
-rem Pronóstico horario de una ruta a 60 minutos (el del plan del día siguiente; rol analista)
+rem guarda). Por omisión («modelo»: «auto») responde el pronóstico de corto plazo si cubre la ruta, la fecha y la hora
+rem (medias horas de 04:00 a 21:00, con datos leídos hasta el instante); si no, el horario. «modelo» y «motivo_modelo»
+rem dicen cuál respondió y por qué. Con «modelo»: «corto_plazo» queda fijado: fuera de cobertura, 422 fuera_de_cobertura
 curl -X POST http://localhost:8000/api/v1/predictions/run -H "X-API-Key: %CLAVE%" ^
      -H "Content-Type: application/json" ^
-     -d "{\"ruta\": \"CRA 54\", \"instante\": \"2025-10-01T07:00:00-05:00\", \"horizonte_min\": 60}"
+     -d "{\"ruta\": \"CRA 54\", \"instante\": \"2025-10-15T07:00:00-05:00\", \"horizonte_min\": 60, \"modelo\": \"corto_plazo\"}"
+rem El mismo pedido con el modelo horario (el del plan del día siguiente, con siete días de antelación)
+curl -X POST http://localhost:8000/api/v1/predictions/run -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" ^
+     -d "{\"ruta\": \"CRA 54\", \"instante\": \"2025-10-15T07:00:00-05:00\", \"horizonte_min\": 60, \"modelo\": \"horario\"}"
+rem Para no recibir cada segmento (los sentidos van siempre), agregue al cuerpo "incluir_segmentos": false
+rem El endpoint propio del corto plazo, que también guarda; sin guardar, con rol operador:
+rem GET /api/v1/predictions/corto-plazo/calcular?ruta=...&instante=...&horizonte_min=60
+curl -X POST http://localhost:8000/api/v1/predictions/corto-plazo -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" ^
+     -d "{\"ruta\": \"CRA 54\", \"instante\": \"2025-10-15T07:00:00-05:00\", \"horizonte_min\": 60}"
+
+rem Los pronósticos guardados de cada modelo (rol operador); sin «modelo», los dos mezclados
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/predictions?modelo=corto_plazo&ruta=CRA%2054&limite=5"
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/predictions?modelo=horario&ruta=CRA%2054&limite=5"
+rem Las recomendaciones hechas con el pronóstico de corto plazo
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/recommendations?origen=corto_plazo&ruta=CRA%2054"
+rem Las próximas dos horas de una ruta («proximas_dos_horas» de la respuesta del reto: 30, 60 y 120 min con su
+rem recomendación y los 5 segmentos más cargados), en un instante; sin «instante», el último día con datos leídos a la
+rem hora actual. Necesita la foto de la respuesta, como el resto de esa consulta (si no la hay, 404 sin_calcular)
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/respuesta?ruta=CRA%2054&instante=2025-10-15T07:00:00-05:00"
 
 rem Recomendación para una franja (rol analista) y plan del día (rol operador)
 curl -X POST http://localhost:8000/api/v1/recommendations/calculate -H "X-API-Key: %CLAVE%" ^
@@ -420,8 +465,12 @@ curl -X PATCH http://localhost:8000/api/v1/alerts/<alert_id>/status -H "X-API-Ke
      -H "Content-Type: application/json" -d "{\"accion\": \"reconocer\", \"comentario\": \"Se envía un bus de refuerzo\"}"
 curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/alerts/<alert_id>/history
 
-rem Registro de modelos, entrenamiento de un candidato (analista), activación y reversión (admin)
+rem Registro de modelos, entrenamiento de un candidato horario (analista), activación y reversión (admin).
+rem Cada familia (horario y corto_plazo) tiene a lo sumo un activo
 curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/models
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/models?familia=corto_plazo"
+curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/models/cp_lgbm_20250630_s42/importance
+curl -H "X-API-Key: %CLAVE%" "http://localhost:8000/api/v1/monitoring?familia=corto_plazo&limite=1"
 curl -X POST http://localhost:8000/api/v1/models/train -H "X-API-Key: %CLAVE%" ^
      -H "Content-Type: application/json" -d "{\"hasta\": \"2025-09-30\", \"semilla\": 42}"
 curl -X POST http://localhost:8000/api/v1/models/<model_id>/activate -H "X-API-Key: %CLAVE%" ^
@@ -430,19 +479,26 @@ curl -X POST "http://localhost:8000/api/v1/models/<model_id>/activate?forzar=tru
      -H "Content-Type: application/json" -d "{\"motivo\": \"Aprobado por el comité de operación\"}"
 curl -X POST http://localhost:8000/api/v1/models/rollback -H "X-API-Key: %CLAVE%" ^
      -H "Content-Type: application/json" -d "{\"motivo\": \"Prueba de reversión\"}"
+rem La reversión del modelo de corto plazo (sin «familia», se revierte el horario)
+curl -X POST http://localhost:8000/api/v1/models/rollback -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" -d "{\"familia\": \"corto_plazo\", \"motivo\": \"Prueba de reversión\"}"
 ```
 
 Qué responde la activación:
 
 - **200**: el modelo pasó la compuerta de cuatro criterios en la ventana pedida (por omisión, los 28 días siguientes a
   lo que vio el candidato) y quedó activo; el anterior queda guardado para la reversión.
-- **422 `ventana_en_muestra`**: la ventana empieza dentro de lo que el candidato ya vio (su corte más los 61 días de
-  validación); el detalle dice desde qué día se puede comparar.
+- **422 `ventana_en_muestra`**: la ventana empieza dentro de lo que el candidato ya vio (en el horario, su corte más
+  los 61 días de validación; en el corto plazo, su fecha de corte); el detalle dice desde qué día se puede comparar.
 - **409 `activacion_rechazada`**: algún criterio no se cumplió; el modelo queda «rechazado» con el motivo.
 - **409 `requiere_forzar`**: el modelo ya fue rechazado o sigue en sombra (la compuerta de sombra decide al terminar
   sus 14 días).
 - **`?forzar=true`**: activa aunque no se cumplan los criterios, solo con un `motivo` (sin él, 422
   `motivo_requerido`), y deja la decisión en la auditoría del modelo.
+
+Un modelo de corto plazo pasa por los mismos cuatro criterios, comparado con el activo de su familia en la misma
+ventana, con los datos que ya leyó la API. Una versión nueva llega como candidata: la entrena
+`scripts/entrenar_corto_plazo.py` y la API la registra al arrancar.
 
 Rutas válidas en todos los filtros: `SILENCIO`, `CRA 54` y `CL 72` (en la URL, el espacio va como `%20`). Todas las
 fechas salen en hora de Bogotá (`-05:00`). Las colecciones se paginan con `limite` y `desplazamiento`, y cada respuesta
@@ -459,10 +515,10 @@ bajar el resto):
 |---|---|
 | Respuesta a la pregunta del reto (una fila por ruta y hora) | `GET /api/v1/respuesta/export` |
 | Pronósticos de corto plazo (ruta, sentido y segmento) | `GET /api/v1/predictions/corto-plazo/export` |
-| Pronósticos horarios | `GET /api/v1/predictions/export` |
+| Pronósticos horarios (con `modelo=corto_plazo`, la fila de la ruta de los de corto plazo) | `GET /api/v1/predictions/export` |
 | Recomendaciones | `GET /api/v1/recommendations/export` |
 | Alertas (con los campos de §5.3) | `GET /api/v1/alerts/export` |
-| Monitoreo | `GET /api/v1/monitoring/export` |
+| Monitoreo (`familia=horario` o `familia=corto_plazo`) | `GET /api/v1/monitoring/export` |
 | Estadísticas por segmento | `GET /api/v1/segmentos/estadisticas/export` |
 | Catálogos (procesos, empresas, rutas, segmentos, vehículos, viajes, despachos) | `GET /api/v1/catalogos/<catálogo>/export` |
 
@@ -496,6 +552,9 @@ responde 503 `agregacion_pendiente` y el refresco ya queda en la cola. Un analis
 | La exportación de estadísticas por segmento responde 503 `agregacion_pendiente` | La agregación se está calculando por primera vez y el refresco ya está en la cola. Siga su avance en `GET /api/v1/frequency/executions/{execution_id}` y repita la descarga cuando termine (sección 8). |
 | ¿Por qué el sistema recomendó esto? | Cada pronóstico trae su explicación (las variables que más pesaron) y su versión de modelo y de datos. Cada recomendación trae la fórmula, los límites que mandan y la versión de umbrales. Cada alerta trae el observado, el esperado, el umbral y la explicación. |
 | ¿El sistema despacha buses solo? | No. Recomienda y alerta; el despachador decide (§3.2). |
+| `POST /api/v1/predictions/run` respondió con el modelo horario | Con `modelo` = `auto` (el valor por omisión), responde el corto plazo solo si cubre la ruta, la fecha y la hora: medias horas de 04:00 a 21:00 y datos ya leídos hasta ese instante. Si no, responde el horario y `motivo_modelo` dice por qué. Para exigir el corto plazo, pida `"modelo": "corto_plazo"` (fuera de cobertura responde 422 `fuera_de_cobertura`). |
+| El pronóstico de corto plazo responde 422 `fuera_de_cobertura` para un día reciente | Ese día solo está leído hasta cierta hora y el pronóstico no se adelanta a la lectura: usa solo lo ya leído. El mensaje dice hasta qué hora hay datos; la respuesta de un instante válido lo trae en `datos_hasta`. |
+| En Pronóstico aparece el aviso «Datos excluidos» | La regla de calidad VAL-009 excluyó celdas imposibles de lo que usa ese pronóstico; cuentan como no observadas (sección 3.1). En la lectura de cada ejecución, esas celdas quedan además en `GET /api/v1/frequency/executions/{execution_id}/errors?codigo=VAL-009`. |
 | ¿El sistema borra datos viejos? | Sí: por omisión, lo de más de 13 meses y solo en su propio esquema; nunca una alerta abierta ni el histórico validado. `GET /api/v1/retencion` dice qué borra, el corte de hoy y qué hizo la última corrida (sección 3.3, «Retención de datos»). |
 | El plan dice que la restricción reactiva no aplicó | Solo actúa dentro del día, en una ejecución con un `instante` del día en curso y con la base operacional. La ejecución programada calcula el plan del día siguiente, así que ahí no aplica (sección 3.2). |
 | Una ALT-006 o una ALT-009 no trae viaje ni vehículo | El viaje sale de los viajes programados (`progvehiculos`) de la base operacional, de la réplica o de su exportación. Sin ninguna de ellas, la alerta sale igual y su variable `identificacion_5_3` lo dice (`resultado` = `fuente_sin_viajes`). En una ALT-006 en la que todos los despachos salieron a tiempo, el faltante es de programación y la alerta no inventa un viaje. |
@@ -522,3 +581,5 @@ responde 503 `agregacion_pendiente` y el refresco ya queda en la cola. Un analis
 | Restricción reactiva | Un mínimo de salidas para la hora siguiente cuando la ocupación medida en el segmento crítico ya pasó la ocupación crítica. Es una regla de seguridad, no un pronóstico nuevo. |
 | Retención | Cuánto tiempo guarda el sistema sus resultados antes de borrarlos (por omisión, 13 meses). |
 | Modelo activo, candidato y sombra | El activo es el que hace los pronósticos. Un candidato es un modelo reentrenado que todavía no se usa. En sombra, el candidato predice en paralelo para compararlo antes de activarlo. |
+| Familia del modelo | Hay dos, cada una con su activo: `corto_plazo` (las subidas de los próximos 30, 60 y 120 minutos con lo que ya subió en el día) y `horario` (cada hora con siete días de antelación, para el plan del día siguiente). |
+| VAL-009 | La regla de calidad del corto plazo: un segmento con más subidas en 15 minutos que el tope gobernado (1.000 por omisión) es un registro imposible y no se usa. |

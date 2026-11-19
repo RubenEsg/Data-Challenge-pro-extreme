@@ -17,7 +17,7 @@
 \hypersetup{pdftitle={E02 Especificación técnica - Sistema de pronóstico y frecuencias de despacho}}
 \begin{document}
 \thispagestyle{fancy}
-{\footnotesize\color{rol-tinta-3}E02 · ESPECIFICACIÓN TÉCNICA DE LA SOLUCIÓN \hfill versión de la API \VersionAPI{} · 10 de
+{\footnotesize\color{rol-tinta-3}E02 · ESPECIFICACIÓN TÉCNICA DE LA SOLUCIÓN \hfill versión de la API \VersionAPI{} · 19 de
 noviembre de 2026}\par\vspace{4pt}
 {\interligera\fontsize{22}{26}\selectfont Sistema de pronóstico y frecuencias de despacho\par}
 \vspace{2pt}
@@ -30,31 +30,29 @@ Technologies (especificación v1.5).\par}
 
 \begin{tarjeta}
 \small\textbf{Cómo leer este documento.} Cada sección corresponde a un apartado de la especificación v1.5 (entre
-paréntesis). Cada cifra cita el archivo de evidencia que la produjo, con la ruta relativa a la carpeta
-\path{EntregaFinal/}; el código está en \path{api_frecuencias/} (paquete \path{app/}, migraciones en
-\path{alembic/versions/}, pruebas en \path{tests/}). La tabla de endpoints de la sección~\ref{sec:api} se genera desde
-la propia aplicación FastAPI, así que no puede desviarse del código. Los manuales técnico, de usuario y de despliegue
-están en \path{api_frecuencias/docs/}.
+paréntesis) y cada cifra cita el archivo de evidencia que la produjo, con la ruta relativa a \path{EntregaFinal/}. El
+código está en \path{api_frecuencias/} (\path{app/}, \path{alembic/versions/}, \path{tests/}) y los manuales técnico,
+de usuario y de despliegue, en \path{api_frecuencias/docs/}. La tabla de endpoints (sección~\ref{sec:api}) se genera
+desde la propia aplicación FastAPI.
 \end{tarjeta}
 
 {\small\indicedoscolumnas}
 
 % ------------------------------------------------------------------------------------------------------------------
 \section{Alcance y supuestos (§1--§3, §19)}
-El sistema responde la pregunta de §20 para las rutas SILENCIO, CRA~54 y CL~72 con los datos de 2023 a 2025: cada día
-lee lo nuevo de las tablas de Extreme, valida su calidad, pronostica los pasajeros por ruta y hora (horizontes de 30, 60
-y 120 minutos) con su incertidumbre, recomienda el intervalo de despacho, los buses por hora y los vehículos, evalúa
+El sistema responde la pregunta de §20 para las rutas SILENCIO, CRA~54 y CL~72 con los datos de 2023 a 2025: en cada
+ciclo, diario o intradía, lee lo nuevo de las tablas de Extreme, valida su calidad, pronostica con su incertidumbre las subidas de los siguientes
+30, 60 y 120 minutos por ruta, sentido y segmento con lo observado hasta el instante (y, con el modelo horario, los
+pasajeros por hora del día siguiente), recomienda el intervalo de despacho, los buses por hora y los vehículos, evalúa
 diez reglas de alerta y deja todo en el esquema \texttt{ai\_frecuencias} con su trazabilidad. Lo exponen
 \NOperaciones{} operaciones REST y un tablero. Cumple los seis módulos de §3.1 y respeta §3.2: no controla despachos ni
 vehículos, no toca triggers ni tablas operativas y no se declara listo para producción sin la prueba de Extreme.
 
 \textbf{Supuestos hasta que Extreme entregue lo de §19.} Capacidad, tiempo de ciclo, flota por franja e intervalo
-programado se derivan de los datos (\path{datos/parametros_operativos_hora.parquet}); las tipologías de capacidad
-salen del reporte de flota sin placas (\path{app/servicios/tipologias_flota.json}); los umbrales de §5.1, los pesos de
-§10.2 y los parámetros del plan del día empiezan en valores sugeridos o supuestos. Todo eso vive versionado en
-\texttt{ai\_frecuencias.threshold\_config}, donde el área operativa lo cambia sin recompilar. La espera
-máxima de §5.1 se lee como espera media del pasajero, así que el headway máximo efectivo es el menor entre
-\texttt{headway\_maximo\_min} y dos veces \texttt{espera\_max\_min} (S12); el headway vigente de
+programado se derivan de los datos; las tipologías de capacidad salen del reporte de flota sin placas; los umbrales de
+§5.1, los pesos de §10.2 y los parámetros del plan del día empiezan en valores sugeridos o supuestos. Todo eso vive
+versionado en \texttt{ai\_frecuencias.threshold\_config}, donde el área operativa lo cambia sin recompilar. La espera
+máxima de §5.1 se lee como espera media del pasajero (S12, sección~\ref{sec:optimizacion}); el headway vigente de
 \texttt{rutas.frecuenciadespachos}, sin unidad en la tabla, se lee en minutos (S14), y una novedad vial sin filas en
 \texttt{novedades\_viales\_ruta} afecta a todas las rutas (S15). Los supuestos, con quién debe validarlos, están en
 \path{documentos/mapeo_especificacion.md} (sección 0), y los \NHallazgosTexto{} hallazgos sobre los datos y scripts de
@@ -66,13 +64,11 @@ Extreme (\HallazgosRango, \path{api_frecuencias/docs/hallazgos_extreme.md}), con
 La solución separa ingesta, dominio operacional, analítica, inferencia, optimización, alertas y exposición (§7.1). En
 la figura~\ref{fig:arquitectura}, las tablas de Extreme siguen alimentadas por sus triggers; un adaptador de solo
 lectura toma lo nuevo; un trabajo en cola corre el ciclo; los resultados se escriben con otro usuario y solo en
-\texttt{ai\_frecuencias}; la API los sirve y el tablero los muestra. Al cerrar, el ciclo guarda con el modelo activo el
-plan del día siguiente (\texttt{recommendation} con origen \texttt{plan\_dia}) y la foto de la respuesta del reto
+\texttt{ai\_frecuencias}; la API los sirve y el tablero los muestra. Al cerrar, el ciclo guarda con el modelo horario
+activo el plan del día siguiente (\texttt{recommendation} con origen \texttt{plan\_dia}) y la foto de la respuesta del reto
 (\texttt{respuesta\_reto}), que \texttt{GET /api/v1/recommendations/plan} y \texttt{GET /api/v1/respuesta} solo leen
 (sección~\ref{sec:api}). Una ejecución se puede partir en un trabajo por ruta bajo una madre, con marca de agua y
-candado por ruta (RNF-005) y la versión de umbrales vigente al crearla. Otros dos trabajos de la cola refrescan la
-agregación de segmentos y aplican la retención (§18). Las tablas de resultados llevan las dimensiones de §8.3
-(sección~\ref{sec:bd}) y la API filtra por \texttt{idruta}.
+candado por ruta (RNF-005). Las tablas de resultados llevan las dimensiones de §8.3 (sección~\ref{sec:bd}).
 
 \begin{figure}[ht]
 \centering
@@ -96,8 +92,8 @@ agregación de segmentos y aplican la retención (§18). Las tablas de resultado
   \texttt{FOR UPDATE SKIP LOCKED}, reintentos, progreso; planificador diario y semanal (\path{planificador.py});
   trabajos por ruta bajo una madre (RNF-005); refresco de la agregación de segmentos; retención (§18)};
 \node[nuestra=3.9cm, below=of cola] (ciclo) {\textbf{Ciclo de frecuencia} (\path{ejecucion.py})\\
-  1 calidad (§6.3) · 2 variables fv2 · 3 inferencia (modelo activo, banda calibrada; reparto por segmento y sentido)
-  · 4 optimización MILP ·
+  1 calidad (§6.3) · 2 variables fv2 y panel de 15 min · 3 inferencia: corto plazo (30, 60 y 120 min por ruta,
+  sentido y segmento) y horario, con banda calibrada · 4 optimización MILP ·
   5 alertas ALT-001..010 con escalamiento · 6 monitoreo y política · 7 plan del día siguiente y foto de la respuesta
   · 8 consolidados de Extreme: calidad y contraste};
 \node[nuestra=3.5cm, anchor=north west] (ai) at (ext.west |- ciclo.north) {\textbf{PostgreSQL 14 + PostGIS}\\
@@ -136,7 +132,7 @@ API Gateway / REST & \path{app/main.py}, \path{app/routers/} & FastAPI, Pydantic
 Acceso analítico & \path{app/servicios/fuentes.py} & SQLAlchemy Core en modo lectura; lectura incremental y lecturas de contexto \\
 Dominio operacional & \path{app/servicios/catalogos.py}, \path{flota_ciclo.py}, \path{segmentos.py}, \path{segmentos_refresco.py} & procesos, rutas, segmentos, vehículos, viajes, despachos; flota y ciclo versionados; estadísticas por segmento desde la agregación materializada \\
 Feature service & \path{app/servicios/variables.py}, \path{novedades.py}, \path{calidad.py}, \path{consolidados.py} & variables fv2 versionadas, con las novedades viales por ruta; validación de seis dimensiones; contraste de los consolidados de Extreme con la agregación propia \\
-Inferencia & \path{app/servicios/inferencia.py}, \path{onnx_motor.py}, \path{modelo_segmentos.py} & scikit-learn (HGB) u ONNX Runtime; SHAP; calibración conformal; reparto por segmento y sentido con su banda \\
+Inferencia & \path{app/servicios/corto_plazo.py}, \path{panel_corto_plazo.py}, \path{inferencia.py}, \path{onnx_motor.py}, \path{modelo_segmentos.py} & corto plazo con LightGBM (\path{onnx_corto_plazo.py}) y horario con scikit-learn (HGB), los dos también en ONNX Runtime; SHAP; calibración conformal; reparto por segmento del horario \\
 Optimización & \path{app/servicios/optimizacion.py}, \path{ocupacion.py}, \path{motor_d5/} & PuLP/CBC (MILP) con la función objetivo de §10.2; plan del día con el pronóstico horario del modelo activo; ocupación histórica y actual por segmento (§10.1) \\
 Respuesta del reto & \path{app/servicios/respuesta.py}, \path{routers/respuesta.py} & foto de la respuesta de §20 por fecha y ruta (\texttt{respuesta\_reto}), calculada en la cola \\
 Alertas & \path{app/servicios/alertas.py}, \path{notificaciones.py} & motor de reglas propio, episodios, máquina de estados, adaptadores de correo y WhatsApp simulados \\
@@ -178,17 +174,16 @@ Tabla (§8.2) & Filas en la réplica & Uso en la solución \\
 \end{table}
 
 Las variables de §6.1 que no existen en el DDL (máximos y mínimos por segmento) se derivan en una agregación
-materializada de \texttt{ai\_frecuencias} (migración 0008). La refresca un trabajo de la cola por tramos de 31 días,
-que se parten por fecha y por ruta si agotan el \texttt{statement\_timeout}; desde la migración 0012 compara las huellas
+materializada de \texttt{ai\_frecuencias} (migración 0008). La refresca un trabajo de la cola por tramos de 31 días;
+desde la migración 0012 compara las huellas
 de la ventana de solape: sin filas nuevas relee \SegSinCambiosFechas{} fechas y escribe \SegSinCambiosEscritas{}
 filas, donde antes releía \SegSinCambiosFechasAntes{} fechas (\SegSinCambiosFilasAntes{} filas).
 \evid{api_frecuencias/docs/evidencias/pruebas/segmentos_sin_cambios.json} \texttt{GET}
 \path{/api/v1/segmentos/estadisticas} da promedio, máximo y mínimo de subidas, bajadas y pasajeros por segmento,
 estacionalidad, día ISO y hora, igual que la agregación directa, sin tocar la base de Extreme.
 \evid{.../pruebas/segmentos_equivalencia.json} Las variables de calendario y contexto de §6.2 forman la versión
-\texttt{fv2}; la estacionalidad oficial falta (H1). Las novedades se cruzan por fecha, rango horario y ruta (§11.2): una
-con filas en \texttt{novedades\_viales\_ruta} afecta solo a sus rutas, y una sin filas, a todas (S15); hoy esa tabla está
-vacía. \evid{.../replica/novedades_por_ruta_replica.json}
+\texttt{fv2}; la estacionalidad oficial falta (H1). Las novedades se cruzan por fecha, rango horario y ruta (§11.2,
+S15). \evid{.../replica/novedades_por_ruta_replica.json}
 
 \subsection{Calidad por lote (§6.3)}
 \path{app/servicios/calidad.py} valida cada lote antes de usarlo y guarda cada error en
@@ -205,7 +200,7 @@ los consulta por lote, fila y causa (§14.2).
 Dimensión & Códigos & Validación y tratamiento \\
 \midrule
 Completitud & COMP-001, COMP-002 & campos obligatorios presentes y no nulos; la fila va a cuarentena \\
-Validez & VAL-001 a VAL-008 & conteos $\ge 0$, fechas, horas, día ISO y bloque horario coherentes, capacidad $> 0$; error con código y detalle \\
+Validez & VAL-001 a VAL-009 & conteos $\ge 0$, fechas, horas, día ISO y bloque horario coherentes, capacidad $> 0$; error con código y detalle; VAL-009 excluye del corto plazo la celda de 15 min con más subidas que su tope \\
 Unicidad & UNI-001 & proceso, ruta, día, estacionalidad y franja sin duplicar; no se corrige: el reporte del lote va al responsable del consolidado por el canal de notificaciones (el destinatario lo define Extreme) \\
 Consistencia & CONS-001, CONS-002, CONTR-001 a 003 & promedios coherentes con subidas, bajadas y viajes; consolidados de Extreme frente a la agregación propia; se excluye de la inferencia o del análisis \\
 Oportunidad & OPOR-001, OPOR-002 & dato tardío o con marca en el futuro (no bloquea); alerta ALT-009 de retraso y latencia media del lote \\
@@ -215,9 +210,8 @@ Relacional & REL-001 a REL-007 & ruta, estacionalidad, novedad, segmento (de su 
 \end{table}
 
 \textbf{Bajadas y consolidados de Extreme (§6.1, §7.3, §11.2).} Desde la migración 0013,
-\texttt{demanda\_observada} guarda las bajadas con la regla de los pasajeros (\texttt{bajadas\_viajes}: Σ
-\texttt{numerobajadas} de los viajes válidos; sin réplica, de \path{datos/bajadas_horaria.parquet}) y, con la capa de
-segmentos, las subidas y bajadas de \texttt{timbradas\_segmentos} con su cobertura; en los mismos viajes, las dos
+\texttt{demanda\_observada} guarda las bajadas con la regla de los pasajeros (\texttt{bajadas\_viajes}) y, con la capa
+de segmentos, las subidas y bajadas de \texttt{timbradas\_segmentos} con su cobertura; en los mismos viajes, las dos
 bajadas difieren \BajadasDifMismos~\%. \evid{.../consolidados/definicion_bajadas.md} Una vez por ejecución, el ciclo
 lee \texttt{timbradas\_consolidado}, \texttt{timbradas\_segmentos\_anio} y \texttt{timbradas\_segmentos\_consolidado},
 cada una desde su marca de agua, las valida con las reglas de §6.3 (CONS-001 admite el \texttt{CEIL} de Extreme, H7) y
@@ -225,9 +219,8 @@ compara sus promedios por viaje y sus viajes por día con la agregación propia 
 \texttt{threshold\_config}: \ConsTolerancia~\% y, desde \ConsTolGrosera~\%, la llave queda fuera del análisis. El
 consolidado de ruta se compara por ruta, día ISO y estacionalidad, no por hora (H10). En la réplica, ninguna de sus
 \ConsFilas{} filas da un falso error; de \ConsLlaves{} llaves se comparan \ConsComparadas, con \ConsIncidencias{}
-incidencias y \ConsGroseras{} groseras que apuntan a los datos de Extreme (hallazgo H17: festivos con dos
-filas en \texttt{estacionalidades\_anio}, días corrientes con más viajes que los aptos y bajadas de CL~72 un
-\ConsBajadasClDif~\% mayores). Las tablas por segmento no traen filas de Sobusa (H4): su contraste, sin la hora del
+incidencias y \ConsGroseras{} groseras que apuntan a los datos de Extreme (hallazgo H17; por ejemplo, bajadas de
+CL~72 un \ConsBajadasClDif~\% mayores). Las tablas por segmento no traen filas de Sobusa (H4): su contraste, sin la hora del
 bloque de Extreme (H10), se probó con filas sintéticas y con la liquidación real de tres viajes en la réplica. \evid{.../consolidados/contraste_consolidados.md}
 
 \subsection{Marca de agua, idempotencia y no fuga}
@@ -244,17 +237,57 @@ bloque de Extreme (H10), se probó con filas sintéticas y con la liquidación r
 \item \textbf{Carga idempotente (§14.2).} \texttt{demanda\_observada} tiene una restricción única por ruta, fecha y
   hora: la recarga idéntica de \IngestaFilas{} filas inserta 0 y actualiza 0, y una recarga con 1.116 filas cambiadas
   actualiza exactamente 1.116. \evid{api_frecuencias/docs/evidencias/rendimiento.txt}
-\item \textbf{Sin fuga temporal (§9.3).} La partición es cronológica: entrenamiento hasta el corte, validación y la
-  prueba reservada \PruebaDesde{} a \PruebaHasta{}. Las pruebas de \path{tests/datos_ml} alteran datos posteriores
-  al corte en tres cortes distintos y comprueban que ninguna variable cambia hasta el corte más 7 días. La prueba
-  reservada se consultó al elegir fv2 frente a fv1, así que no es «nunca vista»: la selección se hizo con la
-  validación y los backtests congelados de 2024 y 2025, la prueba queda como reporte informativo y se pide a Extreme
-  un periodo de 2026 como prueba limpia (§19).
+\item \textbf{Sin fuga temporal (§9.3).} La partición es cronológica: entrenamiento, validación y prueba reservada
+  (la del corto plazo se calculó una sola vez; la horaria, \PruebaDesde{} a \PruebaHasta, se consultó al elegir fv2
+  frente a fv1 y queda como reporte informativo; se pide a Extreme un periodo de 2026 como prueba limpia, §19). Las
+  pruebas de \path{tests/datos_ml} alteran datos posteriores al corte y comprueban que ninguna variable cambia.
 \end{itemize}
 
 % ------------------------------------------------------------------------------------------------------------------
 \section{Modelo de demanda (§9)}
 \label{sec:modelo}
+Hay dos familias de modelos, cada una con su activo y su compuerta (columna \texttt{familia} de
+\texttt{model\_registry}). La de \textbf{corto plazo} responde RF-005 y la usan por omisión \texttt{POST
+/predictions/run} y \texttt{GET /predictions/segmentos}; la \textbf{horaria} arma el plan del día siguiente
+(sección~\ref{sec:optimizacion}).
+
+\subsection{Corto plazo: 30, 60 y 120 minutos por ruta, sentido y segmento (RF-005)}
+\label{sec:corto}
+\paragraph{Formulación y prueba} Cada media hora, de 04:00 a 21:00, se pronostican las subidas de los siguientes 30, 60
+y 120 minutos con lo observado hasta ese instante, sobre un panel de bloques de 15 minutos por ruta, día y segmento
+oficial de 500~m (\CortoSubidas{} subidas de 2023 a 2025 asignadas con la regla de Extreme, que coincide con su tabla
+en el \CortoMismoSegmento~\% de las subidas). \texttt{\CortoModelo} son \CortoArtefactos{} LightGBM Poisson, uno por
+nivel (ruta y segmento), horizonte y ruta; el sentido es la suma de sus segmentos (S9). Usa lo observado hoy hasta el
+instante, las salidas ya iniciadas, la misma ventana en días y semanas anteriores y el calendario, nada posterior al
+instante; la banda P10--P90 es conformal por tramo del pronóstico. Todo se eligió con ene.--jun. de 2025 (protocolo
+confirmado en git antes) y la prueba de jul.--dic. se calculó una vez: WAPE por ruta de \CortoRutaTreinta,
+\CortoRutaSesenta{} y \CortoRutaCientoveinte~\% a 30, 60 y 120 min frente a \CortoRutaTreintaBase,
+\CortoRutaSesentaBase{} y \CortoRutaCientoveinteBase~\% del promedio por día y hora (IC95 de la diferencia a 60 min,
+\CortoDifIC{} puntos; cobertura de la banda, \CortoCobertura~\%); a 60 min, \CortoSentidoSesenta~\% por sentido
+(\CortoSentidoSesentaBase~\%) y \CortoSegmentoSesenta~\% por segmento (\CortoSegmentoSesentaBase~\%), con ventaja en
+\CortoSegGana{} de \CortoSegTotal{} segmentos. En los domingos corrientes no le gana al promedio (pierde en CRA~54).
+\evid{pronostico_corto_plazo/README.md}
+
+\paragraph{En el ciclo (RF-004, RF-013, §7.3, §10.2)} Cada ciclo agrega lo nuevo de \texttt{timbradas\_segmentos} y
+\texttt{progvehiculos} hasta la marca de agua en \texttt{subidas\_15min}, \texttt{salidas\_15min} y
+\texttt{lectura\_15min} (hasta qué instante se leyó cada ruta y día; migración 0016); el modelo ve el panel
+empaquetado más lo leído, nada más. VAL-009 (validez, bloqueante) excluye la celda que supera
+\texttt{cp\_tope\_subidas\_bloque\_segmento} y la deja en \texttt{data\_quality\_error}: con el tope por omisión solo
+caen los dos registros imposibles de CRA~54. Cada pronóstico, diario o intradía, queda en
+\texttt{prediction\_corto\_plazo} con su recomendación de §10.2 (origen \texttt{corto\_plazo}); los intradía alimentan
+ALT-001 a ALT-004 y \texttt{GET /respuesta} trae las próximas dos horas.
+
+\paragraph{Ciclo de vida, monitoreo y ONNX (RF-018, RF-019, §9.2, §9.5)} Se siembra en \texttt{model\_registry} con el
+SHA-256 de su manifiesto; una versión nueva entra como candidata, y activarla (\texttt{POST
+/models/\{model\_id\}/activate}) pasa por la misma compuerta de cuatro criterios que el horario (\texttt{POST /models/rollback} con
+\texttt{familia=corto\_plazo} la revierte). El ciclo diario mide el error móvil de 7 días por horizonte y ruta, la
+cobertura, el volumen y el PSI, y levanta ALT-010 por ruta (\texttt{GET /monitoring?familia=corto\_plazo}). Un
+conversor propio lleva los \CortoArtefactos{} modelos a ONNX con diferencia relativa máxima de \CortoOnnxDifRel{} en
+\CortoOnnxFilas{} filas (tolerancia \CortoOnnxTol); la explicación local es el TreeSHAP exacto de LightGBM. La API
+reproduce las \CortoReproducidas{} predicciones de la prueba y \CortoReproduce{} con las guardadas.
+\evid{api_frecuencias/docs/evidencias/modelo/corto_plazo_onnx.json}, \evid{.../modelo/corto_plazo_reproduccion.json}
+
+\subsection{Horario: el plan del día siguiente}
 \paragraph{Formulación} Pronóstico supervisado de pasajeros por ruta, día y hora de salida. Líneas base de §9.1: B1,
 la regla manual de Sobusa formalizada como el promedio de las ocho semanas anteriores para la misma ruta, día y hora
 (supuesto S0: Sobusa la describió como una estimación manual con promedios), y B2, la última semana. Candidato tabular: \texttt{HistGradientBoostingRegressor} con pérdida Poisson para el punto y dos modelos de
@@ -267,21 +300,12 @@ rezago diario y el impacto de las novedades viales.
 WAPE de \WAPEact~\% (IC95 \WAPEactIC; bootstrap de bloques de 7 días), frente a \WAPEbuno~\% de B1 y \WAPEbdos~\% de B2;
 la diferencia con B1 tiene IC95 de \DifActBunoIC{} puntos. Gana en las tres rutas y en pico y valle
 (figura~\ref{fig:rutas}). Congelado un año, repite: \RobDosmilveinticuatro~\% frente a \RobDosmilveinticuatroBuno~\% en
-2024 y \RobDosmilveinticinco~\% frente a \RobDosmilveinticincoBuno~\% en 2025. Por horizonte (origen móvil,
-\HorEvaluado): \HorTreinta~\% a 30 min (B1 \HorTreintaBuno~\%), \HorSesenta~\% a 60 min (B1 \HorSesentaBuno~\%) y
-\HorCientoveinte~\% a 120 min (B1 \HorCientoveinteBuno~\%); el de 30 min usa una aproximación del observado, porque la
-API agrega por hora. El pronóstico directo de esas ventanas, cada media hora y por ruta, sentido y segmento, se validó
-aparte con los eventos de conteo (se eligió con ene.--jun. de 2025 y se probó con jul.--dic.): a 60 min,
-\CortoRutaSesenta~\% por ruta, \CortoSentidoSesenta~\% por sentido y \CortoSegmentoSesenta~\% por segmento, frente a
-\CortoRutaSesentaBase, \CortoSentidoSesentaBase{} y \CortoSegmentoSesentaBase~\% del promedio por día y hora; en los domingos
-corrientes no mejora a ese promedio; la API lo sirve y reproduce esa prueba (\evid{pronostico_corto_plazo/README.md}). El 13,94~\% (experimento 11, LightGBM) y el 13,62~\% (experimento 12,
-híbrido con un modelo fundacional) del informe académico son otra métrica, a 7 días y sobre todo 2025: no se comparan
-con esta prueba. \evid{api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.md}, \evid{.../modelo/horizontes.json}
-
-\paragraph{Candidato registrado} \texttt{\ModeloCand} agrega el calendario escolar y universitario (versión fv3).
-Congelado un año, baja el error a \RobCandDosmilveinticuatro~\% en 2024 y \RobCandDosmilveinticinco~\% en 2025
-(diferencia con el activo de \RobCandDosmilveinticincoDifIC{} puntos en 2025, IC95); en la prueba reservada,
-\WAPEcand~\%. No se activó: espera la sombra y la compuerta de §9.5. \evid{.../modelo/decision_fv3.md}
+2024 y \RobDosmilveinticinco~\% frente a \RobDosmilveinticincoBuno~\% en 2025. Las ventanas de 30, 60 y 120 minutos las
+responde el corto plazo (sección~\ref{sec:corto}). El 13,94 y el 13,62~\% del informe académico (experimentos 11 y 12)
+son otra métrica, a 7 días y sobre todo 2025. \evid{api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.md}
+\textbf{Candidato registrado:} \texttt{\ModeloCand} (fv3, con el calendario escolar y universitario) baja el error
+congelado a \RobCandDosmilveinticuatro~\% en 2024 y \RobCandDosmilveinticinco~\% en 2025; espera la sombra y la
+compuerta de §9.5. \evid{.../modelo/decision_fv3.md}
 
 \begin{figure}[ht]
 \centering
@@ -304,8 +328,7 @@ los episodios (derecha).}
 (objetivo 80~\%). Encima va una calibración conformal versionada: la vigente (v2) usa un cuantil por bloque horario,
 ajustado solo con la validación y guardado junto al modelo con su SHA-256; en la validación baja la peor desviación de
 la cobertura por grupo a \CalibPeorDesv{} puntos. En la prueba reservada cubre el \CobVdos~\% (\BajoPdiezVdos~\% bajo
-el P10 y \SobrePnoventaVdos~\% sobre el P90) con una banda más angosta que la v1 (conformal móvil por ruta con días
-anteriores, \CobVuno~\%), que queda como respaldo. Las horas de 18 a 20 y los días especiales de fin de año quedan bajo
+el P10 y \SobrePnoventaVdos~\% sobre el P90); la v1 (conformal móvil por ruta, \CobVuno~\%) queda de respaldo. Las horas de 18 a 20 y los días especiales de fin de año quedan bajo
 el 80~\% con cualquier banda; por eso el monitoreo vigila la cobertura móvil. Cada predicción guarda las dos bandas, el
 ajuste y la versión de la calibración.
 \evid{api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json}
@@ -316,22 +339,18 @@ $10^{-6}$. \texttt{GET /models/\{model\_id\}/importance} da la importancia globa
 respuesta de \texttt{POST /predictions/run} trae las claves de §12.3 con \texttt{explanation}.
 \evid{api_frecuencias/docs/evidencias/modelo/explicacion_local_y_bandas.json}
 
-\paragraph{Segmento y sentido (§3.1, §9.1, §9.3)} El pronóstico de la ruta se reparte entre segmentos con un modelo
-propio, \texttt{\SegModeloActivo} (\path{app/servicios/modelo_segmentos.py}): un HGB Poisson pronostica la fracción
-de cada sentido en la hora y otro, la de cada segmento dentro del sentido, con la posición del segmento, el calendario
-y el reparto histórico; la suma de los segmentos es la ruta. Se eligió con un protocolo fijado antes de mirar la
-prueba, con el reparto fijo de las subidas (B0) como línea base. En la prueba (\SegPruebaDesde{} a \SegPruebaHasta)
-el WAPE por segmento y hora es \SegWAPEact~\% frente a \SegWAPEbcero~\% de B0 (IC95 de la diferencia, \SegDifIC{}
-puntos), y la banda P10--P90, conformal y compuesta con la de la ruta, cubre \SegCobSegmento~\% por segmento y
-\SegCobSentido~\% por sentido con el total real. \texttt{GET /predictions/segmentos} lo usa con su ficha (model\_id y
-SHA-256). Límites: solo hay subidas por segmento de enero y febrero de 2023, así que su error en 2025 no se puede
-medir, y el sentido es una aproximación (S9). \evid{api_frecuencias/docs/evidencias/modelo/segmentos_protocolo.md},
-\evid{.../modelo/segmentos_modelo.md}
+\paragraph{Reparto por segmento y sentido (§3.1, §9.1)} El pronóstico horario de la ruta se reparte entre segmentos
+con \texttt{\SegModeloActivo} (\path{app/servicios/modelo_segmentos.py}): un HGB Poisson pronostica la fracción de
+cada sentido y otro, la de cada segmento dentro del sentido; la suma es la ruta. En su prueba (\SegPruebaDesde{} a
+\SegPruebaHasta) el WAPE por segmento y hora es \SegWAPEact~\% frente a \SegWAPEbcero~\% del reparto fijo (IC95 de la
+diferencia, \SegDifIC{} puntos) y la banda cubre \SegCobSegmento~\% por segmento y \SegCobSentido~\% por sentido. Como
+la tabla de Extreme solo trae subidas por segmento de ene.--feb.~2023, \texttt{GET /predictions/segmentos} lo usa para
+repartir una predicción horaria guardada; al vuelo responde por omisión con el corto plazo.
+\evid{api_frecuencias/docs/evidencias/modelo/segmentos_modelo.md}
 
 \paragraph{Trazabilidad (§9.2)} Cada predicción guarda \texttt{model\_id}, \texttt{feature\_version},
 \texttt{data\_cutoff}, \texttt{generated\_at}, horizonte y latencia; \texttt{feature\_snapshot} guarda la foto exacta de
-variables de cada predicción: las filas de la ruta y una fila por segmento con su sentido (\FotoFilasSegmento{} filas
-y unos \FotoMBEjecucion{} MB por ejecución, \path{.../monitoreo/foto_segmentos.json}). El artefacto se carga una vez y
+variables de cada predicción: las filas de la ruta y una fila por segmento con su sentido. El artefacto se carga una vez y
 se verifica su SHA-256 contra el registro; el entrenamiento es reproducible (mismo SHA-256 en dos corridas,
 \path{.../modelo/entrenamiento_fv2.json}).
 
@@ -354,7 +373,8 @@ en una ventana posterior a todo lo que vio el candidato (corte más 61 días de 
 % ------------------------------------------------------------------------------------------------------------------
 \section{Optimización de frecuencia (§10)}
 \label{sec:optimizacion}
-Para cada ruta y hora, \texttt{POST /recommendations/calculate} y el ciclo diario resuelven
+Para cada ruta y hora, \texttt{POST /recommendations/calculate} y el ciclo (con el pronóstico horario o el de corto
+plazo de la ventana) resuelven
 \[
 \min_{k,\,n_t}\; \alpha\,C_{\text{op}}(n) + \beta\,E(k) + \gamma\,P_{\text{sobre}}(n) + \delta\,|k-k_{\text{prog}}|
 \]
@@ -390,23 +410,19 @@ convexa, en todas las capacidades alcanzables, así que el modelo es exacto; coi
   franja y en el plan del día. \evid{api_frecuencias/docs/evidencias/gobierno/ajuste_flota_ciclo.json}
 \item \textbf{Ocupación por segmento (§10.1).} La carga a bordo al salir de cada segmento se deriva de las subidas y
   bajadas de cada viaje, no de \texttt{pasajeros} (H9): en \OcupViajesValidacion{} viajes correlaciona
-  \OcupCorrelacion{} con la ocupación máxima del dispositivo. El perfil histórico (ene.--feb.~2023, por segmento, día
-  de operación y hora, \path{datos/ocupacion_segmentos_hora.parquet}) nombra el segmento crítico de la franja y de cada
-  hora del plan, y el factor de carga crítica es por ruta, día de la semana y hora. El ciclo guarda la ocupación actual
-  en \texttt{ocupacion\_segmento}: ALT-002 observada la mide en el segmento crítico, y el plan del día pone un piso de
-  salidas en la hora siguiente si la última hora cerrada llegó a la ocupación crítica. Ese piso actúa en los ciclos
-  intradía que el planificador encola cada hora (\texttt{PLAN\_INTRADIA\_CRON}); 10.1-d queda parcial por lo que
-  depende de Extreme (latencia de la captura, H10 y H11; estacionalidad nula, H1). En 2023, tras un disparo la hora siguiente sigue sobre el umbral en el
+  \OcupCorrelacion{} con la ocupación máxima del dispositivo. El perfil histórico (ene.--feb.~2023) nombra el segmento
+  crítico de la franja y de cada hora del plan. El ciclo guarda la ocupación actual en \texttt{ocupacion\_segmento}:
+  ALT-002 observada la mide en el segmento crítico, y en los ciclos intradía el plan pone un piso de salidas en la hora
+  siguiente si la última hora cerrada llegó a la ocupación crítica; 10.1-d queda parcial por lo que depende de Extreme
+  (latencia de la captura, H10 y H11; estacionalidad nula, H1). En 2023, tras un disparo la hora siguiente sigue sobre el umbral en el
   \OcupPersistencia~\% de \OcupDisparos{} casos (base, \OcupTasaBase~\%); con los viajes aún en curso, a las
   \OcupCorteTiempoReal{} siguen \OcupDisparosTiempoReal{} de ellos.
   \evid{api_frecuencias/docs/evidencias/ocupacion/backtest_restriccion_reactiva.md}
 \item \textbf{Escenarios (RF-008).} \texttt{comparacion\_actual} compara la frecuencia programada con la recomendada en
   costo, espera, sobreocupación y vehículos; \texttt{escenario} cambia demanda, pesos, nivel de servicio, flota,
   capacidad, ciclo o headway; \texttt{sensibilidad} hace 23 variaciones de un parámetro a la vez.
-\item \textbf{Plan del día (D5).} El mismo MILP reparte las salidas de 4 a 20~h con el pronóstico horario del
-  modelo activo (P10, P50 y P90 de \texttt{inferencia.predecir} con $h = 60$ al inicio de cada hora) para cualquier
-  fecha con variables; el del experimento 12 del informe queda solo como opción (\texttt{MODELO\_PLAN=E12}). La
-  tarifa, la elasticidad y la suavidad salen de \texttt{threshold\_config} (migración 0010) y el plan guarda cada
+\item \textbf{Plan del día (D5).} El mismo MILP reparte las salidas de 4 a 20~h con el P10, P50 y P90 del modelo
+  horario activo para cualquier fecha con variables. La tarifa, la elasticidad y la suavidad salen de \texttt{threshold\_config} (migración 0010) y el plan guarda cada
   parámetro con su fuente; si una suavidad gobernada deja el MILP sin solución, no se entrega plan. Cada hora trae
   límites activos, demanda de diseño, margen, \texttt{viable}, motivo y su headway frente al vigente de
   \texttt{rutas.frecuenciadespachos}; la trazabilidad nombra el modelo, la calibración y la fuente del pronóstico. Sin
@@ -440,7 +456,7 @@ ALT-006 & Despacho ausente o tardío & minutos sin despacho $>$ headway programa
 ALT-007 & Desviación del pronóstico & real fuera de [P10, P90] con error $\ge$ \texttt{error\_pronostico} (\UErrorPron), mismo sentido \UPersistencia{} horas & preventiva \\
 ALT-008 & Consolidado anómalo & |z robusto| $\ge$ \UZ{} en subidas, bajadas o viajes frente al mismo tipo de día de \USemanasRef{} semanas & preventiva \\
 ALT-009 & Datos incompletos & sin datos durante \UAtraso{} períodos de ingesta, campos obligatorios faltantes u horas sin registro (con los viajes del día, sin contar las horas sin servicio programado) & crítica \\
-ALT-010 & Modelo degradado & WAPE móvil de 28 días $>$ \texttt{wape\_max} (\UWapeMax) & crítica \\
+ALT-010 & Modelo degradado & WAPE móvil de 28 días $>$ \texttt{wape\_max} (\UWapeMax); en el corto plazo, de 7 días y por ruta & crítica \\
 \bottomrule
 \end{tabularx}
 \fuente{api_frecuencias/docs/evidencias/alertas/README.md}; umbrales:
@@ -452,11 +468,9 @@ viaje, conductor (solo un seudónimo HMAC, con CHECK en la base) y vehículo; de
 estado, observado, esperado y umbral en las mismas unidades; probabilidad o puntaje con su método; explicación en
 lenguaje operativo y variables influyentes (SHAP); tendencia y serie reciente (§9.4); recomendación, asignado,
 comentarios y ubicación \texttt{geography(Point,4326)} con índice GiST; el estado solo puede ser nueva, reconocida,
-asignada, cerrada o descartada (CHECK en la base). Toda alerta dice en \texttt{variables.identificacion\_5\_3} qué
-campos de identificación le aplican y por qué: viaje, vehículo y conductor se llenan en ALT-006 (el despacho cancelado o
-tardío) y ALT-009 (el viaje con datos faltantes) con los viajes de \texttt{progvehiculos}, leídos en solo lectura y
-seudonimizados al leer, y en la ALT-002 medida en el segmento crítico, que lleva además el sentido aproximado (S9); las
-demás reglas son de la ruta. Sin fuente de viajes quedan vacíos y la alerta lo dice.
+asignada, cerrada o descartada (CHECK). \texttt{variables.identificacion\_5\_3} dice qué campos de identificación le
+aplican: viaje, vehículo y conductor se llenan en ALT-006 y ALT-009 con los viajes de \texttt{progvehiculos},
+seudonimizados al leer, y en la ALT-002 del segmento crítico, con el sentido aproximado (S9); las demás son de la ruta.
 \evid{api_frecuencias/docs/evidencias/alertas/identificacion_viajes.md} La bitácora \texttt{alert\_history} guarda \emph{crear, reconocer,
 asignar, comentar, cerrar, descartar}, \emph{redetección} y \emph{escalar} (RF-011): si un episodio se redetecta con
 mayor severidad, la alerta sube de severidad sin cambiar de estado y se notifica si pasa a crítica; nunca baja sola, y
@@ -473,13 +487,11 @@ de \LiftAntesOcho{} a \LiftOcho{} en ALT-008. Con el modelo de corte 2024 el res
 \AlertasPronostico{} por ruta y día (ALT-001 \AlertasPronUno, ALT-002 \AlertasPronDos, ALT-003 \AlertasPronTres{} y
 ALT-004 \AlertasPronCuatro), así que, sumadas a todas las observadas, el despachador ve \AlertasTotal{} alertas por
 ruta y día. ALT-003 exige además una probabilidad mínima de superar la capacidad efectiva, elegida en una validación
-anterior a la evaluación (\path{scripts/variantes_alt003.py}): donde puede emitirse (sin ALT-001) supera la tasa base;
-contra la de todas las franjas, su lift en la validación fue menor que 1 y su IC en la evaluación incluye 1. La versión
-de \texttt{threshold\_config} que lo siembra está propuesta, sin aprobar.
+anterior a la evaluación: supera la tasa base donde puede emitirse (sin ALT-001), no la de todas las franjas, y la
+versión de \texttt{threshold\_config} que la siembra está propuesta, sin aprobar.
 \evid{api_frecuencias/docs/evidencias/alertas/backtest_alertas_pronostico.md} \textbf{Etiquetas (§18):} sin incidentes
-etiquetados por Extreme, una muestra de alertas se revisó dos veces (\RevisionDoble); los revisores fueron
-automatizados y falta la validación del área operativa de Sobusa, que tiene listo el kit para hacerla a ciegas y sin
-red (\path{.../revision_doble/kit_humano/}).
+etiquetados por Extreme, una muestra de alertas se revisó dos veces (\RevisionDoble); falta la validación del área
+operativa de Sobusa, que tiene listo el kit para hacerla a ciegas.
 \evid{api_frecuencias/docs/evidencias/alertas/revision_doble/} \textbf{Notificación (RF-012):}
 adaptadores de correo y WhatsApp configurables, simulados, con circuit breaker propio.
 
@@ -487,7 +499,7 @@ adaptadores de correo y WhatsApp configurables, simulados, con circuit breaker p
 \section{Base de datos (§8)}
 \label{sec:bd}
 Todo lo nuevo vive en el esquema \texttt{ai\_frecuencias}, creado y versionado con Alembic
-(\path{alembic/versions/}, migraciones 0001 a 0015); las migraciones bajan y suben limpias en el CI (\texttt{upgrade}
+(\path{alembic/versions/}, migraciones 0001 a 0016); las migraciones bajan y suben limpias en el CI (\texttt{upgrade}
 → \texttt{downgrade base} → \texttt{upgrade}). Los instantes son \texttt{TIMESTAMPTZ} guardados en UTC y presentados en America/Bogota (§8.1).
 
 {\small
@@ -497,9 +509,11 @@ Todo lo nuevo vive en el esquema \texttt{ai\_frecuencias}, creado y versionado c
 \toprule Tabla & Contenido & Índices y restricciones \\ \midrule \endfirsthead
 \toprule Tabla & Contenido & Índices y restricciones \\ \midrule \endhead
 \bottomrule \endfoot
-\path{model_registry} & versiones, métricas, hash, corte, auditoría de activación & único parcial: un solo activo \\
+\path{model_registry} & versiones, métricas, hash, corte, auditoría de activación; familia \texttt{horario} o \texttt{corto\_plazo} (0016) & único parcial: un activo por familia \\
 \path{prediction} & punto, P10/P90 calibrados y del modelo, ajuste, explicación local, trazabilidad & ruta-fecha, generada, \texttt{idruta} \\
-\path{recommendation} & headway, buses/h, vehículos, viabilidad, objetivo, versión de umbrales, headway vigente de \texttt{rutas.frecuenciadespachos} y su diferencia (0010); origen \texttt{franja} o \texttt{plan\_dia} & ruta-fecha; únicas por ejecución y predicción, y por ejecución, ruta, fecha y hora del plan \\
+\path{prediction_corto_plazo} & pronóstico de 30, 60 o 120 min por ruta, sentido y segmento, con banda, línea base, explicación y dimensiones (0015, 0016) & única por grupo, nivel, sentido y segmento; CHECK de nivel y banda; ruta-instante-horizonte \\
+\path{subidas_15min}, \path{salidas_15min}, \path{lectura_15min} & lo leído para el corto plazo: subidas por bloque de 15 min y segmento, salidas por bloque, y hasta qué instante se leyó cada ruta y día con sus celdas excluidas (0016) & llaves ruta-fecha-bloque(-segmento) y ruta-fecha \\
+\path{recommendation} & headway, buses/h, vehículos, viabilidad, objetivo, versión de umbrales, headway vigente de \texttt{rutas.frecuenciadespachos} y su diferencia (0010); origen \texttt{franja}, \texttt{plan\_dia} o \texttt{corto\_plazo} (0016) & ruta-fecha; únicas por ejecución y predicción, y por ejecución, ruta, fecha y hora del plan \\
 \path{respuesta_reto} & foto de la respuesta de §20 con modelo, calibración, umbrales, ejecución y fuente del pronóstico & única fecha-ruta-modelo-umbrales; fecha descendente \\
 \path{alert}, \path{alert_history} & estructura de §5.3 y bitácora (con escalamiento) & CHECK de estado, ruta-fecha, código-ruta-ventana, viaje-detección, deduplicación única de abiertas, GiST en \texttt{ubicacion} \\
 \path{execution_log}, \path{execution_attempt} & ejecuciones (cola, progreso, marca, métricas, \texttt{traceparent}; ruta, madre y partición desde la 0009) e intentos & estado, en cola, corriendo, única por franja programada, trabajos de una madre \\
@@ -518,11 +532,10 @@ Todo lo nuevo vive en el esquema \texttt{ai\_frecuencias}, creado y versionado c
 
 \textbf{Dimensiones de §8.3.} \texttt{prediction}, \texttt{recommendation}, \texttt{alert},
 \texttt{demanda\_observada} y \texttt{feature\_snapshot} guardan \texttt{idruta}, \texttt{idempresa}, \texttt{idproceso},
-\texttt{id\_dia\_semana} (ISO 1--7) e \texttt{id\_estacionalidad}; el mapeo sale del catálogo empaquetado
-(\path{datos/catalogo_rutas.json}) o de la réplica en modo integrado, y la estacionalidad queda nula porque para Sobusa
-\texttt{estacionalidades\_anio} no trae filas propias (H1). La migración \path{0006_dimensiones_calidad_respuesta.py} rellena
-las filas existentes y su \texttt{downgrade} está probado
-(\path{tests/integracion/test_api_integracion.py::test_migracion_0006_dimensiones_sube_baja_y_rellena}).
+\texttt{id\_dia\_semana} (ISO 1--7) e \texttt{id\_estacionalidad} (también \texttt{prediction\_corto\_plazo}, desde
+la 0016); el mapeo sale del catálogo empaquetado o de la réplica, y la estacionalidad queda nula porque para Sobusa
+\texttt{estacionalidades\_anio} no trae filas propias (H1). La migración 0006 rellena las filas existentes y su
+\texttt{downgrade} está probado.
 
 \textbf{Particionamiento (§8.1).} \texttt{feature\_snapshot} es la tabla que más crece: con la foto por segmento y
 sentido suma \FotoFilasSegmento{} filas y unos \FotoMBEjecucion{} MB por ejecución, unos \FotoMBMes{} MB al mes con una
@@ -530,8 +543,7 @@ ejecución diaria y 24 veces más con ejecuciones horarias (\path{.../monitoreo/
 \texttt{PARTITION BY RANGE (ventana\_inicio)} por mes, con una función que crea la partición que falte antes de
 escribir, fuera de la transacción del ciclo; la retención (sección~\ref{sec:seguridad}) separa con \texttt{DETACH
 PARTITION} y borra las particiones anteriores al corte. \textbf{Semillas:} la
-migración inicial siembra la primera versión de los umbrales de §5.1; el registro de modelos se siembra con el modelo
-empaquetado si está vacío. \textbf{Extensiones:} PostGIS 3.4 (\texttt{geography} + GiST); \texttt{pg\_stat\_statements}
+migración inicial siembra los umbrales de §5.1; el registro, los modelos empaquetados de las dos familias. \textbf{Extensiones:} PostGIS 3.4 (\texttt{geography} + GiST); \texttt{pg\_stat\_statements}
 se recomienda para el diagnóstico.
 
 % ------------------------------------------------------------------------------------------------------------------
@@ -602,8 +614,7 @@ Consultas pesadas en réplica & todo lo medido corre en la réplica local; la ba
 \textbf{Convenciones (§12.1).} Ruta base \texttt{/api/v1} (versionada en la ruta); JSON UTF-8; instantes ISO-8601 con
 zona (-05:00); validación con Pydantic; error uniforme
 \path|{"error": {"codigo", "mensaje", "detalle", "correlation_id"}}| también para el 422; colecciones con
-\texttt{limite} (1 a 500), \texttt{desplazamiento}, \texttt{orden} (prefijo «-» descendente, lista blanca de campos) y
-filtros; exportaciones CSV y XLSX de lo filtrado (RF-017); cabecera \texttt{X-Correlation-Id} en cada respuesta;
+\texttt{limite} (1 a 500), \texttt{desplazamiento}, \texttt{orden} (lista blanca) y filtros; exportaciones CSV y XLSX de lo filtrado (RF-017); cabecera \texttt{X-Correlation-Id} en cada respuesta;
 Swagger UI y \texttt{/openapi.json} solo fuera de producción (\texttt{ENTORNO}). \textbf{Seguridad:} cabecera
 \texttt{X-API-Key} con tres roles (operador lee y gestiona alertas; analista además ejecuta, calcula y entrena; admin
 además activa, revierte, cambia umbrales, capacidad, flota y ciclo y corre la retención); las claves se guardan solo como hash SHA-256 y la auditoría usa
@@ -612,8 +623,9 @@ con el rol exigido. \evid{api_frecuencias/docs/evidencias/seguridad/matriz_roles
 
 \textbf{Endpoints.} La tabla se genera desde \OrigenTablaAPI{} (\NOperaciones{} operaciones, \NOperacionesVuno{} bajo
 \texttt{/api/v1} y las demás en la raíz); los diez de §12.2 están todos y Schemathesis los recorre en
-\path{tests/contrato}. Los procesos largos no corren dentro de la petición (§7.1): \texttt{POST /frequency/executions}
-(con \texttt{particion=ruta}, la madre y un trabajo por ruta), \texttt{POST /models/train}, \texttt{POST
+\path{tests/contrato}; \texttt{POST /predictions/run} elige el modelo con \texttt{modelo} (\texttt{auto}, el corto
+plazo si cubre la ruta, la fecha y la hora; si no, el horario, y lo dice en \texttt{motivo\_modelo}). Los procesos
+largos no corren dentro de la petición (§7.1): \texttt{POST /frequency/executions}, \texttt{POST /models/train}, \texttt{POST
 /respuesta/calcular}, \texttt{POST /segmentos/estadisticas/refrescar} y \texttt{POST /retencion/aplicar} encolan y
 responden 202 con el \texttt{execution\_id}; \texttt{GET /respuesta}, \texttt{GET /recommendations/plan} y \texttt{GET
 /segmentos/estadisticas} leen lo ya calculado.
@@ -636,7 +648,7 @@ responden 202 con el \texttt{execution\_id}; \texttt{GET /respuesta}, \texttt{GE
 \toprule RNF & Cómo se cumple & Evidencia \\ \midrule \endhead
 \bottomrule \endfoot
 001 Disponibilidad & cola en PostgreSQL con reserva y reintento; un \texttt{kill} durante la lectura o la predicción se retoma sin duplicar predicciones ni alertas (49 de 49 comprobaciones con \texttt{docker kill}) & \path{cola/caida_rnf001_docker.txt} \\
-002 Rendimiento & k6: \Kpeticiones{} consultas paginadas, hasta \Kvus{} usuarios, p95 \Kpnoventaycinco{} ms y \Kerrores~\% de errores; durante una ingesta, p95 \Kingesta{} ms (límite 2.000 ms). \texttt{GET /segmentos/estadisticas} lee la agregación materializada: \SegFrio{} ms la primera petición con la API recién arrancada y \SegCaliente{} ms la segunda (antes, \SegAntesFrio{} y \SegAntesCaliente{} s); con hasta \SegCargaUsuarios{} usuarios durante un refresco completo, p95 \SegCarga{} ms y \SegCargaErrores~\% de errores & \path{pruebas/k6_segmentos.txt}, \path{pruebas/k6_segmentos_consultas.json}, \path{pruebas/k6_segmentos_ingesta.json}, \path{pruebas/k6_volumen.txt} \\
+002 Rendimiento & k6: \Kpeticiones{} consultas paginadas, hasta \Kvus{} usuarios, p95 \Kpnoventaycinco{} ms y \Kerrores~\% de errores; durante una ingesta, p95 \Kingesta{} ms (límite 2.000 ms). \texttt{GET /segmentos/estadisticas} lee la agregación materializada: \SegFrio{} ms la primera petición y \SegCaliente{} ms la segunda (antes, \SegAntesFrio{} y \SegAntesCaliente{} s); con hasta \SegCargaUsuarios{} usuarios durante un refresco completo, p95 \SegCarga{} ms y \SegCargaErrores~\% de errores & \path{pruebas/k6_segmentos.txt}, \path{pruebas/k6_segmentos_consultas.json}, \path{pruebas/k6_segmentos_ingesta.json}, \path{pruebas/k6_volumen.txt} \\
 003 Ingesta & \IngestaFilas{} filas con COPY + upsert en \IngestaSegundos{} s (\IngestaTasa{} filas/s), memoria pico \IngestaMemoria{} MiB & \path{rendimiento.txt}, \path{cola/ingesta.txt} \\
 004 Asincronía & los cinco procesos largos (sección~\ref{sec:api}) responden 202 y encolan; progreso por etapa y reintento con espera creciente; la lectura masiva de segmentos es un trabajo por tramos que, sin cambios en la fuente, no relee fechas ni escribe & \path{cola/demo_ciclo_api_cola.txt}, \path{pruebas/k6_segmentos.txt}, \path{pruebas/segmentos_sin_cambios.json} \\
 005 Escalabilidad & API sin estado; dos réplicas reparten 20 ejecuciones 10/10 sin duplicados. Ejecución particionable por fecha y por ruta (marca de agua y candado por ruta): con dos réplicas, \ParticionPares{} pares de rutas distintas a la vez, \ParticionMismaRuta{} cruces de la misma ruta, sin duplicados y con las mismas salidas que sin partir & \path{cola/replicas.txt}, \path{cola/replicas_por_ruta.txt} \\
@@ -660,9 +672,8 @@ incertidumbre, versión y explicación (sección~\ref{sec:modelo}); recomendaci�
 (sección~\ref{sec:optimizacion}); alertas deduplicadas con historial (sección~\ref{sec:alertas}); modelo mejor que la
 línea base; marca de agua sin escribir en los consolidados (sección~\ref{sec:integracion}); y el ciclo de
 demostración contra la API en Docker: llega un día nuevo y se leen solo sus \DemoFilasNuevas{} filas (repetir lee
-\DemoFilasRepeticion), el activo tiene un WAPE de \DemoWapeNuevo~\% sobre lo recién llegado, el candidato
-\DemoCandidato{} se entrena como job, saca \DemoWapeCand~\% frente a \DemoWapeAct~\% del activo en la misma validación
-temporal (\DemoVentana) y queda \DemoDecision; el ciclo completo tarda \DemoTotalSeg{} s
+\DemoFilasRepeticion), el candidato \DemoCandidato{} se entrena como job, saca \DemoWapeCand~\% frente a \DemoWapeAct~\% del activo en la misma validación
+temporal (\DemoVentana) y queda \DemoDecisionLamina; el ciclo completo tarda \DemoTotalSeg{} s
 (\path{scripts/demo_ciclo_api.py}, \evid{api_frecuencias/docs/evidencias/despliegue/demo_ciclo_api.txt}).
 
 \noindent\begin{minipage}[t]{0.585\linewidth}
@@ -693,8 +704,7 @@ Total & \Ntotal & \Npasan{} aprobadas, \Nfallan{} fallidas, \Nomitidas{} omitida
 
 {\footnotesize\color{rol-tinta-3}Fuente: \FuentePruebas, \CorridaPruebas, con la réplica; cobertura de
 \path{app/}: \FuenteCobertura.} Las omitidas lo son a propósito (la caída real con \texttt{docker kill} y las
-escrituras en la réplica, que se activan con una variable). SonarQube importó \SonarPruebas{} pruebas en su análisis
-(\path{api_frecuencias/docs/evidencias/sonarqube/measures.json}).
+escrituras en la réplica, que se activan con una variable). SonarQube importó \SonarPruebas{} pruebas en su análisis.
 
 \textbf{Integración continua.} \path{api_frecuencias/ci/github_actions_entrega.yml}, el flujo de GitHub Actions:
 Python 3.11 y 3.13, servicio PostGIS 14-3.4, ruff, bandit, Alembic de ida y vuelta, pytest con cobertura mínima de
@@ -709,14 +719,14 @@ En GitHub no hay réplica con los datos del reto, así que allí se omiten las p
 \toprule Riesgo & Mitigación implementada \\ \midrule \endfirsthead
 \toprule Riesgo & Mitigación implementada \\ \midrule \endhead
 \bottomrule \endfoot
-Exposición de datos & los catálogos nunca devuelven placa, conductor, propietario, contactos, módem, póliza ni GPS (0 columnas prohibidas, \path{catalogos/sin_datos_personales.txt}); el conductor de una alerta es un seudónimo HMAC-SHA256 con secreto del entorno y la base rechaza un valor en claro, y las lecturas de la ocupación por segmento y de los viajes de las alertas lo seudonimizan al leer; las lecturas de \texttt{"Procesos"} omiten sus columnas de credenciales \\
-Secretos & ninguno en el repositorio: conexión, claves y secreto del seudónimo llegan por variables de entorno (\path{.env.example} con marcadores que deben cambiarse); las claves de API se guardan como hash; el log no las imprime \\
-Acceso & tres roles con mínimo privilegio; la escritura en la base de Extreme es imposible por permisos, no solo por código \\
-Consulta pesada & lectura incremental, \texttt{statement\_timeout}, réplica, índices solo por el DBA y circuit breaker \\
-Alertas excesivas & persistencia, episodios, deduplicación y severidades; descartadas medidas en el monitoreo \\
+Exposición de datos & los catálogos nunca devuelven placa, conductor, propietario, contactos, módem, póliza ni GPS (\path{catalogos/sin_datos_personales.txt}); el conductor es un seudónimo HMAC-SHA256, se seudonimiza al leer y la base rechaza un valor en claro; las lecturas de \texttt{"Procesos"} omiten sus credenciales \\
+Secretos & ninguno en el repositorio: conexión, claves y secreto del seudónimo llegan por variables de entorno; las claves de API se guardan como hash y el log no las imprime \\
+Acceso & tres roles con mínimo privilegio; escribir en la base de Extreme es imposible por permisos \\
+Consulta pesada & lectura incremental, \texttt{statement\_timeout}, réplica, índices por el DBA, circuit breaker \\
+Alertas excesivas & persistencia, episodios y deduplicación; las descartadas se miden en el monitoreo \\
 Recomendación inviable & estado \texttt{viable=false} con motivo y mejor aproximación \\
 Deriva & PSI, error móvil, sombra, compuerta y reversión automática \\
-Retención & trabajo \texttt{retencion} de la cola (migración 0012), programado o con \texttt{POST /retencion/aplicar}, que simula por omisión: \RetencionMeses{} meses en caliente; separa y borra (o deja para archivar) las particiones viejas de \texttt{feature\_snapshot}, borra por lotes resultados, alertas cerradas, notificaciones y ejecuciones viejas y conserva el histórico validado, la ocupación por segmento y la auditoría; bitácora en \texttt{retencion\_registro} y SQL solo sobre \texttt{ai\_frecuencias} (\path{docs/retencion_datos.md}) \\
+Retención & trabajo \texttt{retencion} de la cola (0012), programado o con \texttt{POST /retencion/aplicar}, que simula por omisión: \RetencionMeses{} meses en caliente; separa las particiones viejas de \texttt{feature\_snapshot}, borra por lotes resultados, alertas cerradas y ejecuciones viejas y conserva el histórico validado y la auditoría; bitácora en \texttt{retencion\_registro} (\path{docs/retencion_datos.md}) \\
 \end{longtable}
 }
 
@@ -725,39 +735,27 @@ Retención & trabajo \texttt{retencion} de la cola (migración 0012), programado
 \label{sec:despliegue}
 \textbf{Contenedores.} \path{api_frecuencias/docker-compose.yml} levanta \texttt{db} (PostgreSQL 14 + PostGIS 3.4),
 \texttt{migrar} (Alembic \texttt{upgrade head} antes de la API) y \texttt{api} (FastAPI con su trabajador de cola y el
-planificador), más \texttt{jaeger} para las trazas. Dos archivos se suman al base: \path{docker-compose.replicas.yml}
-(dos réplicas de la API sobre la misma cola) y \path{docker-compose.integracion.yml} (modo integrado: la API lee de la
-base de Extreme o de su réplica con \texttt{lector\_ia} y escribe con \texttt{escritor\_ia}). El perfil
-\texttt{operacional} arma la réplica local con los scripts de Extreme (pasos y verificación en
-\path{api_frecuencias/docs/despliegue.md}).
+planificador), más \texttt{jaeger} para las trazas. \path{docker-compose.replicas.yml} agrega dos réplicas de la API
+sobre la misma cola y \path{docker-compose.integracion.yml}, el modo integrado (lee con \texttt{lector\_ia} y escribe
+con \texttt{escritor\_ia}). La imagen guarda una copia de los modelos y, al actualizar una instalación, la API agrega
+como candidatos los que falten en el volumen, sin cambiar el activo.
 
 {\sloppy\textbf{Configuración por ambiente (§7.1).} Todo entra por variables de entorno; \texttt{.env.example} trae los
-nombres con marcadores que deben cambiarse (las contraseñas, por ejemplo) y \texttt{.env} no se versiona. Las principales: \emph{bases,} \texttt{DATABASE\_URL} (resultados), \texttt{FUENTE} y
-\texttt{FUENTE\_DATABASE\_URL} (lectura), \texttt{FUENTE\_TABLA}, \texttt{FUENTE\_SOLAPE\_MIN},
-\texttt{FUENTE\_STATEMENT\_TIMEOUT\_MS} y \texttt{CATALOGOS\_DATABASE\_URL}; \emph{ejecución} (valores por omisión),
-\texttt{PLAN\_EJECUCION\_CRON} (todos los días a las 05:15), \texttt{PLAN\_REENTRENAMIENTO\_CRON} (lunes, 04:00),
-\texttt{PLAN\_PARTICION} (\texttt{ninguna} o \texttt{ruta}), \texttt{PLAN\_SEGMENTOS\_CRON} (05:45, con la base
-operacional), \texttt{PLAN\_RETENCION\_CRON} (domingos, 03:30; vacío la apaga), \texttt{SEGMENTOS\_DIAS\_POR\_LOTE},
-\texttt{FOTO\_SEGMENTOS}, \texttt{TRABAJADORES}, \texttt{LEASE\_SEGUNDOS}, \texttt{MAX\_REINTENTOS} y
-\texttt{MOTOR\_INFERENCIA} (\texttt{sklearn} u \texttt{onnx}); \emph{seguridad,} \texttt{AUTH\_HABILITADA},
+nombres con marcadores y \texttt{.env} no se versiona. Las principales: \emph{bases,} \texttt{DATABASE\_URL} (resultados), \texttt{FUENTE} y
+\texttt{FUENTE\_DATABASE\_URL} (lectura), \texttt{FUENTE\_SOLAPE\_MIN} y \texttt{FUENTE\_STATEMENT\_TIMEOUT\_MS};
+\emph{ejecución,} \texttt{PLAN\_EJECUCION\_CRON}, \texttt{PLAN\_INTRADIA\_CRON}, \texttt{PLAN\_REENTRENAMIENTO\_CRON},
+\texttt{PLAN\_PARTICION}, \texttt{PLAN\_SEGMENTOS\_CRON}, \texttt{PLAN\_RETENCION\_CRON}, \texttt{TRABAJADORES},
+\texttt{MAX\_REINTENTOS} y \texttt{MOTOR\_INFERENCIA} (\texttt{onnx} para los dos modelos); \emph{seguridad,} \texttt{AUTH\_HABILITADA},
 \texttt{API\_KEYS} (solo hashes), \texttt{SEUDONIMO\_SECRETO}, \texttt{ENTORNO} (en \texttt{produccion} se apagan
 Swagger y \texttt{/openapi.json}) y \texttt{METRICAS\_PUBLICAS}; \emph{resiliencia y observabilidad,}
 \texttt{CIRCUITO\_FUENTE\_FALLOS\_MAX}, \texttt{CIRCUITO\_FUENTE\_REINICIO\_S}, \texttt{OTEL\_EXPORTADOR},
-\texttt{LOG\_NIVEL} y \texttt{NOTIFICACIONES\_CANALES} con sus destinatarios (el de
-\texttt{NOTIF\_UNICIDAD\_DESTINATARIOS}, responsable del consolidado, lo define Extreme; mientras esté vacía, el reporte
-de unicidad queda pendiente en \texttt{notification\_log}).\par}
+\texttt{LOG\_NIVEL} y \texttt{NOTIFICACIONES\_CANALES} con sus destinatarios.\par}
 
-\textbf{Ciclo diario en operación.} El planificador encola una ejecución por franja (índice único: dos réplicas no
-encolan dos veces la misma); con \texttt{PLAN\_PARTICION=ruta}, la madre y un trabajo por ruta en la misma
-transacción. El trabajador la reclama con \texttt{SKIP LOCKED}, corre las etapas con progreso visible en
-\texttt{GET /frequency/executions/\{execution\_id\}} y confirma resultados, marcas de agua y estado en una sola
-transacción. Al cerrar calcula el plan del día siguiente y la foto de la respuesta (si eso falla, la ejecución queda
-\texttt{ok} con la advertencia en sus métricas) y, una vez por ejecución, lee, valida y contrasta los consolidados: una tabla
-que falla queda como fallo parcial, sin mover su marca. Si trajo datos nuevos y la base operacional está configurada,
-pide una vez el refresco de la agregación de segmentos (en una ejecución partida, la madre hace las dos cosas). Si la
-política lo pide, encola un reentrenamiento, que pasa por sombra y compuerta antes de cualquier activación; un
-administrador puede activar o revertir con auditoría (\texttt{POST /models/\{model\_id\}/activate},
-\texttt{/models/rollback}).
+\textbf{Ciclo en operación.} El planificador encola el ciclo diario y los intradía, uno por franja (índice único: dos
+réplicas no encolan dos veces la misma). El trabajador lo reclama con \texttt{SKIP LOCKED}, muestra el progreso por
+etapa y confirma resultados, marcas de agua y estado en una sola transacción; al cerrar calcula el plan del día
+siguiente y la foto de la respuesta, y contrasta los consolidados. Si la política lo pide, encola un reentrenamiento,
+que pasa por sombra y compuerta antes de activarse.
 
 % ------------------------------------------------------------------------------------------------------------------
 \section{Decisiones técnicas}
@@ -766,20 +764,21 @@ administrador puede activar o revertir con auditoría (\texttt{POST /models/\{mo
 \toprule Decisión & Alternativas & Razón \\ \midrule \endfirsthead
 \toprule Decisión & Alternativas & Razón \\ \midrule \endhead
 \bottomrule \endfoot
-Adaptador propio de solo lectura con lista blanca de SELECT & ORM sobre las tablas de Extreme; vistas nuevas en su esquema & RF-002 y §11.3: ningún objeto nuevo en el esquema operacional; la guarda rechaza DML y DDL antes de conectarse \\
-Marca de agua con ventana de solape y huella md5 & solo \texttt{ultima\_actualizacion > marca} & las marcas no tienen zona y llevan la hora de inicio de la transacción (H8) y el cierre resella todo (H7): sin solape se pierden filas tardías y sin huella se reprocesa todo \\
+Adaptador propio de solo lectura con lista blanca de SELECT & ORM; vistas nuevas en su esquema & RF-002 y §11.3: ningún objeto nuevo en el esquema operacional; la guarda rechaza DML y DDL antes de conectarse \\
+Marca de agua con ventana de solape y huella md5 & solo \texttt{ultima\_actualizacion > marca} & las marcas llevan la hora de inicio de la transacción (H8) y el cierre resella todo (H7): sin solape se pierden filas tardías y sin huella se reprocesa todo \\
 Cola en PostgreSQL (\texttt{SKIP LOCKED}) & Celery o RQ con Redis & un servicio menos; resultados y «ok» en la misma transacción (exactamente una vez) \\
-Partición por ruta, apagada por omisión & una sola marca global; partir siempre & RNF-005: las réplicas reparten rutas sin cruzar la misma; sin los índices propuestos cada trabajo paga su lectura y sus costos fijos \\
-Agregación de segmentos materializada & agregar en cada petición; caché con vencimiento & RNF-002 y §7.1: no toca la base de Extreme y da lo mismo que la agregación directa; el refresco tiene reintento, tramos y candado \\
-HGB Poisson con cuantiles, exportable a ONNX & LightGBM o el híbrido (experimentos 11 y 12); redes temporales & reproducible desde Python con scikit-learn, sin GPU ni descargas en cada solicitud (§9.2), paridad ONNX y latencia de \OnnxMsFila{} ms por fila; las cifras del informe son otra métrica (sección~\ref{sec:modelo}) \\
-Calibración conformal versionada (v2 por bloque horario; v1 de respaldo) & usar la banda de cuantiles tal cual & acerca la cobertura al 80~\% sin tocar el pronóstico, se ajusta solo con la validación y se verifica por hash; la banda del modelo cubría 67,67~\% en 2024 \\
-Modelo de segmentos jerárquico sobre el pronóstico de la ruta & reparto fijo de las subidas; un modelo independiente por segmento & la suma de los segmentos es la ruta y la banda se compone con la de la ruta; mejora al reparto fijo en la prueba, con un protocolo fijado antes de mirarla \\
+Partición por ruta, apagada por omisión & una sola marca global; partir siempre & RNF-005: las réplicas reparten rutas sin cruzar la misma; sin los índices propuestos cada trabajo paga su lectura \\
+Agregación de segmentos materializada & agregar en cada petición; caché con vencimiento & RNF-002 y §7.1: no toca la base de Extreme y da lo mismo que la agregación directa \\
+Corto plazo (RF-005): LightGBM Poisson por nivel, horizonte y ruta & repartir la ruta entre segmentos; un modelo propio para el sentido & se eligió en la validación (el reparto y el sentido directo se equivocaron más); LightGBM \CortoLightGBM{} trata los faltantes de forma nativa, da el TreeSHAP exacto y se exporta a ONNX con un conversor propio y paridad verificada (sección~\ref{sec:corto}) \\
+Horario (plan del día): HGB Poisson con cuantiles & LightGBM o el híbrido (experimentos 11 y 12); redes temporales & reproducible desde Python con scikit-learn, sin GPU ni descargas en cada solicitud (§9.2), paridad ONNX y latencia de \OnnxMsFila{} ms por fila \\
+Calibración conformal versionada & usar la banda de cuantiles tal cual & acerca la cobertura al 80~\% sin tocar el pronóstico, se ajusta solo con la validación y se verifica por hash; la banda del modelo cubría 67,67~\% en 2024 \\
+Reparto jerárquico del pronóstico horario por segmento & reparto fijo de las subidas & la suma de los segmentos es la ruta y la banda se compone con la de la ruta; mejora al reparto fijo en su prueba \\
 MILP con PuLP/CBC & heurística; OR-Tools & exacto (verificado contra enumeración), solucionador libre y una sola formulación para la franja y para el plan del día \\
 Episodios y persistencia de 2 h & una alerta por hora & §18 «alertas excesivas»: de \AlertasAntes{} a \AlertasAhora{} alertas por ruta y día con mayor precisión \\
-Umbrales y parámetros en \texttt{threshold\_config} versionado & constantes en el código; regenerar los datos empaquetados & regla de gobierno de §5.1: se cambian sin recompilar; un candado evita que dos cambios simultáneos pierdan parámetros, y cada resultado guarda su versión \\
-Claves de API por rol & OAuth2/JWT con un proveedor de identidad & el prototipo no tiene proveedor de identidad; la política está en un solo lugar (\path{app/seguridad.py}) y se puede cambiar por JWT sin tocar los routers \\
-Partición mensual de \texttt{feature\_snapshot} & particionar todas las tablas & §8.1 «cuando se justifique»: es la que más crece (\FotoFilasSegmento{} filas de segmentos por ejecución); las demás, unas miles de filas por día \\
-Respuesta y plan calculados en la cola y leídos por el GET & resolver el MILP dentro de la petición & §7.1: un GET no corre un proceso largo; la foto guarda modelo, calibración y umbrales, y el 404 \texttt{sin\_calcular} dice cómo pedirla \\
+Umbrales y parámetros en \texttt{threshold\_config} versionado & constantes en el código; regenerar los datos empaquetados & regla de gobierno de §5.1: se cambian sin recompilar, con candado, y cada resultado guarda su versión \\
+Claves de API por rol & OAuth2/JWT con un proveedor de identidad & no hay proveedor de identidad; la política está en \path{app/seguridad.py} y se puede cambiar por JWT sin tocar los routers \\
+Partición mensual de \texttt{feature\_snapshot} & particionar todas las tablas & §8.1 «cuando se justifique»: es la que más crece (\FotoFilasSegmento{} filas de segmentos por ejecución) \\
+Respuesta y plan calculados en la cola & resolver el MILP dentro de la petición & §7.1: un GET no corre un proceso largo; la foto guarda modelo, calibración y umbrales \\
 El tablero consume la API & leer la base desde el tablero & una sola fuente de verdad, los mismos roles y la misma auditoría \\
 \end{longtable}
 \fuente{api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.md} (cobertura de 2024) y las secciones anteriores.

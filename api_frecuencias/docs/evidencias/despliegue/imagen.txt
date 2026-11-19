@@ -1,7 +1,7 @@
-Imagen de la API (sobusa_limpio-api) · 2026-11-18 20:49:52 -0500
-  id sha256:b2d2e1d4bddf…, creada 2026-11-19T01:44:30.514231285Z
-  tamaño (contenido de las capas, docker image inspect .Size): 460.0 MB
-  tamaño en disco (docker images): 1.72GB
+Imagen de la API (sobusa_limpio-api) · 2026-11-19 03:27:51 -0500
+  id sha256:2d92e90fbfcf…, creada 2026-11-19T08:19:51.314392793Z
+  tamaño (contenido de las capas, docker image inspect .Size): 519.0 MB
+  tamaño en disco (docker images): 1.85GB
   usuario: sobusa; puerto: ['8000/tcp']; comando: ['sh', '-c', 'alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000']
   HEALTHCHECK: ['CMD-SHELL', 'python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen(\'http://127.0.0.1:8000/health\', timeout=4).status == 200 else 1)"']
   variables de la imagen (ninguna secreta; se omiten PATH y las de verificación de la imagen base): ['LANG=C.UTF-8', 'PYTHON_VERSION=3.11.18', 'PYTHONDONTWRITEBYTECODE=1', 'PYTHONUNBUFFERED=1', 'PIP_DISABLE_PIP_VERSION_CHECK=1', 'TZ=America/Bogota', 'DATA_DIR=/app/datos']
@@ -10,10 +10,10 @@ $ dentro de la imagen: python, usuario y tamaños
   Python 3.11.18
   uid=10001(sobusa) gid=10001(sobusa) groups=10001(sobusa)
   973M	/usr/local/lib/python3.11/site-packages
-  1.8M	/app/app
-  54M	/app/datos
+  1.9M	/app/app
+  62M	/app/datos
   1.2M	/app/scripts
-  152K	/app/alembic
+  164K	/app/alembic
   24 MB /usr/local/lib/python3.11/site-packages/sqlalchemy
   27 MB /usr/local/lib/python3.11/site-packages/numpy.libs
   29 MB /usr/local/lib/python3.11/site-packages/scipy.libs
@@ -32,11 +32,12 @@ $ docker history (capas)
   0B	HEALTHCHECK {Test:[CMD-SHELL python -c "impo…
   0B	EXPOSE [8000/tcp]
   0B	USER sobusa
-  55.8MB	RUN /bin/sh -c useradd --create-home --uid 1…
-  55.7MB	COPY datos ./datos # buildkit
-  1.24MB	COPY scripts ./scripts # buildkit
-  1.8MB	COPY app ./app # buildkit
-  164kB	COPY alembic ./alembic # buildkit
+  64.4MB	RUN /bin/sh -c useradd --create-home --uid 1…
+  46.9MB	COPY datos/modelos ./modelos_imagen # buildk…
+  64.3MB	COPY datos ./datos # buildkit
+  1.26MB	COPY scripts ./scripts # buildkit
+  1.93MB	COPY app ./app # buildkit
+  176kB	COPY alembic ./alembic # buildkit
   16.4kB	COPY alembic.ini pyproject.toml ./ # buildkit
   1.01GB	RUN /bin/sh -c pip install --only-binary=:al…
   12.3kB	COPY requirements.txt . # buildkit

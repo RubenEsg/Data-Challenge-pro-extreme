@@ -1,8 +1,8 @@
 {
  "pruebas": {
   "codigo_salida": 0,
-  "duracion_s": 2289.7,
-  "tests": 1810,
+  "duracion_s": 1821.8,
+  "tests": 1833,
   "failures": 0,
   "errors": 0,
   "skipped": 10
@@ -22,5 +22,5 @@
   }
  },
  "codigo_scanner": 0,
- "generado_en": "2026-11-18T21:30:33-05:00"
+ "generado_en": "2026-11-19T04:16:38-05:00"
 }

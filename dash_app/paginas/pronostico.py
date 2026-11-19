@@ -263,7 +263,7 @@ def _ultimos_por_ventana(items):
 
 
 def _fecha_reciente(ruta, horizonte):
-    d, err = API.obtener("predictions", ruta=ruta, horizonte_min=horizonte, limite=1, orden="-fecha")
+    d, err = API.obtener("predictions", ruta=ruta, horizonte_min=horizonte, limite=1, orden="-fecha", modelo="horario")
     if err or not d or not d.get("items"):
         return None, err
     return d["items"][0]["fecha"], None
@@ -406,7 +406,8 @@ def api_pronosticos(ruta, fecha, h, _fa, _fs, _pa, _ps, pagina, sel):
     elif disparo == "pr-api-sig":
         pagina += 1
 
-    todo, err = API.obtener("predictions", ruta=ruta, desde=fecha, hasta=fecha, horizonte_min=h, limite=TOPE_DIA, orden="instante")
+    todo, err = API.obtener("predictions", ruta=ruta, desde=fecha, hasta=fecha, horizonte_min=h, limite=TOPE_DIA, orden="instante",
+                             modelo="horario")
     if err:
         return salida(fecha, ui.aviso([err, API.ayuda_error(err)], "atencion", API.titulo_error(err), rol="status"),
                       lista=ui.nota("Sin datos: la API no está disponible."))
@@ -421,7 +422,7 @@ def api_pronosticos(ruta, fecha, h, _fa, _fs, _pa, _ps, pagina, sel):
     graf = _figura_banda(dia, reales, ruta, fecha, h)
     cifras = _cifras_api(dia, reales, h)
 
-    pag, err = API.obtener("predictions", ruta=ruta, desde=fecha, hasta=fecha, horizonte_min=h, limite=POR_PAGINA,
+    pag, err = API.obtener("predictions", ruta=ruta, desde=fecha, hasta=fecha, horizonte_min=h, limite=POR_PAGINA, modelo="horario",
                            desplazamiento=pagina * POR_PAGINA, orden="instante")
     if err:
         return salida(fecha, ui.aviso(err, "atencion", API.titulo_error(err), rol="status"), cifras, graf)

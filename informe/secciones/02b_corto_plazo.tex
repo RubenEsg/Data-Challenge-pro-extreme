@@ -151,8 +151,8 @@ ocho semanas, el modelo se equivoca por ruta a 60 minutos en \CPSinRutaModLX~\% 
 
 \paragraph{Lo que falta.} Las subidas son demanda observada: dependen de los buses que pasaron. El modelo supone que
 el conteo llega en vivo, y la latencia real de la captura no se conoce. Los dos registros imposibles siguen en los
-datos: filtrarlos antes de entrenar es un pendiente. La API ya lo sirve (\texttt{POST /api/v1/predictions/corto-plazo})
-y reproduce las \CPReproFilas{} predicciones de esta prueba; falta alimentarlo con la captura en vivo.
+datos del entrenamiento: al servir se excluyen. La API lo sirve por omisión, reproduce las \CPReproFilas{}
+predicciones de esta prueba y lo alimenta con la lectura incremental.
 
 % Fin de la sección P: las tablas y figuras siguientes retoman la numeración del informe.
 \setcounter{table}{\value{cptabla}}\setcounter{figure}{\value{cpfigura}}

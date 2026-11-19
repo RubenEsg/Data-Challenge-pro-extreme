@@ -1,13 +1,19 @@
 {
  "servidor": "SonarQube 26.11.0.134175 (Community Build, Docker)",
  "proyecto": "sobusa-api-frecuencias",
- "generado_en": "2026-11-18T21:30:35-05:00",
+ "generado_en": "2026-11-19T04:16:39-05:00",
  "ultimo_analisis": {
-  "key": "f175cf26-8f4a-45aa-8ee4-4aded7e9b63f",
-  "date": "2026-11-19T02:29:35+0000",
+  "key": "668c6046-5c91-4e6f-96bf-68685cc8ef02",
+  "date": "2026-11-19T09:15:50+0000",
   "events": [
    {
-    "key": "805e59a6-0a80-4629-8355-16f5eddd6c70",
+    "key": "1da5245e-5720-431d-b2be-dad83ca76b66",
+    "category": "QUALITY_GATE",
+    "name": "Passed",
+    "description": ""
+   },
+   {
+    "key": "eca76b8c-44d6-4cac-9760-0b42312f94f9",
     "category": "VERSION",
     "name": "1.0.0"
    }
@@ -25,7 +31,7 @@
     "metricKey": "coverage",
     "comparator": "LT",
     "errorThreshold": "85",
-    "actualValue": "95.8"
+    "actualValue": "95.2"
    },
    {
     "status": "OK",

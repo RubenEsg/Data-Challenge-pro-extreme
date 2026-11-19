@@ -61,7 +61,9 @@ def test_migracion_0014_versiona_el_minimo_de_alt003_como_propuesta_y_baja(migra
         _alembic("upgrade", "head")
     despues = vigentes()
     fila = despues["alt003_probabilidad_minima"]
-    assert fila.valor == 0.30 and fila.creado_por == m.CREADO_POR and fila.aprobado_por is None
+    # la 0016 (el tope VAL-009 del corto plazo) crea otra versión del conjunto completo encima de la de la 0014 y
+    # conserva el valor que dejó la 0014
+    assert fila.valor == 0.30 and fila.creado_por in (m.CREADO_POR, "migracion_0016") and fila.aprobado_por is None
     assert len({f.version for f in despues.values()}) == 1 and set(antes) <= set(despues)
     assert de_la_0014() == len(set(antes) | {"alt003_probabilidad_minima"})      # el conjunto completo, UNA versión
     api = cliente.get("/api/v1/thresholds").json()

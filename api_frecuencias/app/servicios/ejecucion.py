@@ -253,8 +253,11 @@ def nueva_version_umbrales(sesion: Session, valores: dict[str, Any], creado_por:
 
 
 # ---------------------------------------------------------------- registro de modelos
-def modelo_activo(sesion: Session) -> RegistroModelo | None:
-    return sesion.scalar(select(RegistroModelo).where(RegistroModelo.estado == "activo"))
+def modelo_activo(sesion: Session, familia: str = "horario") -> RegistroModelo | None:
+    """El modelo activo de la familia: «horario» (el del plan del día siguiente, por omisión) o «corto_plazo» (30, 60
+    y 120 minutos). Cada familia tiene a lo sumo uno (migración 0016)."""
+    return sesion.scalar(select(RegistroModelo).where(RegistroModelo.estado == "activo",
+                                                      RegistroModelo.familia == familia))
 
 
 def registrar_modelo(sesion: Session, info: dict, estado: str = "candidato",
@@ -291,7 +294,8 @@ def registrar_modelo(sesion: Session, info: dict, estado: str = "candidato",
 
 def sembrar_registro(sesion: Session) -> int:
     """Si el registro está vacío, registra los modelos ya entrenados que publique inferencia (si los expone)."""
-    if sesion.scalar(select(func.count()).select_from(RegistroModelo)):
+    if sesion.scalar(select(func.count()).select_from(RegistroModelo)
+                     .where(RegistroModelo.familia == "horario")):
         return 0
     try:
         from app.servicios import inferencia
@@ -315,6 +319,26 @@ def sembrar_registro(sesion: Session) -> int:
             r.auditoria = [*r.auditoria, {"evento": "activacion_inicial", "en": ahora().isoformat()}]
     sesion.commit()
     return len(fichas)
+
+
+def registrar_sembrados(sesion: Session, model_ids: list[str]) -> int:
+    """Los modelos horarios que app/servicios/modelos_imagen.py copió de la imagen al volumen entran al registro de la
+    base como candidatos (si ya están, no se tocan): el activo no cambia."""
+    from app.servicios import inferencia
+
+    pedidos = set(model_ids)
+    n = 0
+    for ficha in inferencia.listar_modelos():
+        mid = ficha.get("model_id")
+        if mid not in pedidos or not ficha.get("ejecutable_en_api", True) or \
+                sesion.scalar(select(RegistroModelo).where(RegistroModelo.model_id == mid)) is not None:
+            continue
+        r = registrar_modelo(sesion, ficha, estado="candidato")
+        r.auditoria = [*r.auditoria, {"evento": "siembra_imagen", "en": ahora().isoformat(),
+                                      "motivo": "modelo de la imagen que el volumen no tenía"}]
+        n += 1
+    sesion.commit()
+    return n
 
 
 # ---------------------------------------------------------------- ejecuciones
@@ -1456,11 +1480,14 @@ def alertas_observadas(s: Session, rutas: list[str], df, validos, errores: list[
 def construir_recomendacion(r: dict, *, ruta: str, fecha: date, hora: int, demanda_hora: float | None,
                             demanda_p90: float | None, execution_id: uuid.UUID | None,
                             prediction_id: uuid.UUID | None, umbrales_version: int | None,
-                            entradas: dict, origen: str = "franja") -> Recomendacion:
-    """Fila de recommendation: la de una franja (§10.2, ligada a su predicción) o una hora del plan del día
-    (origen='plan_dia', sin predicción), con las dimensiones de §8.3."""
+                            entradas: dict, origen: str = "franja",
+                            prediction_corto_plazo_id: uuid.UUID | None = None) -> Recomendacion:
+    """Fila de recommendation: la de una franja (§10.2, ligada a su predicción), una hora del plan del día
+    (origen='plan_dia', sin predicción) o la de un pronóstico de corto plazo (origen='corto_plazo', ligada a la fila
+    de la ruta de prediction_corto_plazo), con las dimensiones de §8.3."""
     return Recomendacion(
-        recommendation_id=uuid.uuid4(), execution_id=execution_id, prediction_id=prediction_id, ruta=ruta,
+        recommendation_id=uuid.uuid4(), execution_id=execution_id, prediction_id=prediction_id,
+        prediction_corto_plazo_id=prediction_corto_plazo_id, ruta=ruta,
         fecha=fecha, hora=hora, demanda_hora=demanda_hora, demanda_p90=demanda_p90,
         buses_hora=None if r.get("buses_hora") is None else int(r["buses_hora"]),
         headway_min=_num(r.get("headway_min")),
@@ -1765,32 +1792,200 @@ def _monitorear(s: Session, c: _Ciclo, wape_por_ruta: dict[str, float]) -> None:
     wape_por_ruta.update({r: w for r, w in (c.monitoreo.get("wape_por_ruta") or {}).items() if w is not None})
 
 
-def _pronostico_corto_plazo(s: Session, c: _Ciclo, rutas: list[str], instante: datetime) -> None:
-    """RF-005 y §7.3 paso 5: el pronóstico de corto plazo (30, 60 y 120 min por ruta, sentido y segmento, con lo
-    observado hasta el instante) de cada ruta y horizonte del ciclo, guardado con su execution_id en
-    prediction_corto_plazo. Un instante o una fecha fuera de la cobertura del modelo se anota como omitido; un error
-    del modelo queda en los fallos de la ejecución."""
+def _fin_del_dia(f: date) -> datetime:
+    return datetime.combine(f, dtime(23, 59, 59), tzinfo=ZONA)
+
+
+def _leer_corto_plazo(s: Session, c: _Ciclo) -> None:
+    """RF-013 y §7.3 pasos 2 a 4 para el pronóstico de corto plazo: los días que trajo la lectura incremental, en
+    bloques de 15 minutos por segmento (app/servicios/panel_corto_plazo.py). En modo integrado se re-agregan de
+    timbradas_segmentos y progvehiculos, solo lo actualizado antes de la marca de agua; en modo Parquet salen del panel
+    empaquetado (la llegada simulada) y un día que el panel no trae no se marca como leído. Cada celda pasa por VAL-009
+    (los errores van a data_quality_error con su llave), lectura_15min dice hasta dónde se leyó cada día y las celdas
+    válidas de los días que el panel no tiene quedan en subidas_15min y salidas_15min (las de un día del panel ya están
+    empaquetadas). Un fallo queda en los fallos de la ejecución y el ciclo sigue."""
+    from app.servicios import panel_corto_plazo as P
+
+    resumen: dict[str, Any] = {"fuente": None, "dias": 0, "celdas": 0, "subidas": 0.0, "excluidas": 0, "guardadas": 0,
+                               "sin_datos": []}
+    if s is None or c.validos is None or not len(c.validos) or c.marca_nueva is None:
+        c.metricas["lectura_corto_plazo"] = dict(resumen, nota="sin días nuevos que leer")
+        return
+    integrado = hasattr(c.fuente, "leer_panel_15min")
+    resumen["fuente"] = "timbradas_segmentos" if integrado else "panel_empaquetado"
+    maximo = P.tope(c.umbrales)
+    errores: list[dict] = []
+    try:
+        with s.begin_nested():
+            for ruta, g in c.validos.groupby("ruta"):
+                errores += _leer_corto_plazo_de_la_ruta(s, c, ruta, {_a_fecha(f) for f in g["fecha"]}, integrado,
+                                                        maximo, resumen)
+            if errores:
+                resumen["errores_calidad"] = _guardar_errores(s, c.execution_id, P.LOTE, errores)
+    except Exception as exc:  # noqa: BLE001 - sin esta lectura el corto plazo usa lo que ya tenía; el ciclo sigue
+        log.warning("lectura de corto plazo: %s", exc)
+        c.fallos.append({"etapa": "lectura_corto_plazo", "error": str(exc)})
+        resumen["error"] = str(exc)
+    if len(resumen["sin_datos"]) > 20:
+        resumen["sin_datos"] = resumen["sin_datos"][:20] + [{"y": f"{len(resumen['sin_datos']) - 20} más"}]
+    resumen["subidas"] = round(resumen["subidas"], 1)
+    resumen["tope_subidas_bloque_segmento"] = maximo
+    c.metricas["lectura_corto_plazo"] = resumen
+
+
+def _leer_corto_plazo_de_la_ruta(s: Session, c: _Ciclo, ruta: str, fechas: set, integrado: bool, maximo: float,
+                                 resumen: dict) -> list[dict]:
+    """Los días de una ruta: los lee de la fuente o del panel, los guarda y devuelve los errores VAL-009."""
+    from app.servicios import corto_plazo as cp
+    from app.servicios import panel_corto_plazo as P
+
+    try:
+        idruta = cp.idruta_de(ruta)
+    except cp.FueraDeCobertura:
+        return []
+    fechas = sorted(fechas)
+    if integrado:
+        # los días que el panel empaquetado ya trae salen de los eventos de conteo con el bloque de cada subida; el
+        # cargue inicial de timbradas_segmentos pone el del fin del viaje (H10): solo se leen los días posteriores al
+        # panel (lo que escribe el trigger en vivo)
+        fin_panel = P.fin_del_panel()
+        resumen["en_el_panel"] = resumen.get("en_el_panel", 0) + sum(f <= fin_panel for f in fechas)
+        fechas = [f for f in fechas if f > fin_panel]
+        if not fechas:
+            return []
+        sub, sal = P.de_la_fuente(c.fuente, idruta, fechas, c.marca_nueva)
+    else:
+        sub, sal = P.del_panel(idruta, fechas)
+        con_datos = set(sub["fecha"]) | set(sal["fecha"])
+        resumen["sin_datos"] += [{"ruta": ruta, "fecha": f.isoformat()} for f in fechas if f not in con_datos]
+        fechas = [f for f in fechas if f in con_datos]
+    hastas = {f: min(c.marca_nueva.astimezone(ZONA), _fin_del_dia(f)) for f in fechas}
+    if not hastas:
+        return []
+    r, errores = P.guardar_dias(s, idruta, sub, sal, hastas, resumen["fuente"], c.execution_id, maximo)
+    for k in ("dias", "celdas", "subidas", "excluidas", "guardadas"):
+        resumen[k] += r[k]
+    return errores
+
+
+def _instante_corto_plazo(c: _Ciclo, instante: datetime) -> datetime:
+    """El instante del pronóstico de corto plazo del ciclo. Un ciclo con instante (los intradía y los pedidos con
+    instante) usa el suyo; el diario, el primer instante del día siguiente al último leído (04:00): a esa hora todo lo
+    que usa el modelo ya se leyó (los días anteriores), y nada del día pronosticado cuenta como observado."""
+    if c.p.get("instante"):
+        return instante
+    base = instante.astimezone(ZONA).date()
+    return datetime.combine(base, dtime(4, 0), tzinfo=ZONA)
+
+
+@dataclass
+class _CortoPlazoDelCiclo:
+    """Lo común a los pronósticos de corto plazo de un ciclo (instante, modelo, recomendador, alertas)."""
+
+    s: Session
+    c: _Ciclo
+    instante: datetime
+    model_id: str | None
+    catalogo: dict
+    recomendador: _RecomendacionesDeLaEjecucion | None
+    contextos: list | None
+    resumen: dict
+
+
+def _pronostico_corto_plazo(s: Session, c: _Ciclo, rutas: list[str], instante: datetime,
+                            catalogo: dict | None = None, recomendador: _RecomendacionesDeLaEjecucion | None = None,
+                            contextos: list | None = None) -> None:
+    """RF-005, §7.3 pasos 5 a 7: el pronóstico de corto plazo (30, 60 y 120 min por ruta, sentido y segmento) de cada
+    ruta y horizonte del ciclo, con lo leído hasta la marca de agua de la ejecución (nada posterior cuenta como
+    observado), guardado con su execution_id en prediction_corto_plazo; la recomendación de §10.2 de su franja (la
+    hora del punto medio de la ventana, a ritmo por hora, con la misma restricción reactiva de §10.1 que el resto del
+    ciclo) en recommendation con origen 'corto_plazo'; y, en los ciclos intradía, los contextos de las alertas de
+    pronóstico (atención inmediata). Fuera de la cobertura del modelo se anota como omitido; un error queda en los
+    fallos de la ejecución."""
     from app.servicios import corto_plazo as cp
 
-    resumen: dict[str, Any] = {"pronosticos": 0, "omitidos": [], "model_id": None}
+    resumen: dict[str, Any] = {"pronosticos": 0, "recomendaciones": 0, "contextos_alerta": 0, "omitidos": [],
+                               "model_id": None}
     if s is None:                       # ciclo sin base (pruebas de una parte del ciclo): no hay dónde guardarlo
         c.metricas["corto_plazo"] = dict(resumen, omitido="sin sesión de base de datos")
         return
-    for ruta in rutas:
-        for h in c.horizontes:
-            try:
-                r = cp.pronosticar(ruta, instante, int(h))
-            except cp.FueraDeCobertura as exc:
-                resumen["omitidos"].append({"ruta": ruta, "horizonte_min": int(h), "motivo": str(exc)})
-                continue
-            except Exception as exc:  # noqa: BLE001 - se registra por ruta y horizonte
-                c.fallos.append({"etapa": "corto_plazo", "ruta": ruta, "horizonte_min": h, "error": str(exc)})
-                continue
-            r["generated_at"] = ahora().astimezone(ZONA).isoformat(timespec="seconds")
-            cp.guardar(s, r, execution_id=c.execution_id)
-            resumen["pronosticos"] += 1
-            resumen["model_id"] = r["model_id"]
+    t = _instante_corto_plazo(c, instante)
+    activo = modelo_activo(s, "corto_plazo")
+    resumen.update(instante=t.isoformat(), datos_hasta=c.marca_nueva.isoformat() if c.marca_nueva else None)
+    ctx = _CortoPlazoDelCiclo(s, c, t, activo.model_id if activo else None, catalogo or {},
+                              recomendador if catalogo else None,
+                              contextos if es_intradia(c.p) and contextos is not None else None, resumen)
+    with cp.con_sesion(s):
+        for ruta in rutas:
+            for h in c.horizontes:
+                _un_pronostico_corto_plazo(ctx, ruta, int(h))
     c.metricas["corto_plazo"] = resumen
+
+
+def _un_pronostico_corto_plazo(ctx: _CortoPlazoDelCiclo, ruta: str, h: int) -> None:
+    """Una ruta y un horizonte: el pronóstico, su recomendación y, en los intradía, el contexto de sus alertas."""
+    from app.servicios import corto_plazo as cp
+
+    c, resumen = ctx.c, ctx.resumen
+    try:
+        r = cp.pronosticar(ruta, ctx.instante, h, model_id=ctx.model_id, hasta=c.marca_nueva)
+    except cp.FueraDeCobertura as exc:
+        resumen["omitidos"].append({"ruta": ruta, "horizonte_min": h, "motivo": str(exc)})
+        return
+    except Exception as exc:  # noqa: BLE001 - se registra por ruta y horizonte
+        c.fallos.append({"etapa": "corto_plazo", "ruta": ruta, "horizonte_min": h, "error": str(exc)})
+        return
+    r["generated_at"] = ahora().astimezone(ZONA).isoformat(timespec="seconds")
+    franja, rec_d, entradas = _recomendacion_corto_plazo(ctx, ruta, h, r)
+    grupo = cp.guardar(ctx.s, r, execution_id=c.execution_id)
+    resumen["pronosticos"] += 1
+    resumen["model_id"] = r["model_id"]
+    if rec_d is None:
+        return
+    ctx.s.flush()
+    ctx.s.add(construir_recomendacion(
+        rec_d, ruta=ruta, fecha=franja["fecha"], hora=franja["hora"], demanda_hora=franja["demanda_hora"],
+        demanda_p90=franja["p90_hora"], execution_id=c.execution_id, prediction_id=None,
+        umbrales_version=c.version_u, origen="corto_plazo", prediction_corto_plazo_id=r["prediction_id"],
+        entradas=dict(entradas, prediccion_corto_plazo={"grupo_id": str(grupo),
+                                                        "prediction_id": str(r["prediction_id"])})))
+    resumen["recomendaciones"] += 1
+    if ctx.contextos is not None:
+        ctx.contextos.append(_contexto_alerta_corto_plazo(ruta, h, franja, r, entradas, rec_d))
+        resumen["contextos_alerta"] += 1
+
+
+def _recomendacion_corto_plazo(ctx: _CortoPlazoDelCiclo, ruta: str, h: int, r: dict) -> tuple:
+    """(franja, recomendación, entradas) de §10.2 con el pronóstico de la ventana; (None, None, None) sin
+    recomendador o si falla (queda en los fallos)."""
+    from app.servicios import corto_plazo as cp
+
+    if ctx.recomendador is None:
+        return None, None, None
+    franja = cp.franja_hora(r)
+    info = dict(ctx.catalogo.get(ruta, {}), ruta=ruta)
+    try:
+        rec_d, entradas = ctx.recomendador.de_la_franja(info, ruta, franja)
+    except Exception as exc:  # noqa: BLE001
+        ctx.c.fallos.append({"etapa": "recomendacion_corto_plazo", "ruta": ruta, "horizonte_min": h,
+                             "error": str(exc)})
+        return None, None, None
+    rec_d["franja_prediccion"] = franja
+    r["recomendacion"] = cp.resumen_recomendacion(franja, rec_d, ctx.c.version_u)
+    return franja, rec_d, entradas
+
+
+def _contexto_alerta_corto_plazo(ruta: str, h: int, franja: dict, r: dict, entradas: dict, rec_d: dict) -> dict:
+    """El contexto de las alertas de pronóstico (ALT-001 a ALT-004) de un pronóstico de corto plazo."""
+    from app.servicios import alertas
+
+    return alertas.contexto_pronostico(
+        ruta, h, franja, {"pasajeros": r["pasajeros"], "p10": r["p10"], "p90": r["p90"], "model_id": r["model_id"]},
+        entradas, rec_d, empresa=empresa_de(ruta), detectada_en=ahora(),
+        # §5.3 variables influyentes: el TreeSHAP del pronóstico de corto plazo, en la forma de siempre
+        variables_influyentes=[{"variable": f["variable"], "descripcion": f["descripcion"], "valor": f.get("valor"),
+                                "factor": f.get("factor"), "fuente": "shap_modelo_corto_plazo"}
+                               for f in r["explicacion"]["factores"]])
 
 
 def _pronostico_y_recomendacion(s: Session, c: _Ciclo, ruta: str, info: dict, h: Any, instante: datetime,
@@ -1969,6 +2164,7 @@ def _con_datos_nuevos(s: Session, c: _Ciclo) -> None:
     headway vigente del plan, _info_de_las_rutas), alertas deduplicadas (de pronóstico y observadas) y
     notificaciones."""
     instante = _instante_por_defecto(c.p, c.validos, c.marca_nueva)
+    _leer_corto_plazo(s, c)
     wape_por_ruta = _error_y_monitoreo(s, c)
     _ocupacion_actual(s, c, instante)
     _avance(c.execution_id, 45, "prediccion")
@@ -1982,7 +2178,13 @@ def _con_datos_nuevos(s: Session, c: _Ciclo) -> None:
         for h in c.horizontes:
             _pronostico_y_recomendacion(s, c, ruta, catalogo.get(ruta, {}), h, instante, wape_por_ruta, recomendador,
                                         contextos)
-    _pronostico_corto_plazo(s, c, rutas, instante)
+    _pronostico_corto_plazo(s, c, rutas, instante, catalogo, recomendador, contextos)
+    # §9.4 del corto plazo (error móvil, cobertura, volumen, PSI y ALT-010): una vez por ejecución diaria, no en cada
+    # trabajo de una ejecución partida por ruta (RNF-005) ni en los intradía (el día a medias)
+    if not es_intradia(c.p) and c.ruta is None:
+        from app.servicios import monitoreo_corto_plazo
+
+        c.metricas["monitoreo_corto_plazo"] = json_seguro(monitoreo_corto_plazo.en_ciclo(s, c))
     _avance(c.execution_id, 70, "alertas")
 
     umbrales_alertas = dict(c.umbrales) | {"version": c.version_u}

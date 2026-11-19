@@ -83,6 +83,7 @@ se lee del entorno del proceso y no del `.env`: hay que definirla en la consola 
 | `CATALOGOS_DATABASE_URL` | URL de solo lectura propia de los catálogos (vacía = `FUENTE_DATABASE_URL`) | vacía | **Sí** |
 | `CATALOGOS_DATOS_DIR`, `CATALOGOS_FLOTA_CSV`, `CATALOGOS_CACHE_S` | Exportaciones Parquet, reporte de flota y caché (s) | `../../datos`, `../../insumos_sobusa/flota_sobusa.csv`, 300 | No |
 | `DATA_DIR`, `MODELOS_DIR` | Carpeta de datos (Parquet/JSON) y de modelos | `./datos` (imagen: `/app/datos`), `DATA_DIR/modelos` | No |
+| `MODELOS_IMAGEN_DIR` | Segunda copia de los modelos dentro de la imagen, de donde la API copia al arrancar lo que le falta al volumen `modelos` (sección 9). No hace falta definirla; fuera de Docker la carpeta no existe y no se copia nada | `/app/modelos_imagen` | No |
 | `TZ` | Zona de presentación (§8.1); en la base todo va con zona horaria | `America/Bogota` | No |
 
 **Operación**
@@ -102,7 +103,7 @@ se lee del entorno del proceso y no del `.env`: hay que definirla en la consola 
 | `PLAN_RETENCION_CRON` | Corrida programada de la retención de datos (§18; `docs/retencion_datos.md`); vacía la apaga. Con el planificador encendido (Compose), esa corrida **aplica** la política por omisión (`retencion_aplicar_programada` = 1 en `threshold_config`; sección 7). Solo por `env_file` | `30 3 * * 0` (domingos, 03:30) | No |
 | `MODELO_PLAN` | Pronóstico de la foto de la respuesta del reto: el modelo activo o `E12` (el pronóstico precalculado de 2025 del experimento 12 del informe) | modelo activo | No |
 | `INFERENCIA_SERIE` | `validada`: un script sin sesión de base arma las variables con el histórico validado de `demanda_observada` (la API y el ciclo ya lo hacen con su sesión) | vacía en el venv (serie empaquetada); `validada` en Compose y en `.env.example` (definirla vacía en el `.env` deja solo la serie empaquetada) | No |
-| `MOTOR_INFERENCIA`, `CALIBRACION_BANDA` | `sklearn` u `onnx`; `v1` fuerza la banda conformal móvil en lugar de la calibración versionada | `sklearn`, vacía | No |
+| `MOTOR_INFERENCIA`, `CALIBRACION_BANDA` | `sklearn` u `onnx`. Con `onnx` corren en ONNX Runtime el modelo horario y también el de corto plazo (sus 18 árboles exportados en `datos/modelos/corto_plazo/cp_lgbm_20250630_s42/onnx/`, que viajan en la imagen; cada uno se verifica por SHA-256 al cargar). `v1` fuerza la banda conformal móvil en lugar de la calibración versionada | `sklearn`, vacía | No |
 | `NOTIFICACIONES_CANALES`, `NOTIFICACIONES_SEVERIDAD` | Canales simulados (`correo,whatsapp`) y severidad mínima | vacío en el venv (`correo,whatsapp` en Compose), `critica` | No |
 | `NOTIF_CORREO_DESTINATARIOS`, `NOTIF_CORREO_REMITENTE`, `NOTIF_WHATSAPP_NUMEROS` | Destinatarios (se enmascaran en logs; el envío es simulado) | vacíos (Compose: `despacho@example.com`, `+570000000000`) | Dato personal |
 | `NOTIF_UNICIDAD_DESTINATARIOS` | Correos del responsable del consolidado para el reporte de llaves duplicadas de cada lote (§6.3; correo simulado, con el remitente de `NOTIF_CORREO_REMITENTE`). Lo define Extreme; sin él, el reporte queda en `notification_log` como `pendiente_destinatario`. Solo por `env_file` | vacía | Dato personal |
@@ -169,8 +170,11 @@ curl http://127.0.0.1:8000/health      {"estado": "ok", "base_datos": "ok", ...}
 Qué pasa al arrancar: `db` (PostGIS 14-3.4) queda sano; el servicio **`migrar`** corre `alembic upgrade head` una sola
 vez y termina con código 0; solo entonces arranca **`api`** (uvicorn en el puerto 8000, usuario sin privilegios,
 HEALTHCHECK contra `/health`). Al primer arranque, el registro de modelos se siembra desde
-`datos/modelos/registro.json` con el modelo activo `hgb_fv2_20250831_s42`. Los modelos que se entrenen después quedan
-en el volumen `modelos` y sobreviven a los reinicios. Swagger: http://127.0.0.1:8000/docs (fuera de producción).
+`datos/modelos/registro.json` con el modelo activo `hgb_fv2_20250831_s42` (familia `horario`) y desde
+`datos/modelos/corto_plazo/registro.json` con `cp_lgbm_20250630_s42` (familia `corto_plazo`): un activo por familia.
+Los modelos que se entrenen después quedan en el volumen `modelos` y sobreviven a los reinicios; al actualizar la
+imagen, los modelos nuevos que trae entran a ese volumen como candidatos (sección 9). Swagger:
+http://127.0.0.1:8000/docs (fuera de producción).
 
 | Tarea | Comando |
 |---|---|
@@ -238,7 +242,11 @@ Como ese modo define `FUENTE_DATABASE_URL`, el planificador programa además el 
 también, con `lector_ia`, las subidas y bajadas por segmento de los viajes de las franjas que acaba de entregar, para
 la ocupación actual por segmento (§10.1, `docs/ocupacion_segmentos.md`), y los viajes del día de cada ruta en
 `progvehiculos`, para el viaje, el vehículo y el seudónimo del conductor de ALT-006 y ALT-009
-(`docs/alertas_viajes_y_alt003.md`). Al cerrar, cada ejecución lee además los consolidados de Extreme desde su marca
+(`docs/alertas_viajes_y_alt003.md`). Para el pronóstico de corto plazo, cada ciclo re-agrega además, con `lector_ia`,
+los días que tocó la lectura incremental en bloques de 15 minutos: las subidas por segmento de `timbradas_segmentos`
+(solo lo actualizado antes de la marca de agua) y las salidas de `progvehiculos.fechainicio`, de los días posteriores
+al panel empaquetado; lo guarda en `ai_frecuencias.subidas_15min`, `salidas_15min` y `lectura_15min` (`docs/manual_tecnico.md`, sección 5, «El modelo de
+corto plazo»). La réplica no trae eventos de conteo nuevos de 2026 salvo los que simula la llegada. Al cerrar, cada ejecución lee además los consolidados de Extreme desde su marca
 por tabla, los valida y los contrasta con la agregación propia (`docs/consolidados_ciclo.md`). La retención de datos
 (`PLAN_RETENCION_CRON`) se programa igual que en los demás modos con el planificador encendido y solo borra en
 `ai_frecuencias` (sección 7).
@@ -284,15 +292,21 @@ la cola y queda en `execution_log.traceparent`.
   por segmento de §10.1, 0012 el tipo de trabajo `retencion`, la bitácora `retencion_registro`, la columna
   `huellas_solape` de `segmento_estadistica_refresco` y los seis parámetros de la retención de §18 en
   `threshold_config`, 0013 las bajadas y las medidas de los segmentos en `demanda_observada`, la tabla
-  `marca_agua_tabla` y las tolerancias del contraste de los consolidados en `threshold_config`, y 0014 el mínimo de
-  probabilidad de ALT-003 en `threshold_config`). Son aditivas: no borran datos (la que borra datos viejos es la tarea
-  de retención, no la migración; sección 7). Las que versionan umbrales (la 0001, la 0003, la 0004, la 0005, la 0007,
-  la 0010, la 0012, la 0013 y la 0014) crean cada una una versión nueva del conjunto, así que en una base nueva sin
-  ningún `PUT /thresholds` la versión vigente es la 9, con 71 parámetros. La crea la 0014 y nace **propuesta**: rige
-  desde que se aplica la migración, `GET /api/v1/thresholds` la muestra como propuesta y el área operativa la aprueba
-  con `POST /api/v1/thresholds/{version}/aprobar` (`docs/alertas_viajes_y_alt003.md`, sección 4). La 0013 y la 0014
-  toman el candado de `bloquear_umbrales`: un `PUT /thresholds` de otra réplica durante el despliegue espera. La
-  evidencia `docs/evidencias/gobierno/umbrales_en_postgresql.json` es de la cabeza 0014 (`version_vigente` = 9).
+  `marca_agua_tabla` y las tolerancias del contraste de los consolidados en `threshold_config`, 0014 el mínimo de
+  probabilidad de ALT-003 en `threshold_config`, 0015 la tabla `prediction_corto_plazo` y 0016, la cabeza, el corto
+  plazo dentro del ciclo: las tablas `subidas_15min`, `salidas_15min` y `lectura_15min`, el origen `corto_plazo` y
+  `prediction_corto_plazo_id` en `recommendation`, las dimensiones de §8.3 en `prediction_corto_plazo`, la columna
+  `familia` de `model_registry` con un activo por familia y el tope `cp_tope_subidas_bloque_segmento` de VAL-009 en
+  `threshold_config`). La cadena va de la 0001 a la 0016, con una sola cabeza. Son aditivas: no borran datos (la que
+  borra datos viejos es la tarea de retención, no la migración; sección 7). Las que versionan umbrales (la 0001, la
+  0003, la 0004, la 0005, la 0007, la 0010, la 0012, la 0013, la 0014 y la 0016) crean cada una una versión nueva del
+  conjunto. En una base nueva sin ningún `PUT /thresholds`, la vigente es la que crea la 0016: los 71 parámetros de la
+  versión 9 de la 0014 más el tope de VAL-009. Nace **propuesta**, como la de la 0014: rige desde que se aplica la
+  migración, `GET /api/v1/thresholds` la muestra como propuesta y el área operativa la aprueba con
+  `POST /api/v1/thresholds/{version}/aprobar` (`docs/alertas_viajes_y_alt003.md`, sección 4). Si el tope ya estaba
+  vigente, la 0016 no crea otra versión. La 0013, la 0014 y la 0016 toman el candado de `bloquear_umbrales`: un
+  `PUT /thresholds` de otra réplica durante el despliegue espera. La evidencia
+  `docs/evidencias/gobierno/umbrales_en_postgresql.json` es de la cabeza 0014 (`version_vigente` = 9).
 - En Compose las aplica el servicio `migrar` (`alembic upgrade head`) antes de la API; con varias réplicas nadie
   compite por Alembic. Repetirla no hace nada (comprobado en `migraciones.txt`).
 - Comandos útiles: `docker compose -p sobusa_api run --rm migrar alembic current`, `... alembic history`, y para
@@ -359,8 +373,8 @@ docker compose -p sobusa_api exec -T db pg_dump -U sobusa -d ai_frecuencias -n a
 docker compose -p sobusa_api exec -T db pg_restore -U sobusa -d ai_frecuencias --clean --if-exists < respaldo_ai_frecuencias.dump
 ```
 
-Los modelos entrenados viven en el volumen `modelos` (`/app/datos/modelos`); para respaldarlos:
-`docker compose -p sobusa_api cp api:/app/datos/modelos ./respaldo_modelos`. La réplica operacional no se respalda
+Los modelos entrenados viven en el volumen `modelos` (`/app/datos/modelos`, con los registros de `segmentos/` y
+`corto_plazo/`); para respaldarlos: `docker compose -p sobusa_api cp api:/app/datos/modelos ./respaldo_modelos`. La réplica operacional no se respalda
 desde aquí: es una copia que se reconstruye con `scripts/replica_cargar.py`.
 
 **Retención de datos (§18).** Con el planificador encendido (en Compose, por omisión), la franja de
@@ -434,22 +448,24 @@ copia temporal de `datos/`, está en `demo_esperado.md`: dos corridas del 13-11-
 cada una, y la misma salida salvo los tiempos y los identificadores.
 
 Los demás resultados de la tabla salen de la corrida completa de `verificar_despliegue.py` (con la demostración) del
-18-11-2026, a las 20:44, en el equipo de desarrollo: «Resultado global: OK» en 5,6 min, que dejó
+19-11-2026, a las 03:19, en el equipo de desarrollo: «Resultado global: OK» en 8,2 min, que dejó
 `arranque_limpio.txt`, `migraciones.txt`, `demo_ciclo_api.txt`, `reinicio.txt` e `imagen.txt`. Los tiempos varían de
-una corrida a otra; cada corrida reescribe esos archivos. Es del código final: la cabeza de
-Alembic es la 0015 (`alembic/versions/`) y la demostración usa el cliente común `scripts/cliente_http.py` (sección 5).
+una corrida a otra; cada corrida reescribe esos archivos. La cabeza de Alembic es la 0016 (el corto plazo dentro del
+ciclo) y la demostración usa el cliente común `scripts/cliente_http.py` (sección 5). Cada ciclo hace además la lectura
+de 15 minutos, los pronósticos de 30, 60 y 120 minutos con su recomendación y el monitoreo del corto plazo, por eso
+una ejecución tarda ahora entre 51 y 73 s (antes, unos 20 s).
 
 | Paso | Resultado |
 |---|---|
-| Construcción | 173 s la primera vez sin caché (`construccion_sin_cache.txt`); 10,5 s reutilizando la caché de BuildKit (`arranque_limpio.txt`, paso 1) |
-| `up -d --build` desde volúmenes nuevos | retorna en 20,9 s; `GET /health` = ok a los 25,3 s y HEALTHCHECK `healthy` a los 26,5 s; `db` sano y `migrar` termina con código 0 (`arranque_limpio.txt`, pasos 2 y 3) |
-| Migraciones | 0001 → 0015 (head) en la base nueva; `alembic current` = 0015 (head); repetir `alembic upgrade head` no hace nada; 24 tablas en `ai_frecuencias`, la partición `feature_snapshot_202611`, el índice GiST `ix_alert_ubicacion` y `pg_stat_statements` cargado (`migraciones.txt`) |
+| Construcción | 173 s la primera vez sin caché (`construccion_sin_cache.txt`); 17,7 s reutilizando la caché de BuildKit (`arranque_limpio.txt`, paso 1) |
+| `up -d --build` desde volúmenes nuevos | retorna en 18,8 s; `GET /health` = ok a los 22,6 s y HEALTHCHECK `healthy` a los 24,3 s; `db` sano y `migrar` termina con código 0 (`arranque_limpio.txt`, pasos 2 y 3) |
+| Migraciones | 0001 → 0016 (head) en la base nueva; `alembic current` = 0016 (head); repetir `alembic upgrade head` no hace nada; 27 tablas en `ai_frecuencias` (con `subidas_15min`, `salidas_15min` y `lectura_15min`), la partición `feature_snapshot_202611`, el índice GiST `ix_alert_ubicacion` y `pg_stat_statements` cargado (`migraciones.txt`) |
 | Claves y roles | 2 claves (admin y operador) creadas con `scripts/crear_api_key.py` dentro del contenedor; sin clave 401, operador 200, operador sobre una ruta de admin (`POST /api/v1/models/rollback`) 403, `/metrics` 200; `SEUDONIMO_SECRETO` llega al contenedor (64 caracteres, no se muestra) (`arranque_limpio.txt`, paso 4) |
 | Demostración §14.2 (referencia con la API en el venv, `demo_esperado.md`; 13-11-2026, antes de fv3) | pasos (1) a (6) con código 0 en 120 s (120 s en la confirmación): 49.623, 51 y 4.641 filas; repetición con 0 filas; candidato `hgb_fv2_20250930_s42` entrenado por el trabajador de la cola; 714 filas de la sombra; comparación en 2025-12-01..14 (WAPE 14,108 % del candidato frente a 13,982 % del activo); decisión: **rechazado** por la compuerta de sombra, y 409 `requiere_forzar` al intentar activarlo sin forzar; el activo sigue siendo `hgb_fv2_20250831_s42`; notificaciones simuladas 116 y omitidas 72, porque las alertas observadas evalúan ahora cada día del lote |
-| Demostración §14.2 en Docker (`demo_ciclo_api.txt`) | sobre la pila creada desde cero (18-11-2026, 20:44), código 0 en 183,1 s con los seis pasos impresos: 49.623, 51 y 4.641 filas; repetición con 0 filas; candidato `hgb_fv3_20250930_s42` (desde el 15-11-2026 el entrenamiento usa las variables fv3, con el calendario escolar y universitario) entrenado por el trabajador de la cola en 19,7 s; 714 filas de la sombra; comparación en 2025-12-01..14 (WAPE 13,578 % del candidato frente a 13,982 % del activo); decisión: **activado** por la compuerta de cuatro criterios, que cumple los cuatro, y revertido al final con `POST /api/v1/models/rollback` para dejar la pila como estaba (el activo vuelve a ser `hgb_fv2_20250831_s42`); notificaciones simuladas 116 y omitidas 72 |
-| RNF-001 (`reinicio.txt`) | A) SIGKILL (`docker kill` + `docker start`) durante la ejecución: API de vuelta en 4,2 s, ejecución terminada 38,2 s después del corte con la traza de intentos [abandonado, ok]; B) `docker compose restart api`: de vuelta en 3,4 s, terminada 43,8 s después, [abandonado, ok]. En los dos, las mismas predicciones y recomendaciones de la ejecución de referencia, sin duplicados, con todas las comprobaciones de `scripts/prueba_caida.py` en OK; en toda la base, 0 predicciones duplicadas y 0 ejecuciones colgadas |
-| Imagen (`imagen.txt`) | 1,72 GB en disco (460,0 MB de capas, con LightGBM y `libgomp1` para el pronóstico de corto plazo), usuario `sobusa` (uid 10001), sin herramientas de desarrollo; su `pip freeze` (74 paquetes, `requisitos_congelados.txt`) es idéntico a `requirements.txt` con los marcadores de Linux y Python 3.11 |
-| `down -v` | 2,5 s; sin contenedores ni volúmenes del proyecto |
+| Demostración §14.2 en Docker (`demo_ciclo_api.txt`) | sobre la pila creada desde cero (19-11-2026, 03:20), código 0 en 294 s con los seis pasos impresos: 49.623, 51 y 4.641 filas; repetición con 0 filas; candidato `hgb_fv3_20250930_s42` (desde el 15-11-2026 el entrenamiento usa las variables fv3, con el calendario escolar y universitario) entrenado por el trabajador de la cola en 56,1 s; 714 filas de la sombra; comparación en 2025-12-01..14 (WAPE 13,578 % del candidato frente a 13,982 % del activo `hgb_fv2_20250831_s42`); decisión: **activado** por la compuerta de cuatro criterios, que cumple los cuatro, y revertido al final con `POST /api/v1/models/rollback` para dejar la pila como estaba (el activo horario vuelve a ser `hgb_fv2_20250831_s42`; el de corto plazo, `cp_lgbm_20250630_s42`, no se toca); en cada ciclo, la lectura de 15 minutos (2.919 días-ruta y 11.012.701 celdas en la carga inicial, 2 excluidas por VAL-009, ninguna copiada a la base porque son del panel empaquetado), 9 pronósticos de corto plazo con su recomendación y el monitoreo del corto plazo (WAPE móvil de 5,07 % a 7,77 %); notificaciones simuladas 116 y omitidas 72 |
+| RNF-001 (`reinicio.txt`) | A) SIGKILL (`docker kill` + `docker start`) durante la ejecución: API de vuelta en 5,0 s, ejecución terminada 60,2 s después del corte con la traza de intentos [abandonado, ok]; B) `docker compose restart api`: de vuelta en 3,6 s, terminada 63,9 s después, [abandonado, ok]. En los dos, las mismas predicciones y recomendaciones de la ejecución de referencia, sin duplicados, con todas las comprobaciones de `scripts/prueba_caida.py` en OK; en toda la base, 0 predicciones duplicadas y 0 ejecuciones colgadas |
+| Imagen (`imagen.txt`) | 1,85 GB en disco (519,0 MB de capas, con LightGBM y `libgomp1` para el pronóstico de corto plazo y la segunda copia de los modelos en `/app/modelos_imagen`), usuario `sobusa` (uid 10001), sin herramientas de desarrollo; su `pip freeze` (74 paquetes, `requisitos_congelados.txt`) es idéntico a `requirements.txt` con los marcadores de Linux y Python 3.11 |
+| `down -v` | 2,4 s; sin contenedores ni volúmenes del proyecto |
 | Modo integrado (`modo_integrado.txt`) | `alembic upgrade head` como `escritor_ia` (la base ya estaba en la 0014); `/health` ok en 3,5 s y una ejecución «ok» en 2,1 s con 0 filas nuevas (13-11-2026); la API lee como `lector_ia` (solo `SELECT`/`WITH` en transacciones que terminan en `ROLLBACK`) y escribe solo en `ai_frecuencias` como `escritor_ia` (0 escrituras fuera del esquema); un `CREATE TABLE` como `lector_ia` se rechaza (`ReadOnlySqlTransaction`); el contenedor y el volumen de la réplica no cambian |
 
 ## 9. Actualizar una pila en uso sin perder datos
@@ -462,7 +478,25 @@ curl http://127.0.0.1:8000/health
 ```
 
 `--no-deps` evita tocar el contenedor `db` (ya está corriendo y sano). Las ejecuciones que estaban corriendo se
-retoman solas al arrancar (`REANUDAR_EJECUCIONES=true`, RNF-001).
+retoman solas al arrancar (`REANUDAR_EJECUCIONES=true`, RNF-001). Una base que estaba en la 0015 sube a la 0016 con el
+mismo `migrar`.
+
+**Los modelos de una imagen nueva.** En Compose, `/app/datos/modelos` es el volumen `modelos`: Docker lo llena con lo
+que trae la imagen solo la primera vez, cuando está vacío. Al actualizar una instalación que ya existía, ese volumen
+tapaba los modelos nuevos de la imagen; por ejemplo, el de corto plazo no llegaba y `/api/v1/predictions/corto-plazo`
+respondía 503. Por eso la imagen guarda una segunda copia de `datos/modelos` en `/app/modelos_imagen`
+(`MODELOS_IMAGEN_DIR`), y al arrancar la API (`app/servicios/modelos_imagen.py`) copia al volumen lo que le falta:
+
+- las carpetas de los modelos que el volumen no tiene;
+- en cada registro (el de los modelos horarios, `segmentos/` y `corto_plazo/`), las fichas de esos modelos, **como
+  candidatos**: el modelo activo no cambia, y activar sigue siendo una decisión con su compuerta
+  (`POST /api/v1/models/{model_id}/activate`). Si el volumen no tiene un registro, se copia el de la imagen tal cual,
+  con su activo.
+
+Nada se sobrescribe ni se borra. Los modelos horarios nuevos entran además a `model_registry` como candidatos (evento
+`siembra_imagen` en su auditoría), y los de corto plazo, como candidatos de la familia `corto_plazo`; si esa familia no
+tenía activo, el activo del registro de corto plazo lo es. El log de arranque dice qué se copió («Modelos de la imagen
+copiados al volumen»); si la copia falla, la API arranca igual y el error queda en el log.
 
 ## 10. Solución de problemas
 
@@ -478,4 +512,6 @@ retoman solas al arrancar (`REANUDAR_EJECUCIONES=true`, RNF-001).
 | El conductor sale `null` en las alertas | Falta `SEUDONIMO_SECRETO` en el `.env` (no se guarda nunca el dato en claro) |
 | Una ejecución quedó «corriendo» tras apagar el equipo | Al arrancar, la API la retoma; si la réplica no vuelve, otra la toma al vencer la reserva (`LEASE_SEGUNDOS`) |
 | En modo integrado aparece un segundo «operacional» vacío | Se levantó el perfil `integracion` con `-p sobusa_api`: use siempre `-p sobusa_rep` y `--no-deps` (sección 3.3) |
+| `/api/v1/predictions/corto-plazo` responde 503 `pronostico_no_disponible` | Sin el modelo de corto plazo en el volumen `modelos`: con una imagen anterior al 19-11-2026, el volumen de una instalación vieja lo tapaba. Reconstruya y recree la API (sección 9): al arrancar copia los modelos que faltan. Con `MOTOR_INFERENCIA=onnx`, también responde así si el modelo activo no tiene su exportación ONNX (`scripts/exportar_onnx_corto_plazo.py`) |
+| `POST /api/v1/predictions/run` responde con el modelo horario | Con `modelo` = `auto` (por omisión) responde el corto plazo solo si cubre la ruta, la fecha y la hora; si no, el horario, y `motivo_modelo` dice por qué |
 | La construcción falla al descargar ruedas | Sin red o sin rueda binaria para la plataforma: la imagen exige ruedas (`--only-binary=:all:`) para no compilar; use la caché de BuildKit o una red con salida a PyPI |

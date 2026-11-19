@@ -264,7 +264,7 @@ def test_listado_de_recomendaciones_documenta_el_filtro_origen(cliente):
         operacion = esquema["paths"][ruta]["get"]
         origen = next(p for p in operacion["parameters"] if p["name"] == "origen")
         assert "«franja»" in origen["description"] and "«plan_dia»" in origen["description"]
-        assert "ambos orígenes" in origen["description"]
+        assert "todos los orígenes" in origen["description"] and "«corto_plazo»" in origen["description"]
     descripcion = esquema["paths"]["/api/v1/recommendations"]["get"]["description"]
     assert "origen=franja" in descripcion and "/recommendations/plan" in descripcion
 
@@ -283,11 +283,61 @@ def test_predictions_run_pronostica_con_la_serie_validada_de_la_sesion(auth, cla
 
     monkeypatch.setattr(inferencia, "predecir", espia)
     cuerpo = {"ruta": "CL 72", "instante": "2025-03-04T09:00:00-05:00", "horizonte_min": 60,
-              "incluir_recomendacion": False}
+              "incluir_recomendacion": False, "modelo": "horario"}
     r = auth.post("/api/v1/predictions/run", json=cuerpo, headers=_h(claves_prueba["analista"]))
     assert r.status_code == 201, r.text
+    assert r.json()["modelo"] == "horario"
     assert vistas and vistas[0] is not None                     # la sesión de la petición, no la serie empaquetada
     assert inferencia._SESION_DATOS.get() is None               # el contexto se cierra al terminar
+
+
+def test_predictions_run_responde_por_omision_con_el_pronostico_de_corto_plazo(auth, claves_prueba, monkeypatch):
+    """RF-005 en el endpoint de §12.2: sin modelo ni model_id responde el corto plazo (las subidas de la ventana con
+    lo observado hasta el instante), por ruta, sentido y segmento, con lo leído por la sesión; lo guarda en
+    prediction_corto_plazo, su recomendación en recommendation (origen corto_plazo) y aparece en GET /predictions y
+    GET /predictions/{id}. Fuera de su cobertura (una fecha sin datos de 15 minutos) responde el horario y lo dice."""
+    from app.servicios import corto_plazo as cp
+
+    vistas = []
+    original = cp.pronosticar
+
+    def espia(*args, **kwargs):
+        vistas.append(cp._SESION.get())
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(cp, "pronosticar", espia)
+    cuerpo = {"ruta": "CRA 54", "instante": "2025-10-15T07:10:00-05:00", "horizonte_min": 60}
+    r = auth.post("/api/v1/predictions/run", json=cuerpo, headers=_h(claves_prueba["analista"]))
+    assert r.status_code == 201, r.text
+    x = r.json()
+    assert x["modelo"] == "corto_plazo" and x["model_id"].startswith("cp_") and vistas and vistas[0] is not None
+    assert x["instante"].startswith("2025-10-15T07:00") and x["ventana"]["hasta"].startswith("2025-10-15T08:00")
+    assert x["p10"] <= x["pasajeros"] <= x["p90"] and [s["sentido"] for s in x["sentidos"]] == ["ida", "regreso"]
+    assert len(x["segmentos"]) == 123 and x["grupo_id"] and x["explanation"]
+    rec = x["recomendacion"]
+    assert rec["origen"] == "corto_plazo" and rec["prediction_corto_plazo_id"] == x["prediction_id"]
+    assert rec["hora"] == 7 and rec["detalle"]["entradas"]["prediccion_corto_plazo"]["grupo_id"] == x["grupo_id"]
+    operador = _h(claves_prueba["operador"])
+    una = auth.get(f"/api/v1/predictions/{x['prediction_id']}", headers=operador).json()
+    assert una["modelo"] == "corto_plazo" and una["pasajeros"] == x["pasajeros"] and una["hora"] == 7
+    lista = auth.get("/api/v1/predictions", params={"ruta": "CRA 54", "desde": "2025-10-15", "hasta": "2025-10-15",
+                                                     "modelo": "corto_plazo"}, headers=operador).json()
+    assert x["prediction_id"] in {p["prediction_id"] for p in lista["items"]}
+    todos = auth.get("/api/v1/predictions", params={"ruta": "CRA 54", "desde": "2025-10-15", "hasta": "2025-10-15"},
+                     headers=operador).json()
+    assert x["prediction_id"] in {p["prediction_id"] for p in todos["items"]} and todos["total"] >= lista["total"]
+    recs = auth.get("/api/v1/recommendations", params={"origen": "corto_plazo", "ruta": "CRA 54"},
+                    headers=operador).json()
+    assert rec["recommendation_id"] in {q["recommendation_id"] for q in recs["items"]}
+    # una fecha que el corto plazo no cubre: responde el horario y dice por qué
+    otro = auth.post("/api/v1/predictions/run", json={"ruta": "CRA 54", "instante": "2026-01-05T07:00:00-05:00",
+                                                     "horizonte_min": 60}, headers=_h(claves_prueba["analista"]))
+    assert otro.status_code == 201, otro.text
+    assert otro.json()["modelo"] == "horario" and "no cubre" in otro.json()["motivo_modelo"]
+    fijo = auth.post("/api/v1/predictions/run", json={"ruta": "CRA 54", "instante": "2026-01-05T07:00:00-05:00",
+                                                     "horizonte_min": 60, "modelo": "corto_plazo"},
+                     headers=_h(claves_prueba["analista"]))
+    assert fijo.status_code == 422 and fijo.json()["error"]["codigo"] == "fuera_de_cobertura"
 
 
 def test_plan_del_dia_en_modo_sincrono_de_pruebas(auth, claves_prueba, monkeypatch):
@@ -308,7 +358,8 @@ def test_plan_del_dia_en_modo_sincrono_de_pruebas(auth, claves_prueba, monkeypat
 
 
 def test_predictions_run_trae_las_claves_de_12_3(auth, claves_prueba):
-    cuerpo = {"ruta": "CRA 54", "instante": "2025-03-04T06:30:00-05:00", "horizonte_min": 60}
+    # un miércoles corriente de la prueba reservada (no un día de Carnaval), a media mañana: la franja es viable
+    cuerpo = {"ruta": "CRA 54", "instante": "2025-10-15T10:00:00-05:00", "horizonte_min": 60}
     assert auth.post("/api/v1/predictions/run", json=cuerpo,
                      headers=_h(claves_prueba["operador"])).status_code == 403
     r = auth.post("/api/v1/predictions/run", json=cuerpo, headers=_h(claves_prueba["analista"]))
@@ -335,15 +386,24 @@ def test_predictions_run_trae_las_claves_de_12_3(auth, claves_prueba):
         assert campo in x
     franja = rec["detalle"]["salida"]["franja_prediccion"]
     assert rec["hora"] == franja["hora"] and rec["demanda_hora"] == pytest.approx(franja["demanda_hora"])
+    assert x["modelo"] == "corto_plazo" and x["sentidos"] and x["segmentos"]
     # §8.3: el listado de predicciones filtra por idruta
     lista = auth.get("/api/v1/predictions", params={"idruta": 16, "limite": 5},
                      headers=_h(claves_prueba["operador"])).json()
     assert lista["items"] and {p["ruta"] for p in lista["items"]} == {"CRA 54"}
     ejemplo = {k: x[k] for k in ("predictionId", "routeId", "generatedAt", "horizonMinutes", "predictedPassengers",
                                  "confidenceInterval", "modelVersion", "recommendation", "explanation")}
-    _guardar("ejemplo_prediccion_12_3.json", {"solicitud": cuerpo, "claves_12_3": ejemplo,
+    _guardar("ejemplo_prediccion_12_3.json", {"solicitud": cuerpo, "modelo": x["modelo"], "claves_12_3": ejemplo,
                                               "recomendacion_viable": rec["viable"], "motivo": rec["motivo"],
-                                              "franja": franja})
+                                              "franja": franja, "sentidos": x["sentidos"],
+                                              "segmentos_primeros_5": x["segmentos"][:5]})
+    # el mismo pedido con el modelo horario (el del plan del día siguiente)
+    h = auth.post("/api/v1/predictions/run", json=dict(cuerpo, modelo="horario"),
+                  headers=_h(claves_prueba["analista"])).json()
+    assert h["modelo"] == "horario" and CLAVES_12_3 <= set(h)
+    _guardar("ejemplo_prediccion_12_3_horario.json",
+             {"solicitud": dict(cuerpo, modelo="horario"), "modelo": h["modelo"],
+              "claves_12_3": {k: h[k] for k in ejemplo}})
 
 
 def test_predictions_run_con_franja_inviable_no_presenta_la_aproximacion(auth, claves_prueba, monkeypatch):

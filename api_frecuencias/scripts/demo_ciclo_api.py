@@ -116,9 +116,30 @@ def ejecutar(c: httpx.Client, hasta: date, etiqueta: str) -> dict:
           f"filas leídas {d['filas_leidas']}, válidas {d['filas_validas']}")
     decir(f"    predicciones {d['predicciones']}, recomendaciones {d['recomendaciones']}, alertas {d['alertas']}; "
           f"notificaciones simuladas {simuladas}, omitidas {omitidas}")
+    decir_corto_plazo(d.get("metricas") or {})
     if d["estado"] != "ok":
         decir("    MENSAJE:", d.get("mensaje"))
     return d
+
+
+def decir_corto_plazo(m: dict) -> None:
+    """RF-005 en el ciclo: lo leído en bloques de 15 minutos (y lo excluido por VAL-009), los pronósticos de 30, 60 y
+    120 min con su recomendación y el monitoreo del modelo de corto plazo."""
+    lec, cp, mon = (m.get("lectura_corto_plazo") or {}), (m.get("corto_plazo") or {}), (m.get("monitoreo_corto_plazo")
+                                                                                         or {})
+    if lec:
+        decir(f"    corto plazo · lectura ({lec.get('fuente') or '—'}): {lec.get('dias', 0)} días-ruta, "
+              f"{lec.get('celdas', 0)} celdas válidas, {lec.get('excluidas', 0)} excluidas por VAL-009, "
+              f"{lec.get('guardadas', 0)} guardadas en subidas_15min (las de un día del panel ya están empaquetadas)")
+    if cp:
+        decir(f"    corto plazo · pronósticos {cp.get('pronosticos', 0)} ({cp.get('model_id') or '—'}, instante "
+              f"{(cp.get('instante') or '—')[:16]}), recomendaciones {cp.get('recomendaciones', 0)}, "
+              f"omitidos {len(cp.get('omitidos') or [])}")
+    if mon.get("estado"):
+        w, cob = mon.get("wape_movil"), mon.get("cobertura_p10_p90")
+        decir(f"    corto plazo · monitoreo {mon['estado']}: WAPE móvil "
+              f"{'—' if w is None else f'{100 * w:.2f} %'}, cobertura P10-P90 "
+              f"{'—' if cob is None else f'{100 * cob:.1f} %'} ({mon.get('desde')} a {mon.get('hasta')})")
 
 
 def duracion(d: dict) -> str:
@@ -149,9 +170,11 @@ def politica_de(d: dict) -> dict:
     return ((d.get("metricas") or {}).get("monitoreo") or {}).get("politica") or {}
 
 
-def modelo_activo(c: httpx.Client) -> dict | None:
-    for m in c.get(f"{API}/models", params={"limite": 100}).json().get("items", []):
-        if m["estado"] == "activo":
+def modelo_activo(c: httpx.Client, familia: str = "horario") -> dict | None:
+    """El activo de la familia (cada familia tiene a lo sumo uno): el ciclo de §14.2 es el del modelo horario; el de
+    corto plazo se monitorea en cada ciclo y tiene su propia compuerta."""
+    for m in c.get(f"{API}/models", params={"limite": 100, "familia": familia}).json().get("items", []):
+        if m["estado"] == "activo" and m.get("familia", familia) == familia:
             return m
     return None
 
@@ -381,7 +404,7 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915 - el guion sigue los seis pas
         decir(f"    Sin decisión: el candidato sigue {ficha['estado']} (sombra {estado_sombra}); fallos de la "
               f"ejecución: {(e3.get('metricas') or {}).get('fallos')}")
         codigo = 1
-    decir("    registro de modelos:", [(m["model_id"], m["estado"])
+    decir("    registro de modelos:", [(m["model_id"], m.get("familia"), m["estado"])
                                        for m in c.get(f"{API}/models", params={"limite": 100}).json()["items"]])
     decir(f"\nNotificaciones de las ejecuciones (metricas.notificaciones_por_estado): simuladas "
           f"{_NOTIFICACIONES['simulada']}, omitidas {_NOTIFICACIONES['omitida']}.")

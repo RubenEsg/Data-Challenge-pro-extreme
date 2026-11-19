@@ -111,7 +111,9 @@ def test_ciclo_guarda_monitoreo_foto_y_columnas_nuevas(primera, entorno):
     eid = uuid.UUID(primera["execution_id"])
     mon = primera["metricas"]["monitoreo"]
     assert primera["predicciones"] == 9 and mon["estado"] in ("ok", "aviso", "alerta")
-    fila = s.scalar(select(MonitoreoModelo).where(MonitoreoModelo.execution_id == eid, MonitoreoModelo.rol == "activo"))
+    fila = s.scalar(select(MonitoreoModelo).where(            # la del modelo horario (la del corto plazo va aparte)
+        MonitoreoModelo.execution_id == eid, MonitoreoModelo.rol == "activo",
+        MonitoreoModelo.detalle["familia"].astext.is_distinct_from("corto_plazo")))
     assert fila.model_id == ACTIVO and fila.ventana_dias == 28 and fila.n_predicciones == 9
     assert fila.hasta == date(2025, 9, 15) and 0 < fila.wape_movil < 0.5 and 0 < fila.cobertura_p10_p90 <= 1
     assert {"lag7", "dia_lag7", "objetivo", "prediccion"} <= set(fila.psi) and fila.estado == mon["estado"]
@@ -143,7 +145,11 @@ def test_ciclo_guarda_monitoreo_foto_y_columnas_nuevas(primera, entorno):
 
 def test_endpoints_de_monitoreo(cliente, primera):
     eid = primera["execution_id"]
-    r = cliente.get("/api/v1/monitoring", params={"execution_id": eid})
+    # una fila del modelo horario y otra del corto plazo (detalle.familia = corto_plazo) en la misma ejecución
+    todas = cliente.get("/api/v1/monitoring", params={"execution_id": eid}).json()
+    cp = cliente.get("/api/v1/monitoring", params={"execution_id": eid, "familia": "corto_plazo"}).json()
+    assert todas["total"] == 2 and cp["total"] == 1 and cp["items"][0]["model_id"].startswith("cp_")
+    r = cliente.get("/api/v1/monitoring", params={"execution_id": eid, "familia": "horario"})
     assert r.status_code == 200 and r.json()["total"] == 1
     item = r.json()["items"][0]
     assert item["model_id"] == ACTIVO and item["estado"] in ("ok", "aviso", "alerta")
@@ -219,12 +225,36 @@ def test_pronostico_por_segmento_suma_la_ruta(cliente, primera, entorno):
     assert all(0 <= x["fraccion_reparto"] <= 1 for x in d["segmentos"])
     assert "2023" in d["periodo_reparto"] and "S9" in d["nota"] and "conformal" in d["banda_segmentos"]
     v = cliente.get("/api/v1/predictions/segmentos", params={"ruta": "CRA 54", "instante": "2025-09-16T07:00:00-05:00",
-                                                             "horizonte_min": 120, "nivel": "sentido"}).json()
+                                                             "horizonte_min": 120, "nivel": "sentido",
+                                                             "fuente": "reparto"}).json()
     assert v["segmentos"] == [] and sum(x["pasajeros"] for x in v["sentidos"]) == pytest.approx(v["pasajeros_ruta"],
                                                                                                abs=0.05)
     assert cliente.get("/api/v1/predictions/segmentos", params={"ruta": "NO", "instante": "2025-09-16T07:00:00"}
                        ).status_code == 404
     assert cliente.get("/api/v1/predictions/segmentos").status_code == 422
+
+
+def test_pronostico_por_segmento_al_vuelo_es_el_del_corto_plazo(cliente):
+    """Crítica 3 del curso y §3.1 «por sentido y segmento»: al vuelo, /predictions/segmentos responde por omisión con
+    el modelo de segmentos de E14 (ajustado con 2023-2025, medido una vez en su prueba reservada), cada segmento con su
+    banda; con fuente=reparto o con prediction_id, el reparto sobre el modelo horario."""
+    params = {"ruta": "CRA 54", "instante": "2025-09-16T07:00:00-05:00", "horizonte_min": 60}
+    d = cliente.get("/api/v1/predictions/segmentos", params=params)
+    assert d.status_code == 200, d.text
+    d = d.json()
+    assert d["fuente"] == "corto_plazo" and d["model_id"].startswith("cp_") and len(d["segmentos"]) == 123
+    assert all(x["p10"] <= x["pasajeros"] <= x["p90"] for x in d["segmentos"] + d["sentidos"])
+    assert all(x["id_segmento"] for x in d["segmentos"]) and "2023-2025" in d["nota"]
+    for s in d["sentidos"]:     # cada sentido es la suma de sus segmentos
+        suma = sum(x["pasajeros"] for x in d["segmentos"] if x["sentido"] == s["sentido"])
+        assert s["pasajeros"] == pytest.approx(suma, abs=0.1 * len(d["segmentos"]))
+    r = cliente.get("/api/v1/predictions/segmentos", params=params | {"fuente": "reparto"}).json()
+    assert r["fuente"] == "reparto" and r["modelo_segmentos"]["model_id"]
+    fuera = cliente.get("/api/v1/predictions/segmentos", params=params | {"instante": "2026-01-05T07:00:00-05:00"})
+    assert fuera.status_code == 200 and fuera.json()["fuente"] == "reparto"      # fuera de la cobertura: reparte
+    fijo = cliente.get("/api/v1/predictions/segmentos", params=params | {"instante": "2026-01-05T07:00:00-05:00",
+                                                                         "fuente": "corto_plazo"})
+    assert fijo.status_code == 422 and fijo.json()["error"]["codigo"] == "fuera_de_cobertura"
 
 
 def test_pronostico_por_segmento_con_la_linea_base_y_modelo_desconocido(cliente, primera, entorno):
@@ -256,7 +286,7 @@ def test_pronostico_por_segmento_errores_declarados(cliente, primera, monkeypatc
     en el modelo (404) y artefacto de segmentos que no pasa la verificación (503, degradación prevista)."""
     from app.servicios import modelo_segmentos
 
-    al_vuelo = {"ruta": "SILENCIO", "instante": "2025-09-16T07:00:00-05:00"}
+    al_vuelo = {"ruta": "SILENCIO", "instante": "2025-09-16T07:00:00-05:00", "fuente": "reparto"}
     r = cliente.get("/api/v1/predictions/segmentos", params=al_vuelo | {"horizonte_min": 45})
     assert r.status_code == 422 and r.json()["error"]["codigo"] == "horizonte_invalido"
     r = cliente.get("/api/v1/predictions/segmentos", params=al_vuelo | {"model_id": "no_existe"})

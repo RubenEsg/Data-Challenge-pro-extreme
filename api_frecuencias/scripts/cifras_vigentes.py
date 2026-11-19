@@ -69,6 +69,52 @@ def _mil(x: float | None, dec: int = 1) -> str:
     return (entero.replace(",", ".") + ("," + frac if frac else "")).replace("-", "−")
 
 
+def _pct_mitad(x: float | None) -> str:
+    """Dos decimales con la mitad hacia arriba sobre el decimal escrito (8,715 → 8,72), la regla de E14."""
+    from decimal import ROUND_HALF_UP, Decimal
+
+    return SIN if x is None else f"{Decimal(str(x)).quantize(Decimal('0.01'), ROUND_HALF_UP)}".replace(".", ",") + " %"
+
+
+PRUEBA_E14 = RAIZ.parent / "pronostico_corto_plazo" / "resultados" / "prueba.json"
+
+
+def _corto_plazo(c: list) -> None:
+    """El pronóstico pedido (RF-005): la prueba reservada de E14 (julio a diciembre de 2025, calculada una sola vez), la
+    reproducción de esa prueba por la API, la exportación a ONNX y la regla de calidad VAL-009."""
+    try:
+        prueba = __import__("json").loads(PRUEBA_E14.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        prueba = {}
+    rel_prueba = "../../pronostico_corto_plazo/resultados/prueba.json"
+    niveles = prueba.get("niveles") or {}
+    for nivel, nombre in (("ruta", "por ruta"), ("sentido", "por sentido"), ("segmento", "por segmento")):
+        partes = []
+        for h in ("30", "60", "120"):
+            t_ = ((niveles.get(nivel) or {}).get(h) or {}).get("todas_las_rutas") or {}
+            m, b = (t_.get("modelo") or {}).get("wape"), (t_.get("promedio_dia_hora") or {}).get("wape")
+            partes.append(SIN if m is None or b is None else f"{h} min {_pct_mitad(m)} frente a {_pct_mitad(b)}")
+        c.append((f"WAPE del pronóstico de corto plazo {nombre} en la prueba reservada (jul–dic 2025), modelo "
+                  "cp_lgbm_20250630_s42 frente al promedio por día y hora", "; ".join(partes), rel_prueba))
+    rel = "modelo/corto_plazo_reproduccion.json"
+    rep_ = _json(rel) or {}
+    pred = rep_.get("predicciones") or {}
+    filas = sum(int((pred.get(n) or {}).get("filas_api") or 0) for n in ("ruta", "sentido"))
+    dif = max([float(((pred.get(n) or {}).get("pronostico") or {}).get("diferencia_maxima") or 0) for n in pred] or [0])
+    c.append(("La API reproduce la prueba reservada del corto plazo (predicciones por ruta y por sentido)",
+              SIN if not rep_ else f"{_mil(filas, 0)} predicciones, diferencia máxima {_num(dif, 4)}; coincide: "
+                                   f"{'sí' if rep_.get('coincide') else 'no'}", rel))
+    rel = "modelo/corto_plazo_onnx.json"
+    onx = _json(rel) or {}
+    arts = (onx.get("artefactos") or {}).values()
+    peor = max([float(a.get("diferencia_relativa_maxima") or 0) for a in arts] or [0])
+    n = sum(int(a.get("filas_paridad") or 0) for a in arts)
+    tol = float(onx.get("tolerancia_relativa") or 0)
+    c.append(("ONNX del corto plazo: paridad con LightGBM de los 18 artefactos",
+              SIN if not onx else (f"{_mil(n, 0)} filas, diferencia relativa máxima {f'{peor:.1e}'.replace('.', ',')} "
+                                   f"(tolerancia {tol:.0e}); paridad: {'sí' if onx.get('paridad') else 'no'}"), rel))
+
+
 def _modelo(c: list) -> None:
     ev = _json("modelo/evaluacion_modelo.json")
     g = (ev or {}).get("prueba_reservada", {}).get("global", {})
@@ -513,6 +559,7 @@ def _indices(c: list) -> None:
 
 def cifras() -> list[tuple[str, str, str]]:
     c: list[tuple[str, str, str]] = []
+    _corto_plazo(c)
     _modelo(c)
     _modelo_segmentos(c)
     _alertas(c)
@@ -548,7 +595,8 @@ def main() -> int:
 
 def _rutas(rel: str, prefijo: str, formato: str) -> str:
     """La evidencia de una cifra con su prefijo; una cifra que sale de dos archivos los nombra a los dos («a y b»)."""
-    return " y ".join(formato.format(prefijo + r) for r in rel.split(" y "))
+    return " y ".join(formato.format(r[len("../../"):] if r.startswith("../../") else prefijo + r)
+                      for r in rel.split(" y "))
 
 
 if __name__ == "__main__":

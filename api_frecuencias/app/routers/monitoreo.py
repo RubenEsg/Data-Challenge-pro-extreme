@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, datetime
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import ConfigDict, Field
@@ -74,8 +74,16 @@ class FotoSalida(Salida):
     creado_en: datetime
 
 
-def _filtrar(model_id, rol, estado, desde, hasta, execution_id):
+Familia = Annotated[Literal["horario", "corto_plazo"] | None, Query(
+    description="horario (el modelo del plan del día siguiente) o corto_plazo (30, 60 y 120 min); sin él, los dos")]
+
+
+def _filtrar(model_id, rol, estado, desde, hasta, execution_id, familia=None):
     consulta = select(MonitoreoModelo)
+    if familia == "corto_plazo":     # el monitoreo del corto plazo lleva detalle.familia (monitoreo_corto_plazo.py)
+        consulta = consulta.where(MonitoreoModelo.detalle["familia"].astext == "corto_plazo")
+    elif familia == "horario":
+        consulta = consulta.where(MonitoreoModelo.detalle["familia"].astext.is_distinct_from("corto_plazo"))
     if model_id:
         consulta = consulta.where(MonitoreoModelo.model_id == model_id)
     if rol:
@@ -97,10 +105,10 @@ def listar(model_id: str | None = None, rol: Literal["activo", "sombra"] | None 
            estado: Literal["ok", "aviso", "alerta", "sin_datos"] | None = None,
            desde: date | None = Query(None, description="Fin de ventana desde (fecha de datos)"),
            hasta: date | None = Query(None, description="Fin de ventana hasta (fecha de datos)"),
-           execution_id: uuid.UUID | None = None, pagina: ParametrosPagina = Depends(),
+           execution_id: uuid.UUID | None = None, familia: Familia = None, pagina: ParametrosPagina = Depends(),
            sesion: Session = Depends(obtener_sesion)):
-    return paginar(sesion, _filtrar(model_id, rol, estado, desde, hasta, execution_id), MonitoreoModelo, pagina,
-                   "-creado_en")
+    return paginar(sesion, _filtrar(model_id, rol, estado, desde, hasta, execution_id, familia), MonitoreoModelo,
+                   pagina, "-creado_en")
 
 
 @router.get("/export", summary="Exportar el monitoreo filtrado (CSV o XLSX)",
@@ -109,9 +117,9 @@ def exportar_monitoreo(formato: Literal["csv", "xlsx"] = "csv", model_id: str | 
                        rol: Literal["activo", "sombra"] | None = None,
                        estado: Literal["ok", "aviso", "alerta", "sin_datos"] | None = None,
                        desde: date | None = None, hasta: date | None = None, execution_id: uuid.UUID | None = None,
-                       orden: str | None = None, sesion: Session = Depends(obtener_sesion)):
-    return exportar(sesion, _filtrar(model_id, rol, estado, desde, hasta, execution_id), MonitoreoModelo, formato,
-                    "monitoreo", orden, "-creado_en")
+                       familia: Familia = None, orden: str | None = None, sesion: Session = Depends(obtener_sesion)):
+    return exportar(sesion, _filtrar(model_id, rol, estado, desde, hasta, execution_id, familia), MonitoreoModelo,
+                    formato, "monitoreo", orden, "-creado_en")
 
 
 @router.get("/policy", summary="Política de aprendizaje continuo: ¿reentrenar?, retadores en sombra y umbrales")

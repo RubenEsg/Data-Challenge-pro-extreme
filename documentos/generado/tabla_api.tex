@@ -13,7 +13,7 @@
 \texttt{GET} & \path{/predictions/corto-plazo/dia} & operador & La curva del día: el pronóstico de cada media hora de 04:00 a 21:00, por ruta y sentido \\
 \texttt{GET} & \path{/predictions/corto-plazo/modelo} & operador & Versión activa del modelo de corto plazo: artefactos, datos, prueba reservada y cobertura \\
 \texttt{GET} & \path{/predictions/corto-plazo/export} & operador & Exportar pronósticos de corto plazo filtrados (CSV o XLSX) \\
-\texttt{POST} & \path{/predictions/run} & analista & Inferencia para una ruta y un horizonte (incluye la recomendación derivada) \\
+\texttt{POST} & \path{/predictions/run} & analista & Inferencia para una ruta y un horizonte de 30, 60 o 120 min (incluye la recomendación… \\
 \texttt{GET} & \path{/predictions} & operador & Consultar pronósticos por filtros \\
 \texttt{GET} & \path{/predictions/export} & operador & Exportar pronósticos filtrados (CSV o XLSX) \\
 \texttt{GET} & \path{/predictions/{prediction_id}} & operador & Una predicción \\
@@ -32,7 +32,7 @@
 \texttt{GET} & \path{/models/{model_id}} & operador & Ficha de un modelo \\
 \texttt{POST} & \path{/models/{model_id}/activate} & admin & Activar una versión con la compuerta de cuatro criterios, en una ventana posterior a todo… \\
 \texttt{GET} & \path{/models/{model_id}/evaluation} & operador & Evaluación del modelo: la registrada y, con desde/hasta, la de una ventana sobre datos… \\
-\texttt{GET} & \path{/models/{model_id}/importance} & operador & Importancia global: permutación (aumento del MAE) y media de |SHAP| \\
+\texttt{GET} & \path{/models/{model_id}/importance} & operador & Importancia global: permutación (aumento del MAE) y media de |SHAP|; en el corto plazo,… \\
 \texttt{GET} & \path{/thresholds} & operador & Umbrales vigentes, su versión y si están aprobados \\
 \texttt{PUT} & \path{/thresholds} & admin & Cambiar umbrales: crea una versión nueva del conjunto \\
 \texttt{GET} & \path{/thresholds/history} & operador & Histórico de versiones de los umbrales \\

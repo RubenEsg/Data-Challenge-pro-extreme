@@ -11,7 +11,7 @@
 \hypersetup{pdftitle={E01 Documento ejecutivo - Cada cuánto despachar}}
 \begin{document}
 \thispagestyle{fancy}
-{\footnotesize\color{rol-tinta-3}E01 · DOCUMENTO EJECUTIVO \hfill 14 de noviembre de 2026}\par\vspace{2pt}
+{\footnotesize\color{rol-tinta-3}E01 · DOCUMENTO EJECUTIVO \hfill 19 de noviembre de 2026}\par\vspace{2pt}
 {\interligera\fontsize{19}{22}\selectfont\hyphenpenalty=10000\exhyphenpenalty=10000 Cada cuánto despachar en
 SILENCIO, CRA~54 y CL~72: pronóstico, frecuencias y alertas para Sobusa\par}
 \vspace{3pt}
@@ -22,12 +22,13 @@ Prototipo en Python 3.11+, FastAPI y PostgreSQL 14 (condición habilitante, §16
 \begin{respuesta}
 \small\textbf{La pregunta (§20):} con los datos históricos y recientes, ¿cada cuánto despachar buses para optimizar la
 flota y el recaudo? ¿Cuántos pasajeros y vehículos se esperan, y qué situaciones requieren atención inmediata?\\[2pt]
-\textbf{Cómo la responde el sistema:} cada día lee lo nuevo de PostgreSQL sin tocar las tablas de Extreme, pronostica
-los pasajeros por ruta y hora con el modelo activo y una banda P10–P90, traduce el pronóstico en intervalo de despacho,
-buses por hora y vehículos con un optimizador entero que respeta la flota, el ciclo y los headway mínimo y máximo,
-deja calculado el plan del día siguiente y levanta alertas explicadas. Ejemplo, \RespEjRuta{} el \RespuestaFecha{}
-(laboral): \RespEjSalidas{} salidas frente a \RespEjProgramadas{} programadas, cada \RespEjPicoManana{} min en el pico
-de la mañana, \RespEjValle{} en el valle y \RespEjPicoTarde{} en el pico de la tarde; \RespEjNoViables.
+\textbf{Cómo la responde el sistema:} en cada ciclo, diario e intradía, lee lo nuevo de PostgreSQL sin tocar las tablas
+de Extreme y pronostica las subidas de los siguientes 30, 60 y 120 minutos por ruta, sentido y segmento, con lo
+observado hasta ese instante y una banda P10–P90. Un optimizador entero lo traduce en intervalo de despacho, buses por
+hora y vehículos dentro de la flota, el ciclo y los headway mínimo y máximo, y se levantan alertas explicadas. Con el
+modelo horario queda calculado el plan del día siguiente; por ejemplo, \RespEjRuta{} el \RespuestaFecha{} (laboral): \RespEjSalidas{} salidas frente a \RespEjProgramadas{} programadas, cada
+\RespEjPicoManana{} min en el pico de la mañana, \RespEjValle{} en el valle y \RespEjPicoTarde{} en el pico de la
+tarde; \RespEjNoViables.
 \evid{api_frecuencias/docs/evidencias/respuesta/}{\footnotesize\color{rol-tinta-3}\RespuestaFuente}
 \end{respuesta}
 
@@ -42,9 +43,10 @@ los parámetros de §19.
 
 \section{Qué entregamos y qué valor tiene}
 \begin{itemize}
-\item \textbf{Para Sobusa:} un pronóstico con un \MejoraRelBuno~\% menos de error (WAPE) que la regla actual y un plan por hora que
-  \emph{reasigna} buses en lugar de recortarlos. En el informe académico (todo 2025, con el pronóstico a 7 días del
-  experimento 12 y costos con fuente; el producto calcula el plan con el modelo activo), ese plan pone 451 salidas al
+\item \textbf{Para Sobusa:} un pronóstico de las próximas dos horas con un \CortoMejoraRel~\% menos de error (WAPE, por
+  ruta a 60~min) que el promedio por día y hora, y un plan del día siguiente con un \MejoraRelBuno~\% menos de error
+  que la regla actual, que \emph{reasigna} buses en lugar de recortarlos. En el informe académico (todo 2025, pronóstico
+  a 7 días del experimento 12, costos con fuente; el producto usa el modelo horario), ese plan pone 451 salidas al
   día frente a 460, baja la espera de 4,43 a 4,30 minutos y los pasajeros diarios sobre la capacidad de 317 a 267;
   ahorra +501 M COP al año en operación y el saldo anual va de −2.825 M COP (solo pasajeros perdidos) a +1.600 M COP
   (también los ganados): por eso el piloto mide la elasticidad antes de cambiar horarios.
@@ -60,20 +62,18 @@ los parámetros de §19.
 \begin{tarjeta}[top=3pt,bottom=3pt]
 \small
 \begin{tabularx}{\linewidth}{@{}p{2.55cm}X@{}}
-\textbf{Modelo vs. línea base} & Modelo activo \ModeloActivo, prueba reservada \PruebaDesde{} a \PruebaHasta{}
-  (\Nprueba{} horas-ruta): WAPE \dato{\WAPEact~\%} (IC95 \WAPEactIC) frente a \WAPEbuno~\% (IC95 \WAPEbunoIC) de la
-  regla manual; la diferencia tiene IC95 de \DifActBunoIC{} puntos. Gana en las tres rutas, en pico (\WAPEPico~\%) y
-  valle (\WAPEValle~\%), y congelado un año: \RobDosmilveinticuatro~\% vs. \RobDosmilveinticuatroBuno~\% en 2024 y
-  \RobDosmilveinticinco~\% vs. \RobDosmilveinticincoBuno~\% en 2025. La prueba se consultó al elegir fv2 frente a fv1:
-  es informativa, la selección se hizo con la validación y los años congelados, y pedimos a Extreme un periodo de 2026
-  como prueba limpia. Un candidato con el calendario escolar y universitario, registrado sin activar, baja 2025 a
-  \RobCandDosmilveinticinco~\%. El 13,94 y el 13,62~\% del informe académico son a 7 días y no se comparan con esta
-  cifra. El pronóstico directo a 30, 60 y 120 min por ruta, sentido y segmento se validó aparte: a 60 min por ruta,
-  \CortoRutaSesenta~\% frente a \CortoRutaSesentaBase~\% del promedio por día y hora.
-  \evid{api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.md}, \evid{pronostico_corto_plazo/README.md}\\[2pt]
-\textbf{Incertidumbre} & Banda P10–P90 con cobertura de \dato{\CobModelo~\%} (objetivo 80~\%); con la calibración
-  conformal versionada vigente, \CobVdos~\%: \BajoPdiezVdos~\% de las horas quedan bajo el P10 y \SobrePnoventaVdos~\%
-  sobre el P90. \evid{api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json}\\[2pt]
+\textbf{Modelo vs. línea base} & Corto plazo (\CortoModelo, LightGBM), prueba reservada de jul.–dic. de 2025
+  calculada una sola vez: por ruta, WAPE de \dato{\CortoRutaTreinta, \CortoRutaSesenta{} y \CortoRutaCientoveinte~\%} a
+  30, 60 y 120 min frente a \CortoRutaTreintaBase, \CortoRutaSesentaBase{} y \CortoRutaCientoveinteBase~\% del promedio
+  por día y hora (IC95 de la diferencia a 60 min: \CortoDifIC{} puntos); a 60 min, \CortoSentidoSesenta~\% por
+  sentido (\CortoSentidoSesentaBase~\%) y \CortoSegmentoSesenta~\% por segmento (\CortoSegmentoSesentaBase~\%), y gana
+  en \CortoSegGana{} de \CortoSegTotal{} segmentos. Modelo horario del plan del día siguiente (\ModeloActivo):
+  \WAPEact~\% frente a \WAPEbuno~\% de la regla manual (\PruebaDesde{} a \PruebaHasta); esa prueba se consultó al
+  elegir su versión (es informativa) y pedimos a Extreme un periodo de 2026 como prueba limpia.
+  \evid{pronostico_corto_plazo/resultados/prueba.json}, \evid{api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.md}\\[2pt]
+\textbf{Incertidumbre} & Banda P10–P90 conformal ajustada solo con la validación: cubre el \dato{\CortoCobertura~\%}
+  en el corto plazo (por ruta a 60 min) y el \CobVdos~\% en el horario (objetivo 80~\%).
+  \evid{api_frecuencias/docs/evidencias/modelo/calibracion_condicional.json}\\[2pt]
 \textbf{Recomendación} & La función objetivo de §10.2 se resuelve como MILP (PuLP/CBC) y coincide con la enumeración
   exacta en \FranjasMilpIgual{} de \FranjasTotal{} franjas reales; \FranjasViables{} son viables y las otras salen
   marcadas \emph{no viables} con el motivo y la mejor aproximación ejecutable (§10.3, §18).
@@ -87,23 +87,20 @@ los parámetros de §19.
 \textbf{Alertas} & Con persistencia de 2 horas y episodios deduplicados, las alertas observadas ALT-005 a ALT-009
   bajan de \AlertasAntes{} a \dato{\AlertasAhora{} por ruta y día} (\DiasRuta{} días-ruta fuera de muestra) y el lift
   sube a \LiftCinco{} (ALT-005), \LiftSeis{} (ALT-006), \LiftSiete{} (ALT-007) y \LiftOcho{} (ALT-008). Con todas las
-  familias (ALT-002 observada, rupturas y las de pronóstico del ciclo diario) el despachador ve \AlertasTotal{} por
-  ruta y día; si un episodio se agrava, la alerta escala. \evid{api_frecuencias/docs/evidencias/alertas/}\\[2pt]
+  familias, el despachador ve \AlertasTotal{} por ruta y día. \evid{api_frecuencias/docs/evidencias/alertas/}\\[2pt]
 \textbf{Integración no invasiva} & En una réplica con los scripts y el trigger de Extreme: 0 escrituras indebidas en
-  \NIntentosTotal{} intentos (\NIntentosLector{} del usuario de lectura y \NIntentosEscritor{} del de resultados sobre
-  14 tablas de Extreme); una llegada real de 584 eventos se entrega como exactamente 1 franja nueva, y la consulta
+  \NIntentosTotal{} intentos de los dos usuarios sobre 14 tablas de Extreme; una llegada real de 584 eventos se entrega como exactamente 1 franja nueva, y la consulta
   incremental baja de 122 ms a 0,01 ms con el índice que proponemos (lo aplicaría su DBA).
   \evid{api_frecuencias/docs/evidencias/replica/}\\[2pt]
 \textbf{Ingeniería} & \Ntotal{} pruebas automáticas en seis niveles (\Npasan{} aprobadas, \Nfallan{} fallidas y
   \Nomitidas{} omitidas a propósito en la corrida del \FechaPruebas), cobertura de \Cobertura~\%, integración continua
-  \EstadoCICorto, k6 con p95 de \Kpnoventaycinco{} ms (límite 2.000 ms) y \IngestaFilas{} filas ingeridas en
-  \IngestaSegundos{} s; \SonarCorto. {\footnotesize\color{rol-tinta-3}\FuentePruebas}\\
+  \EstadoCICorto, k6 con p95 de \Kpnoventaycinco{} ms (límite 2.000 ms); \SonarCorto. {\footnotesize\color{rol-tinta-3}\FuentePruebas}\\
 \end{tabularx}
 \end{tarjeta}
 \begin{center}
-\includegraphics[width=0.6\linewidth]{wape_modelos}\\[-1pt]
-{\footnotesize\tenue{WAPE (punto) e IC95 por bootstrap de bloques de 7 días; azul: modelos, gris: líneas base.}}
-\evid{api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.json}
+\includegraphics[width=0.6\linewidth]{wape_corto_plazo}\\[-1pt]
+{\footnotesize\tenue{WAPE del corto plazo en la prueba reservada, por nivel y horizonte.}}
+\evid{pronostico_corto_plazo/resultados/prueba.json}
 \end{center}
 
 \section{Limitaciones}
@@ -114,14 +111,16 @@ los parámetros de §19.
   documento usa ese campo como ocupación.
 \item \textbf{Supuestos de §19 sin confirmar.} Capacidad, ciclo, flota por franja, severidades y pesos de la función
   objetivo son valores derivados de los datos o sugeridos por §5.1; quedan versionados en \texttt{threshold\_config} y
-  el área operativa los puede cambiar sin recompilar. La espera máxima de §5.1 se lee como espera media (headway / 2),
-  así que el headway máximo efectivo es el menor entre el máximo y dos veces la espera (supuesto S12, preguntado a
-  Extreme). β, la elasticidad de los pasajeros a las salidas, está estimada en ≈~0,70 por observación (informe, §4.2),
-  sin validar en campo; el plan usa 0,5 por prudencia, la sensibilidad está en
-  \path{api_frecuencias/docs/evidencias/optimizacion/sensibilidad.md} y el piloto la mide.
-\item \textbf{Modelo y alertas.} El error es mayor en la tarde (17–19~h) y en vísperas de festivo; la banda conformal
-  cubre un poco menos del 80~\% objetivo. Sin incidentes etiquetados por Extreme, la precisión de las alertas es una
-  aproximación; la muestra revisada dos veces (\RevisionDoble) espera la validación del área operativa de Sobusa.
+  el área operativa los puede cambiar sin recompilar. La espera máxima de §5.1 se lee como espera media (headway / 2;
+  supuesto S12, preguntado a Extreme). β, la elasticidad de los pasajeros a las salidas, está estimada en ≈~0,70 por observación (informe, §4.2),
+  sin validar en campo; el plan usa 0,5 por prudencia y el piloto la mide.
+\item \textbf{Pronóstico de corto plazo.} En los domingos corrientes no le gana al promedio por día y hora (la pérdida
+  está en CRA~54, sin causa identificada). La regla VAL-009 excluye al servir los dos registros imposibles de CRA~54,
+  pero el modelo se entrenó con el de 2024 (filtrarlos antes es otro experimento). Los datos de 15 minutos posteriores
+  a 2025 vienen de la lectura incremental, probada con una fuente de prueba.
+\item \textbf{Modelo horario y alertas.} El error es mayor en la tarde (17–19~h) y en vísperas de festivo; la banda
+  conformal cubre un poco menos del 80~\% objetivo. Sin incidentes etiquetados por Extreme, la precisión de las alertas es una
+  aproximación; la muestra revisada dos veces espera la validación del área operativa de Sobusa.
 \item \textbf{Alcance probado.} La integración se probó en una réplica local con las exportaciones; no se tocó la base
   compartida del reto ni una base productiva.
 \end{itemize}

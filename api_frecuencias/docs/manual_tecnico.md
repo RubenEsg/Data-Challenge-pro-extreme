@@ -41,6 +41,8 @@ capa delgada encima de ellos.
                       │                                 │  segmento_estadistica (_dia, _refresco)  │
                       │                                 │  ocupacion_segmento · retencion_registro │
                       │                                 │  marca_agua_tabla                        │
+                      │                                 │  prediction_corto_plazo · subidas_15min  │
+                      │                                 │  salidas_15min · lectura_15min           │
                       │ marca de agua + solape + huella └───────────────────▲──────────────────────┘
                       ▼                                                     │ usuario escritor_ia
   ┌──────────────────────────────────────────────────────────────────────┐ │ (solo ai_frecuencias)
@@ -86,14 +88,20 @@ Reglas del código:
 
 | Módulo | Qué hace | Requisitos |
 |---|---|---|
-| `fuentes.py` | `FuenteParquet` y `FuentePostgresSoloLectura`. La segunda valida que el SQL sea solo `SELECT`, abre `SET TRANSACTION READ ONLY` con `statement_timeout` y `TimeZone='America/Bogota'` y termina con `ROLLBACK`. Lee por marca de agua con una ventana de solape (`FUENTE_SOLAPE_MIN`) y una huella md5 por llave natural: una fila tardía o modificada se entrega una sola vez. `leer_particion(fuente, particion, hasta)` lee por ruta: un solo SELECT de la lista blanca con la variante fija `r.nombre = ANY(CAST(:rutas AS text[]))` y, a cada ruta, la regla de marca, solape y huella con su propia marca (`marca_agua_ruta`, RNF-005; `docs/particion_por_ruta.md`). `leer_carga_segmentos(franjas)` lee, para las franjas que acaba de entregar esa lectura, los viajes no cancelados con sus subidas y bajadas por segmento, el vehículo y el conductor, con otro SELECT constante de la lista blanca (`_SQL_CARGA_SEGMENTOS`, las franjas como arreglos enlazados); el conductor se seudonimiza al leer (`seudonimizar_conductores`). `viajes(ruta, desde, hasta)` lee los viajes de una ruta con salida programada en la ventana (`progvehiculos`, SELECT constante `sql_viajes_ruta`, con el conteo de `timbradas_segmentos` por viaje si la fuente lee la capa de segmentos) y reemplaza `idconductor` por su seudónimo antes de devolverlos (`seudonimizar_viajes`). `para_tabla(tabla)` da otra lectura de la lista blanca con la misma conexión y el mismo `statement_timeout` (la usan los consolidados). `demanda_segmentos` entrega además `bajadas_viajes`: Σ `numerobajadas` de los viajes válidos, con la regla de los pasajeros. | RF-001, RF-002, RF-013, RNF-005, §5.3, §6.1, §8.3, §10.1, §11.3 |
+| `fuentes.py` | `FuenteParquet` y `FuentePostgresSoloLectura`. La segunda valida que el SQL sea solo `SELECT`, abre `SET TRANSACTION READ ONLY` con `statement_timeout` y `TimeZone='America/Bogota'` y termina con `ROLLBACK`. Lee por marca de agua con una ventana de solape (`FUENTE_SOLAPE_MIN`) y una huella md5 por llave natural: una fila tardía o modificada se entrega una sola vez. `leer_particion(fuente, particion, hasta)` lee por ruta: un solo SELECT de la lista blanca con la variante fija `r.nombre = ANY(CAST(:rutas AS text[]))` y, a cada ruta, la regla de marca, solape y huella con su propia marca (`marca_agua_ruta`, RNF-005; `docs/particion_por_ruta.md`). `leer_carga_segmentos(franjas)` lee, para las franjas que acaba de entregar esa lectura, los viajes no cancelados con sus subidas y bajadas por segmento, el vehículo y el conductor, con otro SELECT constante de la lista blanca (`_SQL_CARGA_SEGMENTOS`, las franjas como arreglos enlazados); el conductor se seudonimiza al leer (`seudonimizar_conductores`). `viajes(ruta, desde, hasta)` lee los viajes de una ruta con salida programada en la ventana (`progvehiculos`, SELECT constante `sql_viajes_ruta`, con el conteo de `timbradas_segmentos` por viaje si la fuente lee la capa de segmentos) y reemplaza `idconductor` por su seudónimo antes de devolverlos (`seudonimizar_viajes`). `para_tabla(tabla)` da otra lectura de la lista blanca con la misma conexión y el mismo `statement_timeout` (la usan los consolidados). `demanda_segmentos` entrega además `bajadas_viajes`: Σ `numerobajadas` de los viajes válidos, con la regla de los pasajeros. `leer_panel_15min(idruta, segmentos, fechas, hasta)` da, para el corto plazo, las subidas por `id_segmento`, día y bloque de 15 minutos de `timbradas_segmentos` (solo las filas con `ultimaactualizacion` anterior a `hasta`) y las salidas por bloque de `progvehiculos.fechainicio`, con dos SELECT constantes y valores enlazados, cada uno en la transacción READ ONLY de siempre. | RF-001, RF-002, RF-013, RNF-005, §5.3, §6.1, §8.3, §10.1, §11.3 |
 | `calidad.py` | `validar_lote(df, lote, catalogos, ahora, retraso_maximo)`: completitud, validez, unicidad, consistencia, oportunidad y relacional (§6.3). Cada error lleva lote, fila, llave del registro, campo, valor, código, dimensión, detalle y si bloquea. La tolerancia de oportunidad sale de la versión de umbrales del ciclo: `periodos_atraso` × `periodo_ingesta_min`, el umbral de §5.1 «datos atrasados» (`retraso_maximo_de`). Los esquemas `consolidado`, `segmentos_anio` y `segmentos_consolidado` validan los consolidados de Extreme: CONS-001 (el promedio es Σ / `nro_viajes` exacto, con 1 %, o el `CEIL` que escribe `fn_consolidar_timbradas_historicas`, H7), REL-004 y REL-006 (el segmento existe y es de la ruta de la fila), REL-007 y VAL-007 (el día de la semana existe y corresponde a la fecha o a las fechas de su estacionalidad) y VAL-008 (la hora es la del bloque). | RF-004, §5.1, §6.3, §7.3, §14.2 |
 | `dimensiones.py` | Dimensiones de §8.3 de cada fila de resultados (`idruta`, `idempresa`, `idproceso`, `id_dia_semana` e `id_estacionalidad`), desde el catálogo empaquetado o, en modo integrado, desde la réplica. | §8.3 |
 | `ingesta.py` | Incorpora las filas válidas a `demanda_observada` con `COPY` a una tabla de paso y un `INSERT … ON CONFLICT … WHERE … IS DISTINCT FROM`, en la misma transacción de la ejecución. Una carga repetida no duplica. Desde la migración 0013 guarda también las medidas opcionales que traiga el lote (`MEDIDAS`: `bajadas_viajes`, `subidas`, `bajadas` y `viajes_con_timbradas`); una medida que no llega, o que llega nula, no borra la guardada (`COALESCE` en el upsert). | RNF-003, §6.1, §9.5, §14.2 |
 | `datos.py` | Vista analítica `demanda_horaria` y catálogo de rutas (capacidad, ciclo, flota y frecuencia actual). También los archivos opcionales, entre ellos las novedades por ruta (`novedades_por_ruta`; el archivo solo existe si `novedades_viales_ruta` trae filas), el perfil de ocupación por segmento (`ocupacion_segmentos_historica`) y las bajadas por ruta, fecha y hora (`bajadas_horaria`, `datos/bajadas_horaria.parquet`), que `FuenteParquet` agrega a la serie (`con_bajadas`). | §6.1 |
 | `variables.py` | Variables del modelo por versión (`VERSIONES`: fv1 y fv2), sin información posterior al instante de predicción. | §9.2, §9.3 |
 | `inferencia.py` | Entrena, registra, carga (verifica el SHA-256 y la versión de variables), predice con banda P10–P90 calibrada y explicación local SHAP, y evalúa (MAE, RMSE, WAPE, sMAPE y sesgo, por ruta, pico y valle). `variables_de` arma la tabla de variables y le pone encima las novedades por ruta: es el mismo paso al entrenar y al inferir. | RF-005, RF-006, RF-015, §9, §11.2 |
-| `onnx_motor.py` | Motor ONNX Runtime alternativo (`MOTOR_INFERENCIA=onnx`). | §9.1, §9.2 |
+| `onnx_motor.py` | Motor ONNX Runtime alternativo (`MOTOR_INFERENCIA=onnx`, `motor_configurado`), para el modelo horario y para el de corto plazo. | §9.1, §9.2 |
+| `corto_plazo.py` · `variables_corto_plazo.py` | El pronóstico de corto plazo (RF-005): las subidas de los próximos 30, 60 y 120 minutos por ruta, sentido y segmento con lo observado hasta el instante. Carga los 18 árboles verificando su SHA-256 (y, con `MOTOR_INFERENCIA=onnx`, los de su exportación ONNX), arma la serie con el panel empaquetado y lo leído (`con_sesion`), aplica VAL-009 (`sin_calidad()` la apaga), pronostica con `pronosticar(..., hasta=)`, lleva la ventana a la franja de §10.2 (`franja_hora`), guarda en `prediction_corto_plazo` (`guardar`) y da la importancia global (`importancia_global`). Sección 5, «El modelo de corto plazo». | RF-005, RF-006, §3.1, §9.1–§9.4 |
+| `panel_corto_plazo.py` | Lo que alimenta al corto plazo: lee los días que trajo la lectura incremental (`de_la_fuente` en modo integrado, `del_panel` en modo Parquet), aplica VAL-009 (`excluir_imposibles`, `error_calidad`, tope `cp_tope_subidas_bloque_segmento`), anota en `lectura_15min` hasta dónde se leyó cada día y guarda en `subidas_15min` y `salidas_15min` las celdas de los días que el panel empaquetado no tiene (`guardar_dias`, en lote) y une lo leído con el panel (`unir`, con el calendario de las fechas nuevas de `calendario`). | RF-004, RF-013, §6.3, §7.3, §11.2 |
+| `gobierno_corto_plazo.py` | Ciclo de vida del corto plazo: `sembrar` (versiones del registro de artefactos a `model_registry`, familia `corto_plazo`), `evaluar` (WAPE, MAE, sesgo y cobertura en una ventana con lo leído), `compuerta` (los cuatro criterios de `politica.compuerta` con los mismos umbrales) y `ventana` (posterior a la fecha de corte del candidato). | RF-018, RF-019, §9.2, §9.5 |
+| `monitoreo_corto_plazo.py` | Monitoreo del corto plazo en cada ciclo diario: error móvil, cobertura, volumen y PSI en `model_monitoring` (`detalle.familia = corto_plazo`) y ALT-010 por ruta. | §9.4, §9.5, ALT-010 |
+| `onnx_corto_plazo.py` | Traducción de cada LightGBM del corto plazo a ONNX (`TreeEnsembleRegressor` de ai.onnx.ml 3 con umbrales y hojas en doble precisión, la misma regla de faltantes y un `Exp`) y su sesión de ONNX Runtime. | §9.1, §9.2 |
+| `modelos_imagen.py` | Al arrancar, copia al volumen de modelos lo que trae la imagen y le falta (`sembrar`; sección 8 y `despliegue.md`, sección 9). | RNF-008, §9.2 |
 | `modelo_segmentos.py` | Modelo supervisado de la demanda por segmento y sentido. Incluye el reparto fijo B0 (línea base), un HGB Poisson con exposición y sus variantes jerárquicas (sentido × reparto dentro del sentido), la banda P10–P90 conformal de Mondrian compuesta con la de la ruta, el artefacto con SHA-256 y el registro propio (`datos/modelos/segmentos/`). También desagrega una ventana y arma las filas por segmento de la foto de variables. Detalle en `docs/modelo_segmentos.md`. | §3.1, §7.3 paso 4, §9.1, §9.2, §9.3 |
 | `optimizacion.py` | `recomendar` (línea base de §10.3), `optimizar` (función objetivo de §10.2 como MILP de la franja con PuLP/CBC), `recomendacion_franja`, comparación con la frecuencia programada y con el headway vigente de `rutas.frecuenciadespachos`, escenarios y sensibilidad, `plan_dia` (MILP D5 del día con el modelo activo y los parámetros de `PARAMETROS_PLAN` versionados) y `plan_dia_d5` (la reproducción de D5 con sus parámetros, copia en `motor_d5/`). `factor_carga_franja` es por ruta, día de la semana de operación y hora, con el tipo de día de respaldo; la franja y cada hora del plan traen `ocupacion_historica`, y `plan_dia(ocupacion_actual=…)` aplica la restricción reactiva (sección 7). | RF-007, RF-008, §5.1, §6.2, §10 |
 | `alertas.py` | Reglas ALT-001 a ALT-010 (`evaluar_alertas` sobre el pronóstico y `evaluar_observadas` sobre los datos reales), episodios, deduplicación, máquina de estados `TRANSICIONES` y seudónimo del conductor. ALT-002 observada se mide en el segmento crítico cuando la hora trae la ocupación por segmento. `IDENTIFICACION_5_3` y `VARIANTES_5_3` dicen qué campos de §5.3 aplican a cada regla; `identificar_viaje_006` e `identificar_viajes_009` eligen el viaje de ALT-006 y ALT-009 entre los del día. ALT-003 exige `alt003_probabilidad_minima` y ALT-008 evalúa también las bajadas (sección 6). | RF-009, RF-010, RF-011, §5 |
@@ -103,8 +111,8 @@ Reglas del código:
 | `novedades.py` | Novedades viales por fecha, rango horario y ruta: una novedad con filas en `novedades_viales_ruta` afecta solo a sus rutas del catálogo; una sin filas, a todas (supuesto declarado para Sobusa). `aplicar_por_ruta` pone las de rutas dadas encima de la tabla de variables. | §6.1, §11.2, RF-003 |
 | `retencion.py` | Trabajo `retencion` de la cola (sección 8, «Retención de datos»): reglas por grupo con SQL constante solo sobre `ai_frecuencias`, simulación en una transacción que se revierte, `lock_timeout` de 500 ms al separar una partición y bitácora en `retencion_registro`. | §18 |
 | `monitoreo.py` | Monitoreo por ejecución: WAPE, MAE y sesgo móviles de 28 días, cobertura, PSI por variable, volumen y porcentaje de alertas descartadas. También guarda la foto de variables (`feature_snapshot`) con una fila por segmento y sentido de cada predicción (§7.3 paso 4). Esas filas van en su propio punto de guardado: si fallan, se omiten solo ellas. | §7.3, §9.4, §11.2 |
-| `politica.py` | Aprendizaje continuo: cuándo reentrenar, retador en sombra, compuerta, activación auditada y reversión automática. | RF-018, RF-019, §9.5 |
-| `ejecucion.py` | Orquesta el ciclo de frecuencia y el de entrenamiento, y la ejecución madre de una ejecución partida por ruta (`_ciclo_de_la_madre`). Todo queda ligado a `execution_id`, `model_id`, `feature_version`, `umbrales_version` y `data_cutoff`. `bloquear_umbrales` deja pasar un solo cambio del conjunto gobernado a la vez (sección 8), y `umbrales_de_la_ejecucion` da la versión de umbrales con que corre un ciclo (sección 3). `_ocupacion_actual` y `reportar_unicidad` son los pasos del ciclo de §10.1 y §6.3 (sección 3). `viajes_del_dia` trae los viajes del día de cada ruta para ALT-006 y ALT-009, y `consolidados_de_la_ejecucion` corre los consolidados de Extreme una vez por ejecución (sección 3). | RF-013, RNF-005, RNF-011, §5.1, §5.3 |
+| `politica.py` | Aprendizaje continuo: cuándo reentrenar, retador en sombra, compuerta, activación auditada y reversión automática. La sombra y la antigüedad de los datos solo miran la familia horaria; el corto plazo tiene su compuerta en `gobierno_corto_plazo.py`. | RF-018, RF-019, §9.5 |
+| `ejecucion.py` | Orquesta el ciclo de frecuencia y el de entrenamiento, y la ejecución madre de una ejecución partida por ruta (`_ciclo_de_la_madre`). Todo queda ligado a `execution_id`, `model_id`, `feature_version`, `umbrales_version` y `data_cutoff`. `bloquear_umbrales` deja pasar un solo cambio del conjunto gobernado a la vez (sección 8), y `umbrales_de_la_ejecucion` da la versión de umbrales con que corre un ciclo (sección 3). `_ocupacion_actual` y `reportar_unicidad` son los pasos del ciclo de §10.1 y §6.3 (sección 3). `viajes_del_dia` trae los viajes del día de cada ruta para ALT-006 y ALT-009, y `consolidados_de_la_ejecucion` corre los consolidados de Extreme una vez por ejecución (sección 3). `_leer_corto_plazo`, `_instante_corto_plazo` y `_pronostico_corto_plazo` son los pasos del corto plazo (sección 3), y `modelo_activo(sesion, familia)` da el activo de la familia `horario` (por omisión) o `corto_plazo`. `registrar_sembrados` lleva a `model_registry`, como candidatos, los modelos horarios que `modelos_imagen.py` copió al volumen. | RF-005, RF-013, RNF-005, RNF-011, §5.1, §5.3 |
 | `cola.py` | Cola de trabajos en PostgreSQL para N réplicas, con candado por ruta para los trabajos de frecuencia (sección 4). | RNF-001, RNF-004, RNF-005 |
 | `planificador.py` | Planificador interno (APScheduler): ejecución diaria (partida por ruta con `PLAN_PARTICION=ruta`), revisión semanal del reentrenamiento, retención de datos (`tarea_retencion`, `PLAN_RETENCION_CRON`) y, con `FUENTE_DATABASE_URL`, refresco de la agregación de segmentos. | §7.2, §9.5, §18, RNF-005 |
 | `circuito.py` | Circuit breaker de la base fuente y de los notificadores. | RNF-010 |
@@ -118,11 +126,26 @@ Reglas del código:
 ### 2.3 Routers (`app/routers/`)
 
 `ejecuciones.py` (`/frequency/executions` y `/frequency/watermarks`), `predicciones.py` (`/predictions` y
-`/recommendations`), `pronostico_segmentos.py` (`/predictions/segmentos`, con el modelo de segmentos activo o el que
-pida `modelo_segmentos`), `alertas.py` (`/alerts`), `modelos.py` (`/models`), `umbrales.py` (`/thresholds`),
+`/recommendations`), `pronostico_corto_plazo.py` (`/predictions/corto-plazo`), `pronostico_segmentos.py`
+(`/predictions/segmentos`), `alertas.py` (`/alerts`), `modelos.py` (`/models`), `umbrales.py` (`/thresholds`),
 `monitoreo.py` (`/monitoring`), `planificador.py` (`/scheduler`), `catalogos.py` (`/catalogos`, también la flota y el
 ciclo), `segmentos.py` (`/segmentos`, con el refresco de la agregación), `respuesta.py` (`/respuesta`) y
-`retencion.py` (`/retencion`: la política vigente con la última corrida y la corrida bajo demanda). `comun.py`
+`retencion.py` (`/retencion`: la política vigente con la última corrida y la corrida bajo demanda).
+
+Parámetros que eligen entre los dos modelos (migración 0016):
+
+| Router | Parámetro | Qué hace |
+|---|---|---|
+| `predicciones.py` | `modelo` en el cuerpo de `POST /predictions/run` | `auto` (por omisión): el corto plazo si cubre la ruta, la fecha y la hora (medias horas de 04:00 a 21:00, con datos leídos hasta el instante); si no, el horario, y lo dice en `motivo_modelo`. `corto_plazo` u `horario` lo fijan (fijado y fuera de cobertura, 422 `fuera_de_cobertura`; modelo de corto plazo no disponible, 503 `pronostico_no_disponible`). Un `model_id` del registro de corto plazo o del horario manda sobre `modelo` (`_elegir_modelo`). `incluir_segmentos` (por omisión `true`) incluye cada segmento. |
+| `predicciones.py` | `modelo` en `GET /predictions` y `/predictions/export` | `horario` o `corto_plazo` (la fila de la ruta de `prediction_corto_plazo`, con los campos de `/predictions`: `como_prediccion`). Sin él, el listado mezcla las dos tablas por la misma llave de orden; la exportación es `horario` por omisión. `GET /predictions/{prediction_id}` busca en las dos. |
+| `predicciones.py` | `origen` en `GET /recommendations` | `franja`, `plan_dia` o `corto_plazo`. |
+| `pronostico_segmentos.py` | `fuente` | `auto` (por omisión): al vuelo, el corto plazo por segmento si cubre el instante; con `prediction_id`, `model_id` o `modelo_segmentos`, o fuera de esa cobertura, el reparto con el modelo de segmentos activo o el que pida `modelo_segmentos`. `corto_plazo` o `reparto` lo fijan. La respuesta dice `fuente`. |
+| `modelos.py` | `familia` | En `GET /models`, filtra (`horario` o `corto_plazo`); en `POST /models/rollback`, el cuerpo elige la familia que se revierte (`horario` por omisión). `POST /models/{model_id}/activate` usa la familia del candidato, y `/importance` y `/evaluation` atienden también a un modelo de corto plazo. |
+| `monitoreo.py` | `familia` | En `GET /monitoring` y su exportación: `corto_plazo` (filas con `detalle.familia = corto_plazo`) u `horario` (las demás). |
+| `respuesta.py` | `instante`, `corto_plazo` | `GET /respuesta` agrega `proximas_dos_horas` (`proximas_dos_horas`, calculado en el momento, no en la foto): por ruta, el corto plazo a 30, 60 y 120 min con banda, promedio por día y hora, recomendación de §10.2 y los 5 segmentos con más subidas previstas a 60 min, en el instante de referencia (`instante` o, sin él, el último día con datos leídos a la hora actual del día, entre 04:00 y 20:30). `corto_plazo=false` lo omite; si el corto plazo no está disponible, sale vacío con una `nota` y la respuesta se entrega igual. |
+
+`pronostico_corto_plazo.modelo_de_la_familia` da el `model_id` pedido o el activo de la familia `corto_plazo` en
+`model_registry`; todas las rutas de arriba que pronostican con el corto plazo lo usan. `comun.py`
 reúne la paginación (`ParametrosPagina`; `ordenar` agrega la llave primaria como desempate, para que LIMIT/OFFSET no
 repita ni salte filas cuando hay empates), el error uniforme (`ErrorApi`) y las exportaciones CSV o XLSX. La lista
 completa de rutas, con el rol que exige cada una, está en `../README.md`, sección «Endpoints».
@@ -186,11 +209,14 @@ umbrales ni de parámetros del plan, y la ejecución siguiente ya usa la nueva.
 | `lectura_incremental` | 10 | `fuentes.leer_particion(fuente, particion, hasta)`: solo lo posterior a la marca de agua de cada ruta del trabajo (`ai_frecuencias.marca_agua_ruta`; la de la última ejecución exitosa que la movió), con solape y huella. Antes de leer, el trabajo toma el candado de su partición (`ejecucion.tomar_candados_particion`). | `metricas.lectura` (leídas, entregadas, nuevas, tardías, modificadas y repetidas en el solape) y `metricas.particion` |
 | `calidad` | 25 | `calidad.validar_lote(df, lote, catalogos, ahora, retraso_maximo)` con los catálogos, el reloj del ciclo y la tolerancia de oportunidad de la versión de umbrales del ciclo (`periodos_atraso` × `periodo_ingesta_min`, §5.1 «datos atrasados»). Cada error trae `llave` (las columnas llave del registro, para encontrarlo sin depender del orden del lote), `valor` (el texto de la celda) y `bloqueante`. Las filas con un error bloqueante no siguen; los errores de oportunidad son informativos. En el consolidado, la llave es la de 7 columnas de `fuentes.LLAVES`, y `hora_fin = 00:00` cuenta como 24:00. El lote de un trabajo de ruta se llama `id:ruta:hasta`. Si el lote trae llaves duplicadas (UNI-001), `ejecucion.reportar_unicidad` manda su reporte al responsable del consolidado (§6.3) en la misma transacción; no corrige nada. | `data_quality_error` (`GET …/{execution_id}/errors`, filtrable por `idruta`); el reporte, en `notification_log` y `metricas.reporte_unicidad` |
 | histórico | — | `ingesta`: las filas válidas pasan a `demanda_observada` sin duplicar, con `bajadas_viajes`, `subidas`, `bajadas` y `viajes_con_timbradas` cuando el lote las trae (una medida ausente no borra la guardada). | `metricas.incorporadas_historico` |
+| lectura de corto plazo | — | `ejecucion._leer_corto_plazo` (RF-013, §7.3 pasos 2 a 4): para cada ruta, los días que trajo el lote, en bloques de 15 minutos por segmento. En modo integrado (la fuente tiene `leer_panel_15min`) los re-agrega de `timbradas_segmentos` y `progvehiculos.fechainicio`, solo con lo actualizado antes de la marca de agua de la ejecución; en modo Parquet los toma del panel empaquetado, y un día que el panel no trae no se marca como leído. Cada celda pasa por VAL-009 con el tope de la versión de umbrales del ciclo; lo válido reemplaza los días en `subidas_15min` y `salidas_15min`, y `lectura_15min` guarda hasta qué instante se leyó cada día (el mínimo entre la marca de agua y el fin del día). Va en un punto de guardado: si falla, queda en los fallos y el corto plazo usa lo que ya tenía. | `subidas_15min`, `salidas_15min`, `lectura_15min`; los errores, en `data_quality_error` (lote `corto_plazo_15min`, código VAL-009); `metricas.lectura_corto_plazo` |
 | evaluación | — | `inferencia.evaluar` del modelo activo sobre los días recién llegados (paso 3 del ciclo de §14.2). | `metricas.evaluacion_error` |
 | monitoreo | — | `monitoreo.en_ciclo`: WAPE móvil por ruta (alimenta ALT-010), deriva y cobertura. Un trabajo de ruta solo calcula el WAPE móvil de su ruta para ALT-010; la fila de monitoreo la guarda su madre. | `model_monitoring` |
 | ocupación por segmento | — | `ejecucion._ocupacion_actual` (§10.1): con la fuente PostgreSQL, lee viaje por viaje las franjas que trajo el lote en las últimas 24 h de cada ruta (`FuentePostgresSoloLectura.leer_carga_segmentos`) y reemplaza la ocupación por segmento de esas franjas. Va en un punto de guardado: si falla, queda en los fallos y el ciclo sigue sin ella. Con la fuente Parquet no hay viajes por segmento y solo deja la nota. | `ocupacion_segmento`, `metricas.ocupacion_segmentos` |
-| `prediccion` | 45 | `inferencia.predecir` por ruta y horizonte (30, 60 y 120 min), seguida de la recomendación de la franja con `optimizacion.recomendacion_franja`: la función objetivo de §10.2 con la demanda por hora de la hora principal de la ventana y su banda calibrada. | `prediction`, `recommendation` |
-| `alertas` | 70 | `alertas.evaluar_alertas` sobre cada pronóstico y `evaluar_observadas` (ALT-005 a ALT-009) sobre las horas cerradas del último día recibido. ALT-002 observada usa la ocupación del segmento crítico de la hora si el ciclo la midió (`ejecucion.con_ocupacion_por_segmento`). Para ALT-006 y ALT-009, `ejecucion.viajes_del_dia` lee en solo lectura los viajes del día de cada ruta (`FuentePostgresSoloLectura.viajes` o, si la fuente del ciclo no los trae, `catalogos.viajes_para_alertas`); sin ninguna fuente de viajes las alertas salen igual y lo dicen, y un error de una fuente configurada queda en los fallos (etapa «viajes»). Una alerta redetectada con más severidad se escala (sección 6). | `alert`, `alert_history` |
+| `prediccion` | 45 | `inferencia.predecir` por ruta y horizonte (30, 60 y 120 min) con el modelo horario, seguida de la recomendación de la franja con `optimizacion.recomendacion_franja`: la función objetivo de §10.2 con la demanda por hora de la hora principal de la ventana y su banda calibrada. | `prediction`, `recommendation` (`origen = 'franja'`) |
+| corto plazo (en `prediccion`) | — | `ejecucion._pronostico_corto_plazo` (RF-005, §7.3 pasos 5 a 7): por ruta y horizonte, `corto_plazo.pronosticar` con el activo de la familia `corto_plazo` y `hasta` = la marca de agua de la ejecución, así que nada sin leer cuenta como observado. El instante (`_instante_corto_plazo`) es el de la ejecución en un ciclo con `instante` (los intradía) y, en el diario, las 04:00 del día siguiente al último leído. La recomendación de §10.2 de su franja (la hora del punto medio de la ventana, a ritmo por hora, con la misma restricción reactiva de §10.1) se guarda con el pronóstico; en los ciclos intradía el pronóstico da además el contexto de las alertas de pronóstico. Fuera de la cobertura del modelo queda en `omitidos`; un error, en los fallos por ruta y horizonte. | `prediction_corto_plazo` (con `execution_id`), `recommendation` (`origen = 'corto_plazo'`, `prediction_corto_plazo_id`), `metricas.corto_plazo` |
+| monitoreo del corto plazo | — | Solo en el ciclo diario (no en los intradía): `monitoreo_corto_plazo.en_ciclo` (sección 5, «El modelo de corto plazo»), en su propio punto de guardado; un error queda en los fallos y el ciclo sigue. | `model_monitoring` (`detalle.familia = corto_plazo`), ALT-010 por ruta, `metricas.monitoreo_corto_plazo` |
+| `alertas` | 70 | `alertas.evaluar_alertas` sobre cada pronóstico (en los ciclos intradía, también sobre los de corto plazo) y `evaluar_observadas` (ALT-005 a ALT-009) sobre las horas cerradas del último día recibido. ALT-002 observada usa la ocupación del segmento crítico de la hora si el ciclo la midió (`ejecucion.con_ocupacion_por_segmento`). Para ALT-006 y ALT-009, `ejecucion.viajes_del_dia` lee en solo lectura los viajes del día de cada ruta (`FuentePostgresSoloLectura.viajes` o, si la fuente del ciclo no los trae, `catalogos.viajes_para_alertas`); sin ninguna fuente de viajes las alertas salen igual y lo dicen, y un error de una fuente configurada queda en los fallos (etapa «viajes»). Una alerta redetectada con más severidad se escala (sección 6). | `alert`, `alert_history` |
 | `notificaciones` | 85 | Las alertas nuevas que alcanzan `NOTIFICACIONES_SEVERIDAD`, y las que se escalan a crítica, van a los canales configurados. | `notification_log` |
 | `plan_dia` | 92 | El plan del día siguiente por ruta con el modelo activo (`optimizacion.plan_dia`, sección 7) y la foto de la respuesta del reto para esa fecha (`respuesta.precalcular`), en la misma transacción. La foto usa la versión de umbrales de su ejecución (`respuesta.precalcular(..., umbrales=)`) y reutiliza el plan que el ciclo acaba de guardar; en una ejecución partida es la versión fijada al crearla. Con ocupación observada de la ruta, el plan recibe la restricción reactiva (`_ocupacion_del_plan`, sección 7); sin ella se calcula igual que antes. Si este paso falla, la ejecución termina `ok` y la advertencia queda en `metricas`. | `recommendation` con `origen = 'plan_dia'` (una fila por ruta y hora), `respuesta_reto` |
 | consolidados (en el cierre) | — | `ejecucion.consolidados_de_la_ejecucion` → `consolidados.en_ciclo`, una vez por ejecución: en la de todas las rutas al cerrar y, en una partida, en la madre (nunca en un trabajo de ruta), después del candado del modelo cuando la ejecución lo toma y con la versión de umbrales de la ejecución. Solo lee con `FUENTE_DATABASE_URL`; sin ella, cada tabla queda `sin_fuente`. Por tabla, en un punto de guardado: lectura desde su marca de agua (solape y huellas), calidad (CONS-001, REL-004, REL-006, REL-007, VAL-007 y VAL-008), contraste con la agregación propia (CONTR-001 a CONTR-003, con `contraste_tolerancia`, `contraste_tolerancia_grosera` y `contraste_viajes_minimos`) y la marca nueva en la misma transacción. Una tabla que falla no detiene el ciclo: no mueve su marca y queda en los fallos. | `data_quality_error` (lote `<8 caracteres del execution_id>:<tabla>`), `marca_agua_tabla`, `metricas.calidad.consolidados` |
@@ -206,9 +232,12 @@ Tres garantías del diseño:
   marca.
 - **Trazabilidad (RNF-011).** Cada predicción guarda `model_id`, `feature_version`, `data_cutoff`, `generated_at`,
   horizonte, latencia y explicación (§9.2). Cada recomendación de franja guarda su `prediction_id` y su
-  `umbrales_version`; las del plan del día, su `origen` y la fuente del pronóstico. Cada alerta guarda su
-  `execution_id`.
-- **Dimensiones de §8.3.** `prediction`, `recommendation`, `alert`, `demanda_observada` y `feature_snapshot` guardan
+  `umbrales_version`; las del plan del día, su `origen` y la fuente del pronóstico; las del corto plazo,
+  `origen = 'corto_plazo'` y `prediction_corto_plazo_id`. Cada pronóstico de corto plazo guarda `model_id`,
+  `feature_version`, `data_cutoff`, `generated_at`, latencia, explicación y, en `variables`, `datos_hasta` y `calidad`.
+  Cada alerta guarda su `execution_id`.
+- **Dimensiones de §8.3.** `prediction`, `prediction_corto_plazo` (desde la migración 0016), `recommendation`, `alert`,
+  `demanda_observada` y `feature_snapshot` guardan
   `idruta`, `idempresa` e `idproceso` (del catálogo `datos/catalogo_rutas.json` o de la réplica en modo integrado),
   `id_dia_semana` (ISO 1 a 7) e `id_estacionalidad` (nulo para Sobusa, porque `estacionalidades_anio` es de otro
   proceso: H1 de `hallazgos_extreme.md`). Las escribe `app/servicios/dimensiones.py`, y las consultas de predicciones,
@@ -287,6 +316,12 @@ política o el planificador.
  (train)      (registro)    (predice aparte)     (4 criterios) (auditado) (model_monitoring)  (manual o automática)
 ```
 
+`model_registry` tiene dos familias desde la migración 0016 (`familia`), cada una con a lo sumo un activo (índice
+único parcial `ux_model_registry_un_activo` por familia): `horario`, el modelo del plan del día siguiente, que sigue
+los siete pasos de abajo, y `corto_plazo`, el de 30, 60 y 120 minutos, que comparte la compuerta, la activación, el
+monitoreo y la reversión pero no la sombra ni el reentrenamiento por política (al final de esta sección, «El modelo de
+corto plazo»).
+
 1. **Entrenar.** Se entrena con `POST /api/v1/models/train` (job) o con `scripts/entrenar.py`.
    - Modelo: `HistGradientBoostingRegressor` de scikit-learn con pérdida Poisson para el punto, y dos modelos de
      cuantiles (0,1 y 0,9) para la banda.
@@ -339,19 +374,21 @@ política o el planificador.
    - `?forzar=true` lo activa aunque no apruebe, pero exige un `motivo` en el cuerpo (si falta, 422
      `motivo_requerido`) y deja en la auditoría el evento `activacion_forzada` con los criterios no cumplidos.
 
-   La auditoría registra al usuario autenticado y guarda el activo anterior en `anterior_model_id`. Además, con
+   El candidato se compara con el activo de su propia familia (`modelo_activo(sesion, cand.familia)`). La auditoría
+   registra al usuario autenticado y guarda el activo anterior en `anterior_model_id`. Además, con
    `activacion_automatica` = 1 (el valor por omisión de `threshold_config`), la política activa sola al retador que pasa la compuerta de sombra, también con
    auditoría (`aprobado_por = politica_automatica`); con 0, el retador espera la aprobación de un admin.
-6. **Monitorear** (`GET /api/v1/monitoring`). La deriva (PSI), el error móvil, la cobertura, el volumen y el
-   porcentaje de alertas descartadas se miden en cada ejecución. ALT-010 se dispara si el WAPE móvil pasa la
-   tolerancia.
-7. **Revertir.** `POST /api/v1/models/rollback` (admin) vuelve al anterior. La política también revierte sola si el
-   modelo nuevo se degrada en sus primeros 7 días.
+6. **Monitorear** (`GET /api/v1/monitoring?familia=horario`). La deriva (PSI), el error móvil, la cobertura, el
+   volumen y el porcentaje de alertas descartadas se miden en cada ejecución. ALT-010 se dispara si el WAPE móvil pasa
+   la tolerancia.
+7. **Revertir.** `POST /api/v1/models/rollback` (admin) vuelve al anterior de la familia del cuerpo (`familia`,
+   `horario` por omisión). La política también revierte sola si el modelo horario nuevo se degrada en sus primeros
+   7 días.
 
 Cuándo se reentrena (`GET /api/v1/monitoring/policy`): por periodicidad, por degradación (3 ejecuciones seguidas sobre
 `wape_max`), por deriva o por cobertura baja. Los umbrales están versionados en `threshold_config`.
 
-El modelo que viaja en la entrega es `hgb_fv2_20250831_s42` (activo en `datos/modelos/registro.json`). Su evaluación en
+El modelo horario que viaja en la entrega es `hgb_fv2_20250831_s42` (activo en `datos/modelos/registro.json`). Su evaluación en
 la prueba reservada (nov.–dic. 2025) está en `docs/evidencias/modelo/evaluacion_modelo.md`, y la decisión de usarlo, en
 `docs/evidencias/modelo/decision_fv2.md`. Esa prueba se consultó al elegir fv2 frente a fv1, así que su cifra es
 informativa: el criterio de selección fue la validación y los backtests con modelos congelados en 2024 y 2025, y se pide
@@ -375,29 +412,133 @@ sombra ni por la compuerta del modelo de la ruta: lo elige `scripts/entrenar_seg
 de mirar la prueba (`docs/evidencias/modelo/segmentos_protocolo.md`), y `modelo_segmentos.cargar()` verifica el
 SHA-256 del artefacto y la versión de variables antes de usarlo (`docs/modelo_segmentos.md`).
 
+### El modelo de corto plazo (familia `corto_plazo`)
+
 El pronóstico de corto plazo (RF-005: 30, 60 y 120 minutos por ruta, sentido y segmento con lo observado en el día)
-también tiene su registro (`datos/modelos/corto_plazo/registro.json`; activo `cp_lgbm_20250630_s42`). Es el modelo del
+es la respuesta del producto a lo que pide el enunciado, dentro del ciclo. Sus artefactos tienen su registro
+(`datos/modelos/corto_plazo/registro.json`; activo `cp_lgbm_20250630_s42`, 18 artefactos), y su ciclo de vida se
+gobierna en `model_registry` con la familia `corto_plazo` (`app/servicios/gobierno_corto_plazo.py`). Es el modelo del
 experimento E14 (`../pronostico_corto_plazo/`): se eligió en la validación de enero a junio de 2025 y se midió una sola
-vez en la prueba de julio a diciembre de 2025, con el protocolo confirmado en git antes de correr la validación.
+vez en la prueba de julio a diciembre de 2025, con el protocolo confirmado en git antes de correr la validación. Por
+ruta, su WAPE fue de 8,58 / 7,34 / 6,63 % a 30 / 60 / 120 min frente a 14,36 / 13,18 / 12,22 % del promedio por día y
+hora; por sentido a 60 min, 10,05 frente a 16,10; por segmento a 60 min, 37,63 frente a 43,61 (gana en 332 de 384
+segmentos). En los domingos corrientes no le gana al promedio por día y hora (en CRA 54).
 
 1. **Entrenar.** `scripts/entrenar_corto_plazo.py` lo reentrena con lo elegido (`seleccion.json` del experimento), con
    todo lo anterior al 1 de julio de 2025, la misma semilla y LightGBM 4.7.0, y guarda 18 árboles (ruta y segmento,
    por horizonte y ruta) en texto comprimido, cada uno con su SHA-256, las variables, la banda calibrada, la huella del
    código (`variables_corto_plazo.py` y `corto_plazo.py`, completos y sin el docstring), el SHA-256 de cada archivo del
-   panel y las cifras de la prueba.
+   panel y las cifras de la prueba. Una versión nueva queda **candidata** en el registro de artefactos; `--activar`
+   solo sirve para la primera, cuando no hay otra activa (con otra activa, el script se detiene y remite a la
+   compuerta).
 2. **Verificar.** `scripts/verificar_corto_plazo.py` vuelve a pronosticar la prueba con el código y los artefactos de
    la API y la compara con lo que guardó el experimento: las 168.210 predicciones por ruta y por sentido, los totales
-   por segmento y el WAPE de cada nivel y horizonte (`docs/evidencias/modelo/corto_plazo_reproduccion.md`). Deja una
+   por segmento y el WAPE de cada nivel y horizonte (`docs/evidencias/modelo/corto_plazo_reproduccion.md`). Corre sin
+   la regla VAL-009 (`corto_plazo.sin_calidad()`), porque la prueba se midió con los datos tal cual. Deja una
    muestra fija de 120 predicciones en `datos/corto_plazo/muestra_prueba_e14.csv`, que
    `tests/datos_ml/test_corto_plazo_modelo.py` recalcula en cada corrida del CI.
 3. **Cargar.** `corto_plazo.cargar()` verifica el SHA-256 de cada árbol y la versión de variables (`cp1-2026-11-17`) y
-   los deja en memoria. Un día se pronostica con los 56 días anteriores y el día (`Ruta.recorte`), lo mismo que con la
-   serie entera; una prueba lo comprueba.
+   los deja en memoria. Con `MOTOR_INFERENCIA=onnx` carga además las sesiones de ONNX Runtime de su exportación, cada
+   una con su SHA-256 verificado contra `onnx/manifest_onnx.json`; sin exportación, la carga falla con un mensaje que
+   pide correr `scripts/exportar_onnx_corto_plazo.py`. Un día se pronostica con los 56 días anteriores y el día
+   (`Ruta.recorte`), lo mismo que con la serie entera; una prueba lo comprueba.
 4. **Cambiar el código de variables** obliga a correr los pasos 1 y 2: la prueba de la huella falla si
    `variables_corto_plazo.py` cambió sin volver a registrar el modelo.
+5. **Registrar.** Al arrancar la API (y en cada `GET /api/v1/models`), `gobierno_corto_plazo.sembrar` lleva a
+   `model_registry`, como candidatas de la familia `corto_plazo`, las versiones del registro de artefactos que la base
+   no tiene, con el SHA-256 de su manifiesto, su versión de variables, su fecha de corte y las cifras de su prueba. Si
+   la familia no tiene activo, el activo del registro de artefactos lo es (`aprobado_por = sistema (arranque)`); si
+   un admin lo retiró después, no se vuelve a activar solo. Desde entonces, la fuente de verdad del activo es
+   `model_registry`: la API y el ciclo le pasan su `model_id` a `corto_plazo.pronosticar`.
+6. **Compuerta y activación.** `POST /api/v1/models/{model_id}/activate` con un modelo de la familia aplica los
+   mismos cuatro criterios de `politica.compuerta` y los mismos umbrales versionados (WAPE del candidato ≤ el del
+   activo y ≤ `wape_max`, cobertura P10–P90 en [`cobertura_aviso`, `cobertura_max`] y |sesgo| ≤ `sesgo_max`), con los
+   dos modelos en la misma ventana. La métrica es el pronóstico de la ruta en cada media hora de 04:00 a 21:00 de los
+   días con datos, frente a lo que subió en la ventana (`gobierno_corto_plazo.evaluar`), con los datos que ya leyó la
+   API. La ventana (por omisión, los 28 días siguientes a la fecha de corte, recortados al último día completo con
+   datos) tiene que empezar después de la fecha de corte del candidato: si no, 422 `ventana_en_muestra`; sin datos
+   leídos después del corte, 409 `sin_datos_validacion`. Si no aprueba, queda `rechazado` con 409
+   `activacion_rechazada`, y `?forzar=true` con `motivo` funciona igual que en el horario.
+7. **Monitorear.** En cada ciclo diario, `monitoreo_corto_plazo.en_ciclo` evalúa al activo en los últimos 7 días
+   completos leídos hasta la marca de agua: error móvil (WAPE, MAE y sesgo) por horizonte, por ruta y en conjunto,
+   cobertura P10–P90, volumen de pronósticos guardados en esa ventana (`prediction_corto_plazo`, fila de la ruta) y
+   PSI de `p15`, `p30`, `p60`, `hoy`, `sal60` y `m8` del pronóstico de la ruta a 60 min frente a las 4 semanas
+   anteriores a la fecha de corte del modelo. El estado (ok, aviso o alerta) sale de `monitoreo.estado_de` con los
+   mismos umbrales de monitoreo del modelo horario. La fila va a `model_monitoring` con el `execution_id` del ciclo y
+   `detalle.familia = corto_plazo` (con el detalle por horizonte y por ruta), y un WAPE móvil de una ruta sobre
+   `wape_max` abre ALT-010 (un episodio por modelo y ruta). Los ciclos intradía no lo hacen: con el día a medias el
+   error saldría inflado.
+8. **Revertir.** `POST /api/v1/models/rollback` con `{"familia": "corto_plazo"}` vuelve al activo anterior de la
+   familia, con su auditoría.
 
-No pasa por la sombra ni por la compuerta del modelo horario, que comparan WAPE por hora de salida (otra unidad).
-Hacerlo es un pendiente de `PLAN_EVOLUCION.md` (sección 7).
+`GET /api/v1/models/{model_id}/importance` da, para un modelo de esta familia, la ganancia de LightGBM por variable,
+normalizada en cada artefacto y promediada en las tres rutas, por nivel y horizonte (`corto_plazo.importancia_global`;
+también en `GET /api/v1/predictions/corto-plazo/modelo`). A 60 minutos, por ruta, encabezan `p15` con 40,5 %, `m8`
+12,7 %, `m4` 11,4 % y `p30` 8,2 %. `GET /api/v1/models/{model_id}/evaluation` da la prueba reservada registrada y, con
+`desde` y `hasta`, la evaluación en esa ventana con lo leído.
+
+No tiene sombra ni reentrenamiento por política: la sombra, la política de reentrenamiento, la activación automática y
+la reversión automática siguen siendo de la familia horaria (`politica.en_sombra` solo mira esa familia). Una versión
+nueva se entrena con el script y entra a la compuerta como candidata.
+
+**Lo que alimenta al modelo (`app/servicios/panel_corto_plazo.py`, migración 0016).** La serie de cada ruta es el
+panel empaquetado de 15 minutos (`datos/corto_plazo/`, 2023-2025, con VAL-009) más lo que leyó el ciclo
+(`lectura_15min`, `subidas_15min` y `salidas_15min`, sección 3): los días posteriores al panel la extienden, más un día
+vacío después del último leído, cuyo primer instante (04:00) solo usa días anteriores (`panel_corto_plazo.unir`). Un
+día del panel que el ciclo lee en modo Parquet queda como en el panel: sus celdas no se copian a la base, porque ya
+están empaquetadas (son 12,3 millones; la primera copia y cada relectura tardaban minutos), y `lectura_15min` dice
+hasta dónde se leyó. Un día con celdas guardadas reemplaza al del panel (así se conserva lo que copiaron versiones
+anteriores, con los mismos valores).
+El calendario de las fechas nuevas se calcula con las mismas reglas del panel (`panel_corto_plazo.calendario`: festivos
+de Colombia con Ley Emiliani y Pascua, Carnaval, Semana Santa, vacaciones y calendario académico); reproduce los 1.096
+días de 2023-2025 sin una diferencia (`tests/unit/test_panel_corto_plazo.py`). Lo leído se guarda en memoria por ruta y
+se relee solo si `lectura_15min` cambió. `corto_plazo.con_sesion(sesion)` incluye lo leído en la serie; sin sesión
+(los scripts de evidencia) se usa solo el panel.
+
+**Marca de agua: nada sin leer cuenta.** `corto_plazo.limite_lectura` dice hasta qué instante se puede pronosticar un
+día: un día del panel, sin límite; un día leído o posterior al panel, hasta lo leído de ese día y, si el anterior se
+leyó entero, al menos su primer instante. Un instante posterior responde `FueraDeCobertura` (422 `fuera_de_cobertura`
+en la API). En el ciclo, `pronosticar(..., hasta=marca de agua)` cuenta además solo los bloques de 15 minutos que
+terminaron antes de la marca (`bloques_leidos`), y lo real de una ventana que no se leyó entera no se muestra. Cada
+respuesta dice hasta dónde hay datos (`datos_hasta`).
+
+**Calidad de la entrada (RF-004, §6.3).** VAL-009 (dimensión validez, bloqueante): una celda con más subidas que
+`cp_tope_subidas_bloque_segmento` (`threshold_config`, versionado por la migración 0016; 1.000 por omisión: un segmento
+de 500 m en 15 minutos no recibe más de unos 18 buses × 50 puestos) se excluye, cuenta como no observada y, en la
+lectura del ciclo, queda en `data_quality_error` con su llave (idruta, fecha, bloque, nro_segmento). Con 1.000 solo caen
+los dos registros imposibles de la base, los dos en CRA 54: 97.157 subidas el 26-05-2024 (segmento 1) y 28.782 el
+05-07-2025 (segmento 4); la celda normal más alta del panel tiene 497. La misma regla se aplica al panel empaquetado al
+servir, con el tope vigente, y la respuesta trae `calidad` con las celdas excluidas que usa ese pronóstico (el día y
+sus 8 semanas de historia). Ejemplo: CRA 54, 05-07-2025 08:00, 30 min: con la regla, 584,9 subidas (últimos 15 min:
+256); sin ella, 837,5 (últimos 15 min: 29.038); lo real fue 450.
+
+**ONNX (§9.1, §9.2).** `app/servicios/onnx_corto_plazo.py` traduce cada LightGBM a ONNX: un `TreeEnsembleRegressor`
+de ai.onnx.ml 3 con umbrales y hojas en doble precisión, la misma regla de faltantes y un `Exp`.
+`scripts/exportar_onnx_corto_plazo.py` exporta los 18 a `datos/modelos/corto_plazo/cp_lgbm_20250630_s42/onnx/*.onnx.gz`
+(≈ 8,5 MB) con su SHA-256 en `manifest_onnx.json`. Paridad con LightGBM en 490.140 filas reales de seis días de la
+prueba reservada más las mismas con un 10 % de faltantes: diferencia relativa máxima de 4,9e-7 (tolerancia 1e-5, la
+precisión de float32; `docs/evidencias/modelo/corto_plazo_onnx.md` y `.json`). Con `MOTOR_INFERENCIA=onnx` la API
+pronostica con ONNX Runtime; la explicación local sigue siendo el TreeSHAP de LightGBM, y
+`GET /api/v1/predictions/corto-plazo/modelo` dice el motor (`motor`).
+
+```
+.venv\Scripts\python scripts\entrenar_corto_plazo.py                 (versión nueva: candidata; --activar solo la primera)
+.venv\Scripts\python scripts\verificar_corto_plazo.py                (reproduce la prueba reservada, sin VAL-009)
+.venv\Scripts\python scripts\exportar_onnx_corto_plazo.py            (18 artefactos ONNX con su SHA-256 y su paridad)
+```
+
+**Qué modelo usa cada endpoint por omisión.**
+
+| Endpoint | Modelo por omisión |
+|---|---|
+| `POST /api/v1/predictions/run` | Corto plazo (`modelo=auto`) si cubre la solicitud; si no, el horario. `modelo=horario` o un `model_id` horario fijan el horario. |
+| `POST /api/v1/predictions/corto-plazo`, `GET …/corto-plazo/calcular`, `…/dia`, `…/modelo` | Corto plazo (el activo de su familia) |
+| `GET /api/v1/predictions/segmentos` | Al vuelo, corto plazo por segmento (`fuente=auto`); con `prediction_id`, `model_id` o `modelo_segmentos`, o fuera de su cobertura, el reparto del modelo de segmentos sobre el horario |
+| `GET /api/v1/predictions` | Los dos, si no se pide `modelo` |
+| `GET /api/v1/predictions/export` | Horario (`modelo=corto_plazo` para el otro) |
+| `GET /api/v1/recommendations/plan`, la foto de `GET /api/v1/respuesta`, `POST /api/v1/respuesta/calcular` | Horario (o `E12`) |
+| `proximas_dos_horas` de `GET /api/v1/respuesta` | Corto plazo |
+| El ciclo | Los dos: el horario para las predicciones por hora, el plan del día siguiente y la foto de la respuesta; el corto plazo para `prediction_corto_plazo` y las recomendaciones con `origen = 'corto_plazo'` |
 
 ## 6. Motor de alertas (`app/servicios/alertas.py`)
 
@@ -429,7 +570,12 @@ Hacerlo es un pendiente de `PLAN_EVOLUCION.md` (sección 7).
   `docs/alertas_viajes_y_alt003.md`.
 - **Alertas de pronóstico por hora.** ALT-001 y ALT-002 comparan pasajeros por hora con puestos por hora en la hora
   recomendada: la ventana de la alerta es esa hora. Hay una alerta por franja, con los horizontes que la produjeron en
-  `variables.horizontes_min`, y las variables traen `unidad_demanda` y `demanda_ventana`.
+  `variables.horizontes_min`, y las variables traen `unidad_demanda` y `demanda_ventana`. En los ciclos intradía,
+  los pronósticos de corto plazo del ciclo (sección 3) entran con el mismo contexto (`alertas.contexto_pronostico`,
+  con su franja a ritmo por hora y su recomendación) y pueden abrir ALT-001 a ALT-004; en el ciclo diario, no.
+- **ALT-010 del corto plazo.** El monitoreo diario del corto plazo abre ALT-010 por ruta cuando su WAPE móvil de los
+  últimos 7 días completos supera `wape_max`, con un episodio por modelo y ruta (sección 5, «El modelo de corto
+  plazo»).
 - **ALT-002 observada en el segmento crítico (§10.1).** Si una hora cerrada trae la ocupación medida en su segmento
   crítico con al menos `salidas_minimas_ocupacion` viajes, ALT-002 la mide ahí; si no, la estima con el factor de carga
   de la franja, como antes. `variables.metodo_ocupacion` dice cuál se usó (`segmento_critico` o `factor_carga`). Con la
@@ -623,7 +769,8 @@ aplica al arrancar en Docker con el servicio `migrar`.
 | `0012_retencion_y_ventana_segmentos.py` | Retención de datos (§18) y refresco de segmentos sin cambios. Agrega el tipo de trabajo `retencion` a la restricción de `execution_log.tipo`, leyendo la lista vigente como la 0008. Crea `retencion_registro`, la bitácora de la retención (grupo, objeto, acción, corte, filas, bytes, versión de los parámetros, si fue simulación y el detalle; sin llave foránea a `execution_log`, para sobrevivir a la propia retención). Agrega `segmento_estadistica_refresco.huellas_solape`. Siembra una versión nueva y completa de `threshold_config` con los seis parámetros de la retención (`retencion_meses_foto`, `retencion_meses_resultados`, `retencion_meses_alertas` y `retencion_meses_ejecuciones` en 13, `retencion_archivar_particiones` en 0 y `retencion_aplicar_programada` en 1); un valor ya vigente se conserva. La bajada quita la columna, la tabla, las ejecuciones `retencion` y el tipo, y solo sus filas de `threshold_config`. Baja a la 0011. Al subir y al bajar toma el candado de `bloquear_umbrales`, como la 0013 y la 0014. Pruebas: `tests/integracion/test_retencion.py::test_migracion_0012_sube_y_baja`, `tests/unit/test_retencion.py::test_los_parametros_son_los_que_siembra_la_migracion_0012` y `tests/integracion/test_migracion_0012_candado.py::test_la_0012_espera_el_candado_de_threshold_config_al_bajar_y_al_subir`. |
 | `0013_consolidados_ciclo.py` | Consolidados de Extreme en el ciclo (§6.1, §6.3, §9.5, §11.2). Agrega a `demanda_observada` las columnas `bajadas_viajes` (Σ `numerobajadas` de los viajes válidos de la franja), `subidas` y `bajadas` (Σ de `timbradas_segmentos`) y `viajes_con_timbradas` (su cobertura); las filas que ya estaban quedan con ellas nulas, porque la migración no lee la base de Extreme. Crea `marca_agua_tabla`: la marca de agua y las huellas de la ventana de solape de cada tabla consolidada por proceso, con el `execution_id` que la movió (llave foránea a `execution_log` con `ON DELETE CASCADE`). Siembra una versión nueva y completa de `threshold_config` con `contraste_tolerancia` 0,15, `contraste_tolerancia_grosera` 0,50 y `contraste_viajes_minimos` 30; un valor ya vigente se conserva. Al subir y al bajar toma el candado de `bloquear_umbrales`. La bajada borra la tabla, las cuatro columnas y solo sus filas de `threshold_config`; si no queda una versión vigente, vuelve vigente la anterior. Baja a la 0012. Prueba: `tests/integracion/test_consolidados_ciclo.py::test_migracion_0013_sube_y_baja` (sube y baja su propia revisión, sin suponer que es la cabeza). Detalle en `docs/consolidados_ciclo.md`. |
 | `0014_alt003_probabilidad_minima.py` | Versión nueva y completa de `threshold_config` con `alt003_probabilidad_minima` = 0,30, el mínimo de probabilidad de ALT-003 elegido sin fuga. Nace propuesta (`aprobado_por` nulo): la aprueba el área operativa con `POST /api/v1/thresholds/{version}/aprobar`. Un valor ya vigente se conserva. Toma el mismo candado de `bloquear_umbrales` al subir y al bajar. La bajada borra solo sus filas; si no queda una versión vigente, vuelve vigente la anterior. Baja a la 0013. Pruebas: `tests/integracion/test_gobierno_alt003.py::test_migracion_0014_versiona_el_minimo_de_alt003_como_propuesta_y_baja` (también que `PUT /thresholds` rechaza un 0 con 422) y `tests/unit/test_alertas_alt003.py::test_la_migracion_0014_siembra_el_valor_del_codigo`. Detalle en `docs/alertas_viajes_y_alt003.md`. |
-| `0015_prediccion_corto_plazo.py` (head) | Tabla `prediction_corto_plazo` (RF-005, RF-006, §9.2): el pronóstico de corto plazo, una fila por pronóstico y nivel. Un pronóstico (`grupo_id`) de una ruta en un instante y un horizonte guarda la fila de la ruta (con la explicación local y la recomendación), las de sus dos sentidos y la de cada segmento, con P50, P10, P90, las dos líneas base de §9.1, `model_id`, `feature_version`, `data_cutoff`, `generated_at` y `latencia_ms`; `execution_id` si la generó el ciclo. Restricciones: horizonte 30, 60 o 120, nivel coherente con sentido y segmento, P10 ≤ P90 y un índice único por grupo, nivel, sentido y segmento. La bajada borra la tabla. Pruebas: `tests/integracion/test_corto_plazo_api.py` y la subida, bajada y subida desde cero del CI. |
+| `0015_prediccion_corto_plazo.py` | Tabla `prediction_corto_plazo` (RF-005, RF-006, §9.2): el pronóstico de corto plazo, una fila por pronóstico y nivel. Un pronóstico (`grupo_id`) de una ruta en un instante y un horizonte guarda la fila de la ruta (con la explicación local y la recomendación), las de sus dos sentidos y la de cada segmento, con P50, P10, P90, las dos líneas base de §9.1, `model_id`, `feature_version`, `data_cutoff`, `generated_at` y `latencia_ms`; `execution_id` si la generó el ciclo. Restricciones: horizonte 30, 60 o 120, nivel coherente con sentido y segmento, P10 ≤ P90 y un índice único por grupo, nivel, sentido y segmento. La bajada borra la tabla. Pruebas: `tests/integracion/test_corto_plazo_api.py` y la subida, bajada y subida desde cero del CI. |
+| `0016_corto_plazo_en_vivo.py` (head) | El corto plazo dentro del ciclo (RF-004, RF-005, RF-013, RF-018, RF-019, §7.3, §8.3, §9.2). Crea `subidas_15min` (llave ruta, fecha, bloque de 0 a 95 y segmento; subidas ≥ 0), `salidas_15min` (llave ruta, fecha y bloque) y `lectura_15min` (llave ruta y fecha: `hasta`, `fuente`, `execution_id` con llave foránea a `execution_log` `ON DELETE SET NULL`, celdas, subidas, excluidas y `leido_en`). En `recommendation`: el origen `corto_plazo` en su CHECK y `prediction_corto_plazo_id` (llave foránea a la fila de la ruta, `ON DELETE SET NULL`, con índice parcial). En `prediction_corto_plazo`: `idempresa`, `idproceso`, `id_dia_semana`, `id_estacionalidad` e `id_segmento`. En `model_registry`: `familia` (`horario` por omisión o `corto_plazo`) y el índice único del activo pasa a ser uno por familia. Siembra una versión nueva y completa de `threshold_config` con `cp_tope_subidas_bloque_segmento` = 1.000 (VAL-009); un valor ya vigente se conserva, y toma el candado de `bloquear_umbrales` al subir y al bajar. La bajada borra las recomendaciones `corto_plazo`, los modelos de la familia `corto_plazo` del registro, las columnas, las tres tablas y solo sus filas de `threshold_config` (si no queda una versión vigente, vuelve vigente la anterior). Baja a la 0015. Pruebas: `tests/integracion/test_corto_plazo_api.py`, `tests/integracion/test_gobierno_alt003.py` (la versión vigente que deja) y la subida, bajada y subida desde cero del CI. |
 
 Convenciones:
 
@@ -633,12 +780,13 @@ Convenciones:
 - Un cambio del conjunto gobernado a la vez: `PUT /thresholds` y los ajustes de capacidad, flota y ciclo toman el
   mismo candado de la transacción (`ejecucion.bloquear_umbrales`, `pg_advisory_xact_lock`) antes de leer la versión
   vigente. Todo código nuevo que cree una versión de `threshold_config` debe usar `ejecucion.nueva_version_umbrales` o
-  `catalogos.versionar_ajustes`, que lo toman. Las migraciones 0013 y 0014 toman el mismo candado (`CANDADO_UMBRALES`,
-  copiado de `ejecucion.SQL_CANDADO_UMBRALES`; sus pruebas comprueban que es el mismo texto), así que un
-  `PUT /thresholds` de otra réplica durante el despliegue espera y parte de la versión que deja la migración.
-- En una base nueva sin ningún `PUT /thresholds`, la versión vigente de `threshold_config` es la 9, con 71
-  parámetros: la crea la 0014 y nace propuesta. Crean versiones la 0001, la 0003, la 0004, la 0005, la 0007, la 0010,
-  la 0012, la 0013 y la 0014.
+  `catalogos.versionar_ajustes`, que lo toman. Las migraciones 0013, 0014 y 0016 toman el mismo candado
+  (`CANDADO_UMBRALES`, copiado de `ejecucion.SQL_CANDADO_UMBRALES`; las pruebas de la 0013 y la 0014 comprueban que es
+  el mismo texto), así que un `PUT /thresholds` de otra réplica durante el despliegue espera y parte de la versión que
+  deja la migración.
+- En una base nueva sin ningún `PUT /thresholds`, la versión vigente de `threshold_config` la crea la 0016: los 71
+  parámetros de la versión 9 (la de la 0014) más `cp_tope_subidas_bloque_segmento`, y nace propuesta, como aquella.
+  Crean versiones la 0001, la 0003, la 0004, la 0005, la 0007, la 0010, la 0012, la 0013, la 0014 y la 0016.
 - Una migración que agregue un tipo de trabajo lo suma a la restricción de `execution_log.tipo` leyendo la lista
   vigente, como la 0008 y la 0012, para no pisar los tipos de otras migraciones.
 - Toda tabla de `ai_frecuencias` tiene que tener su regla de retención en `app/servicios/retencion.py` (se borra por
@@ -655,9 +803,11 @@ La política, tabla por tabla, está en `docs/retencion_datos.md`; aquí va lo q
   cada partición mensual de `feature_snapshot` cuyo rango y cuyas filas son anteriores al corte, y borra por lotes de
   5.000 las predicciones, las recomendaciones, las respuestas del reto, las marcas de refresco viejas, las
   notificaciones, las alertas cerradas o descartadas y las ejecuciones que ya no sostienen nada (tampoco la que movió
-  una marca de agua por ruta o por tabla). Conserva `demanda_observada`, `ocupacion_segmento`, `model_registry`,
-  `threshold_config`, `marca_agua_ruta`, `marca_agua_tabla`, las alertas abiertas y su propia bitácora; la agregación
-  de segmentos es derivada y solo se informa. La edad se mide por la fecha en que se escribió cada fila (las alertas,
+  una marca de agua por ruta o por tabla, ni la que dejó una fila de `lectura_15min`). Los pronósticos de corto plazo
+  (`prediction_corto_plazo`) se borran con los resultados. Conserva `demanda_observada`, `ocupacion_segmento`,
+  `model_registry`, `threshold_config`, `marca_agua_ruta`, `marca_agua_tabla`, `subidas_15min`, `salidas_15min` y
+  `lectura_15min` (lo leído para el corto plazo), las alertas abiertas y su propia bitácora; la agregación de segmentos
+  es derivada y solo se informa. La edad se mide por la fecha en que se escribió cada fila (las alertas,
   por su última actualización), así que los datos históricos que se reprocesan hoy, como los de la demostración, no se
   borran.
 - **La corrida programada aplica.** Con `PLANIFICADOR_HABILITADO=true` (el valor de Docker Compose), la franja de
@@ -786,7 +936,8 @@ Todas las variables están en `.env.example`, con su explicación, y se leen en 
 | `PLAN_SEGMENTOS_CRON`, `SEGMENTOS_DIAS_POR_LOTE`, `SEGMENTOS_COMPLETO_DIAS` | Refresco de la agregación de segmentos: cron (por omisión `45 5 * * *`, solo con `FUENTE_DATABASE_URL`), días de `timbradas_segmentos` por lectura de la fuente (31) y días máximos entre dos refrescos completos en modo `auto` (7), los dos de 1 a 366 (`docs/segmentos_materializados.md`). |
 | `PLAN_RETENCION_CRON` | Cron de la corrida programada de la retención de datos (§18; `tarea_retencion`): por omisión `30 3 * * 0`, los domingos a las 03:30; vacío no la programa. Los meses en caliente y si esa corrida aplica o solo simula son parámetros de `threshold_config` (`retencion_*`, sección 8), no variables de entorno. |
 | `FOTO_SEGMENTOS` | `true` por omisión: la foto de variables guarda también una fila por segmento y sentido de cada predicción con el modelo de segmentos activo (`docs/evidencias/monitoreo/foto_segmentos.json` mide las filas y los bytes por ejecución). `false` la apaga y deja solo las filas de la ruta. |
-| `MOTOR_INFERENCIA`, `CALIBRACION_BANDA` | `sklearn` u `onnx`; `CALIBRACION_BANDA=v1` fuerza la calibración v1 de la banda (conformal móvil por ruta) en lugar de la v2 versionada con el modelo (vacía por omisión). |
+| `MOTOR_INFERENCIA`, `CALIBRACION_BANDA` | `sklearn` u `onnx`. Con `onnx`, el modelo horario corre con sus `.onnx` y el de corto plazo con su exportación (`scripts/exportar_onnx_corto_plazo.py`), cada artefacto verificado por SHA-256 al cargar. `CALIBRACION_BANDA=v1` fuerza la calibración v1 de la banda (conformal móvil por ruta) en lugar de la v2 versionada con el modelo (vacía por omisión). |
+| `MODELOS_IMAGEN_DIR` | Carpeta de la segunda copia de los modelos dentro de la imagen (por omisión `/app/modelos_imagen`): al arrancar, `modelos_imagen.sembrar` copia de ahí al volumen lo que le falta. Fuera de Docker la carpeta no existe y no se copia nada. |
 | `OTEL_EXPORTADOR`, `OTEL_SERVICE_NAME`, `LOG_NIVEL`, `TZ` | Observabilidad y zona de presentación. |
 | `NOTIFICACIONES_CANALES`, `NOTIFICACIONES_SEVERIDAD` | Notificaciones simuladas. |
 | `NOTIF_UNICIDAD_DESTINATARIOS` | Correos del responsable del consolidado para el reporte de llaves duplicadas de cada lote (§6.3). Vacía por omisión: el destinatario lo define Extreme y, sin él, el reporte queda `pendiente_destinatario` en `notification_log`. Como las demás `NOTIF_*`, la lee `app/servicios/notificaciones.py` del entorno del proceso, no `app/config.py`. |
@@ -823,6 +974,12 @@ Todas las variables están en `.env.example`, con su explicación, y se leen en 
   reentrenar con `scripts/entrenar_segmentos.py` (`docs/modelo_segmentos.md`, «Reentrenar»): el manifiesto guarda la
   huella del código y `tests/datos_ml/test_segmentos_modelo.py::test_artefacto_activo_integro_y_registro_con_linea_base`
   la compara.
+- **Una versión nueva del modelo de corto plazo.** Entrénela con `scripts/entrenar_corto_plazo.py` (queda candidata),
+  verifíquela con `scripts/verificar_corto_plazo.py`, expórtela con
+  `scripts/exportar_onnx_corto_plazo.py --model-id <id>` si se usará `MOTOR_INFERENCIA=onnx`, y actívela con
+  `POST /api/v1/models/{model_id}/activate` (la compuerta de la sección 5). Si cambia `variables_corto_plazo.py` fuera de su docstring, la prueba de la huella falla: corra
+  `scripts/verificar_corto_plazo.py` (debe seguir reproduciendo la prueba) y
+  `scripts/entrenar_corto_plazo.py --solo-registrar`.
 - **Un umbral o parámetro gobernado que se lee en el ciclo.** Léalo de la versión de la ejecución
   (`ejecucion.umbrales_de_la_ejecucion`), no de la vigente, para que una ejecución partida por ruta use una sola
   versión, y pruébelo también con `PLAN_PARTICION=ruta`. Para versionarlo, use `ejecucion.nueva_version_umbrales` o

@@ -166,8 +166,11 @@ ALT_GRAFICOS = {
     "Datos validados": "Tarjetas con las seis dimensiones de calidad de §6.3, la lectura y el contraste de los "
                        "consolidados de Extreme, la lectura incremental, la carga idempotente y la prueba de no "
                        "fuga.",
-    "El modelo le gana": "Gráfico de puntos con el WAPE y su intervalo del 95 % del modelo activo, el modelo anterior y "
-                         "las líneas base B1 y B2, y una tabla de robustez por ruta, año y horizonte.",
+    "El pronóstico del enunciado": "Tabla del WAPE del pronóstico de 30, 60 y 120 minutos por ruta, sentido y "
+                                   "segmento frente al promedio por día y hora en la prueba reservada, y tarjetas de lo "
+                                   "que ya está en el producto y sus límites.",
+    "El modelo horario del plan": "Gráfico de puntos con el WAPE y su intervalo del 95 % del modelo horario activo, el "
+                                  "modelo anterior y las líneas base B1 y B2.",
     "Incertidumbre y ciclo de vida": "Tarjetas de cobertura, explicabilidad y ciclo de vida del modelo, y la captura de "
                                      "la pantalla Monitoreo del tablero con el error, el sesgo y la cobertura del "
                                      "modelo activo.",

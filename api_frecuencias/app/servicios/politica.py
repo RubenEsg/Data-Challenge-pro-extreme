@@ -97,7 +97,9 @@ def en_sombra(s) -> list:
 
     from app.modelos_db import RegistroModelo
 
-    filas = s.scalars(select(RegistroModelo).where(RegistroModelo.estado == "candidato")).all()
+    # solo la familia horaria: el corto plazo tiene su propia compuerta (app/servicios/gobierno_corto_plazo.py)
+    filas = s.scalars(select(RegistroModelo).where(RegistroModelo.estado == "candidato",
+                                                   RegistroModelo.familia == "horario")).all()
     return [f for f in filas if ((f.metricas or {}).get("sombra") or {}).get("estado") == "en_sombra"]
 
 
@@ -182,7 +184,8 @@ def antiguedad_de_datos(s, activo, hasta: date) -> dict[str, Any]:
 
     from app.modelos_db import RegistroModelo
 
-    otros = s.scalars(select(RegistroModelo).where(RegistroModelo.tipo == "candidato")).all()
+    otros = s.scalars(select(RegistroModelo).where(RegistroModelo.tipo == "candidato",
+                                                   RegistroModelo.familia == "horario")).all()
     vistos = [d for d in (datos_vistos_hasta(m) for m in [activo, *otros]) if d is not None]
     if not vistos:
         return {"ultimo_dato_visto": None}

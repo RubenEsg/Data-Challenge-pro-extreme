@@ -1,4 +1,4 @@
-Migraciones Alembic aplicadas por el servicio «migrar» en la base nueva · 2026-11-18 20:45:02 -0500
+Migraciones Alembic aplicadas por el servicio «migrar» en la base nueva · 2026-11-19 03:20:27 -0500
 
 $ docker compose logs migrar   (alembic upgrade head sobre volumen nuevo)
   INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
@@ -27,9 +27,13 @@ $ docker compose logs migrar   (alembic upgrade head sobre volumen nuevo)
   observado hasta el instante (spec v1.5 §2.2, RF-005, RF-006 «guardar la predicción puntual, el límite inferior, el
   límite superior y la versión del modelo», §3.1 M3, §9.2 «cada predicción guarda model_id, feature_version,
   data_cutoff, generated_at, horizonte y latencia»).
+  INFO  [alembic.runtime.migration] Running upgrade 0015 -> 0016, El pronóstico de corto plazo dentro del ciclo: lo leído cada 15 minutos, su calidad, su recomendación y su ciclo de
+  vida (spec v1.5 RF-004, RF-005, RF-013, RF-018, RF-019, §7.3 pasos 2 a 7, §8.3, §9.2, §9.5, §11.2).
 
 $ alembic history
-  0014 -> 0015 (head), Pronósticos de corto plazo: las subidas de los próximos 30, 60 y 120 minutos por ruta, sentido y segmento, con lo
+  0015 -> 0016 (head), El pronóstico de corto plazo dentro del ciclo: lo leído cada 15 minutos, su calidad, su recomendación y su ciclo de
+  vida (spec v1.5 RF-004, RF-005, RF-013, RF-018, RF-019, §7.3 pasos 2 a 7, §8.3, §9.2, §9.5, §11.2).
+  0014 -> 0015, Pronósticos de corto plazo: las subidas de los próximos 30, 60 y 120 minutos por ruta, sentido y segmento, con lo
   observado hasta el instante (spec v1.5 §2.2, RF-005, RF-006 «guardar la predicción puntual, el límite inferior, el
   límite superior y la versión del modelo», §3.1 M3, §9.2 «cada predicción guarda model_id, feature_version,
   data_cutoff, generated_at, horizonte y latencia»).
@@ -55,7 +59,7 @@ $ alembic history
   bitácora de ejecuciones, errores de calidad, umbrales versionados y notificaciones.
 
 $ alembic current
-  0015 (head)
+  0016 (head)
 
 $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones, el índice GiST y pg_stat_statements
                                                               version                                                            
@@ -70,12 +74,12 @@ $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones
   
    version_num 
   -------------
-   0015
+   0016
   (1 row)
   
    tablas 
   --------
-       24
+       27
   (1 row)
   
              tablename           
@@ -89,6 +93,7 @@ $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones
    execution_log
    feature_snapshot
    feature_snapshot_202611
+   lectura_15min
    marca_agua_ruta
    marca_agua_tabla
    model_monitoring
@@ -100,11 +105,13 @@ $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones
    recommendation
    respuesta_reto
    retencion_registro
+   salidas_15min
    segmento_estadistica
    segmento_estadistica_dia
    segmento_estadistica_refresco
+   subidas_15min
    threshold_config
-  (24 rows)
+  (27 rows)
   
                  particion                
   ----------------------------------------
@@ -133,9 +140,9 @@ $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones
   
 
 $ alembic upgrade head (segunda vez): no hay nada pendiente
-   Container sobusa_limpio-migrar-run-a4ce26106f8b Creating 
-   Container sobusa_limpio-migrar-run-a4ce26106f8b Created 
+   Container sobusa_limpio-migrar-run-9d48c46ee56d Creating 
+   Container sobusa_limpio-migrar-run-9d48c46ee56d Created 
   INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
   INFO  [alembic.runtime.migration] Will assume transactional DDL.
 
-Resultado: versión actual 0015 (head) = head 0015 -> OK
+Resultado: versión actual 0016 (head) = head 0016 -> OK

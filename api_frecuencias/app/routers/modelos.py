@@ -6,11 +6,16 @@ siempre el model_id activo a inferencia.predecir(); el registro en disco de infe
 La activación manual no puede saltarse la gobernanza: aplica la misma compuerta de cuatro criterios que la sombra
 (politica.compuerta), solo en una ventana posterior a todo lo que vio el candidato (corte + 61 días de validación) y
 sobre la serie validada; un modelo rechazado o todavía en sombra necesita forzar=true con motivo, auditado.
+
+Dos familias (migración 0016), cada una con a lo sumo un activo: «horario» (el del plan del día siguiente) y
+«corto_plazo» (el de 30, 60 y 120 minutos, app/servicios/gobierno_corto_plazo.py: los mismos cuatro criterios y los
+mismos umbrales, en una ventana posterior a su fecha de corte, con los datos que ya leyó la API).
 """
 from __future__ import annotations
 
 import logging
 from datetime import date, timedelta
+from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Query, Request
 from sqlalchemy import select
@@ -41,14 +46,21 @@ def _auditar(modelo: RegistroModelo, evento: str, **datos) -> None:
 
 
 @router.get("", response_model=Pagina[ModeloSalida], summary="Consultar el registro de modelos")
-def listar(estado: str | None = None, tipo: str | None = None, pagina: ParametrosPagina = Depends(),
-           sesion: Session = Depends(obtener_sesion)):
+def listar(estado: str | None = None, tipo: str | None = None,
+           familia: Literal["horario", "corto_plazo"] | None = Query(
+               None, description="horario (el del plan del día siguiente) o corto_plazo (30, 60 y 120 min)"),
+           pagina: ParametrosPagina = Depends(), sesion: Session = Depends(obtener_sesion)):
+    from app.servicios import gobierno_corto_plazo
+
     servicio.sembrar_registro(sesion)
+    gobierno_corto_plazo.sembrar(sesion)
     consulta = select(RegistroModelo)
     if estado:
         consulta = consulta.where(RegistroModelo.estado == estado)
     if tipo:
         consulta = consulta.where(RegistroModelo.tipo == tipo)
+    if familia:
+        consulta = consulta.where(RegistroModelo.familia == familia)
     return paginar(sesion, consulta, RegistroModelo, pagina, "-creado_en")
 
 
@@ -66,7 +78,7 @@ def entrenar(solicitud: SolicitudEntrenamiento, tareas: BackgroundTasks, request
 def revertir(solicitud: SolicitudReversion, sesion: Session = Depends(obtener_sesion),
              principal: Principal = Depends(autenticar)):
     usuario = usuario_auditoria(principal, solicitud.usuario)   # RNF-011: la auditoría usa el autenticado
-    activo = servicio.modelo_activo(sesion)
+    activo = servicio.modelo_activo(sesion, solicitud.familia)
     if activo is None or not activo.anterior_model_id:
         raise ErrorApi(409, "sin_version_anterior", "No hay un modelo activo con versión anterior para revertir")
     previo = sesion.scalar(select(RegistroModelo).where(RegistroModelo.model_id == activo.anterior_model_id))
@@ -113,10 +125,14 @@ def activar(model_id: str, solicitud: SolicitudActivacion,
     if cand.estado == "activo":
         raise ErrorApi(409, "ya_activo", f"El modelo {model_id} ya está activo")
     _exigir_forzar(cand, forzar)
-    activo = servicio.modelo_activo(sesion)
-    desde, hasta, limite = _ventana_validacion(cand, solicitud, sesion)
+    activo = servicio.modelo_activo(sesion, cand.familia)
     version_u, umbrales = servicio.umbrales_vigentes(sesion)
-    comp = _compuerta_en_la_ventana(cand, activo, desde, hasta, umbrales, sesion)
+    if cand.familia == "corto_plazo":
+        desde, hasta, limite = _ventana_corto_plazo(cand, solicitud, sesion)
+        comp = _compuerta_corto_plazo(cand, activo, desde, hasta, umbrales, sesion)
+    else:
+        desde, hasta, limite = _ventana_validacion(cand, solicitud, sesion)
+        comp = _compuerta_en_la_ventana(cand, activo, desde, hasta, umbrales, sesion)
     comparacion = servicio.json_seguro({
         "ventana": {"desde": desde, "hasta": hasta}, "limite_en_muestra": limite,
         "candidato": comp["metricas_candidato"], "activo": comp["metricas_activo"],
@@ -139,6 +155,36 @@ def activar(model_id: str, solicitud: SolicitudActivacion,
                             comparacion, hasta)
     sesion.commit()
     return cand
+
+
+def _ventana_corto_plazo(cand: RegistroModelo, solicitud: SolicitudActivacion,
+                         sesion: Session) -> tuple[date, date, date | None]:
+    """La ventana de la compuerta del corto plazo: la pedida o los 28 días posteriores a su fecha de corte, hasta el
+    último día con datos (el panel y lo leído). 422 si empieza dentro de la muestra; 409 si todavía no hay datos."""
+    from app.servicios import corto_plazo, gobierno_corto_plazo
+
+    try:
+        with corto_plazo.con_sesion(sesion):
+            desde, hasta, corte = gobierno_corto_plazo.ventana(cand, solicitud.validacion_desde,
+                                                               solicitud.validacion_hasta)
+    except ValueError as exc:
+        raise ErrorApi(422, "ventana_en_muestra", str(exc)) from exc
+    if desde > hasta:
+        raise ErrorApi(409, "sin_datos_validacion",
+                       f"Todavía no hay datos leídos después del {corte} para comparar al candidato")
+    return desde, hasta, corte
+
+
+def _compuerta_corto_plazo(cand: RegistroModelo, activo: RegistroModelo | None, desde: date, hasta: date,
+                           umbrales: dict, sesion: Session) -> dict:
+    from app.servicios import corto_plazo, gobierno_corto_plazo
+
+    try:
+        with corto_plazo.con_sesion(sesion):
+            return gobierno_corto_plazo.compuerta(cand.model_id, activo.model_id if activo else None, desde, hasta,
+                                                  umbrales)
+    except Exception as exc:  # noqa: BLE001
+        raise ErrorApi(409, "validacion_fallida", f"No fue posible evaluar en {desde}..{hasta}: {exc}") from exc
 
 
 def _exigir_forzar(cand: RegistroModelo, forzar: bool) -> None:
@@ -237,6 +283,10 @@ def _modelo_en_disco(model_id: str):
                                               "ventana sobre datos reales (MAE, RMSE, WAPE, sMAPE, sesgo, cobertura)")
 def evaluacion(model_id: str, desde: date | None = None, hasta: date | None = None,
                sesion: Session = Depends(obtener_sesion)):
+    from app.servicios import gobierno_corto_plazo
+
+    if gobierno_corto_plazo.es_de_la_familia(model_id):
+        return _evaluacion_corto_plazo(model_id, desde, hasta, sesion)
     inferencia = _modelo_en_disco(model_id)
     salida = inferencia.evaluacion_registrada(model_id)
     if desde or hasta:
@@ -249,7 +299,39 @@ def evaluacion(model_id: str, desde: date | None = None, hasta: date | None = No
     return servicio.json_seguro(salida)
 
 
-@router.get("/{model_id}/importance", summary="Importancia global: permutación (aumento del MAE) y media de |SHAP|")
+def _evaluacion_corto_plazo(model_id: str, desde: date | None, hasta: date | None, sesion: Session) -> dict:
+    """La prueba reservada registrada del modelo de corto plazo y, con desde/hasta, su evaluación en esa ventana con
+    los datos que ya leyó la API."""
+    from app.servicios import corto_plazo, gobierno_corto_plazo
+
+    try:
+        m = corto_plazo.cargar(model_id)
+    except corto_plazo.ModeloCortoPlazoNoEncontrado as exc:
+        raise ErrorApi(404, "modelo_no_encontrado", str(exc), {"model_id": model_id}) from exc
+    except corto_plazo.ErrorCortoPlazo as exc:
+        raise ErrorApi(409, "integridad_modelo", str(exc), {"model_id": model_id}) from exc
+    man = m["manifiesto"]
+    salida = {"model_id": model_id, "familia": "corto_plazo", "prueba_reservada": man.get("metricas_prueba"),
+              "periodos": man.get("periodos"), "evaluacion": "pronostico_corto_plazo/README.md (experimento E14)"}
+    if desde or hasta:
+        if not (desde and hasta) or desde > hasta:
+            raise ErrorApi(422, "ventana_invalida", "Indique desde y hasta (desde <= hasta)")
+        with corto_plazo.con_sesion(sesion):
+            salida["ventana"] = gobierno_corto_plazo.evaluar(model_id, desde, hasta)
+    return servicio.json_seguro(salida)
+
+
+@router.get("/{model_id}/importance", summary="Importancia global: permutación (aumento del MAE) y media de |SHAP|; "
+                                               "en el corto plazo, la ganancia de LightGBM por nivel y horizonte")
 def importancia(model_id: str):
+    from app.servicios import corto_plazo, gobierno_corto_plazo
+
+    if gobierno_corto_plazo.es_de_la_familia(model_id):
+        try:
+            m = corto_plazo.cargar(model_id)
+        except corto_plazo.ErrorCortoPlazo as exc:
+            raise ErrorApi(409, "integridad_modelo", str(exc), {"model_id": model_id}) from exc
+        return servicio.json_seguro(dict(corto_plazo.importancia_global(m), model_id=model_id,
+                                         feature_version=m["manifiesto"].get("feature_version")))
     inferencia = _modelo_en_disco(model_id)
     return servicio.json_seguro(inferencia.importancia(model_id))

@@ -40,7 +40,15 @@ La API de frecuencias (`api_frecuencias/`) ya funciona y está medida:
   El ciclo diario completo, con las alertas observadas de cada día del lote, la foto de variables por segmento, el plan
   del día y la foto de la respuesta, tarda 27,5 s en la carga inicial y 20,7 s con un día nuevo
   (`ev/rendimiento/ciclo_final.md`, 13-11-2026).
-- **Calidad del pronóstico y de las alertas.** El modelo activo `hgb_fv2_20250831_s42` tiene un WAPE de 14,77 % (IC95
+- **El pronóstico que pide el enunciado.** Las subidas de los siguientes 30, 60 y 120 minutos por ruta, sentido y
+  segmento (`cp_lgbm_20250630_s42`, de `pronostico_corto_plazo/`) las sirve la API desde el 18-11-2026. Desde el
+  19-11-2026 son la respuesta por omisión de `POST /api/v1/predictions/run` y un paso del ciclo diario e intradía,
+  alimentado por la lectura incremental en bloques de 15 minutos (migración 0016): el pronóstico usa solo lo ya leído.
+  En su prueba reservada (jul.–dic. 2025), por ruta, falla 8,58 %, 7,34 % y 6,63 % a 30, 60 y 120 minutos, frente a
+  14,36 %, 13,18 % y 12,22 % del promedio por día y hora (`pronostico_corto_plazo/resultados/prueba.json`). Tiene su
+  propia familia en `model_registry` (`corto_plazo`), con compuerta, reversión y monitoreo (secciones 6.3 y 7).
+- **Calidad del modelo horario y de las alertas.** El modelo horario activo `hgb_fv2_20250831_s42`, el del plan del
+  día siguiente y semanal, tiene un WAPE de 14,77 % (IC95
   13,10–16,87) en la prueba reservada, frente a 21,18 % de la regla manual B1 (`ev/modelo/evaluacion_modelo.md`). Su
   banda P10–P90 usa la calibración v2 por bloque horario: cobertura de 77,82 % con un ancho medio de 303,4 pasajeros
   (`ev/modelo/calibracion_condicional.md`). Registrado y sin activar, el candidato `hgb_fv3_20250831_s42` (el mismo
@@ -167,7 +175,7 @@ El trigger no se deshabilita en ningún momento (§11.3).
 | **Cola** | Cada ejecución de frecuencia se puede partir por ruta y fecha (RNF-005, migración 0009). Con `particion=ruta` (`POST /api/v1/frequency/executions`) o `PLAN_PARTICION=ruta` (planificador) se crean una ejecución madre y un trabajo por ruta. Cada ruta tiene su marca de agua y sus huellas (`ai_frecuencias.marca_agua_ruta`), su lectura incremental (variante fija de la lista blanca, en solo lectura) y su candado: dos trabajos de la misma ruta nunca corren a la vez, y los de rutas distintas sí, en réplicas distintas. Con dos réplicas uvicorn, rutas distintas corrieron a la vez, sin cruces de la misma ruta ni duplicados y con las mismas salidas que sin partir (`ev/cola/replicas_por_ruta.txt`). La madre y todos sus trabajos usan la versión de umbrales vigente al crear la ejecución. Sin partir (por omisión) rige la regla de antes: una ejecución de frecuencia a la vez. | Cada trabajo de ruta paga sus costos fijos y su propia lectura: 3,8 s por trabajo de media frente a unos 2,9 s por ruta sin partir (`api_frecuencias/docs/particion_por_ruta.md`, «Límites conocidos»). Sin los índices de la sección 1.3, el SELECT de una ruta tarda lo mismo o más que el de todas (`ev/cola/lectura_por_ruta_replica.txt`), así que el planificador sigue sin partir por omisión. Con los índices y más rutas se activa `PLAN_PARTICION=ruta` y se agregan réplicas; el mecanismo (`SELECT … FOR UPDATE SKIP LOCKED` con reserva) no cambia. |
 | **Particionamiento** | `feature_snapshot` ya está particionada por mes. Desde que guarda también una fila por segmento y sentido de cada predicción, suma 1.158 filas y unos 0,47 MB de datos por ejecución, unos 14 MB al mes con una ejecución diaria (`ev/monitoreo/foto_segmentos.json`); con ejecuciones horarias serían 24 veces más. La retención es de 13 meses en caliente y, desde la migración 0012, la aplica una tarea automática: el trabajo «retencion» de la cola. El planificador la encola los domingos a las 03:30 (`PLAN_RETENCION_CRON`) y un admin la puede correr con `POST /api/v1/retencion/aplicar`, que simula por omisión. Las particiones mensuales viejas de `feature_snapshot` se separan con `DETACH PARTITION` y se borran; con `retencion_archivar_particiones` = 1 quedan como `<partición>_archivo`, sin llaves foráneas, para archivarlas con `pg_dump`. Los resultados, las alertas cerradas, las notificaciones y las ejecuciones viejas se borran por lotes; el histórico validado, la ocupación por segmento y la agregación de segmentos se conservan. Los parámetros se gobiernan en `threshold_config` (`api_frecuencias/docs/retencion_datos.md`, `ev/retencion/`). | Particionar por mes `prediction`, `recommendation` y `alert` cuando pasen de unos millones de filas (§8.1); con particiones, la retención podría retirarlas enteras, como hoy la foto, en lugar de borrar por lotes. |
 | **Lectura de la fuente** | Una ejecución diaria lee unas 49.459 filas, el 0,085 % de `timbradas_segmentos` (`ev/replica/explain_incremental.txt`). La agregación de segmentos la refresca un trabajo de la cola, que lee `timbradas_segmentos` con `lector_ia` por tramos de 31 días y parte por fecha y por ruta un tramo que agota el `statement_timeout` (`api_frecuencias/docs/segmentos_materializados.md`). Desde la migración 0012 compara las huellas de la ventana de solape: si la fuente no trae cambios, no relee ninguna fecha ni escribe (`ev/pruebas/segmentos_sin_cambios.json`). Los tres consolidados se leen una vez por ejecución, cada uno desde su marca de agua (`marca_agua_tabla`, migración 0013) y con las mismas huellas: en la réplica, la segunda lectura de `timbradas_consolidado` descarta por huella todas sus filas (`ev/consolidados/contraste_consolidados.md`). | Con los índices de la sección 1.3, el costo de la lectura incremental depende de lo nuevo y no del histórico. Si los rangos de fechas largos pasan a ser habituales en `GET /segmentos/estadisticas`, un grano mensual de la agregación evita volver a sumar el grano diario (sección 7). Cuando las tablas por segmento traigan filas, el contraste suma en la fuente solo las llaves que tocó lo leído, con `statement_timeout` y un tope de incidencias por tabla (`api_frecuencias/docs/consolidados_ciclo.md`, sección 6). |
-| **Inferencia** | El modelo exportado a ONNX da los mismos pronósticos y tarda unos 0,1 ms por fila, frente a 5–12 ms en scikit-learn (`ev/monitoreo/onnx_paridad.json`). | `MOTOR_INFERENCIA=onnx` para el modelo de la ruta en ejecuciones horarias. El modelo por segmento corre en scikit-learn y no tiene versión ONNX. |
+| **Inferencia** | El modelo horario exportado a ONNX da los mismos pronósticos y tarda unos 0,1 ms por fila, frente a 5–12 ms en scikit-learn (`ev/monitoreo/onnx_paridad.json`). Los 18 árboles LightGBM del corto plazo también tienen su versión ONNX: en 490.140 filas reales de seis días de la prueba reservada, más las mismas con un 10 % de faltantes, la diferencia relativa máxima con LightGBM es 4,9e-7 (`ev/modelo/corto_plazo_onnx.md`). | `MOTOR_INFERENCIA=onnx` para el modelo horario de la ruta y para el de corto plazo en ejecuciones horarias. El modelo de segmentos que reparte el pronóstico horario corre en scikit-learn y no tiene versión ONNX. |
 | **Ingesta** | 111.792 filas en unos 4 s con `COPY` y 53 MiB de memoria pico (`ev/rendimiento.txt`). | Lotes por ruta y fecha; el mismo `COPY` a una tabla de paso. |
 
 ## 3. Costos
@@ -265,13 +273,34 @@ Es el mismo calendario de la sección 1.1, contado en días. Las semanas mandan:
 
 Las metas son propuestas del equipo y se acuerdan con Extreme antes de empezar.
 
-**Criterio de salida del modo sombra, por horizonte y ventana.** Se mide al cierre de cada una de las cuatro semanas
-de sombra (semanas 5 a 8). Para pasar al piloto, cada horizonte tiene que cumplir su meta y quedar por debajo de la
-regla manual B1 en el mismo periodo:
+**Criterio de salida del modo sombra, por modelo, horizonte y ventana.** Se mide al cierre de cada una de las cuatro
+semanas de sombra (semanas 5 a 8). Para pasar al piloto, los dos modelos tienen que cumplir sus metas.
+
+**Pronóstico de corto plazo** (el de RF-005: las subidas de los siguientes 30, 60 y 120 minutos). Lo mide el monitoreo
+que deja cada ciclo diario en `model_monitoring` con `detalle.familia = corto_plazo`
+(`GET /api/v1/monitoring?familia=corto_plazo`, `api_frecuencias/app/servicios/monitoreo_corto_plazo.py`): el WAPE
+móvil por horizonte y por ruta en los últimos 7 días completos leídos, con la cobertura P10–P90, la deriva (PSI) y el
+volumen de pronósticos guardados. En cada una de las 4 mediciones semanales, cada horizonte tiene que cumplir su meta
+y quedar por debajo del promedio por día y hora en el mismo periodo (cada pronóstico guardado trae `promedio_dia_hora`
+al lado):
+
+| Horizonte | Qué se mide | Meta | Referencia: la prueba reservada, jul.–dic. 2025 (`pronostico_corto_plazo/resultados/prueba.json`) |
+|---|---|---|---|
+| 30 min | WAPE móvil de 7 días, por ruta | ≤ 14,36 % | El modelo falló 8,58 % por ruta; el promedio por día y hora, 14,36 %, que es la meta |
+| 60 min | El mismo | ≤ 13,18 % | 7,34 % frente a 13,18 % del promedio. Por sentido, 10,05 % frente a 16,10 %, y por segmento, 37,63 % frente a 43,61 % |
+| 120 min | El mismo | ≤ 12,22 % | 6,63 % frente a 12,22 % del promedio |
+
+La meta es no fallar más que lo que falló el promedio por día y hora en la prueba, donde el modelo quedó muy por
+debajo. El monitoreo mide la ruta: por sentido y segmento, las cifras de la prueba quedan como referencia. Una
+ruta con el WAPE móvil sobre `wape_max` (20 %) abre ALT-010, y entonces no se pasa al piloto. Los domingos corrientes
+se miran aparte, porque en la prueba el modelo no le ganó ahí al promedio en CRA 54 (sección 7).
+
+**Modelo horario** (el plan del día siguiente y semanal). Cada horizonte tiene que cumplir su meta y quedar por debajo
+de la regla manual B1 en el mismo periodo:
 
 | Horizonte | Qué se mide | Meta | Por qué ese valor |
 |---|---|---|---|
-| 60 min (el del plan del día y la recomendación) | WAPE móvil de 28 días del modelo activo (`GET /api/v1/monitoring`, `wape_movil`), en cada una de las 4 mediciones semanales | ≤ 15 % | Es el error de pronóstico de §5.1 (`error_pronostico` en `threshold_config`) y está dentro del IC95 de la prueba reservada (14,77 %, IC95 13,10–16,87; `ev/modelo/evaluacion_modelo.md`). En sep.–dic. de 2025, la misma medida quedó entre 12,59 % y 14,95 % en 13 de 14 semanas y subió a 16,04 % en la de Navidad (`ev/monitoreo/monitoreo_2025.json`). |
+| 60 min (el del plan del día y la recomendación) | WAPE móvil de 28 días del modelo horario activo (`GET /api/v1/monitoring?familia=horario`, `wape_movil`), en cada una de las 4 mediciones semanales | ≤ 15 % | Es el error de pronóstico de §5.1 (`error_pronostico` en `threshold_config`) y está dentro del IC95 de la prueba reservada (14,77 %, IC95 13,10–16,87; `ev/modelo/evaluacion_modelo.md`). En sep.–dic. de 2025, la misma medida quedó entre 12,59 % y 14,95 % en 13 de 14 semanas y subió a 16,04 % en la de Navidad (`ev/monitoreo/monitoreo_2025.json`). |
 | 30 min | WAPE de las 4 semanas de sombra, con el protocolo de `ev/modelo/horizontes.json` | ≤ 20 % | Es la tolerancia `wape_max` de ALT-010 (20 %). El modelo dio 19,43 % a 30 min en mar.–dic. de 2025, frente a 23,12 % de B1 (`ev/modelo/horizontes.json`). |
 | 120 min | WAPE de las 4 semanas de sombra, con el mismo protocolo | ≤ 15 % | El modelo dio 10,87 %, frente a 15,44 % de B1, en mar.–dic. de 2025 (`ev/modelo/horizontes.json`). |
 
@@ -284,8 +313,9 @@ descartadas.
 
 | Indicador | Fuente | Meta propuesta |
 |---|---|---|
-| WAPE del pronóstico por horizonte | `GET /api/v1/monitoring` (60 min) y el protocolo de `ev/modelo/horizontes.json` (30 y 120 min) | Las metas del criterio de salida, arriba |
-| Cobertura de la banda P10–P90 | `GET /api/v1/monitoring` | entre 75 % y 90 % |
+| WAPE del pronóstico de corto plazo por horizonte (30, 60 y 120 min, por ruta) | `GET /api/v1/monitoring?familia=corto_plazo` | Las metas del criterio de salida, arriba |
+| WAPE del modelo horario por horizonte | `GET /api/v1/monitoring?familia=horario` (60 min) y el protocolo de `ev/modelo/horizontes.json` (30 y 120 min) | Las metas del criterio de salida, arriba |
+| Cobertura de la banda P10–P90 | `GET /api/v1/monitoring` (las dos familias) | entre 75 % y 90 % |
 | Alertas descartadas | `GET /api/v1/monitoring` (porcentaje de descartadas) | < 30 % |
 | Alertas críticas reconocidas en menos de 15 minutos | `GET /api/v1/alerts/{alert_id}/history` | ≥ 90 % |
 | Recomendaciones revisadas por el despachador (aplicadas, o no aplicadas con comentario) | Comentarios de las alertas y bitácora del piloto | ≥ 80 % |
@@ -296,21 +326,57 @@ descartadas.
 
 ## 7. Lo que queda para la siguiente versión
 
-- **Alimentar en vivo el pronóstico de corto plazo.** Desde el 18-11-2026 la API sirve el pronóstico a 30, 60 y
-  120 minutos por ruta, sentido y segmento (`POST /api/v1/predictions/corto-plazo`, `GET …/calcular`, `GET …/dia` y el
-  ciclo diario; registro propio con SHA-256 en `api_frecuencias/datos/modelos/corto_plazo/`), reproduce las
-  predicciones de su prueba reservada (`ev/modelo/corto_plazo_reproduccion.md`) y el tablero lo muestra primero en
-  Pronóstico. Hoy lee el panel de 15 minutos empaquetado (2023 a 2025). Falta: (1) que la lectura incremental agregue
-  los eventos de conteo por bloque de 15 minutos y segmento, con la regla de Extreme que usa
-  `pronostico_corto_plazo/preparar_panel.py`, para pronosticar con lo que llega en vivo; (2) pasar sus reentrenamientos
-  por la sombra y la compuerta, como los del modelo horario (hoy tiene registro y activación propios); (3) llevar a este
-  pronóstico la recomendación de la franja de `POST /api/v1/predictions/run` y el reparto de
-  `GET /api/v1/predictions/segmentos`, que todavía usa el modelo `seg_hgb_jerarquico_20230227_s42` (37 días), y
-  (4) medir con Extreme la latencia real de la captura (H10, H11): el efecto de 15 y 30 minutos de retraso está medido
-  en `pronostico_corto_plazo/README.md`.
+- **El pronóstico de corto plazo dentro del producto.** Desde el 18-11-2026 la API sirve el pronóstico a 30, 60 y
+  120 minutos por ruta, sentido y segmento (`POST /api/v1/predictions/corto-plazo`, `GET …/calcular`, `GET …/dia`;
+  registro propio con SHA-256 en `api_frecuencias/datos/modelos/corto_plazo/`), reproduce las predicciones de su prueba
+  reservada (`ev/modelo/corto_plazo_reproduccion.md`) y el tablero lo muestra primero en Pronóstico. Lo que faltaba el
+  18-11-2026 quedó hecho el 19-11-2026:
+  - *Alimentado con la lectura incremental.* El ciclo agrega los eventos de conteo por bloque de 15 minutos y segmento
+    (`api_frecuencias/app/servicios/panel_corto_plazo.py`; tablas `subidas_15min`, `salidas_15min` y `lectura_15min`
+    de la migración 0016; paso `_leer_corto_plazo` de `api_frecuencias/app/servicios/ejecucion.py`). En modo integrado
+    lee `timbradas_segmentos` y `progvehiculos.fechainicio` en solo lectura, hasta la marca de agua; con la fuente
+    Parquet toma los días del panel empaquetado. El pronóstico usa solo lo ya leído, y la regla VAL-009 excluye al
+    servir las celdas imposibles (tope `cp_tope_subidas_bloque_segmento` en `threshold_config`). Pruebas:
+    `api_frecuencias/tests/integracion/test_corto_plazo_api.py::test_el_ciclo_lee_los_bloques_de_15_minutos_y_pronostica_con_lo_leido`
+    y `api_frecuencias/tests/unit/test_panel_corto_plazo.py`.
+  - *Sombra, compuerta y monitoreo.* `model_registry` tiene la familia `corto_plazo`, con un activo propio.
+    `POST /api/v1/models/{model_id}/activate` le aplica los cuatro criterios de la compuerta horaria en una ventana
+    posterior al corte del candidato, y `POST /api/v1/models/rollback` con `familia = corto_plazo` lo revierte
+    (`api_frecuencias/app/servicios/gobierno_corto_plazo.py`; prueba
+    `api_frecuencias/tests/integracion/test_corto_plazo_api.py::test_ciclo_de_vida_del_corto_plazo_registro_compuerta_activacion_y_reversion`).
+    Cada ciclo diario deja su monitoreo en `model_monitoring` (sección 6.3).
+  - *La recomendación de `POST /api/v1/predictions/run`.* Responde por omisión con el corto plazo (`modelo = auto`, y
+    con el horario si el corto plazo no cubre la ruta, la fecha y la hora) y guarda su recomendación de §10.2 con
+    `origen = 'corto_plazo'`
+    (`api_frecuencias/tests/integracion/test_recomendaciones.py::test_predictions_run_responde_por_omision_con_el_pronostico_de_corto_plazo`).
+    El ciclo guarda también la recomendación de la franja de cada pronóstico de corto plazo, y en los ciclos intradía
+    esos pronósticos alimentan ALT-001 a ALT-004.
+  - *El pronóstico por segmento.* `GET /api/v1/predictions/segmentos` responde al vuelo, por omisión (`fuente=auto`),
+    con el corto plazo por segmento; `seg_hgb_jerarquico_20230227_s42` (37 días) queda para repartir una predicción
+    horaria guardada o cuando se pide `fuente=reparto`
+    (`api_frecuencias/tests/integracion/test_monitoreo_api.py::test_pronostico_por_segmento_al_vuelo_es_el_del_corto_plazo`).
+
+  Lo que falta del corto plazo:
+  1. Filtrar los registros imposibles antes de entrenar (cp2). VAL-009 los excluye al servir, pero el modelo se
+     entrenó con los datos tal cual. Entrenarlo sin ellos es otro experimento, con su propio protocolo, y no se hizo.
+  2. Explicar por qué CRA 54 pierde frente al promedio por día y hora en los domingos corrientes
+     (`pronostico_corto_plazo/resultados/desglose_domingos_festivos.json`): la causa no está identificada.
+  3. Un candidato de corto plazo con un corte posterior al 30-06-2025 que pase por la compuerta. El mecanismo está
+     (`api_frecuencias/scripts/entrenar_corto_plazo.py` deja candidata cada versión nueva), pero la familia tiene un
+     solo modelo, `cp_lgbm_20250630_s42`, y la compuerta pide una ventana posterior al corte del candidato: con la serie
+     que termina el 31-12-2025, eso necesita datos de 2026.
+  4. Las bajadas por segmento de 2023 a 2025 (10.1-c), para que el perfil de ocupación por segmento deje de depender
+     solo de ene.–feb. 2023.
+
+  Lo que depende de Extreme: la latencia real de la captura (H10, H11; el efecto de 15 y 30 minutos de retraso está
+  medido en `pronostico_corto_plazo/README.md`) y eventos de conteo de 2026 en `timbradas_segmentos`. La lectura en
+  modo integrado está probada con una fuente de prueba; la réplica local no tiene eventos de 2026 salvo los que simula
+  la llegada.
 - Activar el candidato fv3 (`hgb_fv3_20250831_s42`): pasa por la sombra de 14 días y la compuerta de cuatro
   criterios. Activarlo cambia los pronósticos con que se midieron el ciclo diario, las alertas y las respuestas al reto
-  de esta entrega, así que esas mediciones se repiten con él (`ev/modelo/decision_fv3.md`). El calendario académico
+  de esta entrega, así que esas mediciones se repiten con él (`ev/modelo/decision_fv3.md`). En la demostración de
+  §14.2, otro candidato fv3, `hgb_fv3_20250930_s42` (corte 30-09-2025), pasa la compuerta, se activa y se revierte al
+  final (`ev/despliegue/demo_ciclo_api.txt`). El calendario académico
   de 2027 se agrega a `api_frecuencias/datos/calendario_academico.csv` cuando se publiquen las resoluciones.
 - Contar como demanda los pasajeros de los viajes que corrieron aunque el sistema los marcó cancelados (E13): entre
   5,6 % y 7,7 % más pasajeros por año y un WAPE cercano a 12,4 % con el candidato. Cambia qué se mide como demanda y,
@@ -342,7 +408,9 @@ descartadas.
   la ventana de 2 horas: con los viajes completos, 292 de las 457 salidas que agregaría la regla caen en horas que no
   quedaron sobre el umbral (`ev/ocupacion/backtest_restriccion_reactiva.md`). También falta decidir con Extreme el
   espaciado de `PLAN_INTRADIA_CRON` en producción.
-- Modelo por segmento y sentido con datos de 2025. Hoy está entrenado con las subidas por segmento de ene.–feb. 2023
+- Modelo de segmentos que reparte el pronóstico horario, con datos de 2025. El pronóstico por segmento y sentido del
+  producto ya es el de corto plazo, ajustado con las subidas por segmento de 2023 a 2025 (arriba). El modelo que
+  reparte el pronóstico horario sigue entrenado con las subidas por segmento de ene.–feb. 2023
   (`ev/modelo/segmentos_modelo.md`), el único periodo que llenaron los triggers de segmentación, y con el sentido
   aproximado (S9). Cuando Extreme vuelva a ejecutar los triggers y confirme el campo de sentido, se reentrena con
   `api_frecuencias/scripts/entrenar_segmentos.py` y se mide su error en 2025. Con los mismos datos se recalcula el

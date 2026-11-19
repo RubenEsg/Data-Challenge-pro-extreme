@@ -364,6 +364,8 @@ def _en_vivo(url_base: str, fecha_reciente: date, fecha_2025: date) -> list[str]
                 lineas.append(f"  GET {job['consultar_estado']} -> «{estado}» tras {sondeos} sondeos "
                               f"({time.perf_counter() - t0:.1f} s desde el POST)")
                 params = {"fecha": fecha.isoformat()} | ({"ruta": rutas[0]} if rutas else {})
+                if fecha.year == 2025:     # «próximas dos horas» a las 7:00 del mismo día (el corto plazo tiene datos)
+                    params["instante"] = f"{fecha.isoformat()}T07:00:00-05:00"
                 tiempos = []
                 for _ in range(21):
                     t1 = time.perf_counter()
@@ -393,6 +395,17 @@ def _en_vivo(url_base: str, fecha_reciente: date, fecha_2025: date) -> list[str]
                     for x in ruta["atencion_inmediata"][:3]:
                         lineas.append(f"    {x['codigo']} {x['severidad']} {x['estado']} ({x['alcance']}) detectada "
                                       f"{x['detectada_en']}")
+                prox = datos.get("proximas_dos_horas") or {}
+                if prox.get("rutas"):
+                    lineas.append(f"  próximas dos horas (corto plazo {prox.get('model_id')}), instante "
+                                  f"{prox.get('instante')} ({prox.get('origen_instante')}):")
+                    for pr in prox["rutas"]:
+                        txt = "; ".join(f"{h['horizonte_min']} min {h['pasajeros']:.0f} ({h['p10']:.0f}–{h['p90']:.0f})"
+                                        f", {'cada ' + str(h['headway_min']) + ' min' if h['viable'] else 'no viable'}"
+                                        for h in pr["horizontes"])
+                        lineas.append(f"    {pr['ruta']}: {txt}")
+                elif prox:
+                    lineas.append(f"  próximas dos horas: {prox.get('nota')}")
                 if rutas:
                     nombre = f"api_respuesta_{rutas[0].replace(' ', '')}_{fecha.isoformat()}.json"
                     (SALIDA / nombre).write_text(json.dumps(datos, ensure_ascii=False, indent=1), encoding="utf-8")

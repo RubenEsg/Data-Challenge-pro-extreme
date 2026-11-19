@@ -170,10 +170,12 @@ def test_partida_y_sin_partir_dan_las_mismas_predicciones_plan_y_alertas_por_rut
     tocadas_p = {k: n - tras_sin_partir.get(k, 0) for k, n in tras_partida.items() if n != tras_sin_partir.get(k)}
     assert tocadas_x and tocadas_x == tocadas_p          # p. ej. 18 alertas en el día de esta prueba
     # monitoreo del modelo: una fila por ejecución (la de la madre), con las mismas métricas
+    horario = MonitoreoModelo.detalle["familia"].astext.is_distinct_from("corto_plazo")    # el del corto plazo, aparte
     m_x = sesion.scalars(select(MonitoreoModelo).where(MonitoreoModelo.execution_id == x,
-                                                       MonitoreoModelo.rol == "activo")).all()
+                                                       MonitoreoModelo.rol == "activo", horario)).all()
     m_p = sesion.scalars(select(MonitoreoModelo).where(
-        MonitoreoModelo.execution_id == uuid.UUID(partida["execution_id"]), MonitoreoModelo.rol == "activo")).all()
+        MonitoreoModelo.execution_id == uuid.UUID(partida["execution_id"]), MonitoreoModelo.rol == "activo",
+        horario)).all()
     assert len(m_x) == len(m_p) == 1
     for campo in ("fecha_corte", "wape_movil", "mae_movil", "cobertura_p10_p90", "psi_max", "n_observaciones"):
         assert getattr(m_x[0], campo) == getattr(m_p[0], campo), campo

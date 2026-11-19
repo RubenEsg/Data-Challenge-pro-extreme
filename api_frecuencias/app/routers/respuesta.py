@@ -5,6 +5,11 @@ situaciones requieren atención inmediata?». El cálculo está en app/servicios
 POST /api/v1/respuesta/calcular encola una ejecución de tipo «respuesta» y responde 202 con su execution_id; el ciclo
 diario también deja calculado el día siguiente. GET /api/v1/respuesta y su exportación solo leen la foto guardada en
 ai_frecuencias.respuesta_reto; si no existe, 404 «sin_calcular» con la pista del POST.
+
+«Próximas dos horas» (proximas_dos_horas): con el pronóstico de corto plazo (RF-005), las subidas de los próximos 30,
+60 y 120 minutos de cada ruta, con su banda, la línea base, la recomendación de §10.2 y los segmentos más cargados, en
+el instante de referencia: el pedido, o el último instante con datos leídos (el panel empaquetado y lo que trajo la
+lectura incremental) a la hora actual del día.
 """
 from __future__ import annotations
 
@@ -158,6 +163,22 @@ class RespuestaReto(BaseModel):
     trazabilidad: Trazabilidad
     rutas: list[RespuestaRuta]
     limitaciones: list[str]
+    proximas_dos_horas: ProximasDosHoras | None = Field(None, description=(
+        "Atención inmediata: el pronóstico de corto plazo (30, 60 y 120 min) de cada ruta en el instante de "
+        "referencia"))
+
+
+class ProximasDosHoras(BaseModel):
+    """«Qué situaciones requieren atención inmediata»: el pronóstico de corto plazo de cada ruta en el instante de
+    referencia."""
+    instante: str | None = Field(None, description="Instante de referencia (-05:00)")
+    origen_instante: str | None = Field(None, description="pedido, o el último día con datos leídos a la hora actual")
+    model_id: str | None = None
+    rutas: list[dict] = Field(default_factory=list, description=(
+        "Por ruta: el pronóstico de cada horizonte (30, 60 y 120 min) con banda P10-P90, promedio por día y hora, "
+        "recomendación de §10.2 (buses/h, headway, vehículos, viabilidad), por sentido, y los 5 segmentos con más "
+        "subidas previstas en la próxima hora"))
+    nota: str | None = None
 
 
 class SolicitudCalculo(BaseModel):
@@ -200,8 +221,75 @@ def _leer(sesion: Session, ruta: str | None, fecha: date | None) -> dict:
             description=DESCRIPCION)
 def respuesta_reto(ruta: Ruta | None = Query(None, description="SILENCIO, CRA 54 o CL 72; sin ella, las tres"),
                    fecha: date | None = Query(None, description="Día (ISO); sin ella, el siguiente al último dato"),
+                   instante: datetime | None = Query(None, description=(
+                       "Instante de referencia de «próximas dos horas» (sin él, el último día con datos leídos a la "
+                       "hora actual)")),
+                   corto_plazo: bool = Query(True, description="Incluir «próximas dos horas»"),
                    sesion: Session = Depends(obtener_sesion)):
-    return _leer(sesion, ruta, fecha)
+    salida = _leer(sesion, ruta, fecha)
+    if corto_plazo:
+        salida["proximas_dos_horas"] = proximas_dos_horas(sesion, [ruta] if ruta else list(RUTAS_RESPUESTA),
+                                                          instante)
+    return salida
+
+
+RUTAS_RESPUESTA = ("SILENCIO", "CRA 54", "CL 72")
+
+
+def _instante_de_referencia(instante: datetime | None) -> tuple[datetime, str]:
+    """El pedido o el último día con datos leídos, a la hora actual del día (entre 04:00 y 21:00)."""
+    from app.servicios import corto_plazo as cp
+    from app.servicios import ejecucion
+
+    if instante is not None:
+        return instante, "pedido"
+    sc = cp.serie_completa(2)
+    hay = [k for k in range(len(sc.ruta.cal) - 1, -1, -1) if bool(sc.ruta.ok[k])]
+    ultimo = cp.fecha_de_dia(hay[0]) if hay else cp.fecha_de_dia(sc.fin_panel)
+    ahora = ejecucion.ahora().astimezone(cp.ZONA)
+    hora = min(max(ahora.hour, 4), 20)
+    ref = datetime(ultimo.year, ultimo.month, ultimo.day, hora, 30 if ahora.minute >= 30 else 0, tzinfo=cp.ZONA)
+    limite = cp.limite_lectura(sc, ultimo)
+    if limite is not None and ref > limite:
+        ref = limite.replace(minute=30 if limite.minute >= 30 else 0, second=0, microsecond=0)
+    return ref, "último día con datos leídos, a la hora actual del día"
+
+
+def proximas_dos_horas(sesion: Session, rutas: list[str], instante: datetime | None) -> dict:
+    """§20 «situaciones que requieren atención inmediata» con el pronóstico de corto plazo de cada ruta."""
+    from app.routers.pronostico_corto_plazo import modelo_de_la_familia
+    from app.servicios import corto_plazo as cp
+    from app.servicios import datos
+
+    try:
+        mid = modelo_de_la_familia(sesion, None)
+        with cp.con_sesion(sesion):
+            ref, origen = _instante_de_referencia(instante)
+            salida = {"instante": ref.astimezone(cp.ZONA).isoformat(timespec="minutes"), "origen_instante": origen,
+                      "model_id": None, "rutas": []}
+            for ruta in rutas:
+                info = datos.ruta_info(ruta)
+                horizontes = []
+                segmentos = []
+                for h in (30, 60, 120):
+                    r = cp.pronosticar(ruta, ref, h, model_id=mid, incluir_segmentos=(h == 60))
+                    rec = cp.recomendacion(sesion, r, info)
+                    salida["model_id"] = r["model_id"]
+                    horizontes.append({
+                        "horizonte_min": h, "ventana": r["ventana"], "pasajeros": r["pasajeros"], "p10": r["p10"],
+                        "p90": r["p90"], "promedio_dia_hora": r["promedio_dia_hora"], "real": r["real"],
+                        "sentidos": r["sentidos"], "buses_hora": rec.get("buses_hora"),
+                        "headway_min": rec.get("headway_min"), "vehiculos_requeridos": rec.get("vehiculos_requeridos"),
+                        "viable": rec.get("viable"), "motivo": rec.get("motivo"),
+                        "frecuencia_actual_min": rec.get("frecuencia_actual_min"),
+                        "explicacion": [f["descripcion"] for f in r["explicacion"]["factores"][:3]]})
+                    if h == 60:
+                        segmentos = sorted(r.get("segmentos") or [], key=lambda s: -(s["pasajeros"] or 0))[:5]
+                salida["rutas"].append({"ruta": ruta, "datos_hasta": r.get("datos_hasta"), "horizontes": horizontes,
+                                        "segmentos_mas_cargados_60_min": segmentos, "calidad": r.get("calidad")})
+        return salida
+    except Exception as exc:  # noqa: BLE001 - la respuesta del reto se entrega aunque el corto plazo no esté
+        return {"instante": None, "rutas": [], "nota": f"pronóstico de corto plazo no disponible: {exc}"}
 
 
 @router.post("/respuesta/calcular", response_model=CalculoEnCola, status_code=202,

@@ -200,6 +200,14 @@ el cargue inicial del script 5 usa un solo bloque, el del fin del viaje, y `fn_i
 asigna todos los segmentos al bloque de fin. Por eso la equivalencia con la exportación se verifica por sumas por
 (segmento, viaje), no por bloque.
 
+Efecto en el pronóstico de corto plazo (19-11-2026). En modo integrado, la API lee de `timbradas_segmentos` las subidas
+por segmento y bloque de 15 minutos (`fuentes.leer_panel_15min`). En un día histórico de la réplica el segmento coincide
+con el del panel propio (correlación de las subidas por segmento ≥ 0,998) y las salidas por bloque son las mismas, pero
+el bloque no: queda en el del fin del viaje, unas dos horas después de las subidas, y el total es entre 1 % y 11 % menor
+por los viajes sin fecha de fin (H6) (`tests/replica/test_panel_corto_plazo.py`). Lo que escribe el trigger en vivo
+lleva el bloque de cada subida, que es lo que necesita el pronóstico; los días cargados con el script 5 no sirven para
+él (la API usa para esos días el panel empaquetado).
+
 Por lo mismo, el paso de consolidados del ciclo no contrasta `timbradas_consolidado` por hora. En la réplica, su
 promedio por viaje por ruta × día ISO × hora difiere 20,6 % en la mediana del de los viajes asignados a su hora de
 salida (la del histórico propio) y 1,3 % del de los asignados a su hora de fin; por ruta × día ISO × estacionalidad
@@ -293,7 +301,8 @@ Los tres no siempre cuadran entre sí:
   de los días laborales, donde la operación ya las tuvo. En cambio, el headway mínimo gobernado de §5.1 es de 2 min
   (`headway_minimo_min` en `threshold_config`, migración 0001; valor supuesto del equipo), es decir, 30 salidas por
   hora. La API no fuerza una cifra: esas horas salen «no viables» con su motivo (§10.3 y §18). Ejemplo: CRA 54, 19-11-2025,
-  5 h, 34 salidas recomendadas, «No viable: intervalo de 1,76 min, menor que el mínimo de 2,0 min».
+  5 h, «No viable: la demanda prevista pide 32 salidas (una cada 1,88 min) y el headway mínimo gobernado de 2,00 min
+  permite como máximo 30; el plan programa 30 salidas, la mejor aproximación ejecutable».
 
 **Evidencia.** `docs/evidencias/respuesta/respuesta_reto.md` (tablas por ruta y hora, y la nota sobre ciclo, flota e
 intervalo programado) y los archivos `docs/evidencias/respuesta/respuesta_2025-11-19.json` y `respuesta_2025-11-23.json`,

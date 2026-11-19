@@ -1029,6 +1029,23 @@
               "title": "Modelo Segmentos"
             },
             "description": "model_id del registro de segmentos (datos/modelos/segmentos/registro.json); por omisión el activo. seg_reparto_fijo_20230227 es el reparto fijo B0, la línea base"
+          },
+          {
+            "name": "fuente",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "auto",
+                "corto_plazo",
+                "reparto"
+              ],
+              "type": "string",
+              "description": "auto (por omisión): al vuelo, el pronóstico de corto plazo por segmento (el de E14, 2023-2025) si cubre el instante; si no, o con prediction_id, model_id o modelo_segmentos, el reparto. corto_plazo o reparto lo fijan",
+              "default": "auto",
+              "title": "Fuente"
+            },
+            "description": "auto (por omisión): al vuelo, el pronóstico de corto plazo por segmento (el de E14, 2023-2025) si cubre el instante; si no, o con prediction_id, model_id o modelo_segmentos, el reparto. corto_plazo o reparto lo fijan"
           }
         ],
         "responses": {
@@ -1050,7 +1067,7 @@
             }
           },
           "422": {
-            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico). Códigos propios de esta operación: «parametros_requeridos», «horizonte_invalido», «prediccion_invalida».",
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico). Códigos propios de esta operación: «parametros_requeridos», «horizonte_invalido», «prediccion_invalida», «fuera_de_cobertura».",
             "content": {
               "application/json": {
                 "schema": {
@@ -1063,7 +1080,8 @@
               "fuera_de_rango",
               "parametros_requeridos",
               "horizonte_invalido",
-              "prediccion_invalida"
+              "prediccion_invalida",
+              "fuera_de_cobertura"
             ],
             "headers": {
               "X-Correlation-Id": {
@@ -1152,7 +1170,7 @@
             }
           },
           "503": {
-            "description": "Dependencia no disponible o no configurada (réplica, base operacional o archivo de insumos): degradación prevista con el error uniforme (RNF-010). Códigos propios de esta operación: «reparto_no_disponible».",
+            "description": "Dependencia no disponible o no configurada (réplica, base operacional o archivo de insumos): degradación prevista con el error uniforme (RNF-010). Códigos propios de esta operación: «reparto_no_disponible», «pronostico_no_disponible».",
             "content": {
               "application/json": {
                 "schema": {
@@ -1161,7 +1179,8 @@
               }
             },
             "x-codigos-error": [
-              "reparto_no_disponible"
+              "reparto_no_disponible",
+              "pronostico_no_disponible"
             ],
             "headers": {
               "X-Correlation-Id": {
@@ -2734,7 +2753,7 @@
         "tags": [
           "predicciones y recomendaciones"
         ],
-        "summary": "Inferencia para una ruta y un horizonte (incluye la recomendación derivada)",
+        "summary": "Inferencia para una ruta y un horizonte de 30, 60 o 120 min (incluye la recomendación derivada)",
         "operationId": "correr_prediccion_api_v1_predictions_run_post",
         "requestBody": {
           "content": {
@@ -2767,7 +2786,7 @@
             }
           },
           "422": {
-            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico). Códigos propios de esta operación: «parametros_invalidos», «prediccion_invalida».",
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico). Códigos propios de esta operación: «parametros_invalidos», «prediccion_invalida», «fuera_de_cobertura».",
             "content": {
               "application/json": {
                 "schema": {
@@ -2779,7 +2798,8 @@
               "validacion",
               "fuera_de_rango",
               "parametros_invalidos",
-              "prediccion_invalida"
+              "prediccion_invalida",
+              "fuera_de_cobertura"
             ],
             "headers": {
               "X-Correlation-Id": {
@@ -2898,6 +2918,28 @@
             },
             "x-codigos-error": [
               "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependencia no disponible o no configurada (réplica, base operacional o archivo de insumos): degradación prevista con el error uniforme (RNF-010). Códigos propios de esta operación: «pronostico_no_disponible».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "pronostico_no_disponible"
             ],
             "headers": {
               "X-Correlation-Id": {
@@ -3059,6 +3101,28 @@
               "title": "Idruta"
             },
             "description": "Filtro por rutas.idruta de Extreme"
+          },
+          {
+            "name": "modelo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "horario",
+                    "corto_plazo"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Qué pronósticos: «corto_plazo» (las subidas de la ventana de 30, 60 o 120 min con lo observado hasta el instante, RF-005; la fila de la ruta: el detalle por sentido y segmento está en /predictions/corto-plazo), «horario» (el modelo del plan del día siguiente). Sin el filtro, los dos.",
+              "title": "Modelo"
+            },
+            "description": "Qué pronósticos: «corto_plazo» (las subidas de la ventana de 30, 60 o 120 min con lo observado hasta el instante, RF-005; la fila de la ruta: el detalle por sentido y segmento está en /predictions/corto-plazo), «horario» (el modelo del plan del día siguiente). Sin el filtro, los dos."
           },
           {
             "name": "limite",
@@ -3377,6 +3441,22 @@
               ],
               "title": "Orden"
             }
+          },
+          {
+            "name": "modelo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "horario",
+                "corto_plazo"
+              ],
+              "type": "string",
+              "description": "«horario» (por omisión) o «corto_plazo» (la fila de la ruta; el detalle por sentido y segmento sale de /predictions/corto-plazo/export)",
+              "default": "horario",
+              "title": "Modelo"
+            },
+            "description": "«horario» (por omisión) o «corto_plazo» (la fila de la ruta; el detalle por sentido y segmento sale de /predictions/corto-plazo/export)"
           }
         ],
         "responses": {
@@ -4140,7 +4220,8 @@
                 {
                   "enum": [
                     "franja",
-                    "plan_dia"
+                    "plan_dia",
+                    "corto_plazo"
                   ],
                   "type": "string"
                 },
@@ -4148,10 +4229,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Origen de la recomendación. «franja»: la de una franja con la función objetivo de §10.2, ligada a una predicción (POST /predictions/run, POST /recommendations/calculate o el ciclo diario). «plan_dia»: una hora del plan del día siguiente que persiste el ciclo diario (MILP de D5 con el modelo activo; sin prediction_id); GET /recommendations/plan las arma por ruta y fecha. Sin el filtro se listan ambos orígenes.",
+              "description": "Origen de la recomendación. «corto_plazo»: la de §10.2 con el pronóstico de corto plazo de la ventana (30, 60 o 120 min; POST /predictions/run por omisión, POST /predictions/corto-plazo y el ciclo), ligada a la fila de la ruta de prediction_corto_plazo. «franja»: la de una franja con el modelo horario, ligada a su predicción (POST /predictions/run con modelo=horario, POST /recommendations/calculate o el ciclo diario). «plan_dia»: una hora del plan del día siguiente que persiste el ciclo diario (MILP de D5 con el modelo horario activo; sin prediction_id); GET /recommendations/plan las arma por ruta y fecha. Sin el filtro se listan todos los orígenes.",
               "title": "Origen"
             },
-            "description": "Origen de la recomendación. «franja»: la de una franja con la función objetivo de §10.2, ligada a una predicción (POST /predictions/run, POST /recommendations/calculate o el ciclo diario). «plan_dia»: una hora del plan del día siguiente que persiste el ciclo diario (MILP de D5 con el modelo activo; sin prediction_id); GET /recommendations/plan las arma por ruta y fecha. Sin el filtro se listan ambos orígenes."
+            "description": "Origen de la recomendación. «corto_plazo»: la de §10.2 con el pronóstico de corto plazo de la ventana (30, 60 o 120 min; POST /predictions/run por omisión, POST /predictions/corto-plazo y el ciclo), ligada a la fila de la ruta de prediction_corto_plazo. «franja»: la de una franja con el modelo horario, ligada a su predicción (POST /predictions/run con modelo=horario, POST /recommendations/calculate o el ciclo diario). «plan_dia»: una hora del plan del día siguiente que persiste el ciclo diario (MILP de D5 con el modelo horario activo; sin prediction_id); GET /recommendations/plan las arma por ruta y fecha. Sin el filtro se listan todos los orígenes."
           },
           {
             "name": "limite",
@@ -4438,7 +4519,8 @@
                 {
                   "enum": [
                     "franja",
-                    "plan_dia"
+                    "plan_dia",
+                    "corto_plazo"
                   ],
                   "type": "string"
                 },
@@ -4446,10 +4528,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Origen de la recomendación. «franja»: la de una franja con la función objetivo de §10.2, ligada a una predicción (POST /predictions/run, POST /recommendations/calculate o el ciclo diario). «plan_dia»: una hora del plan del día siguiente que persiste el ciclo diario (MILP de D5 con el modelo activo; sin prediction_id); GET /recommendations/plan las arma por ruta y fecha. Sin el filtro se listan ambos orígenes.",
+              "description": "Origen de la recomendación. «corto_plazo»: la de §10.2 con el pronóstico de corto plazo de la ventana (30, 60 o 120 min; POST /predictions/run por omisión, POST /predictions/corto-plazo y el ciclo), ligada a la fila de la ruta de prediction_corto_plazo. «franja»: la de una franja con el modelo horario, ligada a su predicción (POST /predictions/run con modelo=horario, POST /recommendations/calculate o el ciclo diario). «plan_dia»: una hora del plan del día siguiente que persiste el ciclo diario (MILP de D5 con el modelo horario activo; sin prediction_id); GET /recommendations/plan las arma por ruta y fecha. Sin el filtro se listan todos los orígenes.",
               "title": "Origen"
             },
-            "description": "Origen de la recomendación. «franja»: la de una franja con la función objetivo de §10.2, ligada a una predicción (POST /predictions/run, POST /recommendations/calculate o el ciclo diario). «plan_dia»: una hora del plan del día siguiente que persiste el ciclo diario (MILP de D5 con el modelo activo; sin prediction_id); GET /recommendations/plan las arma por ruta y fecha. Sin el filtro se listan ambos orígenes."
+            "description": "Origen de la recomendación. «corto_plazo»: la de §10.2 con el pronóstico de corto plazo de la ventana (30, 60 o 120 min; POST /predictions/run por omisión, POST /predictions/corto-plazo y el ciclo), ligada a la fila de la ruta de prediction_corto_plazo. «franja»: la de una franja con el modelo horario, ligada a su predicción (POST /predictions/run con modelo=horario, POST /recommendations/calculate o el ciclo diario). «plan_dia»: una hora del plan del día siguiente que persiste el ciclo diario (MILP de D5 con el modelo horario activo; sin prediction_id); GET /recommendations/plan las arma por ruta y fecha. Sin el filtro se listan todos los orígenes."
           },
           {
             "name": "orden",
@@ -5840,6 +5922,28 @@
             }
           },
           {
+            "name": "familia",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "horario",
+                    "corto_plazo"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "horario (el del plan del día siguiente) o corto_plazo (30, 60 y 120 min)",
+              "title": "Familia"
+            },
+            "description": "horario (el del plan del día siguiente) o corto_plazo (30, 60 y 120 min)"
+          },
+          {
             "name": "limite",
             "in": "query",
             "required": false,
@@ -6949,7 +7053,7 @@
         "tags": [
           "modelos"
         ],
-        "summary": "Importancia global: permutación (aumento del MAE) y media de |SHAP|",
+        "summary": "Importancia global: permutación (aumento del MAE) y media de |SHAP|; en el corto plazo, la ganancia de LightGBM por nivel y horizonte",
         "operationId": "importancia_api_v1_models__model_id__importance_get",
         "security": [
           {
@@ -12989,6 +13093,28 @@
             }
           },
           {
+            "name": "familia",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "horario",
+                    "corto_plazo"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "horario (el modelo del plan del día siguiente) o corto_plazo (30, 60 y 120 min); sin él, los dos",
+              "title": "Familia"
+            },
+            "description": "horario (el modelo del plan del día siguiente) o corto_plazo (30, 60 y 120 min); sin él, los dos"
+          },
+          {
             "name": "limite",
             "in": "query",
             "required": false,
@@ -13270,6 +13396,28 @@
               ],
               "title": "Execution Id"
             }
+          },
+          {
+            "name": "familia",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "horario",
+                    "corto_plazo"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "horario (el modelo del plan del día siguiente) o corto_plazo (30, 60 y 120 min); sin él, los dos",
+              "title": "Familia"
+            },
+            "description": "horario (el modelo del plan del día siguiente) o corto_plazo (30, 60 y 120 min); sin él, los dos"
           },
           {
             "name": "orden",
@@ -15050,6 +15198,37 @@
               "title": "Fecha"
             },
             "description": "Día (ISO); sin ella, el siguiente al último dato"
+          },
+          {
+            "name": "instante",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Instante de referencia de «próximas dos horas» (sin él, el último día con datos leídos a la hora actual)",
+              "title": "Instante"
+            },
+            "description": "Instante de referencia de «próximas dos horas» (sin él, el último día con datos leídos a la hora actual)"
+          },
+          {
+            "name": "corto_plazo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Incluir «próximas dos horas»",
+              "default": true,
+              "title": "Corto Plazo"
+            },
+            "description": "Incluir «próximas dos horas»"
           }
         ],
         "responses": {
@@ -16932,6 +17111,32 @@
           "dia_con_datos": {
             "type": "boolean",
             "title": "Dia Con Datos"
+          },
+          "datos_hasta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datos Hasta",
+            "description": "Un día leído o posterior al panel: hasta dónde hay datos (los instantes posteriores no se pronostican)"
+          },
+          "calidad": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calidad",
+            "description": "VAL-009: celdas excluidas en el día o en sus 8 semanas de historia"
           },
           "instantes": {
             "items": {
@@ -19164,7 +19369,31 @@
             "additionalProperties": true,
             "type": "object",
             "title": "Cobertura",
-            "description": "Fechas que se pueden pronosticar y las de la prueba"
+            "description": "Fechas que se pueden pronosticar (el panel empaquetado y lo leído) y las de la prueba"
+          },
+          "importancia_global": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Importancia Global",
+            "description": "§9.4: importancia global por nivel y horizonte (ganancia de LightGBM normalizada, promedio de las tres rutas), con lo que significa cada variable"
+          },
+          "calidad": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Calidad",
+            "description": "VAL-009: el tope vigente y las celdas excluidas del panel"
+          },
+          "motor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motor",
+            "description": "lightgbm o onnx (MOTOR_INFERENCIA): con qué se calculan las predicciones"
           }
         },
         "type": "object",
@@ -19275,6 +19504,12 @@
             "type": "string",
             "format": "date-time",
             "title": "Creado En"
+          },
+          "familia": {
+            "type": "string",
+            "title": "Familia",
+            "description": "horario (el del plan del día siguiente) o corto_plazo (30, 60 y 120 minutos); cada familia tiene a lo sumo un activo",
+            "default": "horario"
           }
         },
         "type": "object",
@@ -21407,6 +21642,66 @@
             "type": "string",
             "format": "date-time",
             "title": "Creado En"
+          },
+          "idempresa": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempresa",
+            "description": "§8.3 rutas.idempresa (nulo si Extreme no lo trae)"
+          },
+          "idproceso": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idproceso",
+            "description": "§8.3 llave de Procesos (rutas.proceso, texto en Extreme)"
+          },
+          "id_dia_semana": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Dia Semana",
+            "description": "§8.3 día ISO 1 = lunes … 7 = domingo de la fecha local"
+          },
+          "id_estacionalidad": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Estacionalidad",
+            "description": "§8.3 estacionalidades_anio vigente para el proceso (nula si no hay)"
+          },
+          "id_segmento": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Segmento",
+            "description": "rutas_segmentos.id (nivel segmento)"
           }
         },
         "type": "object",
@@ -21663,6 +21958,29 @@
             "title": "Id Estacionalidad",
             "description": "§8.3 estacionalidades_anio vigente para el proceso (nula si no hay)"
           },
+          "modelo": {
+            "type": "string",
+            "enum": [
+              "horario",
+              "corto_plazo"
+            ],
+            "title": "Modelo",
+            "description": "corto_plazo: las subidas de la ventana con lo observado hasta el instante (RF-005); horario: el modelo del plan del día siguiente, con siete días de antelación",
+            "default": "horario"
+          },
+          "grupo_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grupo Id",
+            "description": "Con el modelo de corto plazo: el pronóstico guardado en prediction_corto_plazo (la ruta, sus sentidos y sus segmentos; GET /predictions/corto-plazo?grupo_id=)"
+          },
           "recomendacion": {
             "anyOf": [
               {
@@ -21672,6 +21990,70 @@
                 "type": "null"
               }
             ]
+          },
+          "motivo_modelo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motivo Modelo",
+            "description": "Por qué respondió ese modelo"
+          },
+          "ventana": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VentanaCortoPlazo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Con el modelo de corto plazo: [instante, instante + horizonte)"
+          },
+          "franja": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Franja"
+          },
+          "sentidos": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SentidoCortoPlazo"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sentidos",
+            "description": "Con el modelo de corto plazo: por sentido"
+          },
+          "segmentos": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SegmentoCortoPlazo"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segmentos",
+            "description": "Con el modelo de corto plazo: por segmento"
           },
           "predictionId": {
             "anyOf": [
@@ -22020,6 +22402,29 @@
             ],
             "title": "Id Estacionalidad",
             "description": "§8.3 estacionalidades_anio vigente para el proceso (nula si no hay)"
+          },
+          "modelo": {
+            "type": "string",
+            "enum": [
+              "horario",
+              "corto_plazo"
+            ],
+            "title": "Modelo",
+            "description": "corto_plazo: las subidas de la ventana con lo observado hasta el instante (RF-005); horario: el modelo del plan del día siguiente, con siete días de antelación",
+            "default": "horario"
+          },
+          "grupo_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grupo Id",
+            "description": "Con el modelo de corto plazo: el pronóstico guardado en prediction_corto_plazo (la ruta, sus sentidos y sus segmentos; GET /predictions/corto-plazo?grupo_id=)"
           }
         },
         "type": "object",
@@ -22366,6 +22771,32 @@
           "explicacion": {
             "$ref": "#/components/schemas/ExplicacionCortoPlazo"
           },
+          "datos_hasta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datos Hasta",
+            "description": "Hasta dónde hay datos leídos del día (nulo: un día del panel empaquetado)"
+          },
+          "calidad": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calidad",
+            "description": "VAL-009: celdas excluidas en el día o en sus 8 semanas de historia"
+          },
           "recomendacion": {
             "anyOf": [
               {
@@ -22493,6 +22924,68 @@
         ],
         "title": "PronosticoCortoPlazo",
         "description": "Pronóstico de corto plazo de una ruta en un instante y un horizonte (RF-005, RF-006, §9.2, §9.4, §12.3)."
+      },
+      "ProximasDosHoras": {
+        "properties": {
+          "instante": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instante",
+            "description": "Instante de referencia (-05:00)"
+          },
+          "origen_instante": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origen Instante",
+            "description": "pedido, o el último día con datos leídos a la hora actual"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "rutas": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Rutas",
+            "description": "Por ruta: el pronóstico de cada horizonte (30, 60 y 120 min) con banda P10-P90, promedio por día y hora, recomendación de §10.2 (buses/h, headway, vehículos, viabilidad), por sentido, y los 5 segmentos con más subidas previstas en la próxima hora"
+          },
+          "nota": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nota"
+          }
+        },
+        "type": "object",
+        "title": "ProximasDosHoras",
+        "description": "«Qué situaciones requieren atención inmediata»: el pronóstico de corto plazo de cada ruta en el instante de\nreferencia."
       },
       "PuntoDiaCortoPlazo": {
         "properties": {
@@ -22791,8 +23284,21 @@
           "origen": {
             "type": "string",
             "title": "Origen",
-            "description": "franja (§10.2, ligada a su predicción) o plan_dia (plan del día siguiente que guarda el ciclo, sin predicción)",
+            "description": "franja (§10.2, ligada a su predicción horaria), plan_dia (plan del día siguiente que guarda el ciclo, sin predicción) o corto_plazo (§10.2 con el pronóstico de corto plazo de la ventana)",
             "default": "franja"
+          },
+          "prediction_corto_plazo_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prediction Corto Plazo Id",
+            "description": "origen corto_plazo: la fila de la ruta del pronóstico de corto plazo"
           },
           "idruta": {
             "anyOf": [
@@ -23399,8 +23905,21 @@
           "origen": {
             "type": "string",
             "title": "Origen",
-            "description": "franja (§10.2, ligada a su predicción) o plan_dia (plan del día siguiente que guarda el ciclo, sin predicción)",
+            "description": "franja (§10.2, ligada a su predicción horaria), plan_dia (plan del día siguiente que guarda el ciclo, sin predicción) o corto_plazo (§10.2 con el pronóstico de corto plazo de la ventana)",
             "default": "franja"
+          },
+          "prediction_corto_plazo_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prediction Corto Plazo Id",
+            "description": "origen corto_plazo: la fila de la ruta del pronóstico de corto plazo"
           },
           "idruta": {
             "anyOf": [
@@ -23798,6 +24317,17 @@
             },
             "type": "array",
             "title": "Limitaciones"
+          },
+          "proximas_dos_horas": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProximasDosHoras"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Atención inmediata: el pronóstico de corto plazo (30, 60 y 120 min) de cada ruta en el instante de referencia"
           }
         },
         "type": "object",
@@ -24680,6 +25210,18 @@
             "type": "integer",
             "title": "Nro Segmento"
           },
+          "id_segmento": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Segmento",
+            "description": "rutas_segmentos.id del segmento"
+          },
           "sentido": {
             "type": "string",
             "title": "Sentido"
@@ -25460,11 +26002,29 @@
                 "type": "null"
               }
             ],
-            "title": "Model Id"
+            "title": "Model Id",
+            "description": "Versión registrada (del registro horario o del de corto plazo); la activa si falta"
+          },
+          "modelo": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "corto_plazo",
+              "horario"
+            ],
+            "title": "Modelo",
+            "description": "Qué modelo responde. «auto» (por omisión): el de corto plazo, que pronostica las subidas de los próximos 30, 60 o 120 minutos con lo observado hasta el instante (RF-005, el elegido y medido en el experimento E14), si cubre la ruta, la fecha y la hora (medias horas de 04:00 a 21:00); si no, el horario, que pronostica con siete días de antelación (el del plan del día siguiente). «corto_plazo» u «horario» lo fijan; un model_id registrado manda sobre este campo.",
+            "default": "auto"
           },
           "incluir_recomendacion": {
             "type": "boolean",
             "title": "Incluir Recomendacion",
+            "default": true
+          },
+          "incluir_segmentos": {
+            "type": "boolean",
+            "title": "Incluir Segmentos",
+            "description": "Con el modelo de corto plazo: incluir el pronóstico de cada segmento de 500 m (los sentidos van siempre)",
             "default": true
           }
         },
@@ -25792,6 +26352,16 @@
               }
             ],
             "title": "Motivo"
+          },
+          "familia": {
+            "type": "string",
+            "enum": [
+              "horario",
+              "corto_plazo"
+            ],
+            "title": "Familia",
+            "description": "La familia cuyo activo se revierte",
+            "default": "horario"
           }
         },
         "type": "object",

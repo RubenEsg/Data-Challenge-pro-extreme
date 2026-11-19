@@ -9,19 +9,27 @@ cambian después: el guion es el registro de lo narrado y de lo que se ve en pan
   de la grabación del commit `8d4e651`.
 - El registro de producción está en `../../api_frecuencias/docs/evidencias/video/registro.txt`.
 
-## Nota del 14-11-2026: cifras que cambiaron después de la grabación
+## Nota del 19-11-2026: lo que el video no muestra y las cifras que cambiaron
 
-El código siguió cambiando después del 9-11-2026 y la evidencia se regeneró. El video y el guion conservan las cifras
-de la grabación. Las vigentes están en `../../MATRIZ_CUMPLIMIENTO.md`, bloque «Cifras vigentes», que sale de
-`../../api_frecuencias/scripts/cifras_vigentes.py`.
+El video se grabó el 9-11-2026, antes de la retroalimentación del curso (17-11-2026). Muestra el modelo horario, el
+que pronostica cada ruta y hora con siete días de antelación y hoy arma el plan del día siguiente y semanal. No
+muestra el pronóstico que pide la especificación: las subidas de los siguientes 30, 60 y 120 minutos por ruta,
+sentido y segmento, con lo observado hasta el instante. Ese pronóstico se hizo después, en
+`../../pronostico_corto_plazo/`; la API lo sirve y el tablero lo muestra primero en Pronóstico, en la sección «Lo que
+pide el enunciado: 30, 60 y 120 minutos». No hay un video que lo muestre.
 
-| Lo que dice el video | Cifra vigente | Por qué cambió |
+El código siguió cambiando después de la grabación y la evidencia se regeneró. El video y el guion conservan las
+cifras del día en que se grabaron. Las vigentes están en `../../MATRIZ_CUMPLIMIENTO.md`, bloque «Cifras vigentes», que
+sale de `../../api_frecuencias/scripts/cifras_vigentes.py`.
+
+| Lo que dice el video | Lo vigente | Por qué cambió |
 |---|---|---|
-| 1.060 pruebas automáticas, sin fallas, con 5 omitidas | 1.770 casos, 0 fallas, 0 errores y 0 omitidas (`pruebas/suite_final.xml`, 14-11-2026) | Se agregaron pruebas, y la suite final corre también los procesos reales y las pruebas de escritura en la réplica |
-| 94,3 % de cobertura | 95,70 % (`pruebas/coverage_final.xml`) | La misma razón |
+| El pronóstico es el del modelo horario, por ruta y hora | El pronóstico del enunciado es el de corto plazo, a 30, 60 y 120 minutos por ruta, sentido y segmento (`../../pronostico_corto_plazo/README.md`); el horario queda para el plan del día siguiente y semanal | La retroalimentación del curso (17-11-2026) señaló que la entrega pronosticaba a siete días por ruta y hora, y no lo que pide la especificación |
+| Ciclo de §14.2: el candidato da 14,108 % frente a 13,982 % del activo y la compuerta lo rechaza | El candidato `hgb_fv3_20250930_s42` (variables fv3) da 13,578 % frente a 13,982 % del activo en la misma ventana; la compuerta lo aprueba y lo activa, y al final la demostración lo revierte con `POST /api/v1/models/rollback`, así que el activo vuelve a ser `hgb_fv2_20250831_s42` (`despliegue/demo_ciclo_api.txt`, corrida del 18-11-2026) | Desde el 15-11-2026 el candidato de la demostración se entrena con las variables fv3, que suman el calendario escolar y universitario; el de la grabación tenía las variables fv2 |
+| 1.060 pruebas automáticas, sin fallas, con 5 omitidas, y 94,3 % de cobertura | Ver «Cifras vigentes» (`pruebas/suite_final.xml`, `pruebas/coverage_final.xml`) | Se agregaron pruebas con cada cambio del código |
 | Alertas observadas por ruta y día: de 6,083 a 0,534 | De 6,083 a 0,543 (ALT-005 a ALT-009); con todas las reglas observadas, 1,265 (`alertas/backtest_alertas.md`) | ALT-008 evalúa también las bajadas y el backtest usa el factor de carga del ciclo |
 | k6: p95 de 451,3 ms en consultas y 627,5 ms con un año de resultados | Medición vigente del 13-11-2026: p95 de 864,1 ms con 50 usuarios (`pruebas/k6_segmentos.txt`) | Se midió otra vez con el código final y un volumen sembrado mayor; las del video quedan como corridas anteriores |
-| Ciclo de §14.2 en la pila creada desde cero | Las mismas filas, el mismo candidato y la misma decisión; cambian las alertas de cada paso (`despliegue/demo_esperado.md`) | Las alertas observadas evalúan ahora cada día del lote |
+| SonarQube aprueba su puerta | Ver «Cifras vigentes» (`sonarqube/quality_gate.json`) | El análisis se repite sobre el código vigente |
 
-Las rutas de la tabla son relativas a `../../api_frecuencias/docs/evidencias/`. No cambian el modelo activo, su WAPE,
-la cobertura de la banda, la decisión de la compuerta ni la puerta de SonarQube, que sigue aprobada.
+Las rutas de la tabla que no empiezan por `../../` son relativas a `../../api_frecuencias/docs/evidencias/`. No
+cambian el modelo horario activo, `hgb_fv2_20250831_s42`, su WAPE en la prueba reservada ni la cobertura de su banda.

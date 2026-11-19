@@ -445,49 +445,59 @@ def _modelo(sesion, model_id: str, estado: str) -> RegistroModelo:
 
 
 def test_activacion_controlada_y_reversion(cliente, sesion, monkeypatch):
+    """RF-019 en la familia horaria (la del corto plazo tiene su propio activo y no se toca): un candidato que no
+    mejora se rechaza, uno que mejora se activa y la reversión vuelve al anterior. El activo real se restituye al final
+    aunque la prueba falle (si no, las pruebas siguientes pronosticarían con un modelo de mentira)."""
     from app.servicios import inferencia
 
-    previo_real = sesion.scalar(select(RegistroModelo.model_id).where(RegistroModelo.estado == "activo"))
-    sesion.execute(text("UPDATE ai_frecuencias.model_registry SET estado='retirado' WHERE estado='activo'"))
+    horario = "familia = 'horario'"
+    previo_real = sesion.scalar(select(RegistroModelo.model_id).where(RegistroModelo.estado == "activo",
+                                                                     RegistroModelo.familia == "horario"))
+    sesion.execute(text(f"UPDATE ai_frecuencias.model_registry SET estado='retirado' WHERE estado='activo' AND "
+                        f"{horario}"))
     sesion.commit()
     sufijo = uuid.uuid4().hex[:6]
     base, malo, bueno = f"base-{sufijo}", f"malo-{sufijo}", f"bueno-{sufijo}"
-    _modelo(sesion, base, "activo")
-    _modelo(sesion, malo, "candidato")
-    _modelo(sesion, bueno, "candidato")
-    wapes = {base: 15.0, malo: 18.5, bueno: 13.9}
-    ventanas = []
+    try:
+        _modelo(sesion, base, "activo")
+        _modelo(sesion, malo, "candidato")
+        _modelo(sesion, bueno, "candidato")
+        wapes = {base: 15.0, malo: 18.5, bueno: 13.9}
+        ventanas = []
 
-    def evaluar(model_id, desde, hasta, *a, **k):
-        ventanas.append((model_id, desde, hasta))
-        # la compuerta de activación mira también la cobertura calibrada y el sesgo (cuatro criterios)
-        return {"wape": wapes[model_id], "mae": 1.0, "rmse": 1.0, "por_ruta": {}, "sesgo_pct": 1.0,
-                "cobertura_p10_p90_conformal": 80.0}
+        def evaluar(model_id, desde, hasta, *a, **k):
+            ventanas.append((model_id, desde, hasta))
+            # la compuerta de activación mira también la cobertura calibrada y el sesgo (cuatro criterios)
+            return {"wape": wapes[model_id], "mae": 1.0, "rmse": 1.0, "por_ruta": {}, "sesgo_pct": 1.0,
+                    "cobertura_p10_p90_conformal": 80.0}
 
-    monkeypatch.setattr(inferencia, "evaluar", evaluar)
-    r = cliente.post(f"/api/v1/models/{malo}/activate", json={"aprobado_por": "comite"})
-    assert r.status_code == 409 and r.json()["error"]["codigo"] == "activacion_rechazada"
-    assert cliente.get(f"/api/v1/models/{malo}").json()["estado"] == "rechazado"
-    assert ventanas[0][1:] == ventanas[1][1:]  # misma validación temporal para ambos
+        monkeypatch.setattr(inferencia, "evaluar", evaluar)
+        r = cliente.post(f"/api/v1/models/{malo}/activate", json={"aprobado_por": "comite"})
+        assert r.status_code == 409 and r.json()["error"]["codigo"] == "activacion_rechazada"
+        assert cliente.get(f"/api/v1/models/{malo}").json()["estado"] == "rechazado"
+        assert ventanas[0][1:] == ventanas[1][1:]  # misma validación temporal para ambos
 
-    r = cliente.post(f"/api/v1/models/{bueno}/activate", json={"aprobado_por": "comite", "motivo": "mejor WAPE"})
-    assert r.status_code == 200, r.text
-    cuerpo = r.json()
-    assert cuerpo["estado"] == "activo" and cuerpo["anterior_model_id"] == base and cuerpo["aprobado_por"] == "comite"
-    assert cuerpo["metricas"]["validacion_activacion"]["candidato"]["wape"] == 13.9
-    assert cliente.get(f"/api/v1/models/{base}").json()["estado"] == "retirado"
+        r = cliente.post(f"/api/v1/models/{bueno}/activate", json={"aprobado_por": "comite", "motivo": "mejor WAPE"})
+        assert r.status_code == 200, r.text
+        cuerpo = r.json()
+        assert cuerpo["estado"] == "activo" and cuerpo["anterior_model_id"] == base
+        assert cuerpo["aprobado_por"] == "comite"
+        assert cuerpo["metricas"]["validacion_activacion"]["candidato"]["wape"] == 13.9
+        assert cliente.get(f"/api/v1/models/{base}").json()["estado"] == "retirado"
 
-    r = cliente.post("/api/v1/models/rollback", json={"usuario": "comite", "motivo": "prueba de reversión"})
-    assert r.status_code == 200 and r.json()["model_id"] == base and r.json()["estado"] == "activo"
-    activos = cliente.get("/api/v1/models", params={"estado": "activo"}).json()
-    assert activos["total"] == 1 and activos["items"][0]["model_id"] == base
-
-    # deja activo de nuevo el modelo real que había antes de la prueba
-    sesion.execute(text("UPDATE ai_frecuencias.model_registry SET estado='retirado' WHERE estado='activo'"))
-    if previo_real:
-        sesion.execute(text("UPDATE ai_frecuencias.model_registry SET estado='activo' WHERE model_id=:m"),
-                       {"m": previo_real})
-    sesion.commit()
+        r = cliente.post("/api/v1/models/rollback", json={"usuario": "comite", "motivo": "prueba de reversión"})
+        assert r.status_code == 200 and r.json()["model_id"] == base and r.json()["estado"] == "activo"
+        activos = cliente.get("/api/v1/models", params={"estado": "activo", "familia": "horario"}).json()
+        assert activos["total"] == 1 and activos["items"][0]["model_id"] == base
+    finally:
+        # deja activo de nuevo el modelo horario real que había antes de la prueba
+        sesion.rollback()
+        sesion.execute(text(f"UPDATE ai_frecuencias.model_registry SET estado='retirado' WHERE estado='activo' AND "
+                            f"{horario}"))
+        if previo_real:
+            sesion.execute(text("UPDATE ai_frecuencias.model_registry SET estado='activo' WHERE model_id=:m"),
+                           {"m": previo_real})
+        sesion.commit()
 
 
 # ---------------------------------------------------------------- umbrales, exportación, contrato

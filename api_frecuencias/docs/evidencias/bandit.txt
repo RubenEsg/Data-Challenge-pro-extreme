@@ -1,9 +1,9 @@
 bandit 1.9.4
 
-== bandit -r app (todas las severidades) · 2026-11-18 21:29 -0500
+== bandit -r app (todas las severidades) · 2026-11-19 04:15 -0500
 
 código de salida: 0
 
-== bandit -r scripts -ll · 2026-11-18 21:29 -0500
+== bandit -r scripts -ll · 2026-11-19 04:15 -0500
 
 código de salida: 0

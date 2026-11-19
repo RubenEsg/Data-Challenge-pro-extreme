@@ -236,4 +236,5 @@ def markdown(res: dict) -> str:
 
 
 if __name__ == "__main__":
-    main()
+    with CP.sin_calidad():      # la prueba se midió con los datos tal cual: sin la regla VAL-009 de la API
+        main()

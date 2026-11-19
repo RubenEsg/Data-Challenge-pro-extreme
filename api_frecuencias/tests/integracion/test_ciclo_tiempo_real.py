@@ -314,7 +314,8 @@ def test_la_recomendacion_a_pedido_usa_la_ocupacion_medida_antes_de_su_instante(
     ids: list[str] = []
 
     def pedir(instante: str) -> dict:
-        r = cliente.post("/api/v1/predictions/run", json={"ruta": "CL 72", "instante": instante, "horizonte_min": 30})
+        r = cliente.post("/api/v1/predictions/run", json={"ruta": "CL 72", "instante": instante, "horizonte_min": 30,
+                                                          "modelo": "horario"})
         assert r.status_code == 201, r.text
         ids.append(r.json()["prediction_id"])
         return r.json()["recomendacion"]
@@ -510,7 +511,8 @@ def test_la_foto_dice_que_plan_volvio_a_resolver_si_el_modelo_activo_cambio_a_mi
     from app.servicios import inferencia, respuesta
 
     with sesion_contexto() as s:
-        activo = s.execute(text(f"SELECT model_id FROM {E}.model_registry WHERE estado = 'activo'")).scalar()
+        activo = s.execute(text(f"SELECT model_id FROM {E}.model_registry WHERE estado = 'activo' "
+                                "AND familia = 'horario'")).scalar()
         registrados = set(s.execute(text(f"SELECT model_id FROM {E}.model_registry")).scalars())
     otro = next(f["model_id"] for f in inferencia.listar_modelos()          # otro modelo empaquetado, ejecutable
                 if f.get("tipo") == "candidato" and f.get("ejecutable_en_api", True) and f["model_id"] != activo

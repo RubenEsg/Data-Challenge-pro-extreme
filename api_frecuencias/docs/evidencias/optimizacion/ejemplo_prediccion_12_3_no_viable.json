@@ -10,23 +10,23 @@
   "busesPerHour": null,
   "vehiclesRequired": null,
   "viable": false,
-  "reason": "Ni con el headway mínimo (2 buses/h) y la tipología más grande (72 puestos) se cubre la carga del nivel de servicio: se requieren 1.754 puestos/h y el máximo es 144. La flota disponible (79 vehículos, ciclo de 243,8 min) solo sostiene 122 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 1.491 (8,2 % de cobertura). Se informa la mejor aproximación ejecutable: 2 buses/h cada 30,00 min, que cubre el 8,2 % de la carga del nivel de servicio."
+  "reason": "Ni con el headway mínimo (2 buses/h) y la tipología más grande (72 puestos) se cubre la carga del nivel de servicio: se requieren 1.610 puestos/h y el máximo es 144. La flota disponible (79 vehículos, ciclo de 243,8 min) solo sostiene 122 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 1.368 (8,9 % de cobertura). Se informa la mejor aproximación ejecutable: 2 buses/h cada 30,00 min, que cubre el 8,9 % de la carga del nivel de servicio."
  },
- "motivo": "Ni con el headway mínimo (2 buses/h) y la tipología más grande (72 puestos) se cubre la carga del nivel de servicio: se requieren 1.754 puestos/h y el máximo es 144. La flota disponible (79 vehículos, ciclo de 243,8 min) solo sostiene 122 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 1.491 (8,2 % de cobertura). Se informa la mejor aproximación ejecutable: 2 buses/h cada 30,00 min, que cubre el 8,2 % de la carga del nivel de servicio.",
+ "motivo": "Ni con el headway mínimo (2 buses/h) y la tipología más grande (72 puestos) se cubre la carga del nivel de servicio: se requieren 1.610 puestos/h y el máximo es 144. La flota disponible (79 vehículos, ciclo de 243,8 min) solo sostiene 122 pasajeros/h de capacidad efectiva y la carga del nivel de servicio es 1.368 (8,9 % de cobertura). Se informa la mejor aproximación ejecutable: 2 buses/h cada 30,00 min, que cubre el 8,9 % de la carga del nivel de servicio.",
  "mejor_aproximacion": {
   "aviso": "Mejor aproximación ejecutable: respeta la flota, el ciclo y el headway, pero NO cumple el nivel de servicio.",
   "buses_hora": 2,
   "headway_min": 30.0,
   "vehiculos_requeridos": 9,
   "capacidad_efectiva_pasajeros_h": 122.4,
-  "cobertura_nivel_servicio": 0.0821,
+  "cobertura_nivel_servicio": 0.0895,
   "componentes_cop": {
    "costo_operativo": 439157.66,
-   "tiempo_espera": 5934724.74,
-   "sobreocupacion": 12141149.36,
+   "tiempo_espera": 5619549.03,
+   "sobreocupacion": 11405188.33,
    "desviacion_frecuencia": 648090.36
   },
-  "total_ponderado_cop": 19163122.12,
+  "total_ponderado_cop": 18111985.38,
   "asignacion": [
    {
     "codigo": "T1",

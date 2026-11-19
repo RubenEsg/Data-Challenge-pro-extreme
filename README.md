@@ -4,8 +4,15 @@
 **Equipo:** Abrahan Basto Martínez, Rubén Esguerra Fernández y Paula Gómez
 
 > **La propuesta en una frase: no quitar buses, cambiarlos de hora.**
-> Un modelo pronostica cuántos pasajeros habrá en cada ruta y hora con una semana de antelación, y un optimizador reparte
-> las salidas: menos en el valle y más en los picos, con casi las mismas horas de bus.
+> <!-- corto_plazo_frase:inicio (generado por pronostico_corto_plazo/escribir_readme.py) -->
+> El sistema pronostica cuántos pasajeros subirán en los siguientes 30, 60 y 120 minutos por ruta, sentido y segmento,
+> con lo observado hasta ese instante, y la API lo sirve dentro del ciclo diario e intradía. En la prueba reservada
+> (julio a diciembre de 2025), por ruta, falla 8,58 %, 7,34 % y 6,63 % (WAPE a 30, 60 y 120 minutos), frente a
+> 14,36 %, 13,18 % y 12,22 % del promedio por día y hora; a 60 minutos, por sentido, 10,05 % frente a 16,10 %, y por segmento,
+> 37,63 % frente a 43,61 %.
+> <!-- corto_plazo_frase:fin -->
+> Un segundo modelo, horario, arma el plan del día siguiente y semanal, y un optimizador reparte las salidas: menos en
+> el valle y más en los picos, con casi las mismas horas de bus.
 
 <!-- corto_plazo:inicio (bloque generado por pronostico_corto_plazo/escribir_readme.py: no editar a mano) -->
 ## Correcciones tras la retroalimentación del curso (17 de noviembre de 2026)
@@ -25,7 +32,7 @@ Lo que se conserva y lo que falta:
 - **El sentido es una aproximación** (la mitad del ciclo), y se midió cuánto afecta (`pronostico_corto_plazo/panel/revision_sentido.json`).
 - **Donde no gana: los domingos corrientes.** Por ruta a 60 minutos, el modelo falla 10,37 % y el promedio por día y hora 9,72 %; la pérdida está en CRA 54 (11,10 frente a 8,93). La ventaja del grupo «domingo o festivo» viene de los festivos, en que el promedio falla 101,05 % y el modelo 10,63 % (`pronostico_corto_plazo/resultados/desglose_domingos_festivos.json`, análisis posterior a la prueba).
 - **Un registro imposible en la prueba.** La base trae 28.782 subidas en un solo segmento de CRA 54 en 15 minutos (05-07-2025, 07:45). El protocolo no previó filtrarlo, así que las cifras de la tabla lo incluyen; infla sobre todo el RMSE (303,9 por ruta a 60 minutos). En un análisis posterior, sin los 9 días que toca, el modelo falla 6,91 % y el promedio 12,51 %, con un RMSE de 73,7 (`pronostico_corto_plazo/resultados/sensibilidad_registro_anomalo.json`).
-- **Ya está en la API y en el tablero** (18 de noviembre de 2026). `POST /api/v1/predictions/corto-plazo` lo calcula y lo guarda por ruta, sentido y segmento, con su banda, sus líneas base, su explicación y la recomendación de §10.2; el ciclo diario también lo genera. La API usa los mismos árboles, verificados con SHA-256, y reproduce las 168.210 predicciones guardadas de la prueba (`api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.md`). En el tablero es lo primero de Pronóstico. Falta alimentarlo con la captura en vivo: hoy lee el panel de 2023 a 2025 (`PLAN_EVOLUCION.md`, sección 7).
+- **Es el pronóstico del producto** (18 y 19 de noviembre de 2026). `POST /api/v1/predictions/run` responde con él por omisión (y `/api/v1/predictions/corto-plazo`), por ruta, sentido y segmento, con su banda, sus líneas base, su explicación y la recomendación de §10.2. Dentro del ciclo diario e intradía lo alimenta la lectura incremental en bloques de 15 minutos, con una regla de calidad que excluye los registros imposibles; su recomendación queda en `recommendation`, sus alertas de atención inmediata salen en los ciclos intradía, se monitorea (error móvil, cobertura, deriva, ALT-010), se activa y se revierte con la misma compuerta del modelo horario y está exportado a ONNX. La API usa los mismos árboles, verificados con SHA-256, y reproduce las 168.210 predicciones guardadas de la prueba (`api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.md`). En el tablero es lo primero de Pronóstico.
 
 <!-- corto_plazo:fin -->
 
@@ -35,7 +42,11 @@ Lo que se conserva y lo que falta:
 los comandos de «Cómo correr el laboratorio Dash»). Es la entrada única: Inicio trae la propuesta, lo que se ahorra, lo que
 se juega en pasajes y el piloto que lo mide, y sus pestañas llevan al pronóstico, al horario y al resultado. Lo que
 pide el enunciado, el pronóstico a 30, 60 y 120 minutos por ruta, sentido y segmento, es lo primero de la pestaña
-Pronóstico. La app sin
+Pronóstico, en la sección «Lo que pide el enunciado: 30, 60 y 120 minutos». El doble clic abre el tablero sin la API:
+esa sección calcula el pronóstico solo con la API corriendo, y sin ella muestra las cifras de su prueba reservada. Para
+verla en vivo, levante la API desde `api_frecuencias/` con `docker compose -p sobusa_api up -d --build` (antes, el
+`.env` y la clave de «Backend del reto (FastAPI + PostgreSQL)», más abajo) y abra el tablero desde `dash_app/` con
+`set SOBUSA_API_URL=http://127.0.0.1:8000`, `set SOBUSA_API_KEY=<clave>` y `python app.py`. La app sin
 conexión (`app_sobusa/app.html`) y sus páginas sueltas muestran lo mismo con resultados ya calculados: son anexos, y el
 tablero los reúne en su pantalla «Anexos».
 
@@ -60,7 +71,7 @@ La especificación v1.5 de Extreme Technologies se revisa en cuatro documentos:
 | E02 | Especificación técnica | `documentos/E02_especificacion_tecnica.pdf` |
 | E03 | Código fuente | `api_frecuencias/`: código en `app/`, dependencias en `pyproject.toml`, `requirements.txt` y `requisitos_congelados.txt`, pruebas en `tests/` y reporte de SonarQube en `docs/evidencias/sonarqube/` (`resumen.md`: puerta de calidad condición por condición; se repite con `scripts/sonar_local.py`). El historial de desarrollo, commit por commit, está en `HISTORIAL_DESARROLLO.md`, que genera `historial_desarrollo.py` desde el repositorio de desarrollo del equipo. |
 | E04 | Base de datos | `api_frecuencias/alembic/versions/` (DDL del esquema `ai_frecuencias`, índices y datos semilla de umbrales). El registro de modelos se siembra desde `api_frecuencias/datos/modelos/registro.json`. |
-| E05 | Modelo IA | `api_frecuencias/datos/modelos/hgb_fv2_20250831_s42/` (artefacto y manifiesto con SHA-256). Entrenamiento reproducible con `api_frecuencias/scripts/entrenar.py`; métricas en `api_frecuencias/docs/evidencias/modelo/`. Por segmento y sentido, `api_frecuencias/datos/modelos/segmentos/` (modelo activo `seg_hgb_jerarquico_20230227_s42`), entrenado con `api_frecuencias/scripts/entrenar_segmentos.py` según el protocolo de `api_frecuencias/docs/evidencias/modelo/segmentos_protocolo.md`. El pronóstico de corto plazo que pide el enunciado (30, 60 y 120 minutos por ruta, sentido y segmento) se elige con `pronostico_corto_plazo/validar.py` y se prueba con `pronostico_corto_plazo/probar.py`; sus modelos se vuelven a entrenar con esos dos guiones desde `pronostico_corto_plazo/panel/`. La API lo sirve con los 18 árboles reentrenados igual (`api_frecuencias/datos/modelos/corto_plazo/`, `api_frecuencias/scripts/entrenar_corto_plazo.py`), que reproducen las predicciones de su prueba (`api_frecuencias/scripts/verificar_corto_plazo.py`). |
+| E05 | Modelo IA | `api_frecuencias/datos/modelos/hgb_fv2_20250831_s42/` (artefacto y manifiesto con SHA-256). Entrenamiento reproducible con `api_frecuencias/scripts/entrenar.py`; métricas en `api_frecuencias/docs/evidencias/modelo/`. Por segmento y sentido, `api_frecuencias/datos/modelos/segmentos/` (modelo activo `seg_hgb_jerarquico_20230227_s42`), entrenado con `api_frecuencias/scripts/entrenar_segmentos.py` según el protocolo de `api_frecuencias/docs/evidencias/modelo/segmentos_protocolo.md`. El pronóstico de corto plazo que pide el enunciado (30, 60 y 120 minutos por ruta, sentido y segmento) se elige con `pronostico_corto_plazo/validar.py` y se prueba con `pronostico_corto_plazo/probar.py`; sus modelos se vuelven a entrenar con esos dos guiones desde `pronostico_corto_plazo/panel/`. La API lo sirve con los 18 árboles reentrenados igual (`api_frecuencias/datos/modelos/corto_plazo/`, `api_frecuencias/scripts/entrenar_corto_plazo.py`), que reproducen las predicciones de su prueba (`api_frecuencias/scripts/verificar_corto_plazo.py`), y también en ONNX (`api_frecuencias/scripts/exportar_onnx_corto_plazo.py`; paridad con LightGBM en `api_frecuencias/docs/evidencias/modelo/corto_plazo_onnx.md`). |
 | E06 | Prototipo | API (`api_frecuencias/`) y tablero (`dash_app/`: las pantallas Alertas, Recomendaciones, Operación y Monitoreo, las dos primeras secciones de Pronóstico (el pronóstico a 30, 60 y 120 minutos por ruta, sentido y segmento y el modelo horario) y la tarjeta de Inicio con la respuesta del reto consumen la API). Capturas y recorrido en `api_frecuencias/docs/evidencias/tablero/`. |
 | E07 | Integración PostgreSQL | `api_frecuencias/docs/integracion_postgresql.md` (consultas de solo lectura, marca de agua, mapa de tablas y EXPLAIN), `api_frecuencias/docs/evidencias/replica/` y `api_frecuencias/docs/hallazgos_extreme.md`. |
 | E08 | Pruebas | `api_frecuencias/tests/` (unitarias, integración, contrato, datos/ML, réplica y Testcontainers), `api_frecuencias/k6/` (carga) y `api_frecuencias/docs/evidencias/pruebas/`. Integración continua: `.github/workflows/api_frecuencias.yml` en la raíz del repositorio de entrega (la misma definición está en `api_frecuencias/ci/github_actions_entrega.yml`). Los conteos de la suite, la cobertura y la carga con k6 están en la tabla «Cifras vigentes del backend», más abajo. |
@@ -82,8 +93,8 @@ docker compose -p sobusa_api up -d --build
 ```
 
 - **`verificar_despliegue.py` (de 15 a 25 minutos).** Levanta una pila aislada desde cero (proyecto `sobusa_limpio`,
-  puertos 8010 y 5440, volúmenes propios) y aplica las migraciones 0001 → 0015. Crea las claves de API y corre el ciclo
-  completo de §14.2 con `scripts/demo_ciclo_api.py`:
+  puertos 8010 y 5440, volúmenes propios) y aplica todas las migraciones (`alembic upgrade head`). Crea las claves de
+  API y corre el ciclo completo de §14.2 con `scripts/demo_ciclo_api.py`:
   1. **llegada de información nueva:** carga inicial hasta el 30-08-2025 (49.623 filas), un día nuevo (51 filas) y los
      días hasta el 30-11-2025 (4.641 filas);
   2. **lectura incremental:** cada ejecución muestra su marca de agua anterior y la nueva, y la repetición lee 0 filas;
@@ -99,11 +110,13 @@ docker compose -p sobusa_api up -d --build
      Un candidato que no mejora queda rechazado, y activarlo sin forzar responde 409 `requiere_forzar`.
 
   Después prueba que la API sobrevive a un `docker kill` sin perder ni duplicar datos y lo borra todo al final. Qué
-  muestra cada paso y por qué, con la salida de referencia, está en
-  `api_frecuencias/docs/evidencias/despliegue/demo_esperado.md`. La salida de la corrida en Docker queda en
+  muestra cada paso y por qué está en `api_frecuencias/docs/evidencias/despliegue/demo_esperado.md`; su salida de
+  referencia es la corrida del 13-11-2026, cuando el candidato era `hgb_fv2_20250930_s42` (variables fv2, WAPE
+  14,108 % frente a 13,982 % del activo) y la compuerta lo rechazaba. La salida vigente es la de la corrida en Docker,
   `demo_ciclo_api.txt` de esa misma carpeta, que `verificar_despliegue.py` reescribe en cada corrida, y el arranque
-  desde cero, en `arranque_limpio.txt` («Resultado global: OK»). Como el candidato no queda activo, no hay nada que
-  revertir; la activación y la reversión se prueban aparte en
+  desde cero queda en `arranque_limpio.txt` («Resultado global: OK»). En esa corrida el candidato
+  `hgb_fv3_20250930_s42` pasa la compuerta, se activa y se revierte (paso 6). La activación y la reversión se prueban
+  además en
   `api_frecuencias/tests/integracion/test_api_integracion.py::test_activacion_controlada_y_reversion` y
   `api_frecuencias/tests/integracion/test_monitoreo_api.py::test_retador_en_sombra_compuerta_y_reversion`.
 - **`copy` y `docker compose`.** Dejan la API en http://127.0.0.1:8000 para explorarla con Swagger (`/docs`). Si ya hay
@@ -112,10 +125,11 @@ docker compose -p sobusa_api up -d --build
 - **El mismo ciclo sin Docker para la API.** Con la API corriendo en el venv (`uvicorn`, ver «Cómo correrla» en
   `api_frecuencias/README.md`) y una clave de admin en `SOBUSA_API_KEY`:
   `.venv\Scripts\python scripts\demo_ciclo_api.py --base http://127.0.0.1:8000 --revertir` (por omisión,
-  `--hasta 2025-08-30 --corte 2025-09-30`). Se verificó el 13-11-2026 contra una base de pruebas nueva y una copia
-  temporal de los datos: dos corridas con código 0 (120 s cada una) y la misma salida, con
-  el mismo rechazo del candidato. La referencia está en
-  `api_frecuencias/docs/evidencias/despliegue/demo_esperado.md`.
+  `--hasta 2025-08-30 --corte 2025-09-30`). Se verificó el 13-11-2026, con el código de ese día, contra una base de
+  pruebas nueva y una copia temporal de los datos: dos corridas con código 0 (120 s cada una) y la misma salida, en la
+  que la compuerta rechazaba al candidato de entonces (`api_frecuencias/docs/evidencias/despliegue/demo_esperado.md`).
+  Con el código vigente, la corrida de referencia es la de Docker del 18-11-2026: el candidato `hgb_fv3_20250930_s42`
+  pasa la compuerta, se activa y `--revertir` deja otra vez activo a `hgb_fv2_20250831_s42`.
 
 Para ver el tablero conectado a esa API, desde `dash_app/`:
 
@@ -136,7 +150,7 @@ y abra http://127.0.0.1:8050. El recorrido por cada pantalla está en `api_frecu
 | `entrega_final.ipynb` | El mismo cuaderno, con sus salidas. | Jupyter o VS Code. Para volver a ejecutarlo hace falta el proyecto completo (abajo). |
 | `dash_app/` | **Laboratorio del modelo** (Dash, Python): el pronóstico y el optimizador corren en vivo. | En Windows, doble clic en `dash_app/iniciar_dash.bat`; en cualquier sistema, `python app.py` (abajo). |
 | `app_sobusa/app.html` | **App «Sobusa Despacho»**: nueve pantallas con todo el proyecto, la repetición de un día de 2025 en la consola (sin mandos sobre los buses) y la vista 3D. *Solo en el ZIP completo (`Entrega_final_Sobusa.zip`); no viene en el ZIP ligero.* | Doble clic, en Edge o Chrome, sin internet. |
-| `pronostico_corto_plazo/` | **El pronóstico que pide el enunciado**: las subidas de los siguientes 30, 60 y 120 minutos por ruta, sentido y segmento, con el protocolo escrito antes de la validación, la validación, la prueba reservada y las subidas por segmento de 2023 a 2025. La API lo sirve en `/api/v1/predictions/corto-plazo` y reproduce sus predicciones de la prueba (`api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.md`). | Su `README.md`; para repetirlo, `python validar.py` y `python probar.py --repetir`. |
+| `pronostico_corto_plazo/` | **El pronóstico que pide el enunciado**: las subidas de los siguientes 30, 60 y 120 minutos por ruta, sentido y segmento, con el protocolo escrito antes de la validación, la validación, la prueba reservada y las subidas por segmento de 2023 a 2025. La API lo sirve como respuesta por omisión de `POST /api/v1/predictions/run`, en `/api/v1/predictions/corto-plazo` y en el ciclo diario e intradía, y reproduce sus predicciones de la prueba (`api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.md`). | Su `README.md`; para repetirlo, `python validar.py` y `python probar.py --repetir`. |
 | `api_frecuencias/` | **Backend del reto** (FastAPI + PostgreSQL 14): ejecución incremental, pronóstico a 30/60/120 min, recomendación de frecuencia y flota, alertas y registro de modelos. | Con Docker, dos comandos (abajo). |
 | `MATRIZ_CUMPLIMIENTO.md` · `PLAN_EVOLUCION.md` · `HISTORIAL_DESARROLLO.md` | Cada requisito de la especificación v1.5 con dónde se cumple y su estado; plan de integración, escalabilidad, costos, riesgos, hoja de ruta y adopción; lista de los commits del desarrollo. | Cualquier visor de Markdown. |
 | `documentos/` | Documento ejecutivo (E01), especificación técnica (E02), presentación final y video de E11 (`video/`), la respuesta a la pregunta del reto (`respuesta_pregunta_reto.md`) y el mapeo de §1–§3 y §17–§20 de la especificación a la evidencia (`mapeo_especificacion.md`). | Lector de PDF, reproductor de video o visor de Markdown. |
@@ -173,7 +187,8 @@ Abra **http://127.0.0.1:8050**. No necesita internet ni la base de datos (solo e
 solucionador CBC viene dentro de PuLP. Las pantallas del laboratorio son:
 
 - Inicio;
-- Pronóstico (con la API, los pronósticos del modelo activo; sin ella, ruta, día y experimento del informe en 2025);
+- Pronóstico (con la API, el pronóstico a 30, 60 y 120 minutos por ruta, sentido y segmento y los del modelo horario;
+  sin ella, la prueba reservada de ese pronóstico y los experimentos del informe en 2025);
 - **Horario en vivo** (el optimizador D5 resuelto en el momento, con los costos, la elasticidad y el intervalo que usted
   elija);
 - Despacho en vivo (la repetición de un día de 2025 con el plan; no tiene mandos sobre los buses, como pide §3.2);
@@ -182,19 +197,24 @@ solucionador CBC viene dentro de PuLP. Las pantallas del laboratorio son:
 - Anexos (el informe, el cuaderno y, si está la carpeta `app_sobusa/` del ZIP completo, la app sin conexión: material de
   apoyo que no hace falta abrir para entender la propuesta).
 
-Las pantallas **Alertas, Recomendaciones, Operación y Monitoreo**, la sección «Modelo activo (API)» de Pronóstico y la
-tarjeta de Inicio con la respuesta a la pregunta del reto consumen la API del reto. Para usarlas, levante la API (abajo) y defina `SOBUSA_API_URL` y
-`SOBUSA_API_KEY`. Detalle en `dash_app/README.md` y en `api_frecuencias/docs/manual_usuario.md`.
+Las pantallas **Alertas, Recomendaciones, Operación y Monitoreo**, las secciones «Lo que pide el enunciado: 30, 60 y
+120 minutos» (sin la API muestra solo su prueba reservada) y «Modelo horario de la API: el plan del día siguiente» de
+Pronóstico y la tarjeta de Inicio con la respuesta a la pregunta del reto consumen la API del reto. Para usarlas,
+levante la API (abajo: `docker compose -p sobusa_api up -d --build` desde `api_frecuencias/`) y, antes de
+`python app.py`, defina `SOBUSA_API_URL` y `SOBUSA_API_KEY`. Detalle en `dash_app/README.md` y en
+`api_frecuencias/docs/manual_usuario.md`.
 
 ## Backend del reto (FastAPI + PostgreSQL)
 
 `api_frecuencias/` es el backend que pide la especificación de Extreme Technologies (Python, FastAPI y PostgreSQL 14 con
 PostGIS): lee los datos nuevos por marca de agua, valida su calidad (también la de los consolidados de Extreme, que
-contrasta con su propia agregación), pronostica la demanda a 30, 60 y 120 minutos con su banda p10-p90, recomienda
-headway, buses por hora y vehículos (y dice si la flota alcanza), genera alertas ALT-001 a ALT-010 explicables y
+contrasta con su propia agregación), pronostica las subidas de los siguientes 30, 60 y 120 minutos por ruta, sentido y
+segmento con lo leído hasta el instante y su banda p10-p90, recomienda headway, buses por hora y vehículos (y dice si
+la flota alcanza), genera alertas ALT-001 a ALT-010 explicables y
 gestionables (con el viaje, el vehículo y el seudónimo del conductor cuando la regla mira un viaje), y registra cada
-modelo con su hash para activarlo o revertirlo con auditoría. Un modelo propio reparte el pronóstico de la ruta por
-segmento y sentido, una ejecución se puede partir en un trabajo por ruta (con marca de agua y candado por ruta) y los
+modelo con su hash para activarlo o revertirlo con auditoría, en dos familias (corto plazo y horario), cada una con su
+compuerta y su monitoreo. El modelo horario arma el plan del día siguiente; un modelo propio reparte su pronóstico por
+segmento y sentido. Una ejecución se puede partir en un trabajo por ruta (con marca de agua y candado por ruta) y los
 umbrales, los parámetros del plan, la flota y el ciclo se cambian por la API, versionados, sin recompilar. Guarda todo
 en su propio esquema `ai_frecuencias`; por omisión lee los datos del reto ya exportados a Parquet, así que nunca
 escribe en la base compartida. Con Docker Desktop abierto, desde `api_frecuencias/`:
@@ -232,9 +252,11 @@ Cifras vigentes del backend, cada una con su archivo en `api_frecuencias/docs/ev
 ### El modelo del producto (la API del reto)
 
 La API corre dos modelos. El que pide el enunciado, el pronóstico a 30, 60 y 120 minutos por ruta, sentido y
-segmento con lo observado en el día, es el de `pronostico_corto_plazo/` (`cp_lgbm_20250630_s42`, en
-`/api/v1/predictions/corto-plazo`); sus cifras están arriba, en «Correcciones tras la retroalimentación del curso».
-El modelo horario, que pronostica con siete días de antelación y arma el plan del día siguiente, es
+segmento con lo observado hasta el instante, es el de `pronostico_corto_plazo/` (`cp_lgbm_20250630_s42`, LightGBM con
+pérdida Poisson): es la respuesta por omisión de `POST /api/v1/predictions/run`, se consulta en
+`/api/v1/predictions/corto-plazo` y lo genera el ciclo diario e intradía con lo que trae la lectura incremental. Sus
+cifras están al principio y en «Correcciones tras la retroalimentación del curso».
+El modelo horario, el del plan del día siguiente y semanal, pronostica con siete días de antelación y es
 `hgb_fv2_20250831_s42`: gradient boosting
 de scikit-learn con pérdida Poisson, cuantiles P10 y P90 y banda calibrada. Pronostica los pasajeros de cada ruta y
 hora.
@@ -255,7 +277,10 @@ variables de calendario escolar y universitario (`api_frecuencias/datos/calendar
 su fuente). Con el mismo protocolo se equivoca menos que fv2 en la validación (12,96 % frente a 13,55 %) y en los
 dos años congelados, sobre todo en los recesos escolares (en 2025, de 17,36 % a 15,61 %). No lo activamos en esta
 entrega porque cambiaría los pronósticos que usan el ciclo diario, las alertas y las respuestas al reto, medidos con
-fv2. La API lo pone en sombra y su compuerta decide (`api_frecuencias/docs/evidencias/modelo/decision_fv3.md`).
+fv2. La API lo pone en sombra y su compuerta decide (`api_frecuencias/docs/evidencias/modelo/decision_fv3.md`). En la
+demostración de §14.2, otro candidato con las mismas variables y corte 30-09-2025, `hgb_fv3_20250930_s42`, pasa la
+compuerta y se activa, y al final la demostración lo revierte: el activo de esta entrega sigue siendo
+`hgb_fv2_20250831_s42`.
 
 ### Los experimentos del informe académico
 
@@ -275,9 +300,13 @@ Por qué difieren de la cifra del producto:
   festivos y Navidad, donde también la regla manual empeora (21,18 % frente a 20,04 %).
 - **El protocolo.** Los experimentos se reentrenan cada mes (doce pliegues con origen móvil). El producto es un solo
   modelo congelado en su fecha de corte, como funcionaría en producción hasta que la compuerta apruebe un retador.
-- **El horizonte.** Los experimentos pronostican cada franja con 7 días de antelación para armar el horario semanal. El
-  producto pronostica la hora con variables de 7 o más días de antigüedad y un ajuste intradía para las ventanas de 30,
-  60 y 120 minutos (`api_frecuencias/docs/evidencias/modelo/horizontes.json`).
+- **El horizonte.** Los experimentos pronostican cada franja con 7 días de antelación para armar el horario semanal.
+  El modelo horario del producto también pronostica la hora con variables de 7 o más días de antigüedad, para el plan
+  del día siguiente. Las ventanas de 30, 60 y 120 minutos del producto no salen de ese modelo con un ajuste intradía:
+  las pronostica el modelo de corto plazo, con lo observado hasta el instante (`pronostico_corto_plazo/`). El modelo
+  horario da esas ventanas con un perfil intrahorario en los pronósticos horarios que guarda el ciclo
+  (`GET /api/v1/predictions?modelo=horario`) y en `POST /api/v1/predictions/run` cuando se pide `modelo=horario` o el
+  corto plazo no cubre la ruta, la fecha y la hora (`api_frecuencias/docs/evidencias/modelo/horizontes.json`).
 - **La métrica comparable.** En la misma ventana (todo 2025) y frente a la misma regla manual (20,04 %), el modelo del
   producto congelado da 14,48 %, entre el experimento 1 y el experimento 11.
 

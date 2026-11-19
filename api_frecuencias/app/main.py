@@ -163,9 +163,12 @@ async def _manejar_inesperado(request: Request, exc: Exception):
 
 PREFIJO = "/api/v1"
 from app.routers import monitoreo as _monitoreo, pronostico_segmentos as _segmentos  # noqa: E402,I001
+from app.routers import pronostico_corto_plazo as _corto_plazo  # noqa: E402,I001
 
-# /predictions/segmentos va ANTES de predicciones (si no, /predictions/{prediction_id} la captura)
-for modulo in (ejecuciones, _segmentos, predicciones, alertas, modelos, umbrales, planificador, catalogos, _monitoreo):
+# /predictions/segmentos y /predictions/corto-plazo van ANTES de predicciones (si no, /predictions/{prediction_id}
+# las captura)
+for modulo in (ejecuciones, _segmentos, _corto_plazo, predicciones, alertas, modelos, umbrales, planificador, catalogos,
+               _monitoreo):
     # §7.2: toda ruta de /api/v1 exige X-API-Key y el rol que fija la matriz de app/seguridad.py
     app.include_router(modulo.router, prefix=PREFIJO, dependencies=[Depends(seguridad.autenticar)])
 # RNF-005: marcas de agua por proceso y ruta (GET /api/v1/frequency/watermarks)

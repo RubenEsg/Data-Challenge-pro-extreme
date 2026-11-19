@@ -274,7 +274,7 @@ API agrega por hora. El pronóstico directo de esas ventanas, cada media hora y 
 aparte con los eventos de conteo (se eligió con ene.--jun. de 2025 y se probó con jul.--dic.): a 60 min,
 \CortoRutaSesenta~\% por ruta, \CortoSentidoSesenta~\% por sentido y \CortoSegmentoSesenta~\% por segmento, frente a
 \CortoRutaSesentaBase, \CortoSentidoSesentaBase{} y \CortoSegmentoSesentaBase~\% del promedio por día y hora; en los domingos
-corrientes no mejora a ese promedio, y todavía no está en la API (\evid{pronostico_corto_plazo/README.md}). El 13,94~\% (experimento 11, LightGBM) y el 13,62~\% (experimento 12,
+corrientes no mejora a ese promedio; la API lo sirve y reproduce esa prueba (\evid{pronostico_corto_plazo/README.md}). El 13,94~\% (experimento 11, LightGBM) y el 13,62~\% (experimento 12,
 híbrido con un modelo fundacional) del informe académico son otra métrica, a 7 días y sobre todo 2025: no se comparan
 con esta prueba. \evid{api_frecuencias/docs/evidencias/modelo/evaluacion_modelo.md}, \evid{.../modelo/horizontes.json}
 
@@ -487,7 +487,7 @@ adaptadores de correo y WhatsApp configurables, simulados, con circuit breaker p
 \section{Base de datos (§8)}
 \label{sec:bd}
 Todo lo nuevo vive en el esquema \texttt{ai\_frecuencias}, creado y versionado con Alembic
-(\path{alembic/versions/}, migraciones 0001 a 0014); las migraciones bajan y suben limpias en el CI (\texttt{upgrade}
+(\path{alembic/versions/}, migraciones 0001 a 0015); las migraciones bajan y suben limpias en el CI (\texttt{upgrade}
 → \texttt{downgrade base} → \texttt{upgrade}). Los instantes son \texttt{TIMESTAMPTZ} guardados en UTC y presentados en America/Bogota (§8.1).
 
 {\small
@@ -619,7 +619,7 @@ responden 202 con el \texttt{execution\_id}; \texttt{GET /respuesta}, \texttt{GE
 /segmentos/estadisticas} leen lo ya calculado.
 
 {\footnotesize
-\setlength{\LTpre}{2pt}\setlength{\LTpost}{2pt}
+\setlength{\LTpre}{2pt}\setlength{\LTpost}{2pt}\renewcommand{\arraystretch}{0.94}
 \input{generado/tabla_api.tex}
 }
 

@@ -8,7 +8,7 @@ cómo gestionar una alerta, cómo leer una recomendación y cómo usar la API di
 
 | Quiero saber… | En el tablero | En la API | Qué mirar |
 |---|---|---|---|
-| Cuántos pasajeros vienen | Pronóstico · Recomendaciones | `GET /api/v1/predictions`, `POST /api/v1/predictions/run` | pasajeros esperados, banda P10–P90, `model_id` y explicación |
+| Cuántos pasajeros vienen | Pronóstico (arriba: los próximos 30, 60 y 120 minutos) · Recomendaciones | `GET /api/v1/predictions/corto-plazo/calcular`, `POST /api/v1/predictions/corto-plazo`, `GET /api/v1/predictions`, `POST /api/v1/predictions/run` | subidas esperadas por ruta, sentido y segmento, banda P10–P90, líneas base, `model_id` y explicación |
 | Cada cuánto despachar | Recomendaciones · Horario | `GET /api/v1/recommendations`, `POST /api/v1/recommendations/calculate`, `GET /api/v1/recommendations/plan` | `headway_min` y `buses_hora` frente a la frecuencia programada (`frecuencia_actual_min`) |
 | Cuántos buses necesito | Recomendaciones · Inicio | las mismas y `GET /api/v1/respuesta` | por franja, `vehiculos_requeridos` (⌈ciclo / headway⌉) frente a la flota disponible, y `viable` con su `motivo`; para el día, `vehiculos.requeridos_pico` de la respuesta (los buses en ruta a la vez en el momento más cargado) frente a `flota_disponible` |
 | Qué requiere atención ya | Alertas · Operación | `GET /api/v1/alerts?estado=nueva` | severidad, explicación, observado frente a esperado y umbral, y recomendación |
@@ -43,12 +43,39 @@ Cada pantalla abre con su pregunta en grande y sus controles a la derecha. El bo
 con los datos del gráfico y sus fuentes. Hay dos grupos de pantallas:
 
 - **Alertas, Recomendaciones, Operación y Monitoreo** consumen la API en vivo, y también la tarjeta «Respuesta a la
-  pregunta del reto» de Inicio. Si la API no responde, lo dicen («La API no responde en …») y no muestran cifras
+  pregunta del reto» de Inicio y las dos primeras secciones de Pronóstico. Si la API no responde, lo dicen («La API no responde en …») y no muestran cifras
   inventadas.
 - **El resto** (Inicio, Pronóstico, Horario, Despacho, El modelo, Resultado y Anexos) lee los datos del proyecto que
   vienen con el tablero.
 
-### 3.1 Alertas · ¿Qué pide atención ahora?
+### 3.1 Pronóstico · ¿Cuántos pasajeros subirán en los próximos 30, 60 y 120 minutos?
+
+![Pronóstico: lo que pide el enunciado](evidencias/tablero/dash_pronostico_corto_plazo.png)
+
+Es lo primero de la pantalla Pronóstico y es lo que pide la especificación (RF-005): con lo que ya subió hoy, cuántos
+pasajeros subirán en la próxima media hora, en la próxima hora y en las próximas dos horas, en toda la ruta, en cada
+sentido y en cada segmento de 500 m.
+
+1. Elija la ruta, la fecha, la hora y el horizonte (30, 60 o 120 min). Las fechas son las de la prueba reservada
+   (julio a diciembre de 2025), que el modelo no vio al entrenar ni al elegirse.
+2. Las cuatro fichas de arriba dicen cuántas subidas vienen, con la banda P10–P90 (ocho de cada diez ventanas reales
+   caen dentro); el promedio por día y hora, que es la línea base de la especificación; lo que de verdad pasó, solo para
+   comparar, porque el pronóstico no lo usa; y la recomendación que sale de ese pronóstico: buses por hora, cada cuántos
+   minutos y cuántos vehículos.
+3. La curva del día muestra el pronóstico de cada media hora con su banda, el promedio y lo real. La línea vertical es
+   la hora elegida.
+4. «Por qué ese número» lista las variables que más mueven el pronóstico, con el factor por el que lo multiplican; la
+   primera suele ser lo que subió en los 15 minutos anteriores.
+5. «A lo largo de la ruta» muestra las subidas previstas en cada segmento, en el orden del recorrido; la línea vertical
+   marca dónde empieza el regreso. «Por sentido» da ida y regreso y lo que ya subió en el día frente a lo habitual.
+6. Abajo, «Cómo le fue en la prueba reservada» trae el error del modelo y de las líneas base por nivel y horizonte, y
+   «La lectura» dice dónde no gana: en los domingos corrientes.
+
+Esta parte pide el pronóstico a la API (`GET /api/v1/predictions/corto-plazo/calcular` y `/dia`); sin API lo dice y no
+muestra cifras. La tabla de la prueba se ve siempre. Para guardar un pronóstico, `POST /api/v1/predictions/corto-plazo`
+(rol analista, sección 7).
+
+### 3.2 Alertas · ¿Qué pide atención ahora?
 
 ![Bandeja de alertas](evidencias/tablero/dash_alertas.png)
 
@@ -85,7 +112,7 @@ con los datos del gráfico y sus fuentes. Hay dos grupos de pantallas:
 - **Acciones.** Solo se activan las que permite el estado actual (sección 4).
 - **Exportar.** CSV y XLSX con los mismos filtros (`GET /api/v1/alerts/export`).
 
-### 3.2 Recomendaciones · ¿Cada cuánto debe salir un bus?
+### 3.3 Recomendaciones · ¿Cada cuánto debe salir un bus?
 
 ![Recomendaciones](evidencias/tablero/dash_recomendaciones.png)
 
@@ -146,7 +173,7 @@ con los datos del gráfico y sus fuentes. Hay dos grupos de pantallas:
   de umbrales (sección 3.3).
 - **Exportar.** CSV y XLSX.
 
-### 3.3 Operación · ¿Cómo está corriendo el sistema?
+### 3.4 Operación · ¿Cómo está corriendo el sistema?
 
 ![Operación](evidencias/tablero/dash_operacion.png)
 
@@ -203,7 +230,7 @@ cada vista es el mismo.
 Con una clave de operador, las acciones de analista o de administrador quedan bloqueadas y el tablero dice qué rol
 hace falta (`evidencias/tablero/operacion_403_operador_1366x768.png`).
 
-### 3.4 Monitoreo · ¿El modelo sigue sirviendo?
+### 3.5 Monitoreo · ¿El modelo sigue sirviendo?
 
 ![Monitoreo](evidencias/tablero/dash_monitoreo.png)
 
@@ -221,14 +248,14 @@ Lee `GET /api/v1/monitoring`, `GET /api/v1/monitoring/policy`, `GET /api/v1/mode
 Los estados siempre van con icono y palabra («Sin novedad», «Aviso», «Alerta»), no solo con color.
 ![Monitoreo: reentrenamiento y sombra](evidencias/tablero/dash_monitoreo_politica.png)
 
-### 3.5 Las pantallas del laboratorio del modelo
+### 3.6 Las pantallas del laboratorio del modelo
 
 ![Inicio con la respuesta a la pregunta del reto](evidencias/tablero/dash_inicio_respuesta.png)
 
 | Pantalla | Pregunta que responde | Qué mirar |
 |---|---|---|
 | Inicio | ¿Qué proponemos? | La propuesta en una frase, el ahorro en operación con lo que se juega en pasajes contado en tres pasos (primero el piloto que lo mide; si las salidas nuevas atraen suficientes pasajeros, el plan se aplica; si atraen menos, no se aplica), el error de la regla manual frente al modelo y el servicio (pasajeros sobre la capacidad y espera). La tarjeta «Respuesta a la pregunta del reto» trae, desde la API, cada cuánto despachar, cuántos pasajeros y vehículos se esperan y qué alertas piden atención, por ruta. |
-| Pronóstico | ¿Cuántos pasajeros habrá? | Arriba, la sección «Modelo activo (API)»: los pronósticos que guarda la API con su modelo (`GET /api/v1/predictions`), con la banda P10–P90 calibrada frente a lo real, las variables que más mueven cada pronóstico (SHAP) y la exportación. Debajo, los experimentos del informe: pasajeros reales frente a pronosticados hora por hora para una ruta y un día de 2025, con la banda de la hora pico y la regla manual, hechos con 7 días de antelación. |
+| Pronóstico | ¿Cuántos pasajeros habrá? | Arriba, «Lo que pide el enunciado» (sección 3.1). Después, «Modelo horario de la API: el plan del día siguiente»: los pronósticos horarios que guarda la API con su modelo (`GET /api/v1/predictions`), con la banda P10–P90 calibrada frente a lo real, las variables que más mueven cada pronóstico (SHAP) y la exportación. Debajo, los experimentos del informe: pasajeros reales frente a pronosticados hora por hora para una ruta y un día de 2025, con la banda de la hora pico y la regla manual, hechos con 7 días de antelación. |
 | Horario | ¿Cuántos buses y cada cuánto? | El optimizador D5 resuelto en el momento con los costos, la elasticidad y el intervalo que usted elija: salidas por hora frente a las de hoy, carga del punto más lleno, balance del día y horario minuto a minuto (CSV). |
 | Despacho | ¿Qué sale ahora y en qué bus? | Un día de 2025 repetido como si fuera en vivo: reloj, fichas (salidas frente al plan, buses en la calle, próximo despacho), mapa con los buses, alertas y próximos despachos. Es una repetición sin mandos: no controla ningún bus (§3.2). |
 | El modelo | ¿Qué modelo es y por qué? | El error de los modelos del informe académico (experimentos 1, 11 y 12, a 7 días y sobre todo 2025) frente a la regla manual, su ficha y las variables que más pesan. No es el modelo que corre en la API: ese es `hgb_fv2_20250831_s42`, y su error está en `evidencias/modelo/evaluacion_modelo.md`. |
@@ -237,7 +264,7 @@ Los estados siempre van con icono y palabra («Sin novedad», «Aviso», «Alert
 
 El detalle de cada tarjeta está en `../../dash_app/README.md`.
 
-### 3.6 Rutina sugerida por turno
+### 3.7 Rutina sugerida por turno
 
 | Momento | Quién | Qué hacer en el tablero |
 |---|---|---|
@@ -368,7 +395,13 @@ curl -H "X-API-Key: %CLAVE%" http://localhost:8000/api/v1/retencion
 curl -X POST http://localhost:8000/api/v1/retencion/aplicar -H "X-API-Key: %CLAVE%" ^
      -H "Content-Type: application/json" -d "{\"simular\": true, \"motivo\": \"Revisión antes de aplicar\"}"
 
-rem Pronóstico de una ruta a 60 minutos (rol analista)
+rem Lo que pide el enunciado: las subidas de los próximos 60 minutos por ruta, sentido y segmento (rol analista; se
+rem guarda). Sin guardar, con rol operador: GET /api/v1/predictions/corto-plazo/calcular?ruta=...&instante=...
+curl -X POST http://localhost:8000/api/v1/predictions/corto-plazo -H "X-API-Key: %CLAVE%" ^
+     -H "Content-Type: application/json" ^
+     -d "{\"ruta\": \"CRA 54\", \"instante\": \"2025-10-01T07:00:00-05:00\", \"horizonte_min\": 60}"
+
+rem Pronóstico horario de una ruta a 60 minutos (el del plan del día siguiente; rol analista)
 curl -X POST http://localhost:8000/api/v1/predictions/run -H "X-API-Key: %CLAVE%" ^
      -H "Content-Type: application/json" ^
      -d "{\"ruta\": \"CRA 54\", \"instante\": \"2025-10-01T07:00:00-05:00\", \"horizonte_min\": 60}"
@@ -425,7 +458,8 @@ bajar el resto):
 | Qué | Endpoint |
 |---|---|
 | Respuesta a la pregunta del reto (una fila por ruta y hora) | `GET /api/v1/respuesta/export` |
-| Pronósticos | `GET /api/v1/predictions/export` |
+| Pronósticos de corto plazo (ruta, sentido y segmento) | `GET /api/v1/predictions/corto-plazo/export` |
+| Pronósticos horarios | `GET /api/v1/predictions/export` |
 | Recomendaciones | `GET /api/v1/recommendations/export` |
 | Alertas (con los campos de §5.3) | `GET /api/v1/alerts/export` |
 | Monitoreo | `GET /api/v1/monitoring/export` |

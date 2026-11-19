@@ -13,7 +13,7 @@ Para cada ruta (SILENCIO, CRA 54 y CL 72) y hora, la API entrega:
 
 | Pregunta | Respuesta de la API | Dónde |
 |---|---|---|
-| ¿Cuántos pasajeros se esperan? | Pronóstico a 30, 60 y 120 minutos con banda P10–P90 calibrada, versión del modelo y explicación | `POST /api/v1/predictions/run`, `GET /api/v1/predictions` |
+| ¿Cuántos pasajeros se esperan? | Con lo que ya subió hoy, las subidas de los próximos 30, 60 y 120 minutos por ruta, sentido y segmento, con banda P10–P90, las líneas base de §9.1, la versión del modelo y su explicación; para el plan del día siguiente, el pronóstico horario con siete días de antelación | `POST /api/v1/predictions/corto-plazo`, `GET /api/v1/predictions/corto-plazo/calcular`; `POST /api/v1/predictions/run`, `GET /api/v1/predictions` |
 | ¿Cada cuánto despachar? | Headway y buses por hora con la función objetivo de §10.2 (costo, espera, sobreocupación y desviación), frente a la frecuencia programada | `POST /api/v1/recommendations/calculate`, `GET /api/v1/recommendations/plan` |
 | ¿Cuántos vehículos? | Por franja, ⌈ciclo / headway⌉ (§10.3) frente a la flota disponible; para el día, los buses en ruta a la vez con el plan (`vehiculos.requeridos_pico` de `GET /api/v1/respuesta`); si no alcanza, `viable = false` con el motivo | las mismas y `GET /api/v1/respuesta` |
 | ¿Qué requiere atención? | Alertas ALT-001 a ALT-010 con severidad, evidencia, umbral, explicación, recomendación y estado | `GET /api/v1/alerts` |
@@ -52,7 +52,8 @@ El esquema `ai_frecuencias` tiene además `execution_attempt` (cola), `model_mon
 por proceso y ruta), la agregación de la capa de segmentos (`segmento_estadistica_dia`, `segmento_estadistica` y
 `segmento_estadistica_refresco`), `ocupacion_segmento` (ocupación actual por segmento, §10.1), `retencion_registro`
 (bitácora de la retención de datos, §18) y `marca_agua_tabla` (marca de agua de los consolidados de Extreme por
-proceso y tabla, §6.1); las migraciones 0001 a 0014 están descritas en `docs/manual_tecnico.md`, sección 8.
+proceso y tabla, §6.1) y `prediction_corto_plazo` (el pronóstico de corto plazo por ruta, sentido y segmento,
+RF-005); las migraciones 0001 a 0015 están descritas en `docs/manual_tecnico.md`, sección 8.
 
 | Módulo (`app/servicios/`) | Qué hace |
 |---|---|
@@ -61,6 +62,7 @@ proceso y tabla, §6.1); las migraciones 0001 a 0014 están descritas en `docs/m
 | `consolidados.py` | Paso del ciclo para los consolidados de Extreme (§6.1, §6.3, §11.2; migración 0013): una vez por ejecución lee `timbradas_consolidado`, `timbradas_segmentos_anio` y `timbradas_segmentos_consolidado`, cada una desde su marca de agua (`marca_agua_tabla`), las valida y las contrasta con la agregación propia (CONTR-001 a CONTR-003 en `data_quality_error`). El resumen queda en `metricas.calidad.consolidados` (`docs/consolidados_ciclo.md`). |
 | `datos.py` | Vista analítica `demanda_horaria` y catálogo de rutas (capacidad, ciclo, flota, frecuencia actual). Con `datos/bajadas_horaria.parquet`, la serie offline trae también las bajadas de los viajes válidos (`bajadas_viajes`). |
 | `inferencia.py` | Entrena, registra, carga (verifica el SHA-256 del artefacto), predice y evalúa (MAE, RMSE, WAPE por ruta, pico y valle). |
+| `corto_plazo.py` · `variables_corto_plazo.py` | El pronóstico que pide RF-005: las subidas de los próximos 30, 60 y 120 minutos por ruta, sentido y segmento con lo observado hasta el instante (el modelo del experimento E14, `../pronostico_corto_plazo/`). LightGBM Poisson por nivel, horizonte y ruta (18 árboles, registro propio con SHA-256 en `datos/modelos/corto_plazo/`), sentido como suma de segmentos, banda P10–P90 conformal, líneas base, explicación local exacta (TreeSHAP) y recomendación de §10.2. Lee el panel de 15 minutos de `datos/corto_plazo/`. `scripts/verificar_corto_plazo.py` comprueba que reproduce las predicciones de la prueba reservada. |
 | `optimizacion.py` | `optimizar`: función objetivo de §10.2 (min α·costo_operativo + β·tiempo_espera + γ·sobreocupación + δ·desviación) como MILP de la franja con PuLP/CBC, sujeta a capacidad sobre el P90 calibrado, flota, headway mínimo y máximo y ciclo; pesos versionados en `threshold_config`; tipologías de capacidad de `tipologias_flota.json` (§10.1); comparación con la frecuencia programada y con el headway vigente de `rutas.frecuenciadespachos`, «qué pasa si» y sensibilidad (RF-008). `recomendar` es la línea base de §10.3, `plan_dia` el MILP D5 del día con el modelo activo (tarifa, elasticidad y suavidad versionadas en `threshold_config`, `PARAMETROS_PLAN`) y `plan_dia_d5` la reproducción de laboratorio de D5 (`motor_d5/`). El factor de carga crítica (`factor_carga_franja`) es por ruta, día de la semana de operación y hora, con el tipo de día de respaldo; la franja y cada hora del plan traen su segmento crítico histórico (`ocupacion_historica`), y `plan_dia(ocupacion_actual=…)` aplica la restricción reactiva de la ocupación observada (§10.1). |
 | `alertas.py` | Reglas ALT-001 a ALT-010, deduplicación y máquina de estados (reconocer, asignar, comentar, cerrar, descartar). ALT-002 observada se mide en el segmento crítico cuando la hora trae la ocupación por segmento. ALT-006 y ALT-009 llevan el viaje, el vehículo y el seudónimo del conductor cuando la fuente trae los viajes, y toda alerta dice en `variables.identificacion_5_3` qué campos de §5.3 le aplican y por qué. ALT-003 exige además una probabilidad mínima de superar la capacidad efectiva (`alt003_probabilidad_minima`, migración 0014; `docs/alertas_viajes_y_alt003.md`); con los viajes del día, ALT-009 no cuenta como faltante una hora sin ningún viaje programado no cancelado, y ALT-008 evalúa subidas, bajadas y número de viajes (`docs/consolidados_ciclo.md`). |
 | `notificaciones.py` | Adaptadores de correo y WhatsApp configurables; el envío es simulado y queda en `notification_log`. También manda el reporte de las llaves duplicadas de cada lote (UNI-001) al responsable del consolidado (§6.3, `NOTIF_UNICIDAD_DESTINATARIOS`); sin destinatario queda `pendiente_destinatario`. |
@@ -272,7 +274,7 @@ primaria desempata el orden (`app/routers/comun.py`, `ordenar`), así las págin
 exportaciones aceptan `formato=csv|xlsx` y
 responden con `X-Total-Count` (registros que cumplen el filtro) y `X-Truncado` (`true` si el archivo se cortó en el
 tope de 100.000 filas).
-El contrato completo (OpenAPI 3.1: 65 rutas y 69 operaciones) está en `docs/openapi.json` y en Swagger (`/docs`, fuera de
+El contrato completo (OpenAPI 3.1: 70 rutas y 75 operaciones) está en `docs/openapi.json` y en Swagger (`/docs`, fuera de
 producción). Cada operación de `/api/v1` declara su rol mínimo en `x-rol-minimo` y los errores que de verdad puede
 devolver, todos con el formato uniforme: 400 `cuerpo_ilegible` (cuerpo que no se puede decodificar), 401
 `no_autenticado`, 403 `prohibido` (con `rol_requerido`), 404, 409, 422 `validacion` (con `tipo` = `caracter_nulo` si
@@ -298,7 +300,18 @@ de una fuente externa, 503. Detalle en `docs/manual_tecnico.md`, sección 2.4.
 | GET | `/api/v1/predictions` | operador | Pronósticos guardados, con filtros (ruta, fechas, horizonte, modelo), paginación y orden. |
 | GET | `/api/v1/predictions/{prediction_id}` | operador | Una predicción con su trazabilidad (`model_id`, `feature_version`, `data_cutoff`, latencia y explicación local). |
 | GET | `/api/v1/predictions/export` | operador | Los mismos filtros, en CSV o XLSX. |
-| GET | `/api/v1/predictions/segmentos` | operador | Pronóstico por segmento y sentido con el modelo de segmentos activo (`seg_hgb_jerarquico_20230227_s42`, verificado por SHA-256) y banda P10–P90 por segmento y por sentido. `modelo_segmentos=` elige otra versión registrada, como el reparto fijo B0 (`seg_reparto_fijo_20230227`). |
+| GET | `/api/v1/predictions/segmentos` | operador | Reparto por segmento y sentido del pronóstico horario con el modelo de segmentos activo (`seg_hgb_jerarquico_20230227_s42`, verificado por SHA-256) y banda P10–P90 por segmento y por sentido. `modelo_segmentos=` elige otra versión registrada, como el reparto fijo B0 (`seg_reparto_fijo_20230227`). |
+
+**Pronóstico de corto plazo (RF-005: 30, 60 y 120 minutos por ruta, sentido y segmento)**
+
+| Método | Ruta | Rol | Para qué |
+|---|---|---|---|
+| POST | `/api/v1/predictions/corto-plazo` | analista | Pronostica, con lo observado hasta el instante (media hora de 04:00 a 21:00), las subidas de la ventana para la ruta, sus dos sentidos y cada segmento de 500 m, con banda P10–P90, el promedio por día y hora y la última semana, la explicación local y la recomendación de §10.2; lo guarda en `prediction_corto_plazo` y trae las claves de §12.3. |
+| GET | `/api/v1/predictions/corto-plazo` | operador | Pronósticos de corto plazo guardados, con filtros (ruta, nivel, sentido, segmento, horizonte, fechas, modelo, ejecución), paginación y orden. |
+| GET | `/api/v1/predictions/corto-plazo/export` | operador | Los mismos filtros, en CSV o XLSX. |
+| GET | `/api/v1/predictions/corto-plazo/calcular` | operador | El mismo pronóstico sin guardarlo (lo usa el tablero). |
+| GET | `/api/v1/predictions/corto-plazo/dia` | operador | La curva del día: el pronóstico de cada media hora de 04:00 a 21:00 por ruta y por sentido, con lo real si ya está en los datos. |
+| GET | `/api/v1/predictions/corto-plazo/modelo` | operador | La versión activa: artefactos con SHA-256, datos, corte, las cifras de su prueba reservada y las fechas que cubre. |
 
 **Recomendaciones**
 
@@ -402,8 +415,8 @@ Ejemplos con `curl` y `X-API-Key`, para cada perfil de usuario: `docs/manual_usu
 `scripts/demo_ciclo_api.py` recorre los seis pasos contra una API en marcha (con `SOBUSA_API_KEY` de rol admin), y
 `scripts/verificar_despliegue.py` lo hace sobre una pila creada desde cero. Con sus valores por omisión
 (`--hasta 2025-08-30 --corte 2025-09-30`): llegan 49.623, 51 y 4.641 filas; la repetición lee 0; el candidato
-`hgb_fv2_20250930_s42` se compara con el activo en 2025-12-01..14 (WAPE 14,108 % frente a 13,982 %) y la compuerta lo
-rechaza. `docs/evidencias/despliegue/demo_esperado.md` explica qué muestra cada paso y por qué esas fechas, y trae la
+`hgb_fv3_20250930_s42` (variables fv3) se compara con el activo en 2025-12-01..14 (WAPE 13,578 % frente a 13,982 %),
+la compuerta lo activa y la demostración lo revierte al final con `POST /models/rollback` (18-11-2026). `docs/evidencias/despliegue/demo_esperado.md` explica qué muestra cada paso y por qué esas fechas, y trae la
 salida de referencia contra la API en el venv. La corrida en Docker queda en
 `docs/evidencias/despliegue/demo_ciclo_api.txt`, que `verificar_despliegue.py` reescribe en cada corrida.
 `scripts/demo_ciclo.py` además gestiona alertas, exporta y notifica (`docs/evidencias/demo_ciclo.txt`); otras corridas
@@ -491,14 +504,14 @@ con su archivo:
 | Banda P10–P90 con la calibración v2 (prueba reservada) | Cobertura de 77,82 % (v1: 77,88 %) con un ancho medio de 303,4 pasajeros (v1: 312,9) | `docs/evidencias/modelo/calibracion_condicional.md` |
 | Volumen de alertas (§18 «Alertas excesivas»), 15-09 a 31-12-2025 | 1,265 alertas observadas por ruta y día en total (con la ALT-002 observada, 0,710, y la ruptura de RF-009, 0,012); solo ALT-005 a ALT-009, 0,543, frente a 6,08 con las reglas anteriores. ALT-008, que evalúa también las bajadas, da 0,071. Con las de pronóstico, 2,203 por ruta y día (1,265 + 0,938; `scripts/cifras_vigentes.py`) | `docs/evidencias/alertas/backtest_alertas.md` (las de pronóstico, en `docs/evidencias/alertas/backtest_alertas_pronostico.md`) |
 | Revisión doble de 96 alertas (§18) | Kappa de 0,943 entre los dos revisores (automatizados) antes de conciliar; precisión reponderada de 0,839 (intervalo 95 %: 0,757–0,882) | `docs/evidencias/alertas/revision_doble/conciliacion.json` |
-| Contrato OpenAPI (§12.1, §14.1) | Schemathesis con cinco chequeos en las 69 operaciones (65 rutas) de `docs/openapi.json`, sin fallas; `tests/contrato`: 197 casos (128 pruebas y 69 subpruebas), 0 fallas, 0 omitidas y 0 xfail (11-11-2026; el contrato no cambió después) | `docs/evidencias/contrato/schemathesis.txt`, `docs/evidencias/contrato/pytest_contrato.txt` |
+| Contrato OpenAPI (§12.1, §14.1) | Schemathesis con cinco chequeos en las 75 operaciones (70 rutas) de `docs/openapi.json`, sin fallas; `tests/contrato`: 209 casos (134 pruebas y 75 subpruebas), 0 fallas, 0 omitidas y 0 xfail (18-11-2026, con las seis operaciones del pronóstico de corto plazo) | `docs/evidencias/contrato/schemathesis.txt`, `docs/evidencias/contrato/pytest_contrato.txt` |
 | Modelo por segmento y sentido, prueba del 18 al 27-feb-2023 | WAPE por segmento y hora de 42,09 frente a 43,06 del reparto fijo B0; banda P10–P90 con cobertura de 78,31 % por segmento y 83,40 % por sentido (con el total real de la ruta) | `docs/evidencias/modelo/segmentos_modelo.md` |
 | Ocupación por segmento (§10.1), ene.–feb. 2023 | La carga a bordo derivada de las subidas y bajadas por segmento correlaciona 0,961 con la ocupación máxima del dispositivo en 21.511 viajes. La restricción reactiva, con los viajes completos (cota superior), dispara 147 veces y la hora siguiente queda sobre el umbral en el 28,6 % de los casos (tasa base: 5,9 %); con los viajes todavía en curso siguen 25 disparos a las (h+1):05 | `docs/evidencias/ocupacion/perfil_ocupacion_segmentos.json` (`validacion`) y `docs/evidencias/ocupacion/backtest_restriccion_reactiva.md` |
 | Alertas de pronóstico por hora, mismo periodo | ALT-001 0,438, ALT-002 0,306, ALT-003 0,164 y ALT-004 0,031 por ruta y día (0,938 en total), con lift de 1,81, 2,03, 1,05 (2,08 donde puede emitirse) y 7,62. El mínimo de probabilidad de ALT-003 (0,30) se eligió en una validación anterior a la evaluación; en la evaluación, su lift es 2,08 [1,51; 2,99] donde puede emitirse y 1,16 [0,82; 1,51] sobre todas las franjas | `docs/evidencias/alertas/backtest_alertas_pronostico.md` |
-| Suite completa final (unitarias, integración, réplica, contrato y datos/ML) | 1.770 casos (1.106 unitarias, 217 de integración, 209 de réplica, 197 de contrato y 41 de datos/ML): 1.770 aprobados, 0 fallas, 0 errores y 0 omitidas, en una sola sesión, con los procesos reales (`PRUEBA_CAIDA=1`, `PRUEBA_REPLICAS=1` y `PRUEBA_PLANIFICADOR=1`) y las pruebas de escritura en la réplica (`REPLICA_PRUEBAS_ESCRITURA=1`) (14-11-2026) | `docs/evidencias/pruebas/suite_final.xml` (la misma corrida que importa SonarQube) |
-| Cobertura de `app/` (incluido `motor_d5/`) en esa suite | 95,70 % (14.656 de 15.314 líneas; mínimo exigido en el CI y en la puerta de SonarQube: 85 %) | `docs/evidencias/pruebas/coverage_final.xml` |
-| Despliegue desde cero (RNF-008) | `scripts/verificar_despliegue.py` (13-11-2026, 23:07): «Resultado global: OK» en 4,0 min (arranque, migraciones 0001 → 0014, claves por rol, demostración de §14.2 con el cliente HTTP común, reinicios sin pérdidas y limpieza) | `docs/evidencias/despliegue/arranque_limpio.txt` |
-| Análisis con SonarQube (RNF-013) | Puerta «Reto Sobusa v1.5» **aprobada (OK)** en el análisis del 14-11-2026, 00:56, sobre todo el código: 0 vulnerabilidades, 0 bugs, 0 hallazgos bloqueantes y 0 críticos, duplicación de 0,0 % y cobertura de 95,7 %; 1 hallazgo de mantenibilidad aceptado con su justificación (la copia literal del solver D5, app/servicios/motor_d5/milp.py) | `docs/evidencias/sonarqube/quality_gate.json` (condición por condición en `resumen.md`) |
+| Suite completa final (unitarias, integración, réplica, contrato y datos/ML) | 1.810 casos (1.121 unitarias, 223 de integración, 209 de réplica, 209 de contrato y 48 de datos/ML): 1.800 aprobados, 0 fallas, 0 errores y 10 omitidas: las pruebas pesadas que solo corren con `PRUEBA_CAIDA=1`, `PRUEBA_REPLICAS=1`, `PRUEBA_PLANIFICADOR=1` o `REPLICA_PRUEBAS_ESCRITURA=1`, que este cambio no toca (con ellas encendidas, la suite del 14-11-2026 pasó entera: 1.770 casos y 0 omitidas) (18-11-2026) | `docs/evidencias/pruebas/suite_final.xml` (la misma corrida que importa SonarQube) |
+| Cobertura de `app/` (incluido `motor_d5/`) en esa suite | 95,76 % (15.464 de 16.148 líneas; mínimo exigido en el CI y en la puerta de SonarQube: 85 %) | `docs/evidencias/pruebas/coverage_final.xml` |
+| Despliegue desde cero (RNF-008) | `scripts/verificar_despliegue.py` (18-11-2026, 20:44): «Resultado global: OK» en 5,6 min (arranque, migraciones 0001 → 0015, claves por rol, demostración de §14.2 con el cliente HTTP común, reinicios sin pérdidas y limpieza) | `docs/evidencias/despliegue/arranque_limpio.txt` |
+| Análisis con SonarQube (RNF-013) | Puerta «Reto Sobusa v1.5» **aprobada (OK)** en el análisis del 18-11-2026, 21:29, sobre todo el código: 0 vulnerabilidades, 0 bugs, 0 hallazgos bloqueantes y 0 críticos, duplicación de 0,0 % y cobertura de 95,8 %; 1 hallazgo de mantenibilidad aceptado con su justificación (la copia literal del solver D5, app/servicios/motor_d5/milp.py) | `docs/evidencias/sonarqube/quality_gate.json` (condición por condición en `resumen.md`) |
 
 El mapeo de las secciones §1–§3 y §17–§20 de la especificación a esta evidencia está en
 `../documentos/mapeo_especificacion.md`.
@@ -593,6 +606,13 @@ hasta que el área operativa la apruebe). Se cambian sin recompilar ni reiniciar
   `numpy.isclose` (diferencia ≤ 0,01 pasajeros + 0,001 × valor).
   - Paridad: diferencia máxima de 0,003 pasajeros y el mismo WAPE con los dos motores.
   - Velocidad: unos 0,1 ms por fila, frente a 5-12 ms en scikit-learn (`onnx_paridad.json`).
+- **Corto plazo (§2.2, RF-005, §3.1, §9.1; `/api/v1/predictions/corto-plazo`).** Es el pronóstico que pide el
+  enunciado: en cada media hora, las subidas de los próximos 30, 60 y 120 minutos por ruta, sentido y segmento, con lo
+  que ya subió en el día. Es el modelo del experimento E14 (`../pronostico_corto_plazo/README.md`): se eligió con
+  enero a junio de 2025 y se midió una sola vez en julio a diciembre de 2025. `scripts/entrenar_corto_plazo.py` lo
+  reentrena con la misma configuración y semilla y `scripts/verificar_corto_plazo.py` comprueba que la API reproduce
+  las predicciones guardadas de esa prueba (`docs/evidencias/modelo/corto_plazo_reproduccion.md`). El ciclo diario
+  lo genera para cada ruta y horizonte, y el tablero lo muestra primero en Pronóstico.
 - **Segmento y sentido (§3.1, §9.1, §9.3; `GET /api/v1/predictions/segmentos`).** Hay un modelo supervisado propio
   (`app/servicios/modelo_segmentos.py`; `docs/modelo_segmentos.md`). La fracción del sentido sale de un HGB Poisson por
   hora y sentido, y el reparto dentro del sentido, de otro HGB Poisson con el total de la ruta como exposición. Se
@@ -647,15 +667,18 @@ Método, cifras y limitaciones: `docs/ocupacion_segmentos.md`; evidencias en `do
 
 - La base del reto es histórica (termina el 31-12-2025): la «llegada de datos nuevos» se simula con los días de 2025.
   En la réplica local, los datos llegan de verdad por el trigger de Extreme, pero con viajes reservados de esos años.
-- El modelo de la API pronostica la hora y la reparte en la ventana pedida (30, 60 o 120 min) con el perfil intrahorario
-  de 2024 y un factor intradía que solo usa horas ya cerradas. Los experimentos 11 y 12 del informe académico se
+- El modelo horario de la API (el del plan del día siguiente) pronostica la hora y la reparte en la ventana pedida
+  (30, 60 o 120 min) con el perfil intrahorario de 2024 y un factor intradía que solo usa horas ya cerradas. El
+  pronóstico de corto plazo (`/api/v1/predictions/corto-plazo`) sí usa lo observado en el día, pero lee el panel
+  empaquetado de 2023 a 2025: falta alimentarlo con la lectura incremental (`../PLAN_EVOLUCION.md`, sección 7). Los experimentos 11 y 12 del informe académico se
   evaluaron a 7 días, sobre todo 2025 y reentrenando cada mes; aquí son una referencia, y el 12 queda como opción del
   plan del día (`pronostico=E12`).
 - El modelo por segmento y sentido se entrenó con las subidas de `timbradas_segmentos`, que solo cubren ene-feb 2023
   porque los triggers de segmentación no se volvieron a ejecutar: su error en 2025 no está medido. El 17-11-2026 se
   reconstruyeron las subidas por segmento de 2023 a 2025 con la misma regla, y con ellas se validó aparte el
-  pronóstico por ruta, sentido y segmento a 30, 60 y 120 minutos (`../pronostico_corto_plazo/README.md`); reentrenar este modelo
-  con ese panel está pendiente (`../PLAN_EVOLUCION.md`, sección 7). El sentido es una aproximación, porque
+  pronóstico por ruta, sentido y segmento a 30, 60 y 120 minutos (`../pronostico_corto_plazo/README.md`), que la API
+  sirve desde el 18-11-2026 (`POST /api/v1/predictions/corto-plazo`). Este reparto queda para el pronóstico horario;
+  reentrenarlo con ese panel está pendiente (`../PLAN_EVOLUCION.md`, sección 7). El sentido es una aproximación, porque
   las exportaciones no lo traen. La banda por segmento cubre algo menos del 80 % (78 % por hora y 76 a 77 % en
   ventanas de 2 y 3 horas), y de punta a punta depende de la banda de la ruta. Las alertas se calculan por ruta y hora.
 - La ocupación por segmento tiene el mismo límite de datos: el perfil histórico es de ene.–feb. 2023 y la estacionalidad
@@ -728,7 +751,7 @@ El estado de cada requisito está en `../MATRIZ_CUMPLIMIENTO.md`, y lo que falta
 | `docs/manual_usuario.md` | Despachadores y analistas: pantallas del tablero, gestión de alertas, lectura de recomendaciones, API con `curl`, exportaciones y preguntas frecuentes. |
 | `docs/manual_tecnico.md` | Mantenimiento: arquitectura, módulos, flujo de una ejecución, cola, ciclo de vida del modelo, alertas, optimizador, base de datos, observabilidad, seguridad, cómo extender y cómo probar. |
 | `docs/despliegue.md` | Despliegue con Docker Compose, venv, réplica, dos réplicas y Jaeger; variables de entorno; respaldo y solución de problemas. |
-| `docs/openapi.json` | Contrato OpenAPI 3.1 de la API (el mismo de `/openapi.json` y Swagger): 65 rutas y 69 operaciones, cada una con su rol mínimo (`x-rol-minimo`) y sus errores. |
+| `docs/openapi.json` | Contrato OpenAPI 3.1 de la API (el mismo de `/openapi.json` y Swagger): 70 rutas y 75 operaciones, cada una con su rol mínimo (`x-rol-minimo`) y sus errores. |
 | `docs/integracion_postgresql.md` | Integración con la base operacional: usuarios técnicos, mapa de tablas, marca de agua, no interferencia y EXPLAIN. |
 | `docs/particion_por_ruta.md` | Partición del ciclo por ruta y fecha (RNF-005, migración 0009): madre y trabajos, marca de agua y candado por ruta, límites medidos. |
 | `docs/segmentos_materializados.md` | Capa de segmentos (migración 0008): agregación materializada, trabajo `segmentos` de la cola, modos del refresco, refresco sin cambios con las huellas de la ventana de solape (migración 0012) y rendimiento. |

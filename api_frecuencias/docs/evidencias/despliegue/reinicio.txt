@@ -1,12 +1,12 @@
-RNF-001 · recuperación ante reinicios de la API en la pila Docker Compose «sobusa_limpio» · 2026-11-13 23:09:54 -0500
+RNF-001 · recuperación ante reinicios de la API en la pila Docker Compose «sobusa_limpio» · 2026-11-18 20:48:23 -0500
 La API corre como en producción (uvicorn en el contenedor, cola en PostgreSQL con reserva que vence, REANUDAR_EJECUCIONES=true). Escenarios, cada uno con un día nuevo de datos:
   A) SIGKILL: docker kill (señal 9 al proceso de la API, sin apagado ordenado) y docker start del mismo contenedor (misma identidad de réplica);
   B) reinicio ordenado: docker compose restart api (SIGTERM y arranque).
 Referencia: una ejecución del día sin interrupción. Las comprobaciones son las de scripts/prueba_caida.py.
 
-0) Referencia sin interrupción (f9c1f1c3-269d-46f8-b570-0a0d89265a68, hasta 2025-12-14):
+0) Referencia sin interrupción (08961ee7-c79b-49fc-9664-f9c42a17bdc1, hasta 2025-12-14):
    referencia: estado=ok intentos=1 filas_leidas=714 predicciones=9 recomendaciones=60 alertas=33 notificaciones=66 errores_dq=0 foto_ruta=12 foto_segmento=1158
-   traza de intentos: [(1, '2e56ae722867:1:e0ba40:t1', 'ok')]
+   traza de intentos: [(1, 'e1905c684414:1:dd17a5:t1', 'ok')]
    marca de agua: 2025-11-30 23:59:59-05:00 -> 2025-12-14 23:59:59-05:00
    [OK] estado ok
    [OK] intentos = 1
@@ -21,10 +21,10 @@ Referencia: una ejecución del día sin interrupción. Las comprobaciones son la
    [OK] marca de agua contigua
    [OK] foto de variables = referencia y sin filas repetidas (de la ruta y por segmento)
 
-1) Escenario A: SIGKILL (docker kill + docker start) durante «calidad» (1c9fa68d-f689-4bb5-bff8-7aceb48c123d, hasta 2025-12-15); predicciones visibles desde fuera antes del corte: 0
-   API de vuelta en 2.6 s; ejecución ok 24.1 s después del corte; traza de intentos ['abandonado', 'ok']
+1) Escenario A: SIGKILL (docker kill + docker start) durante «calidad» (6043ee4d-9883-4ab1-a919-3af3a5428a6c, hasta 2025-12-15); predicciones visibles desde fuera antes del corte: 0
+   API de vuelta en 4.2 s; ejecución ok 38.2 s después del corte; traza de intentos ['abandonado', 'ok']
    escenario A: estado=ok intentos=2 filas_leidas=51 predicciones=9 recomendaciones=60 alertas=4 notificaciones=8 errores_dq=0 foto_ruta=12 foto_segmento=1158
-   traza de intentos: [(1, '2e56ae722867:1:e0ba40:t1', 'abandonado'), (2, '2e56ae722867:1:2173ac:t1', 'ok')]
+   traza de intentos: [(1, 'e1905c684414:1:dd17a5:t1', 'abandonado'), (2, 'e1905c684414:1:bb19b6:t1', 'ok')]
    marca de agua: 2025-12-14 23:59:59-05:00 -> 2025-12-15 23:59:59-05:00
    [OK] estado ok
    [OK] intentos = 2
@@ -39,10 +39,10 @@ Referencia: una ejecución del día sin interrupción. Las comprobaciones son la
    [OK] marca de agua contigua
    [OK] foto de variables = referencia y sin filas repetidas (de la ruta y por segmento)
 
-2) Escenario B: reinicio ordenado (docker compose restart) durante «calidad» (b055b050-6624-4aa6-9d19-98862bd7c846, hasta 2025-12-16); predicciones visibles desde fuera antes del corte: 0
-   API de vuelta en 2.6 s; ejecución ok 34.9 s después del corte; traza de intentos ['abandonado', 'ok']
+2) Escenario B: reinicio ordenado (docker compose restart) durante «calidad» (8472a22a-cc12-4e17-a676-b1166f45a16f, hasta 2025-12-16); predicciones visibles desde fuera antes del corte: 0
+   API de vuelta en 3.4 s; ejecución ok 43.8 s después del corte; traza de intentos ['abandonado', 'ok']
    escenario B: estado=ok intentos=2 filas_leidas=51 predicciones=9 recomendaciones=60 alertas=13 notificaciones=26 errores_dq=0 foto_ruta=12 foto_segmento=1158
-   traza de intentos: [(1, '2e56ae722867:1:2173ac:t1', 'abandonado'), (2, '2e56ae722867:1:4a78d8:t1', 'ok')]
+   traza de intentos: [(1, 'e1905c684414:1:bb19b6:t1', 'abandonado'), (2, 'e1905c684414:1:978317:t1', 'ok')]
    marca de agua: 2025-12-15 23:59:59-05:00 -> 2025-12-16 23:59:59-05:00
    [OK] estado ok
    [OK] intentos = 2

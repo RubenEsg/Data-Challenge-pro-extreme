@@ -1187,6 +1187,1548 @@
         ]
       }
     },
+    "/api/v1/predictions/corto-plazo": {
+      "post": {
+        "tags": [
+          "pronóstico de corto plazo"
+        ],
+        "summary": "Pronóstico a 30, 60 o 120 minutos por ruta, sentido y segmento (se guarda)",
+        "operationId": "pronosticar_api_v1_predictions_corto_plazo_post",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SolicitudCortoPlazo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PronosticoCortoPlazo"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico). Códigos propios de esta operación: «horizonte_invalido», «fuera_de_cobertura», «parametros_invalidos».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango",
+              "horizonte_invalido",
+              "fuera_de_cobertura",
+              "parametros_invalidos"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cuerpo ilegible: no se pudo decodificar el cuerpo de la solicitud (p. ej. bytes que no son UTF-8); código «cuerpo_ilegible».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "cuerpo_ilegible"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Prohibido: el rol de la clave está por debajo del rol mínimo de la operación (código «prohibido»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "prohibido"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No encontrado: el recurso indicado no existe (código «no_encontrado» u otro más específico). Códigos propios de esta operación: «ruta_desconocida», «modelo_no_encontrado».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "ruta_desconocida",
+              "modelo_no_encontrado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependencia no disponible o no configurada (réplica, base operacional o archivo de insumos): degradación prevista con el error uniforme (RNF-010). Códigos propios de esta operación: «pronostico_no_disponible».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "pronostico_no_disponible"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "description": "Rol mínimo: **analista** (cabecera X-API-Key).",
+        "x-rol-minimo": "analista"
+      },
+      "get": {
+        "tags": [
+          "pronóstico de corto plazo"
+        ],
+        "summary": "Consultar pronósticos de corto plazo guardados por filtros",
+        "operationId": "listar_api_v1_predictions_corto_plazo_get",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ruta"
+            }
+          },
+          {
+            "name": "idruta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2147483647,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "rutas.idruta",
+              "title": "Idruta"
+            },
+            "description": "rutas.idruta"
+          },
+          {
+            "name": "nivel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "ruta",
+                    "sentido",
+                    "segmento"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Nivel"
+            }
+          },
+          {
+            "name": "sentido",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "ida",
+                    "regreso"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sentido"
+            }
+          },
+          {
+            "name": "nro_segmento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 10000,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Nro Segmento"
+            }
+          },
+          {
+            "name": "horizonte_min",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 120,
+                  "minimum": 30
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Horizonte del pronóstico en minutos: 30, 60 o 120",
+              "enum": [
+                30,
+                60,
+                120
+              ],
+              "title": "Horizonte Min"
+            },
+            "description": "Horizonte del pronóstico en minutos: 30, 60 o 120"
+          },
+          {
+            "name": "desde",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Desde"
+            }
+          },
+          {
+            "name": "hasta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Hasta"
+            }
+          },
+          {
+            "name": "grupo_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Grupo Id"
+            }
+          },
+          {
+            "name": "execution_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Execution Id"
+            }
+          },
+          {
+            "name": "model_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Id"
+            }
+          },
+          {
+            "name": "limite",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "description": "Tamaño de página",
+              "default": 50,
+              "title": "Limite"
+            },
+            "description": "Tamaño de página"
+          },
+          {
+            "name": "desplazamiento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000000000,
+              "minimum": 0,
+              "description": "Registros a saltar",
+              "default": 0,
+              "title": "Desplazamiento"
+            },
+            "description": "Registros a saltar"
+          },
+          {
+            "name": "orden",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Campo de orden; prefijo '-' para descendente",
+              "title": "Orden"
+            },
+            "description": "Campo de orden; prefijo '-' para descendente"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pagina_PrediccionCortoPlazoSalida_"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango",
+              "orden_invalido"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "description": "Rol mínimo: **operador** (cabecera X-API-Key).",
+        "x-rol-minimo": "operador"
+      }
+    },
+    "/api/v1/predictions/corto-plazo/calcular": {
+      "get": {
+        "tags": [
+          "pronóstico de corto plazo"
+        ],
+        "summary": "Pronóstico a 30, 60 o 120 minutos sin guardarlo (consulta del tablero)",
+        "operationId": "calcular_api_v1_predictions_corto_plazo_calcular_get",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruta",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Ruta del catálogo (SILENCIO, CRA 54 o CL 72) o su idruta",
+              "title": "Ruta"
+            },
+            "description": "Ruta del catálogo (SILENCIO, CRA 54 o CL 72) o su idruta"
+          },
+          {
+            "name": "instante",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Instante t del pronóstico (hora de Bogotá si no trae zona). Se redondea hacia abajo a la media hora; cubre de 04:00 a 21:00, las medias horas en que se eligió y se midió el modelo",
+              "title": "Instante"
+            },
+            "description": "Instante t del pronóstico (hora de Bogotá si no trae zona). Se redondea hacia abajo a la media hora; cubre de 04:00 a 21:00, las medias horas en que se eligió y se midió el modelo"
+          },
+          {
+            "name": "horizonte_min",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 120,
+              "minimum": 30,
+              "description": "Horizonte en minutos: 30, 60 o 120",
+              "enum": [
+                30,
+                60,
+                120
+              ],
+              "default": 60,
+              "title": "Horizonte Min"
+            },
+            "description": "Horizonte en minutos: 30, 60 o 120"
+          },
+          {
+            "name": "model_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Id"
+            }
+          },
+          {
+            "name": "incluir_segmentos",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Incluir Segmentos"
+            }
+          },
+          {
+            "name": "incluir_recomendacion",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Incluir Recomendacion"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PronosticoCortoPlazo"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico). Códigos propios de esta operación: «horizonte_invalido», «fuera_de_cobertura», «parametros_invalidos».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango",
+              "horizonte_invalido",
+              "fuera_de_cobertura",
+              "parametros_invalidos"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No encontrado: el recurso indicado no existe (código «no_encontrado» u otro más específico). Códigos propios de esta operación: «ruta_desconocida», «modelo_no_encontrado».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "ruta_desconocida",
+              "modelo_no_encontrado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependencia no disponible o no configurada (réplica, base operacional o archivo de insumos): degradación prevista con el error uniforme (RNF-010). Códigos propios de esta operación: «pronostico_no_disponible».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "pronostico_no_disponible"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "description": "Rol mínimo: **operador** (cabecera X-API-Key).",
+        "x-rol-minimo": "operador"
+      }
+    },
+    "/api/v1/predictions/corto-plazo/dia": {
+      "get": {
+        "tags": [
+          "pronóstico de corto plazo"
+        ],
+        "summary": "La curva del día: el pronóstico de cada media hora de 04:00 a 21:00, por ruta y sentido",
+        "operationId": "dia_api_v1_predictions_corto_plazo_dia_get",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ruta",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Ruta del catálogo (SILENCIO, CRA 54 o CL 72) o su idruta",
+              "title": "Ruta"
+            },
+            "description": "Ruta del catálogo (SILENCIO, CRA 54 o CL 72) o su idruta"
+          },
+          {
+            "name": "fecha",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "Fecha"
+            }
+          },
+          {
+            "name": "horizonte_min",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 120,
+              "minimum": 30,
+              "description": "Horizonte en minutos: 30, 60 o 120",
+              "enum": [
+                30,
+                60,
+                120
+              ],
+              "default": 60,
+              "title": "Horizonte Min"
+            },
+            "description": "Horizonte en minutos: 30, 60 o 120"
+          },
+          {
+            "name": "model_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiaCortoPlazo"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico). Códigos propios de esta operación: «horizonte_invalido», «fuera_de_cobertura».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango",
+              "horizonte_invalido",
+              "fuera_de_cobertura"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No encontrado: el recurso indicado no existe (código «no_encontrado» u otro más específico). Códigos propios de esta operación: «ruta_desconocida», «modelo_no_encontrado».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "ruta_desconocida",
+              "modelo_no_encontrado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependencia no disponible o no configurada (réplica, base operacional o archivo de insumos): degradación prevista con el error uniforme (RNF-010). Códigos propios de esta operación: «pronostico_no_disponible».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "pronostico_no_disponible"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "description": "Rol mínimo: **operador** (cabecera X-API-Key).",
+        "x-rol-minimo": "operador"
+      }
+    },
+    "/api/v1/predictions/corto-plazo/modelo": {
+      "get": {
+        "tags": [
+          "pronóstico de corto plazo"
+        ],
+        "summary": "Versión activa del modelo de corto plazo: artefactos, datos, prueba reservada y cobertura",
+        "operationId": "modelo_api_v1_predictions_corto_plazo_modelo_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModeloCortoPlazo"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Dependencia no disponible o no configurada (réplica, base operacional o archivo de insumos): degradación prevista con el error uniforme (RNF-010). Códigos propios de esta operación: «pronostico_no_disponible».",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "pronostico_no_disponible"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "description": "Rol mínimo: **operador** (cabecera X-API-Key).",
+        "x-rol-minimo": "operador"
+      }
+    },
+    "/api/v1/predictions/corto-plazo/export": {
+      "get": {
+        "tags": [
+          "pronóstico de corto plazo"
+        ],
+        "summary": "Exportar pronósticos de corto plazo filtrados (CSV o XLSX)",
+        "operationId": "exportar_corto_plazo_api_v1_predictions_corto_plazo_export_get",
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "formato",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "csv",
+                "xlsx"
+              ],
+              "type": "string",
+              "default": "csv",
+              "title": "Formato"
+            }
+          },
+          {
+            "name": "orden",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Orden"
+            }
+          },
+          {
+            "name": "ruta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ruta"
+            }
+          },
+          {
+            "name": "idruta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2147483647,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "rutas.idruta",
+              "title": "Idruta"
+            },
+            "description": "rutas.idruta"
+          },
+          {
+            "name": "nivel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "ruta",
+                    "sentido",
+                    "segmento"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Nivel"
+            }
+          },
+          {
+            "name": "sentido",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "ida",
+                    "regreso"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sentido"
+            }
+          },
+          {
+            "name": "nro_segmento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 10000,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Nro Segmento"
+            }
+          },
+          {
+            "name": "horizonte_min",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 120,
+                  "minimum": 30
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Horizonte del pronóstico en minutos: 30, 60 o 120",
+              "enum": [
+                30,
+                60,
+                120
+              ],
+              "title": "Horizonte Min"
+            },
+            "description": "Horizonte del pronóstico en minutos: 30, 60 o 120"
+          },
+          {
+            "name": "desde",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Desde"
+            }
+          },
+          {
+            "name": "hasta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Hasta"
+            }
+          },
+          {
+            "name": "grupo_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Grupo Id"
+            }
+          },
+          {
+            "name": "execution_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Execution Id"
+            }
+          },
+          {
+            "name": "model_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Archivo con los registros filtrados (formato=csv, UTF-8 con BOM, o formato=xlsx)",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            },
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Disposition": {
+                "description": "attachment; filename=\"<nombre>_<AAAAMMDD_HHMMSS>.<ext>\"",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Total-Count": {
+                "description": "Registros que cumplen el filtro (aunque el archivo traiga menos)",
+                "required": true,
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "X-Truncado": {
+                "description": "true si el archivo se cortó en el tope de 100,000 filas (LIMITE_EXPORTACION); afine los filtros para exportar el resto",
+                "required": true,
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "true",
+                    "false"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación: el cuerpo, la consulta, la ruta o una cabecera no es válida, incluido el byte NUL (código «validacion», con detalle [{campo, mensaje, tipo}], u otro más específico).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "validacion",
+              "fuera_de_rango",
+              "orden_invalido"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sin autenticación: falta la cabecera X-API-Key o la clave no es válida (código «no_autenticado»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "no_autenticado"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Siempre «ApiKey header=\"X-API-Key\"»",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error no controlado: el cuerpo trae el correlation_id para ubicarlo en el log (código «error_interno»).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaError"
+                }
+              }
+            },
+            "x-codigos-error": [
+              "error_interno"
+            ],
+            "headers": {
+              "X-Correlation-Id": {
+                "description": "Identificador de correlación: el de la petición si se envió, o uno nuevo; aparece en el log y en la traza (RNF-006)",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "description": "Rol mínimo: **operador** (cabecera X-API-Key).",
+        "x-rol-minimo": "operador"
+      }
+    },
     "/api/v1/predictions/run": {
       "post": {
         "tags": [
@@ -15360,6 +16902,59 @@
         ],
         "title": "DespachoSalida"
       },
+      "DiaCortoPlazo": {
+        "properties": {
+          "ruta": {
+            "type": "string",
+            "title": "Ruta"
+          },
+          "idruta": {
+            "type": "integer",
+            "title": "Idruta"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha"
+          },
+          "horizonte_min": {
+            "type": "integer",
+            "title": "Horizonte Min"
+          },
+          "model_id": {
+            "type": "string",
+            "title": "Model Id"
+          },
+          "en_muestra": {
+            "type": "boolean",
+            "title": "En Muestra"
+          },
+          "dia_con_datos": {
+            "type": "boolean",
+            "title": "Dia Con Datos"
+          },
+          "instantes": {
+            "items": {
+              "$ref": "#/components/schemas/PuntoDiaCortoPlazo"
+            },
+            "type": "array",
+            "title": "Instantes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ruta",
+          "idruta",
+          "fecha",
+          "horizonte_min",
+          "model_id",
+          "en_muestra",
+          "dia_con_datos",
+          "instantes"
+        ],
+        "title": "DiaCortoPlazo",
+        "description": "La curva del día: el pronóstico de cada media hora de 04:00 a 21:00, por ruta y por sentido."
+      },
       "EjecucionCreada": {
         "properties": {
           "execution_id": {
@@ -16606,6 +18201,88 @@
         ],
         "title": "EventoFlotaCiclo"
       },
+      "ExplicacionCortoPlazo": {
+        "properties": {
+          "metodo": {
+            "type": "string",
+            "title": "Metodo"
+          },
+          "valor_base": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valor Base",
+            "description": "Pronóstico sin ninguna variable (exp del valor esperado)"
+          },
+          "factores": {
+            "items": {
+              "$ref": "#/components/schemas/FactorCortoPlazo"
+            },
+            "type": "array",
+            "title": "Factores"
+          }
+        },
+        "type": "object",
+        "required": [
+          "metodo"
+        ],
+        "title": "ExplicacionCortoPlazo"
+      },
+      "FactorCortoPlazo": {
+        "properties": {
+          "variable": {
+            "type": "string",
+            "title": "Variable"
+          },
+          "descripcion": {
+            "type": "string",
+            "title": "Descripcion"
+          },
+          "valor": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valor"
+          },
+          "contribucion_log": {
+            "type": "number",
+            "title": "Contribucion Log",
+            "description": "Contribución TreeSHAP en la escala log del modelo de Poisson"
+          },
+          "factor": {
+            "type": "number",
+            "title": "Factor",
+            "description": "exp(contribución): factor por el que la variable multiplica el pronóstico"
+          },
+          "sentido": {
+            "type": "string",
+            "enum": [
+              "sube",
+              "baja"
+            ],
+            "title": "Sentido"
+          }
+        },
+        "type": "object",
+        "required": [
+          "variable",
+          "descripcion",
+          "contribucion_log",
+          "factor",
+          "sentido"
+        ],
+        "title": "FactorCortoPlazo"
+      },
       "FlotaCicloSalida": {
         "properties": {
           "ruta": {
@@ -17358,6 +19035,145 @@
         "title": "MarcaAguaSalida",
         "description": "Marca de agua de la lectura incremental por proceso y ruta (RNF-005, migración 0009)."
       },
+      "ModeloCortoPlazo": {
+        "properties": {
+          "model_id": {
+            "type": "string",
+            "title": "Model Id"
+          },
+          "tipo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo"
+          },
+          "feature_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feature Version"
+          },
+          "data_cutoff": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Cutoff"
+          },
+          "entrenado_con": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entrenado Con"
+          },
+          "semilla": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Semilla"
+          },
+          "estructura": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Estructura"
+          },
+          "banda": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Banda"
+          },
+          "sha256": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Sha256"
+          },
+          "version_datos": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Version Datos"
+          },
+          "metricas_prueba": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metricas Prueba"
+          },
+          "origen": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Origen"
+          },
+          "evaluacion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluacion"
+          },
+          "activo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activo"
+          },
+          "historial_activacion": {
+            "items": {},
+            "type": "array",
+            "title": "Historial Activacion"
+          },
+          "cobertura": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Cobertura",
+            "description": "Fechas que se pueden pronosticar y las de la prueba"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "title": "ModeloCortoPlazo",
+        "description": "§9.2: la versión del modelo de corto plazo con su fecha de corte, sus artefactos (SHA-256), sus datos y las\ncifras de su prueba reservada."
+      },
       "ModeloSalida": {
         "properties": {
           "model_id": {
@@ -17721,6 +19537,91 @@
           "creado_en"
         ],
         "title": "MonitoreoSalida"
+      },
+      "ObservadoCortoPlazo": {
+        "properties": {
+          "ultimos_15_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ultimos 15 Min"
+          },
+          "ultimos_30_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ultimos 30 Min"
+          },
+          "ultimos_60_min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ultimos 60 Min"
+          },
+          "ultimas_2_horas": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ultimas 2 Horas"
+          },
+          "acumulado_hoy": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acumulado Hoy"
+          },
+          "habitual_acumulado": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Habitual Acumulado",
+            "description": "Lo acumulado a esta hora en las 4 semanas anteriores"
+          },
+          "salidas_ultima_hora": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salidas Ultima Hora"
+          }
+        },
+        "type": "object",
+        "title": "ObservadoCortoPlazo",
+        "description": "Lo que ya se sabe en el instante, en toda la ruta."
       },
       "PaginaCatalogo_DespachoSalida_": {
         "properties": {
@@ -18208,6 +20109,37 @@
           "items"
         ],
         "title": "Pagina[MonitoreoSalida]"
+      },
+      "Pagina_PrediccionCortoPlazoSalida_": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limite": {
+            "type": "integer",
+            "title": "Limite"
+          },
+          "desplazamiento": {
+            "type": "integer",
+            "title": "Desplazamiento"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PrediccionCortoPlazoSalida"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "limite",
+          "desplazamiento",
+          "items"
+        ],
+        "title": "Pagina[PrediccionCortoPlazoSalida]"
       },
       "Pagina_PrediccionSalida_": {
         "properties": {
@@ -19271,6 +21203,231 @@
         ],
         "title": "PoliticaRetencion"
       },
+      "PrediccionCortoPlazoSalida": {
+        "properties": {
+          "prediction_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Prediction Id"
+          },
+          "grupo_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Grupo Id"
+          },
+          "execution_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Id"
+          },
+          "ruta": {
+            "type": "string",
+            "title": "Ruta"
+          },
+          "idruta": {
+            "type": "integer",
+            "title": "Idruta",
+            "description": "§8.3 rutas.idruta de Extreme"
+          },
+          "nivel": {
+            "type": "string",
+            "enum": [
+              "ruta",
+              "sentido",
+              "segmento"
+            ],
+            "title": "Nivel"
+          },
+          "sentido": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sentido"
+          },
+          "nro_segmento": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nro Segmento"
+          },
+          "instante": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Instante"
+          },
+          "horizonte_min": {
+            "type": "integer",
+            "title": "Horizonte Min"
+          },
+          "objetivo": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Objetivo"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date",
+            "title": "Fecha"
+          },
+          "franja": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Franja"
+          },
+          "pasajeros": {
+            "type": "number",
+            "title": "Pasajeros"
+          },
+          "p10": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P10"
+          },
+          "p90": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P90"
+          },
+          "promedio_dia_hora": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promedio Dia Hora"
+          },
+          "ultima_semana": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ultima Semana"
+          },
+          "model_id": {
+            "type": "string",
+            "title": "Model Id"
+          },
+          "feature_version": {
+            "type": "string",
+            "title": "Feature Version"
+          },
+          "data_cutoff": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Cutoff"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "latencia_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latencia Ms"
+          },
+          "explicacion": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Explicacion"
+          },
+          "variables": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Variables"
+          },
+          "recomendacion": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recomendacion"
+          },
+          "creado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creado En"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prediction_id",
+          "grupo_id",
+          "ruta",
+          "idruta",
+          "nivel",
+          "instante",
+          "horizonte_min",
+          "objetivo",
+          "fecha",
+          "pasajeros",
+          "model_id",
+          "feature_version",
+          "generated_at",
+          "creado_en"
+        ],
+        "title": "PrediccionCortoPlazoSalida"
+      },
       "PrediccionRespuesta": {
         "properties": {
           "prediction_id": {
@@ -20009,6 +22166,437 @@
           "proceso"
         ],
         "title": "ProcesoSalida"
+      },
+      "PronosticoCortoPlazo": {
+        "properties": {
+          "pasajeros": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pasajeros",
+            "description": "Subidas pronosticadas en la ventana (P50 del modelo de Poisson)"
+          },
+          "p10": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P10",
+            "description": "Límite inferior de la banda P10-P90 (conformal, ajustada en la validación)"
+          },
+          "p90": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P90",
+            "description": "Límite superior de la banda P10-P90"
+          },
+          "promedio_dia_hora": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promedio Dia Hora",
+            "description": "Línea base de §9.1: promedio de la misma ventana en las 8 semanas anteriores (mismo día y hora)"
+          },
+          "ultima_semana": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ultima Semana",
+            "description": "Línea base de §9.1: la misma ventana hace 7 días"
+          },
+          "real": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Real",
+            "description": "Subidas que hubo en la ventana, si ya están en los datos (solo para comparar; el pronóstico no las usa)"
+          },
+          "grupo_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grupo Id",
+            "description": "Identificador del pronóstico guardado (nulo si se calculó sin guardar)"
+          },
+          "ruta": {
+            "type": "string",
+            "title": "Ruta"
+          },
+          "idruta": {
+            "type": "integer",
+            "title": "Idruta",
+            "description": "§8.3 rutas.idruta de Extreme"
+          },
+          "instante_solicitado": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Instante Solicitado"
+          },
+          "instante": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Instante",
+            "description": "Instante usado (la media hora)"
+          },
+          "horizonte_min": {
+            "type": "integer",
+            "title": "Horizonte Min"
+          },
+          "ventana": {
+            "$ref": "#/components/schemas/VentanaCortoPlazo"
+          },
+          "franja": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Franja"
+          },
+          "model_id": {
+            "type": "string",
+            "title": "Model Id"
+          },
+          "feature_version": {
+            "type": "string",
+            "title": "Feature Version"
+          },
+          "data_cutoff": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Cutoff",
+            "description": "Último día con que se entrenó el modelo"
+          },
+          "en_muestra": {
+            "type": "boolean",
+            "title": "En Muestra",
+            "description": "La fecha está dentro del periodo de entrenamiento del modelo"
+          },
+          "dia_con_datos": {
+            "type": "boolean",
+            "title": "Dia Con Datos",
+            "description": "El día trae eventos de conteo (si no, lo real no se compara)"
+          },
+          "generated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generated At"
+          },
+          "latencia_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latencia Ms"
+          },
+          "sentidos": {
+            "items": {
+              "$ref": "#/components/schemas/SentidoCortoPlazo"
+            },
+            "type": "array",
+            "title": "Sentidos"
+          },
+          "segmentos": {
+            "items": {
+              "$ref": "#/components/schemas/SegmentoCortoPlazo"
+            },
+            "type": "array",
+            "title": "Segmentos"
+          },
+          "observado": {
+            "$ref": "#/components/schemas/ObservadoCortoPlazo"
+          },
+          "explicacion": {
+            "$ref": "#/components/schemas/ExplicacionCortoPlazo"
+          },
+          "recomendacion": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recomendacion",
+            "description": "§10.2 con este pronóstico llevado a ritmo por hora"
+          },
+          "predictionId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predictionid"
+          },
+          "routeId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Routeid"
+          },
+          "generatedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generatedat",
+            "description": "ISO-8601 con la zona de Bogotá (-05:00)"
+          },
+          "horizonMinutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Horizonminutes"
+          },
+          "predictedPassengers": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predictedpassengers"
+          },
+          "confidenceInterval": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IntervaloConfianza"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "modelVersion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelversion"
+          },
+          "recommendation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecomendacionResumen"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "explanation": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Explanation",
+            "description": "Variables que más mueven este pronóstico"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ruta",
+          "idruta",
+          "instante_solicitado",
+          "instante",
+          "horizonte_min",
+          "ventana",
+          "model_id",
+          "feature_version",
+          "en_muestra",
+          "dia_con_datos",
+          "observado",
+          "explicacion"
+        ],
+        "title": "PronosticoCortoPlazo",
+        "description": "Pronóstico de corto plazo de una ruta en un instante y un horizonte (RF-005, RF-006, §9.2, §9.4, §12.3)."
+      },
+      "PuntoDiaCortoPlazo": {
+        "properties": {
+          "pasajeros": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pasajeros",
+            "description": "Subidas pronosticadas en la ventana (P50 del modelo de Poisson)"
+          },
+          "p10": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P10",
+            "description": "Límite inferior de la banda P10-P90 (conformal, ajustada en la validación)"
+          },
+          "p90": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P90",
+            "description": "Límite superior de la banda P10-P90"
+          },
+          "promedio_dia_hora": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promedio Dia Hora",
+            "description": "Línea base de §9.1: promedio de la misma ventana en las 8 semanas anteriores (mismo día y hora)"
+          },
+          "ultima_semana": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ultima Semana",
+            "description": "Línea base de §9.1: la misma ventana hace 7 días"
+          },
+          "real": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Real",
+            "description": "Subidas que hubo en la ventana, si ya están en los datos (solo para comparar; el pronóstico no las usa)"
+          },
+          "instante": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Instante"
+          },
+          "franja": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Franja"
+          },
+          "sentidos": {
+            "items": {
+              "$ref": "#/components/schemas/SentidoCortoPlazo"
+            },
+            "type": "array",
+            "title": "Sentidos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "instante"
+        ],
+        "title": "PuntoDiaCortoPlazo"
       },
       "RecomendacionCalculada": {
         "properties": {
@@ -22014,6 +24602,124 @@
         ],
         "title": "RutaSalida"
       },
+      "SegmentoCortoPlazo": {
+        "properties": {
+          "pasajeros": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pasajeros",
+            "description": "Subidas pronosticadas en la ventana (P50 del modelo de Poisson)"
+          },
+          "p10": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P10",
+            "description": "Límite inferior de la banda P10-P90 (conformal, ajustada en la validación)"
+          },
+          "p90": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P90",
+            "description": "Límite superior de la banda P10-P90"
+          },
+          "promedio_dia_hora": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promedio Dia Hora",
+            "description": "Línea base de §9.1: promedio de la misma ventana en las 8 semanas anteriores (mismo día y hora)"
+          },
+          "ultima_semana": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ultima Semana",
+            "description": "Línea base de §9.1: la misma ventana hace 7 días"
+          },
+          "real": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Real",
+            "description": "Subidas que hubo en la ventana, si ya están en los datos (solo para comparar; el pronóstico no las usa)"
+          },
+          "nro_segmento": {
+            "type": "integer",
+            "title": "Nro Segmento"
+          },
+          "sentido": {
+            "type": "string",
+            "title": "Sentido"
+          },
+          "km_inicio": {
+            "type": "number",
+            "title": "Km Inicio",
+            "description": "Kilómetro del ciclo en que empieza el segmento"
+          },
+          "lat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lat"
+          },
+          "lon": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lon"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nro_segmento",
+          "sentido",
+          "km_inicio"
+        ],
+        "title": "SegmentoCortoPlazo"
+      },
       "SegmentoSalida": {
         "properties": {
           "id": {
@@ -22126,6 +24832,92 @@
           "nro_segmento"
         ],
         "title": "SegmentoSalida"
+      },
+      "SentidoCortoPlazo": {
+        "properties": {
+          "pasajeros": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pasajeros",
+            "description": "Subidas pronosticadas en la ventana (P50 del modelo de Poisson)"
+          },
+          "p10": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P10",
+            "description": "Límite inferior de la banda P10-P90 (conformal, ajustada en la validación)"
+          },
+          "p90": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P90",
+            "description": "Límite superior de la banda P10-P90"
+          },
+          "promedio_dia_hora": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promedio Dia Hora",
+            "description": "Línea base de §9.1: promedio de la misma ventana en las 8 semanas anteriores (mismo día y hora)"
+          },
+          "ultima_semana": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ultima Semana",
+            "description": "Línea base de §9.1: la misma ventana hace 7 días"
+          },
+          "real": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Real",
+            "description": "Subidas que hubo en la ventana, si ya están en los datos (solo para comparar; el pronóstico no las usa)"
+          },
+          "sentido": {
+            "type": "string",
+            "title": "Sentido",
+            "description": "ida o regreso (aproximado por la mitad del ciclo, supuesto S9)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sentido"
+        ],
+        "title": "SentidoCortoPlazo"
       },
       "SolicitudActivacion": {
         "properties": {
@@ -22303,6 +25095,62 @@
           "motivo"
         ],
         "title": "SolicitudCapacidad"
+      },
+      "SolicitudCortoPlazo": {
+        "properties": {
+          "ruta": {
+            "type": "string",
+            "title": "Ruta",
+            "description": "Ruta del catálogo (SILENCIO, CRA 54 o CL 72) o su idruta"
+          },
+          "instante": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Instante",
+            "description": "Instante t del pronóstico (hora de Bogotá si no trae zona). Se redondea hacia abajo a la media hora; cubre de 04:00 a 21:00, las medias horas en que se eligió y se midió el modelo"
+          },
+          "horizonte_min": {
+            "type": "integer",
+            "enum": [
+              30,
+              60,
+              120
+            ],
+            "title": "Horizonte Min",
+            "default": 60
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id",
+            "description": "Versión registrada del modelo de corto plazo (la activa si falta)"
+          },
+          "incluir_segmentos": {
+            "type": "boolean",
+            "title": "Incluir Segmentos",
+            "description": "Incluir el pronóstico de cada segmento de 500 m",
+            "default": true
+          },
+          "incluir_recomendacion": {
+            "type": "boolean",
+            "title": "Incluir Recomendacion",
+            "description": "Incluir la recomendación de §10.2 con este pronóstico",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "ruta",
+          "instante"
+        ],
+        "title": "SolicitudCortoPlazo",
+        "description": "RF-005: las subidas de la ventana [t, t + horizonte) por ruta, sentido y segmento, con lo observado hasta t."
       },
       "SolicitudEjecucion": {
         "properties": {
@@ -23722,6 +26570,26 @@
         ],
         "title": "Vehiculos"
       },
+      "VentanaCortoPlazo": {
+        "properties": {
+          "desde": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Desde"
+          },
+          "hasta": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Hasta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "desde",
+          "hasta"
+        ],
+        "title": "VentanaCortoPlazo"
+      },
       "ViajeSalida": {
         "properties": {
           "idprogramacion": {
@@ -23894,8 +26762,12 @@
       "description": "Ciclo completo por ejecución: lectura incremental, calidad, predicción, recomendación, alertas y notificaciones (job en segundo plano con cola en PostgreSQL)"
     },
     {
+      "name": "pronóstico de corto plazo",
+      "description": "Lo que pide RF-005: las subidas de los próximos 30, 60 y 120 minutos por ruta, sentido y segmento con lo observado hasta el instante, banda P10-P90, líneas base, explicación local y recomendación (modelo de E14, medido en su prueba reservada)"
+    },
+    {
       "name": "predicciones y recomendaciones",
-      "description": "Pronóstico de demanda 30/60/120 min con banda P10-P90 y recomendación de frecuencia y flota (§10.2), plan D5 del día y exportaciones"
+      "description": "Modelo horario con siete días de antelación (el del plan del día siguiente): ventanas de 30/60/120 min con banda P10-P90 y recomendación de frecuencia y flota (§10.2), plan D5 del día y exportaciones"
     },
     {
       "name": "alertas",

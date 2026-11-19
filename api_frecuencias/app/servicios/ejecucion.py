@@ -1765,6 +1765,34 @@ def _monitorear(s: Session, c: _Ciclo, wape_por_ruta: dict[str, float]) -> None:
     wape_por_ruta.update({r: w for r, w in (c.monitoreo.get("wape_por_ruta") or {}).items() if w is not None})
 
 
+def _pronostico_corto_plazo(s: Session, c: _Ciclo, rutas: list[str], instante: datetime) -> None:
+    """RF-005 y §7.3 paso 5: el pronóstico de corto plazo (30, 60 y 120 min por ruta, sentido y segmento, con lo
+    observado hasta el instante) de cada ruta y horizonte del ciclo, guardado con su execution_id en
+    prediction_corto_plazo. Un instante o una fecha fuera de la cobertura del modelo se anota como omitido; un error
+    del modelo queda en los fallos de la ejecución."""
+    from app.servicios import corto_plazo as cp
+
+    resumen: dict[str, Any] = {"pronosticos": 0, "omitidos": [], "model_id": None}
+    if s is None:                       # ciclo sin base (pruebas de una parte del ciclo): no hay dónde guardarlo
+        c.metricas["corto_plazo"] = dict(resumen, omitido="sin sesión de base de datos")
+        return
+    for ruta in rutas:
+        for h in c.horizontes:
+            try:
+                r = cp.pronosticar(ruta, instante, int(h))
+            except cp.FueraDeCobertura as exc:
+                resumen["omitidos"].append({"ruta": ruta, "horizonte_min": int(h), "motivo": str(exc)})
+                continue
+            except Exception as exc:  # noqa: BLE001 - se registra por ruta y horizonte
+                c.fallos.append({"etapa": "corto_plazo", "ruta": ruta, "horizonte_min": h, "error": str(exc)})
+                continue
+            r["generated_at"] = ahora().astimezone(ZONA).isoformat(timespec="seconds")
+            cp.guardar(s, r, execution_id=c.execution_id)
+            resumen["pronosticos"] += 1
+            resumen["model_id"] = r["model_id"]
+    c.metricas["corto_plazo"] = resumen
+
+
 def _pronostico_y_recomendacion(s: Session, c: _Ciclo, ruta: str, info: dict, h: Any, instante: datetime,
                                 wape_por_ruta: dict[str, float], recomendador: _RecomendacionesDeLaEjecucion,
                                 contextos: list) -> None:
@@ -1954,6 +1982,7 @@ def _con_datos_nuevos(s: Session, c: _Ciclo) -> None:
         for h in c.horizontes:
             _pronostico_y_recomendacion(s, c, ruta, catalogo.get(ruta, {}), h, instante, wape_por_ruta, recomendador,
                                         contextos)
+    _pronostico_corto_plazo(s, c, rutas, instante)
     _avance(c.execution_id, 70, "alertas")
 
     umbrales_alertas = dict(c.umbrales) | {"version": c.version_u}

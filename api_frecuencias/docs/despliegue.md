@@ -407,18 +407,20 @@ de prueba se generan al azar en un archivo temporal que se borra al final. Devue
    fecha lee 0 filas y crea 0 predicciones.
 3. **Evaluación del error** del modelo activo `hgb_fv2_20250831_s42` en lo que llegó, con el monitoreo de §9.4 y la
    decisión de la política, que pide reentrenar por periodicidad.
-4. **Modelo candidato:** `hgb_fv2_20250930_s42`, con corte 2025-09-30 y `datos_hasta` = 2025-11-30, así que solo ve lo
-   que ya llegó. La política ya encoló ese entrenamiento al cerrar la ejecución; el script espera ese trabajo en vez de
+4. **Modelo candidato:** `hgb_fv3_20250930_s42` (desde el 15-11-2026 el entrenamiento usa las variables fv3, con el
+   calendario escolar y universitario), con corte 2025-09-30 y `datos_hasta` = 2025-11-30, así que solo ve lo que ya
+   llegó. La política ya encoló ese entrenamiento al cerrar la ejecución; el script espera ese trabajo en vez de
    pedir otro igual con `POST /api/v1/models/train`, y solo lo pide si la política no lo encoló. Queda en sombra del
    2025-12-01 al 2025-12-14.
 5. **Comparación con el modelo activo** en la misma ventana, 2025-12-01..14: posterior a todo lo que vieron los dos
    modelos y anterior al 2025-12-31, último día de la serie empaquetada. Llegan esos 14 días (714 filas) y
-   `GET /api/v1/models/{model_id}/evaluation` da WAPE 14,108 % del candidato frente a 13,982 % del activo.
-6. **Decisión:** la compuerta de cuatro criterios (`politica.compuerta`) imprime cada uno. Solo falla «WAPE del
-   candidato ≤ WAPE del activo» (los de `wape_max`, cobertura P10–P90 y sesgo se cumplen), así que el candidato queda
-   rechazado y el activo sigue. Activarlo sin forzar con `POST /api/v1/models/{model_id}/activate` responde 409
-   `requiere_forzar`. Con `--revertir`, si la compuerta lo hubiera activado, se revierte con `POST /models/rollback`; en
-   esta corrida no hay nada que revertir.
+   `GET /api/v1/models/{model_id}/evaluation` da WAPE 13,578 % del candidato frente a 13,982 % del activo.
+6. **Decisión:** la compuerta de cuatro criterios (`politica.compuerta`) imprime cada uno. Los cuatro se cumplen
+   (WAPE del candidato ≤ el del activo y ≤ `wape_max`, cobertura P10–P90 y sesgo), así que el candidato queda activado,
+   con su auditoría. Con `--revertir`, la demostración lo revierte al final con `POST /models/rollback` y el activo
+   vuelve a ser `hgb_fv2_20250831_s42`. Cuando un candidato no mejora (la corrida del 13-11-2026, con las variables
+   fv2), queda rechazado y activarlo sin forzar con `POST /api/v1/models/{model_id}/activate` responde 409
+   `requiere_forzar`.
 
 `POST /models/{model_id}/activate` exige una ventana posterior a lo que vio el candidato (corte + 61 días) y responde
 422 `ventana_en_muestra` si no lo es; la demostración nunca le pasa una ventana dentro de la muestra. No cambian entre
@@ -432,22 +434,22 @@ copia temporal de `datos/`, está en `demo_esperado.md`: dos corridas del 13-11-
 cada una, y la misma salida salvo los tiempos y los identificadores.
 
 Los demás resultados de la tabla salen de la corrida completa de `verificar_despliegue.py` (con la demostración) del
-13-11-2026, a las 23:07, en el equipo de desarrollo: «Resultado global: OK» en 4,0 min, que dejó
+18-11-2026, a las 20:44, en el equipo de desarrollo: «Resultado global: OK» en 5,6 min, que dejó
 `arranque_limpio.txt`, `migraciones.txt`, `demo_ciclo_api.txt`, `reinicio.txt` e `imagen.txt`. Los tiempos varían de
 una corrida a otra; cada corrida reescribe esos archivos. Es del código final: la cabeza de
-Alembic es la 0014 (`alembic/versions/`) y la demostración usa el cliente común `scripts/cliente_http.py` (sección 5).
+Alembic es la 0015 (`alembic/versions/`) y la demostración usa el cliente común `scripts/cliente_http.py` (sección 5).
 
 | Paso | Resultado |
 |---|---|
-| Construcción | 173 s la primera vez sin caché (`construccion_sin_cache.txt`); 3,1 s reutilizando la caché de BuildKit (`arranque_limpio.txt`, paso 1) |
-| `up -d --build` desde volúmenes nuevos | retorna en 13,5 s; `GET /health` = ok a los 16,3 s y HEALTHCHECK `healthy` a los 19,1 s; `db` sano y `migrar` termina con código 0 (`arranque_limpio.txt`, pasos 2 y 3) |
-| Migraciones | 0001 → 0014 (head) en la base nueva; `alembic current` = 0014 (head); repetir `alembic upgrade head` no hace nada; 23 tablas en `ai_frecuencias`, la partición `feature_snapshot_202611`, el índice GiST `ix_alert_ubicacion` y `pg_stat_statements` cargado (`migraciones.txt`) |
+| Construcción | 173 s la primera vez sin caché (`construccion_sin_cache.txt`); 10,5 s reutilizando la caché de BuildKit (`arranque_limpio.txt`, paso 1) |
+| `up -d --build` desde volúmenes nuevos | retorna en 20,9 s; `GET /health` = ok a los 25,3 s y HEALTHCHECK `healthy` a los 26,5 s; `db` sano y `migrar` termina con código 0 (`arranque_limpio.txt`, pasos 2 y 3) |
+| Migraciones | 0001 → 0015 (head) en la base nueva; `alembic current` = 0015 (head); repetir `alembic upgrade head` no hace nada; 24 tablas en `ai_frecuencias`, la partición `feature_snapshot_202611`, el índice GiST `ix_alert_ubicacion` y `pg_stat_statements` cargado (`migraciones.txt`) |
 | Claves y roles | 2 claves (admin y operador) creadas con `scripts/crear_api_key.py` dentro del contenedor; sin clave 401, operador 200, operador sobre una ruta de admin (`POST /api/v1/models/rollback`) 403, `/metrics` 200; `SEUDONIMO_SECRETO` llega al contenedor (64 caracteres, no se muestra) (`arranque_limpio.txt`, paso 4) |
-| Demostración §14.2 (referencia con la API en el venv, `demo_esperado.md`) | pasos (1) a (6) con código 0 en 120 s (120 s en la confirmación): 49.623, 51 y 4.641 filas; repetición con 0 filas; candidato `hgb_fv2_20250930_s42` entrenado por el trabajador de la cola; 714 filas de la sombra; comparación en 2025-12-01..14 (WAPE 14,108 % del candidato frente a 13,982 % del activo); decisión: **rechazado** por la compuerta de sombra, y 409 `requiere_forzar` al intentar activarlo sin forzar; el activo sigue siendo `hgb_fv2_20250831_s42`; notificaciones simuladas 116 y omitidas 72, porque las alertas observadas evalúan ahora cada día del lote |
-| Demostración §14.2 en Docker (`demo_ciclo_api.txt`) | sobre la pila creada desde cero (13-11-2026, 23:07), código 0 en 133,5 s con los seis pasos impresos: 49.623, 51 y 4.641 filas; repetición con 0 filas; candidato `hgb_fv2_20250930_s42` entrenado por el trabajador de la cola en 14,6 s; 714 filas de la sombra; comparación en 2025-12-01..14 (WAPE 14,108 % del candidato frente a 13,982 % del activo); decisión: **rechazado** por la compuerta de cuatro criterios (solo falla «WAPE del candidato ≤ WAPE del activo»), y 409 `requiere_forzar` al intentar activarlo sin forzar; el activo sigue siendo `hgb_fv2_20250831_s42`; notificaciones simuladas 116 y omitidas 72 |
-| RNF-001 (`reinicio.txt`) | A) SIGKILL (`docker kill` + `docker start`) durante la ejecución: API de vuelta en 2,6 s, ejecución terminada 24,1 s después del corte con la traza de intentos [abandonado, ok]; B) `docker compose restart api`: de vuelta en 2,6 s, terminada 34,9 s después, [abandonado, ok]. En los dos, las mismas predicciones y recomendaciones de la ejecución de referencia, sin duplicados, con todas las comprobaciones de `scripts/prueba_caida.py` en OK; en toda la base, 0 predicciones duplicadas y 0 ejecuciones colgadas |
-| Imagen (`imagen.txt`) | 1,52 GB en disco (369,2 MB de capas), usuario `sobusa` (uid 10001), sin herramientas de desarrollo; su `pip freeze` (72 paquetes, `requisitos_congelados.txt`) es idéntico a `requirements.txt` con los marcadores de Linux y Python 3.11 |
-| `down -v` | 1,9 s; sin contenedores ni volúmenes del proyecto |
+| Demostración §14.2 (referencia con la API en el venv, `demo_esperado.md`; 13-11-2026, antes de fv3) | pasos (1) a (6) con código 0 en 120 s (120 s en la confirmación): 49.623, 51 y 4.641 filas; repetición con 0 filas; candidato `hgb_fv2_20250930_s42` entrenado por el trabajador de la cola; 714 filas de la sombra; comparación en 2025-12-01..14 (WAPE 14,108 % del candidato frente a 13,982 % del activo); decisión: **rechazado** por la compuerta de sombra, y 409 `requiere_forzar` al intentar activarlo sin forzar; el activo sigue siendo `hgb_fv2_20250831_s42`; notificaciones simuladas 116 y omitidas 72, porque las alertas observadas evalúan ahora cada día del lote |
+| Demostración §14.2 en Docker (`demo_ciclo_api.txt`) | sobre la pila creada desde cero (18-11-2026, 20:44), código 0 en 183,1 s con los seis pasos impresos: 49.623, 51 y 4.641 filas; repetición con 0 filas; candidato `hgb_fv3_20250930_s42` (desde el 15-11-2026 el entrenamiento usa las variables fv3, con el calendario escolar y universitario) entrenado por el trabajador de la cola en 19,7 s; 714 filas de la sombra; comparación en 2025-12-01..14 (WAPE 13,578 % del candidato frente a 13,982 % del activo); decisión: **activado** por la compuerta de cuatro criterios, que cumple los cuatro, y revertido al final con `POST /api/v1/models/rollback` para dejar la pila como estaba (el activo vuelve a ser `hgb_fv2_20250831_s42`); notificaciones simuladas 116 y omitidas 72 |
+| RNF-001 (`reinicio.txt`) | A) SIGKILL (`docker kill` + `docker start`) durante la ejecución: API de vuelta en 4,2 s, ejecución terminada 38,2 s después del corte con la traza de intentos [abandonado, ok]; B) `docker compose restart api`: de vuelta en 3,4 s, terminada 43,8 s después, [abandonado, ok]. En los dos, las mismas predicciones y recomendaciones de la ejecución de referencia, sin duplicados, con todas las comprobaciones de `scripts/prueba_caida.py` en OK; en toda la base, 0 predicciones duplicadas y 0 ejecuciones colgadas |
+| Imagen (`imagen.txt`) | 1,72 GB en disco (460,0 MB de capas, con LightGBM y `libgomp1` para el pronóstico de corto plazo), usuario `sobusa` (uid 10001), sin herramientas de desarrollo; su `pip freeze` (74 paquetes, `requisitos_congelados.txt`) es idéntico a `requirements.txt` con los marcadores de Linux y Python 3.11 |
+| `down -v` | 2,5 s; sin contenedores ni volúmenes del proyecto |
 | Modo integrado (`modo_integrado.txt`) | `alembic upgrade head` como `escritor_ia` (la base ya estaba en la 0014); `/health` ok en 3,5 s y una ejecución «ok» en 2,1 s con 0 filas nuevas (13-11-2026); la API lee como `lector_ia` (solo `SELECT`/`WITH` en transacciones que terminan en `ROLLBACK`) y escribe solo en `ai_frecuencias` como `escritor_ia` (0 escrituras fuera del esquema); un `CREATE TABLE` como `lector_ia` se rechaza (`ReadOnlySqlTransaction`); el contenedor y el volumen de la réplica no cambian |
 
 ## 9. Actualizar una pila en uso sin perder datos

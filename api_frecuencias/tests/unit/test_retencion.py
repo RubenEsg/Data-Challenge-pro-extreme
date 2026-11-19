@@ -229,7 +229,8 @@ def test_la_politica_cubre_cada_tabla_del_esquema():
 def test_las_ejecuciones_nunca_se_borran_si_algo_las_sostiene():
     candidatas = next(r for r in R.REGLAS if r.tabla == "execution_log").candidatas
     for tabla in ("marca_agua_ruta", "marca_agua_tabla", "model_registry", "demanda_observada", "prediction",
-                  "recommendation", "alert", "notification_log", "respuesta_reto", "segmento_estadistica_refresco"):
+                  "prediction_corto_plazo", "recommendation", "alert", "notification_log", "respuesta_reto",
+                  "segmento_estadistica_refresco"):
         assert f"FROM ai_frecuencias.{tabla} r WHERE r.execution_id = t.execution_id" in candidatas, tabla
     assert "estado IN ('ok', 'error')" in candidatas and "DISTINCT ON (u.tipo)" in candidatas
     assert "h.padre_id = b.execution_id" in candidatas                  # una madre solo sin trabajos que se conservan

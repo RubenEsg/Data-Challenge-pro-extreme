@@ -1,6 +1,6 @@
 Operaciones del contrato OpenAPI y códigos de respuesta declarados (spec v1.5 §12.1, §12.2, RNF-009)
-Generado desde app.openapi() (app/openapi_doc.py) el 11-11-2026, 04:47:11 (Bogotá) | versión de la API 1.0.0 | OpenAPI 3.1.0
-65 rutas y 69 operaciones. Todo 4xx/5xx declarado usa el esquema uniforme RespuestaError {error: {codigo, mensaje, detalle, correlation_id}}.
+Generado desde app.openapi() (app/openapi_doc.py) el 18-11-2026, 21:34:50 (Bogotá) | versión de la API 1.0.0 | OpenAPI 3.1.0
+70 rutas y 75 operaciones. Todo 4xx/5xx declarado usa el esquema uniforme RespuestaError {error: {codigo, mensaje, detalle, correlation_id}}.
 Columnas: método, ruta, rol mínimo (x-rol-minimo), estados declarados, tipos de contenido del éxito.
 
 GET    /api/v1/alerts                                          operador  200 401 422 500                    application/json
@@ -48,6 +48,12 @@ GET    /api/v1/monitoring/export                               operador  200 401
 GET    /api/v1/monitoring/feature-snapshots                    operador  200 401 422 500                    application/json
 GET    /api/v1/monitoring/policy                               operador  200 401 422 500                    application/json
 GET    /api/v1/predictions                                     operador  200 401 422 500                    application/json
+GET    /api/v1/predictions/corto-plazo                         operador  200 401 422 500                    application/json
+POST   /api/v1/predictions/corto-plazo                         analista  201 400 401 403 404 422 500 503    application/json
+GET    /api/v1/predictions/corto-plazo/calcular                operador  200 401 404 422 500 503            application/json
+GET    /api/v1/predictions/corto-plazo/dia                     operador  200 401 404 422 500 503            application/json
+GET    /api/v1/predictions/corto-plazo/export                  operador  200 401 422 500                    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
+GET    /api/v1/predictions/corto-plazo/modelo                  operador  200 401 422 500 503                application/json
 GET    /api/v1/predictions/export                              operador  200 401 422 500                    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv
 POST   /api/v1/predictions/run                                 analista  201 400 401 403 404 422 500        application/json
 GET    /api/v1/predictions/segmentos                           operador  200 401 404 422 500 503            application/json
@@ -148,6 +154,16 @@ GET    /api/v1/models/{model_id}/evaluation                    422  ventana_inva
 GET    /api/v1/models/{model_id}/importance                    404  modelo_no_encontrado
 GET    /api/v1/models/{model_id}/importance                    409  integridad_modelo
 GET    /api/v1/monitoring/feature-snapshots                    422  filtro_requerido
+POST   /api/v1/predictions/corto-plazo                         404  ruta_desconocida, modelo_no_encontrado
+POST   /api/v1/predictions/corto-plazo                         422  horizonte_invalido, fuera_de_cobertura, parametros_invalidos
+POST   /api/v1/predictions/corto-plazo                         503  pronostico_no_disponible
+GET    /api/v1/predictions/corto-plazo/calcular                404  ruta_desconocida, modelo_no_encontrado
+GET    /api/v1/predictions/corto-plazo/calcular                422  horizonte_invalido, fuera_de_cobertura, parametros_invalidos
+GET    /api/v1/predictions/corto-plazo/calcular                503  pronostico_no_disponible
+GET    /api/v1/predictions/corto-plazo/dia                     404  ruta_desconocida, modelo_no_encontrado
+GET    /api/v1/predictions/corto-plazo/dia                     422  horizonte_invalido, fuera_de_cobertura
+GET    /api/v1/predictions/corto-plazo/dia                     503  pronostico_no_disponible
+GET    /api/v1/predictions/corto-plazo/modelo                  503  pronostico_no_disponible
 POST   /api/v1/predictions/run                                 404  ruta_desconocida, modelo_no_encontrado
 POST   /api/v1/predictions/run                                 422  parametros_invalidos, prediccion_invalida
 GET    /api/v1/predictions/segmentos                           404  no_encontrado, ruta_desconocida, modelo_no_encontrado, ruta_sin_segmentos

@@ -1,4 +1,4 @@
-Migraciones Alembic aplicadas por el servicio «migrar» en la base nueva · 2026-11-13 23:07:26 -0500
+Migraciones Alembic aplicadas por el servicio «migrar» en la base nueva · 2026-11-18 20:45:02 -0500
 
 $ docker compose logs migrar   (alembic upgrade head sobre volumen nuevo)
   INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
@@ -23,9 +23,17 @@ $ docker compose logs migrar   (alembic upgrade head sobre volumen nuevo)
   contraste versionadas (§5.2 ALT-008, §6.1, §6.3, §7.3 paso 3, §9.5, §11.2).
   INFO  [alembic.runtime.migration] Running upgrade 0013 -> 0014, Mínimo de probabilidad de ALT-003 de pronóstico versionado en threshold_config (§5.1 «regla de gobierno», §5.2,
   §18 «Alertas excesivas»).
+  INFO  [alembic.runtime.migration] Running upgrade 0014 -> 0015, Pronósticos de corto plazo: las subidas de los próximos 30, 60 y 120 minutos por ruta, sentido y segmento, con lo
+  observado hasta el instante (spec v1.5 §2.2, RF-005, RF-006 «guardar la predicción puntual, el límite inferior, el
+  límite superior y la versión del modelo», §3.1 M3, §9.2 «cada predicción guarda model_id, feature_version,
+  data_cutoff, generated_at, horizonte y latencia»).
 
 $ alembic history
-  0013 -> 0014 (head), Mínimo de probabilidad de ALT-003 de pronóstico versionado en threshold_config (§5.1 «regla de gobierno», §5.2,
+  0014 -> 0015 (head), Pronósticos de corto plazo: las subidas de los próximos 30, 60 y 120 minutos por ruta, sentido y segmento, con lo
+  observado hasta el instante (spec v1.5 §2.2, RF-005, RF-006 «guardar la predicción puntual, el límite inferior, el
+  límite superior y la versión del modelo», §3.1 M3, §9.2 «cada predicción guarda model_id, feature_version,
+  data_cutoff, generated_at, horizonte y latencia»).
+  0013 -> 0014, Mínimo de probabilidad de ALT-003 de pronóstico versionado en threshold_config (§5.1 «regla de gobierno», §5.2,
   §18 «Alertas excesivas»).
   0012 -> 0013, Consolidados de Extreme en el ciclo diario: bajadas en el histórico, marca de agua por tabla y tolerancias del
   contraste versionadas (§5.2 ALT-008, §6.1, §6.3, §7.3 paso 3, §9.5, §11.2).
@@ -47,7 +55,7 @@ $ alembic history
   bitácora de ejecuciones, errores de calidad, umbrales versionados y notificaciones.
 
 $ alembic current
-  0014 (head)
+  0015 (head)
 
 $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones, el índice GiST y pg_stat_statements
                                                               version                                                            
@@ -62,12 +70,12 @@ $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones
   
    version_num 
   -------------
-   0014
+   0015
   (1 row)
   
    tablas 
   --------
-       23
+       24
   (1 row)
   
              tablename           
@@ -88,6 +96,7 @@ $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones
    notification_log
    ocupacion_segmento
    prediction
+   prediction_corto_plazo
    recommendation
    respuesta_reto
    retencion_registro
@@ -95,7 +104,7 @@ $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones
    segmento_estadistica_dia
    segmento_estadistica_refresco
    threshold_config
-  (23 rows)
+  (24 rows)
   
                  particion                
   ----------------------------------------
@@ -124,9 +133,9 @@ $ psql: versión del servidor, PostGIS, versión de Alembic, tablas, particiones
   
 
 $ alembic upgrade head (segunda vez): no hay nada pendiente
-   Container sobusa_limpio-migrar-run-bd8a1b4cfaae Creating 
-   Container sobusa_limpio-migrar-run-bd8a1b4cfaae Created 
+   Container sobusa_limpio-migrar-run-a4ce26106f8b Creating 
+   Container sobusa_limpio-migrar-run-a4ce26106f8b Created 
   INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
   INFO  [alembic.runtime.migration] Will assume transactional DDL.
 
-Resultado: versión actual 0014 (head) = head 0014 -> OK
+Resultado: versión actual 0015 (head) = head 0015 -> OK

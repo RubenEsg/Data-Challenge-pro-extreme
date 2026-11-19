@@ -252,8 +252,8 @@ promedio en \CortoSegGana{} de \CortoSegTotal{} segmentos.
 \end{tarjeta}
 \begin{tarjeta}
 \scriptsize\titulotarjeta{Lo que falta}
-Llevarlo a la API, que hoy pronostica por hora de salida. En los domingos corrientes no mejora al promedio. El
-sentido es una aproximación y 2025 ya se conocía, con otro objetivo.
+Ya está en la API y en el tablero; falta alimentarlo en vivo. En los domingos corrientes no mejora al promedio.
+El sentido es una aproximación y 2025 ya se conocía, con otro objetivo.
 \end{tarjeta}
 \end{column}
 \end{columns}
@@ -456,8 +456,7 @@ día \DemoMarcaDespues{} aparece en la fuente, después de la marca de agua};
 \DemoCandidato{} entrenado en \DemoEntrenoSeg{} s};
 \node[paso, left=4mm of d] (e) {\textbf{Comparación con el activo}\\ misma validación temporal (\DemoVentana): WAPE
 \DemoWapeCand~\% del candidato frente a \DemoWapeAct~\% del activo};
-\node[paso, left=4mm of e] (f) {\textbf{Decisión}\\ \DemoDecision{} (409): el activo se conserva y la decisión queda
-en el registro de modelos, auditada y reversible};
+\node[paso, left=4mm of e] (f) {\textbf{Decisión}\\ \DemoDecisionLamina};
 \foreach \n/\k in {a/1,b/2,c/3,d/4,e/5,f/6} \node[num] at (\n.north west) {\k};
 \draw[fl] (a) -- (b); \draw[fl] (b) -- (c); \draw[fl] (c) -- (d); \draw[fl] (d) -- (e); \draw[fl] (e) -- (f);
 \end{tikzpicture}

@@ -129,10 +129,10 @@ completa de rutas, con el rol que exige cada una, está en `../README.md`, secci
 
 ### 2.4 Contrato de la API: errores, roles y filtros
 
-El contrato está en `docs/openapi.json` (OpenAPI 3.1: 65 rutas y 69 operaciones, 67 bajo `/api/v1`) y lo verifican las
+El contrato está en `docs/openapi.json` (OpenAPI 3.1: 70 rutas y 75 operaciones, 73 bajo `/api/v1`) y lo verifican las
 pruebas de `tests/contrato/` contra las respuestas reales (Schemathesis con cinco chequeos en cada operación). La
-corrida registrada en `docs/evidencias/contrato/schemathesis.txt` (11-11-2026, con el contrato vigente) cubre las 69
-operaciones: 69 de 69 sin fallas. Se regenera con `docs/evidencias/contrato/generar_evidencia_contrato.py`.
+corrida registrada en `docs/evidencias/contrato/schemathesis.txt` (18-11-2026, con el contrato vigente) cubre las 75
+operaciones: 75 de 75 sin fallas. Se regenera con `docs/evidencias/contrato/generar_evidencia_contrato.py`.
 
 - **Error uniforme (§12.1).** Todo error responde `{"error": {"codigo", "mensaje", "detalle", "correlation_id"}}` con la
   cabecera `X-Correlation-Id`, también los que no pasan por un router:
@@ -375,6 +375,30 @@ sombra ni por la compuerta del modelo de la ruta: lo elige `scripts/entrenar_seg
 de mirar la prueba (`docs/evidencias/modelo/segmentos_protocolo.md`), y `modelo_segmentos.cargar()` verifica el
 SHA-256 del artefacto y la versión de variables antes de usarlo (`docs/modelo_segmentos.md`).
 
+El pronóstico de corto plazo (RF-005: 30, 60 y 120 minutos por ruta, sentido y segmento con lo observado en el día)
+también tiene su registro (`datos/modelos/corto_plazo/registro.json`; activo `cp_lgbm_20250630_s42`). Es el modelo del
+experimento E14 (`../pronostico_corto_plazo/`): se eligió en la validación de enero a junio de 2025 y se midió una sola
+vez en la prueba de julio a diciembre de 2025, con el protocolo confirmado en git antes de correr la validación.
+
+1. **Entrenar.** `scripts/entrenar_corto_plazo.py` lo reentrena con lo elegido (`seleccion.json` del experimento), con
+   todo lo anterior al 1 de julio de 2025, la misma semilla y LightGBM 4.7.0, y guarda 18 árboles (ruta y segmento,
+   por horizonte y ruta) en texto comprimido, cada uno con su SHA-256, las variables, la banda calibrada, la huella del
+   código (`variables_corto_plazo.py` y `corto_plazo.py`, completos y sin el docstring), el SHA-256 de cada archivo del
+   panel y las cifras de la prueba.
+2. **Verificar.** `scripts/verificar_corto_plazo.py` vuelve a pronosticar la prueba con el código y los artefactos de
+   la API y la compara con lo que guardó el experimento: las 168.210 predicciones por ruta y por sentido, los totales
+   por segmento y el WAPE de cada nivel y horizonte (`docs/evidencias/modelo/corto_plazo_reproduccion.md`). Deja una
+   muestra fija de 120 predicciones en `datos/corto_plazo/muestra_prueba_e14.csv`, que
+   `tests/datos_ml/test_corto_plazo_modelo.py` recalcula en cada corrida del CI.
+3. **Cargar.** `corto_plazo.cargar()` verifica el SHA-256 de cada árbol y la versión de variables (`cp1-2026-11-17`) y
+   los deja en memoria. Un día se pronostica con los 56 días anteriores y el día (`Ruta.recorte`), lo mismo que con la
+   serie entera; una prueba lo comprueba.
+4. **Cambiar el código de variables** obliga a correr los pasos 1 y 2: la prueba de la huella falla si
+   `variables_corto_plazo.py` cambió sin volver a registrar el modelo.
+
+No pasa por la sombra ni por la compuerta del modelo horario, que comparan WAPE por hora de salida (otra unidad).
+Hacerlo es un pendiente de `PLAN_EVOLUCION.md` (sección 7).
+
 ## 6. Motor de alertas (`app/servicios/alertas.py`)
 
 - **Catálogo de §5.2.** Hay dos familias de reglas:
@@ -598,7 +622,8 @@ aplica al arrancar en Docker con el servicio `migrar`.
 | `0011_ocupacion_segmentos.py` | Tabla `ocupacion_segmento` (§10.1): una fila por ruta, fecha, hora de salida y segmento (llave `ruta`, `fecha`, `hora`, `nro_segmento`), con los viajes medidos, la carga media y máxima, los puestos, la ocupación media y máxima, el viaje de la carga máxima, el sentido aproximado, `id_dia_semana`, `id_estacionalidad`, la marca `critico` y el `execution_id` (sin llave foránea, como `segmento_estadistica_dia`). Índices parcial por `critico`, por `idruta` y fecha y por `execution_id`. No agrega tipos de trabajo. La bajada borra la tabla. Baja a la 0010. Prueba de subida y bajada: la de la cadena completa, `tests/testcontainers/test_postgis_contenedor.py::test_alembic_upgrade_downgrade_upgrade_desde_cero` (la tabla está en las que exige); no tiene una prueba propia. |
 | `0012_retencion_y_ventana_segmentos.py` | Retención de datos (§18) y refresco de segmentos sin cambios. Agrega el tipo de trabajo `retencion` a la restricción de `execution_log.tipo`, leyendo la lista vigente como la 0008. Crea `retencion_registro`, la bitácora de la retención (grupo, objeto, acción, corte, filas, bytes, versión de los parámetros, si fue simulación y el detalle; sin llave foránea a `execution_log`, para sobrevivir a la propia retención). Agrega `segmento_estadistica_refresco.huellas_solape`. Siembra una versión nueva y completa de `threshold_config` con los seis parámetros de la retención (`retencion_meses_foto`, `retencion_meses_resultados`, `retencion_meses_alertas` y `retencion_meses_ejecuciones` en 13, `retencion_archivar_particiones` en 0 y `retencion_aplicar_programada` en 1); un valor ya vigente se conserva. La bajada quita la columna, la tabla, las ejecuciones `retencion` y el tipo, y solo sus filas de `threshold_config`. Baja a la 0011. Al subir y al bajar toma el candado de `bloquear_umbrales`, como la 0013 y la 0014. Pruebas: `tests/integracion/test_retencion.py::test_migracion_0012_sube_y_baja`, `tests/unit/test_retencion.py::test_los_parametros_son_los_que_siembra_la_migracion_0012` y `tests/integracion/test_migracion_0012_candado.py::test_la_0012_espera_el_candado_de_threshold_config_al_bajar_y_al_subir`. |
 | `0013_consolidados_ciclo.py` | Consolidados de Extreme en el ciclo (§6.1, §6.3, §9.5, §11.2). Agrega a `demanda_observada` las columnas `bajadas_viajes` (Σ `numerobajadas` de los viajes válidos de la franja), `subidas` y `bajadas` (Σ de `timbradas_segmentos`) y `viajes_con_timbradas` (su cobertura); las filas que ya estaban quedan con ellas nulas, porque la migración no lee la base de Extreme. Crea `marca_agua_tabla`: la marca de agua y las huellas de la ventana de solape de cada tabla consolidada por proceso, con el `execution_id` que la movió (llave foránea a `execution_log` con `ON DELETE CASCADE`). Siembra una versión nueva y completa de `threshold_config` con `contraste_tolerancia` 0,15, `contraste_tolerancia_grosera` 0,50 y `contraste_viajes_minimos` 30; un valor ya vigente se conserva. Al subir y al bajar toma el candado de `bloquear_umbrales`. La bajada borra la tabla, las cuatro columnas y solo sus filas de `threshold_config`; si no queda una versión vigente, vuelve vigente la anterior. Baja a la 0012. Prueba: `tests/integracion/test_consolidados_ciclo.py::test_migracion_0013_sube_y_baja` (sube y baja su propia revisión, sin suponer que es la cabeza). Detalle en `docs/consolidados_ciclo.md`. |
-| `0014_alt003_probabilidad_minima.py` (head) | Versión nueva y completa de `threshold_config` con `alt003_probabilidad_minima` = 0,30, el mínimo de probabilidad de ALT-003 elegido sin fuga. Nace propuesta (`aprobado_por` nulo): la aprueba el área operativa con `POST /api/v1/thresholds/{version}/aprobar`. Un valor ya vigente se conserva. Toma el mismo candado de `bloquear_umbrales` al subir y al bajar. La bajada borra solo sus filas; si no queda una versión vigente, vuelve vigente la anterior. Baja a la 0013. Pruebas: `tests/integracion/test_gobierno_alt003.py::test_migracion_0014_versiona_el_minimo_de_alt003_como_propuesta_y_baja` (también que `PUT /thresholds` rechaza un 0 con 422) y `tests/unit/test_alertas_alt003.py::test_la_migracion_0014_siembra_el_valor_del_codigo`. Detalle en `docs/alertas_viajes_y_alt003.md`. |
+| `0014_alt003_probabilidad_minima.py` | Versión nueva y completa de `threshold_config` con `alt003_probabilidad_minima` = 0,30, el mínimo de probabilidad de ALT-003 elegido sin fuga. Nace propuesta (`aprobado_por` nulo): la aprueba el área operativa con `POST /api/v1/thresholds/{version}/aprobar`. Un valor ya vigente se conserva. Toma el mismo candado de `bloquear_umbrales` al subir y al bajar. La bajada borra solo sus filas; si no queda una versión vigente, vuelve vigente la anterior. Baja a la 0013. Pruebas: `tests/integracion/test_gobierno_alt003.py::test_migracion_0014_versiona_el_minimo_de_alt003_como_propuesta_y_baja` (también que `PUT /thresholds` rechaza un 0 con 422) y `tests/unit/test_alertas_alt003.py::test_la_migracion_0014_siembra_el_valor_del_codigo`. Detalle en `docs/alertas_viajes_y_alt003.md`. |
+| `0015_prediccion_corto_plazo.py` (head) | Tabla `prediction_corto_plazo` (RF-005, RF-006, §9.2): el pronóstico de corto plazo, una fila por pronóstico y nivel. Un pronóstico (`grupo_id`) de una ruta en un instante y un horizonte guarda la fila de la ruta (con la explicación local y la recomendación), las de sus dos sentidos y la de cada segmento, con P50, P10, P90, las dos líneas base de §9.1, `model_id`, `feature_version`, `data_cutoff`, `generated_at` y `latencia_ms`; `execution_id` si la generó el ciclo. Restricciones: horizonte 30, 60 o 120, nivel coherente con sentido y segmento, P10 ≤ P90 y un índice único por grupo, nivel, sentido y segmento. La bajada borra la tabla. Pruebas: `tests/integracion/test_corto_plazo_api.py` y la subida, bajada y subida desde cero del CI. |
 
 Convenciones:
 
@@ -893,18 +918,19 @@ SonarQube Community en Docker, junto con ruff y bandit, y deja la evidencia en `
 La puerta de calidad «Reto Sobusa v1.5» se evalúa sobre todo el código y exige 0 vulnerabilidades, 0 bugs, 0 hallazgos
 bloqueantes o críticos, 100 % de los security hotspots revisados, cobertura ≥ 85 % y duplicación ≤ 3 %. El estado de cada
 análisis, condición por condición, está en `docs/evidencias/sonarqube/resumen.md` y `quality_gate.json`. En el análisis
-vigente (14-11-2026, 00:56) la puerta queda **aprobada (OK)**: 0 vulnerabilidades, 0 bugs, 0 hallazgos bloqueantes y 0
-críticos, duplicación de 0,0 % y cobertura de 95,7 % (`security_hotspots_reviewed` no tiene valor porque no hay
+vigente (18-11-2026, 21:29) la puerta queda **aprobada (OK)**: 0 vulnerabilidades, 0 bugs, 0 hallazgos bloqueantes y 0
+críticos, duplicación de 0,0 % y cobertura de 95,8 % (`security_hotspots_reviewed` no tiene valor porque no hay
 security hotspots). La deuda de mantenibilidad aceptada va en `scripts/sonar_decisiones.json`, cada entrada con su
 justificación (nunca bugs ni vulnerabilidades); en ese análisis queda 1 hallazgo de complejidad cognitiva
 (`python:S3776`), en la copia literal del solver D5 (`app/servicios/motor_d5/milp.py`). `--sin-pruebas` reanaliza con la cobertura guardada y `--solo-exportar` solo rehace la evidencia.
 
 Resultados vigentes de la suite completa final (los cinco niveles de arriba, la corrida con cobertura que alimenta el
-análisis de SonarQube, 14-11-2026): 1.770 casos (1.106 unitarias, 217 de integración, 209 de réplica, 197 de contrato y 41 de datos/ML),
-todos aprobados, con 0 fallas, 0 errores y 0 omitidas, en una sola sesión con los procesos reales (`PRUEBA_CAIDA=1`,
-`PRUEBA_REPLICAS=1` y `PRUEBA_PLANIFICADOR=1`) y las pruebas de escritura en la réplica (`REPLICA_PRUEBAS_ESCRITURA=1`), en
+análisis de SonarQube, 18-11-2026): 1.810 casos (1.121 unitarias, 223 de integración, 209 de réplica, 209 de contrato y 48 de datos/ML),
+con 1.800 aprobados, 0 fallas, 0 errores y 10 omitidas, las pruebas pesadas que solo corren con `PRUEBA_CAIDA=1`,
+`PRUEBA_REPLICAS=1`, `PRUEBA_PLANIFICADOR=1` o `REPLICA_PRUEBAS_ESCRITURA=1` (con ellas encendidas, la suite del
+14-11-2026 pasó entera: 1.770 casos y 0 omitidas), en
 `docs/evidencias/pruebas/suite_final.xml` (idéntico a `docs/evidencias/sonarqube/pytest.xml`); cobertura de `app/`,
-con `motor_d5/`, de 95,70 %: 14.656 de 15.314 líneas (`docs/evidencias/pruebas/coverage_final.xml`, idéntico a
+con `motor_d5/`, de 95,76 %: 15.464 de 16.148 líneas (`docs/evidencias/pruebas/coverage_final.xml`, idéntico a
 `docs/evidencias/sonarqube/coverage.xml`). Las corridas anteriores, que todavía describían xfail o fallas ya
 corregidas, están en `docs/evidencias/historial/`.
 

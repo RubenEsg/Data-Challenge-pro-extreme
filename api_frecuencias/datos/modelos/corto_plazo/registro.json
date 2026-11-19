@@ -1,0 +1,23 @@
+{
+ "activo": "cp_lgbm_20250630_s42",
+ "modelos": {
+  "cp_lgbm_20250630_s42": {
+   "model_id": "cp_lgbm_20250630_s42",
+   "tipo": "lgbm_poisson_corto_plazo",
+   "feature_version": "cp1-2026-11-17",
+   "data_cutoff": "2025-06-30",
+   "entrenado_con": "2023-01-01 a 2025-06-30 (entrenamiento más validación)",
+   "generado_en": "2026-11-19T01:41:49+00:00",
+   "estado": "activo"
+  }
+ },
+ "historial_activacion": [
+  {
+   "en": "2026-11-19T00:38:01+00:00",
+   "de": null,
+   "a": "cp_lgbm_20250630_s42",
+   "usuario": "entrenamiento",
+   "motivo": "modelo elegido en la validación de E14 y medido una vez en su prueba reservada (julio-diciembre de 2025)"
+  }
+ ]
+}

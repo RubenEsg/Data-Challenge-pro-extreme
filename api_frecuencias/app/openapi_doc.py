@@ -37,6 +37,7 @@ from fastapi import FastAPI
 PREFIJO = "/api/v1"
 # Rutas que aparecen en varias tablas de este módulo (errores, códigos y filtros obligatorios por operación)
 RUTA_PRONOSTICO_SEGMENTOS = "/api/v1/predictions/segmentos"
+RUTA_CORTO_PLAZO = "/api/v1/predictions/corto-plazo"
 RUTA_CAPACIDAD = "/api/v1/catalogos/capacidad"
 RUTA_REFRESCO_SEGMENTOS = "/api/v1/segmentos/estadisticas/refrescar"
 RUTA_FLOTA = "/api/v1/catalogos/flota"
@@ -68,6 +69,10 @@ DESCRIPCIONES = {
 ERRORES_POR_OPERACION: dict[tuple[str, str], set[int]] = {
     ("post", "/api/v1/predictions/run"): {404},
     ("get", RUTA_PRONOSTICO_SEGMENTOS): {404, 503},
+    ("post", RUTA_CORTO_PLAZO): {404, 503},
+    ("get", RUTA_CORTO_PLAZO + "/calcular"): {404, 503},
+    ("get", RUTA_CORTO_PLAZO + "/dia"): {404, 503},
+    ("get", RUTA_CORTO_PLAZO + "/modelo"): {503},
     ("post", "/api/v1/recommendations/calculate"): {404},
     ("get", "/api/v1/recommendations/plan"): {404},
     ("post", "/api/v1/models/rollback"): {404, 409},
@@ -95,6 +100,9 @@ CODIGOS_GENERALES: dict[int, tuple[str, ...]] = {
 _CODIGOS_CATALOGOS = {422: ("filtro_invalido",), 500: ("operacion_no_permitida",),
                       503: ("catalogo_no_disponible", "fuente_no_disponible")}
 _CODIGOS_SEGMENTOS = {422: ("parametro_invalido",), 503: ("fuente_no_disponible",)}
+_CODIGOS_CORTO_PLAZO = {404: ("ruta_desconocida", "modelo_no_encontrado"),
+                        422: ("horizonte_invalido", "fuera_de_cobertura", "parametros_invalidos"),
+                        503: ("pronostico_no_disponible",)}
 CODIGOS_POR_OPERACION: dict[tuple[str, str], dict[int, tuple[str, ...]]] = {
     ("get", "/api/v1/frequency/executions"): {422: ("rango_invalido",)},
     ("post", "/api/v1/frequency/executions"): {422: ("ruta_desconocida",)},     # RNF-005: partición por ruta
@@ -104,6 +112,12 @@ CODIGOS_POR_OPERACION: dict[tuple[str, str], dict[int, tuple[str, ...]]] = {
         404: ("no_encontrado", "ruta_desconocida", "modelo_no_encontrado", "ruta_sin_segmentos"),
         422: ("parametros_requeridos", "horizonte_invalido", "prediccion_invalida"),
         503: ("reparto_no_disponible",)},
+    ("post", RUTA_CORTO_PLAZO): _CODIGOS_CORTO_PLAZO,
+    ("get", RUTA_CORTO_PLAZO + "/calcular"): _CODIGOS_CORTO_PLAZO,
+    ("get", RUTA_CORTO_PLAZO + "/dia"): {404: ("ruta_desconocida", "modelo_no_encontrado"),
+                                         422: ("horizonte_invalido", "fuera_de_cobertura"),
+                                         503: ("pronostico_no_disponible",)},
+    ("get", RUTA_CORTO_PLAZO + "/modelo"): {503: ("pronostico_no_disponible",)},
     ("post", "/api/v1/recommendations/calculate"): {404: ("no_encontrado", "ruta_desconocida"),
                                                     422: ("parametros_invalidos",)},
     ("get", "/api/v1/recommendations/plan"): {404: ("sin_calcular", "plan_no_disponible", "ruta_desconocida")},
@@ -148,8 +162,12 @@ CABECERA_ADJUNTO = {"Content-Disposition": {"description": "attachment; filename
 ETIQUETAS = {
     "ejecuciones": "Ciclo completo por ejecución: lectura incremental, calidad, predicción, recomendación, alertas "
                    "y notificaciones (job en segundo plano con cola en PostgreSQL)",
-    "predicciones y recomendaciones": "Pronóstico de demanda 30/60/120 min con banda P10-P90 y recomendación de "
-                                      "frecuencia y flota (§10.2), plan D5 del día y exportaciones",
+    "pronóstico de corto plazo": "Lo que pide RF-005: las subidas de los próximos 30, 60 y 120 minutos por ruta, "
+                                 "sentido y segmento con lo observado hasta el instante, banda P10-P90, líneas base, "
+                                 "explicación local y recomendación (modelo de E14, medido en su prueba reservada)",
+    "predicciones y recomendaciones": "Modelo horario con siete días de antelación (el del plan del día siguiente): "
+                                      "ventanas de 30/60/120 min con banda P10-P90 y recomendación de frecuencia y "
+                                      "flota (§10.2), plan D5 del día y exportaciones",
     "alertas": "Alertas ALT-001..ALT-010 (§5): consulta por filtros y por lugar, gestión de estado y bitácora",
     "modelos": "Registro de modelos: entrenamiento, evaluación, importancia, activación controlada y reversión",
     "umbrales": "Umbrales y pesos versionados (threshold_config)",

@@ -274,6 +274,40 @@ class Prediccion(Base):
     id_estacionalidad: Mapped[int | None] = mapped_column(Integer)
 
 
+class PrediccionCortoPlazo(Base):
+    """migración 0015: pronóstico de corto plazo (30, 60 y 120 min) por ruta, sentido y segmento (RF-005, RF-006)."""
+    __tablename__ = "prediction_corto_plazo"
+    prediction_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    grupo_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    execution_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey(f"{ESQUEMA}.execution_log.execution_id", ondelete=AL_BORRAR_NULO)
+    )
+    ruta: Mapped[str] = mapped_column(Text, nullable=False)
+    idruta: Mapped[int] = mapped_column(Integer, nullable=False)
+    nivel: Mapped[str] = mapped_column(Text, nullable=False)
+    sentido: Mapped[str | None] = mapped_column(Text)
+    nro_segmento: Mapped[int | None] = mapped_column(Integer)
+    instante: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    horizonte_min: Mapped[int] = mapped_column(Integer, nullable=False)
+    objetivo: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    fecha: Mapped[date] = mapped_column(Date, nullable=False)
+    franja: Mapped[str | None] = mapped_column(Text)
+    pasajeros: Mapped[float] = mapped_column(Float, nullable=False)
+    p10: Mapped[float | None] = mapped_column(Float)
+    p90: Mapped[float | None] = mapped_column(Float)
+    promedio_dia_hora: Mapped[float | None] = mapped_column(Float)
+    ultima_semana: Mapped[float | None] = mapped_column(Float)
+    model_id: Mapped[str] = mapped_column(Text, nullable=False)
+    feature_version: Mapped[str] = mapped_column(Text, nullable=False)
+    data_cutoff: Mapped[date | None] = mapped_column(Date)
+    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    latencia_ms: Mapped[float | None] = mapped_column(Float)
+    explicacion: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    variables: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    recomendacion: Mapped[dict | None] = mapped_column(JSONB)
+    creado_en: Mapped[datetime] = _ahora()
+
+
 class Recomendacion(Base):
     __tablename__ = "recommendation"
     recommendation_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

@@ -1,0 +1,142 @@
+{
+ "generado_en": "2026-11-19T00:40:47+00:00",
+ "model_id": "cp_lgbm_20250630_s42",
+ "tolerancia": 0.006,
+ "predicciones": {
+  "ruta": {
+   "filas_guardadas": 56070,
+   "filas_api": 56070,
+   "filas_en_las_dos": 56070,
+   "solo_guardadas": 0,
+   "solo_api": 0,
+   "real": {
+    "diferencia_maxima": 0.0,
+    "filas_fuera_de_tolerancia": 0
+   },
+   "pronostico": {
+    "diferencia_maxima": 0.0054,
+    "filas_fuera_de_tolerancia": 0
+   },
+   "p10": {
+    "diferencia_maxima": 0.0052,
+    "filas_fuera_de_tolerancia": 0
+   },
+   "p90": {
+    "diferencia_maxima": 0.0052,
+    "filas_fuera_de_tolerancia": 0
+   },
+   "promedio_dia_hora": {
+    "diferencia_maxima": 0.005,
+    "filas_fuera_de_tolerancia": 0
+   },
+   "coincide": true
+  },
+  "sentido": {
+   "filas_guardadas": 112140,
+   "filas_api": 112140,
+   "filas_en_las_dos": 112140,
+   "solo_guardadas": 0,
+   "solo_api": 0,
+   "real": {
+    "diferencia_maxima": 0.0,
+    "filas_fuera_de_tolerancia": 0
+   },
+   "pronostico": {
+    "diferencia_maxima": 0.0051,
+    "filas_fuera_de_tolerancia": 0
+   },
+   "p10": {
+    "diferencia_maxima": 0.0052,
+    "filas_fuera_de_tolerancia": 0
+   },
+   "p90": {
+    "diferencia_maxima": 0.0052,
+    "filas_fuera_de_tolerancia": 0
+   },
+   "promedio_dia_hora": {
+    "diferencia_maxima": 0.0063,
+    "filas_fuera_de_tolerancia": 0
+   },
+   "coincide": true
+  }
+ },
+ "wape": {
+  "ruta": {
+   "30": {
+    "wape_api": 8.582,
+    "wape_prueba": 8.582,
+    "coincide": true
+   },
+   "60": {
+    "wape_api": 7.344,
+    "wape_prueba": 7.344,
+    "coincide": true
+   },
+   "120": {
+    "wape_api": 6.634,
+    "wape_prueba": 6.634,
+    "coincide": true
+   }
+  },
+  "sentido": {
+   "30": {
+    "wape_api": 12.129,
+    "wape_prueba": 12.129,
+    "coincide": true
+   },
+   "60": {
+    "wape_api": 10.046,
+    "wape_prueba": 10.046,
+    "coincide": true
+   },
+   "120": {
+    "wape_api": 8.715,
+    "wape_prueba": 8.715,
+    "coincide": true
+   }
+  },
+  "segmento": {
+   "30": {
+    "wape_api": 51.075,
+    "wape_prueba": 51.075,
+    "coincide": true
+   },
+   "60": {
+    "wape_api": 37.632,
+    "wape_prueba": 37.632,
+    "coincide": true
+   },
+   "120": {
+    "wape_api": 28.558,
+    "wape_prueba": 28.558,
+    "coincide": true
+   }
+  }
+ },
+ "segmentos": {
+  "filas": 1158,
+  "diferencia_maxima_total_pronosticado": 0.11,
+  "reales_iguales": true,
+  "coincide": true
+ },
+ "camino_de_un_dia": {
+  "dias": [
+   "SILENCIO 2025-07-16",
+   "SILENCIO 2025-09-19",
+   "SILENCIO 2025-10-27",
+   "SILENCIO 2025-11-18",
+   "CRA 54 2025-07-17",
+   "CRA 54 2025-08-06",
+   "CRA 54 2025-10-05",
+   "CRA 54 2025-11-04",
+   "CL 72 2025-07-23",
+   "CL 72 2025-10-02",
+   "CL 72 2025-11-07",
+   "CL 72 2025-11-20"
+  ],
+  "coincide": true,
+  "diferencia_maxima": 0.0
+ },
+ "coincide": true,
+ "segundos": 74.5
+}

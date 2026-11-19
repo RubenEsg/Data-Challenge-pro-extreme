@@ -19,8 +19,8 @@ Grupos (cada uno con sus meses en caliente; lo anterior al corte):
   feature_snapshot (a prediction y a execution_log, ON DELETE CASCADE): con ellas, borrar después su predicción o su
   ejecución vieja (las reglas de resultados y de ejecuciones, en la misma corrida) vaciaría el archivo en cascada.
 - resultados (retencion_meses_resultados): recommendation, prediction (con su foto por llave foránea),
-  respuesta_reto y segmento_estadistica_refresco (menos la última marca y la del último completo), por su fecha de
-  creación.
+  prediction_corto_plazo, respuesta_reto y segmento_estadistica_refresco (menos la última marca y la del último
+  completo), por su fecha de creación.
 - alertas (retencion_meses_alertas): notification_log por fecha y las alertas cerradas o descartadas por su última
   actualización, con su historial; una alerta abierta nunca se borra.
 - ejecuciones (retencion_meses_ejecuciones): execution_log «ok» o «error» con sus intentos, errores de calidad y filas
@@ -203,7 +203,7 @@ class Regla:
 _PLANTILLA_SIN_REFERENCIA = ("NOT EXISTS (SELECT 1 FROM ai_frecuencias.{tabla} r WHERE r.execution_id = "
                              "t.execution_id)")
 _REFERENCIAS_EJECUCION = ("marca_agua_ruta", "marca_agua_tabla", "model_registry", "demanda_observada", "prediction",
-                          "recommendation", "alert", "notification_log", "respuesta_reto",
+                          "prediction_corto_plazo", "recommendation", "alert", "notification_log", "respuesta_reto",
                           "segmento_estadistica_refresco")
 _PLANTILLA_EJECUCIONES = """WITH base AS (
     SELECT t.execution_id FROM ai_frecuencias.execution_log t
@@ -230,6 +230,10 @@ REGLAS: tuple[Regla, ...] = (
           "(SELECT 1 FROM ai_frecuencias.recommendation r WHERE r.prediction_id = t.prediction_id)",
           "predicciones por fecha de creación (su foto de variables se borra con ellas; nunca una que sostiene una "
           "recomendación que se conserva)"),
+    Regla("resultados", "prediction_corto_plazo", "prediction_id", "retencion_meses_resultados",
+          "SELECT t.prediction_id FROM ai_frecuencias.prediction_corto_plazo t WHERE t.creado_en < :corte",
+          "pronósticos de corto plazo por fecha de creación (la fila de la ruta, las de sus sentidos y las de sus "
+          "segmentos)"),
     Regla("resultados", "respuesta_reto", "id", "retencion_meses_resultados",
           "SELECT t.id FROM ai_frecuencias.respuesta_reto t WHERE t.generado_en < :corte",
           "fotos de la respuesta del reto por fecha de cálculo"),

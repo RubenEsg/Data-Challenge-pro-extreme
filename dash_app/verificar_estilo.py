@@ -27,7 +27,9 @@ import tokens as T  # noqa: E402
 
 CSS = AQUI / "assets" / "estilos.css"
 BASE_PY = [AQUI / "ui.py", AQUI / "tokens.py", AQUI / "app.py", AQUI / "controles.py", AQUI / "cliente_api.py"]
-PAGINAS_PY = sorted((AQUI / "paginas").glob("*.py"))
+# las secciones que una página arma desde otro módulo cumplen las mismas reglas que las páginas
+VISTAS_PY = [AQUI / "corto_plazo_vista.py"]
+PAGINAS_PY = sorted((AQUI / "paginas").glob("*.py")) + VISTAS_PY
 # El Dash ya no copia app/tokens.css: sigue la referencia que eligió el usuario (DISENO.md §1). Tokens que deben existir:
 NUEVOS = ["--serie-modelo", "--serie-modelo-tinte", "--serie-hoy", "--serie-hoy-tinte", "--serie-real", "--serie-recorta",
           "--serie-recorta-tinte", "--serie-contexto", "--franja", "--lavado", "--blanco", "--tinta-tenue", "--tinta-inversa",
@@ -314,14 +316,15 @@ def comprobar_python(inf, con_paginas=True):
             inf.falla(g, f"tamaño de letra escrito a mano en la línea {codigo.count(chr(10), 0, m.start()) + 1} (usa las clases o ui.fuente_svg)")
             mal += 1
         compat = _rango_compat(fuente) if py.name == "ui.py" else None
-        for patron, que in (PROHIBIDOS + PROHIBIDOS_PAGINAS if py.parent.name == "paginas" else PROHIBIDOS):
+        es_pagina = py.parent.name == "paginas" or py in VISTAS_PY
+        for patron, que in (PROHIBIDOS + PROHIBIDOS_PAGINAS if es_pagina else PROHIBIDOS):
             for m in re.finditer(patron, codigo, re.S):
                 linea = codigo.count("\n", 0, m.start()) + 1
                 if compat and compat[0] <= linea <= compat[1]:
                     continue
                 inf.falla(g, f"{que} · línea {linea}")
                 mal += 1
-        if py.parent.name == "paginas":
+        if es_pagina:
             malas, sueltas = _cifras_a_mano(ast.parse(fuente))
             for linea, texto in malas:
                 inf.falla(g, f"cifra escrita a mano en la línea {linea}: «{texto}»")

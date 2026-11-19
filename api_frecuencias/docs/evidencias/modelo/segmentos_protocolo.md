@@ -7,8 +7,10 @@
 > con la regla de Extreme (en los 58 días que trae la tabla, el 99,975 % de las subidas cae en el mismo segmento). El
 > modelo se entrenó con 2023 y 2024, se eligió con enero a junio de 2025 y se probó una sola vez con julio a diciembre
 > de 2025. A 60 minutos, el error por segmento (WAPE) es 37,63 % frente a 43,61 % del promedio por día y hora, y el
-> modelo gana en 332 de los 384 segmentos con subidas. Ese modelo todavía no está en la API: llevarlo es el primer
-> pendiente de `PLAN_EVOLUCION.md` (sección 7).
+> modelo gana en 332 de los 384 segmentos con subidas. Desde el 18 de noviembre de 2026 la API sirve ese modelo
+> (`POST /api/v1/predictions/corto-plazo`) y reproduce las predicciones de su prueba
+> (`corto_plazo_reproduccion.md`, en esta carpeta). El modelo de 37 días de este protocolo queda para repartir el
+> pronóstico horario (`GET /api/v1/predictions/segmentos`).
 
 Especificación v1.5: §3.1 «Predicción de demanda: por ruta, sentido, segmento y franja horaria → pronóstico e intervalo
 de confianza», §9.1 «pronóstico supervisado … por ruta, sentido, segmento y ventana temporal», §9.3 (división

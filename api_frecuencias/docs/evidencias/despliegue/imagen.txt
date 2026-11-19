@@ -1,7 +1,7 @@
-Imagen de la API (sobusa_limpio-api) · 2026-11-13 23:10:56 -0500
-  id sha256:8cff93f3b129…, creada 2026-11-14T04:04:43.680030833Z
-  tamaño (contenido de las capas, docker image inspect .Size): 369.2 MB
-  tamaño en disco (docker images): 1.52GB
+Imagen de la API (sobusa_limpio-api) · 2026-11-18 20:49:52 -0500
+  id sha256:b2d2e1d4bddf…, creada 2026-11-19T01:44:30.514231285Z
+  tamaño (contenido de las capas, docker image inspect .Size): 460.0 MB
+  tamaño en disco (docker images): 1.72GB
   usuario: sobusa; puerto: ['8000/tcp']; comando: ['sh', '-c', 'alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000']
   HEALTHCHECK: ['CMD-SHELL', 'python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen(\'http://127.0.0.1:8000/health\', timeout=4).status == 200 else 1)"']
   variables de la imagen (ninguna secreta; se omiten PATH y las de verificación de la imagen base): ['LANG=C.UTF-8', 'PYTHON_VERSION=3.11.18', 'PYTHONDONTWRITEBYTECODE=1', 'PYTHONUNBUFFERED=1', 'PIP_DISABLE_PIP_VERSION_CHECK=1', 'TZ=America/Bogota', 'DATA_DIR=/app/datos']
@@ -9,11 +9,11 @@ Imagen de la API (sobusa_limpio-api) · 2026-11-13 23:10:56 -0500
 $ dentro de la imagen: python, usuario y tamaños
   Python 3.11.18
   uid=10001(sobusa) gid=10001(sobusa) groups=10001(sobusa)
-  957M	/usr/local/lib/python3.11/site-packages
-  1.7M	/app/app
-  9.3M	/app/datos
+  973M	/usr/local/lib/python3.11/site-packages
+  1.8M	/app/app
+  54M	/app/datos
   1.2M	/app/scripts
-  148K	/app/alembic
+  152K	/app/alembic
   24 MB /usr/local/lib/python3.11/site-packages/sqlalchemy
   27 MB /usr/local/lib/python3.11/site-packages/numpy.libs
   29 MB /usr/local/lib/python3.11/site-packages/scipy.libs
@@ -32,14 +32,15 @@ $ docker history (capas)
   0B	HEALTHCHECK {Test:[CMD-SHELL python -c "impo…
   0B	EXPOSE [8000/tcp]
   0B	USER sobusa
-  9.76MB	RUN /bin/sh -c useradd --create-home --uid 1…
-  9.7MB	COPY datos ./datos # buildkit
-  1.2MB	COPY scripts ./scripts # buildkit
-  1.72MB	COPY app ./app # buildkit
-  160kB	COPY alembic ./alembic # buildkit
+  55.8MB	RUN /bin/sh -c useradd --create-home --uid 1…
+  55.7MB	COPY datos ./datos # buildkit
+  1.24MB	COPY scripts ./scripts # buildkit
+  1.8MB	COPY app ./app # buildkit
+  164kB	COPY alembic ./alembic # buildkit
   16.4kB	COPY alembic.ini pyproject.toml ./ # buildkit
-  989MB	RUN /bin/sh -c pip install --only-binary=:al…
+  1.01GB	RUN /bin/sh -c pip install --only-binary=:al…
   12.3kB	COPY requirements.txt . # buildkit
+  844kB	RUN /bin/sh -c apt-get update     && apt-get…
   8.19kB	WORKDIR /app
   0B	ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFER…
   0B	CMD ["python3"]
@@ -54,5 +55,5 @@ $ docker history (capas)
   87.7MB	# debian.sh --arch 'amd64' out/ 'trixie' '@1…
 
 Herramientas de desarrollo dentro de la imagen (debe ser []): []
-requisitos_congelados.txt regenerado con el pip freeze de la imagen: 72 paquetes
-pip freeze de la imagen frente a requirements.txt: 72 instalados, 72 fijados, diferencias [] (idénticos)
+requisitos_congelados.txt regenerado con el pip freeze de la imagen: 74 paquetes
+pip freeze de la imagen frente a requirements.txt: 74 instalados, 74 fijados, diferencias [] (idénticos)

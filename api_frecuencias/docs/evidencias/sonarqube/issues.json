@@ -1,13 +1,13 @@
 {
  "servidor": "SonarQube 26.11.0.134175 (Community Build, Docker)",
  "proyecto": "sobusa-api-frecuencias",
- "generado_en": "2026-11-14T00:56:02-05:00",
+ "generado_en": "2026-11-18T21:30:35-05:00",
  "ultimo_analisis": {
-  "key": "9c2e3897-468f-4a2c-a614-0ae5f006698b",
-  "date": "2026-11-14T05:55:19+0000",
+  "key": "f175cf26-8f4a-45aa-8ee4-4aded7e9b63f",
+  "date": "2026-11-19T02:29:35+0000",
   "events": [
    {
-    "key": "75d1b5f5-52d3-461e-a700-0222fe2ff41f",
+    "key": "805e59a6-0a80-4629-8355-16f5eddd6c70",
     "category": "VERSION",
     "name": "1.0.0"
    }
@@ -16,7 +16,7 @@
   "manualNewCodePeriodBaseline": false,
   "detectedCI": "undetected"
  },
- "total_abiertos": 1666,
+ "total_abiertos": 1741,
  "total_aceptados": 1,
  "facetas": [
   {
@@ -24,11 +24,11 @@
    "values": [
     {
      "val": "MAJOR",
-     "count": 1635
+     "count": 1703
     },
     {
      "val": "MINOR",
-     "count": 31
+     "count": 38
     },
     {
      "val": "INFO",
@@ -49,7 +49,7 @@
    "values": [
     {
      "val": "CODE_SMELL",
-     "count": 1666
+     "count": 1741
     },
     {
      "val": "BUG",
@@ -66,7 +66,7 @@
    "values": [
     {
      "val": "MAINTAINABILITY",
-     "count": 1665
+     "count": 1740
     },
     {
      "val": "SECURITY",
@@ -87,11 +87,11 @@
     },
     {
      "val": "MEDIUM",
-     "count": 1637
+     "count": 1705
     },
     {
      "val": "LOW",
-     "count": 32
+     "count": 39
     },
     {
      "val": "INFO",
@@ -108,11 +108,11 @@
    "values": [
     {
      "val": "python:S9073",
-     "count": 1576
+     "count": 1639
     },
     {
      "val": "python:S5778",
-     "count": 30
+     "count": 34
     },
     {
      "val": "python:S117",
@@ -125,6 +125,10 @@
     {
      "val": "python:S7632",
      "count": 8
+    },
+    {
+     "val": "python:S8410",
+     "count": 7
     },
     {
      "val": "python:S3358",
@@ -147,16 +151,16 @@
      "count": 3
     },
     {
+     "val": "python:S1172",
+     "count": 2
+    },
+    {
      "val": "python:S7503",
      "count": 2
     },
     {
      "val": "python:S5869",
      "count": 2
-    },
-    {
-     "val": "python:S1172",
-     "count": 1
     },
     {
      "val": "python:S1542",
@@ -186,6 +190,1822 @@
   }
  ],
  "issues": [
+  {
+   "key": "88263c59-5407-4000-8af8-e8e502da984d",
+   "rule": "python:S8410",
+   "severity": "MINOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "LOW"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:app/routers/pronostico_corto_plazo.py",
+   "line": 113,
+   "message": "Use \"Annotated\" type hints for FastAPI dependency injection",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "convention",
+    "fastapi",
+    "type-hint"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "8370e3fc-3e8c-4ce3-8724-77d15c3cd44f",
+   "rule": "python:S8410",
+   "severity": "MINOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "LOW"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:app/routers/pronostico_corto_plazo.py",
+   "line": 131,
+   "message": "Use \"Annotated\" type hints for FastAPI dependency injection",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "convention",
+    "fastapi",
+    "type-hint"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "97641680-84ba-4c58-9d24-851a20ffb8e9",
+   "rule": "python:S8410",
+   "severity": "MINOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "LOW"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:app/routers/pronostico_corto_plazo.py",
+   "line": 202,
+   "message": "Use \"Annotated\" type hints for FastAPI dependency injection",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "convention",
+    "fastapi",
+    "type-hint"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "abbe9ac9-0c74-4aa1-8914-4c6271052863",
+   "rule": "python:S8410",
+   "severity": "MINOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "LOW"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:app/routers/pronostico_corto_plazo.py",
+   "line": 202,
+   "message": "Use \"Annotated\" type hints for FastAPI dependency injection",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "convention",
+    "fastapi",
+    "type-hint"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "ca89542c-8b2e-4647-91aa-d29da824f925",
+   "rule": "python:S8410",
+   "severity": "MINOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "LOW"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:app/routers/pronostico_corto_plazo.py",
+   "line": 203,
+   "message": "Use \"Annotated\" type hints for FastAPI dependency injection",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "convention",
+    "fastapi",
+    "type-hint"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "280ef5fb-d187-4163-ae8e-9c69cd00cec8",
+   "rule": "python:S8410",
+   "severity": "MINOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "LOW"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:app/routers/pronostico_corto_plazo.py",
+   "line": 209,
+   "message": "Use \"Annotated\" type hints for FastAPI dependency injection",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "convention",
+    "fastapi",
+    "type-hint"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "30db19cd-6bbc-4f35-86ae-a4567f989f41",
+   "rule": "python:S8410",
+   "severity": "MINOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "LOW"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:app/routers/pronostico_corto_plazo.py",
+   "line": 210,
+   "message": "Use \"Annotated\" type hints for FastAPI dependency injection",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "convention",
+    "fastapi",
+    "type-hint"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "1bf917b0-f6bd-4963-9373-da2a116f59cb",
+   "rule": "python:S1172",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:app/servicios/variables_corto_plazo.py",
+   "line": 187,
+   "message": "Remove the unused function parameter \"v\".",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "unused"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "fc2cf814-e242-4f9b-8068-d76b73590e7b",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 46,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "7088c698-cbb3-4e8b-a6a8-c08c164ca592",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 47,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "d743fdef-ef50-47ab-af8c-1f5e4d7dc528",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 48,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "5fad6b9d-881b-4c78-ac8d-f7094d1c9b7a",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 58,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "db14e217-8105-49d9-8bc5-19933ce399b5",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 70,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "adb2e3a7-b142-41d5-ba29-d0abfc07c42d",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 85,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "7654f0e8-f77f-4659-aa05-b7a682a467cd",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 86,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "9735fd5a-d45c-40a4-8162-8b3a25f90432",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 87,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "dc43ded1-2326-472b-93d6-af101b63e0af",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 88,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "3f48335e-909f-4aff-b716-6a84f766c697",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 93,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "0a59d53f-b3e6-4474-9b91-4511a766c560",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 101,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "2573349c-9856-4423-ac8b-cc87ec1249c0",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 103,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "9eebb3b9-ef94-4119-8cf2-c6e08df74d2a",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 108,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "2a6afbd8-a845-4931-b9b5-cb164fc50740",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 109,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "bdbfdce4-f1de-4156-84d5-7f1bce29d175",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 111,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "c9e2ccaf-6b62-4de1-be7d-9fe9e2b5511d",
+   "rule": "python:S5778",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 113,
+   "message": "Refactor this exception test to have only one invocation possibly throwing an exception.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "tests",
+    "pytest",
+    "unittest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "553626e7-792f-4333-ae32-31f434a9e38c",
+   "rule": "python:S5778",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/datos_ml/test_corto_plazo_modelo.py",
+   "line": 115,
+   "message": "Refactor this exception test to have only one invocation possibly throwing an exception.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "tests",
+    "pytest",
+    "unittest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "4b13616c-e229-4036-8e14-1da0fdb9a155",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 32,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "750d5546-e8e5-4a3b-ae1b-18d9b3fb59ce",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 33,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "34d94014-14db-487f-b137-4772c5dd3b41",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 34,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "ddf80756-fc53-49a8-b114-ffec8c3ecf24",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 35,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "97e6e599-75b8-489d-83ae-5add334062e8",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 37,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "58d8a32b-8f2c-4a00-be68-94839334aba1",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 38,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "7543a4b4-d634-422a-863a-379e0c0b94a5",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 41,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "215148df-906f-4d34-b470-e87123c8dd99",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 46,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "91fc89ab-8363-43dd-9e53-aff2bb26b6ec",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 47,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "6b91ee36-e238-4fc5-9683-87452fd6ddc1",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 48,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "46468e8b-3021-461c-b715-d02ece1a934e",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 56,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "743a006f-b5d6-46aa-932c-8b5ef9523952",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 60,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "9205f7a4-733b-46ad-8a8e-b20fc3f5a187",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 62,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "9de07c37-af29-44f7-abfd-131d641e7686",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 67,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "2678aec7-a067-4c19-9694-15563d9eeea6",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 74,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "82a964ca-8fbe-4abe-ab46-8627d7db5de5",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 76,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "5222e575-fda0-43d1-a614-e3505ef4341c",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 78,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "a4a2c1b6-6222-49ea-b0c1-971655ca65e7",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 89,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "f4d85ca3-6410-45fb-b20e-201cb2a82c0e",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 91,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "5200f3a2-8cde-4976-afef-a8939a79da00",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 93,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "da6d0fac-cec5-440a-9e9d-6fdfce4023d6",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 95,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "eaffd70c-79af-4c4b-9b77-79473d0dfc44",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 97,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "8497df33-7961-411f-b281-e8ae6e8f3c70",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 99,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "3ffebd07-025b-40bd-9394-4c4e4a432ac0",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 107,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "1479d569-a718-43db-861b-34e516b974ff",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 136,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "a809f1f3-869a-49bc-ba19-73c04ae3a94b",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 137,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "28e407db-510e-4552-b537-3120e489fc7d",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 138,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "fe2c4da1-eee3-45cd-b3ca-52204556c35d",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/integracion/test_corto_plazo_api.py",
+   "line": 142,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "ca7fe7c9-f05e-448b-98b4-f2bee8704b93",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 72,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "9e983f24-c731-4197-8f9e-b8d87a921dca",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 73,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "5b7b67a9-1b14-4680-8c84-59c6ec5a0b6c",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 84,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "3349c098-53ad-484f-b24b-ed57afbb68fb",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 85,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "830c8e16-599f-4cec-89c1-078f70892bfe",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 92,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "531c7246-c3f7-46f4-b6c7-1ac07adeab70",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 98,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "de32dbcc-87db-4d45-9d5e-7f2638533035",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 115,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "c6f54a51-57b7-4c55-a8a0-496e1a3294de",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 123,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "24b0c01e-fb51-4426-ad64-d985800bb581",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 128,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "567e066f-34c5-4152-bb90-94be3a4620ec",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 130,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "b2a355a1-892b-4d59-bc2e-03525fb7407c",
+   "rule": "python:S5778",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 141,
+   "message": "Refactor this exception test to have only one invocation possibly throwing an exception.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "tests",
+    "pytest",
+    "unittest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "4361b45f-2ffc-4f03-9bda-455499c7777e",
+   "rule": "python:S5778",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 143,
+   "message": "Refactor this exception test to have only one invocation possibly throwing an exception.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "tests",
+    "pytest",
+    "unittest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "bc72e447-8764-4da8-9f09-3bd2bc90b737",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 171,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "9ccd96cc-ace6-4eab-bdcc-b9dfce70c008",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 173,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "ac57c177-142a-4758-aaab-007ff6f1b351",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 175,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "3ad5646f-f568-4a9e-bd8b-7f8230ed19bb",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 176,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "42870ab0-ac3f-4873-9cd0-94228f8587ac",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 178,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "38ce4ea0-72ea-4b89-83ff-933c1cdacc1e",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 197,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "107ed5c0-c668-45f8-91f6-838d3e9c642e",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 198,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "ff0f65ab-4376-4121-9ada-6430a9cf3266",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_corto_plazo.py",
+   "line": 199,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "d0136edd-9a2e-4ea2-b513-7b13d5902234",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_historial_desarrollo.py",
+   "line": 103,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "fba43959-14aa-45d7-a242-e13fc260003b",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
+   "line": 248,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "8c0a8a35-d869-47c5-8df8-8694a5f5cfbb",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
+   "line": 285,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "624c22c7-7db2-45ee-9771-cc4c312ea4f1",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
+   "line": 546,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
+  {
+   "key": "692741b9-ba09-466d-8e37-0ebadf69c859",
+   "rule": "python:S9073",
+   "severity": "MAJOR",
+   "type": "CODE_SMELL",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "MEDIUM"
+    }
+   ],
+   "component": "sobusa-api-frecuencias:tests/unit/test_onnx.py",
+   "line": 45,
+   "message": "Split this composite assertion into separate assertions.",
+   "status": "OPEN",
+   "issueStatus": "OPEN",
+   "resolution": null,
+   "cleanCodeAttribute": "CLEAR",
+   "tags": [
+    "pytest"
+   ],
+   "effort": "5min"
+  },
   {
    "key": "2ff9fbba-3035-4362-b35e-b53e4134bc79",
    "rule": "python:S9073",
@@ -2705,7 +4525,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:app/servicios/ejecucion.py",
-   "line": 1832,
+   "line": 1860,
    "message": "Fix the syntax of this issue suppression comment.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -2726,7 +4546,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:app/servicios/ejecucion.py",
-   "line": 1905,
+   "line": 1933,
    "message": "Replace this constructor call with a literal.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -2914,7 +4734,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:app/servicios/retencion.py",
-   "line": 537,
+   "line": 541,
    "message": "Either remove or fill this block of code.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -2937,7 +4757,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:app/servicios/retencion.py",
-   "line": 637,
+   "line": 641,
    "message": "Replace this constructor call with a literal.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -2979,7 +4799,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 391,
+   "line": 404,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -3002,7 +4822,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 394,
+   "line": 407,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -3025,7 +4845,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 396,
+   "line": 409,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -3048,7 +4868,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 399,
+   "line": 412,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -16074,7 +17894,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_historial_desarrollo.py",
-   "line": 104,
+   "line": 105,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -20199,7 +22019,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_respuesta.py",
-   "line": 480,
+   "line": 481,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -20222,7 +22042,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_respuesta.py",
-   "line": 482,
+   "line": 483,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -20245,7 +22065,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_respuesta.py",
-   "line": 505,
+   "line": 506,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -20268,7 +22088,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_respuesta.py",
-   "line": 510,
+   "line": 511,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -20291,7 +22111,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_respuesta.py",
-   "line": 514,
+   "line": 515,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -20431,7 +22251,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_retencion.py",
-   "line": 234,
+   "line": 235,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -20454,7 +22274,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_retencion.py",
-   "line": 260,
+   "line": 261,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -20477,7 +22297,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_retencion.py",
-   "line": 270,
+   "line": 271,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -21748,7 +23568,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:app/servicios/ejecucion.py",
-   "line": 2115,
+   "line": 2144,
    "message": "Fix the syntax of this issue suppression comment.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -21769,7 +23589,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:app/servicios/ejecucion.py",
-   "line": 2173,
+   "line": 2202,
    "message": "Replace this constructor call with a literal.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -21855,7 +23675,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 350,
+   "line": 363,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -21878,7 +23698,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 356,
+   "line": 369,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -21901,7 +23721,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 365,
+   "line": 378,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -21924,7 +23744,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 414,
+   "line": 427,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -21947,7 +23767,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 422,
+   "line": 435,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -21970,7 +23790,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 425,
+   "line": 438,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -21993,7 +23813,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 435,
+   "line": 448,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -22016,7 +23836,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 441,
+   "line": 454,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -22039,7 +23859,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 443,
+   "line": 456,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -22062,7 +23882,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 465,
+   "line": 478,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -22085,7 +23905,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 468,
+   "line": 481,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -22108,7 +23928,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 670,
+   "line": 683,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -24615,7 +26435,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/integracion/test_seguridad.py",
-   "line": 185,
+   "line": 186,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -24638,7 +26458,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/integracion/test_seguridad.py",
-   "line": 186,
+   "line": 187,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -26204,7 +28024,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 464,
+   "line": 478,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -26227,7 +28047,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 466,
+   "line": 480,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -26250,7 +28070,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 473,
+   "line": 487,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -26273,7 +28093,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 478,
+   "line": 492,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -26296,7 +28116,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 496,
+   "line": 510,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -26319,7 +28139,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 497,
+   "line": 511,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -26342,7 +28162,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 499,
+   "line": 513,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -26365,7 +28185,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 525,
+   "line": 548,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -26388,7 +28208,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 553,
+   "line": 576,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -26411,7 +28231,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 565,
+   "line": 588,
    "message": "Refactor this exception test to have only one invocation possibly throwing an exception.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -26436,7 +28256,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 583,
+   "line": 606,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -27887,7 +29707,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_respuesta.py",
-   "line": 400,
+   "line": 401,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -27910,7 +29730,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_respuesta.py",
-   "line": 407,
+   "line": 408,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -27933,7 +29753,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_respuesta.py",
-   "line": 408,
+   "line": 409,
    "message": "Refactor this exception test to have only one invocation possibly throwing an exception.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -27958,7 +29778,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_respuesta.py",
-   "line": 417,
+   "line": 418,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -27981,7 +29801,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 598,
+   "line": 611,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -28004,7 +29824,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 769,
+   "line": 782,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -28027,7 +29847,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 771,
+   "line": 784,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -28188,7 +30008,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 259,
+   "line": 272,
    "message": "Unify assertion argument order in this file; both \"actual first\" and \"expected first\" conventions are used.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -28212,7 +30032,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 606,
+   "line": 619,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -28235,7 +30055,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 706,
+   "line": 719,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -28258,7 +30078,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 708,
+   "line": 721,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -28281,7 +30101,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 717,
+   "line": 730,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -28304,7 +30124,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 720,
+   "line": 733,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -28925,7 +30745,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 298,
+   "line": 305,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -29364,7 +31184,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:app/seguridad.py",
-   "line": 175,
+   "line": 176,
    "message": "Use asynchronous features in this function or remove the `async` keyword.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -29387,7 +31207,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:app/seguridad.py",
-   "line": 199,
+   "line": 200,
    "message": "Remove the unused function parameter \"request\".",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -29414,7 +31234,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:app/seguridad.py",
-   "line": 199,
+   "line": 200,
    "message": "Use asynchronous features in this function or remove the `async` keyword.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -29613,7 +31433,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:app/servicios/ejecucion.py",
-   "line": 2417,
+   "line": 2446,
    "message": "Replace this constructor call with a literal.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -29634,7 +31454,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:app/servicios/ejecucion.py",
-   "line": 2474,
+   "line": 2503,
    "message": "Replace this constructor call with a literal.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -30001,7 +31821,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:app/servicios/variables.py",
-   "line": 177,
+   "line": 252,
    "message": "Specify the \"validate\" parameter of this merge.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -30048,7 +31868,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 324,
+   "line": 337,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -30071,7 +31891,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 497,
+   "line": 510,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -30094,7 +31914,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 521,
+   "line": 534,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -30117,7 +31937,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 526,
+   "line": 539,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -30140,7 +31960,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/contrato/test_contrato_openapi.py",
-   "line": 567,
+   "line": 580,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -32948,7 +34768,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/integracion/test_seguridad.py",
-   "line": 110,
+   "line": 111,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -32971,7 +34791,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/integracion/test_seguridad.py",
-   "line": 159,
+   "line": 160,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -32994,7 +34814,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/integracion/test_seguridad.py",
-   "line": 163,
+   "line": 164,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36117,7 +37937,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 235,
+   "line": 238,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36140,30 +37960,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 238,
-   "message": "Split this composite assertion into separate assertions.",
-   "status": "OPEN",
-   "issueStatus": "OPEN",
-   "resolution": null,
-   "cleanCodeAttribute": "CLEAR",
-   "tags": [
-    "pytest"
-   ],
-   "effort": "5min"
-  },
-  {
-   "key": "25333ab0-17f7-4408-a0f8-a0d468e8442d",
-   "rule": "python:S9073",
-   "severity": "MAJOR",
-   "type": "CODE_SMELL",
-   "impacts": [
-    {
-     "softwareQuality": "MAINTAINABILITY",
-     "severity": "MEDIUM"
-    }
-   ],
-   "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 241,
+   "line": 243,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36186,7 +37983,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 245,
+   "line": 252,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36209,7 +38006,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 247,
+   "line": 254,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36232,30 +38029,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 268,
-   "message": "Split this composite assertion into separate assertions.",
-   "status": "OPEN",
-   "issueStatus": "OPEN",
-   "resolution": null,
-   "cleanCodeAttribute": "CLEAR",
-   "tags": [
-    "pytest"
-   ],
-   "effort": "5min"
-  },
-  {
-   "key": "2a2ffd29-52bc-4f02-8392-ade0821a480d",
-   "rule": "python:S9073",
-   "severity": "MAJOR",
-   "type": "CODE_SMELL",
-   "impacts": [
-    {
-     "softwareQuality": "MAINTAINABILITY",
-     "severity": "MEDIUM"
-    }
-   ],
-   "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 278,
+   "line": 275,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36278,7 +38052,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 296,
+   "line": 303,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36301,7 +38075,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 305,
+   "line": 312,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36324,7 +38098,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 308,
+   "line": 315,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36347,7 +38121,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 346,
+   "line": 353,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36370,7 +38144,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 347,
+   "line": 354,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36393,7 +38167,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 359,
+   "line": 366,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36416,7 +38190,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 367,
+   "line": 374,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36439,7 +38213,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 369,
+   "line": 376,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36462,7 +38236,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 381,
+   "line": 388,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36485,7 +38259,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 423,
+   "line": 437,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36508,7 +38282,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 427,
+   "line": 441,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36531,7 +38305,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 440,
+   "line": 454,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36554,7 +38328,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 448,
+   "line": 462,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -36577,7 +38351,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_inferencia.py",
-   "line": 454,
+   "line": 468,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",
@@ -37210,29 +38984,6 @@
    "effort": "5min"
   },
   {
-   "key": "7e56b928-f0ce-44ef-8c00-8b255049a697",
-   "rule": "python:S9073",
-   "severity": "MAJOR",
-   "type": "CODE_SMELL",
-   "impacts": [
-    {
-     "softwareQuality": "MAINTAINABILITY",
-     "severity": "MEDIUM"
-    }
-   ],
-   "component": "sobusa-api-frecuencias:tests/unit/test_onnx.py",
-   "line": 44,
-   "message": "Split this composite assertion into separate assertions.",
-   "status": "OPEN",
-   "issueStatus": "OPEN",
-   "resolution": null,
-   "cleanCodeAttribute": "CLEAR",
-   "tags": [
-    "pytest"
-   ],
-   "effort": "5min"
-  },
-  {
    "key": "f1f1952b-e842-4ab8-9027-c54fdd834644",
    "rule": "python:S9073",
    "severity": "MAJOR",
@@ -37244,7 +38995,7 @@
     }
    ],
    "component": "sobusa-api-frecuencias:tests/unit/test_onnx.py",
-   "line": 63,
+   "line": 64,
    "message": "Split this composite assertion into separate assertions.",
    "status": "OPEN",
    "issueStatus": "OPEN",

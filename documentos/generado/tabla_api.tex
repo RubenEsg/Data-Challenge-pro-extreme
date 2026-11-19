@@ -1,4 +1,4 @@
-% Generado por documentos/tabla_api.py desde la aplicación FastAPI (app.main): 69 operaciones. No editar a mano.
+% Generado por documentos/tabla_api.py desde la aplicación FastAPI (app.main): 75 operaciones. No editar a mano.
 \begin{longtable}{@{}l>{\raggedright\arraybackslash}p{5.3cm}l>{\raggedright\arraybackslash}p{7.2cm}@{}}
 \toprule Método & Ruta (bajo \texttt{/api/v1}) & Rol mínimo & Finalidad \\ \midrule \endhead
 \bottomrule \endfoot
@@ -7,6 +7,12 @@
 \texttt{GET} & \path{/frequency/executions/{execution_id}} & operador & Corte, estado, métricas y errores \\
 \texttt{GET} & \path{/frequency/executions/{execution_id}/errors} & operador & Errores de calidad de la ejecución por lote, fila, llave y causa \\
 \texttt{GET} & \path{/predictions/segmentos} & operador & Pronóstico por segmento y sentido (modelo de segmentos versionado sobre el pronóstico de… \\
+\texttt{POST} & \path{/predictions/corto-plazo} & analista & Pronóstico a 30, 60 o 120 minutos por ruta, sentido y segmento (se guarda) \\
+\texttt{GET} & \path{/predictions/corto-plazo} & operador & Consultar pronósticos de corto plazo guardados por filtros \\
+\texttt{GET} & \path{/predictions/corto-plazo/calcular} & operador & Pronóstico a 30, 60 o 120 minutos sin guardarlo (consulta del tablero) \\
+\texttt{GET} & \path{/predictions/corto-plazo/dia} & operador & La curva del día: el pronóstico de cada media hora de 04:00 a 21:00, por ruta y sentido \\
+\texttt{GET} & \path{/predictions/corto-plazo/modelo} & operador & Versión activa del modelo de corto plazo: artefactos, datos, prueba reservada y cobertura \\
+\texttt{GET} & \path{/predictions/corto-plazo/export} & operador & Exportar pronósticos de corto plazo filtrados (CSV o XLSX) \\
 \texttt{POST} & \path{/predictions/run} & analista & Inferencia para una ruta y un horizonte (incluye la recomendación derivada) \\
 \texttt{GET} & \path{/predictions} & operador & Consultar pronósticos por filtros \\
 \texttt{GET} & \path{/predictions/export} & operador & Exportar pronósticos filtrados (CSV o XLSX) \\

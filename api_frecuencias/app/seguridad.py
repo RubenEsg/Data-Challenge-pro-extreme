@@ -47,6 +47,7 @@ POLITICA: dict[tuple[str, str], str] = {
     ("POST", "/frequency/executions"): "analista",
     ("GET", "/frequency/watermarks"): "operador",            # RNF-005: marcas de agua por proceso y ruta
     ("POST", "/predictions/run"): "analista",
+    ("POST", "/predictions/corto-plazo"): "analista",          # RF-005: pronóstico de 30, 60 y 120 min (se guarda)
     ("POST", "/recommendations/calculate"): "analista",
     ("POST", "/respuesta/calcular"): "analista",
     ("POST", "/segmentos/estadisticas/refrescar"): "analista",

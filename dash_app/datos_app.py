@@ -118,6 +118,16 @@ def modelo_producto():
         return {}
 
 
+@lru_cache(maxsize=1)
+def corto_plazo():
+    """datos/corto_plazo.json: la prueba reservada del pronóstico a 30, 60 y 120 minutos por ruta, sentido y segmento
+    (experimento E14, el modelo de /api/v1/predictions/corto-plazo), por nivel y horizonte. Vacío si falta."""
+    try:
+        return json.loads((DATOS / "corto_plazo.json").read_text(encoding="utf-8"))
+    except OSError:
+        return {}
+
+
 def fuentes_producto(*claves):
     """Archivos de donde salen esas cifras de modelo_producto.json, sin repetir."""
     org = modelo_producto().get("origen") or {}

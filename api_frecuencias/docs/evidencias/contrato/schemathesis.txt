@@ -1,13 +1,13 @@
 Schemathesis 4.33.1: contrato por propiedades en TODAS las operaciones del OpenAPI (spec v1.5 §14.1 «Contrato»)
-Corrida: 11-11-2026, 04:47:11 a 04:49:36 (hora de Bogotá), 145.1 s; base local de pruebas PostgreSQL 14 + PostGIS 3.4; clave admin; 5 ejemplos por operación (SCHEMATHESIS_EJEMPLOS=5, derandomize). Código de salida de pytest: 0.
+Corrida: 18-11-2026, 21:34:50 a 21:37:40 (hora de Bogotá), 170.0 s; base local de pruebas PostgreSQL 14 + PostGIS 3.4; clave admin; 5 ejemplos por operación (SCHEMATHESIS_EJEMPLOS=5, derandomize). Código de salida de pytest: 0.
 Prueba: tests/contrato/test_schemathesis.py::test_ninguna_entrada_produce_error_5xx_y_todo_cumple_el_contrato
 Chequeos en cada respuesta: not_a_server_error, status_code_conformance, content_type_conformance,
 response_schema_conformance y response_headers_conformance (un 503 con el error uniforme solo se acepta si la
 operación lo declara). Sin lista de defectos conocidos ni xfail.
 Regenerar: python docs/evidencias/contrato/generar_evidencia_contrato.py (junit en schemathesis_junit.xml).
 
-Resultado junit: 70 casos (1 prueba + 69 subpruebas, una por operación), 0 fallas, 0 errores, 0 omitidas.
-Operaciones sin ninguna falla: 69 de 69.
+Resultado junit: 76 casos (1 prueba + 75 subpruebas, una por operación), 0 fallas, 0 errores, 0 omitidas.
+Operaciones sin ninguna falla: 75 de 75.
 
 Operación                                                      Resultado
 POST /api/v1/frequency/executions                              ok
@@ -15,6 +15,12 @@ GET /api/v1/frequency/executions                               ok
 GET /api/v1/frequency/executions/{execution_id}                ok
 GET /api/v1/frequency/executions/{execution_id}/errors         ok
 GET /api/v1/predictions/segmentos                              ok
+POST /api/v1/predictions/corto-plazo                           ok
+GET /api/v1/predictions/corto-plazo                            ok
+GET /api/v1/predictions/corto-plazo/calcular                   ok
+GET /api/v1/predictions/corto-plazo/dia                        ok
+GET /api/v1/predictions/corto-plazo/modelo                     ok
+GET /api/v1/predictions/corto-plazo/export                     ok
 POST /api/v1/predictions/run                                   ok
 GET /api/v1/predictions                                        ok
 GET /api/v1/predictions/export                                 ok

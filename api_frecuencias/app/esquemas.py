@@ -347,6 +347,183 @@ class PrediccionRespuesta(PrediccionSalida):
     explanation: list[str] = Field(default_factory=list, description="Variables principales del pronóstico")
 
 
+# ---------------------------------------------------------------- pronóstico de corto plazo (30, 60 y 120 minutos)
+DESC_CP_INSTANTE = ("Instante t del pronóstico (hora de Bogotá si no trae zona). Se redondea hacia abajo a la media "
+                    "hora; cubre de 04:00 a 21:00, las medias horas en que se eligió y se midió el modelo")
+DESC_CP_RUTA = "Ruta del catálogo (SILENCIO, CRA 54 o CL 72) o su idruta"
+
+
+class SolicitudCortoPlazo(BaseModel):
+    """RF-005: las subidas de la ventana [t, t + horizonte) por ruta, sentido y segmento, con lo observado hasta t."""
+    model_config = ConfigDict(protected_namespaces=())
+    ruta: str = Field(..., description=DESC_CP_RUTA)
+    instante: datetime = Field(..., description=DESC_CP_INSTANTE)
+    horizonte_min: Horizonte = 60
+    model_id: str | None = Field(None, description="Versión registrada del modelo de corto plazo (la activa si falta)")
+    incluir_segmentos: bool = Field(True, description="Incluir el pronóstico de cada segmento de 500 m")
+    incluir_recomendacion: bool = Field(True, description="Incluir la recomendación de §10.2 con este pronóstico")
+
+
+class CeldaCortoPlazo(BaseModel):
+    pasajeros: float | None = Field(None, description="Subidas pronosticadas en la ventana (P50 del modelo de Poisson)")
+    p10: float | None = Field(None, description="Límite inferior de la banda P10-P90 (conformal, ajustada en la "
+                                                "validación)")
+    p90: float | None = Field(None, description="Límite superior de la banda P10-P90")
+    promedio_dia_hora: float | None = Field(None, description="Línea base de §9.1: promedio de la misma ventana en "
+                                                              "las 8 semanas anteriores (mismo día y hora)")
+    ultima_semana: float | None = Field(None, description="Línea base de §9.1: la misma ventana hace 7 días")
+    real: float | None = Field(None, description="Subidas que hubo en la ventana, si ya están en los datos (solo "
+                                                 "para comparar; el pronóstico no las usa)")
+
+
+class SentidoCortoPlazo(CeldaCortoPlazo):
+    sentido: str = Field(..., description="ida o regreso (aproximado por la mitad del ciclo, supuesto S9)")
+
+
+class SegmentoCortoPlazo(CeldaCortoPlazo):
+    nro_segmento: int
+    sentido: str
+    km_inicio: float = Field(..., description="Kilómetro del ciclo en que empieza el segmento")
+    lat: float | None = None
+    lon: float | None = None
+
+
+class FactorCortoPlazo(BaseModel):
+    variable: str
+    descripcion: str
+    valor: float | None = None
+    contribucion_log: float = Field(..., description="Contribución TreeSHAP en la escala log del modelo de Poisson")
+    factor: float = Field(..., description="exp(contribución): factor por el que la variable multiplica el pronóstico")
+    sentido: Literal["sube", "baja"]
+
+
+class ExplicacionCortoPlazo(BaseModel):
+    metodo: str
+    valor_base: float | None = Field(None, description="Pronóstico sin ninguna variable (exp del valor esperado)")
+    factores: list[FactorCortoPlazo] = Field(default_factory=list)
+
+
+class ObservadoCortoPlazo(BaseModel):
+    """Lo que ya se sabe en el instante, en toda la ruta."""
+    ultimos_15_min: float | None = None
+    ultimos_30_min: float | None = None
+    ultimos_60_min: float | None = None
+    ultimas_2_horas: float | None = None
+    acumulado_hoy: float | None = None
+    habitual_acumulado: float | None = Field(None, description="Lo acumulado a esta hora en las 4 semanas anteriores")
+    salidas_ultima_hora: float | None = None
+
+
+class VentanaCortoPlazo(BaseModel):
+    desde: datetime
+    hasta: datetime
+
+
+class PronosticoCortoPlazo(Salida, CeldaCortoPlazo):
+    """Pronóstico de corto plazo de una ruta en un instante y un horizonte (RF-005, RF-006, §9.2, §9.4, §12.3)."""
+    grupo_id: uuid.UUID | None = Field(None, description="Identificador del pronóstico guardado (nulo si se calculó "
+                                                         "sin guardar)")
+    ruta: str
+    idruta: int = Field(..., description=DESC_IDRUTA)
+    instante_solicitado: datetime
+    instante: datetime = Field(..., description="Instante usado (la media hora)")
+    horizonte_min: int
+    ventana: VentanaCortoPlazo
+    franja: str | None = None
+    model_id: str
+    feature_version: str
+    data_cutoff: date | None = Field(None, description="Último día con que se entrenó el modelo")
+    en_muestra: bool = Field(..., description="La fecha está dentro del periodo de entrenamiento del modelo")
+    dia_con_datos: bool = Field(..., description="El día trae eventos de conteo (si no, lo real no se compara)")
+    generated_at: datetime | None = None
+    latencia_ms: float | None = None
+    sentidos: list[SentidoCortoPlazo] = Field(default_factory=list)
+    segmentos: list[SegmentoCortoPlazo] = Field(default_factory=list)
+    observado: ObservadoCortoPlazo
+    explicacion: ExplicacionCortoPlazo
+    recomendacion: dict | None = Field(None, description="§10.2 con este pronóstico llevado a ritmo por hora")
+    # §12.3 «Ejemplo de respuesta de predicción»
+    predictionId: uuid.UUID | None = None
+    routeId: str | None = None
+    generatedAt: str | None = Field(None, description="ISO-8601 con la zona de Bogotá (-05:00)")
+    horizonMinutes: int | None = None
+    predictedPassengers: int | None = None
+    confidenceInterval: IntervaloConfianza | None = None
+    modelVersion: str | None = None
+    recommendation: RecomendacionResumen | None = None
+    explanation: list[str] = Field(default_factory=list, description="Variables que más mueven este pronóstico")
+
+
+class PuntoDiaCortoPlazo(CeldaCortoPlazo):
+    instante: datetime
+    franja: str | None = None
+    sentidos: list[SentidoCortoPlazo] = Field(default_factory=list)
+
+
+class DiaCortoPlazo(Salida):
+    """La curva del día: el pronóstico de cada media hora de 04:00 a 21:00, por ruta y por sentido."""
+    ruta: str
+    idruta: int
+    fecha: date
+    horizonte_min: int
+    model_id: str
+    en_muestra: bool
+    dia_con_datos: bool
+    instantes: list[PuntoDiaCortoPlazo]
+
+
+class PrediccionCortoPlazoSalida(Salida):
+    prediction_id: uuid.UUID
+    grupo_id: uuid.UUID
+    execution_id: uuid.UUID | None = None
+    ruta: str
+    idruta: int = Field(..., description=DESC_IDRUTA)
+    nivel: Literal["ruta", "sentido", "segmento"]
+    sentido: str | None = None
+    nro_segmento: int | None = None
+    instante: datetime
+    horizonte_min: int
+    objetivo: datetime
+    fecha: date
+    franja: str | None = None
+    pasajeros: float
+    p10: float | None = None
+    p90: float | None = None
+    promedio_dia_hora: float | None = None
+    ultima_semana: float | None = None
+    model_id: str
+    feature_version: str
+    data_cutoff: date | None = None
+    generated_at: datetime
+    latencia_ms: float | None = None
+    explicacion: dict = Field(default_factory=dict)
+    variables: dict = Field(default_factory=dict)
+    recomendacion: dict | None = None
+    creado_en: datetime
+
+
+class ModeloCortoPlazo(Salida):
+    """§9.2: la versión del modelo de corto plazo con su fecha de corte, sus artefactos (SHA-256), sus datos y las
+    cifras de su prueba reservada."""
+    model_config = ConfigDict(protected_namespaces=())
+    model_id: str
+    tipo: str | None = None
+    feature_version: str | None = None
+    data_cutoff: date | None = None
+    entrenado_con: str | None = None
+    semilla: int | None = None
+    estructura: dict = Field(default_factory=dict)
+    banda: str | None = None
+    sha256: dict = Field(default_factory=dict)
+    version_datos: dict = Field(default_factory=dict)
+    metricas_prueba: dict = Field(default_factory=dict)
+    origen: dict = Field(default_factory=dict)
+    evaluacion: str | None = None
+    activo: str | None = None
+    historial_activacion: list = Field(default_factory=list)
+    cobertura: dict = Field(default_factory=dict, description="Fechas que se pueden pronosticar y las de la prueba")
+
+
 class EscenarioRecomendacion(BaseModel):
     """RF-008 «qué pasa si»: el mismo cálculo con la demanda, los pesos u otras restricciones cambiadas."""
     factor_demanda: float | None = Field(None, gt=0, le=5, description="Multiplica la demanda puntual y su banda")

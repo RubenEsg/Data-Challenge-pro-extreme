@@ -1,0 +1,302 @@
+{
+ "periodo": [
+  "2025-07-01",
+  "2025-12-31"
+ ],
+ "entrenado_con": "2023-01-01 a 2025-06-30 (entrenamiento más validación)",
+ "dias": 184,
+ "repetida": false,
+ "niveles": {
+  "ruta": {
+   "30": {
+    "modelo": 8.582,
+    "promedio_dia_hora": 14.358,
+    "ultima_semana": 17.31,
+    "persistencia": 16.998,
+    "ic95_diferencia": [
+     -7.8,
+     -4.08
+    ],
+    "cobertura": 81.43,
+    "celdas": 18690,
+    "por_ruta": {
+     "SILENCIO": [
+      8.197,
+      13.903
+     ],
+     "CRA 54": [
+      8.034,
+      14.136
+     ],
+     "CL 72": [
+      10.858,
+      15.735
+     ]
+    }
+   },
+   "60": {
+    "modelo": 7.344,
+    "promedio_dia_hora": 13.179,
+    "ultima_semana": 15.564,
+    "persistencia": 22.98,
+    "ic95_diferencia": [
+     -7.95,
+     -4.08
+    ],
+    "cobertura": 82.8,
+    "celdas": 18690,
+    "por_ruta": {
+     "SILENCIO": [
+      6.746,
+      12.642
+     ],
+     "CRA 54": [
+      7.11,
+      13.203
+     ],
+     "CL 72": [
+      8.975,
+      13.926
+     ]
+    }
+   },
+   "120": {
+    "modelo": 6.634,
+    "promedio_dia_hora": 12.219,
+    "ultima_semana": 14.136,
+    "persistencia": 34.915,
+    "ic95_diferencia": [
+     -7.73,
+     -3.8
+    ],
+    "cobertura": 83.78,
+    "celdas": 18690,
+    "por_ruta": {
+     "SILENCIO": [
+      5.847,
+      11.664
+     ],
+     "CRA 54": [
+      6.713,
+      12.4
+     ],
+     "CL 72": [
+      7.59,
+      12.51
+     ]
+    }
+   }
+  },
+  "sentido": {
+   "30": {
+    "modelo": 12.129,
+    "promedio_dia_hora": 17.778,
+    "ultima_semana": 21.57,
+    "persistencia": 20.197,
+    "ic95_diferencia": [
+     -7.51,
+     -3.99
+    ],
+    "cobertura": 80.79,
+    "celdas": 37380,
+    "por_ruta": {
+     "SILENCIO": [
+      12.718,
+      18.512
+     ],
+     "CRA 54": [
+      10.837,
+      16.75
+     ],
+     "CL 72": [
+      15.217,
+      19.828
+     ]
+    }
+   },
+   "60": {
+    "modelo": 10.046,
+    "promedio_dia_hora": 16.098,
+    "ultima_semana": 19.102,
+    "persistencia": 25.884,
+    "ic95_diferencia": [
+     -7.8,
+     -4.6
+    ],
+    "cobertura": 81.34,
+    "celdas": 37380,
+    "por_ruta": {
+     "SILENCIO": [
+      10.855,
+      16.69
+     ],
+     "CRA 54": [
+      8.878,
+      15.474
+     ],
+     "CL 72": [
+      12.407,
+      17.115
+     ]
+    }
+   },
+   "120": {
+    "modelo": 8.715,
+    "promedio_dia_hora": 14.673,
+    "ultima_semana": 17.032,
+    "persistencia": 37.877,
+    "ic95_diferencia": [
+     -7.76,
+     -4.46
+    ],
+    "cobertura": 83.18,
+    "celdas": 37380,
+    "por_ruta": {
+     "SILENCIO": [
+      9.589,
+      15.184
+     ],
+     "CRA 54": [
+      7.755,
+      14.334
+     ],
+     "CL 72": [
+      10.32,
+      14.933
+     ]
+    }
+   }
+  },
+  "segmento": {
+   "30": {
+    "modelo": 51.075,
+    "promedio_dia_hora": 56.686,
+    "ultima_semana": 69.05,
+    "persistencia": 70.122,
+    "ic95_diferencia": [
+     -7.18,
+     -4.18
+    ],
+    "cobertura": 79.36,
+    "celdas": 2404780,
+    "por_ruta": {
+     "SILENCIO": [
+      57.294,
+      63.179
+     ],
+     "CRA 54": [
+      41.316,
+      46.977
+     ],
+     "CL 72": [
+      71.665,
+      76.702
+     ]
+    }
+   },
+   "60": {
+    "modelo": 37.632,
+    "promedio_dia_hora": 43.607,
+    "ultima_semana": 52.805,
+    "persistencia": 59.364,
+    "ic95_diferencia": [
+     -7.47,
+     -4.74
+    ],
+    "cobertura": 79.71,
+    "celdas": 2404780,
+    "por_ruta": {
+     "SILENCIO": [
+      42.601,
+      48.493
+     ],
+     "CRA 54": [
+      30.315,
+      36.655
+     ],
+     "CL 72": [
+      52.56,
+      57.54
+     ]
+    }
+   },
+   "120": {
+    "modelo": 28.558,
+    "promedio_dia_hora": 34.591,
+    "ultima_semana": 41.18,
+    "persistencia": 61.718,
+    "ic95_diferencia": [
+     -7.6,
+     -4.76
+    ],
+    "cobertura": 80.04,
+    "celdas": 2404780,
+    "por_ruta": {
+     "SILENCIO": [
+      32.448,
+      38.363
+     ],
+     "CRA 54": [
+      23.175,
+      29.634
+     ],
+     "CL 72": [
+      39.115,
+      44.022
+     ]
+    }
+   }
+  }
+ },
+ "segmentos_60": {
+  "gana": 332,
+  "con_subidas": 384,
+  "subidas_pct": 99.07
+ },
+ "tipo_de_dia_60": {
+  "laboral": {
+   "modelo": 6.474,
+   "promedio_dia_hora": 10.898,
+   "dias": 121,
+   "gana": true
+  },
+  "sábado": {
+   "modelo": 10.125,
+   "promedio_dia_hora": 13.8,
+   "dias": 26,
+   "gana": true
+  },
+  "domingo": {
+   "modelo": 10.366,
+   "promedio_dia_hora": 9.719,
+   "dias": 23,
+   "gana": false
+  },
+  "festivo": {
+   "modelo": 10.629,
+   "promedio_dia_hora": 101.05,
+   "dias": 8,
+   "gana": true
+  }
+ },
+ "domingos_cra54_60": {
+  "celdas": 805,
+  "dias": 23,
+  "modelo": 11.102,
+  "promedio_dia_hora": 8.928,
+  "sesgo_del_modelo_pct": 2.281,
+  "gana_el_modelo": false
+ },
+ "dia_de_ejemplo": {
+  "fecha": "2025-07-07",
+  "wape_modelo": 5.53,
+  "wape_mediano": 5.53,
+  "wape_promedio_ese_dia": 10.34,
+  "ruta": "CRA 54"
+ },
+ "origen": {
+  "prueba": "EntregaFinal/pronostico_corto_plazo/resultados/prueba.json",
+  "domingos": "EntregaFinal/pronostico_corto_plazo/resultados/desglose_domingos_festivos.json",
+  "dia_de_ejemplo": "EntregaFinal/pronostico_corto_plazo/resultados/figuras.json"
+ }
+}

@@ -1,0 +1,33 @@
+
+== Bien (20) ==
+  [Contraste] 33 pares con su mínimo (4,5:1 texto, 3:1 texto de 24 px o más y marcas); el más justo: --tinta-inversa sobre --insight-3 3.02:1
+  [Roles] los 45 roles de ROL son tokens de :root (40 tokens distintos)
+  [CSS] 611 reglas sin colores, tamaños, pesos, interlineados, radios, sombras ni espaciados literales (salvo la lista blanca de la app); 97 var() definidas; 4 tokens retirados ausentes
+  [Python · ui.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · tokens.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · app.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · controles.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · cliente_api.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/alertas.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/despacho.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/enlaces.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/horario.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/inicio.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/modelo.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/monitoreo.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/operacion.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/pronostico.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/recomendaciones.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · paginas/resultado.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+  [Python · corto_plazo_vista.py] sin colores ni tamaños escritos a mano y sin las piezas retiradas
+
+== Notas (2) ==
+  [Python · ui.py] bloque de compatibilidad en las líneas 1020–1081; lo usan las páginas sin migrar: figura(
+  [Paleta] no están node o el validador de paletas (VALIDADOR_PALETA con la ruta de validate_palette.js): se omite la validación de la paleta
+
+== Avisos (3) ==
+  [Python · paginas/modelo.py] 18 números sueltos en cadenas (revisar que salgan de datos/): l. 19 «4»; l. 20 «8»; l. 23 «14»; l. 24 «4»; l. 25 «28»; l. 25 «8»; l. 27 «28»; l. 29 «10» …
+  [Python · paginas/pronostico.py] 10 números sueltos en cadenas (revisar que salgan de datos/): l. 190 «100»; l. 191 «100»; l. 210 «60»; l. 210 «120»; l. 210 «60»; l. 210 «100»; l. 214 «100»; l. 544 «100» …
+  [Python · corto_plazo_vista.py] 16 números sueltos en cadenas (revisar que salgan de datos/): l. 145 «60»; l. 145 «120»; l. 228 «500»; l. 152 «60»; l. 152 «120»; l. 232 «500»; l. 99 «60»; l. 131 «04» …
+
+Resultado: PASA · 20 bien · 3 avisos · 0 fallas

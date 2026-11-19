@@ -1,0 +1,19 @@
+{
+ "generado_en": "2026-11-19T01:41:49+00:00",
+ "script": "scripts/entrenar_corto_plazo.py",
+ "fuente": "pronostico_corto_plazo/panel (experimento E14): eventos de conteo con subidas 2023-2025, exportados en solo lectura y asignados al segmento oficial de 500 m con la regla de Extreme",
+ "archivos": {
+  "subidas_segmento_15min.parquet": {
+   "sha256": "eeafbe63f3e08f4d610f034a9f2944705c814555976b180eab69872a94871472"
+  },
+  "salidas_15min.parquet": {
+   "sha256": "0bc37f5a07536dc24c1f4c3d33159ef9df0133c1a165913eeb8195b9a91a49bd"
+  },
+  "segmentos.csv": {
+   "sha256": "95f23fad2cd7fe4bbfa9b3a0ab974bfb6449d84e373bc73608f71828cc35149f"
+  },
+  "calendario.csv": {
+   "sha256": "9e5eb951575410b895168dbe76958699ad9c91bc1babdaf42295d40891eaef31"
+  }
+ }
+}

@@ -1,7 +1,7 @@
 DATASET ACORDADO DE RNF-002 (§14.1 «Carga | k6 | Consultas e ingesta con el volumen acordado»)
 El volumen acordado es UN AÑO de operación del ciclo diario: 365 ejecuciones o más, con sus predicciones, recomendaciones y alertas.
 Se arma con scripts/sembrar_volumen.py, que replica filas reales de la API con identificadores nuevos y fechas corridas.
-Medición vigente: 2026-11-13, con el código final (migraciones 0001 a 0014), en docs/evidencias/pruebas/k6_segmentos.txt y sus k6_segmentos_*.json
+Medición vigente: 2026-11-13, con el código del 13-11 (migraciones 0001 a 0014; la 0015, del 18-11, solo agrega la tabla del pronóstico de corto plazo), en docs/evidencias/pruebas/k6_segmentos.txt y sus k6_segmentos_*.json
 (scripts/medir_segmentos.py; API de un solo proceso en :8360, modo integrado con la réplica 5434 como lector_ia, autenticación encendida).
    Base local sembrada con scripts/sembrar_volumen.py desde 33 ejecuciones reales del ciclo final (docs/evidencias/pruebas/plantilla_volumen.py): unos 1.000 MB,
    1.056 ejecuciones del ciclo, 9.216 predicciones, 61.440 recomendaciones (franjas y horas del plan del día), 8.224 alertas, 8.896 entradas de historial y

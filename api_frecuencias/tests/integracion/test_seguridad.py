@@ -24,6 +24,7 @@ ESPERADO_ESCRITURAS = {
     ("PATCH", "/api/v1/alerts/{alert_id}/status"): "operador",
     ("POST", "/api/v1/frequency/executions"): "analista",
     ("POST", "/api/v1/predictions/run"): "analista",
+    ("POST", "/api/v1/predictions/corto-plazo"): "analista",             # RF-005: pronóstico de 30, 60 y 120 min
     ("POST", "/api/v1/recommendations/calculate"): "analista",
     ("POST", "/api/v1/respuesta/calcular"): "analista",                  # §7.1: encola el cálculo de la respuesta
     ("POST", "/api/v1/segmentos/estadisticas/refrescar"): "analista",    # §7.1: encola el refresco de segmentos

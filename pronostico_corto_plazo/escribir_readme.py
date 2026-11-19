@@ -51,6 +51,17 @@ def leer(rel: str) -> dict:
     return json.loads((C.AQUI / rel).read_text(encoding="utf-8"))
 
 
+REPRODUCCION = C.AQUI.parent / "api_frecuencias" / "docs" / "evidencias" / "modelo" / "corto_plazo_reproduccion.json"
+
+
+def reproduccion() -> dict | None:
+    """La comprobación de que la API reproduce esta prueba (api_frecuencias/scripts/verificar_corto_plazo.py)."""
+    if not REPRODUCCION.exists():
+        return None
+    r = json.loads(REPRODUCCION.read_text(encoding="utf-8"))
+    return dict(r, filas=sum(x["filas_en_las_dos"] for x in r["predicciones"].values()))
+
+
 def main() -> None:
     ver, sen = leer("panel/verificacion_extreme.json"), leer("panel/revision_sentido.json")
     val, sel, pru = leer("resultados/validacion.json"), leer("resultados/seleccion.json"), leer("resultados/prueba.json")
@@ -329,8 +340,16 @@ def main() -> None:
       "modelo pronostica lo que se va a contar, no la gente que espera.")
     a("- **Supone que el conteo llega en vivo.** La especificación lo prevé (el disparador de conteo), pero la latencia real "
       "de la captura no se conoce; por eso se midió el efecto de 15 y 30 minutos de retraso.")
-    a("- **No está integrado en la API.** La API pronostica hoy por hora de salida con su propio modelo. Llevar este a la "
-      "API es el siguiente paso (`../PLAN_EVOLUCION.md`, sección 7).")
+    rep = reproduccion()
+    if rep and rep["coincide"]:
+        a("- **Lee el panel empaquetado, no la captura en vivo.** La API ya sirve este modelo "
+          "(`POST /api/v1/predictions/corto-plazo`) y reproduce las "
+          f"{num(rep['filas'], 0)} predicciones guardadas de esta prueba "
+          "(`../api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.md`), pero pronostica con este panel de "
+          "2023 a 2025. Alimentarlo con la lectura incremental es el primer pendiente de `../PLAN_EVOLUCION.md` (sección 7).")
+    else:
+        a("- **No está integrado en la API.** La API pronostica hoy por hora de salida con su propio modelo. Llevar este a "
+          "la API es el siguiente paso (`../PLAN_EVOLUCION.md`, sección 7).")
     a("- **En los domingos corrientes el modelo no mejora al promedio por día y hora** (tabla de «Domingos y festivos por "
       "separado»).")
     a("- **Once días de 2025 sin eventos** (los últimos de mes) quedan fuera del entrenamiento y de la evaluación.")
@@ -512,6 +531,7 @@ def bloque_entrega(ver: dict, val: dict, pru: dict) -> list[str]:
     val60 = val["elegidos_con_todas_las_filas"]["ruta"]["60"]["wape"]
     base_val60 = val["lineas_base"]["ruta"]["promedio_dia_hora"]["60"]["wape"]
     sem60 = pru["secundarios"]["informacion_del_dia"]["60"]["semanal"]["wape"]
+    rep = reproduccion()
     return [
         MARCA_INI + " (bloque generado por pronostico_corto_plazo/escribir_readme.py: no editar a mano) -->",
         "## Correcciones tras la retroalimentación del curso (17 de noviembre de 2026)",
@@ -519,7 +539,9 @@ def bloque_entrega(ver: dict, val: dict, pru: dict) -> list[str]:
         "La retroalimentación señaló tres faltas de la entrega. Las tres se corrigieron en la carpeta "
         "[`pronostico_corto_plazo/`](pronostico_corto_plazo/README.md), que resuelve el problema tal como lo pide la "
         "especificación: **el pronóstico de las subidas de los siguientes 30, 60 y 120 minutos por ruta, sentido y "
-        "segmento**. En el informe y en el cuaderno es la sección P.",
+        "segmento**. En el informe y en el cuaderno es la sección P"
+        + ("; desde el 18 de noviembre lo sirve la API (`POST /api/v1/predictions/corto-plazo`) y es lo primero de la "
+           "pantalla Pronóstico del tablero." if rep and rep["coincide"] else "."),
         "",
         "| Lo que se señaló | Lo que se hizo | Resultado | Evidencia |",
         "|---|---|---|---|",
@@ -559,11 +581,24 @@ def bloque_entrega(ver: dict, val: dict, pru: dict) -> list[str]:
         "(`pronostico_corto_plazo/panel/revision_sentido.json`).",
         *vineta_domingos(),
         *vineta_anomalo(),
-        "- **Falta llevarlo a la API.** La API sigue pronosticando por hora de salida, y su modelo por segmento es el de 37 "
-        "días. Integrar este pronóstico es el primer pendiente de `PLAN_EVOLUCION.md` (sección 7).",
+        *vineta_api(rep),
         "",
         MARCA_FIN,
     ]
+
+
+def vineta_api(rep: dict | None) -> list[str]:
+    """La viñeta de la API: ya lo sirve y reproduce la prueba (o, si no se ha comprobado, que falta llevarlo)."""
+    if not rep or not rep["coincide"]:
+        return ["- **Falta llevarlo a la API.** La API sigue pronosticando por hora de salida, y su modelo por segmento es "
+                "el de 37 días. Integrar este pronóstico es el primer pendiente de `PLAN_EVOLUCION.md` (sección 7)."]
+    return ["- **Ya está en la API y en el tablero** (18 de noviembre de 2026). `POST /api/v1/predictions/corto-plazo` lo "
+            "calcula y lo guarda por ruta, sentido y segmento, con su banda, sus líneas base, su explicación y la "
+            "recomendación de §10.2; el ciclo diario también lo genera. La API usa los mismos árboles, verificados con "
+            f"SHA-256, y reproduce las {num(rep['filas'], 0)} predicciones guardadas de la prueba "
+            "(`api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.md`). En el tablero es lo primero de "
+            "Pronóstico. Falta alimentarlo con la captura en vivo: hoy lee el panel de 2023 a 2025 "
+            "(`PLAN_EVOLUCION.md`, sección 7)."]
 
 
 def actualizar_entrega(lineas: list[str]) -> None:

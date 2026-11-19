@@ -1,6 +1,9 @@
-"""Pronóstico: ¿Cuántos pasajeros habrá? Dos partes, cada una con su rótulo (DISENO.md §8):
+"""Pronóstico: ¿Cuántos pasajeros habrá? Tres partes, cada una con su rótulo (DISENO.md §8):
 
-1. «Modelo activo (API)»: los pronósticos que guarda la API del reto con el modelo que ejecuta (GET /api/v1/predictions,
+0. «Lo que pide el enunciado: 30, 60 y 120 minutos» (corto_plazo_vista.py): con lo que ya subió hoy, las subidas de los
+   próximos 30, 60 y 120 minutos por ruta, sentido y segmento, con el modelo de corto plazo que sirve la API
+   (GET /api/v1/predictions/corto-plazo/calcular y /dia) y las cifras de su prueba reservada (datos/corto_plazo.json).
+1. «Modelo horario de la API: el plan del día siguiente»: los pronósticos que guarda la API del reto con el modelo que ejecuta (GET /api/v1/predictions,
    paginado, con los filtros ruta, fecha y horizonte). Muestra la banda P10–P90 calibrada frente a lo real cuando ya se
    conoce (pasajeros validados de 2025 de datos/pronosticos_2025.parquet, con la misma fracción de cada hora que usa la
    API para la ventana), el modelo (model_id), la versión de la calibración y, de la predicción elegida, las variables que
@@ -17,6 +20,7 @@ import plotly.graph_objects as go
 from dash import ALL, Input, Output, State, callback, ctx, dcc, html, no_update
 
 import cliente_api as API
+import corto_plazo_vista as CPV
 import datos_app as D
 import ui
 from controles import FECHA_INICIAL, mover_fecha, selector_fecha
@@ -126,11 +130,13 @@ def _seccion_api(P):
                    "una suma o resta."),
         ui.fuentes(FUENTES_API + [FUENTE_DETALLE]),
     ])
-    sub = "Los pronósticos que guarda la API del reto con su modelo activo: la banda P10–P90 calibrada frente a lo real."
+    sub = ("El modelo horario de la API pronostica cada hora con siete días de antelación: sirve para armar el horario del "
+           "día siguiente. La banda P10–P90 calibrada frente a lo real.")
     if P:
-        sub = (f"Los pronósticos que guarda la API del reto con su modelo activo ({P['model_id']}): la banda P10–P90 "
-               "calibrada frente a lo real cuando ya se conoce, y por qué sale cada cifra.")
-    return ui.seccion("Modelo activo (API)", [
+        sub = (f"El modelo horario de la API ({P['model_id']}) pronostica cada hora con siete días de antelación: sirve para "
+               "armar el horario del día siguiente. La banda P10–P90 calibrada frente a lo real cuando ya se conoce, y por "
+               "qué sale cada cifra.")
+    return ui.seccion("Modelo horario de la API: el plan del día siguiente", [
         html.Div(id="pr-api-aviso", **{"aria-live": "polite"}),
         html.Div(id="pr-api-cifras"),
         ui.rejilla([banda, detalle], "2-1"),
@@ -198,7 +204,13 @@ def layout(**_):
     b1, e12 = D.valor("inicio", "inicio_error_regla_manual"), D.valor("inicio", "inicio_error_hibrido")
     h, antelacion = _antelacion()
     P = D.modelo_producto()
-    if P:
+    cp = D.corto_plazo()
+    if cp:
+        r60 = cp["niveles"]["ruta"]["60"]
+        sub = (f"Con lo que ya subió hoy, la API pronostica los próximos 30, 60 y 120 minutos por ruta, sentido y segmento: a "
+               f"60 minutos se equivoca en {num(r60['modelo'], 1)} de cada 100 subidas; el promedio por día y hora, en "
+               f"{num(r60['promedio_dia_hora'], 1)}.")
+    elif P:
         sub = (f"El modelo activo de la API pronostica cada ruta y ventana con su banda P10–P90: en la prueba de nov–dic 2025 "
                f"se equivoca en {num(P['wape_modelo'])} de cada 100 pasajeros; la regla manual, en {num(P['wape_regla_manual'])}.")
     else:
@@ -209,6 +221,7 @@ def layout(**_):
         dcc.Store(id="pr-api-sel", data=None),
         dcc.Download(id="pr-api-descarga"),
         ui.arriba(cabecera),
+        CPV.seccion(),
         _seccion_api(P),
         _seccion_laboratorio(b1, e12, h, antelacion),
     ])

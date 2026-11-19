@@ -1,0 +1,112 @@
+{
+ "inicio": "2026-11-18 20:08:05",
+ "pruebas": [
+  {
+   "prueba": "1600 px: carga sin errores de consola y sin desplazamiento horizontal",
+   "ok": true,
+   "detalle": "errores [] · ancho del contenido 1600"
+  },
+  {
+   "prueba": "la sección está arriba de la pantalla y rotulada",
+   "ok": true,
+   "detalle": "Lo que pide el enunciado: 30, 60 y 120 minutos"
+  },
+  {
+   "prueba": "CRA 54 17:00 60 min: pronóstico y banda = GET /calcular",
+   "ok": true,
+   "detalle": "1917.8 [1765.4; 2078.7]"
+  },
+  {
+   "prueba": "CRA 54 17:00 60 min: promedio por día y hora y lo real = API",
+   "ok": true,
+   "detalle": "promedio 1780.3 · real 1996.0"
+  },
+  {
+   "prueba": "CRA 54 17:00 60 min: la recomendación de §10.2 = API",
+   "ok": true,
+   "detalle": "viable True · 17 buses/h cada 3.53 min"
+  },
+  {
+   "prueba": "CRA 54 60 min: la curva del día tiene los instantes de GET /dia",
+   "ok": true,
+   "detalle": "35 filas · API 35"
+  },
+  {
+   "prueba": "CRA 54: un segmento por fila en el perfil",
+   "ok": true,
+   "detalle": "123 filas · API 123"
+  },
+  {
+   "prueba": "CRA 54: ida y regreso = API",
+   "ok": true,
+   "detalle": "[('ida', 761.1), ('regreso', 1219.4)]"
+  },
+  {
+   "prueba": "CRA 54: la variable que más mueve el pronóstico y su factor = API (TreeSHAP)",
+   "ok": true,
+   "detalle": "p15 × 1.168"
+  },
+  {
+   "prueba": "CRA 54: la curva dibuja banda, pronóstico, promedio y real",
+   "ok": true,
+   "detalle": "4 trazas"
+  },
+  {
+   "prueba": "la prueba reservada = datos/corto_plazo.json (sin API)",
+   "ok": true,
+   "detalle": "ruta 60 min 7.344 frente a 13.179"
+  },
+  {
+   "prueba": "está el aviso «Lo que no funcionó» con los domingos corrientes",
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "prueba": "SILENCIO 17:00 30 min: pronóstico y banda = GET /calcular",
+   "ok": true,
+   "detalle": "511.8 [450.9; 563.1]"
+  },
+  {
+   "prueba": "SILENCIO 17:00 30 min: promedio por día y hora y lo real = API",
+   "ok": true,
+   "detalle": "promedio 470.9 · real 507.0"
+  },
+  {
+   "prueba": "SILENCIO 17:00 30 min: la recomendación de §10.2 = API",
+   "ok": true,
+   "detalle": "viable False · 8 buses/h cada 7.5 min"
+  },
+  {
+   "prueba": "SILENCIO 30 min: la curva del día tiene los instantes de GET /dia",
+   "ok": true,
+   "detalle": "35 filas · API 35"
+  },
+  {
+   "prueba": "SILENCIO: un segmento por fila en el perfil",
+   "ok": true,
+   "detalle": "135 filas · API 135"
+  },
+  {
+   "prueba": "SILENCIO: ida y regreso = API",
+   "ok": true,
+   "detalle": "[('ida', 230.7), ('regreso', 248.5)]"
+  },
+  {
+   "prueba": "SILENCIO: la variable que más mueve el pronóstico y su factor = API (TreeSHAP)",
+   "ok": true,
+   "detalle": "p15 × 1.327"
+  },
+  {
+   "prueba": "SILENCIO: la curva dibuja banda, pronóstico, promedio y real",
+   "ok": true,
+   "detalle": "4 trazas"
+  },
+  {
+   "prueba": "400 px: carga sin errores de consola y sin desplazamiento horizontal",
+   "ok": true,
+   "detalle": "errores [] · ancho del contenido 400"
+  }
+ ],
+ "fin": "2026-11-18 20:08:31",
+ "resumen": "21 de 21 comprobaciones bien"
+}

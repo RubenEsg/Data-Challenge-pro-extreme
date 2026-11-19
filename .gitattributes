@@ -4,3 +4,6 @@
 # Artefactos de los modelos: se verifican con su SHA-256 (manifest.json), así que viajan byte a byte, sin conversión
 # de fin de línea, en clones de Windows, macOS o Linux (si git cambiara CRLF por LF, el hash dejaría de coincidir).
 api_frecuencias/datos/modelos/** -text
+# El panel de 15 minutos del pronóstico de corto plazo y su muestra de la prueba: el manifiesto del modelo guarda
+# el SHA-256 de cada archivo, así que también viajan byte a byte.
+api_frecuencias/datos/corto_plazo/** -text

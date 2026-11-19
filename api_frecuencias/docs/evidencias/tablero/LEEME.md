@@ -23,6 +23,24 @@ quedan aparte, rotulados «experimento 11 / experimento 12». Aquí está lo que
 
 Las cifras de las capturas son las de ese ciclo de demostración, no las de la operación real.
 
+## Pronóstico · «Lo que pide el enunciado» (18-11-2026)
+
+`e2e_corto_plazo.txt` (y `.json`): **21 de 21 comprobaciones bien** con Edge sin interfaz, el 18 de noviembre de 2026, contra una API de desarrollo con el código de esta entrega y el modelo `cp_lgbm_20250630_s42`. El script es `e2e_corto_plazo.py`.
+
+| Qué | Resultado |
+|---|---|
+| Carga | A 1600 y a 400 px, con su título, 0 errores de consola y sin desplazamiento horizontal |
+| CRA 54, 7 de julio de 2025, 17:00, 60 min (los controles por omisión) | El pronóstico, la banda P10–P90, el promedio por día y hora, lo real y la recomendación de §10.2 son los de `GET /api/v1/predictions/corto-plazo/calcular`; la curva del día tiene los 35 instantes de `GET …/dia`; el perfil, los 123 segmentos; los dos sentidos y la primera variable de la explicación (TreeSHAP) coinciden con la API |
+| SILENCIO a 30 min | Lo mismo al cambiar los controles: 135 segmentos |
+| Prueba reservada | La tabla por nivel y horizonte es la de `dash_app/datos/corto_plazo.json` (se ve sin API) y está el aviso «Lo que no funcionó» con los domingos corrientes |
+
+Capturas: `dash_pronostico_corto_plazo.png` (la sección), `dash_pronostico.png` y `dash_pronostico_completa.png` (la pantalla). La verificación del sistema de diseño incluye la sección: la estática pasa (`verificar_estilo_estatico_corto_plazo.txt`) y, en vivo, Pronóstico pasa a 1366 y a 400 px con 0 errores de consola.
+
+**Pendiente, fuera de este cambio.** Ese día, en vivo, Despacho volvió a dar el error de consola «Style is not done
+loading» en varias cargas en frío (en una corrida de `despacho_carga_en_frio.py`, 4 de 6; los buses se dibujan igual).
+El 14-11-2026 había pasado 5 de 5 (`despacho_carga_en_frio.txt`). Es la carrera de MapLibre con el estilo de calles,
+que se descarga de internet, así que depende de cuánto tarda esa descarga. Despacho no cambió.
+
 ## Recorrido de punta a punta
 
 `e2e_tablero_completo.txt` (y `.json` con el detalle): **135 de 135 comprobaciones bien** con Edge sin interfaz a 1600×900, el
@@ -33,7 +51,7 @@ Las cifras de las capturas son las de ese ciclo de demostración, no las de la o
 | Las once pantallas | Cargan con su título, 0 errores de consola y sin desplazamiento horizontal |
 | Teclado (RNF-012) | En **las once pantallas** Tab recorre la barra y después los controles de la pantalla en orden de lectura, siempre con el foco visible. También el botón de atribución del mapa de Despacho, que ahora usa el contorno de la app |
 | Contraste (WCAG AA) | Todo el texto visible de las once pantallas pasa 4,5:1 (3:1 el texto grande); el mínimo medido es 3,45:1, en texto de 24 px o más |
-| Pronóstico · «Modelo activo (API)» | Frente a `GET /api/v1/predictions` (ruta CRA 54, el 4 de septiembre de 2025, 60 min): una ventana por instante del día (17), el modelo `hgb_fv2_20250831_s42` y la calibración v2, la banda P10–P90 con el P50 y lo real, la paginación de la API («Siguiente» trae la página 2), las variables SHAP del pronóstico elegido con su efecto (iguales a `GET /predictions/{id}`) y su banda. Exporta CSV y XLSX (`export_predicciones_dash.csv` y `.xlsx`, de `GET /predictions/export`) |
+| Pronóstico · modelo horario de la API (antes «Modelo activo (API)») | Frente a `GET /api/v1/predictions` (ruta CRA 54, el 4 de septiembre de 2025, 60 min): una ventana por instante del día (17), el modelo `hgb_fv2_20250831_s42` y la calibración v2, la banda P10–P90 con el P50 y lo real, la paginación de la API («Siguiente» trae la página 2), las variables SHAP del pronóstico elegido con su efecto (iguales a `GET /predictions/{id}`) y su banda. Exporta CSV y XLSX (`export_predicciones_dash.csv` y `.xlsx`, de `GET /predictions/export`) |
 | Pronóstico · laboratorio | Rotulado «Laboratorio del informe académico: experimento 11 / experimento 12», con el aviso de que no es el modelo de la API ni se compara con sus cifras. En toda la pantalla no aparece «modelo final» ni «E11/E12» a secas |
 | El modelo | La primera tarjeta es el modelo del producto, con sus cifras iguales a `../modelo/evaluacion_modelo.json` (14,77 % frente a 21,18 % de la regla manual en nov–dic 2025) y a `../modelo/calibracion_condicional.json` (cobertura v2 77,82 %). Declara que esa prueba es un reporte informativo. Su importancia es igual a `GET /models/{id}/importance` (media de \|SHAP\|). Los experimentos del informe van después, en su sección rotulada |
 | Inicio · respuesta del reto (§7.1) | Se crea una versión nueva de los umbrales con los mismos valores (`PUT /thresholds`). La foto de la respuesta queda vieja: `GET /respuesta` responde 404 «sin_calcular». La tarjeta muestra «Calculando…» (`dash_inicio_calculando.png`), pide `POST /respuesta/calcular`, que queda como una ejecución «respuesta» de la cola terminada en «ok», y vuelve a consultar cada 3 s hasta tener la respuesta (3,3 s desde que se abre la pantalla). Pasajeros esperados y vehículos de la hora pico iguales a la API. La trazabilidad nombra el modelo, la calibración de la banda y la fuente del pronóstico del plan, y «Atención inmediata» dice que son las alertas abiertas ahora. CRA 54 y CL 72 también pasan por «Calculando…». El «…» trae la tabla hora por hora. Exporta CSV y XLSX (`export_respuesta_dash.csv` y `.xlsx`) |
@@ -54,7 +72,7 @@ Una por pantalla:
 
 De las partes nuevas o revisadas:
 
-- `dash_pronostico_api.png`: la sección «Modelo activo (API)»;
+- `dash_pronostico_api.png`: la sección del modelo horario (entonces «Modelo activo (API)»);
 - `dash_inicio_calculando.png` y `dash_inicio_respuesta.png`: la respuesta asíncrona y la tarjeta llena;
 - `dash_operacion_salud.png`: «Salud del servicio»;
 - `dash_alertas_detalle.png`;

@@ -15,6 +15,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# libgomp1: el runtime de OpenMP que usa LightGBM (pronóstico de corto plazo); la imagen slim no lo trae.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Ruedas binarias únicamente (sin compilar nada en la imagen); la caché de pip vive fuera de la capa.
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \

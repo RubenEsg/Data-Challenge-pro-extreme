@@ -903,6 +903,13 @@ def cifras_demo():
     macro("DemoVentana", ventana.replace(" .. ", " a "), p)
     decision = "rechazado" if "RECHAZADO" in t else ("activado" if re.search(r"ACTIVADO", t) else "s.\\,d.")
     macro("DemoDecision", decision, p)
+    # el texto del paso 6 de la lámina, según lo que pasó en la corrida
+    revertido = "Reversión (POST /api/v1/models/rollback): 200" in t
+    lamina = {"rechazado": r"rechazado (409): el activo se conserva y la decisión queda en el registro de modelos, "
+                           r"auditada y reversible",
+              "activado": r"activado por la compuerta, auditado" + (r"; la demostración lo revierte con "
+                          r"\texttt{POST /models/rollback}" if revertido else "")}.get(decision, decision)
+    macro("DemoDecisionLamina", lamina, p)
     total = busca(r"Ciclo completo en (\d+) s")
     macro("DemoTotalSeg", total, p)
 

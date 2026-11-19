@@ -61,6 +61,10 @@ tqdm==4.70.1
 cloudpickle==3.1.2
 packaging==26.3
 onnxruntime==1.31.1
+# Pronóstico de corto plazo (30, 60 y 120 min; app/servicios/corto_plazo.py): LightGBM carga los árboles y da la
+# explicación local exacta (pred_contrib). En Linux necesita libgomp1 (el Dockerfile lo instala)
+lightgbm==4.7.0
+narwhals==2.29.0
 flatbuffers==25.12.19
 protobuf==7.36.2
 

@@ -58,12 +58,13 @@ La API de frecuencias (`api_frecuencias/`) ya funciona y está medida:
   red, está en `ev/alertas/revision_doble/kit_humano/`. La prueba reservada se consultó al elegir las variables fv2,
   así que su cifra es informativa; se pide a Extreme un periodo de 2026 como prueba limpia
   (`documentos/mapeo_especificacion.md`, sección 6).
-- **Pruebas.** La suite completa final (1.770 casos) pasa con 0 fallas, 0 errores y 0 omitidas
-  (`ev/pruebas/suite_final.xml`), con una cobertura de `app/` de 95,70 %, `motor_d5/` incluido
+- **Pruebas.** La suite completa final (1.810 casos, 18-11-2026) pasa con 0 fallas y 0 errores; las 10 omitidas son
+  las pruebas pesadas que se activan con una variable (`ev/pruebas/suite_final.xml`), con una cobertura de `app/`
+  de 95,76 %, `motor_d5/` incluido
   (`ev/pruebas/coverage_final.xml`). El flujo de integración continua está en `.github/workflows/api_frecuencias.yml`.
 - **Calidad de código.** La puerta de SonarQube «Reto Sobusa v1.5», sobre todo el código, queda aprobada (OK) en el
-  análisis del 14-11-2026, 00:56: 0 vulnerabilidades, 0 bugs, 0 hallazgos bloqueantes y 0 críticos, duplicación de
-  0,0 % y cobertura de 95,7 % (`ev/sonarqube/quality_gate.json`, `ev/sonarqube/resumen.md`).
+  análisis del 18-11-2026, 21:29: 0 vulnerabilidades, 0 bugs, 0 hallazgos bloqueantes y 0 críticos, duplicación de
+  0,0 % y cobertura de 95,8 % (`ev/sonarqube/quality_gate.json`, `ev/sonarqube/resumen.md`).
 
 El paso a producción no cambia el código: cambian las variables de entorno (`FUENTE`, `FUENTE_DATABASE_URL` y
 `DATABASE_URL`) y el lugar donde corre.
@@ -295,14 +296,18 @@ descartadas.
 
 ## 7. Lo que queda para la siguiente versión
 
-- **Llevar a la API el pronóstico de corto plazo por ruta, sentido y segmento** (`pronostico_corto_plazo/`). Es el que pide el
-  enunciado (30, 60 y 120 minutos) y ya está elegido y probado con meses distintos, pero corre fuera de la API. Falta:
-  (1) que la lectura incremental agregue los eventos de conteo por bloque de 15 minutos y segmento, con la regla de
-  Extreme que usa `pronostico_corto_plazo/preparar_panel.py`; (2) registrar los modelos por nivel y horizonte con su
-  manifiesto y su SHA-256, y pasarlos por la sombra y la compuerta como cualquier candidato; (3) servirlos en
-  `POST /api/v1/predictions/run` y en `GET /api/v1/predictions/segmentos`, en lugar del reparto con el perfil
-  intrahorario y del modelo `seg_hgb_jerarquico_20230227_s42`, que se entrenó con 37 días, y (4) medir con Extreme
-  la latencia real de la captura (H10, H11): el efecto de 15 y 30 minutos de retraso está medido en `pronostico_corto_plazo/README.md`.
+- **Alimentar en vivo el pronóstico de corto plazo.** Desde el 18-11-2026 la API sirve el pronóstico a 30, 60 y
+  120 minutos por ruta, sentido y segmento (`POST /api/v1/predictions/corto-plazo`, `GET …/calcular`, `GET …/dia` y el
+  ciclo diario; registro propio con SHA-256 en `api_frecuencias/datos/modelos/corto_plazo/`), reproduce las
+  predicciones de su prueba reservada (`ev/modelo/corto_plazo_reproduccion.md`) y el tablero lo muestra primero en
+  Pronóstico. Hoy lee el panel de 15 minutos empaquetado (2023 a 2025). Falta: (1) que la lectura incremental agregue
+  los eventos de conteo por bloque de 15 minutos y segmento, con la regla de Extreme que usa
+  `pronostico_corto_plazo/preparar_panel.py`, para pronosticar con lo que llega en vivo; (2) pasar sus reentrenamientos
+  por la sombra y la compuerta, como los del modelo horario (hoy tiene registro y activación propios); (3) llevar a este
+  pronóstico la recomendación de la franja de `POST /api/v1/predictions/run` y el reparto de
+  `GET /api/v1/predictions/segmentos`, que todavía usa el modelo `seg_hgb_jerarquico_20230227_s42` (37 días), y
+  (4) medir con Extreme la latencia real de la captura (H10, H11): el efecto de 15 y 30 minutos de retraso está medido
+  en `pronostico_corto_plazo/README.md`.
 - Activar el candidato fv3 (`hgb_fv3_20250831_s42`): pasa por la sombra de 14 días y la compuerta de cuatro
   criterios. Activarlo cambia los pronósticos con que se midieron el ciclo diario, las alertas y las respuestas al reto
   de esta entrega, así que esas mediciones se repiten con él (`ev/modelo/decision_fv3.md`). El calendario académico

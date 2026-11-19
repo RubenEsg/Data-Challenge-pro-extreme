@@ -207,7 +207,7 @@ La conclusión no cambia. Sin esos días bajan el error del modelo y el del prom
 - **La prueba no es ciega en sentido estricto:** 2025 se conocía por los experimentos anteriores, aunque con otro objetivo.
 - **Las subidas son demanda observada.** Dependen de los buses que pasaron: si no pasa bus, no hay subida. El modelo pronostica lo que se va a contar, no la gente que espera.
 - **Supone que el conteo llega en vivo.** La especificación lo prevé (el disparador de conteo), pero la latencia real de la captura no se conoce; por eso se midió el efecto de 15 y 30 minutos de retraso.
-- **No está integrado en la API.** La API pronostica hoy por hora de salida con su propio modelo. Llevar este a la API es el siguiente paso (`../PLAN_EVOLUCION.md`, sección 7).
+- **Lee el panel empaquetado, no la captura en vivo.** La API ya sirve este modelo (`POST /api/v1/predictions/corto-plazo`) y reproduce las 168.210 predicciones guardadas de esta prueba (`../api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.md`), pero pronostica con este panel de 2023 a 2025. Alimentarlo con la lectura incremental es el primer pendiente de `../PLAN_EVOLUCION.md` (sección 7).
 - **En los domingos corrientes el modelo no mejora al promedio por día y hora** (tabla de «Domingos y festivos por separado»).
 - **Once días de 2025 sin eventos** (los últimos de mes) quedan fuera del entrenamiento y de la evaluación.
 - **Los registros imposibles siguen en los datos.** El protocolo no previó filtrarlos: uno cae en el entrenamiento y otro en la prueba. Su efecto en la prueba está medido arriba; filtrarlos antes de entrenar es un pendiente.

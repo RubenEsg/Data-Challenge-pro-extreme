@@ -69,6 +69,14 @@ def main() -> None:
     macro("CPFugaValores", num(fuga["valores_comparados"], 0), f)
     macro("CPFugaDiferencias", num(fuga["diferencias"], 0), f)
 
+    # la API reproduce la prueba (api_frecuencias/scripts/verificar_corto_plazo.py)
+    repro = json.loads((AQUI.parent / "api_frecuencias" / "docs" / "evidencias" / "modelo"
+                        / "corto_plazo_reproduccion.json").read_text(encoding="utf-8"))
+    if not repro["coincide"]:
+        raise SystemExit("La API no reproduce la prueba: no se puede decir que sirve el mismo modelo")
+    f = "../api_frecuencias/docs/evidencias/modelo/corto_plazo_reproduccion.json"
+    macro("CPReproFilas", num(sum(x["filas_en_las_dos"] for x in repro["predicciones"].values()), 0), f)
+
     f = "resultados/validacion.json"
     for nivel, n in NIVEL.items():
         for conjunto, c in (("semanal", "Semanal"), ("con_hoy", "ConHoy"), ("completo", "Completo")):

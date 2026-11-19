@@ -22,6 +22,9 @@ Archivos que produce:
   costos/resultados/costos_para_planificador.json.
 - cifras_app.json: el objeto window.DATOS_APP de app/datos_app.js (cada cifra con su archivo y clave de origen).
 - ficha_modelos.json: copia de app/ficha_modelos.json.
+- corto_plazo.json: las cifras de la prueba reservada del pronóstico de corto plazo (30, 60 y 120 minutos por ruta,
+  sentido y segmento; experimento E14, el modelo que sirve la API en /api/v1/predictions/corto-plazo), de
+  EntregaFinal/pronostico_corto_plazo/resultados/prueba.json, desglose_domingos_festivos.json y figuras.json.
 - sensibilidad_beta.csv y beta_equilibrio.csv: copias de simulacion_ahorro/resultados/ y costos/resultados/.
 - ahorro_anual.json: salidas, horas de bus, km, costo de km y conductor, ahorro en operación y pasajes en juego al año de
   hoy, del plan que reasigna (el recomendado) y del que recorta; por ruta, por hora y tipo de día (con las salidas que se
@@ -59,6 +62,8 @@ def leer_args():
                     help="solo datos/modelo_producto.json (el modelo activo de la API) y su entrada en origen.json")
     ap.add_argument("--solo-ahorro", action="store_true",
                     help="solo datos/ahorro_anual.json (las cifras de «¿Qué gana Sobusa?») y su entrada en origen.json")
+    ap.add_argument("--solo-corto-plazo", action="store_true",
+                    help="solo datos/corto_plazo.json (la prueba reservada del pronóstico a 30, 60 y 120 minutos)")
     return ap.parse_args()
 
 
@@ -199,6 +204,58 @@ def _candidato(R, reg, activo):
             "wape_prueba": pr["global"]["cand"]["wape"], "ic95_prueba": pr["bootstrap"]["cand"]["ic95"],
             "ic95_diferencia_prueba": pr["bootstrap"]["cand_menos_anterior"]["ic95"], "robustez": rob,
             "decision": "EntregaFinal/api_frecuencias/docs/evidencias/modelo/decision_fv3.md"}
+
+
+# --- Pronóstico de corto plazo (experimento E14, el que sirve la API en /predictions/corto-plazo) -----------------------
+F_CP = "EntregaFinal/pronostico_corto_plazo/resultados"
+FUENTES_CP = [f"{F_CP}/prueba.json", f"{F_CP}/desglose_domingos_festivos.json", f"{F_CP}/figuras.json"]
+
+
+def corto_plazo(R):
+    """Las cifras de la prueba reservada (julio a diciembre de 2025, calculada una sola vez) por nivel y horizonte: WAPE
+    del modelo y de las tres líneas base, IC95 de la diferencia con el promedio, cobertura de la banda P10–P90, por ruta
+    a 60 minutos, los segmentos en que gana y el desglose de domingos y festivos (lo que no funcionó)."""
+    base = R / F_CP
+    pru = json.loads((base / "prueba.json").read_text(encoding="utf-8"))
+    dom = json.loads((base / "desglose_domingos_festivos.json").read_text(encoding="utf-8"))
+    fig = json.loads((base / "figuras.json").read_text(encoding="utf-8"))
+    niveles = {}
+    for nivel, por_h in pru["niveles"].items():
+        niveles[nivel] = {}
+        for h, b in por_h.items():
+            t = b["todas_las_rutas"]
+            niveles[nivel][h] = {"modelo": t["modelo"]["wape"], "promedio_dia_hora": t["promedio_dia_hora"]["wape"],
+                                 "ultima_semana": t["ultima_semana"]["wape"], "persistencia": t["persistencia"]["wape"],
+                                 "ic95_diferencia": t["ic95"]["modelo_menos_promedio_dia_hora"]["ic95"],
+                                 "cobertura": b["banda_p10_p90"]["todas_las_rutas"]["cobertura_pct"],
+                                 "celdas": t["modelo"]["n"],
+                                 "por_ruta": {r: [v["modelo"]["wape"], v["promedio_dia_hora"]["wape"]]
+                                              for r, v in b["por_ruta"].items()}}
+    seg = pru["por_segmento"]["60"]
+    tipos = dom["horizontes"]["60"]["todas_las_rutas"]
+    return {"periodo": pru["periodos"]["prueba"], "entrenado_con": pru["entrenado_con"],
+            "dias": pru["dias_del_periodo"], "repetida": pru["repetida"], "niveles": niveles,
+            "segmentos_60": {"gana": seg["segmentos_en_que_gana_al_promedio"], "con_subidas": seg["segmentos_con_subidas"],
+                             "subidas_pct": seg["subidas_en_segmentos_en_que_gana_pct"]},
+            "tipo_de_dia_60": {k: {"modelo": v["modelo"], "promedio_dia_hora": v["promedio_dia_hora"], "dias": v["dias"],
+                                   "gana": v["gana_el_modelo"]} for k, v in tipos.items()},
+            "domingos_cra54_60": dom["horizontes"]["60"]["por_ruta"]["CRA 54"]["domingo"],
+            "dia_de_ejemplo": dict(fig["dia_de_ejemplo"], ruta="CRA 54"),
+            "origen": {"prueba": f"{F_CP}/prueba.json", "domingos": f"{F_CP}/desglose_domingos_festivos.json",
+                       "dia_de_ejemplo": f"{F_CP}/figuras.json"}}
+
+
+def solo_corto_plazo(R):
+    """Escribe solo datos/corto_plazo.json y su entrada en datos/origen.json (sin tocar las demás)."""
+    (DESTINO / "corto_plazo.json").write_text(json.dumps(corto_plazo(R), ensure_ascii=False, indent=1), encoding="utf-8")
+    p = DESTINO / "origen.json"
+    org = json.loads(p.read_text(encoding="utf-8")) if p.is_file() else {"generador": "dash_app/preparar_datos.py", "archivos": {}}
+    tam = (DESTINO / "corto_plazo.json").stat().st_size
+    org.setdefault("archivos", {})["corto_plazo.json"] = {"fuentes": FUENTES_CP, "filas": None, "bytes": tam}
+    org["generado"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+    org["total_bytes"] = sum(v["bytes"] for v in org["archivos"].values())
+    p.write_text(json.dumps(org, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"  {'corto_plazo.json':28s} {tam / 1024:8.1f} KB")
 
 
 def solo_producto(R):
@@ -895,6 +952,11 @@ def main():
         print(f"Proyecto: {R} (solo el modelo del producto)")
         solo_producto(R)
         return
+    if a.solo_corto_plazo:
+        DESTINO.mkdir(exist_ok=True)
+        print(f"Proyecto: {R} (solo el pronóstico de corto plazo)")
+        solo_corto_plazo(R)
+        return
     if a.solo_ahorro:
         if not (R / "experimentos").is_dir():
             sys.exit(f"No encuentro la carpeta del proyecto en {R} (falta experimentos/). Use --proyecto.")
@@ -937,6 +999,8 @@ def main():
     anotar("ahorro_anual.json", FUENTES_AHORRO)
     (DESTINO / "modelo_producto.json").write_text(json.dumps(modelo_producto(R), ensure_ascii=False, indent=1), encoding="utf-8")
     anotar("modelo_producto.json", [F_REG, F_EVAL, F_CAL])
+    (DESTINO / "corto_plazo.json").write_text(json.dumps(corto_plazo(R), ensure_ascii=False, indent=1), encoding="utf-8")
+    anotar("corto_plazo.json", FUENTES_CP)
     if (R / F_REPLAY / "indice.js").is_file():
         for nombre, fuentes in despacho(R):
             anotar(nombre, fuentes)

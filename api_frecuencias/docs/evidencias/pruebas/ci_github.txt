@@ -1,26 +1,31 @@
-en verde en GitHub Actions (run 43956047348, 2026-11-16)
+en verde en GitHub Actions (run 44447932844, 2026-11-18)
 
 Integración continua en GitHub Actions sobre runners limpios de Ubuntu (sin la réplica ni los datos que git ignora).
 
 Repositorio de entrega (público): RubenEsg/Data-Challenge-pro-extreme, flujo .github/workflows/api_frecuencias.yml
-(copia de api_frecuencias/ci/github_actions_entrega.yml). Commit probado: d9bb384, el que registró el modelo candidato
-fv3 (cambia api_frecuencias/app/servicios/variables.py, datos.py e inferencia.py; docs/evidencias/modelo/decision_fv3.md).
-Run: https://github.com/RubenEsg/Data-Challenge-pro-extreme/actions/runs/43956047348
+(copia de api_frecuencias/ci/github_actions_entrega.yml). Commit probado: 0c1a805, el que llevó a la API el pronóstico
+de corto plazo (30, 60 y 120 minutos por ruta, sentido y segmento: app/servicios/corto_plazo.py y
+variables_corto_plazo.py, el router /api/v1/predictions/corto-plazo y la migración 0015).
+Run: https://github.com/RubenEsg/Data-Challenge-pro-extreme/actions/runs/44447932844
 Trabajos (UTC):
-- ruff · bandit · migraciones · pytest (Python 3.11): success (2026-11-16T21:03:05Z → 21:13:02Z)
-- ruff · bandit · migraciones · pytest (Python 3.13): success (2026-11-16T21:03:06Z → 21:14:00Z)
-- Prueba de caída RNF-001 y ejecución programada §14.2 (Python 3.11): success (21:14:03Z → 21:23:07Z)
+- ruff · bandit · migraciones · pytest (Python 3.11): success (2026-11-19T02:56:53Z → 03:08:55Z)
+- ruff · bandit · migraciones · pytest (Python 3.13): success (2026-11-19T02:56:53Z → 03:08:16Z)
+- Prueba de caída RNF-001 y ejecución programada §14.2 (Python 3.11): success (03:08:57Z → 03:18:06Z)
 - SonarQube (puerta de calidad): omitido; el flujo lo salta sin servidor ni token. El análisis real está en
-  docs/evidencias/sonarqube/ (scripts/sonar_local.py, puerta «Reto Sobusa v1.5»), hecho sobre el código del 14-11.
+  docs/evidencias/sonarqube/ (scripts/sonar_local.py, puerta «Reto Sobusa v1.5»), hecho sobre este mismo código el
+  18-11 (puerta aprobada).
 Resultados leídos del registro de cada trabajo:
-- Python 3.11 y 3.13: ruff y bandit sin hallazgos; migraciones arriba, abajo y arriba (0001 a 0014); pytest con 1.503
+- Python 3.11 y 3.13: ruff y bandit sin hallazgos; migraciones arriba, abajo y arriba (0001 a 0015); pytest con 1.537
   aprobadas, 206 omitidas a propósito (las pruebas de réplica necesitan la réplica local cargada, que no existe en
-  GitHub) y 69 subpruebas de Schemathesis aprobadas; cobertura de app/ 95,13 % (umbral 85 %); OpenAPI sin deriva
-  (65 rutas).
+  GitHub) y 75 subpruebas de Schemathesis aprobadas; cobertura de app/ 95,24 % (umbral 85 %); OpenAPI sin deriva
+  (70 rutas).
 - Prueba de caída y ejecución programada: 3 aprobadas (la caída, la franja diaria programada y el ciclo intradía
   programado).
 Cada push al repositorio vuelve a correr el flujo: el estado del último commit se ve en la pestaña Actions. Los
-commits posteriores a d9bb384 no cambian el código de la API (api_frecuencias/app).
+commits posteriores a 0c1a805 solo cambian documentos y evidencias, no el código de la API (api_frecuencias/app).
+
+Corrida anterior, del 16-11-2026 (run 43956047348, commit d9bb384, el que registró el candidato fv3): en verde, con
+1.503 aprobadas, 206 omitidas y 69 subpruebas, cobertura de 95,13 % y 65 rutas.
 
 Corrida anterior, del 14-11-2026 (run 43568125975, commit 5dc7abd, el código final antes del candidato fv3): en verde,
 con los mismos conteos (1.503 aprobadas, 206 omitidas y 69 subpruebas), cobertura de 95,15 % y 65 rutas.

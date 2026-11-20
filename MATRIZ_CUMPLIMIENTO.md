@@ -249,7 +249,7 @@ Conteo de las filas de esta matriz por estado.
 - Evaluar un candidato temporal para el corto plazo. TFT, N-HiTS y la red convolucional 3D solo se evaluaron para el
   problema horario (9.1-e).
 - Volver a grabar el video de 5 minutos (E11). El que se entrega se grabó el 9-11-2026 y muestra el modelo horario,
-  no el pronóstico de corto plazo; la nueva grabación está en curso (E11.1).
+  no el pronóstico de corto plazo, y no se volvió a grabar; el corto plazo en el tablero se ve en `api_frecuencias/docs/evidencias/tablero/e2e_corto_plazo.txt` y sus capturas (E11.1).
 - Las demás filas en Parcial dependen de información de Extreme o de la validación de Sobusa, y están en una de las
   dos listas de arriba.
 
@@ -824,7 +824,7 @@ Conteo de las filas de esta matriz por estado.
 | E10.3 | E10: manual técnico | `api_frecuencias/docs/manual_tecnico.md` | Cumple | `api_frecuencias/docs/evidencias/despliegue/verificacion_manuales.txt` | |
 | E10.4 | E10: manual de usuario | `api_frecuencias/docs/manual_usuario.md` | Cumple | `api_frecuencias/docs/evidencias/tablero/LEEME.md` | |
 | E10.5 | E10: manual de despliegue | `api_frecuencias/docs/despliegue.md` | Cumple | `api_frecuencias/docs/evidencias/despliegue/arranque_limpio.txt` | |
-| E11.1 | Demostración: video de máximo 5 minutos | `documentos/video/E11_video_demostracion.mp4`; `documentos/video/E11_video_demostracion.srt`; `documentos/video/guion.md` | Cumple | `api_frecuencias/docs/evidencias/video/verificacion_video.json`; `api_frecuencias/docs/evidencias/video/registro.txt` | Dura menos de 5 minutos, con audio y subtítulos. Se grabó el 9-11-2026: muestra pantallas del tablero anteriores a su última revisión y el modelo horario, no el pronóstico de corto plazo que hoy responde RF-005. Se está grabando de nuevo; mientras tanto, el corto plazo en el tablero se ve en `api_frecuencias/docs/evidencias/tablero/e2e_corto_plazo.txt` («Pendiente de nuestra parte»). |
+| E11.1 | Demostración: video de máximo 5 minutos | `documentos/video/E11_video_demostracion.mp4`; `documentos/video/E11_video_demostracion.srt`; `documentos/video/guion.md` | Cumple | `api_frecuencias/docs/evidencias/video/verificacion_video.json`; `api_frecuencias/docs/evidencias/video/registro.txt` | Dura menos de 5 minutos, con audio y subtítulos. Se grabó el 9-11-2026: muestra pantallas del tablero anteriores a su última revisión y el modelo horario, no el pronóstico de corto plazo que hoy responde RF-005. No se volvió a grabar; el corto plazo en el tablero se ve en `api_frecuencias/docs/evidencias/tablero/e2e_corto_plazo.txt` («Pendiente de nuestra parte»). |
 | E11.2 | E11: presentación final | `documentos/presentacion_final.pdf`; `documentos/presentacion_final.pptx`; `documentos/notas_orador.txt` | Cumple | `documentos/presentacion_final.tex`; `documentos/compilar.py` | El PDF es la versión principal; el PPTX es editable. |
 | E12.1 | Plan de evolución: integración | `PLAN_EVOLUCION.md` §1 | Cumple | `api_frecuencias/docs/hallazgos_extreme.md` | |
 | E12.2 | E12: escalabilidad | `PLAN_EVOLUCION.md` §2 | Cumple | `api_frecuencias/docs/evidencias/pruebas/README.md` (sección «RNF-005»); `api_frecuencias/docs/evidencias/cola/replicas_por_ruta.txt` |  |

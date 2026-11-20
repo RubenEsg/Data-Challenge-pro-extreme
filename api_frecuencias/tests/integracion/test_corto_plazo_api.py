@@ -206,6 +206,36 @@ def test_el_ciclo_lee_los_bloques_de_15_minutos_y_pronostica_con_lo_leido(sesion
     assert {r.prediction_corto_plazo_id for r in recs} == {f.prediction_id for f in rutas}
 
 
+def test_en_un_ciclo_intradia_el_corto_plazo_alimenta_las_alertas_de_pronostico(sesion, ejecucion_de_prueba):
+    """§7.3 paso 7 y §11.2 (alertas de pronóstico con la recomendación de la franja): en un ciclo intradía, cada
+    pronóstico de corto plazo deja el contexto de sus alertas (demanda por hora, capacidad de la recomendación y las
+    variables influyentes del TreeSHAP del modelo) y alertas.evaluar_pronostico lo convierte en alertas de pronóstico.
+    CRA 54 el miércoles 19-11-2025 a las 07:00, con lo leído hasta las 07:04: la demanda de la hora pico supera lo que
+    da la flota (la recomendación sale no viable), y eso es una alerta de pronóstico."""
+    from datetime import date, datetime
+    from zoneinfo import ZoneInfo
+
+    import pandas as pd
+
+    from app.servicios import alertas, ejecucion
+
+    z = ZoneInfo(BOGOTA_ZONA)
+    instante = datetime(2025, 11, 19, 7, 0, tzinfo=z)
+    validos = pd.DataFrame({"ruta": ["CRA 54"], "fecha": [date(2025, 11, 19)]})
+    c = _ciclo(ejecucion_de_prueba, validos, datetime(2025, 11, 19, 7, 4, tzinfo=z), instante=instante)
+    c.p["intradia"] = True
+    contextos: list[dict] = []
+    ejecucion._pronostico_corto_plazo(sesion, c, ["CRA 54"], instante, ejecucion._info_de_las_rutas(),
+                                      ejecucion._RecomendacionesDeLaEjecucion({}, None), contextos)
+    m = c.metricas["corto_plazo"]
+    assert c.fallos == [] and m["pronosticos"] == 3 and m["contextos_alerta"] == 3 and len(contextos) == 3
+    assert all(x["variables_influyentes"] and {v["fuente"] for v in x["variables_influyentes"]}
+               == {"shap_modelo_corto_plazo"} for x in contextos)
+    emitidas = alertas.evaluar_pronostico(contextos, alertas._umbrales({}))
+    assert emitidas and {a["codigo"] for a in emitidas} <= {"ALT-001", "ALT-002", "ALT-003", "ALT-004"}
+    assert all(a["ruta"] == "CRA 54" for a in emitidas)
+
+
 def test_un_dia_nuevo_leido_de_la_fuente_se_pronostica_hasta_donde_se_leyo(sesion, ejecucion_de_prueba):
     """En modo integrado los bloques salen de timbradas_segmentos (aquí, una fuente de prueba con lo del miércoles
     17-12-2025 pasado al 1-1-2026): un día posterior al panel se pronostica hasta donde se leyó, no más allá, y el día

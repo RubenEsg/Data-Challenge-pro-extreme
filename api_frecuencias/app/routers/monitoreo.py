@@ -125,15 +125,21 @@ def exportar_monitoreo(formato: Literal["csv", "xlsx"] = "csv", model_id: str | 
 @router.get("/policy", summary="Política de aprendizaje continuo: ¿reentrenar?, retadores en sombra y umbrales")
 def politica_vigente(sesion: Session = Depends(obtener_sesion)) -> dict[str, Any]:
     from app.esquemas import bogota_profundo
-    from app.servicios import ejecucion, politica
+    from app.servicios import ejecucion, politica, reentreno_corto_plazo
 
     version, umbrales = ejecucion.umbrales_vigentes(sesion)
     decision = politica.decidir_reentreno(sesion, umbrales)
     sombra = [{"model_id": c.model_id, "sombra": (c.metricas or {}).get("sombra"), "creado_en": c.creado_en}
               for c in politica.en_sombra(sesion)]
+    # RF-018c: la misma decisión para el corto plazo (la que toma el ciclo diario al cerrar)
+    corto_plazo = {"decision": reentreno_corto_plazo.decidir(sesion, umbrales,
+                                                             politica._fecha(ejecucion.ultima_marca_agua(sesion))),
+                   "en_sombra": [{"model_id": c.model_id, "sombra": (c.metricas or {}).get("sombra"),
+                                  "creado_en": c.creado_en} for c in reentreno_corto_plazo.en_sombra(sesion)],
+                   "en_ciclo": reentreno_corto_plazo.en_ciclo_habilitado()}
     # §8.1: todo instante (también los guardados en UTC dentro de metricas.sombra) sale en America/Bogota (-05:00)
     return bogota_profundo(ejecucion.json_seguro({"umbrales_version": version, "decision": decision,
-                                                  "en_sombra": sombra,
+                                                  "en_sombra": sombra, "corto_plazo": corto_plazo,
                                                   "umbrales": politica.umbrales_politica(umbrales)}))
 
 

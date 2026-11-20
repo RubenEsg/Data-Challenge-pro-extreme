@@ -100,6 +100,9 @@ def _base_local_de_pruebas():
 os.environ["DATABASE_URL"] = URL_PRUEBAS or ""
 os.environ["REANUDAR_EJECUCIONES"] = "false"
 os.environ["MAX_REINTENTOS"] = "1"
+# RF-018c: un ciclo de prueba no encola el reentrenamiento del corto plazo (del orden de 15 minutos); las pruebas de
+# esa política lo encienden (tests/integracion/test_reentreno_corto_plazo.py)
+os.environ.setdefault("REENTRENO_CORTO_PLAZO_EN_CICLO", "false")
 
 # §7.2: claves de PRUEBA nuevas en cada corrida (nunca en el repositorio); el entorno solo lleva sus hashes.
 # La autenticación queda apagada salvo en tests/integracion/test_seguridad.py, que la enciende; aun así el cliente

@@ -49,7 +49,10 @@ def ficha(model_id: str) -> dict:
             "feature_version": man.get("feature_version"),
             "data_cutoff": datetime(corte.year, corte.month, corte.day, tzinfo=cp.ZONA),
             "metricas": {"prueba": man.get("metricas_prueba") or {}, "entrenado_con": man.get("entrenado_con"),
-                         "artefactos": len(man.get("artefactos") or {}), "periodos": man.get("periodos")}}
+                         "artefactos": len(man.get("artefactos") or {}), "periodos": man.get("periodos"),
+                         "datos_hasta": man.get("datos_hasta") or man.get("data_cutoff"),
+                         "validacion": man.get("metricas_validacion"),
+                         "origen": (man.get("origen") or {}).get("reentrenamiento")}}
 
 
 def sembrar(sesion) -> int:
@@ -218,9 +221,12 @@ def compuerta(cand_id: str, activo_id: str | None, desde: date, hasta: date, umb
 
 
 def ventana(cand, desde: date | None, hasta: date | None) -> tuple[date, date, date]:
-    """La ventana de la compuerta: por omisión, los 28 días que siguen a la fecha de corte del candidato, recortados al
-    último día con datos. ValueError si empieza dentro de la muestra (en o antes del corte)."""
-    corte = cand.data_cutoff.astimezone(cp.ZONA).date() if cand.data_cutoff else None
+    """La ventana de la compuerta: por omisión, los 28 días que siguen a lo último que vio el candidato (su fecha de
+    corte o, si se reentrenó, el fin de la validación con que se ajustó su banda), recortados al último día con datos.
+    ValueError si empieza dentro de la muestra."""
+    from app.servicios import reentreno_corto_plazo
+
+    corte = reentreno_corto_plazo.datos_vistos_hasta(cand)
     d = desde or ((corte + timedelta(days=1)) if corte else None)
     if d is None:
         raise ValueError("Indique validacion_desde y validacion_hasta")

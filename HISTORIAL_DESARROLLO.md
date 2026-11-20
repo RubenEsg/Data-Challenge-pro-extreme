@@ -1,17 +1,17 @@
 # Historial de desarrollo
 
-Lista cronológica de **todos los commits** (275) del repositorio de desarrollo del equipo, desde el primero hasta `d15a14b`, el commit al que apuntaba `main` al generarla. Responde al «historial» del entregable E03 (fila E03.3 de `MATRIZ_CUMPLIMIENTO.md`): el repositorio de entrega se arma con `empaquetar_entrega.py` a partir de `EntregaFinal/` y solo guarda sus sincronizaciones.
+Lista cronológica de **todos los commits** (277) del repositorio de desarrollo del equipo, desde el primero hasta `70aee4d`, el commit al que apuntaba `main` al generarla. Responde al «historial» del entregable E03 (fila E03.3 de `MATRIZ_CUMPLIMIENTO.md`): el repositorio de entrega se arma con `empaquetar_entrega.py` a partir de `EntregaFinal/` y solo guarda sus sincronizaciones.
 
 - **De dónde sale.** `historial_desarrollo.py` lee `git log` del repositorio de desarrollo, sin red, y escribe este archivo. Por cada commit publica la fecha y la hora del autor, el hash corto, el asunto, cuántos archivos y líneas cambia (`git log --numstat -M`) y cuántos de esos archivos están en `EntregaFinal/`, la carpeta que se convierte en el repositorio de entrega.
 - **Qué no publica.** Correos, nombres de autor (todo el historial es de un solo contribuyente), cuerpos de los mensajes ni rutas de archivos. La revisión automática de los asuntos (claves, contraseñas, tokens, credenciales en URL, cadenas largas con aspecto aleatorio) no omitió ninguno.
-- **Cómo verificarlo.** Los hashes son los del repositorio de desarrollo del equipo, que se muestra a quien evalúe si lo pide. Ahí, `git log --reverse --format="%h %aI %s" main` da la misma lista y `git show --numstat <hash>` las cifras de cada commit. Cada hash de git depende de todo lo anterior, así que el hash completo del último commit fija la cadena entera: `d15a14b315bdd4697eb9db181fd9f33ddca03e4f`. El primer commit es `6f885e83cae939c90cfc2796c13cc433dfce643a`.
-- **Generado** el 19 de noviembre de 2026 a las 05:32 (−05:00), desde `main` (`d15a14b`). Al integrar commits nuevos se vuelve a correr el script.
+- **Cómo verificarlo.** Los hashes son los del repositorio de desarrollo del equipo, que se muestra a quien evalúe si lo pide. Ahí, `git log --reverse --format="%h %aI %s" main` da la misma lista y `git show --numstat <hash>` las cifras de cada commit. Cada hash de git depende de todo lo anterior, así que el hash completo del último commit fija la cadena entera: `70aee4dc6f4093fb02290116a88ce677c701e7f2`. El primer commit es `6f885e83cae939c90cfc2796c13cc433dfce643a`.
+- **Generado** el 20 de noviembre de 2026 a las 13:38 (−05:00), desde `main` (`70aee4d`). Al integrar commits nuevos se vuelve a correr el script.
 
 ## Resumen
 
 | Commits | Días con commits | Primer commit | Último commit | Tocan `EntregaFinal/` | Archivos cambiados (suma) | Líneas agregadas / quitadas |
 |---|---|---|---|---|---|---|
-| 275 | 21 | 2026-10-07 | 2026-11-19 | 230 | 6.936 | +1.416.497 / −132.682 |
+| 277 | 22 | 2026-10-07 | 2026-11-20 | 232 | 6.969 | +1.417.513 / −132.723 |
 
 Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombrado cuenta una vez. Todas las horas tienen el mismo huso (−05:00). 13 commit(s) de fusión no traen cifras: git no muestra su diferencia.
 
@@ -386,7 +386,7 @@ Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombra
 | 21:53 | `18de04b` | Historial de desarrollo al día | 1 | +16 / −5 | sí (1) |
 | 22:25 | `f8a12a6` | Evidencia de la integración continua: run 44447932844 en verde sobre la entrega con el pronóstico de corto plazo | 14 (10 binarios) | +28 / −15 | sí (13) |
 
-## 2026-11-19 · jueves · 4 commits
+## 2026-11-19 · jueves · 5 commits
 
 | Hora | Commit | Asunto | Archivos | Líneas | En `EntregaFinal/` |
 |---|---|---|---|---|---|
@@ -394,3 +394,10 @@ Un archivo binario cuenta como archivo pero no suma líneas; un archivo renombra
 | 04:22 | `97e8bc6` | Historial de desarrollo al día | 1 | +13 / −5 | sí (1) |
 | 05:03 | `6ab3631` | Prueba en contenedor: GET /predictions une el modelo horario y el de corto plazo; el conteo de la ejecución es el horario | 1 | +5 / −1 | sí (1) |
 | 05:32 | `d15a14b` | Evidencia de la integración continua: run 44502387738 en verde sobre la entrega con el corto plazo dentro del ciclo | 14 (11 binarios) | +27 / −17 | sí (14) |
+| 05:32 | `dd4df20` | Historial de desarrollo al día | 1 | +8 / −5 | sí (1) |
+
+## 2026-11-20 · viernes · 1 commit
+
+| Hora | Commit | Asunto | Archivos | Líneas | En `EntregaFinal/` |
+|---|---|---|---|---|---|
+| 13:37 | `70aee4d` | Reentrenamiento controlado del pronóstico de corto plazo (RF-018c, §9.5-e, §9.5-j, §14.2 «Incremental 3») | 32 (11 binarios) | +1.008 / −36 | sí (31) |

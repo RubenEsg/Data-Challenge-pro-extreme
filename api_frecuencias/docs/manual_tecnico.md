@@ -98,7 +98,8 @@ Reglas del código:
 | `onnx_motor.py` | Motor ONNX Runtime alternativo (`MOTOR_INFERENCIA=onnx`, `motor_configurado`), para el modelo horario y para el de corto plazo. | §9.1, §9.2 |
 | `corto_plazo.py` · `variables_corto_plazo.py` | El pronóstico de corto plazo (RF-005): las subidas de los próximos 30, 60 y 120 minutos por ruta, sentido y segmento con lo observado hasta el instante. Carga los 18 árboles verificando su SHA-256 (y, con `MOTOR_INFERENCIA=onnx`, los de su exportación ONNX), arma la serie con el panel empaquetado y lo leído (`con_sesion`), aplica VAL-009 (`sin_calidad()` la apaga), pronostica con `pronosticar(..., hasta=)`, lleva la ventana a la franja de §10.2 (`franja_hora`), guarda en `prediction_corto_plazo` (`guardar`) y da la importancia global (`importancia_global`). Sección 5, «El modelo de corto plazo». | RF-005, RF-006, §3.1, §9.1–§9.4 |
 | `panel_corto_plazo.py` | Lo que alimenta al corto plazo: lee los días que trajo la lectura incremental (`de_la_fuente` en modo integrado, `del_panel` en modo Parquet), aplica VAL-009 (`excluir_imposibles`, `error_calidad`, tope `cp_tope_subidas_bloque_segmento`), anota en `lectura_15min` hasta dónde se leyó cada día y guarda en `subidas_15min` y `salidas_15min` las celdas de los días que el panel empaquetado no tiene (`guardar_dias`, en lote) y une lo leído con el panel (`unir`, con el calendario de las fechas nuevas de `calendario`). | RF-004, RF-013, §6.3, §7.3, §11.2 |
-| `gobierno_corto_plazo.py` | Ciclo de vida del corto plazo: `sembrar` (versiones del registro de artefactos a `model_registry`, familia `corto_plazo`), `evaluar` (WAPE, MAE, sesgo y cobertura en una ventana con lo leído), `compuerta` (los cuatro criterios de `politica.compuerta` con los mismos umbrales) y `ventana` (posterior a la fecha de corte del candidato). | RF-018, RF-019, §9.2, §9.5 |
+| `gobierno_corto_plazo.py` | Ciclo de vida del corto plazo: `sembrar` (versiones del registro de artefactos a `model_registry`, familia `corto_plazo`), `evaluar` (WAPE, MAE, sesgo y cobertura en una ventana con lo leído), `compuerta` (los cuatro criterios de `politica.compuerta` con los mismos umbrales) y `ventana` (posterior a lo último que vio el candidato). | RF-018, RF-019, §9.2, §9.5 |
+| `reentreno_corto_plazo.py` | Reentrenamiento controlado del corto plazo: `decidir` (periodicidad, degradación, deriva y cobertura con los umbrales de la política horaria; no encola con un entrenamiento de la familia pendiente, un retador en sombra o un corte que no agrega `reentreno_periodicidad_dias` días de entrenamiento), `encolar` (trabajo «entrenamiento» con `parametros.familia = corto_plazo`), `preparar` y `entrenar_preparado` (la serie validada en una transacción corta y los 18 artefactos sin tocar la base, publicados de una vez), `ciclo` (el trabajo de la cola: registra la candidata y la deja en sombra), `revisar_sombra` (la compuerta al completarse la ventana) y `despues_del_ciclo` (lo llama el ciclo diario). `REENTRENO_CORTO_PLAZO_EN_CICLO=false` lo apaga solo para el corto plazo. | RF-018c, §9.5-e, §9.5-j, §14.2 |
 | `monitoreo_corto_plazo.py` | Monitoreo del corto plazo en cada ciclo diario: error móvil, cobertura, volumen y PSI en `model_monitoring` (`detalle.familia = corto_plazo`) y ALT-010 por ruta. | §9.4, §9.5, ALT-010 |
 | `onnx_corto_plazo.py` | Traducción de cada LightGBM del corto plazo a ONNX (`TreeEnsembleRegressor` de ai.onnx.ml 3 con umbrales y hojas en doble precisión, la misma regla de faltantes y un `Exp`) y su sesión de ONNX Runtime. | §9.1, §9.2 |
 | `modelos_imagen.py` | Al arrancar, copia al volumen de modelos lo que trae la imagen y le falta (`sembrar`; sección 8 y `despliegue.md`, sección 9). | RNF-008, §9.2 |
@@ -511,6 +512,29 @@ los dos registros imposibles de la base, los dos en CRA 54: 97.157 subidas el 26
 servir, con el tope vigente, y la respuesta trae `calidad` con las celdas excluidas que usa ese pronóstico (el día y
 sus 8 semanas de historia). Ejemplo: CRA 54, 05-07-2025 08:00, 30 min: con la regla, 584,9 subidas (últimos 15 min:
 256); sin ella, 837,5 (últimos 15 min: 29.038); lo real fue 450.
+
+**Reentrenamiento controlado (RF-018c, §9.5-e, §9.5-j, `app/servicios/reentreno_corto_plazo.py`).** Al cerrar
+cada ciclo diario, después de su monitoreo, la política del corto plazo usa los mismos umbrales versionados que la del
+modelo horario. Decide reentrenar por periodicidad (`reentreno_periodicidad_dias` días de datos nuevos desde lo último
+que vio una versión de la familia), por degradación (WAPE móvil sobre `wape_max` en las últimas
+`reentreno_dias_degradacion` filas de monitoreo), por deriva (PSI en alerta) o por cobertura baja. No encola si hay un
+entrenamiento de la familia pendiente o un retador en sombra, ni si el corte nuevo (la fecha leída menos 61 días) no
+agrega `reentreno_periodicidad_dias` días de entrenamiento a la última versión: así nunca reemplaza el modelo con cada
+registro. El trabajo «entrenamiento» con `parametros.familia = corto_plazo` lee, en una transacción corta, la serie
+validada de cada ruta (la misma del pronóstico: el panel con VAL-009 y lo leído, hasta `datos_hasta`) y entrena los 18
+artefactos sin tocar la base. Usa la configuración elegida en E14 (variables, hiperparámetros, estructura y semilla),
+sin volver a elegir: entrenamiento hasta el corte, banda conformal por tramo ajustada en los 61 días siguientes. Publica
+la carpeta de una vez (temporal y renombre) y registra la versión como candidata, `cp_lgbm_AAAAMMDD_sNN`, que nunca
+pisa la activa. La candidata queda en sombra los `sombra_dias` días siguientes a `datos_hasta`. Cuando el ciclo los
+leyó enteros, `revisar_sombra` aplica la compuerta de cuatro criterios en esa ventana y la activa
+(`activacion_automatica` = 1), la deja aprobada para un admin o la rechaza, con la misma decisión de la sombra horaria.
+Tarda del orden de 15 minutos por versión (las 9 cajas de segmento entrenan sobre unos 4 millones de filas cada una).
+`POST /api/v1/models/train` con `familia=corto_plazo` lo pide a mano. `REENTRENO_CORTO_PLAZO_EN_CICLO=false` lo apaga
+solo para el corto plazo; las pruebas generales lo usan, y las de esta política lo encienden
+(`tests/integracion/test_reentreno_corto_plazo.py`). Con la misma serie, corte y semilla, dos entrenamientos dan los
+mismos artefactos (el mismo SHA-256). El conversor ONNX necesita el paquete `onnx`, que la imagen no trae: una versión
+reentrenada se sirve con LightGBM (el motor por omisión) hasta exportarla con `scripts/exportar_onnx_corto_plazo.py
+--model-id`.
 
 **ONNX (§9.1, §9.2).** `app/servicios/onnx_corto_plazo.py` traduce cada LightGBM a ONNX: un `TreeEnsembleRegressor`
 de ai.onnx.ml 3 con umbrales y hojas en doble precisión, la misma regla de faltantes y un `Exp`.

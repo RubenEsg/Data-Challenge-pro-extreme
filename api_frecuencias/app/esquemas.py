@@ -864,6 +864,10 @@ class SolicitudEntrenamiento(BaseModel):
     # con datos_hasta la serie se trunca ahí (solo datos ya validados) y el candidato pasa a sombra (§9.5)
     datos_hasta: date | None = Field(None, description="Último día de datos validados que se usan (validación = "
                                                        "hasta+1 .. datos_hasta); el candidato queda en sombra")
+    familia: Literal["horario", "corto_plazo"] = Field(
+        "horario", description="horario (el del plan del día siguiente) o corto_plazo (30, 60 y 120 minutos: los 18 "
+                               "artefactos con la configuración de E14 sobre el histórico validado, del orden de 15 "
+                               "minutos; sin datos_hasta, la validación es hasta+1 .. hasta+61 y no hay sombra)")
 
 
 # ---------------------------------------------------------------- umbrales

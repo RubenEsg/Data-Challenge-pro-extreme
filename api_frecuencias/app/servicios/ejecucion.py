@@ -2182,9 +2182,12 @@ def _con_datos_nuevos(s: Session, c: _Ciclo) -> None:
     # §9.4 del corto plazo (error móvil, cobertura, volumen, PSI y ALT-010): una vez por ejecución diaria, no en cada
     # trabajo de una ejecución partida por ruta (RNF-005) ni en los intradía (el día a medias)
     if not es_intradia(c.p) and c.ruta is None:
-        from app.servicios import monitoreo_corto_plazo
+        from app.servicios import monitoreo_corto_plazo, reentreno_corto_plazo
 
-        c.metricas["monitoreo_corto_plazo"] = json_seguro(monitoreo_corto_plazo.en_ciclo(s, c))
+        mon_cp = monitoreo_corto_plazo.en_ciclo(s, c)
+        # RF-018c: la sombra y la decisión de reentreno del corto plazo, con su monitoreo de este ciclo
+        mon_cp["politica"] = reentreno_corto_plazo.despues_del_ciclo(s, c, mon_cp)
+        c.metricas["monitoreo_corto_plazo"] = json_seguro(mon_cp)
     _avance(c.execution_id, 70, "alertas")
 
     umbrales_alertas = dict(c.umbrales) | {"version": c.version_u}
@@ -2636,6 +2639,11 @@ def _ciclo_entrenamiento(execution_id: uuid.UUID) -> None:
 
     with sesion_contexto() as s:
         p = dict(s.get(Ejecucion, execution_id).parametros or {})
+    if p.get("familia") == "corto_plazo":     # RF-018c para el corto plazo (app/servicios/reentreno_corto_plazo.py)
+        from app.servicios import reentreno_corto_plazo
+
+        reentreno_corto_plazo.ciclo(execution_id, p)
+        return
     _avance(execution_id, 20, "entrenamiento")
     info = politica.entrenar_candidato(p)
     _avance(execution_id, 80, "registro")

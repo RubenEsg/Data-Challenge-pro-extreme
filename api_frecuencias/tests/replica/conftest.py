@@ -11,6 +11,7 @@ se hace en transacciones que se deshacen, o en tablas de prueba que se borran.
 """
 from __future__ import annotations
 
+import os
 import uuid
 from collections.abc import Callable, Iterator
 
@@ -19,6 +20,9 @@ import pytest
 from scripts import replica_comun as rc
 
 psycopg = pytest.importorskip("psycopg")
+# RF-018c: un ciclo de prueba no encola el reentrenamiento del corto plazo (del orden de 15 minutos); las pruebas de
+# esa política lo encienden (tests/integracion/test_reentreno_corto_plazo.py)
+os.environ.setdefault("REENTRENO_CORTO_PLAZO_EN_CICLO", "false")
 
 
 def pytest_configure(config):

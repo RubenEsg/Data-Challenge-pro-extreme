@@ -278,8 +278,9 @@ caen los dos registros imposibles de CRA~54. Cada pronóstico, diario o intradí
 ALT-001 a ALT-004 y \texttt{GET /respuesta} trae las próximas dos horas.
 
 \paragraph{Ciclo de vida, monitoreo y ONNX (RF-018, RF-019, §9.2, §9.5)} Se siembra en \texttt{model\_registry} con el
-SHA-256 de su manifiesto; una versión nueva entra como candidata, y activarla (\texttt{POST
-/models/\{model\_id\}/activate}) pasa por la misma compuerta de cuatro criterios que el horario (\texttt{POST /models/rollback} con
+SHA-256 de su manifiesto. La política del horario también lo reentrena (periodicidad, degradación, deriva o cobertura),
+con el histórico validado y la configuración de E14; la versión nueva queda candidata, pasa 14 días en sombra y la
+misma compuerta de cuatro criterios la activa o la rechaza (\texttt{POST /models/rollback} con
 \texttt{familia=corto\_plazo} la revierte). El ciclo diario mide el error móvil de 7 días por horizonte y ruta, la
 cobertura, el volumen y el PSI, y levanta ALT-010 por ruta (\texttt{GET /monitoring?familia=corto\_plazo}). Un
 conversor propio lleva los \CortoArtefactos{} modelos a ONNX con diferencia relativa máxima de \CortoOnnxDifRel{} en

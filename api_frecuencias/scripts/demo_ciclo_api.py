@@ -58,7 +58,7 @@ def decir(*partes) -> None:
     print(linea, flush=True)
 
 
-def titulo(numero: int, texto: str) -> None:
+def titulo(numero: int | str, texto: str) -> None:
     decir(f"\n({numero}) {texto}")
 
 
@@ -108,7 +108,8 @@ def ejecutar(c: httpx.Client, hasta: date, etiqueta: str) -> dict:
     r = c.post(f"{API}/frequency/executions", json={"hasta": hasta.isoformat()},
                headers={"X-Correlation-Id": f"demo-{etiqueta}-{hasta.isoformat()}"})
     r.raise_for_status()
-    d = esperar(c, r.json()["execution_id"])
+    # puede esperar en la cola detrás de los entrenamientos que encoló la política (el del corto plazo, ~15 min)
+    d = esperar(c, r.json()["execution_id"], limite_s=3600)
     simuladas, omitidas = notificaciones(d)
     _NOTIFICACIONES["simulada"] += simuladas
     _NOTIFICACIONES["omitida"] += omitidas
@@ -135,6 +136,15 @@ def decir_corto_plazo(m: dict) -> None:
         decir(f"    corto plazo · pronósticos {cp.get('pronosticos', 0)} ({cp.get('model_id') or '—'}, instante "
               f"{(cp.get('instante') or '—')[:16]}), recomendaciones {cp.get('recomendaciones', 0)}, "
               f"omitidos {len(cp.get('omitidos') or [])}")
+    pol = mon.get("politica") or {}
+    dec = pol.get("reentreno") or {}
+    if dec:
+        encolado = pol.get("entrenamiento_encolado")
+        decir(f"    corto plazo · política: reentrenar {dec.get('reentrenar')}, motivos {dec.get('motivos')}, bloqueos "
+              f"{dec.get('bloqueos')}" + (f"; encolado (job {encolado}, corte {dec.get('hasta')}, datos hasta "
+                                          f"{dec.get('datos_hasta')})" if encolado else ""))
+    for s in pol.get("sombra") or []:
+        decir(f"    corto plazo · sombra de {s.get('model_id')}: {s.get('estado')}")
     if mon.get("estado"):
         w, cob = mon.get("wape_movil"), mon.get("cobertura_p10_p90")
         decir(f"    corto plazo · monitoreo {mon['estado']}: WAPE móvil "
@@ -168,6 +178,54 @@ def metricas_cortas(m: dict | None) -> str:
 def politica_de(d: dict) -> dict:
     """Lo que decidió la política al cerrar el ciclo (reversión, sombra, reentreno), en metricas.monitoreo.politica."""
     return ((d.get("metricas") or {}).get("monitoreo") or {}).get("politica") or {}
+
+
+def politica_cp_de(d: dict) -> dict:
+    """La política del corto plazo (RF-018c): sombra y reentreno, en metricas.monitoreo_corto_plazo.politica."""
+    return ((d.get("metricas") or {}).get("monitoreo_corto_plazo") or {}).get("politica") or {}
+
+
+def candidato_corto_plazo(c: httpx.Client, job) -> str | None:
+    """Espera el reentrenamiento del corto plazo que encoló la política y dice qué quedó registrado."""
+    decir(f"    Corto plazo (RF-018c): la política encoló también su reentrenamiento (job {job}, los 18 artefactos con "
+          "la configuración de E14 sobre el histórico validado); se espera:")
+    e = esperar(c, str(job), limite_s=5400)
+    decir(f"    entrenamiento del corto plazo {e['estado']} en {duracion(e)} (trabajador de la cola): "
+          f"{e.get('mensaje')}")
+    if e["estado"] != "ok" or not e.get("model_id"):
+        return None
+    mid = e["model_id"]
+    ficha = c.get(f"{API}/models/{mid}").json()
+    met = ficha.get("metricas") or {}
+    sm = met.get("sombra") or {}
+    val = (((met.get("metricas_validacion") or met.get("validacion") or {}).get("ruta") or {}).get("60") or {})
+    wapes = ", ".join(f"{r} {m.get('wape')} %" for r, m in val.items() if m.get("wape") is not None)
+    per = (met.get("periodos") or {}).get("validacion") or []
+    decir(f"    candidato {mid}: estado {ficha['estado']}, corte {fecha(ficha.get('data_cutoff'))}, validación "
+          f"{' .. '.join(per)} (con ella se ajustó su banda); WAPE de validación por ruta a 60 min: {wapes}; sombra "
+          f"{sm.get('estado')} del {sm.get('inicio')} al {sm.get('fin')}")
+    return mid
+
+
+def decision_corto_plazo(c: httpx.Client, a: argparse.Namespace, candidato: str, e3: dict) -> int:
+    """La compuerta de la sombra del corto plazo en el ciclo que completó su ventana, y la reversión con --revertir."""
+    titulo("6b", "Decisión sobre el candidato de corto plazo")
+    for s in politica_cp_de(e3).get("sombra") or []:
+        if s.get("model_id") != candidato:
+            continue
+        v = s.get("ventana") or {}
+        decir(f"    Compuerta de cuatro criterios (gobierno_corto_plazo.compuerta) en {v.get('desde')} .. "
+              f"{v.get('hasta')}, candidato {candidato} frente al activo {s.get('activo')}:")
+        imprimir_criterios(s.get("criterios") or [])
+    ficha = c.get(f"{API}/models/{candidato}").json()
+    decir(f"    {ficha['estado'].upper()} {candidato}" + (f": {ficha.get('motivo')}" if ficha.get("motivo") else ""))
+    if ficha["estado"] == "activo" and a.revertir:
+        rb = c.post(f"{API}/models/rollback", json={"usuario": a.aprobado_por, "familia": "corto_plazo",
+                                                     "motivo": "demostración del mecanismo de reversión"})
+        decir(f"    Reversión (POST {API}/models/rollback, familia corto_plazo): {rb.status_code} -> activo "
+              f"{rb.json().get('model_id') if rb.status_code == 200 else rb.text[:200]}")
+        return 0 if rb.status_code == 200 else 1
+    return 0 if ficha["estado"] in ("activo", "rechazado", "candidato") else 1
 
 
 def modelo_activo(c: httpx.Client, familia: str = "horario") -> dict | None:
@@ -334,6 +392,8 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915 - el guion sigue los seis pas
     decir(f"    sombra: {sombra.get('estado')} del {sombra.get('inicio')} al {sombra.get('fin')} "
           f"({sombra.get('dias')} días); banda P10-P90 con su propia calibración {cal.get('version')} por "
           f"{cal.get('grupos')}, {cal.get('ajustado_con')}")
+    cp_job = politica_cp_de(e2).get("entrenamiento_encolado")
+    cp_candidato = candidato_corto_plazo(c, cp_job) if cp_job else None
     if sombra.get("estado") != "en_sombra":
         decir("    El candidato no quedó en sombra: falta la ventana de comparación.")
         return guardar(a, 1)
@@ -404,6 +464,8 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915 - el guion sigue los seis pas
         decir(f"    Sin decisión: el candidato sigue {ficha['estado']} (sombra {estado_sombra}); fallos de la "
               f"ejecución: {(e3.get('metricas') or {}).get('fallos')}")
         codigo = 1
+    if cp_candidato:
+        codigo = max(codigo, decision_corto_plazo(c, a, cp_candidato, e3))
     decir("    registro de modelos:", [(m["model_id"], m.get("familia"), m["estado"])
                                        for m in c.get(f"{API}/models", params={"limite": 100}).json()["items"]])
     decir(f"\nNotificaciones de las ejecuciones (metricas.notificaciones_por_estado): simuladas "

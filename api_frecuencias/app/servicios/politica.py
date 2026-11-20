@@ -238,8 +238,10 @@ def _bloqueos_reentreno(s) -> list[str]:
     from app.modelos_db import Ejecucion
 
     bloqueos = []
+    # los de la familia corto_plazo (parametros.familia) tienen su propia política (reentreno_corto_plazo.py)
     pendientes = s.scalar(select(func.count()).select_from(Ejecucion).where(
-        Ejecucion.tipo == "entrenamiento", Ejecucion.estado.in_(("en_cola", "corriendo")))) or 0
+        Ejecucion.tipo == "entrenamiento", Ejecucion.estado.in_(("en_cola", "corriendo")),
+        func.coalesce(Ejecucion.parametros["familia"].astext, "horario") != "corto_plazo")) or 0
     if pendientes:
         bloqueos.append(f"{pendientes} entrenamiento(s) en cola o corriendo")
     sombra = [c.model_id for c in en_sombra(s)]

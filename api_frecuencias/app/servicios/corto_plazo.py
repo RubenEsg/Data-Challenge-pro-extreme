@@ -38,6 +38,7 @@ import gzip
 import hashlib
 import json
 import math
+import os
 import threading
 import time
 from contextlib import contextmanager
@@ -173,7 +174,9 @@ def registrar(manifiesto: dict, *, activar: bool, motivo: str, usuario: str = "e
         m["estado"] = "activo" if k == reg.get("activo") else "candidato"
     ruta = carpeta_modelos() / ARCHIVO_REGISTRO
     ruta.parent.mkdir(parents=True, exist_ok=True)
-    ruta.write_text(json.dumps(reg, ensure_ascii=False, indent=1), encoding="utf-8")
+    temporal = ruta.with_name(f".{ARCHIVO_REGISTRO}.{os.getpid()}.tmp")
+    temporal.write_text(json.dumps(reg, ensure_ascii=False, indent=1), encoding="utf-8")
+    os.replace(temporal, ruta)
     return reg
 
 

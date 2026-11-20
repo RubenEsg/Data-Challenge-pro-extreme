@@ -23,6 +23,9 @@ import pytest
 RAIZ = Path(__file__).resolve().parents[2]
 IMAGEN = os.environ.get("TESTCONTAINERS_IMAGEN", "postgis/postgis:14-3.4")
 
+# RF-018c: un ciclo de prueba no encola el reentrenamiento del corto plazo (del orden de 15 minutos); las pruebas de
+# esa política lo encienden (tests/integracion/test_reentreno_corto_plazo.py)
+os.environ.setdefault("REENTRENO_CORTO_PLAZO_EN_CICLO", "false")
 ACTIVAS = os.environ.get("TESTCONTAINERS", "").strip().lower() in ("1", "true", "si", "sí")
 
 # claves de PRUEBA de esta sesión (nunca en el repositorio); el entorno solo lleva sus hashes

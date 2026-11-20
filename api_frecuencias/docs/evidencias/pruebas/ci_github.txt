@@ -23,8 +23,11 @@ Resultados leídos del registro de cada trabajo:
   programado).
 Cada push al repositorio vuelve a correr el flujo: el estado del último commit se ve en la pestaña Actions. El
 commit 1a533f1 (20-11-2026) agrega el reentrenamiento controlado del corto plazo (app/servicios/reentreno_corto_plazo.py
-y sus pruebas, tests/integracion/test_reentreno_corto_plazo.py); su corrida (run 44794897848) estaba en curso al armar
-este paquete: su resultado está en la pestaña Actions del repositorio.
+y sus pruebas, tests/integracion/test_reentreno_corto_plazo.py). Su corrida (run 44794897848) falló en una sola
+prueba, test_la_politica_del_corto_plazo_decide_bloquea_y_encola: en la base de la CI otra prueba vacía model_registry
+al bajar y subir las migraciones con la API ya arrancada, y la prueba suponía activo el modelo de corto plazo de E14.
+La prueba ahora lo siembra y lo activa antes de decidir (commit siguiente); el código de la API no cambia. La corrida
+de ese commit estaba en curso al armar este paquete: su resultado está en la pestaña Actions del repositorio.
 
 Corrida anterior del mismo día (run 44496365466, commit 489559f): falló una sola prueba,
 tests/testcontainers/test_postgis_contenedor.py::test_api_ciclo_incremental_completo_en_contenedor, que solo corre en

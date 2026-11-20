@@ -22,6 +22,20 @@ def _ciclo_falso(umbrales: dict | None = None) -> SimpleNamespace:
     return SimpleNamespace(umbrales=umbrales or {}, version_u=None, execution_id=uuid.uuid4(), fallos=[])
 
 
+def _activo_e14(sesion) -> None:
+    """La familia corto_plazo con su activo de arranque (otra prueba puede haber vaciado model_registry al bajar y
+    subir las migraciones con la API ya arrancada)."""
+    from app.modelos_db import RegistroModelo
+    from app.servicios import corto_plazo as cp
+    from app.servicios import ejecucion, gobierno_corto_plazo
+
+    gobierno_corto_plazo.sembrar(sesion)
+    if ejecucion.modelo_activo(sesion, "corto_plazo") is None:
+        e14 = sesion.scalar(select(RegistroModelo).where(RegistroModelo.model_id == cp.MODEL_ID_E14))
+        e14.estado = "activo"
+        sesion.commit()
+
+
 def _borrar_entrenamientos(sesion) -> None:
     from app.modelos_db import Ejecucion
 
@@ -41,6 +55,7 @@ def test_la_politica_del_corto_plazo_decide_bloquea_y_encola(cliente, sesion, mo
     from app.servicios import reentreno_corto_plazo as R
 
     _borrar_entrenamientos(sesion)
+    _activo_e14(sesion)
     try:
         dec = R.decidir(sesion, {}, date(2025, 8, 31))
         assert dec["modelo_activo"] == "cp_lgbm_20250630_s42" and str(dec["ultimo_dato_visto"]) == "2025-06-30"
@@ -133,6 +148,7 @@ def test_el_trabajo_entrena_registra_la_candidata_en_sombra_y_la_compuerta_decid
     from app.servicios import reentreno_corto_plazo as R
 
     mid = "cp_lgbm_20250930_s42"
+    _activo_e14(sesion)
     e = ejecucion.crear_ejecucion(sesion, "entrenamiento", {"familia": "corto_plazo", "hasta": "2025-09-30",
                                                              "datos_hasta": "2025-11-30", "solicitado_por": "prueba",
                                                              "motivo": "prueba del reentrenamiento"}, None)

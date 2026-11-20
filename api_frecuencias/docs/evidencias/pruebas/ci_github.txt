@@ -1,33 +1,34 @@
-en verde en GitHub Actions (run 44502387738, 2026-11-19)
+en verde en GitHub Actions (run 44797643192, 2026-11-20)
 
 Integración continua en GitHub Actions sobre runners limpios de Ubuntu (sin la réplica ni los datos que git ignora).
 
 Repositorio de entrega (público): RubenEsg/Data-Challenge-pro-extreme, flujo .github/workflows/api_frecuencias.yml
-(copia de api_frecuencias/ci/github_actions_entrega.yml). Commit probado: 311d973, con el pronóstico de corto plazo
-dentro del ciclo (migración 0016: lectura de 15 minutos, recomendación, monitoreo y familia corto_plazo en
-model_registry; app/servicios/panel_corto_plazo.py, monitoreo_corto_plazo.py y gobierno_corto_plazo.py).
-Run: https://github.com/RubenEsg/Data-Challenge-pro-extreme/actions/runs/44502387738
+(copia de api_frecuencias/ci/github_actions_entrega.yml). Commit probado: c560703, con el reentrenamiento controlado
+del pronóstico de corto plazo (app/servicios/reentreno_corto_plazo.py, RF-018c) y sus pruebas
+(tests/integracion/test_reentreno_corto_plazo.py).
+Run: https://github.com/RubenEsg/Data-Challenge-pro-extreme/actions/runs/44797643192
 Trabajos (UTC):
-- ruff · bandit · migraciones · pytest (Python 3.11): success (2026-11-19T10:05:32Z → 10:19:54Z)
-- ruff · bandit · migraciones · pytest (Python 3.13): success (2026-11-19T10:05:33Z → 10:19:03Z)
-- Prueba de caída RNF-001 y ejecución programada §14.2 (Python 3.11): success (10:19:57Z → 10:29:09Z)
+- ruff · bandit · migraciones · pytest (Python 3.11): success (2026-11-20T18:57:59Z → 19:12:25Z)
+- ruff · bandit · migraciones · pytest (Python 3.13): success (2026-11-20T18:57:58Z → 19:12:37Z)
+- Prueba de caída RNF-001 y ejecución programada §14.2 (Python 3.11): success (19:12:39Z → 19:22:08Z)
 - SonarQube (puerta de calidad): omitido; el flujo lo salta sin servidor ni token. El análisis real está en
-  docs/evidencias/sonarqube/ (scripts/sonar_local.py, puerta «Reto Sobusa v1.5»), hecho sobre este mismo código de
-  app/ el 19-11 a las 04:15 (puerta aprobada).
+  docs/evidencias/sonarqube/ (scripts/sonar_local.py, puerta «Reto Sobusa v1.5», aprobada el 19-11 a las 04:15),
+  hecho sobre el código de app/ anterior al reentrenamiento del corto plazo.
 Resultados leídos del registro de cada trabajo:
-- Python 3.11 y 3.13: ruff y bandit sin hallazgos; migraciones arriba, abajo y arriba (0001 a 0016); pytest con 1.557
+- Python 3.11 y 3.13: ruff y bandit sin hallazgos; migraciones arriba, abajo y arriba (0001 a 0016); pytest con 1.564
   aprobadas, 209 omitidas a propósito (las pruebas de réplica necesitan la réplica local cargada, que no existe en
-  GitHub) y 75 subpruebas de Schemathesis aprobadas; cobertura de app/ 94,64 % (umbral 85 %); OpenAPI sin deriva
-  (70 rutas).
+  GitHub) y 75 subpruebas de Schemathesis aprobadas; OpenAPI sin deriva (70 rutas).
 - Prueba de caída y ejecución programada: 3 aprobadas (la caída, la franja diaria programada y el ciclo intradía
   programado).
-Cada push al repositorio vuelve a correr el flujo: el estado del último commit se ve en la pestaña Actions. El
-commit 1a533f1 (20-11-2026) agrega el reentrenamiento controlado del corto plazo (app/servicios/reentreno_corto_plazo.py
-y sus pruebas, tests/integracion/test_reentreno_corto_plazo.py). Su corrida (run 44794897848) falló en una sola
-prueba, test_la_politica_del_corto_plazo_decide_bloquea_y_encola: en la base de la CI otra prueba vacía model_registry
-al bajar y subir las migraciones con la API ya arrancada, y la prueba suponía activo el modelo de corto plazo de E14.
-La prueba ahora lo siembra y lo activa antes de decidir (commit siguiente); el código de la API no cambia. La corrida
-de ese commit estaba en curso al armar este paquete: su resultado está en la pestaña Actions del repositorio.
+Cada push al repositorio vuelve a correr el flujo: el estado del último commit se ve en la pestaña Actions.
+
+Corrida anterior del mismo día (run 44794897848, commit 1a533f1): falló una sola prueba,
+test_la_politica_del_corto_plazo_decide_bloquea_y_encola. En la base de la CI otra prueba vacía model_registry al
+bajar y subir las migraciones con la API ya arrancada, y la prueba suponía activo el modelo de corto plazo de E14;
+ahora lo siembra y lo activa antes de decidir (commit c560703). El código de la API no cambió entre las dos corridas.
+
+Corrida del 19-11-2026 (run 44502387738, commit 311d973, antes del reentrenamiento del corto plazo): en verde, con
+1.557 aprobadas, 209 omitidas y 75 subpruebas, cobertura de 94,64 % y 70 rutas.
 
 Corrida anterior del mismo día (run 44496365466, commit 489559f): falló una sola prueba,
 tests/testcontainers/test_postgis_contenedor.py::test_api_ciclo_incremental_completo_en_contenedor, que solo corre en
